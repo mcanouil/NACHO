@@ -1,0 +1,186 @@
+#' @title Read RCC files
+#' @description Reads RCC or RCC.gz files.
+#' @param rcc.file File extension of nanoString with predefined XML-like tags
+#' @return List of dataframes containing the data between the predefined
+#'  XML-like tags.
+#'@keywords internal
+rcc.read <- function(rcc.file){
+  tags <- c("Header","Sample_Attributes",
+            "Lane_Attributes","Code_Summary","Messages")
+  raw <- readLines(rcc.file)
+  tag.positions <- sapply(tags, function(y) grep(y,raw))
+  rcc.list <- apply(tag.positions,2,extract_data,raw)
+  colnames(rcc.list$Code_Summary) <- rcc.list$Code_Summary[1,]
+  rcc.list$Code_Summary <- rcc.list$Code_Summary[-1,]
+  tmp<- sapply(tags[-4],change_rows ,rcc.list)
+  rcc.list[names(tmp)] <- tmp
+  return(rcc.list)
+}
+
+#' @title Extracts data between XML-like RCC tags
+#' @description Extracts data between XML-like RCC tags and saves
+#'  them as data.frame.
+#' @param positions Vector containing "<tag>" and "</tag>" location
+#'  in raw RCC file. 
+#' @param raw_rcc Raw RCC file.
+#' @return Data.frame containing the data between the XML-like tags.
+#' @keywords internal
+extract_data <- function(positions, raw_rcc){
+  content.list <- raw_rcc[(positions[1]+ 1):(positions[2]-1)]
+  td.content.list <- lapply(content.list,
+                            function(vec) unique(unlist(strsplit(vec, ","))))
+  content.df <- as.data.frame(do.call(rbind,td.content.list),
+                              stringsAsFactors = F)
+  return(content.df)
+}
+
+#' @title Changes first row into column names
+#' @description Changes the first row of a selection of dataframes
+#'  from a list to column names.
+#' @param attribute Name of element in list in which the first row
+#'  needs to change to column names.
+#' @param list List containing dataframes.
+#' @return Changed element with first row as column name.
+#' @keywords internal
+change_rows <- function(attribute, list){
+  rownames(list[[attribute]]) <- list[[attribute]][,1]
+  list[[attribute]][,1] <- NULL
+  return(list[[attribute]])
+}
+
+#' @title Loads Samplesheet.csv
+#' @param ssheet path to Samplesheet.csv
+#' @return Samplesheet.csv as data.frame
+#' @keywords internal
+load.samplesheet <- function(ssheet){
+  ssheet_df <- read.csv(ssheet, header = T, sep=",")
+  return(ssheet_df)
+}
+
+#' @title Extracts counts
+#' @description Extracts Endogenous counts from the Code_Summary dataframe 
+#' originating from the RCC files
+#' @param rcc_content List of dataframes originating from RCC files
+#' @return Vector of Endogenous counts of specified RCC file
+#' @keywords internal
+extract_counts <- function(rcc_content){
+  counts <- rcc_content$Code_Summary
+  spec_counts <- as.numeric(counts[grep("Endogenous",
+                                        counts$CodeClass),"Count"])
+  names(spec_counts) <- counts[grep("Endogenous",
+                                    counts$CodeClass),"Name"]
+  return(spec_counts)
+}
+
+#' @title Calculates all QC values 
+#' @description  Calculates all consecutive QC values by calling QC calculation
+#'functions and processes these values into a vector.
+#' @param rcc_content List of dataframes originating from RCC files
+#' @return Vector of QC values.
+#' @keywords internal
+qc_features <- function(rcc_content){
+  sample <- rcc_content$Sample_Attributes
+  lane <- rcc_content$Lane_Attributes
+  counts <- rcc_content$Code_Summary
+  sample_labels <- c("Date")
+  lane_labels <- c("ID","FovCounted","FovCount","BindingDensity",
+                   "ScannerID","StagePosition","CartridgeID")
+  control_labels <- c("Positive","Negative")
+  sample_data <- sapply(sample_labels,function(y) sample[y,])
+  lane_data <- sapply(lane_labels,function(y) lane[y,])
+  control_data <- counts[counts$CodeClass %in% control_labels,]
+  control_data <- control_data[order(control_data$Name),]
+  positives <- as.numeric(control_data[control_data$CodeClass %in%
+                                         "Positive","Count"])
+  negatives <- as.numeric(control_data[control_data$CodeClass %in%
+                                         "Negative","Count"])
+  counts <- as.numeric(counts[grep("Endogenous",counts$CodeClass),
+                              "Count"])
+  pc <- positive.control.qc(positives)
+  ld <- limit.detection.qc(pos.e = positives[5]
+                           , negatives = negatives)
+  fov <- imaging.qc(fov.counted = as.numeric(lane_data["FovCounted"]),
+                    fov.count = as.numeric(lane_data["FovCount"]))
+  mean_count <- round(mean(counts),2)
+  median_count <- median(counts)
+  output <- c(sample_data["Date"],lane_data["ID"],
+              "BD" = unname(lane_data["BindingDensity"]),
+              lane_data["ScannerID"],lane_data["StagePosition"],
+              lane_data["CartridgeID"],"FoV" = fov,"PC" = pc,
+              "LoD" = ld,"MC" = mean_count,"MedC" = median_count)
+  return(output)
+}
+
+#' @title Removing of outliers 
+#' @description  Detects outliers based on QC measures and normalization
+#' factors all thresholds are as mentioned by the manufacturer.
+#' @param rcc_content List of dataframes originating from RCC files
+#' @return Subset of the original Samplesheet provided by the user
+#' @keywords internal
+remove.outliers <- function(summarized){
+  qc <- summarized$features
+  ssheet <- summarized$ssheet
+  factors <- summarized$norm_facs
+  binding_out <- rownames(qc[as.numeric(qc$BD) > 2.25 |
+                               as.numeric(qc$BD) < 0.1,])
+  fov_out <- rownames(qc[as.numeric(qc$FoV) < 75,])
+  pc_out <- rownames(qc[as.numeric(qc$PC) < 0.95,])
+  lod_out <- rownames(qc[as.numeric(qc$LoD) < 2,])
+  fac_out <- rownames(factors[factors$Positive_factor < (1/4) |
+                                factors$Positive_factor > 4,])
+  house_out <- rownames(factors[factors$House_factor < (1/11) |
+                                  factors$House_factor >11,])
+  all_out <- unique(c(binding_out,fov_out,pc_out,lod_out, house_out, fac_out))
+  outliers_removed <- ssheet[!ssheet$Accession %in% all_out,]
+  return(outliers_removed)
+}
+
+#' @title Extracts all counts other than the Endogenous ones.
+#' @description  Extracts all counts which are not named: Endogenous.
+#' if the user has given custom houskeeping genes, these will also be
+#' extracted and treated as control genes. 
+#' @param rcc_content List of dataframes originating from RCC files
+#' @param custom String of concatenated housekeeping genes. 
+#' @return Vector of counts other than Endogenous.
+#' @keywords internal 
+control_genes <- function(rcc_content, custom){
+  counts <- rcc_content$Code_Summary
+  if(custom != ""){
+    custom <- unlist(strsplit(custom,"@"))
+    house <- counts[counts$Name %in% custom,]
+    counts <- counts[!grepl("Endogenous",counts$CodeClass),]
+    counts <- rbind(counts,house)
+  }else{
+    counts <- counts[!grepl("Endogenous",counts$CodeClass),]
+  }
+  return(counts)
+}
+
+#' @title Extract housekeeping genes and performs initial normalization 
+#' transformation on housekeeping counts
+#' @description Extract housekeeping genes and performs initial normalization 
+#' transformation, so that housekeeping normaliztion factors can be calulated
+#' independent of technical variation.
+#' @param rcc_content List of dataframes originating from RCC files
+#' @param pos_fact Positive normalization factor
+#' @param intercept background threshold
+#' @param custom String of concatenated housekeeping genes. 
+#' @return Vector transformed housekeeping gene counts.
+#' @keywords internal 
+housekeeping <- function(rcc_content, pos_fact, intercept, custom){
+  counts <- rcc_content$Code_Summary
+  if(custom == ""){
+    house <- as.numeric(counts[counts$CodeClass %in%
+                                 "Housekeeping","Count"])
+    name <- counts[counts$CodeClass %in%
+                     "Housekeeping","Name"]
+  }else{
+    custom <- unlist(strsplit(custom,"@"))
+    custom <- unlist(lapply(custom, function(x) unlist(strsplit(x,"\\|"))[1]))
+    house <- sapply(custom, function(x) as.numeric(counts[grepl(x, counts$Name),"Count"]))
+  }
+  house <- house - intercept
+  house <- house * pos_fact
+  house[house <= 0] <- 1
+  return(house)
+}
