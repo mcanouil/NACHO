@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1528882653633.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "41699C6E",
+    "lastKnownWriteTime" : 1528123994,
+    "last_content_update" : 1528123994,
+    "path" : "C:/Users/gbouland/Desktop/BitBucket/NAHCO/aid.R",
+    "project_path" : "aid.R",
+    "properties" : {
+        "cursorPosition" : "76,16",
+        "scrollLine" : "64"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
