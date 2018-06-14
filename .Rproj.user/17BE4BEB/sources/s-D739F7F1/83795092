@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1528979891647.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "83795092",
+    "lastKnownWriteTime" : 1528980998,
+    "last_content_update" : 1528980998503,
+    "path" : "C:/Users/gbouland/Desktop/BitBucket/NAHCO/dashboard/server.R",
+    "project_path" : "dashboard/server.R",
+    "properties" : {
+        "cursorPosition" : "374,49",
+        "scrollLine" : "352"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -20,13 +20,15 @@
 #' summarize("path/to/samplesheet.csv","FILE_COL,c("hsa-miR-361-5p","hsa-miR-186-5p","hsa-miR-26a-5p"),"GLM")
 #' @export
 summarize <- function(data_dir = NULL, ssheet=NULL,id_colname=NULL, housekeep="", norm="GEO"){
+  require(reshape2)
   locations <- list.files(data_dir, pattern=".RCC",recursive = T)
   housekeep <- paste(housekeep,collapse = "@")
   ssheet_df <- load.samplesheet(ssheet)
   accession <- ssheet_df[,id_colname]
-  accession <- ssheet_df[,id_colname]
   location_match <- sapply(accession, function(y) locations[grep(y,locations)])
   names(location_match) <- accession
+  location_match <- Filter(length,location_match)
+  accession <- names(location_match)
   if(length(locations) > length(accession)){
     warning("djdjdjd")
   }
@@ -35,29 +37,35 @@ summarize <- function(data_dir = NULL, ssheet=NULL,id_colname=NULL, housekeep=""
   counts <- lapply(rcc_content, extract_counts)
   names(counts) <- accession
   counts <- do.call(cbind,counts)
+  control_genes <- lapply(rcc_content, control_genes, housekeep)
+  names(control_genes) <- accession
+  control_genes <- melt(control_genes,
+                        id.vars=c("CodeClass","Name","Accession","Count"))
+  exc_probes <- probe.exclusion(control_genes)
   if(housekeep == "predict"){
-    temp_facs <- probe.factor(rcc_content)
+    temp_facs <- factor_calculation(rcc_content,housekeep,norm, exc_probes)
     rownames(temp_facs) <- accession
     tmp_counts <- lapply(colnames(counts), function(x) {
       local <- counts[,x] - temp_facs[x,"Negative_factor"]
       local <- counts[,x] * temp_facs[x,"Positive_factor"]
       local[local <= 0] <- 0.1
-      local <- floor(local)
+      local <- round(local)
       local
     })
     names(tmp_counts) <- accession
     tmp_counts<- do.call(cbind,tmp_counts)
     predicted_housekeeping <<- predict.housekeeping(tmp_counts)
     housekeep <- paste(predicted_housekeeping,collapse = "@")
+    control_genes <- lapply(rcc_content, control_genes, housekeep)
+    names(control_genes) <- accession
+    control_genes <- melt(control_genes,
+                          id.vars=c("CodeClass","Name","Accession","Count"))
   }
-  control_genes <- lapply(rcc_content, control_genes, housekeep)
-  names(control_genes) <- accession
-  control_genes <- melt(control_genes,
-                        id.vars=c("CodeClass","Name","Accession","Count"))
+  
   qc_values <- lapply(rcc_content, qc_features)
   qc_values <- do.call(rbind, qc_values)
   qc_values <- as.data.frame(qc_values, stringsAsFactors=F)
-  norm_factor <- factor_calculation(rcc_content,housekeep,norm)
+  norm_factor <- factor_calculation(rcc_content,housekeep,norm, exc_probes)
   rownames(norm_factor) <- accession
   pcas <- prinicipal_components(counts)
   rownames(qc_values) <- accession
@@ -119,7 +127,7 @@ normalize <- function(summary, housekeep="", remove.outliers=T, norm="GEO"){
   counts <- lapply(colnames(counts), function(x){
     local <- counts[,x] * norm_factor[x,"Positive_factor"] * norm_factor[x,"House_factor"]
     local[local <= 0] <- 0.1
-    local <- floor(local)
+    local <- round(local)
     local
   })
   names(counts) <- accession
@@ -163,7 +171,7 @@ visualize <- function(summary=NULL){
                                                 "access","locations","housekeep")))){
     stop("No valid data provided. \n Use get.features() to generate data")
   }
-  dir <- "C:/Users/gbouland/Desktop/normalize_test/dashboard"
+  dir <- "./dashboard"
   #dir <- system.file("shiny-examples", "nacho_app", package = "testnacho")
   qcdata_ssheet <<- summary
   runApp(dir)

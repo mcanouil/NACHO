@@ -184,3 +184,6 @@ housekeeping <- function(rcc_content, pos_fact, intercept, custom){
   house[house <= 0] <- 1
   return(house)
 }
+
+
+
