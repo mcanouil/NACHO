@@ -42,6 +42,7 @@ summarize <- function(data_dir = NULL, ssheet=NULL,id_colname=NULL, housekeep=""
   control_genes <- melt(control_genes,
                         id.vars=c("CodeClass","Name","Accession","Count"))
   exc_probes <- probe.exclusion(control_genes)
+  
   if(housekeep == "predict"){
     temp_facs <- factor_calculation(rcc_content,housekeep,norm, exc_probes)
     rownames(temp_facs) <- accession
@@ -110,7 +111,13 @@ normalize <- function(summary, housekeep="", remove.outliers=T, norm="GEO"){
     location_match <- summary[["locations"]]
     path_to_files <- paste(path,location_match[accession],sep="/")
     rcc_content <- lapply(path_to_files, rcc.read)
-    norm_factor <- factor_calculation(rcc_content, housekeep = housekeep, norm)
+    
+    control_genes <- lapply(rcc_content, control_genes, housekeep)
+    names(control_genes) <- accession
+    control_genes <- melt(control_genes,
+                          id.vars=c("CodeClass","Name","Accession","Count"))
+    exc_probes <- probe.exclusion(control_genes)
+    norm_factor <- factor_calculation(rcc_content, housekeep = housekeep, norm, exc_probes)
     rownames(norm_factor) <- accession
     counts <- lapply(rcc_content, extract_counts)
     counts <- do.call(cbind,counts)

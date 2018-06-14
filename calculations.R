@@ -92,8 +92,8 @@ geometric <- function(rcc_content, probes){
 #' @return Vector with positive factor and backrground threshold
 #' @keywords internal
 intercept_slope <- function(rcc_content, exc_negs){
+  
   probes_out <- c("POS_F(0.125)", exc_negs)
-  print(probes_out)
   counts <- rcc_content$Code_Summary
   control_labels <- c("Positive","Negative")
   control_data <- counts[counts$CodeClass %in% control_labels,]
@@ -164,6 +164,12 @@ predict.housekeeping <- function(counts){
   return(names(miR_sd)[1:5])
 }
 
+#' @title Probe exclusion
+#' @description Compares probe specfic median with overal median, excludes probes when
+#' probe specific mean differs more than 50% from overal median
+#' @param control_genes dataframe of all control genes
+#' @return names of excluded probes
+#' @keywords internal
 probe.exclusion <- function(control_genes){
   local_neg <- control_genes[control_genes$CodeClass == "Negative",]
   dcasted<- dcast(L1~Name, data = local_neg[,c("Name","L1","Count")])
