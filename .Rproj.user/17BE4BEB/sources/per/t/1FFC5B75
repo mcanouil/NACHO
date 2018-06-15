@@ -5,15 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "2070955388",
+    "hash" : "1445758802",
     "id" : "1FFC5B75",
-    "lastKnownWriteTime" : 1528983391,
-    "last_content_update" : 1528983391555,
+    "lastKnownWriteTime" : 1529069950,
+    "last_content_update" : 1529069950994,
     "path" : "C:/Users/gbouland/Desktop/BitBucket/NAHCO/calculations.R",
     "project_path" : "calculations.R",
     "properties" : {
-        "cursorPosition" : "170,35",
-        "scrollLine" : "145"
+        "cursorPosition" : "93,0",
+        "scrollLine" : "0"
     },
     "relative_order" : 2,
     "source_on_save" : false,

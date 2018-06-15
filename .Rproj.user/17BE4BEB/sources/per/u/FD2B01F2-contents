@@ -1,0 +1,61 @@
+test <- summarize("C:/Users/gbouland/Desktop/Data_test",
+                  "Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA/Samplesheet.csv",
+                  "Accession","predict","GLM")
+
+
+test <- summarize("Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA",
+                  "Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA/Samplesheet.csv",
+                  "Accession",my_housekeep,"GLM")
+
+
+"C:/Users/gbouland/Desktop/Data_test"
+
+
+gsub("[\\(\\)]", "", regmatches("NEG_D(0)", gregexpr("\\(.*?\\)", "NEG_D(0)"))[[1]])
+
+visualize(test)
+
+my_housekeep <- c("hsa-miR-491-5p|0","hsa-miR-1910-5p|0","hsa-miR-514a-5p|0")
+
+norms <- normalize(summary = test,housekeep = my_housekeep,remove.outliers = T,norm = "GLM")
+
+
+
+test2 <- summarize("Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA",
+                  "Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA/Samplesheet.csv",
+                  "Accession",my_housekeep,"GLM")
+
+norms2 <- normalize(summary = test2,housekeep = my_housekeep,remove.outliers = T,norm = "GLM")
+
+ssheet <- test$ssheet
+
+
+normal <- normss$normalized
+sprednorm <- stack(as.data.frame(normal))
+sprednorm$values <- ifelse(sprednorm$values == 0, NA, sprednorm$values)
+sprednorm$date <- sapply(sprednorm$ind, function(x) ssheet[ssheet$Accession == as.character(x),"date"])
+sprednorm.dens.plot <- ggplot(sprednorm, aes(x =log10(sprednorm[,"values"]+1))) +
+  stat_density(aes(group = ind, color = as.factor(date)),position="identity",geom="line") + labs(x="Log10(counts)",color="Date")
+ggsave("predicted_miR_normalization.pdf", width = 8, height = 6)
+
+
+ggplot(sprednorm, aes(x = sprednorm[,"values"],y = as.factor(ind), fill=as.factor(date))) +
+  geom_density_ridges(quantile_lines = T, vline_color="white") +
+  facet_wrap(~date, scales ="free_y",ncol = 6) +  scale_x_log10() +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) + labs(title="SSPE=F")
+
+
+normal <- norms2$normalized
+sprednorm <- stack(as.data.frame(normal))
+sprednorm$values <- ifelse(sprednorm$values == 0, NA, sprednorm$values)
+sprednorm$date <- sapply(sprednorm$ind, function(x) ssheet[ssheet$Accession == as.character(x),"date"])
+sprednorm.dens.plot <- ggplot(sprednorm, aes(x =log10(sprednorm[,"values"]+1))) +
+  stat_density(aes(group = ind, color = as.factor(date)),position="identity",geom="line") + labs(x="Log10(counts)",color="Date")
+
+
+
+
+
+library(ggridges)
