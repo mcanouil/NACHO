@@ -42,9 +42,15 @@ summarize <- function(data_dir = NULL, ssheet=NULL,id_colname=NULL, housekeep=""
   control_genes <- melt(control_genes,
                         id.vars=c("CodeClass","Name","Accession","Count"))
   exc_probes <- probe.exclusion(control_genes)
-  
+  sspe_probes <- sample.specific.probe.exclusion(control_genes)
+  sspe_names <- colnames(sspe_probes)
+  sspe_probes <- setNames(split(sspe_probes, seq(nrow(sspe_probes))), rownames(sspe_probes))
+  sspe_probes <- lapply(sspe_probes,function(x){
+    names(x) <- sspe_names
+    x
+    })
   if(housekeep == "predict"){
-    temp_facs <- factor_calculation(rcc_content,housekeep,norm, exc_probes)
+    temp_facs <- factor_calculation(rcc_content,housekeep,norm, exc_probes,sspe_probes)
     rownames(temp_facs) <- accession
     tmp_counts <- lapply(colnames(counts), function(x) {
       local <- counts[,x] - temp_facs[x,"Negative_factor"]
@@ -62,11 +68,10 @@ summarize <- function(data_dir = NULL, ssheet=NULL,id_colname=NULL, housekeep=""
     control_genes <- melt(control_genes,
                           id.vars=c("CodeClass","Name","Accession","Count"))
   }
-  
   qc_values <- lapply(rcc_content, qc_features)
   qc_values <- do.call(rbind, qc_values)
   qc_values <- as.data.frame(qc_values, stringsAsFactors=F)
-  norm_factor <- factor_calculation(rcc_content,housekeep,norm, exc_probes)
+  norm_factor <- factor_calculation(rcc_content,housekeep,norm, exc_probes, sspe_probes)
   rownames(norm_factor) <- accession
   pcas <- prinicipal_components(counts)
   rownames(qc_values) <- accession
@@ -117,7 +122,14 @@ normalize <- function(summary, housekeep="", remove.outliers=T, norm="GEO"){
     control_genes <- melt(control_genes,
                           id.vars=c("CodeClass","Name","Accession","Count"))
     exc_probes <- probe.exclusion(control_genes)
-    norm_factor <- factor_calculation(rcc_content, housekeep = housekeep, norm, exc_probes)
+    sspe_probes <- sample.specific.probe.exclusion(control_genes)
+    sspe_names <- colnames(sspe_probes)
+    sspe_probes <- setNames(split(sspe_probes, seq(nrow(sspe_probes))), rownames(sspe_probes))
+    sspe_probes <- lapply(sspe_probes,function(x){
+      names(x) <- sspe_names
+      x
+    })
+    norm_factor <- factor_calculation(rcc_content, housekeep = housekeep, norm, exc_probes,sspe_probes)
     rownames(norm_factor) <- accession
     counts <- lapply(rcc_content, extract_counts)
     counts <- do.call(cbind,counts)
@@ -176,7 +188,7 @@ visualize <- function(summary=NULL){
                                                 "counts",
                                                 "path",
                                                 "access","locations","housekeep")))){
-    stop("No valid data provided. \n Use get.features() to generate data")
+    stop("No valid data provided. \n Use summarize() to generate data")
   }
   dir <- "./dashboard"
   #dir <- system.file("shiny-examples", "nacho_app", package = "testnacho")
