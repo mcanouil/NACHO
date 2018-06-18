@@ -5,17 +5,17 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "763658071",
+    "hash" : "407239333",
     "id" : "83795092",
-    "lastKnownWriteTime" : 1528980998,
-    "last_content_update" : 1528980998503,
+    "lastKnownWriteTime" : 1529329310,
+    "last_content_update" : 1529329310137,
     "path" : "C:/Users/gbouland/Desktop/BitBucket/NAHCO/dashboard/server.R",
     "project_path" : "dashboard/server.R",
     "properties" : {
-        "cursorPosition" : "374,49",
+        "cursorPosition" : "12,41",
         "scrollLine" : "0"
     },
-    "relative_order" : 5,
+    "relative_order" : 4,
     "source_on_save" : false,
     "source_window" : "",
     "type" : "r_source"

@@ -5,10 +5,12 @@ pc_sum <- qcdata_ssheet[["pcsum"]]
 facs <- qcdata_ssheet[["norm_facs"]]
 control <- qcdata_ssheet[["control"]]
 housekeep <- qcdata_ssheet[["housekeep"]]
+save_path <- qcdata_ssheet[["path"]]
 
 server <- function(input, output){
   observeEvent(input$do,{
-    ggsave(paste0(getwd(),"/",input$name,".pdf"), width = input$w, height = input$h)
+    ggsave(paste0(save_path,"/",input$name,".pdf"), width = input$w, height = input$h)
+    showNotification(paste0("Plot successfully saved to: ",save_path))
   })
   
   #Render subtabs based on maintab

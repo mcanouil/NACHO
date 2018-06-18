@@ -91,9 +91,8 @@ geometric <- function(rcc_content, probes){
 #' @param rcc_content List of dataframes originating from RCC files
 #' @return Vector with positive factor and backrground threshold
 #' @keywords internal
-intercept_slope <- function(rcc_content,sspe,exc_negs){
-  sspe <- names(sspe[sspe==1])
-  probes_out <- c("POS_F(0.125)", unlist(exc_negs))
+intercept_slope <- function(rcc_content,exc_negs){
+  probes_out <- c("POS_F(0.125)",exc_negs)
   counts <- rcc_content$Code_Summary
   control_labels <- c("Positive","Negative")
   control_data <- counts[counts$CodeClass %in% control_labels,]
@@ -103,6 +102,8 @@ intercept_slope <- function(rcc_content,sspe,exc_negs){
   y <- as.numeric(control_data$Count) + 1
   x <- as.numeric(gsub("[\\(\\)]", "", regmatches(prob_names,
                                        gregexpr("\\(.*?\\)", prob_names))[[1]]))
+  print(x)
+  print(y)
   model <- glm(y~x, family = poisson(link = identity))
   output <- c("intercept" = unname(model$coeff[1]),
               "slope" = unname(model$coeff[2]))
@@ -116,15 +117,14 @@ intercept_slope <- function(rcc_content,sspe,exc_negs){
 #' @param norm A string indicating which form of calculation needs to be performed
 #' @return Dataframe of normalization factor for each sample
 #' @keywords internal
-factor_calculation <- function(rcc_content, housekeep, norm, ex_negs,sspe_negs){
+factor_calculation <- function(rcc_content, housekeep, norm, ex_negs){
   if(norm == "GEO"){
     geometric_mean_pos <- sapply(rcc_content, geometric, "Positive")
     geometric_mean_neg <- sapply(rcc_content, geometric, "Negative")
     positive_factor <- sapply(geometric_mean_pos,
                               function(x) mean(geometric_mean_pos) / x)
   }else if(norm == "GLM"){
-    #glms <- sapply(rcc_content, intercept_slope, ex_negs)
-    glms<- mapply(intercept_slope, rcc_content, sspe_negs, MoreArgs = list(ex_negs))
+    glms <- sapply(rcc_content, intercept_slope, ex_negs)
     geometric_mean_neg <- glms["intercept",]
     slopes <- glms["slope",]
     positive_factor <- sapply(slopes,
@@ -160,7 +160,6 @@ predict.housekeeping <- function(counts){
   ratios <- ratios[sum(is.infinite(ratios)) / length(ratios) <= 0.05,]
   ratios <- ifelse(is.infinite(ratios),NA,ratios)
   miR_sd <- sapply(rownames(ratios), function(x) sd(ratios[x,],na.rm = TRUE))
-  
   miR_sd <- sort(miR_sd, decreasing = F)
   return(names(miR_sd)[1:5])
 }
@@ -179,20 +178,11 @@ probe.exclusion <- function(control_genes){
   overal_median <- median(as.numeric(local_neg$Count))
   medians <- sapply(dcasted,function(x) median(as.numeric(x)))
   delta_medians <- sapply(medians,function(x) abs((overal_median-x)))
-  ex_probes <- delta_medians[delta_medians >= (0.5*overal_median)]
+  ex_probes <- delta_medians[delta_medians > (0.5*overal_median)]
   return(names(ex_probes))
 }
 
-sample.specific.probe.exclusion <- function(control_genes){
-  local_neg <- control_genes[control_genes$CodeClass == "Negative",]
-  dcasted<- dcast(L1~Name, data = local_neg[,c("Name","L1","Count")],value.var = "Count")
-  rownames(dcasted) <- dcasted$L1
-  dcasted$L1 <- NULL
-  negIQR <- apply(dcasted, 2, function(x){quantile(as.numeric(x), probs=c(0.75)) * 1.5})
-  exceed_matr <- mapply(function(x,y)ifelse(as.numeric(x) > y,1,0),dcasted,negIQR)
-  rownames(exceed_matr) <- rownames(dcasted)
-  return(exceed_matr)
-}
+
 
 
 

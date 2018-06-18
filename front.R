@@ -42,15 +42,8 @@ summarize <- function(data_dir = NULL, ssheet=NULL,id_colname=NULL, housekeep=""
   control_genes <- melt(control_genes,
                         id.vars=c("CodeClass","Name","Accession","Count"))
   exc_probes <- probe.exclusion(control_genes)
-  sspe_probes <- sample.specific.probe.exclusion(control_genes)
-  sspe_names <- colnames(sspe_probes)
-  sspe_probes <- setNames(split(sspe_probes, seq(nrow(sspe_probes))), rownames(sspe_probes))
-  sspe_probes <- lapply(sspe_probes,function(x){
-    names(x) <- sspe_names
-    x
-    })
   if(housekeep == "predict"){
-    temp_facs <- factor_calculation(rcc_content,housekeep,norm, exc_probes,sspe_probes)
+    temp_facs <- factor_calculation(rcc_content,housekeep,norm, exc_probes)
     rownames(temp_facs) <- accession
     tmp_counts <- lapply(colnames(counts), function(x) {
       local <- counts[,x] - temp_facs[x,"Negative_factor"]
@@ -71,7 +64,7 @@ summarize <- function(data_dir = NULL, ssheet=NULL,id_colname=NULL, housekeep=""
   qc_values <- lapply(rcc_content, qc_features)
   qc_values <- do.call(rbind, qc_values)
   qc_values <- as.data.frame(qc_values, stringsAsFactors=F)
-  norm_factor <- factor_calculation(rcc_content,housekeep,norm, exc_probes, sspe_probes)
+  norm_factor <- factor_calculation(rcc_content,housekeep,norm, exc_probes)
   rownames(norm_factor) <- accession
   pcas <- prinicipal_components(counts)
   rownames(qc_values) <- accession
@@ -116,20 +109,12 @@ normalize <- function(summary, housekeep="", remove.outliers=T, norm="GEO"){
     location_match <- summary[["locations"]]
     path_to_files <- paste(path,location_match[accession],sep="/")
     rcc_content <- lapply(path_to_files, rcc.read)
-    
     control_genes <- lapply(rcc_content, control_genes, housekeep)
     names(control_genes) <- accession
     control_genes <- melt(control_genes,
                           id.vars=c("CodeClass","Name","Accession","Count"))
     exc_probes <- probe.exclusion(control_genes)
-    sspe_probes <- sample.specific.probe.exclusion(control_genes)
-    sspe_names <- colnames(sspe_probes)
-    sspe_probes <- setNames(split(sspe_probes, seq(nrow(sspe_probes))), rownames(sspe_probes))
-    sspe_probes <- lapply(sspe_probes,function(x){
-      names(x) <- sspe_names
-      x
-    })
-    norm_factor <- factor_calculation(rcc_content, housekeep = housekeep, norm, exc_probes,sspe_probes)
+    norm_factor <- factor_calculation(rcc_content, housekeep = housekeep, norm, exc_probes)
     rownames(norm_factor) <- accession
     counts <- lapply(rcc_content, extract_counts)
     counts <- do.call(cbind,counts)
