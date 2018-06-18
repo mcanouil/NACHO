@@ -5,15 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3237275658",
+    "hash" : "1129669436",
     "id" : "CF41D4D3",
-    "lastKnownWriteTime" : 1529069950,
-    "last_content_update" : 1529069950932,
+    "lastKnownWriteTime" : 1529328115,
+    "last_content_update" : 1529328115940,
     "path" : "C:/Users/gbouland/Desktop/BitBucket/NAHCO/front.R",
     "project_path" : "front.R",
     "properties" : {
-        "cursorPosition" : "109,76",
-        "scrollLine" : "0"
+        "cursorPosition" : "78,17",
+        "scrollLine" : "68"
     },
     "relative_order" : 1,
     "source_on_save" : false,

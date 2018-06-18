@@ -5,7 +5,7 @@ test <- summarize("C:/Users/gbouland/Desktop/Data_test",
 
 test <- summarize("Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA",
                   "Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA/Samplesheet.csv",
-                  "Accession",my_housekeep,"GLM")
+                  "Accession","predict","GLM")
 
 
 "C:/Users/gbouland/Desktop/Data_test"
@@ -54,8 +54,85 @@ sprednorm$date <- sapply(sprednorm$ind, function(x) ssheet[ssheet$Accession == a
 sprednorm.dens.plot <- ggplot(sprednorm, aes(x =log10(sprednorm[,"values"]+1))) +
   stat_density(aes(group = ind, color = as.factor(date)),position="identity",geom="line") + labs(x="Log10(counts)",color="Date")
 
-
-
-
-
 library(ggridges)
+my_house <- predicted_housekeeping[c(2,3,4)]
+my_house
+
+
+library(ggplot2)
+
+#met probe exclusion
+my_summary <- summarize("Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA",
+                  "Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA/ssheet_dr.csv",
+                  "Accession",my_house,"GLM")
+my_house <- predicted_housekeeping[c(2,3,4)]
+my_house
+my_final_mir <- normalize(summary = my_summary,housekeep = my_house,remove.outliers = T,norm = "GLM")
+
+normal <- my_final_mir$normalized
+ssheet <- my_summary$ssheet
+sprednorm <- stack(as.data.frame(normal))
+sprednorm$values <- ifelse(sprednorm$values == 0, NA, sprednorm$values)
+sprednorm$date <- sapply(sprednorm$ind, function(x) ssheet[ssheet$Accession == as.character(x),"date"])
+sprednorm.dens.plot <- ggplot(sprednorm, aes(x =log10(sprednorm[,"values"]+1))) +
+  stat_density(aes(group = ind, color = as.factor(date)),position="identity",geom="line") + labs(x="Log10(counts)",color="Date")
+
+#zonder probe exclusion
+my_summary2 <- summarize("Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA",
+                        "Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA/ssheet_dr.csv",
+                        "Accession",my_house,"GLM")
+#my_house <- predicted_housekeeping[c(2,3,4)]
+#my_house
+my_final_mir2 <- normalize(summary = my_summary2,housekeep = my_house,remove.outliers = T,norm = "GLM")
+
+normal2 <- my_final_mir2$normalized
+ssheet <- my_summary2$ssheet
+sprednorm <- stack(as.data.frame(normal2))
+sprednorm$values <- ifelse(sprednorm$values == 0, NA, sprednorm$values)
+sprednorm$date <- sapply(sprednorm$ind, function(x) ssheet[ssheet$Accession == as.character(x),"date"])
+sprednorm.dens.plot2 <- ggplot(sprednorm, aes(x =log10(sprednorm[,"values"]+1))) +
+  stat_density(aes(group = ind, color = as.factor(date)),position="identity",geom="line") + labs(x="Log10(counts)",color="Date")
+
+
+#met alle voorspelde housekeeping #zonder probe exclusion
+my_summary <- summarize("Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA",
+                         "Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA/ssheet_dr.csv",
+                         "Accession","predict","GLM")
+#my_house <- predicted_housekeeping[c(2,3,4)]
+#my_house
+my_final_mir3 <- normalize(summary = my_summary3,housekeep = predicted_housekeeping,remove.outliers = T,norm = "GLM")
+
+normal3 <- my_final_mir3$normalized
+ssheet <- my_summary3$ssheet
+sprednorm <- stack(as.data.frame(normal3))
+sprednorm$values <- ifelse(sprednorm$values == 0, NA, sprednorm$values)
+sprednorm$date <- sapply(sprednorm$ind, function(x) ssheet[ssheet$Accession == as.character(x),"date"])
+sprednorm.dens.plot3 <- ggplot(sprednorm, aes(x =log10(sprednorm[,"values"]+1))) +
+  stat_density(aes(group = ind, color = as.factor(date)),position="identity",geom="line") + labs(x="Log10(counts)",color="Date")
+
+
+#met alle voorspelde housekeeping  met probe exclusion
+my_summary4 <- summarize("Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA",
+                         "Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA/ssheet_dr.csv",
+                         "Accession","predict","GLM")
+#my_house <- predicted_housekeeping[c(2,3,4)]
+#my_house
+my_final_mir4 <- normalize(summary = my_summary4,housekeep = predicted_housekeeping,remove.outliers = T,norm = "GLM")
+
+normal4 <- my_final_mir4$normalized
+ssheet <- my_summary4$ssheet
+sprednorm <- stack(as.data.frame(normal4))
+sprednorm$values <- ifelse(sprednorm$values == 0, NA, sprednorm$values)
+sprednorm$date <- sapply(sprednorm$ind, function(x) ssheet[ssheet$Accession == as.character(x),"date"])
+sprednorm.dens.plot4 <- ggplot(sprednorm, aes(x =log10(sprednorm[,"values"]+1))) +
+  stat_density(aes(group = ind, color = as.factor(date)),position="identity",geom="line") + labs(x="Log10(counts)",color="Date")
+
+
+ggsave(filename ="PET_3house.pdf" ,plot =sprednorm.dens.plot ,width =8 ,height =6 )
+ggsave(filename ="PEF_3house.pdf" ,plot =sprednorm.dens.plot2 ,width =8 ,height =6 )
+ggsave(filename ="PEF_5house.pdf",plot =sprednorm.dens.plot3 ,width =8,height =6)
+ggsave(filename ="PET_5house.pdf",plot =sprednorm.dens.plot4 ,width =8,height =6 )
+
+
+
+dim(my_final_mir4$normalized
