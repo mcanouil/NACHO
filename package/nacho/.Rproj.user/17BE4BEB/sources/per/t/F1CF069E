@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1529407786221.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3756241306",
+    "id" : "F1CF069E",
+    "lastKnownWriteTime" : 1529407521,
+    "last_content_update" : 1529407521,
+    "path" : "C:/Users/gbouland/Desktop/BitBucket/NAHCO/package/nacho/R/calculations.R",
+    "project_path" : "R/calculations.R",
+    "properties" : {
+        "cursorPosition" : "193,0",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

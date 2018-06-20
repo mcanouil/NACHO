@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1528882652076.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "CF41D4D3",
+    "lastKnownWriteTime" : 1529328115,
+    "last_content_update" : 1529328115940,
+    "path" : "C:/Users/gbouland/Desktop/BitBucket/NAHCO/front.R",
+    "project_path" : "front.R",
+    "properties" : {
+        "cursorPosition" : "17,36",
+        "scrollLine" : "4"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
