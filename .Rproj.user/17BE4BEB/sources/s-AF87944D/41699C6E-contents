@@ -22,7 +22,7 @@ rcc.read <- function(rcc.file){
 #' @description Extracts data between XML-like RCC tags and saves
 #'  them as data.frame.
 #' @param positions Vector containing "<tag>" and "</tag>" location
-#'  in raw RCC file. 
+#'  in raw RCC file.
 #' @param raw_rcc Raw RCC file.
 #' @return Data.frame containing the data between the XML-like tags.
 #' @keywords internal
@@ -59,7 +59,7 @@ load.samplesheet <- function(ssheet){
 }
 
 #' @title Extracts counts
-#' @description Extracts Endogenous counts from the Code_Summary dataframe 
+#' @description Extracts Endogenous counts from the Code_Summary dataframe
 #' originating from the RCC files
 #' @param rcc_content List of dataframes originating from RCC files
 #' @return Vector of Endogenous counts of specified RCC file
@@ -73,7 +73,7 @@ extract_counts <- function(rcc_content){
   return(spec_counts)
 }
 
-#' @title Calculates all QC values 
+#' @title Calculates all QC values
 #' @description  Calculates all consecutive QC values by calling QC calculation
 #'functions and processes these values into a vector.
 #' @param rcc_content List of dataframes originating from RCC files
@@ -112,7 +112,7 @@ qc_features <- function(rcc_content){
   return(output)
 }
 
-#' @title Removing of outliers 
+#' @title Removing of outliers
 #' @description  Detects outliers based on QC measures and normalization
 #' factors all thresholds are as mentioned by the manufacturer.
 #' @param rcc_content List of dataframes originating from RCC files
@@ -140,11 +140,11 @@ remove.outliers <- function(summarized){
 #' @title Extracts all counts other than the Endogenous ones.
 #' @description  Extracts all counts which are not named: Endogenous.
 #' if the user has given custom houskeeping genes, these will also be
-#' extracted and treated as control genes. 
+#' extracted and treated as control genes.
 #' @param rcc_content List of dataframes originating from RCC files
-#' @param custom String of concatenated housekeeping genes. 
+#' @param custom String of concatenated housekeeping genes.
 #' @return Vector of counts other than Endogenous.
-#' @keywords internal 
+#' @keywords internal
 control_genes <- function(rcc_content, custom){
   counts <- rcc_content$Code_Summary
   if(custom != ""){
@@ -158,17 +158,17 @@ control_genes <- function(rcc_content, custom){
   return(counts)
 }
 
-#' @title Extract housekeeping genes and performs initial normalization 
+#' @title Extract housekeeping genes and performs initial normalization
 #' transformation on housekeeping counts
-#' @description Extract housekeeping genes and performs initial normalization 
+#' @description Extract housekeeping genes and performs initial normalization
 #' transformation, so that housekeeping normaliztion factors can be calulated
 #' independent of technical variation.
 #' @param rcc_content List of dataframes originating from RCC files
 #' @param pos_fact Positive normalization factor
 #' @param intercept background threshold
-#' @param custom String of concatenated housekeeping genes. 
+#' @param custom String of concatenated housekeeping genes.
 #' @return Vector transformed housekeeping gene counts.
-#' @keywords internal 
+#' @keywords internal
 housekeeping <- function(rcc_content, pos_fact, intercept, custom){
   counts <- rcc_content$Code_Summary
   if(custom == ""){
@@ -186,6 +186,4 @@ housekeeping <- function(rcc_content, pos_fact, intercept, custom){
   house[house <= 0] <- 1
   return(house)
 }
-
-
 
