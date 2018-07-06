@@ -8,6 +8,7 @@ rcc.read <- function(rcc.file){
   tags <- c("Header","Sample_Attributes",
             "Lane_Attributes","Code_Summary","Messages")
   raw <- readLines(rcc.file)
+  raw <- sapply(raw,function(x) gsub("[|]+[[:digit:]]+\\.*[[:digit:]]*","",x))
   tag.positions <- sapply(tags, function(y) grep(y,raw))
   rcc.list <- apply(tag.positions,2,extract_data,raw)
   colnames(rcc.list$Code_Summary) <- rcc.list$Code_Summary[1,]
