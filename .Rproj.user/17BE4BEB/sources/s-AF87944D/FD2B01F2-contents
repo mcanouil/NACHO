@@ -4,7 +4,7 @@ test <- summarize("C:/Users/gbouland/Desktop/Data_test",
 
 
 test <- summarize("Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA",
-                  "Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA/Samplesheet.csv",
+                  "Z:/Roderick/Projects/Rhapsody/004 Omics/003 QC_Nanostring_miRNA/ssheet_dr.csv",
                   "Accession","predict","GLM")
 
 
