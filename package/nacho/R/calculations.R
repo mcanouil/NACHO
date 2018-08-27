@@ -56,6 +56,7 @@ prinicipal_components <- function(counts){
 #' @return geometric mean
 #' @keywords internal
 geoMean <- function(vector_data){
+  vector_data[vector_data == 0] <- 1
   exp(mean(log(vector_data)))
 }
 
@@ -66,7 +67,7 @@ geoMean <- function(vector_data){
 #' @param probes String of either "Positve" or "Negative"
 #' @return geometric mean of control probes
 #' @keywords internal
-geometric <- function(rcc_content, probes){
+geometric <- function(rcc_content, probes,ex_negs=NULL){
   counts <- rcc_content$Code_Summary
   if(probes == "Positive"){
     control_data <- as.numeric(counts[counts$CodeClass %in%
@@ -74,6 +75,8 @@ geometric <- function(rcc_content, probes){
                                         "POS_F(0.125)","Count"])
     control_data[control_data == 0] <- 1 
   }else if(probes == "Negative"){
+    probes_out <- ex_negs
+    control_data <- counts[!counts$Name %in% probes_out,]
     control_data <- as.numeric(counts[counts$CodeClass %in%
                                         probes,"Count"])
     control_data[control_data == 0] <- 1
@@ -101,7 +104,7 @@ intercept_slope <- function(rcc_content,exc_negs){
   prob_names <- paste0(control_data$Name,collapse = "")
   y <- as.numeric(control_data$Count) + 1
   x <- as.numeric(gsub("[\\(\\)]", "", regmatches(prob_names,
-                                       gregexpr("\\(.*?\\)", prob_names))[[1]]))
+                                                  gregexpr("\\(.*?\\)", prob_names))[[1]]))
   model <- glm(y~x, family = poisson(link = identity))
   output <- c("intercept" = unname(model$coeff[1]),
               "slope" = unname(model$coeff[2]))
@@ -118,7 +121,7 @@ intercept_slope <- function(rcc_content,exc_negs){
 factor_calculation <- function(rcc_content, housekeep, norm, ex_negs){
   if(norm == "GEO"){
     geometric_mean_pos <- sapply(rcc_content, geometric, "Positive")
-    geometric_mean_neg <- sapply(rcc_content, geometric, "Negative")
+    geometric_mean_neg <- sapply(rcc_content, geometric, "Negative",ex_negs)
     positive_factor <- sapply(geometric_mean_pos,
                               function(x) mean(geometric_mean_pos) / x)
   }else if(norm == "GLM"){
@@ -179,15 +182,3 @@ probe.exclusion <- function(control_genes){
   ex_probes <- delta_medians[delta_medians > (0.5*overal_median)]
   return(names(ex_probes))
 }
-
-
-
-
-
-
-
-
-
-
-
-
