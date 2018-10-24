@@ -1,0 +1,35 @@
+#' find_housekeeping
+#'
+#' @param data
+#' @param id_colname
+#' @param count_column
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' @importFrom dplyr group_by
+#' @importFrom stats sd
+#' @importFrom tidyr nest
+#' @importFrom utils head
+find_housekeeping <- function(data, id_colname, count_column) {
+  nested_data_df <- tidyr::nest(dplyr::group_by(.data = data, get(id_colname)))
+  colnames(nested_data_df)[1] <- id_colname
+  ratios <- sapply(
+    X = nested_data_df[["data"]],
+    count_column = count_column,
+    FUN = function(.data, count_column) {
+      sample_means <- mean(.data[[count_column]])
+      ratios <- log2(.data[[count_column]] / sample_means)
+      names(ratios) <- .data[["Name"]]
+      ratios <- ratios[sum(is.infinite(ratios)) / length(ratios) <= 0.05]
+      ratios <- ifelse(is.infinite(ratios), NA, ratios)
+      return(ratios)
+    }
+  )
+  ratios <- do.call("cbind", ratios)
+  miR_sd <- apply(X = ratios, MARGIN = 1, FUN = stats::sd, na.rm = TRUE)
+  miR_sd <- sort(miR_sd, decreasing = FALSE)
+  top5 <- utils::head(names(miR_sd), 5)
+  return(top5)
+}
