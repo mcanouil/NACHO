@@ -1,7 +1,0 @@
-"C:/Users/gbouland/Desktop/Git_projects/nanoString_QC2.0/data/GSE70970"
-
-exampleData <-summarize("C:/Users/gbouland/Desktop/Git_projects/nanoString_QC2.0/data/GSE70970",
-          "C:/Users/gbouland/Desktop/Git_projects/nanoString_QC2.0/data/GSE70970/Samplesheet.csv",
-          "geo_accession",housekeep = "predict",norm = "GLM")
-
-visualize(exampleData)
