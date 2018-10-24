@@ -1,0 +1,15 @@
+#' normalise_counts
+#'
+#' @param data
+#'
+#' @return
+#' @export
+#'
+#' @examples
+normalise_counts <- function(data) {
+  out <- (data[["Count"]] - data[["Negative_factor"]]) *
+    data[["Positive_factor"]] *
+    data[["House_factor"]]
+  out[out<=0] <- 0.1
+  return(round(out))
+}

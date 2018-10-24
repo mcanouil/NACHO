@@ -1,0 +1,14 @@
+#' qc_limit_detection
+#'
+#' @param pos_e
+#' @param negatives
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' @importFrom stats sd
+qc_limit_detection <- function(pos_e, negatives) {
+  z_score <- pos_e - mean(negatives) / stats::sd(negatives)
+  return(round(z_score, 2))
+}
