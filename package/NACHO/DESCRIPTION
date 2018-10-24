@@ -1,0 +1,22 @@
+Package: NACHO
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Authors@R: c(
+  person("Gerard", "Bouland", role = c("aut", "cre"), email = "G.Bouland@lumc.nl"),
+  person("Roderick .C", "Slieker", role = c("aut"), email = "R.C.Slieker@lumc.nl"),
+  person("Mickaël", "Canouil", role = c("aut"), email = "***REMOVED***")
+)
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: Something
+License: GPL-3
+Depends: 
+  R (>= 3.5.0),
+  dplyr,
+  purrr,
+  shiny,
+  tibble,
+  tidyr
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.0
