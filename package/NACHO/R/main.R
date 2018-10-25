@@ -1,6 +1,6 @@
 #' summarise
 #'
-#' @param data_dir [character]
+#' @param data_directory [character]
 #' @param ssheet_csv [character]
 #' @param id_colname [character]
 #' @param housekeeping_genes [vector(character)]
@@ -18,7 +18,7 @@
 #' @importFrom tidyr unnest unite
 #' @importFrom utils read.csv
 summarise <- function(
-  data_dir = NULL,
+  data_directory = NULL,
   ssheet_csv = NULL,
   id_colname = NULL,
   housekeeping_genes = NULL,
@@ -28,17 +28,13 @@ summarise <- function(
 ) {
   nacho_df <- utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE)
   nacho_df <- tibble::as_tibble(nacho_df)
-  nacho_df <- dplyr::mutate(
-    .data = nacho_df,
-    file_path = paste(!!data_dir, get(id_colname), sep = "/"),
-    file_exists = purrr::map_lgl(.x = file_path, .f = file.exists)
-  )
-  nacho_df <- dplyr::mutate(
-    .data = nacho_df,
-    rcc_content = purrr::map(.x = file_path, .f = read_rcc)
-  )
-  nacho_df <- tidyr::unnest(data = nacho_df, rcc_content, .drop = FALSE)
-  nacho_df <- tidyr::unnest(data = nacho_df, Code_Summary, .drop = FALSE)
+  nacho_df[["file_path"]] <- paste(data_directory, nacho_df[[id_colname]], sep = "/")
+  nacho_df[["file_exists"]] <- purrr::map_lgl(.x = nacho_df[["file_path"]], .f = file.exists)
+  nacho_df[["rcc_content"]] <- purrr::map(.x = nacho_df[["file_path"]], .f = read_rcc)
+
+  column_to_unnest <- c("rcc_content", "Code_Summary")
+  nacho_df <- tidyr::unnest(data = nacho_df, get(column_to_unnest[1]), .drop = FALSE)
+  nacho_df <- tidyr::unnest(data = nacho_df, get(column_to_unnest[2]), .drop = FALSE)
   nacho_df[["CodeClass"]] <- gsub("Endogenous.*", "Endogenous", nacho_df[["CodeClass"]])
 
   if ("plexset_id" %in% colnames(nacho_df)) {
@@ -46,7 +42,7 @@ summarise <- function(
   }
 
   summary_out <- qc_rcc(
-    data_dir = data_dir,
+    data_dir = data_directory,
     nacho_df = nacho_df,
     id_colname = id_colname,
     housekeeping_genes = housekeeping_genes,

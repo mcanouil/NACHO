@@ -4,12 +4,13 @@
 \alias{summarise}
 \title{summarise}
 \usage{
-summarise(data_dir = NULL, ssheet_csv = NULL, id_colname = NULL,
-  housekeeping_genes = NULL, predict_housekeeping = FALSE,
-  normalisation_method = "GEO", n_comp = 10)
+summarise(data_directory = NULL, ssheet_csv = NULL,
+  id_colname = NULL, housekeeping_genes = NULL,
+  predict_housekeeping = FALSE, normalisation_method = "GEO",
+  n_comp = 10)
 }
 \arguments{
-\item{data_dir}{[character]}
+\item{data_directory}{[character]}
 
 \item{ssheet_csv}{[character]}
 
