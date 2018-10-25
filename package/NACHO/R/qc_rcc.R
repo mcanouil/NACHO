@@ -8,8 +8,7 @@
 #' @param normalisation_method [character]
 #' @param n_comp [numeric]
 #'
-#' @return
-#' @export
+#' @return [nacho]
 #'
 #' @examples
 #' @importFrom dplyr full_join

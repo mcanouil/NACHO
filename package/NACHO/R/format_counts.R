@@ -4,8 +4,7 @@
 #' @param id_colname [character]
 #' @param count_column [character]
 #'
-#' @return
-#' @export
+#' @return [data.frame]
 #'
 #' @examples
 #' @importFrom tidyr spread

@@ -3,8 +3,7 @@
 #' @param counts [data.frame]
 #' @param n_comp [numeric]
 #'
-#' @return
-#' @export
+#' @return [list(data.frame)]
 #'
 #' @examples
 #' @importFrom stats prcomp

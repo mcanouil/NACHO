@@ -16,6 +16,9 @@ geometric_housekeeping(data, positive_factor, intercept,
 
 \item{housekeeping_genes}{[vector(character)]}
 }
+\value{
+[numeric]
+}
 \description{
 geometric_housekeeping
 }

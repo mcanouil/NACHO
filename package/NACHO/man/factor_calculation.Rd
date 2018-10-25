@@ -21,6 +21,9 @@ factor_calculation(nacho_df, id_colname, housekeeping_genes,
 
 \item{exclude_probes}{[vector(character)]}
 }
+\value{
+[data.frame]
+}
 \description{
 factor_calculation
 }

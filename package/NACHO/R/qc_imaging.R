@@ -3,8 +3,7 @@
 #' @param fov_counted [numeric]
 #' @param fov_count [numeric]
 #'
-#' @return
-#' @export
+#' @return [numeric]
 #'
 #' @examples
 qc_imaging <- function(fov_counted, fov_count) {

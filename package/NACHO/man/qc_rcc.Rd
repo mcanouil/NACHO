@@ -22,6 +22,9 @@ qc_rcc(data_dir, nacho_df, id_colname, housekeeping_genes,
 
 \item{n_comp}{[numeric]}
 }
+\value{
+[nacho]
+}
 \description{
 qc_rcc
 }

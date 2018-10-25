@@ -9,6 +9,9 @@ geometric_mean(x)
 \arguments{
 \item{x}{[numeric]}
 }
+\value{
+[numeric]
+}
 \description{
 geometric_mean
 }

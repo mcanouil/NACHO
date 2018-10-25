@@ -8,7 +8,7 @@
 #' @param normalisation_method [character]
 #' @param n_comp [numeric]
 #'
-#' @return
+#' @return [nacho]
 #' @export
 #'
 #' @examples
@@ -61,7 +61,7 @@ summarise <- function(
 #' @param normalisation_method [character]
 #' @param remove_outliers [logical]
 #'
-#' @return
+#' @return [nacho]
 #' @export
 #'
 #' @examples
@@ -146,7 +146,7 @@ normalise <- function(
 #' @param nacho_object [nacho]
 #' @param font_size [numeric]
 #'
-#' @return
+#' @return [NULL]
 #' @export
 #'
 #' @examples

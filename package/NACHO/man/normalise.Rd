@@ -18,6 +18,9 @@ normalise(nacho_object,
 
 \item{remove_outliers}{[logical]}
 }
+\value{
+[nacho]
+}
 \description{
 normalise
 }

@@ -9,6 +9,9 @@ qc_positive_control(counts)
 \arguments{
 \item{counts}{[data.frame]}
 }
+\value{
+[vector(numeric)]
+}
 \description{
 qc_positive_control
 }

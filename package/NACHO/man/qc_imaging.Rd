@@ -11,6 +11,9 @@ qc_imaging(fov_counted, fov_count)
 
 \item{fov_count}{[numeric]}
 }
+\value{
+[numeric]
+}
 \description{
 qc_imaging
 }

@@ -11,6 +11,9 @@ read_tags(tag, raw_rcc)
 
 \item{raw_rcc}{[vector(character)]}
 }
+\value{
+[list(data.frame)]
+}
 \description{
 read_tags
 }

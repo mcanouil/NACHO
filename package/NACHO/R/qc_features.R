@@ -3,8 +3,7 @@
 #' @param data [data.frame]
 #' @param id_colname [character]
 #'
-#' @return
-#' @export
+#' @return [data.frame]
 #'
 #' @examples
 #' @importFrom dplyr group_by

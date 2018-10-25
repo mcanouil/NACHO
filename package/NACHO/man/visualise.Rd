@@ -11,6 +11,9 @@ visualise(nacho_object, font_size = 14)
 
 \item{font_size}{[numeric]}
 }
+\value{
+[NULL]
+}
 \description{
 visualise
 }

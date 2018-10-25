@@ -13,6 +13,9 @@ find_housekeeping(data, id_colname, count_column)
 
 \item{count_column}{[character]}
 }
+\value{
+[vector(character)]
+}
 \description{
 find_housekeeping
 }

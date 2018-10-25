@@ -2,8 +2,7 @@
 #'
 #' @param counts [data.frame]
 #'
-#' @return
-#' @export
+#' @return [vector(numeric)]
 #'
 #' @examples
 #' @importFrom stats cor.test
