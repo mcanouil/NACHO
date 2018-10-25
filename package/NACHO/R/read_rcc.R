@@ -9,11 +9,6 @@
 #' @importFrom purrr map
 #' @importFrom tibble as_tibble
 #' @importFrom tidyr unnest
-
-if (getRversion() >= "2.15.1") { # remove NOTE: 'no visible binding for global variable'
-  utils::globalVariables(c("Header", "Sample_Attributes", "Lane_Attributes", "Messages", "Code_Summary"))
-}
-
 read_rcc <- function(file) {
   tags <- c(
     "Header", "Sample_Attributes", "Lane_Attributes", "Code_Summary", "Messages"
@@ -45,12 +40,22 @@ read_rcc <- function(file) {
   rcc_tbl <- tibble::as_tibble(rcc_list)
 
   if (length(rcc_tbl[["Code_Summary"]][[1]])==8) {
-    rcc_tbl <- tidyr::unnest(data = rcc_tbl, Code_Summary, .drop = FALSE)
+    column_to_unnest <- "Code_Summary"
+    rcc_tbl <- tidyr::unnest(data = rcc_tbl, get(column_to_unnest), .drop = FALSE)
     rcc_tbl[["plexset_id"]] <- paste0("S", 1:8)
   }
 
+  # remove NOTE: 'no visible binding for global variable' though it's a bit ugly
+  column_to_unnest <- c("Header", "Sample_Attributes", "Lane_Attributes", "Messages")
+  rcc_tbl <- tidyr::unnest(
+    data = rcc_tbl,
+    get(column_to_unnest[1]),
+    get(column_to_unnest[2]),
+    get(column_to_unnest[3]),
+    get(column_to_unnest[4]),
+    .drop = FALSE
+  )
 
-  rcc_tbl <- tidyr::unnest(data = rcc_tbl, Header, Sample_Attributes, Lane_Attributes, Messages, .drop = FALSE)
 
   return(rcc_tbl)
 }
