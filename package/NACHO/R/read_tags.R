@@ -3,8 +3,7 @@
 #' @param tag [character]
 #' @param raw_rcc [vector(character)]
 #'
-#' @return
-#' @export
+#' @return [list(data.frame)]
 #'
 #' @examples
 read_tags <- function(tag, raw_rcc) {

@@ -2,8 +2,7 @@
 #'
 #' @param file [character]
 #'
-#' @return
-#' @export
+#' @return [tibble]
 #'
 #' @examples
 #' @importFrom purrr map

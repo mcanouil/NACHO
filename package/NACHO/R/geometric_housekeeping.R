@@ -5,8 +5,7 @@
 #' @param intercept [vector(numeric)]
 #' @param housekeeping_genes [vector(character)]
 #'
-#' @return
-#' @export
+#' @return [numeric]
 #'
 #' @examples
 geometric_housekeeping <- function(data, positive_factor, intercept, housekeeping_genes) {

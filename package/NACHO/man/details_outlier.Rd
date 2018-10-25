@@ -11,6 +11,9 @@ details_outlier(nacho_df, id_colname)
 
 \item{id_colname}{[character]}
 }
+\value{
+[list]
+}
 \description{
 details_outlier
 }

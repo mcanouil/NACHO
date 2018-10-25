@@ -2,8 +2,7 @@
 #'
 #' @param x [numeric]
 #'
-#' @return
-#' @export
+#' @return [numeric]
 #'
 #' @examples
 geometric_mean <- function(x) {

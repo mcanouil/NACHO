@@ -7,8 +7,7 @@
 #' @param normalisation_method [character]
 #' @param exclude_probes [vector(character)]
 #'
-#' @return
-#' @export
+#' @return [data.frame]
 #'
 #' @examples
 #' @importFrom dplyr group_by

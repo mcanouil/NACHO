@@ -13,6 +13,9 @@ geometric_probes(data, probes_type, exclude_probes = NULL)
 
 \item{exclude_probes}{[vector(character)]}
 }
+\value{
+[numeric]
+}
 \description{
 geometric_probes
 }

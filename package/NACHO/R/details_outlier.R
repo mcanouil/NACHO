@@ -3,8 +3,7 @@
 #' @param nacho_df [data.frame]
 #' @param id_colname [character]
 #'
-#' @return
-#' @export
+#' @return [list]
 #'
 #' @examples
 details_outlier <- function(nacho_df, id_colname) {

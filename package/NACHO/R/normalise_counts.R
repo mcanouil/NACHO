@@ -2,8 +2,7 @@
 #'
 #' @param data [data.frame]
 #'
-#' @return
-#' @export
+#' @return [vector(numeric)]
 #'
 #' @examples
 normalise_counts <- function(data) {

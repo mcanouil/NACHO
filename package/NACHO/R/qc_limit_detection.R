@@ -3,8 +3,7 @@
 #' @param pos_e [numeric]
 #' @param negatives [vector(numeric)]
 #'
-#' @return
-#' @export
+#' @return [numeric]
 #'
 #' @examples
 #' @importFrom stats sd

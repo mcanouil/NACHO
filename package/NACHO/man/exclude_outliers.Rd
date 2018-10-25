@@ -9,6 +9,9 @@ exclude_outliers(object)
 \arguments{
 \item{object}{[nacho]}
 }
+\value{
+[data.frame]
+}
 \description{
 exclude_outliers
 }
