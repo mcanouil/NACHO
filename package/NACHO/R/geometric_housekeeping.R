@@ -6,8 +6,6 @@
 #' @param housekeeping_genes [vector(character)]
 #'
 #' @return [numeric]
-#'
-#' @examples
 geometric_housekeeping <- function(data, positive_factor, intercept, housekeeping_genes) {
   house_data <- as.data.frame(data[, c("Name", "CodeClass", "Count")])
   if (is.null(housekeeping_genes)) {

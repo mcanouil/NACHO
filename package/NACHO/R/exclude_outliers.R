@@ -1,13 +1,11 @@
 #' exclude_outliers
 #'
-#' @param object [nacho]
+#' @param object [nacho_set]
 #'
 #' @return [data.frame]
-#'
-#' @examples
 exclude_outliers <- function(object) {
-  nacho_df <- object[["nacho"]]
-  id_colname <- object[["access"]]
+  nacho_df <- object["nacho"]
+  id_colname <- object["access"]
   all_out <- unique(unlist(details_outlier(nacho_df = nacho_df, id_colname = id_colname)))
 
   if (length(all_out)!=0) {

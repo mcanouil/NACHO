@@ -4,7 +4,6 @@
 #'
 #' @return [tibble]
 #'
-#' @examples
 #' @importFrom purrr map
 #' @importFrom tibble as_tibble
 #' @importFrom tidyr unnest

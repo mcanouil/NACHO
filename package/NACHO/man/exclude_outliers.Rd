@@ -7,7 +7,7 @@
 exclude_outliers(object)
 }
 \arguments{
-\item{object}{[nacho]}
+\item{object}{[nacho_set]}
 }
 \value{
 [data.frame]

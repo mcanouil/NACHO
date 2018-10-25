@@ -25,8 +25,11 @@ summarise(data_directory = NULL, ssheet_csv = NULL,
 \item{n_comp}{[numeric]}
 }
 \value{
-[nacho]
+[nacho_set]
 }
 \description{
 summarise
+}
+\examples{
+NULL
 }

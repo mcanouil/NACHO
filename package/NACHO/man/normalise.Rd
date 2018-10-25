@@ -5,12 +5,12 @@
 \title{normalise}
 \usage{
 normalise(nacho_object,
-  housekeeping_genes = nacho_object[["housekeeping_genes"]],
-  normalisation_method = nacho_object[["normalisation_method"]],
+  housekeeping_genes = nacho_object["housekeeping_genes"],
+  normalisation_method = nacho_object["normalisation_method"],
   remove_outliers = TRUE)
 }
 \arguments{
-\item{nacho_object}{[nacho]}
+\item{nacho_object}{[nacho_set]}
 
 \item{housekeeping_genes}{[vector(character)]}
 
@@ -19,8 +19,11 @@ normalise(nacho_object,
 \item{remove_outliers}{[logical]}
 }
 \value{
-[nacho]
+[nacho_set]
 }
 \description{
 normalise
+}
+\examples{
+NULL
 }

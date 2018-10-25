@@ -5,8 +5,6 @@
 #' @param exclude_probes [vector(character)]
 #'
 #' @return [numeric]
-#'
-#' @examples
 geometric_probes <- function(data, probes_type, exclude_probes = NULL) {
   sapply(
     X = data,

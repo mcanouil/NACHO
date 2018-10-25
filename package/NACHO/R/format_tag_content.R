@@ -4,8 +4,6 @@
 #' @param content [data.frame]
 #'
 #' @return [data.frame]
-#'
-#' @examples
 format_tag_content <- function(tag, content) {
   if (nrow(content)==1 & is.na(content[1, 1])) {
     temp <- content

@@ -5,7 +5,6 @@
 #'
 #' @return [data.frame]
 #'
-#' @examples
 #' @importFrom dplyr group_by
 #' @importFrom stats median
 #' @importFrom tidyr nest
