@@ -33,8 +33,8 @@ summarise <- function(
   nacho_df[["rcc_content"]] <- purrr::map(.x = nacho_df[["file_path"]], .f = read_rcc)
 
   column_to_unnest <- c("rcc_content", "Code_Summary")
-  nacho_df <- tidyr::unnest(data = nacho_df, get(column_to_unnest[1]), .drop = FALSE)
-  nacho_df <- tidyr::unnest(data = nacho_df, get(column_to_unnest[2]), .drop = FALSE)
+  nacho_df <- tidyr::unnest(data = nacho_df, rcc_content = get(column_to_unnest[1]), .drop = FALSE)
+  nacho_df <- tidyr::unnest(data = nacho_df, Code_Summary = get(column_to_unnest[2]), .drop = FALSE)
   nacho_df[["CodeClass"]] <- gsub("Endogenous.*", "Endogenous", nacho_df[["CodeClass"]])
 
   if ("plexset_id" %in% colnames(nacho_df)) {
@@ -167,9 +167,9 @@ visualise <- function(nacho_object, font_size = 14) {
 
   nacho_object[["font_size"]] <- font_size
 
-  # assign(x = "nacho_shiny", value = nacho_object, envir = .GlobalEnv) # Not good !!!
-  # nacho_shiny <<- nacho_object # Not good !!!
-  save(list = "nacho_object", file = paste0(tempdir(), "/nacho_shiny.Rdata")) # a bit slow ...
+  assign(x = "nacho_shiny", value = nacho_object, envir = .GlobalEnv) # Not good !!!
+  # nacho_shiny <- nacho_object
+  # save(list = "nacho_object", file = paste0(tempdir(), "/nacho_shiny.Rdata")) # a bit slow ...
 
   app_directory <- system.file("shiny", package = "NACHO")
   shiny::runApp(appDir = app_directory)
