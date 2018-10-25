@@ -145,14 +145,13 @@ normalise <- function(
 #'
 #' @param nacho_object [nacho]
 #' @param font_size [numeric]
-#' @param rdata_path [character]
 #'
 #' @return
 #' @export
 #'
 #' @examples
 #' @importFrom shiny runApp
-visualise <- function(nacho_object, font_size = 14, rdata_path) {
+visualise <- function(nacho_object, font_size = 14) {
   if (missing(nacho_object)) {
     stop("No data provided!")
   }
@@ -167,11 +166,10 @@ visualise <- function(nacho_object, font_size = 14, rdata_path) {
   }
 
   nacho_object[["font_size"]] <- font_size
-  assign(x = "nacho_shiny", value = nacho_object, envir = .GlobalEnv)
 
-  if (!missing(rdata_path)) {
-    save(list = "nacho_object", file = rdata_path)
-  }
+  # assign(x = "nacho_shiny", value = nacho_object, envir = .GlobalEnv) # Not good !!!
+  # nacho_shiny <<- nacho_object # Not good !!!
+  save(list = "nacho_object", file = paste0(tempdir(), "/nacho_shiny.Rdata")) # a bit slow ...
 
   app_directory <- system.file("shiny", package = "NACHO")
   shiny::runApp(appDir = app_directory)
