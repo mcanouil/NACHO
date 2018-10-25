@@ -9,7 +9,17 @@ factor_calculation(nacho_df, id_colname, housekeeping_genes,
   normalisation_method, exclude_probes)
 }
 \arguments{
-\item{exclude_probes}{}
+\item{nacho_df}{[data.frame]}
+
+\item{id_colname}{[character]}
+
+\item{housekeeping_genes}{[vector(character)]}
+
+\item{predict_housekeeping}{[logical]}
+
+\item{normalisation_method}{[character]}
+
+\item{exclude_probes}{[vector(character)]}
 }
 \description{
 factor_calculation

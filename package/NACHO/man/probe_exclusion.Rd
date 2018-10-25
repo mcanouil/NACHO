@@ -7,7 +7,7 @@
 probe_exclusion(control_genes_df)
 }
 \arguments{
-\item{control_genes_df}{}
+\item{control_genes_df}{[data.frame]}
 }
 \description{
 probe_exclusion

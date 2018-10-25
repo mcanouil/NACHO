@@ -5,7 +5,8 @@ Version: 0.1.0
 Authors@R: c(person("Gerard", "Bouland", role = c("aut", "cre"), email = "G.Bouland@lumc.nl"),
   person("Roderick .C", "Slieker", role = c("aut"), email = "R.C.Slieker@lumc.nl"),
   person("Mickaël", "Canouil", role = c("aut"), email = "mickael.canouil@cnrs.fr"))
-Description: Something describing the package
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
 License: GPL-3
 Depends: 
   R (>= 3.5.0),

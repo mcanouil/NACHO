@@ -9,7 +9,19 @@ summarise(data_dir = NULL, ssheet_csv = NULL, id_colname = NULL,
   normalisation_method = "GEO", n_comp = 10)
 }
 \arguments{
-\item{n_comp}{}
+\item{data_dir}{[character]}
+
+\item{ssheet_csv}{[character]}
+
+\item{id_colname}{[character]}
+
+\item{housekeeping_genes}{[vector(character)]}
+
+\item{predict_housekeeping}{[logical]}
+
+\item{normalisation_method}{[character]}
+
+\item{n_comp}{[numeric]}
 }
 \description{
 summarise

@@ -7,7 +7,9 @@
 qc_limit_detection(pos_e, negatives)
 }
 \arguments{
-\item{negatives}{}
+\item{pos_e}{[numeric]}
+
+\item{negatives}{[vector(numeric)]}
 }
 \description{
 qc_limit_detection

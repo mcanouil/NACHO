@@ -12,8 +12,7 @@
 #' @export
 #'
 #' @examples
-#' @importFrom dplyr filter full_join
-#' @importFrom tibble rownames_to_column
+#' @importFrom dplyr full_join
 qc_rcc <- function(
   data_dir,
   nacho_df,
@@ -24,15 +23,11 @@ qc_rcc <- function(
   n_comp
 ) {
   if (is.null(housekeeping_genes)) {
-    housekeeping_genes <- unique(dplyr::filter(
-      .data = nacho_df,
-      grepl("Housekeeping", CodeClass)
-    )[["Name"]])
+    housekeeping_genes <- nacho_df[["Name"]][grepl("Housekeeping", nacho_df[["CodeClass"]])]
+    unique(housekeeping_genes)
   }
-  control_genes_df <- dplyr::filter(
-    .data = nacho_df,
-    Name%in%housekeeping_genes | !grepl("Endogenous", CodeClass)
-  )
+  control_genes_df <- nacho_df[nacho_df[["Name"]]%in%housekeeping_genes | !grepl("Endogenous", nacho_df[["CodeClass"]]), ]
+
   control_genes_df <- format_counts(
     data = control_genes_df,
     id_colname = id_colname,
@@ -63,10 +58,7 @@ qc_rcc <- function(
 
     if (!is.null(predicted_housekeeping)) {
       housekeeping_genes <- predicted_housekeeping
-      control_genes_df <- dplyr::filter(
-        .data = nacho_df,
-        Name%in%predicted_housekeeping
-      )
+      control_genes_df <- nacho_df[nacho_df[["Name"]]%in%predicted_housekeeping, ]
       control_genes_df <- format_counts(
         data = control_genes_df,
         id_colname = id_colname,
@@ -103,10 +95,13 @@ qc_rcc <- function(
   pcsum <- as.data.frame(pcsum)
   pcsum[, "PC"] <- sprintf("PC%02d", as.numeric(gsub("PC", "", rownames(pcsum))))
 
+  pcas_pc <- as.data.frame(pcas[["pc"]], stringsAsFactors = FALSE)
+  pcas_pc[[id_colname]] <- rownames(pcas_pc)
+
   facs_pc_qc <- dplyr::full_join(
     x = dplyr::full_join(
       x = qc_values,
-      y = tibble::rownames_to_column(df = as.data.frame(pcas[["pc"]], stringsAsFactors = FALSE), var = id_colname),
+      y = pcas_pc,
       by = id_colname
     ),
     y = norm_factor,

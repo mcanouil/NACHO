@@ -7,7 +7,7 @@
 exclude_outliers(object)
 }
 \arguments{
-\item{object}{}
+\item{object}{[nacho]}
 }
 \description{
 exclude_outliers

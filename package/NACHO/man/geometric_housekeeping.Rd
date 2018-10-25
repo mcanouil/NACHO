@@ -8,7 +8,13 @@ geometric_housekeeping(data, positive_factor, intercept,
   housekeeping_genes)
 }
 \arguments{
-\item{housekeeping_genes}{}
+\item{data}{[data.frame]}
+
+\item{positive_factor}{[vector(numeric)]}
+
+\item{intercept}{[vector(numeric)]}
+
+\item{housekeeping_genes}{[vector(character)]}
 }
 \description{
 geometric_housekeeping

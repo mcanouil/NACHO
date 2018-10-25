@@ -7,7 +7,11 @@
 visualise(nacho_object, font_size = 14, rdata_path)
 }
 \arguments{
-\item{rdata_path}{}
+\item{nacho_object}{[nacho]}
+
+\item{font_size}{[numeric]}
+
+\item{rdata_path}{[character]}
 }
 \description{
 visualise

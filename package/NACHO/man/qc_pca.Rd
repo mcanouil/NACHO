@@ -7,7 +7,9 @@
 qc_pca(counts, n_comp = 10)
 }
 \arguments{
-\item{n_comp}{}
+\item{counts}{[data.frame]}
+
+\item{n_comp}{[numeric]}
 }
 \description{
 qc_pca

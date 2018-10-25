@@ -10,7 +10,13 @@ normalise(nacho_object,
   remove_outliers = TRUE)
 }
 \arguments{
-\item{remove_outliers}{}
+\item{nacho_object}{[nacho]}
+
+\item{housekeeping_genes}{[vector(character)]}
+
+\item{normalisation_method}{[character]}
+
+\item{remove_outliers}{[logical]}
 }
 \description{
 normalise

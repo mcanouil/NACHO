@@ -7,7 +7,9 @@
 qc_imaging(fov_counted, fov_count)
 }
 \arguments{
-\item{fov_count}{}
+\item{fov_counted}{[numeric]}
+
+\item{fov_count}{[numeric]}
 }
 \description{
 qc_imaging

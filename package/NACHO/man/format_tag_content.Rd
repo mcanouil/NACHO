@@ -7,7 +7,9 @@
 format_tag_content(tag, content)
 }
 \arguments{
-\item{content}{}
+\item{tag}{[character]}
+
+\item{content}{[data.frame]}
 }
 \description{
 format_tag_content

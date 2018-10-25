@@ -7,7 +7,7 @@
 normalise_counts(data)
 }
 \arguments{
-\item{data}{}
+\item{data}{[data.frame]}
 }
 \description{
 normalise_counts
