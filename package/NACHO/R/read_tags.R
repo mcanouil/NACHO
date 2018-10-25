@@ -4,8 +4,6 @@
 #' @param raw_rcc [vector(character)]
 #'
 #' @return [list(data.frame)]
-#'
-#' @examples
 read_tags <- function(tag, raw_rcc) {
   positions <- grep(pattern = tag, x = raw_rcc)
   if ((positions[2]-positions[1])!=1) {

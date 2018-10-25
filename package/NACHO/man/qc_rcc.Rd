@@ -4,11 +4,11 @@
 \alias{qc_rcc}
 \title{qc_rcc}
 \usage{
-qc_rcc(data_dir, nacho_df, id_colname, housekeeping_genes,
+qc_rcc(data_directory, nacho_df, id_colname, housekeeping_genes,
   predict_housekeeping, normalisation_method, n_comp)
 }
 \arguments{
-\item{data_dir}{[character]}
+\item{data_directory}{[character]}
 
 \item{nacho_df}{[data.frame]}
 
@@ -23,7 +23,7 @@ qc_rcc(data_dir, nacho_df, id_colname, housekeeping_genes,
 \item{n_comp}{[numeric]}
 }
 \value{
-[nacho]
+[nacho_set]
 }
 \description{
 qc_rcc

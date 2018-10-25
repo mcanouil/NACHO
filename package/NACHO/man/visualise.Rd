@@ -4,16 +4,17 @@
 \alias{visualise}
 \title{visualise}
 \usage{
-visualise(nacho_object, font_size = 14)
+visualise(nacho_object)
 }
 \arguments{
-\item{nacho_object}{[nacho]}
-
-\item{font_size}{[numeric]}
+\item{nacho_object}{[nacho_set]}
 }
 \value{
 [NULL]
 }
 \description{
 visualise
+}
+\examples{
+NULL
 }

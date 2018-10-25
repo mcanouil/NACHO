@@ -5,7 +5,6 @@
 #'
 #' @return [vector(numeric)]
 #'
-#' @examples
 #' @importFrom stats glm poisson
 norm_glm <- function(data, exclude_probes = NULL) {
   glms <- sapply(

@@ -4,8 +4,6 @@
 #' @param fov_count [numeric]
 #'
 #' @return [numeric]
-#'
-#' @examples
 qc_imaging <- function(fov_counted, fov_count) {
   fov <- (fov_counted / fov_count) * 100
   return(round(fov, 2))

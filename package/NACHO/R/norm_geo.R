@@ -4,8 +4,6 @@
 #' @param exclude_probes [vector(character)]
 #'
 #' @return [vector(numeric)]
-#'
-#' @examples
 norm_geo <- function(data, exclude_probes = NULL) {
   geometric_mean_pos <- geometric_probes(data = data, probes_type = "Positive", exclude_probes = exclude_probes)
   positive_factor <- sapply(

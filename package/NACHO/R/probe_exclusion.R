@@ -4,7 +4,6 @@
 #'
 #' @return [vector(character)]
 #'
-#' @examples
 #' @importFrom stats median
 probe_exclusion <- function(control_genes_df) {
   count_columns <- sapply(X = control_genes_df, FUN = is.numeric)
