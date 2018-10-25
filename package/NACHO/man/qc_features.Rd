@@ -11,6 +11,9 @@ qc_features(data, id_colname)
 
 \item{id_colname}{[character]}
 }
+\value{
+[data.frame]
+}
 \description{
 qc_features
 }

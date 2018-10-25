@@ -2,8 +2,7 @@
 #'
 #' @param control_genes_df [data.frame]
 #'
-#' @return
-#' @export
+#' @return [vector(character)]
 #'
 #' @examples
 #' @importFrom stats median

@@ -11,6 +11,9 @@ qc_limit_detection(pos_e, negatives)
 
 \item{negatives}{[vector(numeric)]}
 }
+\value{
+[numeric]
+}
 \description{
 qc_limit_detection
 }

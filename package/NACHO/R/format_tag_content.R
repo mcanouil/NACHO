@@ -3,8 +3,7 @@
 #' @param tag [character]
 #' @param content [data.frame]
 #'
-#' @return
-#' @export
+#' @return [data.frame]
 #'
 #' @examples
 format_tag_content <- function(tag, content) {

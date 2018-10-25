@@ -11,6 +11,9 @@ norm_geo(data, exclude_probes = NULL)
 
 \item{exclude_probes}{[vector(character)]}
 }
+\value{
+[vector(numeric)]
+}
 \description{
 norm_geo
 }

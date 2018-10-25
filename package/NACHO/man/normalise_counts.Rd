@@ -9,6 +9,9 @@ normalise_counts(data)
 \arguments{
 \item{data}{[data.frame]}
 }
+\value{
+[vector(numeric)]
+}
 \description{
 normalise_counts
 }

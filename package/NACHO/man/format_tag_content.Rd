@@ -11,6 +11,9 @@ format_tag_content(tag, content)
 
 \item{content}{[data.frame]}
 }
+\value{
+[data.frame]
+}
 \description{
 format_tag_content
 }

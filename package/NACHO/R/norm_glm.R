@@ -3,8 +3,7 @@
 #' @param data [list(data.frame)]
 #' @param exclude_probes [vector(character)]
 #'
-#' @return
-#' @export
+#' @return [vector(numeric)]
 #'
 #' @examples
 #' @importFrom stats glm poisson

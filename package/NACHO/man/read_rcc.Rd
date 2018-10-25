@@ -9,6 +9,9 @@ read_rcc(file)
 \arguments{
 \item{file}{[character]}
 }
+\value{
+[tibble]
+}
 \description{
 read_rcc
 }

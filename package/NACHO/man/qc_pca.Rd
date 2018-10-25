@@ -11,6 +11,9 @@ qc_pca(counts, n_comp = 10)
 
 \item{n_comp}{[numeric]}
 }
+\value{
+[list(data.frame)]
+}
 \description{
 qc_pca
 }

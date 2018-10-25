@@ -2,8 +2,7 @@
 #'
 #' @param object [nacho]
 #'
-#' @return
-#' @export
+#' @return [data.frame]
 #'
 #' @examples
 exclude_outliers <- function(object) {

@@ -4,8 +4,7 @@
 #' @param probes_type [character]
 #' @param exclude_probes [vector(character)]
 #'
-#' @return
-#' @export
+#' @return [numeric]
 #'
 #' @examples
 geometric_probes <- function(data, probes_type, exclude_probes = NULL) {

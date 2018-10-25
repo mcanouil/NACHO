@@ -4,8 +4,7 @@
 #' @param id_colname [character]
 #' @param count_column [character]
 #'
-#' @return
-#' @export
+#' @return [vector(character)]
 #'
 #' @examples
 #' @importFrom dplyr group_by

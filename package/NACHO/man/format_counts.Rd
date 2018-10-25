@@ -13,6 +13,9 @@ format_counts(data, id_colname, count_column = "Count")
 
 \item{count_column}{[character]}
 }
+\value{
+[data.frame]
+}
 \description{
 format_counts
 }
