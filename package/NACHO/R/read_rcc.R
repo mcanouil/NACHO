@@ -1,6 +1,6 @@
 #' read_rcc
 #'
-#' @param file
+#' @param file [character]
 #'
 #' @return
 #' @export

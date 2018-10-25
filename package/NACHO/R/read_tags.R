@@ -1,7 +1,7 @@
 #' read_tags
 #'
-#' @param tag
-#' @param raw_rcc
+#' @param tag [character]
+#' @param raw_rcc [vector(character)]
 #'
 #' @return
 #' @export

@@ -1,6 +1,6 @@
 #' normalise_counts
 #'
-#' @param data
+#' @param data [data.frame]
 #'
 #' @return
 #' @export

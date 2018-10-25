@@ -1,7 +1,7 @@
 #' qc_imaging
 #'
-#' @param fov_counted
-#' @param fov_count
+#' @param fov_counted [numeric]
+#' @param fov_count [numeric]
 #'
 #' @return
 #' @export

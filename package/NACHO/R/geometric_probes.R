@@ -1,8 +1,8 @@
 #' geometric_probes
 #'
-#' @param data
-#' @param probes_type
-#' @param exclude_probes
+#' @param data [list(data.frame)]
+#' @param probes_type [character]
+#' @param exclude_probes [vector(character)]
 #'
 #' @return
 #' @export
