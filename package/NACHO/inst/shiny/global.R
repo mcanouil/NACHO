@@ -9,7 +9,7 @@ require(ggpubr)
 require(tibble)
 require(NACHO)
 
-load(file = paste0(tempdir(), "/nacho_shiny.Rdata"))
+# load(file = paste0(tempdir(), "/nacho_shiny.Rdata"))
 
 font_size <- as.numeric(nacho_shiny[["font_size"]])
 ggplot2::theme_set(ggplot2::theme_light(base_size = font_size))
