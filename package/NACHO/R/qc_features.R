@@ -1,7 +1,7 @@
 #' qc_features
 #'
-#' @param data
-#' @param id_colname
+#' @param data [data.frame]
+#' @param id_colname [character]
 #'
 #' @return
 #' @export

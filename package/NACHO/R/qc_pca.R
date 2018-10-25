@@ -1,7 +1,7 @@
 #' qc_pca
 #'
-#' @param counts
-#' @param n_comp
+#' @param counts [data.frame]
+#' @param n_comp [numeric]
 #'
 #' @return
 #' @export

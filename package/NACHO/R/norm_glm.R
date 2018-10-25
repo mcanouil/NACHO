@@ -1,7 +1,7 @@
 #' norm_glm
 #'
-#' @param data
-#' @param exclude_probes
+#' @param data [list(data.frame)]
+#' @param exclude_probes [vector(character)]
 #'
 #' @return
 #' @export
