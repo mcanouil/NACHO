@@ -9,7 +9,6 @@
 #'
 #' @return [data.frame]
 #'
-#' @examples
 #' @importFrom dplyr group_by
 #' @importFrom tidyr nest
 factor_calculation <- function(

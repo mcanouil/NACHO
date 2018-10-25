@@ -4,7 +4,6 @@
 #'
 #' @return [vector(numeric)]
 #'
-#' @examples
 #' @importFrom stats cor.test
 qc_positive_control <- function(counts) {
   measured <- log2(counts[["Count"]])

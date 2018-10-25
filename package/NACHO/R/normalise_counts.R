@@ -3,8 +3,6 @@
 #' @param data [data.frame]
 #'
 #' @return [vector(numeric)]
-#'
-#' @examples
 normalise_counts <- function(data) {
   out <- (data[["Count"]] - data[["Negative_factor"]]) *
     data[["Positive_factor"]] *

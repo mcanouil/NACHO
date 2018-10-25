@@ -1,6 +1,6 @@
 #' qc_rcc
 #'
-#' @param data_dir [character]
+#' @param data_directory [character]
 #' @param nacho_df [data.frame]
 #' @param id_colname [character]
 #' @param housekeeping_genes [vector(character)]
@@ -8,12 +8,11 @@
 #' @param normalisation_method [character]
 #' @param n_comp [numeric]
 #'
-#' @return [nacho]
+#' @return [nacho_set]
 #'
-#' @examples
 #' @importFrom dplyr full_join
 qc_rcc <- function(
-  data_dir,
+  data_directory,
   nacho_df,
   id_colname,
   housekeeping_genes,
@@ -114,15 +113,15 @@ qc_rcc <- function(
     by = id_colname
   )
 
-  qc_out <- list(
-    "access" = id_colname,
-    "housekeeping_genes" = housekeeping_genes,
-    "normalisation_method" = normalisation_method,
-    "remove_outliers" = FALSE,
-    "n_comp" = n_comp,
-    "data_directory" = data_dir,
-    "pc_sum" = pcsum,
-    "nacho" = as.data.frame(nacho_out, stringsAsFactors = FALSE)
+  qc_out <- new_nacho_set(
+    access = id_colname,
+    housekeeping_genes = housekeeping_genes,
+    normalisation_method = normalisation_method,
+    remove_outliers = FALSE,
+    n_comp = n_comp,
+    data_directory = data_directory,
+    pc_sum = pcsum,
+    nacho = as.data.frame(nacho_out, stringsAsFactors = FALSE)
   )
   return(qc_out)
 }

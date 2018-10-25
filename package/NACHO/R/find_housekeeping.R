@@ -6,7 +6,6 @@
 #'
 #' @return [vector(character)]
 #'
-#' @examples
 #' @importFrom dplyr group_by
 #' @importFrom stats sd
 #' @importFrom tidyr nest

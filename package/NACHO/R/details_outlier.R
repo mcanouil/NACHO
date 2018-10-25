@@ -4,8 +4,6 @@
 #' @param id_colname [character]
 #'
 #' @return [list]
-#'
-#' @examples
 details_outlier <- function(nacho_df, id_colname) {
   binding_out <- nacho_df[which(nacho_df[["BD"]] > 2.25 | nacho_df[["BD"]] < 0.1), id_colname]
   fov_out <- nacho_df[which(nacho_df[["FoV"]] < 75), id_colname]

@@ -5,7 +5,6 @@
 #'
 #' @return [list(data.frame)]
 #'
-#' @examples
 #' @importFrom stats prcomp
 qc_pca <- function(counts, n_comp = 10) {
   pc <- stats::prcomp(log(counts + 1))
