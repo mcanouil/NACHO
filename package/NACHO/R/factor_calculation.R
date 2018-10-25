@@ -1,11 +1,11 @@
 #' factor_calculation
 #'
-#' @param nacho_df
-#' @param id_colname
-#' @param housekeeping_genes
-#' @param predict_housekeeping
-#' @param normalisation_method
-#' @param exclude_probes
+#' @param nacho_df [data.frame]
+#' @param id_colname [character]
+#' @param housekeeping_genes [vector(character)]
+#' @param predict_housekeeping [logical]
+#' @param normalisation_method [character]
+#' @param exclude_probes [vector(character)]
 #'
 #' @return
 #' @export

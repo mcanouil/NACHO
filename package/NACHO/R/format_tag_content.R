@@ -1,7 +1,7 @@
 #' format_tag_content
 #'
-#' @param tag
-#' @param content
+#' @param tag [character]
+#' @param content [data.frame]
 #'
 #' @return
 #' @export

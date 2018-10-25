@@ -1,12 +1,12 @@
 #' summarise
 #'
-#' @param data_dir
-#' @param ssheet_csv
-#' @param id_colname
-#' @param housekeeping_genes
-#' @param predict_housekeeping
-#' @param normalisation_method
-#' @param n_comp
+#' @param data_dir [character]
+#' @param ssheet_csv [character]
+#' @param id_colname [character]
+#' @param housekeeping_genes [vector(character)]
+#' @param predict_housekeeping [logical]
+#' @param normalisation_method [character]
+#' @param n_comp [numeric]
 #'
 #' @return
 #' @export
@@ -60,10 +60,10 @@ summarise <- function(
 
 #' normalise
 #'
-#' @param nacho_object
-#' @param housekeeping_genes
-#' @param normalisation_method
-#' @param remove_outliers
+#' @param nacho_object [nacho]
+#' @param housekeeping_genes [vector(character)]
+#' @param normalisation_method [character]
+#' @param remove_outliers [logical]
 #'
 #' @return
 #' @export
@@ -147,9 +147,9 @@ normalise <- function(
 
 #' visualise
 #'
-#' @param nacho_object
-#' @param font_size
-#' @param rdata_path
+#' @param nacho_object [nacho]
+#' @param font_size [numeric]
+#' @param rdata_path [character]
 #'
 #' @return
 #' @export

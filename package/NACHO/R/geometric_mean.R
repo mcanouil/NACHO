@@ -1,6 +1,6 @@
 #' geometric_mean
 #'
-#' @param x
+#' @param x [numeric]
 #'
 #' @return
 #' @export

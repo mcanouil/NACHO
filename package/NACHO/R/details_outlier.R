@@ -1,7 +1,7 @@
 #' details_outlier
 #'
-#' @param nacho_df
-#' @param id_colname
+#' @param nacho_df [data.frame]
+#' @param id_colname [character]
 #'
 #' @return
 #' @export

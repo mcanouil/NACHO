@@ -1,9 +1,9 @@
 #' geometric_housekeeping
 #'
-#' @param data
-#' @param positive_factor
-#' @param intercept
-#' @param housekeeping_genes
+#' @param data [data.frame]
+#' @param positive_factor [vector(numeric)]
+#' @param intercept [vector(numeric)]
+#' @param housekeeping_genes [vector(character)]
 #'
 #' @return
 #' @export

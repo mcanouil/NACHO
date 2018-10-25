@@ -1,8 +1,8 @@
 #' find_housekeeping
 #'
-#' @param data
-#' @param id_colname
-#' @param count_column
+#' @param data [data.frame]
+#' @param id_colname [character]
+#' @param count_column [character]
 #'
 #' @return
 #' @export

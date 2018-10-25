@@ -1,6 +1,6 @@
 #' exclude_outliers
 #'
-#' @param object
+#' @param object [nacho]
 #'
 #' @return
 #' @export

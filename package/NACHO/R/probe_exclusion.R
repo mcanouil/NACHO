@@ -1,6 +1,6 @@
 #' probe_exclusion
 #'
-#' @param control_genes_df
+#' @param control_genes_df [data.frame]
 #'
 #' @return
 #' @export

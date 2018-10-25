@@ -1,6 +1,6 @@
 #' qc_positive_control
 #'
-#' @param counts
+#' @param counts [data.frame]
 #'
 #' @return
 #' @export

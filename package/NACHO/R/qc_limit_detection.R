@@ -1,7 +1,7 @@
 #' qc_limit_detection
 #'
-#' @param pos_e
-#' @param negatives
+#' @param pos_e [numeric]
+#' @param negatives [vector(numeric)]
 #'
 #' @return
 #' @export
