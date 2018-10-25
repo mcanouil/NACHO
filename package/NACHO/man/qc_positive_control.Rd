@@ -7,7 +7,7 @@
 qc_positive_control(counts)
 }
 \arguments{
-\item{counts}{}
+\item{counts}{[data.frame]}
 }
 \description{
 qc_positive_control

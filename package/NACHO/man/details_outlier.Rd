@@ -7,7 +7,9 @@
 details_outlier(nacho_df, id_colname)
 }
 \arguments{
-\item{id_colname}{}
+\item{nacho_df}{[data.frame]}
+
+\item{id_colname}{[character]}
 }
 \description{
 details_outlier

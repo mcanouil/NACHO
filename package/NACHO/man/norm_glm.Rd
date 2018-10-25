@@ -7,7 +7,9 @@
 norm_glm(data, exclude_probes = NULL)
 }
 \arguments{
-\item{exclude_probes}{}
+\item{data}{[list(data.frame)]}
+
+\item{exclude_probes}{[vector(character)]}
 }
 \description{
 norm_glm

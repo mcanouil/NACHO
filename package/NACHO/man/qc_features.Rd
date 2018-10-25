@@ -7,7 +7,9 @@
 qc_features(data, id_colname)
 }
 \arguments{
-\item{id_colname}{}
+\item{data}{[data.frame]}
+
+\item{id_colname}{[character]}
 }
 \description{
 qc_features

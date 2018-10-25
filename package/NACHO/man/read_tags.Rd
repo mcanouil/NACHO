@@ -7,7 +7,9 @@
 read_tags(tag, raw_rcc)
 }
 \arguments{
-\item{raw_rcc}{}
+\item{tag}{[character]}
+
+\item{raw_rcc}{[vector(character)]}
 }
 \description{
 read_tags
