@@ -44,7 +44,7 @@ read_rcc <- function(file) {
     rcc_tbl[["plexset_id"]] <- paste0("S", 1:8)
   }
 
-  rcc_tbl <- tidyr::unnest(data = rcc_tbl, Header, Sample_Attributes, Lane_Attributes, Messages, .drop = FALSE)
+  rcc_tbl <- tidyr::unnest(data = rcc_tbl, "Header", "Sample_Attributes", "Lane_Attributes", "Messages", .drop = FALSE)
 
   return(rcc_tbl)
 }
