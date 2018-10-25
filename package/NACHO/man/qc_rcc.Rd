@@ -8,7 +8,19 @@ qc_rcc(data_dir, nacho_df, id_colname, housekeeping_genes,
   predict_housekeeping, normalisation_method, n_comp)
 }
 \arguments{
-\item{n_comp}{}
+\item{data_dir}{[character]}
+
+\item{nacho_df}{[data.frame]}
+
+\item{id_colname}{[character]}
+
+\item{housekeeping_genes}{[vector(character)]}
+
+\item{predict_housekeeping}{[logical]}
+
+\item{normalisation_method}{[character]}
+
+\item{n_comp}{[numeric]}
 }
 \description{
 qc_rcc

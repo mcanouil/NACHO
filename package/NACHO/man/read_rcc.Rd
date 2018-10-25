@@ -7,7 +7,7 @@
 read_rcc(file)
 }
 \arguments{
-\item{file}{}
+\item{file}{[character]}
 }
 \description{
 read_rcc

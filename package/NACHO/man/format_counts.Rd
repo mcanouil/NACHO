@@ -7,7 +7,11 @@
 format_counts(data, id_colname, count_column = "Count")
 }
 \arguments{
-\item{count_column}{}
+\item{data}{[data.frame]}
+
+\item{id_colname}{[character]}
+
+\item{count_column}{[character]}
 }
 \description{
 format_counts

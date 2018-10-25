@@ -7,7 +7,11 @@
 find_housekeeping(data, id_colname, count_column)
 }
 \arguments{
-\item{count_column}{}
+\item{data}{[data.frame]}
+
+\item{id_colname}{[character]}
+
+\item{count_column}{[character]}
 }
 \description{
 find_housekeeping

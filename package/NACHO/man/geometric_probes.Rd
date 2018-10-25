@@ -7,7 +7,11 @@
 geometric_probes(data, probes_type, exclude_probes = NULL)
 }
 \arguments{
-\item{exclude_probes}{}
+\item{data}{[list(data.frame)]}
+
+\item{probes_type}{[character]}
+
+\item{exclude_probes}{[vector(character)]}
 }
 \description{
 geometric_probes

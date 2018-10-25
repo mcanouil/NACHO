@@ -7,7 +7,7 @@
 geometric_mean(x)
 }
 \arguments{
-\item{x}{}
+\item{x}{[numeric]}
 }
 \description{
 geometric_mean
