@@ -12,7 +12,6 @@
 #' @export
 #'
 #' @examples
-#' @importFrom dplyr mutate
 #' @importFrom purrr map_lgl map
 #' @importFrom tibble as_tibble
 #' @importFrom tidyr unnest unite
