@@ -4,14 +4,12 @@
 \alias{visualise}
 \title{visualise}
 \usage{
-visualise(nacho_object, font_size = 14, rdata_path)
+visualise(nacho_object, font_size = 14)
 }
 \arguments{
 \item{nacho_object}{[nacho]}
 
 \item{font_size}{[numeric]}
-
-\item{rdata_path}{[character]}
 }
 \description{
 visualise
