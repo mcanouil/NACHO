@@ -225,7 +225,7 @@ server <- function(input, output) {
   })
 
   output$outlier_table <- shiny::renderDataTable({
-    details_out <- NACHO::details_outlier(nacho_df = nacho, id_colname = id_colname)
+    details_out <- NACHO:::details_outlier(nacho_df = nacho, id_colname = id_colname)
     all_out <- unique(unlist(details_out))
 
     outlier_table <- data.frame(
