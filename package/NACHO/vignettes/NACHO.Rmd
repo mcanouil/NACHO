@@ -114,7 +114,8 @@ my_nacho <- summarise(
   ssheet_csv = "example/Samplesheet.csv",
   id_colname = "IDFILE", 
   housekeeping_genes = NULL,
-  predict_housekeeping = FALSE,
+  housekeeping_predict = FALSE,
+  housekeeping_norm = TRUE,
   normalisation_method = "GLM", 
   n_comp = 10
 )
@@ -134,7 +135,8 @@ my_nacho <- summarise(
   ssheet_csv = "example/Samplesheet.csv",
   id_colname = "IDFILE", 
   housekeeping_genes = NULL,
-  predict_housekeeping = TRUE,
+  housekeeping_predict = TRUE,
+  housekeeping_norm = TRUE,
   normalisation_method = "GLM", 
   n_comp = 10
 )
@@ -169,6 +171,7 @@ In this example `"GLM"` is used.
 my_nacho_improved <- normalise(
   nacho_object = my_nacho,
   housekeeping_genes = my_housekeeping,
+  housekeeping_norm = TRUE,
   normalisation_method = "GLM", 
   remove_outliers = TRUE
 )

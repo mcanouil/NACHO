@@ -9,6 +9,8 @@
 #'
 #' @slot access [character]
 #' @slot housekeeping_genes [character]
+#' @slot housekeeping_predict [logical]
+#' @slot housekeeping_norm [logical]
 #' @slot normalisation_method [character]
 #' @slot remove_outliers [logical]
 #' @slot n_comp [numeric]
@@ -24,6 +26,8 @@ setClass(
   representation = representation(
     access = "character",
     housekeeping_genes = "character",
+    housekeeping_predict = "logical",
+    housekeeping_norm = "logical",
     normalisation_method = "character",
     remove_outliers = "logical",
     n_comp = "numeric",
@@ -36,6 +40,8 @@ setClass(
   prototype = prototype(
     access = character(),
     housekeeping_genes = character(),
+    housekeeping_predict = logical(),
+    housekeeping_norm = logical(),
     normalisation_method = character(),
     remove_outliers = logical(),
     n_comp = numeric(),
@@ -53,21 +59,77 @@ setClass(
 
 
 ### Constructor ###
-setGeneric(name = "new_nacho_set", def = function (access, housekeeping_genes, normalisation_method, remove_outliers, n_comp, data_directory, pc_sum, nacho, raw_counts, normalised_counts) {standardGeneric("new_nacho_set")})
-setMethod(f = "new_nacho_set", signature = c("missing", "missing", "missing", "missing", "missing", "missing", "missing", "missing", "missing", "missing"), definition = function (access, housekeeping_genes, normalisation_method, remove_outliers, n_comp, data_directory, pc_sum, nacho, raw_counts, normalised_counts) {new("nacho_set")})
-setMethod(f = "new_nacho_set", signature = c("ANY", "ANY", "ANY", "ANY", "ANY", "ANY", "ANY", "ANY", "ANY", "ANY"), definition = function (access, housekeeping_genes, normalisation_method, remove_outliers, n_comp, data_directory, pc_sum, nacho, raw_counts, normalised_counts) {
-  if (missing(access)) {access <- character()}
-  if (missing(housekeeping_genes)) {housekeeping_genes <- character()}
-  if (missing(normalisation_method)) {normalisation_method <- character()}
-  if (missing(remove_outliers)) {remove_outliers <- logical()}
-  if (missing(n_comp)) {n_comp <- numeric()}
-  if (missing(data_directory)) {data_directory <- character()}
-  if (missing(pc_sum)) {pc_sum <- data.frame()}
-  if (missing(nacho)) {nacho <- data.frame()}
-  if (missing(raw_counts)) {raw_counts <- data.frame()}
-  if (missing(normalised_counts)) {normalised_counts <- data.frame()}
-  return(new("nacho_set", access = access, housekeeping_genes = housekeeping_genes, normalisation_method = normalisation_method, remove_outliers = remove_outliers, n_comp = n_comp, data_directory = data_directory, pc_sum = pc_sum, nacho = nacho, raw_counts = raw_counts, normalised_counts = normalised_counts))
-})
+setGeneric(
+  name = "new_nacho_set",
+  def = function(
+    access,
+    housekeeping_genes, housekeeping_predict, housekeeping_norm,
+    normalisation_method, remove_outliers, n_comp,
+    data_directory, pc_sum, nacho,
+    raw_counts, normalised_counts
+  ) {
+    standardGeneric("new_nacho_set")
+  }
+)
+setMethod(
+  f = "new_nacho_set",
+  signature = c(
+    "missing",
+    "missing", "missing", "missing", "missing",
+    "missing", "missing", "missing",
+    "missing", "missing",
+    "missing", "missing"
+  ),
+  definition = function(
+    access,
+    housekeeping_genes, housekeeping_predict, housekeeping_norm,
+    normalisation_method, remove_outliers, n_comp,
+    data_directory, pc_sum, nacho,
+    raw_counts, normalised_counts
+  ) {
+    new("nacho_set")
+  }
+)
+setMethod(
+  f = "new_nacho_set",
+  signature = c("ANY", "ANY", "ANY", "ANY", "ANY", "ANY", "ANY", "ANY", "ANY", "ANY", "ANY", "ANY"),
+  definition = function(
+    access,
+    housekeeping_genes, housekeeping_predict, housekeeping_norm,
+    normalisation_method, remove_outliers, n_comp,
+    data_directory, pc_sum, nacho,
+    raw_counts, normalised_counts
+  ) {
+    if (missing(access)) {access <- character()}
+    if (missing(housekeeping_genes)) {housekeeping_genes <- character()}
+    if (missing(housekeeping_predict)) {housekeeping_predict <- logical()}
+    if (missing(housekeeping_norm)) {housekeeping_norm <- logical()}
+    if (missing(normalisation_method)) {normalisation_method <- character()}
+    if (missing(remove_outliers)) {remove_outliers <- logical()}
+    if (missing(n_comp)) {n_comp <- numeric()}
+    if (missing(data_directory)) {data_directory <- character()}
+    if (missing(pc_sum)) {pc_sum <- data.frame()}
+    if (missing(nacho)) {nacho <- data.frame()}
+    if (missing(raw_counts)) {raw_counts <- data.frame()}
+    if (missing(normalised_counts)) {normalised_counts <- data.frame()}
+
+    return(new(
+      Class = "nacho_set",
+      access = access,
+      housekeeping_genes = housekeeping_genes,
+      housekeeping_predict = housekeeping_predict,
+      housekeeping_norm = housekeeping_norm,
+      normalisation_method = normalisation_method,
+      remove_outliers = remove_outliers,
+      n_comp = n_comp,
+      data_directory = data_directory,
+      pc_sum = pc_sum,
+      nacho = nacho,
+      raw_counts = raw_counts,
+      normalised_counts = normalised_counts
+    ))
+  }
+)
 
 
 ### Is ###
@@ -226,6 +288,28 @@ setMethod(f = "[", signature = "nacho_set", definition = function (x, i, j, drop
         }
       }
     },
+    "housekeeping_predict" = {
+      if (missing(j)) {
+        return(x@housekeeping_predict)
+      } else {
+        if (j>length(x@housekeeping_predict)) {
+          stop("[nacho_set:get] indice out of limits")
+        } else {
+          return(x@housekeeping_predict[j])
+        }
+      }
+    },
+    "housekeeping_norm" = {
+      if (missing(j)) {
+        return(x@housekeeping_norm)
+      } else {
+        if (j>length(x@housekeeping_norm)) {
+          stop("[nacho_set:get] indice out of limits")
+        } else {
+          return(x@housekeeping_norm[j])
+        }
+      }
+    },
     "normalisation_method" = {
       if (missing(j)) {
         return(x@normalisation_method)
@@ -310,6 +394,28 @@ setMethod(f = "[<-", signature = "nacho_set", definition = function (x, i, j, va
         }
       }
     },
+    "housekeeping_predict" = {
+      if (missing(j)) {
+        x@housekeeping_predict <- value
+      } else {
+        if (j>length(x@housekeeping_predict)) {
+          stop("[nacho_set:set] indice out of limits")
+        } else {
+          x@housekeeping_predict[j] <- value
+        }
+      }
+    },
+    "housekeeping_norm" = {
+      if (missing(j)) {
+        x@housekeeping_norm <- value
+      } else {
+        if (j>length(x@housekeeping_norm)) {
+          stop("[nacho_set:set] indice out of limits")
+        } else {
+          x@housekeeping_norm[j] <- value
+        }
+      }
+    },
     "normalisation_method" = {
       if (missing(j)) {
         x@normalisation_method <- value
@@ -369,7 +475,7 @@ setMethod(f = "[<-", signature = "nacho_set", definition = function (x, i, j, va
 #' summary
 #'
 #' @param object [ANY]
-setMethod(f = "summary", signature = "nacho_set", definition = function (object){
+setMethod(f = "summary", signature = "nacho_set", definition = function(object) {
   if (missing(object)){
     stop("[nacho_set:summary] \"object\" is missing", call. = FALSE)
     return(invisible())
