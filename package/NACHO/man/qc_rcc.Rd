@@ -5,7 +5,7 @@
 \title{qc_rcc}
 \usage{
 qc_rcc(data_directory, nacho_df, id_colname, housekeeping_genes,
-  predict_housekeeping, normalisation_method, n_comp)
+  housekeeping_predict, housekeeping_norm, normalisation_method, n_comp)
 }
 \arguments{
 \item{data_directory}{[character]}
@@ -16,7 +16,9 @@ qc_rcc(data_directory, nacho_df, id_colname, housekeeping_genes,
 
 \item{housekeeping_genes}{[vector(character)]}
 
-\item{predict_housekeeping}{[logical]}
+\item{housekeeping_predict}{[logical]}
+
+\item{housekeeping_norm}{[logical]}
 
 \item{normalisation_method}{[character]}
 

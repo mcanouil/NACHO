@@ -14,6 +14,10 @@ nacho_set
 
 \item{\code{housekeeping_genes}}{[character]}
 
+\item{\code{housekeeping_predict}}{[logical]}
+
+\item{\code{housekeeping_norm}}{[logical]}
+
 \item{\code{normalisation_method}}{[character]}
 
 \item{\code{remove_outliers}}{[logical]}

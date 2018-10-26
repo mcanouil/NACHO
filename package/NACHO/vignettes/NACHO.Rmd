@@ -65,11 +65,15 @@ While calling `normalise()` the user has the possibility to remove these outlier
 This example shows how to use summarised data to call upon the interactive web application. 
 The raw data used in the summarisation is from a study of Bruce JP et al.[1] and was acquired from the NCBI GEO public database[2].
 
-```{r pressure}
-library(nacho)
-data(exampleData)
-visualise(exampleData)
+```{r pressure, eval = TRUE}
+library(NACHO)
+data(GSE74821)
+my_nacho <- GSE74821
 ```
+```{r}
+visualise(my_nacho)
+```
+
 
 When `visualise()` is called, the web application that opens should look something like Figure 1. 
 In this figure the tabs QC Visualuals and Average Count vs Binding Denisty are chosen because this shows a clear discrepancy between the CartridgeIDs.
@@ -112,11 +116,11 @@ library(NACHO)
 my_nacho <- summarise(
   data_directory = "example/Data", 
   ssheet_csv = "example/Samplesheet.csv",
-  id_colname = "IDFILE", 
+  id_colname = "IDFILE",
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
   housekeeping_norm = TRUE,
-  normalisation_method = "GLM", 
+  normalisation_method = "GLM",
   n_comp = 10
 )
 visualise(my_nacho)
@@ -140,6 +144,7 @@ my_nacho <- summarise(
   normalisation_method = "GLM", 
   n_comp = 10
 )
+my_nacho
 ```
 
 The discovered housekeeping genes are saved in a global variable named **predicted_housekeeping**. 
@@ -150,10 +155,10 @@ For instance, the suitablity of the discovered housekeeping genes can manually b
 print(my_nacho["housekeeping_genes"])
 ```
 
-Let's say _BAG1_ and _MDM2_ are not suitable,therefore, you want to exclude these genes from the normalisation process.
+Let's say  _`r my_nacho["housekeeping_genes"][1]`_ and _`r my_nacho["housekeeping_genes"][2]`_ are not suitable, therefore, you want to exclude these genes from the normalisation process.
 
 ```{r ex6}
-my_housekeeping <- my_nacho["housekeeping_genes"][c(1, 2)]
+my_housekeeping <- my_nacho["housekeeping_genes"][-c(1, 2)]
 print(my_housekeeping)
 ```
 
@@ -177,44 +182,42 @@ my_nacho_improved <- normalise(
 )
 ```
 
-The `normalise()` function has three dataframes as output; 1) **scaling**, 2) **normalised** and 3) **raw**. 
-These dataframes can be accessed and used using.
+The `normalise()` returns a `nacho_set` object (as `summarise()`) with `@raw_counts` and `@normalised_counts` slots filled with the raw and normalised counts.
+Both counts are also in the `@nacho` data.frame.
 
 ```{r ex8}
-my_data$scaling #Table 1
-my_data$counts #Table 2
-my_data$normalised #Table 3
+my_nacho_improved
 ```
 
-In _Table 1_ the calculated normalisation values can be seen. 
-Here the first five sample are rendered. 
-The positive scaling factors are caluculated using the `"GLM"` method as indicated when the `normalise()` function was called. 
-The same is true for the background signal. 
-The housekeeping factor was calulated using a subset of the discovered housekeeping genes.
+<!-- In _Table 1_ the calculated normalisation values can be seen.  -->
+<!-- Here the first five sample are rendered.  -->
+<!-- The positive scaling factors are caluculated using the `"GLM"` method as indicated when the `normalise()` function was called.  -->
+<!-- The same is true for the background signal.  -->
+<!-- The housekeeping factor was calulated using a subset of the discovered housekeeping genes. -->
 
-```{r ex9}
-table_data1 <- as.matrix(my_data$scaling[1:5, ])
-colnames(table_data1) <- c("Positive Factor", "Background Signal", "Housekeeping Factor")
-rownames(table_data1) <- c("GSM1934697", "GSM1934698", "GSM1934699", "GSM1934700", "GSM1934701")
-stargazer::stargazer(table_data1, type = "html", title = "Normalisation values", header = FALSE)
-```
+<!-- ```{r ex9} -->
+<!-- table_data1 <- as.matrix(my_data$scaling[1:5, ]) -->
+<!-- colnames(table_data1) <- c("Positive Factor", "Background Signal", "Housekeeping Factor") -->
+<!-- rownames(table_data1) <- c("GSM1934697", "GSM1934698", "GSM1934699", "GSM1934700", "GSM1934701") -->
+<!-- stargazer::stargazer(table_data1, type = "html", title = "Normalisation values", header = FALSE) -->
+<!-- ``` -->
 
-In _Table 2_ the untransformed counts of the first five samples and first five genes are rendered. Some gene analysis packages require raw counts together with scaling factors.
+<!-- In _Table 2_ the untransformed counts of the first five samples and first five genes are rendered. Some gene analysis packages require raw counts together with scaling factors. -->
 
-```{r ex10}
-table_data2 <- my_data$counts[1:5, 1:5]
-colnames(table_data2) <- c("GSM1934697", "GSM1934698", "GSM1934699", "GSM1934700", "GSM1934701")
-stargazer::stargazer(table_data2, type = "html", title = "Raw counts", header = FALSE)
-```
+<!-- ```{r ex10} -->
+<!-- table_data2 <- my_data$counts[1:5, 1:5] -->
+<!-- colnames(table_data2) <- c("GSM1934697", "GSM1934698", "GSM1934699", "GSM1934700", "GSM1934701") -->
+<!-- stargazer::stargazer(table_data2, type = "html", title = "Raw counts", header = FALSE) -->
+<!-- ``` -->
 
-While other packages or analysis methods require already transformed data, which can be seen in _Table 3_. 
-In this Table, the sample specific scaling factors are applied on the counts and thereby transformed.
+<!-- While other packages or analysis methods require already transformed data, which can be seen in _Table 3_.  -->
+<!-- In this Table, the sample specific scaling factors are applied on the counts and thereby transformed. -->
 
-```{r ex11}
-table_data3 <- as.matrix(my_data$normalised[1:5, 1:5])
-colnames(table_data3) <- c("GSM1934697", "GSM1934698", "GSM1934699", "GSM1934700", "GSM1934701")
-stargazer::stargazer(table_data3, type = "html", title = "Transformed counts", header = FALSE)
-```
+<!-- ```{r ex11} -->
+<!-- table_data3 <- as.matrix(my_data$normalised[1:5, 1:5]) -->
+<!-- colnames(table_data3) <- c("GSM1934697", "GSM1934698", "GSM1934699", "GSM1934700", "GSM1934701") -->
+<!-- stargazer::stargazer(table_data3, type = "html", title = "Transformed counts", header = FALSE) -->
+<!-- ``` -->
 
 # Session info
 ```{r session}
