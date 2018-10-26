@@ -25,7 +25,8 @@ ui <- shiny::fluidPage(
       shiny::uiOutput(outputId = "interfaceB"),
       shiny::uiOutput(outputId = "interfaceC"),
       shiny::uiOutput(outputId = "interfaceD"),
-      shiny::uiOutput(outputId = "interfaceE"),
+      shiny::uiOutput(outputId = "interfaceE1"),
+      shiny::uiOutput(outputId = "interfaceE2"),
       shiny::uiOutput(outputId = "interfaceF"),
       shiny::uiOutput(outputId = "interfaceG"),
       shiny::tabsetPanel(

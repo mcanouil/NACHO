@@ -10,7 +10,6 @@ server <- function(input, output) {
 
   # Render subtabs based on maintab
   output$subtab <- shiny::renderUI({
-    shiny::req(input$maintabs)
     shiny::req(input$maintabs!="ot")
     switch(
       EXPR = input$maintabs,
@@ -83,11 +82,6 @@ server <- function(input, output) {
 
   output$interfaceB <- shiny::renderUI({
     shiny::req(input$maintabs)
-    # qc_variables <- c(
-    #   "FoV", "PC", "LoD", "MC", "MedC",
-    #   "Positive_factor", "Negative_factor", "House_factor"
-    # )
-    # colour_variables <- names(which(sapply(X = nacho[, qc_variables], FUN = function(y) {nlevels(y) <= 20})))
     colour_variables <- c(id_colname, names(which(sapply(X = nacho, FUN = function(y) {
       unique_y <- unique(y)
       length(unique_y) <= 20 && length(unique_y) > 0 && any(!is.na(unique_y))
@@ -125,7 +119,7 @@ server <- function(input, output) {
   })
 
   output$interfaceC <- shiny::renderUI({
-    shiny::req(input$maintabs)
+    shiny::req(input$maintabs%in%c("met", "vis"))
     if (input$maintabs == "met") {
       shiny::checkboxInput(
         inputId = "outlier",
@@ -133,94 +127,93 @@ server <- function(input, output) {
         value = TRUE
       )
     } else if (input$maintabs == "vis") {
-      shiny::req(input$tabs)
-      if (input$tabs == "prin") {
-        shiny::selectInput(
-          inputId = "pcA_sel",
-          label = "PC on x-axis:",
-          choices = grep("^PC[0-9]+$", colnames(nacho), value = TRUE)
-        )
-      }
+      shiny::req(input$tabs == "prin")
+      shiny::selectInput(
+        inputId = "pcA_sel",
+        label = "PC on x-axis:",
+        choices = grep("^PC[0-9]+$", colnames(nacho), value = TRUE)
+      )
     }
   })
 
   output$interfaceD <- shiny::renderUI({
-    shiny::req(input$maintabs)
+    shiny::req(input$maintabs%in%c("met", "vis"))
     if (input$maintabs == "met") {
       shiny::checkboxInput(
         inputId = "outlab",
         label = "View outlier labels"
       )
     } else if (input$maintabs == "vis") {
-      shiny::req(input$tabs)
-      if (input$tabs == "prin") {
-        shiny::selectInput(
-          inputId = "pcB_sel",
-          label = "PC on y-axis:",
-          choices = grep("^PC[0-9]+$", colnames(nacho), value = TRUE),
-          selected = grep("^PC[0-9]+$", colnames(nacho), value = TRUE)[2]
-        )
-      }
+      shiny::req(input$tabs == "prin")
+      shiny::selectInput(
+        inputId = "pcB_sel",
+        label = "PC on y-axis:",
+        choices = grep("^PC[0-9]+$", colnames(nacho), value = TRUE),
+        selected = grep("^PC[0-9]+$", colnames(nacho), value = TRUE)[2]
+      )
     }
   })
 
-  output$interfaceE <- shiny::renderUI({
-    shiny::req(input$maintabs)
-    if (input$maintabs == "met") {
-      shiny::sliderInput(
-        inputId = "point_size",
-        label = "Outlier size",
-        min = 1,
-        max = 10,
-        value = 0.25*font_size
-      )
-    }
+  output$interfaceE1 <- shiny::renderUI({
+    shiny::req(input$maintabs == "met")
+    shiny::sliderInput(
+      inputId = "point_size",
+      label = "Point size",
+      min = 1,
+      max = 5,
+      value = 0.25*font_size
+    )
+  })
+  output$interfaceE2 <- shiny::renderUI({
+    shiny::req(input$maintabs == "met")
+    shiny::sliderInput(
+      inputId = "outlier_size",
+      label = "Outlier point size (relative)",
+      min = 0,
+      max = 1,
+      value = 0.5
+    )
   })
 
   output$interfaceF <- shiny::renderUI({
-    shiny::req(input$maintabs)
-    shiny::req(input$tabs)
-    if (input$maintabs == "met" & input$tabs == "BD") {
-      shiny::radioButtons(
-        inputId = "BD_choice",
-        label = "Select instrument",
-        choiceNames = c("MAX/FLEX", "SPRINT"),
-        choiceValues = c(2.25, 1.8)
-      )
-    }
+    shiny::req(input$maintabs == "met" & input$tabs == "BD")
+    shiny::radioButtons(
+      inputId = "BD_choice",
+      label = "Select instrument",
+      choiceNames = c("MAX/FLEX", "SPRINT"),
+      choiceValues = c(2.25, 1.8)
+    )
   })
 
   output$interfaceG <- shiny::renderUI({
-    shiny::req(input$maintabs)
-    shiny::req(input$tabs)
+    shiny::req(input$maintabs == "met")
     shiny::req(input$BD_choice)
-    if (input$maintabs == "met") {
-      ranges <- c(
-        "BD" = c(0.1, 4, 0.1, input$BD_choice),
-        "FoV" = c(50, 100, 75),
-        "LoD" = c(0, 30, 2),
-        "PC" = c(0.5, 1, 0.95)
+    ranges <- c(
+      "BD" = c(0.1, 4, 0.1, input$BD_choice),
+      "FoV" = c(50, 100, 75),
+      "LoD" = c(0, 30, 2),
+      "PC" = c(0.5, 1, 0.95)
+    )
+    shiny::req(input$tabs)
+    if (input$tabs == "BD") {
+      shiny::sliderInput(
+        inputId = "threshold",
+        label = "Custom QC threshold",
+        min = as.numeric(ranges["BD1"]),
+        max = as.numeric(ranges["BD2"]),
+        value = c(
+          as.numeric(ranges["BD3"]),
+          as.numeric(ranges["BD4"])
+        )
       )
-      if (input$tabs == "BD") {
-        shiny::sliderInput(
-          inputId = "threshold",
-          label = "Custom QC threshold",
-          min = as.numeric(ranges["BD1"]),
-          max = as.numeric(ranges["BD2"]),
-          value = c(
-            as.numeric(ranges["BD3"]),
-            as.numeric(ranges["BD4"])
-          )
-        )
-      } else if (input$tabs == "FoV" | input$tabs == "LoD" | input$tabs == "PC") {
-        shiny::sliderInput(
-          inputId = "threshold",
-          label = "Custom QC threshold",
-          min = as.numeric(ranges[paste0(input$tabs, "1")]),
-          max = as.numeric(ranges[paste0(input$tabs, "2")]),
-          value = as.numeric(ranges[paste0(input$tabs, "3")])
-        )
-      }
+    } else if (input$tabs == "FoV" | input$tabs == "LoD" | input$tabs == "PC") {
+      shiny::sliderInput(
+        inputId = "threshold",
+        label = "Custom QC threshold",
+        min = as.numeric(ranges[paste0(input$tabs, "1")]),
+        max = as.numeric(ranges[paste0(input$tabs, "2")]),
+        value = as.numeric(ranges[paste0(input$tabs, "3")])
+      )
     }
   })
 
@@ -297,8 +290,7 @@ server <- function(input, output) {
             x = input$Attribute,
             y = paste(labels[input$tabs], units[input$tabs], sep = "\n"),
             colour = input$meta
-          ) +
-          ggplot2::guides(colour = ggplot2::guide_legend(ncol = 3))
+          )
 
         if (input$tabs == "BD") {
           p <- p +
@@ -332,7 +324,7 @@ server <- function(input, output) {
               data = outliers_data,
               mapping = ggplot2::aes_string(x = input$Attribute, y = input$tabs),
               colour = "red",
-              size = input$point_size,
+              size = input$outlier_size*input$point_size,
               na.rm = TRUE,
               groupOnX = TRUE
             )
@@ -348,6 +340,15 @@ server <- function(input, output) {
               colour = "red",
               inherit.aes = FALSE
             )
+        }
+
+        n_colour_levels <- length(unique(local_data[[input$meta]]))
+        if (n_colour_levels<=40) {
+          p <- p + ggplot2::guides(
+            colour = ggplot2::guide_legend(ncol = min(n_colour_levels, 10), byrow = TRUE)
+          )
+        } else {
+          p <- p + ggplot2::guides(colour = "none")
         }
 
         return(p)
@@ -542,7 +543,10 @@ server <- function(input, output) {
               !!id_colname := nacho[[id_colname]]
             )
           )
-          local_data[["Count_Norm"]] <- NACHO:::normalise_counts(data = local_data)
+          local_data[["Count_Norm"]] <- NACHO:::normalise_counts(
+            data = local_data,
+            housekeeping_norm = housekeeping_norm
+          )
           local_data <- dplyr::distinct(
             .data = local_data[, c(id_colname, "Count", "Count_Norm", "Name")]
           )

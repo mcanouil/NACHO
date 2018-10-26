@@ -4,7 +4,8 @@
 #' @param ssheet_csv [character]
 #' @param id_colname [character]
 #' @param housekeeping_genes [vector(character)]
-#' @param predict_housekeeping [logical]
+#' @param housekeeping_predict [logical]
+#' @param housekeeping_norm [logical]
 #' @param normalisation_method [character]
 #' @param n_comp [numeric]
 #'
@@ -21,7 +22,8 @@ summarise <- function(
   ssheet_csv = NULL,
   id_colname = NULL,
   housekeeping_genes = NULL,
-  predict_housekeeping = FALSE,
+  housekeeping_predict = FALSE,
+  housekeeping_norm = TRUE,
   normalisation_method = "GEO",
   n_comp = 10
 ) {
@@ -45,7 +47,8 @@ summarise <- function(
     nacho_df = nacho_df,
     id_colname = id_colname,
     housekeeping_genes = housekeeping_genes,
-    predict_housekeeping = predict_housekeeping,
+    housekeeping_predict = housekeeping_predict,
+    housekeeping_norm = housekeeping_norm,
     normalisation_method = normalisation_method,
     n_comp = n_comp
   )
@@ -57,6 +60,7 @@ summarise <- function(
 #'
 #' @param nacho_object [nacho_set]
 #' @param housekeeping_genes [vector(character)]
+#' @param housekeeping_norm [logical]
 #' @param normalisation_method [character]
 #' @param remove_outliers [logical]
 #'
@@ -67,6 +71,7 @@ summarise <- function(
 normalise <- function(
   nacho_object,
   housekeeping_genes = nacho_object["housekeeping_genes"],
+  housekeeping_norm = nacho_object["housekeeping_norm"],
   normalisation_method = nacho_object["normalisation_method"],
   remove_outliers = TRUE
 ) {
@@ -84,6 +89,18 @@ normalise <- function(
         '    housekeeping_genes=', deparse(nacho_object["housekeeping_genes"]), '\n',
         '"normalise()" parameter:\n',
         '    housekeeping_genes=', deparse(housekeeping_genes), '\n'
+      )
+    )
+  }
+
+  if (!all.equal(sort(nacho_object["housekeeping_norm"]), sort(housekeeping_norm))) {
+    warning(
+      paste0(
+        '"housekeeping_norm" is different from the parameter used to import RCC files!\n',
+        '"summarise()" parameter:\n',
+        '    housekeeping_norm=', deparse(nacho_object["housekeeping_norm"]), '\n',
+        '"normalise()" parameter:\n',
+        '    housekeeping_norm=', deparse(housekeeping_norm), '\n'
       )
     )
   }
@@ -116,7 +133,8 @@ normalise <- function(
         nacho_df = nacho_df,
         id_colname = id_colname,
         housekeeping_genes = housekeeping_genes,
-        predict_housekeeping = FALSE,
+        housekeeping_predict = FALSE,
+        housekeeping_norm = housekeeping_norm,
         normalisation_method = normalisation_method,
         n_comp = nacho_object["n_comp"]
       )
@@ -124,7 +142,10 @@ normalise <- function(
     nacho_object["remove_outliers"] <- remove_outliers
   }
 
-  nacho_object["nacho"][["Count_Norm"]] <- normalise_counts(data = nacho_object["nacho"])
+  nacho_object["nacho"][["Count_Norm"]] <- normalise_counts(
+    data = nacho_object["nacho"],
+    housekeeping_norm = housekeeping_norm
+  )
 
   raw_counts <- format_counts(
     data = nacho_object["nacho"],

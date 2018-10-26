@@ -3,7 +3,7 @@
 #' @param nacho_df [data.frame]
 #' @param id_colname [character]
 #' @param housekeeping_genes [vector(character)]
-#' @param predict_housekeeping [logical]
+#' @param housekeeping_predict [logical]
 #' @param normalisation_method [character]
 #' @param exclude_probes [vector(character)]
 #'
@@ -15,7 +15,7 @@ factor_calculation <- function(
   nacho_df,
   id_colname,
   housekeeping_genes,
-  predict_housekeeping = is.null(housekeeping_genes),
+  housekeeping_predict,
   normalisation_method,
   exclude_probes
 ) {
@@ -39,7 +39,7 @@ factor_calculation <- function(
     exclude_probes = probes_out
   )
 
-  if (predict_housekeeping | is.null(housekeeping_genes)) {
+  if (housekeeping_predict | is.null(housekeeping_genes)) {
     norm_factor <- data.frame(
       "Positive_factor" = positive_factor,
       "Negative_factor" = geometric_mean_neg
