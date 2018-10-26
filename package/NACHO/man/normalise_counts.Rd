@@ -4,10 +4,12 @@
 \alias{normalise_counts}
 \title{normalise_counts}
 \usage{
-normalise_counts(data)
+normalise_counts(data, housekeeping_norm)
 }
 \arguments{
 \item{data}{[data.frame]}
+
+\item{housekeeping_norm}{[logical]}
 }
 \value{
 [vector(numeric)]

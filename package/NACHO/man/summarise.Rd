@@ -6,8 +6,8 @@
 \usage{
 summarise(data_directory = NULL, ssheet_csv = NULL,
   id_colname = NULL, housekeeping_genes = NULL,
-  predict_housekeeping = FALSE, normalisation_method = "GEO",
-  n_comp = 10)
+  housekeeping_predict = FALSE, housekeeping_norm = TRUE,
+  normalisation_method = "GEO", n_comp = 10)
 }
 \arguments{
 \item{data_directory}{[character]}
@@ -18,7 +18,9 @@ summarise(data_directory = NULL, ssheet_csv = NULL,
 
 \item{housekeeping_genes}{[vector(character)]}
 
-\item{predict_housekeeping}{[logical]}
+\item{housekeeping_predict}{[logical]}
+
+\item{housekeeping_norm}{[logical]}
 
 \item{normalisation_method}{[character]}
 
