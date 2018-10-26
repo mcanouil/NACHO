@@ -4,7 +4,8 @@
 #' @param nacho_df [data.frame]
 #' @param id_colname [character]
 #' @param housekeeping_genes [vector(character)]
-#' @param predict_housekeeping [logical]
+#' @param housekeeping_predict [logical]
+#' @param housekeeping_norm [logical]
 #' @param normalisation_method [character]
 #' @param n_comp [numeric]
 #'
@@ -16,13 +17,14 @@ qc_rcc <- function(
   nacho_df,
   id_colname,
   housekeeping_genes,
-  predict_housekeeping,
+  housekeeping_predict,
+  housekeeping_norm,
   normalisation_method,
   n_comp
 ) {
   if (is.null(housekeeping_genes)) {
     housekeeping_genes <- nacho_df[["Name"]][grepl("Housekeeping", nacho_df[["CodeClass"]])]
-    unique(housekeeping_genes)
+    housekeeping_genes <- unique(housekeeping_genes)
   }
   control_genes_df <- nacho_df[nacho_df[["Name"]]%in%housekeeping_genes | !grepl("Endogenous", nacho_df[["CodeClass"]]), ]
 
@@ -35,18 +37,18 @@ qc_rcc <- function(
 
   probes_to_exclude <- probe_exclusion(control_genes_df = control_genes_df)
 
-  if (predict_housekeeping) {
+  if (housekeeping_predict) {
     temp_facs <- factor_calculation(
       nacho_df = nacho_df,
       id_colname = id_colname,
       housekeeping_genes = housekeeping_genes,
-      predict_housekeeping = is.null(housekeeping_genes),
+      housekeeping_predict = housekeeping_predict,
       normalisation_method = normalisation_method,
       exclude_probes = probes_to_exclude
     )
 
     tmp_counts <- dplyr::full_join(x = nacho_df, y = temp_facs, by = id_colname)
-    tmp_counts[, "count_norm"] <- normalise_counts(data = tmp_counts)
+    tmp_counts[, "count_norm"] <- normalise_counts(data = tmp_counts, housekeeping_norm = FALSE)
 
     predicted_housekeeping <- find_housekeeping(
       data = tmp_counts,
@@ -71,7 +73,7 @@ qc_rcc <- function(
     nacho_df = nacho_df,
     id_colname = id_colname,
     housekeeping_genes = housekeeping_genes,
-    predict_housekeeping = is.null(housekeeping_genes),
+    housekeeping_predict = FALSE,
     normalisation_method = normalisation_method,
     exclude_probes = probes_to_exclude
   )
@@ -116,6 +118,8 @@ qc_rcc <- function(
   qc_out <- new_nacho_set(
     access = id_colname,
     housekeeping_genes = housekeeping_genes,
+    housekeeping_predict = housekeeping_predict,
+    housekeeping_norm = housekeeping_norm,
     normalisation_method = normalisation_method,
     remove_outliers = FALSE,
     n_comp = n_comp,

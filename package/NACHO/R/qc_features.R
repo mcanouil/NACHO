@@ -12,12 +12,6 @@ qc_features <- function(data, id_colname) {
   nested_data_df <- tidyr::nest(dplyr::group_by(.data = data, get(id_colname)))
   colnames(nested_data_df)[1] <- id_colname
 
-  # lane_labels <- paste0("lane_", c(
-  #   "ID", "FovCounted", "FovCount", "BindingDensity",
-  #   "ScannerID", "StagePosition", "CartridgeID"
-  # ))
-  # control_labels <- c("Positive", "Negative")
-
   output <- lapply(X = nested_data_df[["data"]], FUN = function(.data) {
     positives <- .data[.data[["CodeClass"]] %in% "Positive", c("Name", "Count")]
     counts <- .data[grep("Endogenous", .data[["CodeClass"]]), ][["Count"]]
