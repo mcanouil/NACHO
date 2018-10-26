@@ -5,8 +5,7 @@
 \title{factor_calculation}
 \usage{
 factor_calculation(nacho_df, id_colname, housekeeping_genes,
-  predict_housekeeping = is.null(housekeeping_genes),
-  normalisation_method, exclude_probes)
+  housekeeping_predict, normalisation_method, exclude_probes)
 }
 \arguments{
 \item{nacho_df}{[data.frame]}
@@ -15,7 +14,7 @@ factor_calculation(nacho_df, id_colname, housekeeping_genes,
 
 \item{housekeeping_genes}{[vector(character)]}
 
-\item{predict_housekeeping}{[logical]}
+\item{housekeeping_predict}{[logical]}
 
 \item{normalisation_method}{[character]}
 

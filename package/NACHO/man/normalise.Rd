@@ -6,6 +6,7 @@
 \usage{
 normalise(nacho_object,
   housekeeping_genes = nacho_object["housekeeping_genes"],
+  housekeeping_norm = nacho_object["housekeeping_norm"],
   normalisation_method = nacho_object["normalisation_method"],
   remove_outliers = TRUE)
 }
@@ -13,6 +14,8 @@ normalise(nacho_object,
 \item{nacho_object}{[nacho_set]}
 
 \item{housekeeping_genes}{[vector(character)]}
+
+\item{housekeeping_norm}{[logical]}
 
 \item{normalisation_method}{[character]}
 
