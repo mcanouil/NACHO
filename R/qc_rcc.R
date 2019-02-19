@@ -9,9 +9,7 @@
 #' @param normalisation_method [character]
 #' @param n_comp [numeric]
 #'
-#' @return [nacho_set]
-#'
-#' @importFrom dplyr full_join
+#' @return [list]
 qc_rcc <- function(
   data_directory,
   nacho_df,
@@ -115,7 +113,7 @@ qc_rcc <- function(
     by = id_colname
   )
 
-  qc_out <- new_nacho_set(
+  qc_out <- list(
     access = id_colname,
     housekeeping_genes = housekeeping_genes,
     housekeeping_predict = housekeeping_predict,

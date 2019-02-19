@@ -5,7 +5,6 @@
 #'
 #' @return [vector(numeric)]
 #'
-#' @importFrom stats glm poisson
 norm_glm <- function(data, exclude_probes = NULL) {
   glms <- sapply(
     X = data,
@@ -26,7 +25,7 @@ norm_glm <- function(data, exclude_probes = NULL) {
           if (grepl("NEG", iprobe)) {0} else if (grepl("POS", iprobe)) {32}
         })
       }
-      model <- stats::glm(y ~ x, family = stats::poisson(link = identity))
+      model <- stats::glm(y ~ x, family = stats::poisson(link = "identity"))
       output <- c(
         "intercept" = unname(model$coeff[1]),
         "slope" = unname(model$coeff[2])
