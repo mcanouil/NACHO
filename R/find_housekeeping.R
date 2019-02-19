@@ -5,11 +5,6 @@
 #' @param count_column [character]
 #'
 #' @return [vector(character)]
-#'
-#' @importFrom dplyr group_by
-#' @importFrom stats sd
-#' @importFrom tidyr nest
-#' @importFrom utils head
 find_housekeeping <- function(data, id_colname, count_column) {
   data <- data[grep("Endogenous", data[["CodeClass"]]), ]
   nested_data_df <- tidyr::nest(dplyr::group_by(.data = data, get(id_colname)))

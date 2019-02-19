@@ -5,8 +5,6 @@
 #' @param count_column [character]
 #'
 #' @return [data.frame]
-#'
-#' @importFrom tidyr spread
 format_counts <- function(data, id_colname, count_column = "Count") {
   counts_df <- tidyr::spread(
     data = data[, c(id_colname, "CodeClass", "Name", count_column)],
