@@ -90,31 +90,31 @@ normalise <- function(
     "nacho"
   )
   if (!all(mandatory_fields%in%names(nacho_object))) {
-    stop('[NACHO::visualise] No valid data provided. \n Use "summarise()" or "summarize()" to generate data!')
+    stop('[NACHO::normalise] No valid data provided. \n Use "summarise()" or "summarize()" to generate data!')
   }
 
   id_colname <- nacho_object[["access"]]
 
-  if (!all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes))) {
+  if (!isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes)))) {
     warning(
       paste0(
-        '"housekeeping_genes" is different from the parameter used to import RCC files!\n',
-        '"summarise()" parameter:\n',
-        '    housekeeping_genes=', deparse(nacho_object[["housekeeping_genes"]]), '\n',
-        '"normalise()" parameter:\n',
-        '    housekeeping_genes=', deparse(housekeeping_genes), '\n'
+        '[NACHO::normalise] "housekeeping_genes" is different from the parameter used to import RCC files!\n',
+        '    "summarise()" parameter:\n',
+        '        housekeeping_genes=', deparse(nacho_object[["housekeeping_genes"]]), '\n',
+        '    "normalise()" parameter:\n',
+        '        housekeeping_genes=', deparse(housekeeping_genes), '\n'
       )
     )
   }
 
-  if (!all.equal(sort(nacho_object[["housekeeping_norm"]]), sort(housekeeping_norm))) {
+  if (nacho_object[["housekeeping_norm"]]!=housekeeping_norm) {
     warning(
       paste0(
-        '"housekeeping_norm" is different from the parameter used to import RCC files!\n',
-        '"summarise()" parameter:\n',
-        '    housekeeping_norm=', deparse(nacho_object[["housekeeping_norm"]]), '\n',
-        '"normalise()" parameter:\n',
-        '    housekeeping_norm=', deparse(housekeeping_norm), '\n'
+        '[NACHO::normalise] "housekeeping_norm" is different from the parameter used to import RCC files!\n',
+        '    "summarise()" parameter:\n',
+        '        housekeeping_norm=', deparse(nacho_object[["housekeeping_norm"]]), '\n',
+        '    "normalise()" parameter:\n',
+        '        housekeeping_norm=', deparse(housekeeping_norm), '\n'
       )
     )
   }
@@ -122,11 +122,11 @@ normalise <- function(
   if (nacho_object[["normalisation_method"]]!=normalisation_method) {
     warning(
       paste0(
-        '"normalisation_method" is different from the parameter used to import RCC files!\n',
-        '"summarise()" parameter:\n',
-        '    normalisation_method=', deparse(nacho_object[["normalisation_method"]]), '\n',
-        '"normalise()" parameter:\n',
-        '    normalisation_method=', deparse(normalisation_method), '\n'
+        '[NACHO::normalise] "normalisation_method" is different from the parameter used to import RCC files!\n',
+        '    "summarise()" parameter:\n',
+        '        normalisation_method=', deparse(nacho_object[["normalisation_method"]]), '\n',
+        '    "normalise()" parameter:\n',
+        '        normalisation_method=', deparse(normalisation_method), '\n'
       )
     )
   }
