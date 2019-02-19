@@ -39,7 +39,7 @@ summarise <- function(
     nacho_df <- tidyr::unite(data = nacho_df, col = !!id_colname, id_colname, "plexset_id")
   }
 
-  summary_out <- qc_rcc(
+  qc_rcc(
     data_directory = data_directory,
     nacho_df = nacho_df,
     id_colname = id_colname,
@@ -49,8 +49,6 @@ summarise <- function(
     normalisation_method = normalisation_method,
     n_comp = n_comp
   )
-
-  return(summary_out)
 }
 
 
@@ -91,8 +89,8 @@ normalise <- function(
     "pc_sum",
     "nacho"
   )
-  if (!all(names(nacho_object)%in%mandatory_fields)) {
-    stop("[NACHO::normalise] No valid data provided. \n Use summarise() to generate data!")
+  if (!all(mandatory_fields%in%names(nacho_object))) {
+    stop('[NACHO::visualise] No valid data provided. \n Use "summarise()" or "summarize()" to generate data!')
   }
 
   id_colname <- nacho_object[["access"]]
@@ -177,7 +175,7 @@ normalise <- function(
   )
   nacho_object[["normalised_counts"]] <- norm_counts
 
-  return(nacho_object)
+  nacho_object
 }
 
 
@@ -206,21 +204,26 @@ visualise <- function(nacho_object) {
     "n_comp",
     "data_directory",
     "pc_sum",
-    "nacho"
+    "nacho" # ,
+    # "raw_counts",
+    # "normalised_counts"
   )
-  if (!all(names(nacho_object)%in%mandatory_fields)) {
-    stop("[NACHO::normalise] No valid data provided. \n Use summarise() to generate data!")
+  if (!interactive()) {
+    stop('[NACHO::visualise] Must be run in interactive R session!')
+  }
+  if (!all(mandatory_fields%in%names(nacho_object))) {
+    stop('[NACHO::visualise] No valid data provided. \n Use "summarise()" or "summarize()" to generate data!')
   }
 
   font_size <- 14
   ggplot2::theme_set(ggplot2::theme_grey(base_size = font_size))
 
-  id_colname <- nacho_shiny[["access"]]
-  housekeeping_genes <- nacho_shiny[["housekeeping_genes"]]
-  housekeeping_norm <- nacho_shiny[["housekeeping_norm"]]
-  pc_sum <- nacho_shiny[["pc_sum"]]
-  nacho <- nacho_shiny[["nacho"]]
-  save_path_default <- nacho_shiny[["data_directory"]]
+  id_colname <- nacho_object[["access"]]
+  housekeeping_genes <- nacho_object[["housekeeping_genes"]]
+  housekeeping_norm <- nacho_object[["housekeeping_norm"]]
+  pc_sum <- nacho_object[["pc_sum"]]
+  nacho <- nacho_object[["nacho"]]
+  save_path_default <- nacho_object[["data_directory"]]
 
   app <- shiny::shinyApp(
     ui = shiny::fluidPage(
@@ -866,8 +869,6 @@ visualise <- function(nacho_object) {
   )
 
   shiny::runApp(app)
-
-  return(invisible())
 }
 
 

@@ -31,7 +31,7 @@ qc_features <- function(data, id_colname) {
     mean_count <- round(mean(counts), 2)
     median_count <- stats::median(counts)
 
-    output <- c(
+    c(
       "Date" = unique(.data[["sample_Date"]]),
       "ID" = unique(.data[["lane_ID"]]),
       "BD" = unique(.data[["lane_BindingDensity"]]),
@@ -44,14 +44,14 @@ qc_features <- function(data, id_colname) {
       "MC" = mean_count,
       "MedC" = median_count
     )
-    return(output)
   })
+
   output <- as.data.frame(do.call("rbind", output), stringsAsFactors = FALSE)
   output[[id_colname]] <- nested_data_df[[id_colname]]
-
   output[c("BD", "FoV", "PC", "LoD", "MC", "MedC")] <- lapply(
     X = output[c("BD", "FoV", "PC", "LoD", "MC", "MedC")],
     FUN = as.numeric
   )
-  return(output)
+
+  output
 }

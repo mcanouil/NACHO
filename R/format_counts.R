@@ -6,11 +6,11 @@
 #'
 #' @return [data.frame]
 format_counts <- function(data, id_colname, count_column = "Count") {
-  counts_df <- tidyr::spread(
-    data = data[, c(id_colname, "CodeClass", "Name", count_column)],
-    key = get(id_colname),
-    value = get(count_column)
+  as.data.frame(
+    tidyr::spread(
+      data = data[, c(id_colname, "CodeClass", "Name", count_column)],
+      key = get(id_colname),
+      value = get(count_column)
+    )
   )
-  counts_df <- as.data.frame(counts_df)
-  return(counts_df)
 }

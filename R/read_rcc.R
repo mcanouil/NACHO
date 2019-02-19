@@ -28,7 +28,7 @@ read_rcc <- function(file) {
       )
       .data <- lapply(X = sample_list, FUN = rbind, control_probes)
     }
-    return(.data)
+    .data
   })
 
   rcc_tbl <- tibble::as_tibble(rcc_list)
@@ -41,7 +41,7 @@ read_rcc <- function(file) {
 
   # remove NOTE: 'no visible binding for global variable' though it's a bit ugly
   column_to_unnest <- c("Header", "Sample_Attributes", "Lane_Attributes", "Messages")
-  rcc_tbl <- tidyr::unnest(
+  tidyr::unnest(
     data = rcc_tbl,
     Header = get(column_to_unnest[1]),
     Sample_Attributes = get(column_to_unnest[2]),
@@ -49,6 +49,4 @@ read_rcc <- function(file) {
     Messages = get(column_to_unnest[4]),
     .drop = FALSE
   )
-
-  return(rcc_tbl)
 }

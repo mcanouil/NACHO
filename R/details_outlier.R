@@ -20,7 +20,7 @@ details_outlier <- function(nacho_df, id_colname) {
   fac_out <- nacho_df[[id_colname]][which(nacho_df[["Positive_factor"]]<(1/4) | nacho_df[["Positive_factor "]]>4)]
   house_out <- nacho_df[[id_colname]][which(nacho_df[["House_factor"]]<(1/11) | nacho_df[["House_factor"]]>11)]
 
-  all_out <- list(
+  list(
     "binding_out" = unique(binding_out),
     "fov_out" = unique(fov_out),
     "pc_out" = unique(pc_out),
@@ -28,6 +28,4 @@ details_outlier <- function(nacho_df, id_colname) {
     "house_out" = unique(house_out),
     "fac_out" = unique(fac_out)
   )
-
-  return(all_out)
 }
