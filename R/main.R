@@ -27,8 +27,8 @@ summarise <- function(
   nacho_df <- utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE)
   nacho_df <- tibble::as_tibble(nacho_df)
   nacho_df[["file_path"]] <- paste(data_directory, nacho_df[[id_colname]], sep = "/")
-  nacho_df[["file_exists"]] <- purrr::map_lgl(.x = nacho_df[["file_path"]], .f = file.exists)
-  nacho_df[["rcc_content"]] <- purrr::map(.x = nacho_df[["file_path"]], .f = read_rcc)
+  nacho_df[["file_exists"]] <- sapply(X = nacho_df[["file_path"]], FUN = file.exists)
+  nacho_df[["rcc_content"]] <- lapply(X = nacho_df[["file_path"]], FUN = read_rcc)
 
   column_to_unnest <- c("rcc_content", "Code_Summary")
   nacho_df <- tidyr::unnest(data = nacho_df, rcc_content = get(column_to_unnest[1]), .drop = FALSE)
