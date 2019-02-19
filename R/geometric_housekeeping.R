@@ -17,5 +17,5 @@ geometric_housekeeping <- function(data, positive_factor, intercept, housekeepin
   house_data[["Count"]] <- house_data[["Count"]] - intercept
   house_data[["Count"]] <- house_data[["Count"]] * positive_factor
   house_data[["Count"]][house_data[["Count"]] <= 0] <- 1
-  return(geometric_mean(house_data[["Count"]]))
+  geometric_mean(house_data[["Count"]])
 }

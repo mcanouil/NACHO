@@ -4,7 +4,7 @@
 \alias{geometric_probes}
 \title{geometric_probes}
 \usage{
-geometric_probes(data, probes_type, exclude_probes = NULL)
+geometric_probes(data, probes_type)
 }
 \arguments{
 \item{data}{[list(data.frame)]}

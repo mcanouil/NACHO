@@ -11,5 +11,5 @@ normalise_counts <- function(data, housekeeping_norm) {
     out <- out * data[["House_factor"]]
   }
   out[out<=0] <- 0.1
-  return(round(out))
+  round(out)
 }

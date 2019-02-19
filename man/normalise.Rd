@@ -2,6 +2,7 @@
 % Please edit documentation in R/main.R
 \name{normalise}
 \alias{normalise}
+\alias{normalize}
 \title{normalise}
 \usage{
 normalise(nacho_object,

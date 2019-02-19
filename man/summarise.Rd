@@ -2,6 +2,7 @@
 % Please edit documentation in R/main.R
 \name{summarise}
 \alias{summarise}
+\alias{summarize}
 \title{summarise}
 \usage{
 summarise(data_directory = NULL, ssheet_csv = NULL,
