@@ -1,7 +1,6 @@
 #' norm_glm
 #'
 #' @param data [list(data.frame)]
-#' @param exclude_probes [vector(character)]
 #'
 #' @return [vector(numeric)]
 norm_glm <- function(data) {

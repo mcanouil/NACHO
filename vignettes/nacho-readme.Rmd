@@ -32,7 +32,7 @@ knitr::opts_chunk$set(
 
 
 ```{r logo, echo = FALSE, eval = TRUE, out.width = "100px"}
-knitr::include_graphics(path = system.file("shiny", "www", "Nacho_logo.png", package = "NACHO"))
+knitr::include_graphics(path = "Nacho_logo.png")
 ```
 
 
@@ -69,7 +69,6 @@ The raw data used in the summarisation is from a study of Bruce JP et al.[1] and
 library(NACHO)
 data(GSE74821)
 my_nacho <- GSE74821
-my_nacho
 ```
 ```{r}
 visualise(my_nacho)

@@ -10,8 +10,6 @@ geometric_probes(data, probes_type)
 \item{data}{[list(data.frame)]}
 
 \item{probes_type}{[character]}
-
-\item{exclude_probes}{[vector(character)]}
 }
 \value{
 [numeric]
