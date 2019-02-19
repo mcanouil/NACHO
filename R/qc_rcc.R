@@ -90,7 +90,7 @@ qc_rcc <- function(
   pcas <- qc_pca(counts = counts_df, n_comp = n_comp)
 
   pcsum <- t(as.matrix(pcas[["pcsum"]]))
-  pcsum <- as.data.frame(pcsum)
+  pcsum <- as.data.frame(pcsum, stringsAsFactors = FALSE)
   pcsum[, "PC"] <- sprintf("PC%02d", as.numeric(gsub("PC", "", rownames(pcsum))))
 
   pcas_pc <- as.data.frame(pcas[["pc"]], stringsAsFactors = FALSE)
