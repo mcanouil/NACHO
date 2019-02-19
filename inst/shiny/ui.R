@@ -33,8 +33,9 @@ ui <- shiny::fluidPage(
         id = "down",
         shiny::tabPanel(
           title = "Download",
-          shiny::numericInput(inputId = "w", label = "Width:", width = 70, value = 10),
-          shiny::numericInput(inputId = "h", label = "Height:", width = 70, value = 10),
+          shiny::numericInput(inputId = "w", label = "Width:", width = 70, value = 8),
+          shiny::numericInput(inputId = "h", label = "Height:", width = 70, value = 6),
+          shiny::textInput(inputId = "save_path", label = "Output directory:", value = save_path_default),
           shiny::textInput(inputId = "name", label = "Plot name:"),
           shiny::actionButton(inputId = "do", label = "Download")
         )
@@ -42,7 +43,7 @@ ui <- shiny::fluidPage(
     ),
     shiny::column(
       width = 9,
-      shiny::plotOutput(outputId = "all", width = "1280px", height = "720px")
+      shiny::plotOutput(outputId = "all", width = "100%", height = "400px")
     )
   )
 )

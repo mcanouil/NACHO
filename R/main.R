@@ -23,6 +23,7 @@ summarise <- function(
   normalisation_method = "GEO",
   n_comp = 10
 ) {
+  data_directory <- normalizePath(data_directory)
   nacho_df <- utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE)
   nacho_df <- tibble::as_tibble(nacho_df)
   nacho_df[["file_path"]] <- paste(data_directory, nacho_df[[id_colname]], sep = "/")
@@ -52,6 +53,13 @@ summarise <- function(
   return(summary_out)
 }
 
+
+#' @export
+#' @rdname summarise
+#' @usage NULL
+summarize <- summarise
+
+
 #' normalise
 #'
 #' @param nacho_object [list]
@@ -71,7 +79,19 @@ normalise <- function(
   normalisation_method = nacho_object[["normalisation_method"]],
   remove_outliers = TRUE
 ) {
-  if (!is_nacho_set(nacho_object)) {
+  mandatory_fields <- c(
+    "access",
+    "housekeeping_genes",
+    "housekeeping_predict",
+    "housekeeping_norm",
+    "normalisation_method",
+    "remove_outliers",
+    "n_comp",
+    "data_directory",
+    "pc_sum",
+    "nacho"
+  )
+  if (!all(names(nacho_object)%in%mandatory_fields)) {
     stop("[NACHO::normalise] No valid data provided. \n Use summarise() to generate data!")
   }
 
@@ -160,6 +180,13 @@ normalise <- function(
   return(nacho_object)
 }
 
+
+#' @export
+#' @rdname normalise
+#' @usage NULL
+normalize <- normalise
+
+
 #' visualise
 #'
 #' @param nacho_object [list]
@@ -169,8 +196,20 @@ normalise <- function(
 #'
 #' @examples NULL
 visualise <- function(nacho_object) {
-  if (!is_nacho_set(nacho_object)) {
-    stop("[NACHO::visualise] No valid data provided. \n Use summarise() to generate data!")
+  mandatory_fields <- c(
+    "access",
+    "housekeeping_genes",
+    "housekeeping_predict",
+    "housekeeping_norm",
+    "normalisation_method",
+    "remove_outliers",
+    "n_comp",
+    "data_directory",
+    "pc_sum",
+    "nacho"
+  )
+  if (!all(names(nacho_object)%in%mandatory_fields)) {
+    stop("[NACHO::normalise] No valid data provided. \n Use summarise() to generate data!")
   }
 
   assign(x = "nacho_shiny", value = nacho_object, envir = .GlobalEnv) # Not good !!!
@@ -180,3 +219,9 @@ visualise <- function(nacho_object) {
 
   return(invisible())
 }
+
+
+#' @export
+#' @rdname visualise
+#' @usage NULL
+visualize <- visualise

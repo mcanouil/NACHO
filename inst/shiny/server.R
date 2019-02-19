@@ -1,11 +1,24 @@
 server <- function(input, output) {
   shiny::observeEvent(input$do, {
+    file_ext <- function (x) {
+        pos <- regexpr("\\.([[:alnum:]]+)$", x)
+        ifelse(pos > -1L, substring(x, pos + 1L), "")
+    }
+    clean_path <- normalizePath(input$save_path)
+    if (!dir.exists(clean_path)) {
+      dir.create(path = clean_path)
+    }
     ggplot2::ggsave(
-      filename = paste0(save_path, "/", input$name, ".pdf"),
+      filename = paste0(
+        clean_path, "/",
+        input$name, if (file_ext(input$name)=="") ".pdf"
+      ),
       width = input$w,
-      height = input$h
+      height = input$h,
+      units = "in",
+      dpi = 300
     )
-    shiny::showNotification(paste0("Plot successfully saved to: ", save_path))
+    shiny::showNotification(paste0('Plot successfully saved to: "', clean_path, '"'))
   })
 
   # Render subtabs based on maintab
@@ -164,6 +177,7 @@ server <- function(input, output) {
       value = 0.25*font_size
     )
   })
+
   output$interfaceE2 <- shiny::renderUI({
     shiny::req(input$maintabs == "met")
     shiny::sliderInput(

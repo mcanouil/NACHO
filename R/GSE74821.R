@@ -15,6 +15,7 @@
 # targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
 # write.csv(x = head(targets, 20), file = "GSE74821/Samplesheet.csv")
 # library(NACHO)
+# devtools::load_all("NACHO")
 # GSE74821 <- summarise(
 #   data_directory = "GSE74821",
 #   ssheet_csv = "GSE74821/Samplesheet.csv",
@@ -25,4 +26,5 @@
 #   normalisation_method = "GLM",
 #   n_comp = 10
 # )
+# GSE74821$data_directory <- "~/"
 # usethis::use_data(GSE74821, overwrite = TRUE)
