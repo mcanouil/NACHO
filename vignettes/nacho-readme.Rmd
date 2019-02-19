@@ -97,10 +97,10 @@ The data is extracted and prepared using the following code.
 
 ```{r ex2}
 library(GEOquery)
-gse <- getGEO(gse = "GSE74821")
+gse <- getGEO("GSE74821")
 targets <- pData(phenoData(gse[[1]]))
 
-getGEOSuppFiles(targets = "GSE74821")
+getGEOSuppFiles("GSE74821")
 untar(tarfile = "GSE74821/GSE74821_RAW.tar", exdir = "example/Data")
 
 targets$IDFILE <- list.files(path = "example/Data", pattern = ".RCC.gz$")

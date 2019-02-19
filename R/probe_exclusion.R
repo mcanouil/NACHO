@@ -11,8 +11,8 @@ probe_exclusion <- function(control_genes_df) {
   delta_medians <- sapply(medians, function(x) {abs((overal_median - x))})
   ex_probes <- delta_medians[delta_medians > (0.5 * overal_median)]
   if (length(ex_probes)!=0 && nrow(local_neg)!=length(ex_probes)) {
-    return(names(ex_probes))
+    names(ex_probes)
   } else {
-    return(NULL)
+    NULL
   }
 }

@@ -106,14 +106,13 @@ qc_rcc <- function(
     by = id_colname
   )
 
-
   nacho_out <- dplyr::full_join(
     x = nacho_df[, c(id_colname, setdiff(colnames(nacho_df), colnames(facs_pc_qc)))],
     y = facs_pc_qc,
     by = id_colname
   )
 
-  qc_out <- list(
+  list(
     access = id_colname,
     housekeeping_genes = housekeeping_genes,
     housekeeping_predict = housekeeping_predict,
@@ -125,5 +124,4 @@ qc_rcc <- function(
     pc_sum = pcsum,
     nacho = as.data.frame(nacho_out, stringsAsFactors = FALSE)
   )
-  return(qc_out)
 }

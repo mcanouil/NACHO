@@ -18,13 +18,11 @@ find_housekeeping <- function(data, id_colname, count_column) {
       ratios <- log2(.data[[count_column]] / sample_means)
       names(ratios) <- .data[["Name"]]
       ratios <- ratios[sum(is.infinite(ratios)) / length(ratios) <= 0.05]
-      ratios <- ifelse(is.infinite(ratios), NA, ratios)
-      return(ratios)
+      ifelse(is.infinite(ratios), NA, ratios)
     }
   )
   ratios <- do.call("cbind", ratios)
   miR_sd <- apply(X = ratios, MARGIN = 1, FUN = stats::sd, na.rm = TRUE)
   miR_sd <- sort(miR_sd, decreasing = FALSE)
-  top5 <- utils::head(names(miR_sd), 5)
-  return(top5)
+  utils::head(names(miR_sd), 5)
 }

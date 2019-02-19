@@ -12,7 +12,7 @@ read_tags <- function(tag, raw_rcc) {
       X = content_list,
       FUN = function(vec) {unique(unlist(strsplit(vec, ",")))}
     )
-    tag_content <- do.call(rbind, td_content_list)
+    tag_content <- do.call("rbind", td_content_list)
     tag_content <- as.data.frame(tag_content, stringsAsFactors = FALSE)
   } else {
     tag_content <- as.data.frame(
@@ -24,5 +24,6 @@ read_tags <- function(tag, raw_rcc) {
   if (tag!="Code_Summary") {
     tag_content <- format_tag_content(tag = tag, content = tag_content)
   }
-  return(list(tag_content))
+
+  list(tag_content)
 }

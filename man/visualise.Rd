@@ -2,6 +2,7 @@
 % Please edit documentation in R/main.R
 \name{visualise}
 \alias{visualise}
+\alias{visualize}
 \title{visualise}
 \usage{
 visualise(nacho_object)

@@ -4,7 +4,7 @@
 \alias{norm_glm}
 \title{norm_glm}
 \usage{
-norm_glm(data, exclude_probes = NULL)
+norm_glm(data)
 }
 \arguments{
 \item{data}{[list(data.frame)]}

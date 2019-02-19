@@ -4,37 +4,26 @@
 #' @param exclude_probes [vector(character)]
 #'
 #' @return [vector(numeric)]
-#'
-norm_glm <- function(data, exclude_probes = NULL) {
+norm_glm <- function(data) {
   glms <- sapply(
     X = data,
-    exclude_probes = exclude_probes,
-    FUN = function(.data, exclude_probes) {
+    FUN = function(.data) {
       control_labels <- c("Positive", "Negative")
-
-      control_data <- as.data.frame(.data[, c("Name", "CodeClass", "Count")])
-      control_data <- control_data[control_data[["CodeClass"]] %in% control_labels, ]
-      control_data <- control_data[order(control_data[, "Name"]), ]
-      control_data <- control_data[!control_data[, "Name"] %in% exclude_probes, ]
-
-      y <- as.numeric(control_data[, "Count"]) + 1
-      if (all(grepl("^[^(]*\\((.*)\\)$", control_data[, "Name"]))) {
-        x <- as.numeric(gsub("^[^(]*\\((.*)\\)$", "\\1", control_data[, "Name"]))
+      .data <- .data[.data[["CodeClass"]] %in% control_labels, ]
+      y <- .data[["Count"]] + 1
+      check_name <- grepl("^[^(]*\\((.*)\\)$", .data[["Name"]])
+      if (all(check_name)) {
+        x <- as.numeric(gsub("^[^(]*\\((.*)\\)$", "\\1", .data[["Name"]]))
       } else {
-        x <- sapply(X = control_data[, "Name"], FUN = function(iprobe) {
-          if (grepl("NEG", iprobe)) {0} else if (grepl("POS", iprobe)) {32}
-        })
+        x <- c(NEG = 0, POS = 32)[gsub("([NP][EO][GS]).*", "\\1", .data[["Name"]])]
       }
-      model <- stats::glm(y ~ x, family = stats::poisson(link = "identity"))
-      output <- c(
-        "intercept" = unname(model$coeff[1]),
-        "slope" = unname(model$coeff[2])
-      )
-      return(output)
+      stats::glm(y ~ x, family = stats::poisson(link = "identity"))$coeff[c(1, 2)]
     }
   )
-  geometric_mean_neg <- glms["intercept", ]
-  slopes <- glms["slope", ]
-  positive_factor <- sapply(X = slopes, FUN = function(x) {mean(slopes) / x})
-  return(positive_factor)
+
+  list(
+    geometric_mean_neg = glms[1, ],
+    positive_factor = mean(glms[2, ]) / glms[2, ]
+  )
 }
+
