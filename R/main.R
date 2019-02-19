@@ -225,12 +225,14 @@ visualise <- function(nacho_object) {
   nacho <- nacho_object[["nacho"]]
   save_path_default <- nacho_object[["data_directory"]]
 
+  addResourcePath("www", system.file("logo", package = "NACHO"))
+
   app <- shiny::shinyApp(
     ui = shiny::fluidPage(
       shiny::fluidRow(
         shiny::column(
           width = 3,
-          shiny::img(src = "Nacho_logo.png", height = 150)
+          shiny::img(src = "www/Nacho_logo.png", height = 150)
         ),
         shiny::column(
           width = 9,
@@ -289,7 +291,7 @@ visualise <- function(nacho_object) {
         ggplot2::ggsave(
           filename = paste0(
             clean_path, "/",
-            input$name, if (file_ext(input$name)=="") ".pdf"
+            input$name, if (file_ext(input$name)=="") ".png"
           ),
           width = input$w,
           height = input$h,
@@ -510,10 +512,10 @@ visualise <- function(nacho_object) {
       })
 
       output$outlier_table <- shiny::renderDataTable({
-        details_out <- NACHO:::details_outlier(nacho_df = nacho, id_colname = id_colname)
+        details_out <- details_outlier(nacho_df = nacho, id_colname = id_colname)
         all_out <- unique(unlist(details_out))
 
-        outlier_table <- data.frame(
+        data.frame(
           "Accession" = all_out,
           "BD" = ifelse(all_out %in% details_out[["binding_out"]], "FAIL", "PASS"),
           "FOV" = ifelse(all_out %in% details_out[["fov_out"]], "FAIL", "PASS"),
@@ -522,7 +524,6 @@ visualise <- function(nacho_object) {
           "PSF" = ifelse(all_out %in% details_out[["fac_out"]], "FAIL", "PASS"),
           "HSF" = ifelse(all_out %in% details_out[["house_out"]], "FAIL", "PASS")
         )
-        return(outlier_table)
       })
 
       output$all <- shiny::renderPlot({
@@ -537,9 +538,9 @@ visualise <- function(nacho_object) {
           "LoD" = "Limit of Detection"
         )
         units <- c(
-          "BD" = "(Optical features / μm²)",
+          "BD" = "(Optical features / um2)",
           "FoV" = "(%Counted)",
-          "PC" = "(R²)",
+          "PC" = "(R2)",
           "LoD" = "(Z)"
         )
 
@@ -563,7 +564,7 @@ visualise <- function(nacho_object) {
               outliers_data <- nacho[nacho[[input$tabs]] <= input$threshold[1], ]
             }
             if (input$tabs %in% c("PC", "LoD")) {
-              req(!all(local_data[[input$tabs]]==0))
+              shiny::req(!all(local_data[[input$tabs]]==0))
             }
 
             local_data <- dplyr::distinct(.data = local_data[, c(id_colname, input$Attribute, input$tabs, input$meta)])
@@ -643,7 +644,7 @@ visualise <- function(nacho_object) {
               p <- p + ggplot2::guides(colour = "none")
             }
 
-            return(p)
+            p
           },
           "cg" = {
             shiny::req(input$colour_choice)
@@ -656,7 +657,12 @@ visualise <- function(nacho_object) {
               )
               p <- ggplot2::ggplot(
                 data = local_data,
-                mapping = ggplot2::aes(x = get(id_colname), y = Count+1, colour = Name, group = Name)
+                mapping = ggplot2::aes(
+                  x = get(id_colname),
+                  y = Count+1,
+                  colour = Name,
+                  group = Name
+                )
               ) +
                 ggplot2::geom_line() +
                 ggplot2::facet_wrap(facets = "CodeClass", scales = "free_y") +
@@ -677,7 +683,11 @@ visualise <- function(nacho_object) {
               )
               p <- ggplot2::ggplot(
                 data = local_data,
-                mapping = ggplot2::aes(x = Name, y = Count+1, colour = get(colour_name))
+                mapping = ggplot2::aes(
+                  x = Name,
+                  y = Count+1,
+                  colour = get(colour_name)
+                )
               ) +
                 ggbeeswarm::geom_quasirandom(size = input$point_size, width = 0.5, na.rm = TRUE) +
                 ggplot2::scale_y_log10(limits = c(1, NA)) +
@@ -689,7 +699,8 @@ visualise <- function(nacho_object) {
               } else {
                 p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
               }
-              return(p)
+
+              p
             }
           },
           "vis" = {
@@ -739,7 +750,7 @@ visualise <- function(nacho_object) {
                   ) +
                   ggplot2::labs(x = "Number of Principal Component", y = "Proportion of Variance")
 
-                ggpubr::ggarrange(p_point, p_histo, nrow = 2, ncol = 1)
+                ggpubr::ggarrange(p_point, p_histo, nrow = 2, ncol = 1, align = "h")
               },
               "MC-BD" = {
                 # Count vs binding
@@ -768,7 +779,7 @@ visualise <- function(nacho_object) {
                 )
                 ggplot2::ggplot(
                   data = local_data,
-                  mapping = ggplot2::aes(x = MC, y = MedC, colour = get(colour_name))
+                  mapping = ggplot2::aes_string(x = "MC", y = "MedC", colour = colour_name)
                 ) +
                   ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
                   ggplot2::labs(
@@ -783,13 +794,14 @@ visualise <- function(nacho_object) {
               }
             )
 
-            req(p)
+            shiny::req(p)
             if (is.character(unique(nacho[[colour_name]])) & length(unique(nacho[[colour_name]]))>40) {
               p <- p + ggplot2::guides(colour = "none")
             } else {
               p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
             }
-            return(p)
+
+            p
           },
           "norm" = {
             shiny::req(input$colour_choice)
@@ -806,7 +818,7 @@ visualise <- function(nacho_object) {
             )
             p <- ggplot2::ggplot(
               data = local_data,
-              mapping = ggplot2::aes(x = Negative_factor, y = Positive_factor, colour = get(colour_name))
+              mapping = ggplot2::aes_string(x = "Negative_factor", y = "Positive_factor", colour = colour_name)
             ) +
               ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
               ggplot2::labs(x = "Negative Factor", y = "Positive Factor", colour = colour_name) +
@@ -818,24 +830,22 @@ visualise <- function(nacho_object) {
               )
               p <- ggplot2::ggplot(
                 data = local_data,
-                mapping = ggplot2::aes(x = Positive_factor, y = House_factor, colour = get(colour_name))
+                mapping = ggplot2::aes_string(x = "Positive_factor", y = "House_factor", colour = colour_name)
               ) +
                 ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
                 ggplot2::labs(x = "Positive Factor", y = "Houskeeping factor", colour = colour_name) +
                 ggplot2::scale_x_log10() +
                 ggplot2::scale_y_log10()
             } else if (input$tabs == "norm_res") {
-              local_data <- dplyr::bind_rows(
-                nacho[nacho[["Name"]] %in% housekeeping_genes, ],
-                tibble::tibble(
-                  "CodeClass" = "Average",
-                  "Name" = "Mean",
-                  "Accession" = "nacho",
-                  "Count" = nacho[["MC"]],
-                  !!id_colname := nacho[[id_colname]]
-                )
+              out <- tibble::tibble(
+                "CodeClass" = "Average",
+                "Name" = "Mean",
+                "Accession" = "nacho",
+                "Count" = nacho[["MC"]]
               )
-              local_data[["Count_Norm"]] <- NACHO:::normalise_counts(
+              out[[id_colname]] <- nacho[[id_colname]]
+              local_data <- dplyr::bind_rows(nacho[nacho[["Name"]] %in% housekeeping_genes, ], out)
+              local_data[["Count_Norm"]] <- normalise_counts(
                 data = local_data,
                 housekeeping_norm = housekeeping_norm
               )
@@ -850,7 +860,12 @@ visualise <- function(nacho_object) {
               )
               p <- ggplot2::ggplot(
                 data = local_data,
-                mapping = ggplot2::aes(x = get(id_colname), y = Count + 1, colour = Name, group = Name)
+                mapping = ggplot2::aes(
+                  x = get(id_colname),
+                  y = Count + 1,
+                  colour = Name,
+                  group = Name
+                )
               ) +
                 ggplot2::geom_line() +
                 ggplot2::facet_grid(~Status) +
@@ -859,7 +874,8 @@ visualise <- function(nacho_object) {
                 ggplot2::labs(x = "Sample index", y = "Counts + 1") +
                 ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(), panel.grid.minor.x = ggplot2::element_blank())
             }
-            return(p)
+
+            p
           }
         )
 

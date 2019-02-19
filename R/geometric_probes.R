@@ -2,7 +2,6 @@
 #'
 #' @param data [list(data.frame)]
 #' @param probes_type [character]
-#' @param exclude_probes [vector(character)]
 #'
 #' @return [numeric]
 geometric_probes <- function(data, probes_type) {

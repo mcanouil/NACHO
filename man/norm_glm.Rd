@@ -8,8 +8,6 @@ norm_glm(data)
 }
 \arguments{
 \item{data}{[list(data.frame)]}
-
-\item{exclude_probes}{[vector(character)]}
 }
 \value{
 [vector(numeric)]
