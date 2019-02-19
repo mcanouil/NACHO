@@ -7,7 +7,7 @@
 visualise(nacho_object)
 }
 \arguments{
-\item{nacho_object}{[nacho_set]}
+\item{nacho_object}{[list]}
 }
 \value{
 [NULL]

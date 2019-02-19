@@ -9,14 +9,10 @@
 #' @param normalisation_method [character]
 #' @param n_comp [numeric]
 #'
-#' @return [nacho_set]
+#' @return [list]
 #' @export
 #'
 #' @examples NULL
-#' @importFrom purrr map_lgl map
-#' @importFrom tibble as_tibble
-#' @importFrom tidyr unnest unite
-#' @importFrom utils read.csv
 summarise <- function(
   data_directory = NULL,
   ssheet_csv = NULL,
@@ -58,121 +54,120 @@ summarise <- function(
 
 #' normalise
 #'
-#' @param nacho_object [nacho_set]
+#' @param nacho_object [list]
 #' @param housekeeping_genes [vector(character)]
 #' @param housekeeping_norm [logical]
 #' @param normalisation_method [character]
 #' @param remove_outliers [logical]
 #'
-#' @return [nacho_set]
+#' @return [list]
 #' @export
 #'
 #' @examples NULL
 normalise <- function(
   nacho_object,
-  housekeeping_genes = nacho_object["housekeeping_genes"],
-  housekeeping_norm = nacho_object["housekeeping_norm"],
-  normalisation_method = nacho_object["normalisation_method"],
+  housekeeping_genes = nacho_object[["housekeeping_genes"]],
+  housekeeping_norm = nacho_object[["housekeeping_norm"]],
+  normalisation_method = nacho_object[["normalisation_method"]],
   remove_outliers = TRUE
 ) {
   if (!is_nacho_set(nacho_object)) {
     stop("[NACHO::normalise] No valid data provided. \n Use summarise() to generate data!")
   }
 
-  id_colname <- nacho_object["access"]
+  id_colname <- nacho_object[["access"]]
 
-  if (!all.equal(sort(nacho_object["housekeeping_genes"]), sort(housekeeping_genes))) {
+  if (!all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes))) {
     warning(
       paste0(
         '"housekeeping_genes" is different from the parameter used to import RCC files!\n',
         '"summarise()" parameter:\n',
-        '    housekeeping_genes=', deparse(nacho_object["housekeeping_genes"]), '\n',
+        '    housekeeping_genes=', deparse(nacho_object[["housekeeping_genes"]]), '\n',
         '"normalise()" parameter:\n',
         '    housekeeping_genes=', deparse(housekeeping_genes), '\n'
       )
     )
   }
 
-  if (!all.equal(sort(nacho_object["housekeeping_norm"]), sort(housekeeping_norm))) {
+  if (!all.equal(sort(nacho_object[["housekeeping_norm"]]), sort(housekeeping_norm))) {
     warning(
       paste0(
         '"housekeeping_norm" is different from the parameter used to import RCC files!\n',
         '"summarise()" parameter:\n',
-        '    housekeeping_norm=', deparse(nacho_object["housekeeping_norm"]), '\n',
+        '    housekeeping_norm=', deparse(nacho_object[["housekeeping_norm"]]), '\n',
         '"normalise()" parameter:\n',
         '    housekeeping_norm=', deparse(housekeeping_norm), '\n'
       )
     )
   }
 
-  if (nacho_object["normalisation_method"]!=normalisation_method) {
+  if (nacho_object[["normalisation_method"]]!=normalisation_method) {
     warning(
       paste0(
         '"normalisation_method" is different from the parameter used to import RCC files!\n',
         '"summarise()" parameter:\n',
-        '    normalisation_method=', deparse(nacho_object["normalisation_method"]), '\n',
+        '    normalisation_method=', deparse(nacho_object[["normalisation_method"]]), '\n',
         '"normalise()" parameter:\n',
         '    normalisation_method=', deparse(normalisation_method), '\n'
       )
     )
   }
 
-  if (nacho_object["remove_outliers"]) {
+  if (nacho_object[["remove_outliers"]]) {
     message("Outliers have already been removed!")
   }
 
-  if (remove_outliers & !nacho_object["remove_outliers"]) {
+  if (remove_outliers & !nacho_object[["remove_outliers"]]) {
     nacho_df <- exclude_outliers(object = nacho_object)
     outliers <- setdiff(
-      unique(nacho_object["nacho"][[nacho_object["access"]]]),
-      unique(nacho_df[[nacho_object["access"]]])
+      unique(nacho_object[["nacho"]][[nacho_object[["access"]]]]),
+      unique(nacho_df[[nacho_object[["access"]]]])
     )
     if (length(outliers)!=0) {
       nacho_object <- qc_rcc(
-        data_directory = nacho_object["data_directory"],
+        data_directory = nacho_object[["data_directory"]],
         nacho_df = nacho_df,
         id_colname = id_colname,
         housekeeping_genes = housekeeping_genes,
         housekeeping_predict = FALSE,
         housekeeping_norm = housekeeping_norm,
         normalisation_method = normalisation_method,
-        n_comp = nacho_object["n_comp"]
+        n_comp = nacho_object[["n_comp"]]
       )
     }
-    nacho_object["remove_outliers"] <- remove_outliers
+    nacho_object[["remove_outliers"]] <- remove_outliers
   }
 
-  nacho_object["nacho"][["Count_Norm"]] <- normalise_counts(
-    data = nacho_object["nacho"],
+  nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(
+    data = nacho_object[["nacho"]],
     housekeeping_norm = housekeeping_norm
   )
 
   raw_counts <- format_counts(
-    data = nacho_object["nacho"],
+    data = nacho_object[["nacho"]],
     id_colname = id_colname,
     count_column = "Count"
   )
-  nacho_object["raw_counts"] <- raw_counts
+  nacho_object[["raw_counts"]] <- raw_counts
 
   norm_counts <- format_counts(
-    data = nacho_object["nacho"],
+    data = nacho_object[["nacho"]],
     id_colname = id_colname,
     count_column = "Count_Norm"
   )
-  nacho_object["normalised_counts"] <- norm_counts
+  nacho_object[["normalised_counts"]] <- norm_counts
 
   return(nacho_object)
 }
 
 #' visualise
 #'
-#' @param nacho_object [nacho_set]
+#' @param nacho_object [list]
 #'
 #' @return [NULL]
 #' @export
 #'
 #' @examples NULL
-#' @importFrom shiny runApp
 visualise <- function(nacho_object) {
   if (!is_nacho_set(nacho_object)) {
     stop("[NACHO::visualise] No valid data provided. \n Use summarise() to generate data!")

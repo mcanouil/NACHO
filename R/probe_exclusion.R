@@ -3,8 +3,6 @@
 #' @param control_genes_df [data.frame]
 #'
 #' @return [vector(character)]
-#'
-#' @importFrom stats median
 probe_exclusion <- function(control_genes_df) {
   count_columns <- sapply(X = control_genes_df, FUN = is.numeric)
   local_neg <- control_genes_df[control_genes_df[["CodeClass"]]%in%"Negative", count_columns]

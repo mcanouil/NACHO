@@ -3,10 +3,6 @@
 #' @param file [character]
 #'
 #' @return [tibble]
-#'
-#' @importFrom purrr map
-#' @importFrom tibble as_tibble
-#' @importFrom tidyr unnest
 read_rcc <- function(file) {
   tags <- c(
     "Header", "Sample_Attributes", "Lane_Attributes", "Code_Summary", "Messages"

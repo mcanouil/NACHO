@@ -4,10 +4,6 @@
 #' @param id_colname [character]
 #'
 #' @return [data.frame]
-#'
-#' @importFrom dplyr group_by
-#' @importFrom stats median
-#' @importFrom tidyr nest
 qc_features <- function(data, id_colname) {
   nested_data_df <- tidyr::nest(dplyr::group_by(.data = data, get(id_colname)))
   colnames(nested_data_df)[1] <- id_colname
