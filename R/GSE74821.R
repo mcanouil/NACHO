@@ -2,7 +2,7 @@
 #'
 #' NanoString nCounter RUO-PAM50 Gene Expression Custom CodeSet
 #'
-#' @format A 'nacho_set' object
+#' @format A 'list' object
 #' @source \url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821}
 "GSE74821"
 
@@ -25,4 +25,4 @@
 #   normalisation_method = "GLM",
 #   n_comp = 10
 # )
-# devtools::use_data(GSE74821, overwrite = TRUE)
+# usethis::use_data(GSE74821, overwrite = TRUE)

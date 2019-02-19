@@ -153,13 +153,13 @@ This gives the user absolute control over which housekeeping genes are used.
 For instance, the suitablity of the discovered housekeeping genes can manually be checked.
 
 ```{r ex5}
-print(my_nacho["housekeeping_genes"])
+print(my_nacho[["housekeeping_genes"]])
 ```
 
-Let's say  _`r my_nacho["housekeeping_genes"][1]`_ and _`r my_nacho["housekeeping_genes"][2]`_ are not suitable, therefore, you want to exclude these genes from the normalisation process.
+Let's say  _`r my_nacho[["housekeeping_genes"]][1]`_ and _`r my_nacho[["housekeeping_genes"]][2]`_ are not suitable, therefore, you want to exclude these genes from the normalisation process.
 
 ```{r ex6}
-my_housekeeping <- my_nacho["housekeeping_genes"][-c(1, 2)]
+my_housekeeping <- my_nacho[["housekeeping_genes"]][-c(1, 2)]
 print(my_housekeeping)
 ```
 
@@ -183,8 +183,8 @@ my_nacho_improved <- normalise(
 )
 ```
 
-The `normalise()` returns a `nacho_set` object (as `summarise()`) with `@raw_counts` and `@normalised_counts` slots filled with the raw and normalised counts.
-Both counts are also in the `@nacho` data.frame.
+The `normalise()` returns a `list` object (as `summarise()`) with `raw_counts` and `normalised_counts` slots filled with the raw and normalised counts.
+Both counts are also in the `nacho` data.frame.
 
 ```{r ex8}
 my_nacho_improved

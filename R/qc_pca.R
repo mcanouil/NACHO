@@ -4,8 +4,6 @@
 #' @param n_comp [numeric]
 #'
 #' @return [list(data.frame)]
-#'
-#' @importFrom stats prcomp
 qc_pca <- function(counts, n_comp = 10) {
   pc <- stats::prcomp(log(counts + 1))
   pc_sum <- summary(pc)

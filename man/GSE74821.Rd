@@ -4,7 +4,7 @@
 \name{GSE74821}
 \alias{GSE74821}
 \title{Presummarised data from GSE74821 (20 samples).}
-\format{A 'nacho_set' object}
+\format{A 'list' object}
 \source{
 \url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821}
 }
