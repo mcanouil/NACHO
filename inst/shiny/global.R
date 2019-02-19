@@ -9,8 +9,6 @@ require(ggpubr)
 require(tibble)
 require(NACHO)
 
-# load(file = paste0(tempdir(), "/nacho_shiny.Rdata"))
-
 font_size <- 14
 ggplot2::theme_set(ggplot2::theme_grey(base_size = font_size))
 
@@ -20,4 +18,4 @@ housekeeping_genes <- nacho_shiny[["housekeeping_genes"]]
 housekeeping_norm <- nacho_shiny[["housekeeping_norm"]]
 pc_sum <- nacho_shiny[["pc_sum"]]
 nacho <- nacho_shiny[["nacho"]]
-save_path <- nacho_shiny[["data_directory"]]
+save_path_default <- nacho_shiny[["data_directory"]]
