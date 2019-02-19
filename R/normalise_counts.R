@@ -5,8 +5,7 @@
 #'
 #' @return [vector(numeric)]
 normalise_counts <- function(data, housekeeping_norm) {
-  out <- (data[["Count"]] - data[["Negative_factor"]]) *
-    data[["Positive_factor"]]
+  out <- (data[["Count"]] - data[["Negative_factor"]]) * data[["Positive_factor"]]
   if (housekeeping_norm) {
     out <- out * data[["House_factor"]]
   }

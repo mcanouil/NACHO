@@ -8,7 +8,7 @@ read_rcc <- function(file) {
     "Header", "Sample_Attributes", "Lane_Attributes", "Code_Summary", "Messages"
   )
   raw <- readLines(file)
-  raw <- sapply(raw, gsub, pattern = "[|]+[[:digit:]]+\\.*[[:digit:]]*", replacement = "")
+  raw <- gsub("[|]+[[:digit:]]+\\.*[[:digit:]]*", "", raw)
 
   rcc_list <- lapply(X = tags, FUN = read_tags, raw_rcc = raw)
   names(rcc_list) <- tags
