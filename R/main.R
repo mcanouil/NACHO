@@ -225,7 +225,7 @@ visualise <- function(nacho_object) {
   nacho <- nacho_object[["nacho"]]
   save_path_default <- nacho_object[["data_directory"]]
 
-  addResourcePath("www", system.file("logo", package = "NACHO"))
+  shiny::addResourcePath("www", system.file("logo", package = "NACHO"))
 
   app <- shiny::shinyApp(
     ui = shiny::fluidPage(
