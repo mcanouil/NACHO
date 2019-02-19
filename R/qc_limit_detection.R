@@ -5,6 +5,6 @@
 #'
 #' @return [numeric]
 qc_limit_detection <- function(pos_e, negatives) {
-  z_score <- pos_e - mean(negatives) / stats::sd(negatives)
+  z_score <- (pos_e - mean(negatives)) / stats::sd(negatives)
   round(z_score, 2)
 }
