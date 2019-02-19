@@ -8,9 +8,6 @@
 #' @param exclude_probes [vector(character)]
 #'
 #' @return [data.frame]
-#'
-#' @importFrom dplyr group_by
-#' @importFrom tidyr nest
 factor_calculation <- function(
   nacho_df,
   id_colname,

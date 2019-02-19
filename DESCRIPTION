@@ -10,7 +10,6 @@ Description: More about what it does (maybe more than one line)
 License: GPL-3 | file LICENSE
 Depends: R (>= 3.5.0)
 Imports:
-  methods,
   tibble,
   dplyr,
   tidyr,
