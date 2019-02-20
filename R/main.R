@@ -24,11 +24,21 @@ summarise <- function(
   n_comp = 10
 ) {
   data_directory <- normalizePath(data_directory)
+
+  message("[NACHO] Importing RCC files.")
   nacho_df <- utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE)
   nacho_df <- tibble::as_tibble(nacho_df)
   nacho_df[["file_path"]] <- paste(data_directory, nacho_df[[id_colname]], sep = "/")
   nacho_df[["file_exists"]] <- sapply(X = nacho_df[["file_path"]], FUN = file.exists)
-  nacho_df[["rcc_content"]] <- lapply(X = nacho_df[["file_path"]], FUN = read_rcc)
+  progress <- dplyr::progress_estimated(length(nacho_df[["file_path"]]) + 2)
+  nacho_df[["rcc_content"]] <- lapply(
+    X = nacho_df[["file_path"]],
+    FUN = function(ifile) {
+      progress$tick()$print()
+      read_rcc(file = ifile)
+    }
+  )
+  progress$pause(0.05)$tick()$print()
 
   column_to_unnest <- c("rcc_content", "Code_Summary")
   nacho_df <- tidyr::unnest(data = nacho_df, rcc_content = get(column_to_unnest[1]), .drop = FALSE)
@@ -38,8 +48,10 @@ summarise <- function(
   if ("plexset_id" %in% colnames(nacho_df)) {
     nacho_df <- tidyr::unite(data = nacho_df, col = !!id_colname, id_colname, "plexset_id")
   }
+  progress$pause(0.05)$tick()$print()
 
-  qc_rcc(
+  message("\n[NACHO] Performing QC and formatting data.")
+  nacho_object <- qc_rcc(
     data_directory = data_directory,
     nacho_df = nacho_df,
     id_colname = id_colname,
@@ -49,6 +61,27 @@ summarise <- function(
     normalisation_method = normalisation_method,
     n_comp = n_comp
   )
+
+  nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(
+    data = nacho_object[["nacho"]],
+    housekeeping_norm = housekeeping_norm
+  )
+
+  raw_counts <- format_counts(
+    data = nacho_object[["nacho"]],
+    id_colname = id_colname,
+    count_column = "Count"
+  )
+  nacho_object[["raw_counts"]] <- raw_counts
+
+  norm_counts <- format_counts(
+    data = nacho_object[["nacho"]],
+    id_colname = id_colname,
+    count_column = "Count_Norm"
+  )
+  nacho_object[["normalised_counts"]] <- norm_counts
+
+  nacho_object
 }
 
 
@@ -87,10 +120,12 @@ normalise <- function(
     "n_comp",
     "data_directory",
     "pc_sum",
-    "nacho"
+    "nacho",
+    "raw_counts",
+    "normalised_counts"
   )
   if (!all(mandatory_fields%in%names(nacho_object))) {
-    stop('[NACHO::normalise] No valid data provided. \n Use "summarise()" or "summarize()" to generate data!')
+    stop('[NACHO] No valid data provided. \n Use "summarise()" or "summarize()" to generate data!')
   }
 
   id_colname <- nacho_object[["access"]]
@@ -98,7 +133,7 @@ normalise <- function(
   if (!isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes)))) {
     warning(
       paste0(
-        '[NACHO::normalise] "housekeeping_genes" is different from the parameter used to import RCC files!\n',
+        '[NACHO] "housekeeping_genes" is different from the parameter used to import RCC files!\n',
         '    "summarise()" parameter:\n',
         '        housekeeping_genes=', deparse(nacho_object[["housekeeping_genes"]]), '\n',
         '    "normalise()" parameter:\n',
@@ -110,7 +145,7 @@ normalise <- function(
   if (nacho_object[["housekeeping_norm"]]!=housekeeping_norm) {
     warning(
       paste0(
-        '[NACHO::normalise] "housekeeping_norm" is different from the parameter used to import RCC files!\n',
+        '[NACHO] "housekeeping_norm" is different from the parameter used to import RCC files!\n',
         '    "summarise()" parameter:\n',
         '        housekeeping_norm=', deparse(nacho_object[["housekeeping_norm"]]), '\n',
         '    "normalise()" parameter:\n',
@@ -122,7 +157,7 @@ normalise <- function(
   if (nacho_object[["normalisation_method"]]!=normalisation_method) {
     warning(
       paste0(
-        '[NACHO::normalise] "normalisation_method" is different from the parameter used to import RCC files!\n',
+        '[NACHO] "normalisation_method" is different from the parameter used to import RCC files!\n',
         '    "summarise()" parameter:\n',
         '        normalisation_method=', deparse(nacho_object[["normalisation_method"]]), '\n',
         '    "normalise()" parameter:\n',
@@ -204,15 +239,15 @@ visualise <- function(nacho_object) {
     "n_comp",
     "data_directory",
     "pc_sum",
-    "nacho" # ,
-    # "raw_counts",
-    # "normalised_counts"
+    "nacho",
+    "raw_counts",
+    "normalised_counts"
   )
   if (!interactive()) {
-    stop('[NACHO::visualise] Must be run in interactive R session!')
+    stop('[NACHO] Must be run in interactive R session!')
   }
   if (!all(mandatory_fields%in%names(nacho_object))) {
-    stop('[NACHO::visualise] No valid data provided. \n Use "summarise()" or "summarize()" to generate data!')
+    stop('[NACHO] No valid data provided. \n Use "summarise()" or "summarize()" to generate data!')
   }
 
   font_size <- 14

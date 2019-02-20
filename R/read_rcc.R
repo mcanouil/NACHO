@@ -13,7 +13,7 @@ read_rcc <- function(file) {
   rcc_list <- lapply(X = tags, FUN = read_tags, raw_rcc = raw)
   names(rcc_list) <- tags
 
-  rcc_list[["Code_Summary"]] <- purrr::map(.x = rcc_list[["Code_Summary"]], .f = function(.data) {
+  rcc_list[["Code_Summary"]] <- lapply(X = rcc_list[["Code_Summary"]], FUN = function(.data) {
     colnames(.data) <- unlist(.data[1, ])
     rownames(.data) <- NULL
     .data <- .data[-1, ]

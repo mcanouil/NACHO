@@ -26,6 +26,7 @@ factor_calculation <- function(
   nested_control_data <- tidyr::nest(dplyr::group_by(.data = control_data, get(id_colname)))
   colnames(nested_control_data)[1] <- id_colname
 
+  message('[NACHO] Normalising data using "', normalisation_method, '" method.')
   factors_norm <- switch(
     EXPR = normalisation_method,
     "GLM" = {
@@ -34,7 +35,7 @@ factor_calculation <- function(
     "GEO" = {
       norm_geo(data = nested_control_data[["data"]])
     },
-    stop('normalisation_method should be either "GLM" or "GEO"!')
+    stop('[NACHO] "normalisation_method" should be either "GLM" or "GEO"!')
   )
   positive_factor <- factors_norm[["positive_factor"]]
   geometric_mean_neg <- factors_norm[["geometric_mean_neg"]]
