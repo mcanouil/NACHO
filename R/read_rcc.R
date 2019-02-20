@@ -18,13 +18,13 @@ read_rcc <- function(file) {
     rownames(.data) <- NULL
     .data <- .data[-1, ]
     if ("Count" %in% colnames(.data)) {
-      .data[, "Count"] <- as.integer(.data[, "Count"])
+      .data[["Count"]] <- as.integer(.data[["Count"]])
     }
     if (all(paste0("Endogenous", 1:8, "s") %in% unique(.data[["CodeClass"]]))) {
       control_probes <- .data[.data[["CodeClass"]]%in%c("Negative", "Positive"), ]
       sample_list <- split(
         x = .data[!.data[["CodeClass"]]%in%c("Negative", "Positive"), ],
-        f = .data[!.data[["CodeClass"]]%in%c("Negative", "Positive"), "CodeClass"]
+        f = .data[["CodeClass"]][!.data[["CodeClass"]]%in%c("Negative", "Positive")]
       )
       .data <- lapply(X = sample_list, FUN = rbind, control_probes)
     }

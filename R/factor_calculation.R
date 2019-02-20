@@ -23,10 +23,10 @@ factor_calculation <- function(
   control_data <- control_data[control_data[["CodeClass"]] %in% c("Positive", "Negative"), ]
   control_data <- control_data[order(control_data[["Name"]]), ]
   control_data <- control_data[!control_data[, "Name"] %in% exclude_probes, ]
+
   nested_control_data <- tidyr::nest(dplyr::group_by(.data = control_data, get(id_colname)))
   colnames(nested_control_data)[1] <- id_colname
 
-  message('[NACHO] Normalising data using "', normalisation_method, '" method.')
   factors_norm <- switch(
     EXPR = normalisation_method,
     "GLM" = {

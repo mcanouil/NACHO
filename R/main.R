@@ -49,8 +49,9 @@ summarise <- function(
     nacho_df <- tidyr::unite(data = nacho_df, col = !!id_colname, id_colname, "plexset_id")
   }
   progress$pause(0.05)$tick()$print()
+  cat("\n")
 
-  message("\n[NACHO] Performing QC and formatting data.")
+  message("[NACHO] Performing QC and formatting data.")
   nacho_object <- qc_rcc(
     data_directory = data_directory,
     nacho_df = nacho_df,
@@ -62,6 +63,12 @@ summarise <- function(
     n_comp = n_comp
   )
 
+  message(
+    paste(
+      '[NACHO] Normalising data using "', normalisation_method, '" method',
+      if (housekeeping_norm) "with" else "without", "housekeeping genes."
+    )
+  )
   nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(
     data = nacho_object[["nacho"]],
     housekeeping_norm = housekeeping_norm
@@ -80,6 +87,23 @@ summarise <- function(
     count_column = "Count_Norm"
   )
   nacho_object[["normalised_counts"]] <- norm_counts
+
+  message(paste(
+    "[NACHO] Returning a list.",
+    "  $ access              : character",
+    "  $ housekeeping_genes  : character" ,
+    "  $ housekeeping_predict: logical",
+    "  $ housekeeping_norm   : logical",
+    "  $ normalisation_method: character",
+    "  $ remove_outliers     : logical",
+    "  $ n_comp              : numeric",
+    "  $ data_directory      : character",
+    "  $ pc_sum              : data.frame",
+    "  $ nacho               : data.frame",
+    "  $ raw_counts          : data.frame",
+    "  $ normalised_counts   : data.frame",
+    sep = "\n"
+  ))
 
   nacho_object
 }
@@ -125,49 +149,49 @@ normalise <- function(
     "normalised_counts"
   )
   if (!all(mandatory_fields%in%names(nacho_object))) {
-    stop('[NACHO] No valid data provided. \n Use "summarise()" or "summarize()" to generate data!')
+    stop('[NACHO] "summarise()" must be used before "normalise()".')
   }
 
   id_colname <- nacho_object[["access"]]
 
   if (!isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes)))) {
-    warning(
+    message(
       paste0(
-        '[NACHO] "housekeeping_genes" is different from the parameter used to import RCC files!\n',
-        '    "summarise()" parameter:\n',
-        '        housekeeping_genes=', deparse(nacho_object[["housekeeping_genes"]]), '\n',
-        '    "normalise()" parameter:\n',
-        '        housekeeping_genes=', deparse(housekeeping_genes), '\n'
+        '[NACHO] Note: "housekeeping_genes" is different from the parameter used in "summarise()".\n',
+        '- "summarise()":\n',
+        '    housekeeping_genes=c("', paste(nacho_object[["housekeeping_genes"]], collapse = '", "'), '")\n',
+        '- "normalise()":\n',
+        '    housekeeping_genes=c("', paste(housekeeping_genes, collapse = '", "'), '"\n'
       )
     )
   }
 
   if (nacho_object[["housekeeping_norm"]]!=housekeeping_norm) {
-    warning(
+    message(
       paste0(
-        '[NACHO] "housekeeping_norm" is different from the parameter used to import RCC files!\n',
-        '    "summarise()" parameter:\n',
-        '        housekeeping_norm=', deparse(nacho_object[["housekeeping_norm"]]), '\n',
-        '    "normalise()" parameter:\n',
-        '        housekeeping_norm=', deparse(housekeeping_norm), '\n'
+        '[NACHO] Note: "housekeeping_norm" is different from the parameter used in "summarise()".\n',
+        '- "summarise()":\n',
+        '    housekeeping_norm=', nacho_object[["housekeeping_norm"]], '\n',
+        '- "normalise()":\n',
+        '    housekeeping_norm=', housekeeping_norm, '\n'
       )
     )
   }
 
   if (nacho_object[["normalisation_method"]]!=normalisation_method) {
-    warning(
+    message(
       paste0(
-        '[NACHO] "normalisation_method" is different from the parameter used to import RCC files!\n',
-        '    "summarise()" parameter:\n',
-        '        normalisation_method=', deparse(nacho_object[["normalisation_method"]]), '\n',
-        '    "normalise()" parameter:\n',
-        '        normalisation_method=', deparse(normalisation_method), '\n'
+        '[NACHO] Note: "normalisation_method" is different from the parameter usedin "summarise()".\n',
+        '- "summarise()":\n',
+        '    normalisation_method="', nacho_object[["normalisation_method"]], '"\n',
+        '- "normalise()":\n',
+        '    normalisation_method="', normalisation_method, '"\n'
       )
     )
   }
 
   if (nacho_object[["remove_outliers"]]) {
-    message("Outliers have already been removed!")
+    message("[NACHO] Outliers have already been removed!")
   }
 
   if (remove_outliers & !nacho_object[["remove_outliers"]]) {
@@ -210,6 +234,23 @@ normalise <- function(
   )
   nacho_object[["normalised_counts"]] <- norm_counts
 
+  message(paste(
+    "[NACHO] Returning a list.",
+    "  $ access              : character",
+    "  $ housekeeping_genes  : character" ,
+    "  $ housekeeping_predict: logical",
+    "  $ housekeeping_norm   : logical",
+    "  $ normalisation_method: character",
+    "  $ remove_outliers     : logical",
+    "  $ n_comp              : numeric",
+    "  $ data_directory      : character",
+    "  $ pc_sum              : data.frame",
+    "  $ nacho               : data.frame",
+    "  $ raw_counts          : data.frame",
+    "  $ normalised_counts   : data.frame",
+    sep = "\n"
+  ))
+
   nacho_object
 }
 
@@ -244,10 +285,10 @@ visualise <- function(nacho_object) {
     "normalised_counts"
   )
   if (!interactive()) {
-    stop('[NACHO] Must be run in interactive R session!')
+    stop('[NACHO] Must be run in an interactive R session!')
   }
   if (!all(mandatory_fields%in%names(nacho_object))) {
-    stop('[NACHO] No valid data provided. \n Use "summarise()" or "summarize()" to generate data!')
+    stop('[NACHO] "summarise()" must be used before "normalise()".')
   }
 
   font_size <- 14
