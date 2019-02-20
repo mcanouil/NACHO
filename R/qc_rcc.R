@@ -36,6 +36,12 @@ qc_rcc <- function(
   probes_to_exclude <- probe_exclusion(control_genes_df = control_genes_df)
 
   if (housekeeping_predict) {
+    message("[NACHO] Searching for the best housekeeping genes.")
+    message(
+      '[NACHO] Computing normalisation factors using "',
+      normalisation_method,
+      '" method for housekeeping genes prediction.'
+    )
     temp_facs <- factor_calculation(
       nacho_df = nacho_df,
       id_colname = id_colname,
@@ -46,7 +52,7 @@ qc_rcc <- function(
     )
 
     tmp_counts <- dplyr::full_join(x = nacho_df, y = temp_facs, by = id_colname)
-    tmp_counts[, "count_norm"] <- normalise_counts(data = tmp_counts, housekeeping_norm = FALSE)
+    tmp_counts[["count_norm"]] <- normalise_counts(data = tmp_counts, housekeeping_norm = FALSE)
 
     predicted_housekeeping <- find_housekeeping(
       data = tmp_counts,
@@ -66,6 +72,7 @@ qc_rcc <- function(
     }
   }
 
+  message('[NACHO] Computing normalisation factors using "', normalisation_method, '" method.')
   qc_values <- qc_features(data = nacho_df, id_colname = id_colname)
   norm_factor <- factor_calculation(
     nacho_df = nacho_df,
@@ -89,9 +96,8 @@ qc_rcc <- function(
   }
   pcas <- qc_pca(counts = counts_df, n_comp = n_comp)
 
-  pcsum <- t(as.matrix(pcas[["pcsum"]]))
-  pcsum <- as.data.frame(pcsum, stringsAsFactors = FALSE)
-  pcsum[, "PC"] <- sprintf("PC%02d", as.numeric(gsub("PC", "", rownames(pcsum))))
+  pcsum <- as.data.frame(t(pcas[["pcsum"]]), stringsAsFactors = FALSE)
+  pcsum[["PC"]] <- sprintf("PC%02d", as.numeric(gsub("PC", "", rownames(pcsum))))
 
   pcas_pc <- as.data.frame(pcas[["pc"]], stringsAsFactors = FALSE)
   pcas_pc[[id_colname]] <- rownames(pcas_pc)

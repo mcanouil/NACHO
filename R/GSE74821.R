@@ -7,14 +7,16 @@
 "GSE74821"
 
 # library(GEOquery)
+# library(NACHO) # devtools::load_all("NACHO")
+
 # gse <- GEOquery::getGEO(GEO = "GSE74821")
-# targets <- Biobase::pData(phenoData(gse[[1]]))
+# targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
 # GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
 # utils::untar(tarfile = paste0(tempdir(), "/GSE74821/GSE74821_RAW.tar"), exdir = paste0(tempdir(), "/GSE74821"))
 # targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE74821"), pattern = ".RCC.gz$")
 # targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
 # utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
-# library(NACHO) # devtools::load_all("NACHO")
+#
 # GSE74821 <- NACHO::summarise(
 #   data_directory = paste0(tempdir(), "/GSE74821"),
 #   ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),

@@ -8,8 +8,7 @@ format_tag_content <- function(tag, content) {
   if (nrow(content)==1 & is.na(content[1, 1])) {
     output <- content
   } else {
-    output <- as.data.frame(x = t(content), stringsAsFactors = FALSE)
-    output <- output[-1, ]
+    output <- as.data.frame(x = t(content[, -1, drop = FALSE]), stringsAsFactors = FALSE)
     rownames(output) <- NULL
     colnames(output) <- paste(tolower(gsub("_.*", "", tag)), content[, 1], sep = "_")
   }

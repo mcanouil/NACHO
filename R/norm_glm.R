@@ -22,6 +22,7 @@ norm_glm <- function(data) {
     }
   )
   progress$pause(0.05)$tick()$print()
+  cat("\n")
 
   list(
     geometric_mean_neg = glms[1, ],
