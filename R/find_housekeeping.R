@@ -9,7 +9,7 @@ find_housekeeping <- function(data, id_colname, count_column) {
   data <- data[grep("Endogenous", data[["CodeClass"]]), ]
   nested_data_df <- tidyr::nest(dplyr::group_by(.data = data, get(id_colname)))
   colnames(nested_data_df)[1] <- id_colname
-  ratios <- sapply(
+  ratios <- lapply(
     X = nested_data_df[["data"]],
     count_column = count_column,
     FUN = function(.data, count_column) {
