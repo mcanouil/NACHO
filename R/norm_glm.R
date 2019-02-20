@@ -4,9 +4,11 @@
 #'
 #' @return [vector(numeric)]
 norm_glm <- function(data) {
+  progress <- dplyr::progress_estimated(length(data)+1)
   glms <- sapply(
     X = data,
     FUN = function(.data) {
+      progress$tick()$print()
       control_labels <- c("Positive", "Negative")
       .data <- .data[.data[["CodeClass"]] %in% control_labels, ]
       y <- .data[["Count"]] + 1
@@ -19,6 +21,7 @@ norm_glm <- function(data) {
       stats::glm(y ~ x, family = stats::poisson(link = "identity"))$coeff[c(1, 2)]
     }
   )
+  progress$pause(0.05)$tick()$print()
 
   list(
     geometric_mean_neg = glms[1, ],
