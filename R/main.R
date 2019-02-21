@@ -326,7 +326,8 @@ visualise <- function(nacho_object) {
               shiny::uiOutput(outputId = "interfaceE1"),
               shiny::uiOutput(outputId = "interfaceE2"),
               shiny::uiOutput(outputId = "interfaceF"),
-              shiny::uiOutput(outputId = "interfaceG")
+              shiny::uiOutput(outputId = "interfaceG"),
+              shiny::uiOutput(outputId = "interfaceH")
             ),
             shiny::tabPanel(
               title = "Download",
@@ -396,7 +397,7 @@ visualise <- function(nacho_object) {
           },
           "cg" = {
             tabslist <- unique(nacho[["CodeClass"]][-grep("Endogenous", nacho[["CodeClass"]])])
-            tabslist <- c(tabslist, "Control probe expression")
+            tabslist <- c(tabslist, "Control Probe Expression")
             do.call(
               what = "tabsetPanel",
               c(
@@ -410,9 +411,9 @@ visualise <- function(nacho_object) {
           "norm" = {
             shiny::tabsetPanel(
               id = "tabs",
-              shiny::tabPanel("Positive factor vs Background threshold", value = "pfbt"),
-              shiny::tabPanel("Housekeeping factor", value = "hf"),
-              shiny::tabPanel("Normalisation result", value = "norm_res")
+              shiny::tabPanel("Positive Factor vs Background Threshold", value = "pfbt"),
+              shiny::tabPanel("Housekeeping Factor", value = "hf"),
+              shiny::tabPanel("Normalisation Result", value = "norm_res")
             )
           },
           "vis" = {
@@ -597,6 +598,19 @@ visualise <- function(nacho_object) {
         }
       })
 
+      output$interfaceH <- shiny::renderUI({
+        shiny::req(input$maintabs %in% c("cg", "norm"))
+        shiny::req(input$tabs %in% c("Control Probe Expression", "norm_res"))
+        shiny::div(
+          shiny::checkboxInput(
+            inputId = "with_smooth",
+            label = "Smooth line (loess)",
+            value = 0
+          ),
+          align = "center"
+        )
+      })
+
       output$outlier_table <- shiny::renderDataTable({
         shiny::req(input$maintabs%in%c("ot"))
         details_out <- details_outlier(nacho_df = nacho, id_colname = id_colname)
@@ -625,10 +639,10 @@ visualise <- function(nacho_object) {
           "LoD" = "Limit of Detection"
         )
         units <- c(
-          "BD" = "(Optical features / µm2)",
-          "FoV" = "(%Counted)",
-          "PC" = "(R2)",
-          "LoD" = "(Z)"
+          "BD" = '"(Optical features / ", mu, m^2, ")"',
+          "FoV" = '"(% Counted)"',
+          "PC" = '(R^2)',
+          "LoD" = '"(Z)"'
         )
 
         # Set defaults
@@ -677,7 +691,8 @@ visualise <- function(nacho_object) {
               ) +
               ggplot2::labs(
                 x = input$Attribute,
-                y = paste(labels[input$tabs], units[input$tabs], sep = "\n"),
+                # y = paste(labels[input$tabs], units[input$tabs], sep = "\n"),
+                y = parse(text = paste0('paste("', labels[input$tabs], '", " ", ',  units[input$tabs], ")")),
                 colour = input$meta
               )
 
@@ -748,7 +763,8 @@ visualise <- function(nacho_object) {
             shiny::req(input$colour_choice)
             shiny::req(input$meta)
             shiny::req(input$Attribute)
-            if (input$tabs == "Control probe expression") {
+            if (input$tabs == "Control Probe Expression") {
+              shiny::req(!is.null(input$with_smooth))
               local_data <- nacho[nacho[["CodeClass"]] %in% c("Positive", "Negative"), ]
               local_data <- dplyr::distinct(
                 .data = local_data[, c(id_colname, "Count", "CodeClass", "Name")]
@@ -771,12 +787,31 @@ visualise <- function(nacho_object) {
                 ggplot2::facet_wrap(facets = "CodeClass", scales = "free_y") +
                 ggplot2::scale_y_log10(limits = c(1, NA)) +
                 ggplot2::scale_x_discrete(labels = NULL) +
-                ggplot2::labs(x = "Sample index", y = "Counts + 1", colour = "Control") +
+                ggplot2::labs(x = "Sample Index", y = "Counts + 1", colour = "Control") +
                 ggplot2::guides(colour = ggplot2::guide_legend(nrow = 8)) +
                 ggplot2::theme(
+                  axis.ticks.x = ggplot2::element_blank(),
                   panel.grid.major.x = ggplot2::element_blank(),
                   panel.grid.minor.x = ggplot2::element_blank()
                 )
+
+              if (input$with_smooth) {
+                p <- p +
+                  ggplot2::geom_smooth(
+                    mapping = ggplot2::aes(
+                      x = as.numeric(as.factor(local_data[[id_colname]])),
+                      y = local_data[["Count"]],
+                      linetype = rep("Loess", length(local_data[["Count"]]))
+                    ),
+                    colour = "black",
+                    se = TRUE,
+                    method = "loess",
+                    inherit.aes = FALSE
+                  ) +
+                  ggplot2::labs(linetype = "Smooth")
+              }
+
+              p
             } else {
               shiny::req(input$point_size)
               if (input$colour_choice) {
@@ -803,7 +838,11 @@ visualise <- function(nacho_object) {
                 ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                 ggbeeswarm::geom_quasirandom(size = input$point_size, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
                 ggplot2::scale_y_log10(limits = c(1, NA)) +
-                ggplot2::labs(colour = colour_name, x = "Gene Name", y = "Counts + 1") +
+                ggplot2::labs(
+                  colour = colour_name,
+                  x = if (input$tabs%in%c("Negative", "Positive")) "Control Name" else "Gene Name",
+                  y = "Counts + 1"
+                ) +
                 ggplot2::theme(axis.text.x = ggplot2::element_text(face = "italic"))
 
               if (is.character(unique(local_data[[colour_name]])) & length(unique(local_data[[colour_name]]))>input$max_factors) {
@@ -891,11 +930,12 @@ visualise <- function(nacho_object) {
                   ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
                   ggplot2::labs(
                     x = labels["MC"],
-                    y = paste(labels["BD"], units["BD"], sep = "\n"),
+                    # y = paste(labels["BD"], units["BD"], sep = "\n"),
+                    y = parse(text = paste0('paste("', labels["BD"], '", " ", ',  units["BD"], ")")),
                     colour = colour_name
                   ) +
                   ggplot2::theme(
-                    axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5)
+                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1)
                   )
               },
               "MC-MedC" = {
@@ -918,7 +958,7 @@ visualise <- function(nacho_object) {
                     colour = colour_name
                   ) +
                   ggplot2::theme(
-                    axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5)
+                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1)
                   )
               }
             )
@@ -976,7 +1016,7 @@ visualise <- function(nacho_object) {
                 ggplot2::theme_grey(base_size = input$font_size) +
                 ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                 ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
-                ggplot2::labs(x = "Positive Factor", y = "Houskeeping factor", colour = colour_name) +
+                ggplot2::labs(x = "Positive Factor", y = "Houskeeping Factor", colour = colour_name) +
                 ggplot2::scale_x_log10() +
                 ggplot2::scale_y_log10()
 
@@ -986,6 +1026,7 @@ visualise <- function(nacho_object) {
                 p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
               }
             } else if (input$tabs == "norm_res") {
+              shiny::req(!is.null(input$with_smooth))
               out <- tibble::tibble(
                 "CodeClass" = "Average",
                 "Name" = "Mean",
@@ -1025,17 +1066,41 @@ visualise <- function(nacho_object) {
                 ggplot2::facet_grid(~Status) +
                 ggplot2::scale_x_discrete(label = NULL) +
                 ggplot2::scale_y_log10(limits = c(1, NA)) +
-                ggplot2::labs(x = "Sample index", y = "Counts + 1") +
+                ggplot2::labs(
+                  x = "Sample Index",
+                  y = "Counts + 1",
+                  colour = "Housekeeping Genes"
+                ) +
                 ggplot2::theme(
+                  axis.ticks.x = ggplot2::element_blank(),
                   panel.grid.major.x = ggplot2::element_blank(),
                   panel.grid.minor.x = ggplot2::element_blank()
                 )
+
+              if (input$with_smooth) {
+                p <- p +
+                  ggplot2::geom_smooth(
+                    mapping = ggplot2::aes(
+                      x = as.numeric(as.factor(local_data[[id_colname]])),
+                      y = local_data[["Count"]],
+                      linetype = rep("Loess", length(local_data[["Count"]]))
+                    ),
+                    colour = "black",
+                    se = TRUE,
+                    method = "loess",
+                    inherit.aes = FALSE,
+                    na.rm = TRUE
+                  ) +
+                  ggplot2::labs(linetype = "Smooth")
+              }
 
               if (is.character(unique(local_data[["Name"]])) & length(unique(local_data[["Name"]]))>input$max_factors) {
                 p <- p + ggplot2::guides(colour = "none")
               } else {
                 p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
               }
+
+              p
             }
 
             p
