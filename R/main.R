@@ -302,18 +302,45 @@ visualise <- function(nacho_object) {
 
   app <- shiny::shinyApp(
     ui = shiny::fluidPage(
-      shiny::fluidRow(
-        shiny::column(
-          width = 2,
-          shiny::img(src = "www/Nacho_logo.png", height = 150),
-          shiny::hr(),
-          shiny::h3("General settings"),
-          shiny::numericInput(inputId = "font_size", label = "Font size:", value = 14),
-          shiny::numericInput(inputId = "max_factors", label = "Max factors (legend):", value = 10),
-          shiny::hr()
+      # titlePanel(shiny::img(src = "www/Nacho_logo.png", height = 150)),
+      shiny::sidebarLayout(
+        shiny::sidebarPanel(width = 3,
+          shiny::div(shiny::img(src = "www/Nacho_logo.png", height = 150), align = "center"),
+          shiny::br(),
+          shiny::tabsetPanel(
+            id = "settings",
+            selected = "Panel",
+            shiny::tabPanel(
+              title = "General",
+              shiny::br(),
+              shiny::numericInput(inputId = "font_size", label = "Font size:", value = 14),
+              shiny::numericInput(inputId = "max_factors", label = "Max factors (legend):", value = 10)
+            ),
+            shiny::tabPanel(
+              title = "Panel",
+              shiny::br(),
+              shiny::uiOutput(outputId = "interfaceA"),
+              shiny::uiOutput(outputId = "interfaceB"),
+              shiny::uiOutput(outputId = "interfaceC"),
+              shiny::uiOutput(outputId = "interfaceD"),
+              shiny::uiOutput(outputId = "interfaceE1"),
+              shiny::uiOutput(outputId = "interfaceE2"),
+              shiny::uiOutput(outputId = "interfaceF"),
+              shiny::uiOutput(outputId = "interfaceG")
+            ),
+            shiny::tabPanel(
+              title = "Download",
+              shiny::br(),
+              shiny::textInput(inputId = "name", label = "Plot name (with extension):"),
+              shiny::textInput(inputId = "save_path", label = "Output directory:", value = save_path_default),
+              shiny::numericInput(inputId = "w", label = "Width (inch):", value = 8),
+              shiny::numericInput(inputId = "h", label = "Height (inch):", value = 6),
+              shiny::numericInput(inputId = "dpi", label = "DPI:", value = 120),
+              shiny::div(shiny::actionButton(inputId = "do", label = "Download"), align = "center")
+            )
+          )
         ),
-        shiny::column(
-          width = 10,
+        shiny::mainPanel(width = 9,
           shiny::tabsetPanel(
             id = "maintabs",
             shiny::tabPanel(title = "QC Metrics", value = "met"),
@@ -323,31 +350,7 @@ visualise <- function(nacho_object) {
             shiny::tabPanel(title = "Outlier Table", value = "ot"),
             shiny::tabPanel(title = "About", value = "about")
           ),
-          shiny::uiOutput("subtab")
-        )
-      ),
-      shiny::fluidRow(
-        shiny::column(
-          width = 2,
-          shiny::h3("Panel settings"),
-          shiny::uiOutput(outputId = "interfaceA"),
-          shiny::uiOutput(outputId = "interfaceB"),
-          shiny::uiOutput(outputId = "interfaceC"),
-          shiny::uiOutput(outputId = "interfaceD"),
-          shiny::uiOutput(outputId = "interfaceE1"),
-          shiny::uiOutput(outputId = "interfaceE2"),
-          shiny::uiOutput(outputId = "interfaceF"),
-          shiny::uiOutput(outputId = "interfaceG"),
-          shiny::hr(),
-          shiny::h3("Download"),
-          shiny::numericInput(inputId = "w", label = "Width:", value = 8),
-          shiny::numericInput(inputId = "h", label = "Height:", value = 6),
-          shiny::textInput(inputId = "save_path", label = "Output directory:", value = save_path_default),
-          shiny::textInput(inputId = "name", label = "Plot name:"),
-          shiny::actionButton(inputId = "do", label = "Download")
-        ),
-        shiny::column(
-          width = 10,
+          shiny::uiOutput("subtab"),
           shiny::dataTableOutput("outlier_table"),
           shiny::plotOutput(outputId = "all", width = "100%", height = "600px")
         )
@@ -372,7 +375,7 @@ visualise <- function(nacho_object) {
           width = input$w,
           height = input$h,
           units = "in",
-          dpi = 300
+          dpi = input$dpi
         )
         shiny::showNotification(paste0('Plot successfully saved to: "', clean_path, '"'))
       })
@@ -463,7 +466,7 @@ visualise <- function(nacho_object) {
             selected = "CodeClass"
           )
         } else if (input$maintabs == "vis" | input$maintabs == "norm" | input$maintabs == "cg") {
-          colour <- ifelse(is.null(input$colour_choice), TRUE, input$colour_choice)
+           colour <- ifelse(is.null(input$colour_choice), TRUE, input$colour_choice)
           if (colour) {
             shiny::selectInput(
               inputId = "meta",
@@ -490,10 +493,13 @@ visualise <- function(nacho_object) {
       output$interfaceC <- shiny::renderUI({
         shiny::req(input$maintabs%in%c("met", "vis"))
         if (input$maintabs == "met") {
-          shiny::checkboxInput(
-            inputId = "outlier",
-            label = "View outliers",
-            value = TRUE
+          shiny::div(
+            shiny::checkboxInput(
+              inputId = "outlier",
+              label = "View outliers",
+              value = TRUE
+            ),
+            align = "center"
           )
         } else if (input$maintabs == "vis") {
           shiny::req(input$tabs == "prin")
@@ -508,9 +514,12 @@ visualise <- function(nacho_object) {
       output$interfaceD <- shiny::renderUI({
         shiny::req(input$maintabs%in%c("met", "vis"))
         if (input$maintabs == "met") {
-          shiny::checkboxInput(
-            inputId = "outlab",
-            label = "View outlier labels"
+          shiny::div(
+            shiny::checkboxInput(
+              inputId = "outlab",
+              label = "View outlier labels"
+            ),
+            align = "center"
           )
         } else if (input$maintabs == "vis") {
           shiny::req(input$tabs == "prin")
@@ -524,7 +533,7 @@ visualise <- function(nacho_object) {
       })
 
       output$interfaceE1 <- shiny::renderUI({
-        shiny::req(input$maintabs == "met")
+        shiny::req(!input$maintabs %in% c("ot", "about"))
         shiny::sliderInput(
           inputId = "point_size",
           label = "Point size",
@@ -551,7 +560,8 @@ visualise <- function(nacho_object) {
           inputId = "BD_choice",
           label = "Select instrument",
           choiceNames = c("MAX/FLEX", "SPRINT"),
-          choiceValues = c(2.25, 1.8)
+          choiceValues = c(2.25, 1.8),
+          inline = TRUE
         )
       })
 
@@ -623,6 +633,7 @@ visualise <- function(nacho_object) {
 
         # Set defaults
         shiny::req(input$maintabs)
+        shiny::req(input$font_size)
         main <- ifelse(is.null(input$maintabs), "met", input$maintabs)
 
         p <- switch(
@@ -647,6 +658,7 @@ visualise <- function(nacho_object) {
             local_data <- dplyr::distinct(.data = local_data[, c(id_colname, input$Attribute, input$tabs, input$meta)])
             outliers_data <- dplyr::distinct(.data = outliers_data[, c(id_colname, input$Attribute, input$tabs, input$meta)])
 
+            shiny::req(nrow(local_data)!=0)
             p <- ggplot2::ggplot(
               data = local_data,
               mapping = ggplot2::aes_string(x = input$Attribute, y = input$tabs, colour = input$meta)
@@ -732,21 +744,25 @@ visualise <- function(nacho_object) {
             p
           },
           "cg" = {
+            shiny::req(input$tabs)
             shiny::req(input$colour_choice)
             shiny::req(input$meta)
             shiny::req(input$Attribute)
-            shiny::req(input$tabs)
             if (input$tabs == "Control probe expression") {
+              local_data <- nacho[nacho[["CodeClass"]] %in% c("Positive", "Negative"), ]
               local_data <- dplyr::distinct(
-                .data = nacho[nacho[["CodeClass"]] %in% c("Positive", "Negative"), c(id_colname, "Count", "CodeClass", "Name")]
+                .data = local_data[, c(id_colname, "Count", "CodeClass", "Name")]
               )
+              local_data[["Count"]] <- local_data[["Count"]] + 1
+
+              shiny::req(nrow(local_data)!=0)
               p <- ggplot2::ggplot(
                 data = local_data,
-                mapping = ggplot2::aes(
-                  x = get(id_colname),
-                  y = Count+1,
-                  colour = Name,
-                  group = Name
+                mapping = ggplot2::aes_string(
+                  x = id_colname,
+                  y = "Count",
+                  colour = "Name",
+                  group = "Name"
                 )
               ) +
                 ggplot2::theme_grey(base_size = input$font_size) +
@@ -757,7 +773,10 @@ visualise <- function(nacho_object) {
                 ggplot2::scale_x_discrete(labels = NULL) +
                 ggplot2::labs(x = "Sample index", y = "Counts + 1", colour = "Control") +
                 ggplot2::guides(colour = ggplot2::guide_legend(nrow = 8)) +
-                ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(), panel.grid.minor.x = ggplot2::element_blank())
+                ggplot2::theme(
+                  panel.grid.major.x = ggplot2::element_blank(),
+                  panel.grid.minor.x = ggplot2::element_blank()
+                )
             } else {
               shiny::req(input$point_size)
               if (input$colour_choice) {
@@ -765,15 +784,19 @@ visualise <- function(nacho_object) {
               } else {
                 colour_name <- input$Attribute
               }
+              local_data <- nacho[nacho[["CodeClass"]] %in% input$tabs, ]
               local_data <- dplyr::distinct(
-                .data = nacho[nacho[["CodeClass"]] %in% input$tabs, c(id_colname, "Name", "Count", colour_name)]
+                .data = local_data[, c(id_colname, "Name", "Count", colour_name)]
               )
+              local_data[["Count"]] <- local_data[["Count"]] + 1
+
+              shiny::req(nrow(local_data)!=0)
               p <- ggplot2::ggplot(
                 data = local_data,
-                mapping = ggplot2::aes(
-                  x = Name,
-                  y = Count+1,
-                  colour = get(colour_name)
+                mapping = ggplot2::aes_string(
+                  x = "Name",
+                  y = "Count",
+                  colour = colour_name
                 )
               ) +
                 ggplot2::theme_grey(base_size = input$font_size) +
@@ -812,6 +835,7 @@ visualise <- function(nacho_object) {
                   .data = nacho[, c(id_colname, input$pcA_sel, input$pcB_sel, colour_name)]
                 )
 
+                shiny::req(nrow(local_data)!=0)
                 p_point <- ggplot2::ggplot(
                   data = local_data,
                   mapping = ggplot2::aes_string(x = input$pcA_sel, y = input$pcB_sel, colour = colour_name)
@@ -827,17 +851,21 @@ visualise <- function(nacho_object) {
                 } else {
                   p_point <- p_point + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
                 }
+                pc_sum[["ProportionofVariance"]] <- pc_sum[["Proportion of Variance"]]
+                pc_sum[["PoV"]] <- scales::percent(pc_sum[["Proportion of Variance"]])
 
+                shiny::req(nrow(pc_sum)!=0)
                 p_histo <- ggplot2::ggplot(
                   data = pc_sum,
-                  mapping = ggplot2::aes(x = PC, y = `Proportion of Variance`, group = 1)
+                  mapping = ggplot2::aes_string(x = "PC", y = "ProportionofVariance")
                 ) +
                   ggplot2::theme_grey(base_size = input$font_size) +
                   ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                   ggplot2::geom_bar(stat = "identity") +
                   ggplot2::geom_text(
-                    mapping = ggplot2::aes(label = scales::percent(`Proportion of Variance`)),
-                    vjust = -1
+                    mapping = ggplot2::aes_string(label = "PoV"),
+                    vjust = -1,
+                    show.legend = FALSE
                   ) +
                   ggplot2::scale_y_continuous(
                     labels = scales::percent,
@@ -852,6 +880,8 @@ visualise <- function(nacho_object) {
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, "MC", "BD", colour_name)]
                 )
+
+                shiny::req(nrow(local_data)!=0)
                 ggplot2::ggplot(
                   data = local_data,
                   mapping = ggplot2::aes_string(x = "MC", y = "BD", colour = colour_name)
@@ -873,6 +903,8 @@ visualise <- function(nacho_object) {
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, "MC", "MedC", colour_name)]
                 )
+
+                shiny::req(nrow(local_data)!=0)
                 ggplot2::ggplot(
                   data = local_data,
                   mapping = ggplot2::aes_string(x = "MC", y = "MedC", colour = colour_name)
@@ -913,6 +945,8 @@ visualise <- function(nacho_object) {
             local_data <- dplyr::distinct(
               .data = nacho[, c(id_colname, "Negative_factor", "Positive_factor", colour_name)]
             )
+
+            shiny::req(nrow(local_data)!=0)
             p <- ggplot2::ggplot(
               data = local_data,
               mapping = ggplot2::aes_string(x = "Negative_factor", y = "Positive_factor", colour = colour_name)
@@ -933,6 +967,8 @@ visualise <- function(nacho_object) {
               local_data <- dplyr::distinct(
                 .data = nacho[, c(id_colname, "Positive_factor", "House_factor", colour_name)]
               )
+
+              shiny::req(nrow(local_data)!=0)
               p <- ggplot2::ggplot(
                 data = local_data,
                 mapping = ggplot2::aes_string(x = "Positive_factor", y = "House_factor", colour = colour_name)
@@ -971,13 +1007,16 @@ visualise <- function(nacho_object) {
                 x = c("Count" = "Raw", "Count_Norm" = "Normalised")[local_data[["Status"]]],
                 levels = c("Count" = "Raw", "Count_Norm" = "Normalised")
               )
+              local_data[["Count"]] <- local_data[["Count"]] + 1
+
+              shiny::req(nrow(local_data)!=0)
               p <- ggplot2::ggplot(
                 data = local_data,
-                mapping = ggplot2::aes(
-                  x = get(id_colname),
-                  y = Count + 1,
-                  colour = Name,
-                  group = Name
+                mapping = ggplot2::aes_string(
+                  x = id_colname,
+                  y = "Count",
+                  colour = "Name",
+                  group = "Name"
                 )
               ) +
                 ggplot2::theme_grey(base_size = input$font_size) +
