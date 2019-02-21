@@ -291,9 +291,6 @@ visualise <- function(nacho_object) {
     stop('[NACHO] "summarise()" must be used before "normalise()".')
   }
 
-  font_size <- 14
-  ggplot2::theme_set(ggplot2::theme_grey(base_size = font_size))
-
   id_colname <- nacho_object[["access"]]
   housekeeping_genes <- nacho_object[["housekeeping_genes"]]
   housekeeping_norm <- nacho_object[["housekeeping_norm"]]
@@ -307,18 +304,23 @@ visualise <- function(nacho_object) {
     ui = shiny::fluidPage(
       shiny::fluidRow(
         shiny::column(
-          width = 3,
-          shiny::img(src = "www/Nacho_logo.png", height = 150)
+          width = 2,
+          shiny::img(src = "www/Nacho_logo.png", height = 150),
+          shiny::hr(),
+          shiny::h3("General settings"),
+          shiny::numericInput(inputId = "font_size", label = "Font size:", value = 14),
+          shiny::numericInput(inputId = "max_factors", label = "Max factors (legend):", value = 10),
+          shiny::hr()
         ),
         shiny::column(
-          width = 9,
+          width = 10,
           shiny::tabsetPanel(
             id = "maintabs",
             shiny::tabPanel(title = "QC Metrics", value = "met"),
             shiny::tabPanel(title = "Control Genes", value = "cg"),
             shiny::tabPanel(title = "QC Visuals", value = "vis"),
             shiny::tabPanel(title = "Normalisation Factors", value = "norm"),
-            shiny::tabPanel(title = "Outlier Table", shiny::dataTableOutput("outlier_table"), value = "ot"),
+            shiny::tabPanel(title = "Outlier Table", value = "ot"),
             shiny::tabPanel(title = "About", value = "about")
           ),
           shiny::uiOutput("subtab")
@@ -326,7 +328,8 @@ visualise <- function(nacho_object) {
       ),
       shiny::fluidRow(
         shiny::column(
-          width = 3,
+          width = 2,
+          shiny::h3("Panel settings"),
           shiny::uiOutput(outputId = "interfaceA"),
           shiny::uiOutput(outputId = "interfaceB"),
           shiny::uiOutput(outputId = "interfaceC"),
@@ -335,21 +338,18 @@ visualise <- function(nacho_object) {
           shiny::uiOutput(outputId = "interfaceE2"),
           shiny::uiOutput(outputId = "interfaceF"),
           shiny::uiOutput(outputId = "interfaceG"),
-          shiny::tabsetPanel(
-            id = "down",
-            shiny::tabPanel(
-              title = "Download",
-              shiny::numericInput(inputId = "w", label = "Width:", width = 70, value = 8),
-              shiny::numericInput(inputId = "h", label = "Height:", width = 70, value = 6),
-              shiny::textInput(inputId = "save_path", label = "Output directory:", value = save_path_default),
-              shiny::textInput(inputId = "name", label = "Plot name:"),
-              shiny::actionButton(inputId = "do", label = "Download")
-            )
-          )
+          shiny::hr(),
+          shiny::h3("Download"),
+          shiny::numericInput(inputId = "w", label = "Width:", value = 8),
+          shiny::numericInput(inputId = "h", label = "Height:", value = 6),
+          shiny::textInput(inputId = "save_path", label = "Output directory:", value = save_path_default),
+          shiny::textInput(inputId = "name", label = "Plot name:"),
+          shiny::actionButton(inputId = "do", label = "Download")
         ),
         shiny::column(
-          width = 9,
-          shiny::plotOutput(outputId = "all", width = "100%", height = "400px")
+          width = 10,
+          shiny::dataTableOutput("outlier_table"),
+          shiny::plotOutput(outputId = "all", width = "100%", height = "600px")
         )
       )
     ),
@@ -530,7 +530,7 @@ visualise <- function(nacho_object) {
           label = "Point size",
           min = 1,
           max = 5,
-          value = 0.25*font_size
+          value = round(0.15*input$font_size)
         )
       })
 
@@ -588,6 +588,7 @@ visualise <- function(nacho_object) {
       })
 
       output$outlier_table <- shiny::renderDataTable({
+        shiny::req(input$maintabs%in%c("ot"))
         details_out <- details_outlier(nacho_df = nacho, id_colname = id_colname)
         all_out <- unique(unlist(details_out))
 
@@ -614,7 +615,7 @@ visualise <- function(nacho_object) {
           "LoD" = "Limit of Detection"
         )
         units <- c(
-          "BD" = "(Optical features / um2)",
+          "BD" = "(Optical features / µm2)",
           "FoV" = "(%Counted)",
           "PC" = "(R2)",
           "LoD" = "(Z)"
@@ -650,7 +651,14 @@ visualise <- function(nacho_object) {
               data = local_data,
               mapping = ggplot2::aes_string(x = input$Attribute, y = input$tabs, colour = input$meta)
             ) +
-              ggbeeswarm::geom_quasirandom(width = 0.2, size = input$point_size, na.rm = TRUE) +
+              ggplot2::theme_grey(base_size = input$font_size) +
+              ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+              ggbeeswarm::geom_quasirandom(
+                width = 0.25,
+                size = input$point_size,
+                na.rm = TRUE,
+                groupOnX = TRUE
+              ) +
               ggplot2::theme(
                 legend.position = "bottom",
                 axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5)
@@ -689,10 +697,11 @@ visualise <- function(nacho_object) {
             if (input$outlier) {
               shiny::req(input$outlier)
               p <- p +
-                ggbeeswarm::geom_beeswarm(
+                ggbeeswarm::geom_quasirandom(
                   data = outliers_data,
                   mapping = ggplot2::aes_string(x = input$Attribute, y = input$tabs),
                   colour = "red",
+                  width = 0.25,
                   size = input$outlier_size*input$point_size,
                   na.rm = TRUE,
                   groupOnX = TRUE
@@ -712,7 +721,7 @@ visualise <- function(nacho_object) {
             }
 
             n_colour_levels <- length(unique(local_data[[input$meta]]))
-            if (n_colour_levels<=40) {
+            if (n_colour_levels<=input$max_factors) {
               p <- p + ggplot2::guides(
                 colour = ggplot2::guide_legend(ncol = min(n_colour_levels, 10), byrow = TRUE)
               )
@@ -740,6 +749,8 @@ visualise <- function(nacho_object) {
                   group = Name
                 )
               ) +
+                ggplot2::theme_grey(base_size = input$font_size) +
+                ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                 ggplot2::geom_line() +
                 ggplot2::facet_wrap(facets = "CodeClass", scales = "free_y") +
                 ggplot2::scale_y_log10(limits = c(1, NA)) +
@@ -765,12 +776,14 @@ visualise <- function(nacho_object) {
                   colour = get(colour_name)
                 )
               ) +
-                ggbeeswarm::geom_quasirandom(size = input$point_size, width = 0.5, na.rm = TRUE) +
+                ggplot2::theme_grey(base_size = input$font_size) +
+                ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+                ggbeeswarm::geom_quasirandom(size = input$point_size, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
                 ggplot2::scale_y_log10(limits = c(1, NA)) +
                 ggplot2::labs(colour = colour_name, x = "Gene Name", y = "Counts + 1") +
                 ggplot2::theme(axis.text.x = ggplot2::element_text(face = "italic"))
 
-              if (is.character(unique(local_data[[colour_name]])) & length(unique(local_data[[colour_name]]))>40) {
+              if (is.character(unique(local_data[[colour_name]])) & length(unique(local_data[[colour_name]]))>input$max_factors) {
                 p <- p + ggplot2::guides(colour = "none")
               } else {
                 p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
@@ -803,18 +816,24 @@ visualise <- function(nacho_object) {
                   data = local_data,
                   mapping = ggplot2::aes_string(x = input$pcA_sel, y = input$pcB_sel, colour = colour_name)
                 ) +
+                  ggplot2::theme_grey(base_size = input$font_size) +
+                  ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                   ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
-                  ggplot2::labs(
-                    x = as.character(input$pcA_sel),
-                    y = as.character(input$pcB_sel),
-                    colour = colour_name
-                  ) +
-                  ggplot2::stat_ellipse()
+                  ggplot2::labs(x = input$pcA_sel, y = input$pcB_sel, colour = colour_name) +
+                  ggplot2::stat_ellipse(na.rm = TRUE)
+
+                if (is.character(unique(nacho[[colour_name]])) & length(unique(nacho[[colour_name]]))>input$max_factors) {
+                  p_point <- p_point + ggplot2::guides(colour = "none")
+                } else {
+                  p_point <- p_point + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+                }
 
                 p_histo <- ggplot2::ggplot(
                   data = pc_sum,
                   mapping = ggplot2::aes(x = PC, y = `Proportion of Variance`, group = 1)
                 ) +
+                  ggplot2::theme_grey(base_size = input$font_size) +
+                  ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                   ggplot2::geom_bar(stat = "identity") +
                   ggplot2::geom_text(
                     mapping = ggplot2::aes(label = scales::percent(`Proportion of Variance`)),
@@ -826,7 +845,7 @@ visualise <- function(nacho_object) {
                   ) +
                   ggplot2::labs(x = "Number of Principal Component", y = "Proportion of Variance")
 
-                ggpubr::ggarrange(p_point, p_histo, nrow = 2, ncol = 1, align = "h")
+                ggpubr::ggarrange(p_point, p_histo, nrow = 2, ncol = 1)
               },
               "MC-BD" = {
                 # Count vs binding
@@ -837,6 +856,8 @@ visualise <- function(nacho_object) {
                   data = local_data,
                   mapping = ggplot2::aes_string(x = "MC", y = "BD", colour = colour_name)
                 ) +
+                  ggplot2::theme_grey(base_size = input$font_size) +
+                  ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                   ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
                   ggplot2::labs(
                     x = labels["MC"],
@@ -844,7 +865,6 @@ visualise <- function(nacho_object) {
                     colour = colour_name
                   ) +
                   ggplot2::theme(
-                    legend.position = "bottom",
                     axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5)
                   )
               },
@@ -857,6 +877,8 @@ visualise <- function(nacho_object) {
                   data = local_data,
                   mapping = ggplot2::aes_string(x = "MC", y = "MedC", colour = colour_name)
                 ) +
+                  ggplot2::theme_grey(base_size = input$font_size) +
+                  ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                   ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
                   ggplot2::labs(
                     x = labels["MC"],
@@ -864,14 +886,13 @@ visualise <- function(nacho_object) {
                     colour = colour_name
                   ) +
                   ggplot2::theme(
-                    legend.position = "bottom",
                     axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5)
                   )
               }
             )
 
             shiny::req(p)
-            if (is.character(unique(nacho[[colour_name]])) & length(unique(nacho[[colour_name]]))>40) {
+            if (is.character(unique(nacho[[colour_name]])) & length(unique(nacho[[colour_name]]))>input$max_factors) {
               p <- p + ggplot2::guides(colour = "none")
             } else {
               p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
@@ -896,9 +917,17 @@ visualise <- function(nacho_object) {
               data = local_data,
               mapping = ggplot2::aes_string(x = "Negative_factor", y = "Positive_factor", colour = colour_name)
             ) +
+              ggplot2::theme_grey(base_size = input$font_size) +
+              ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
               ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
               ggplot2::labs(x = "Negative Factor", y = "Positive Factor", colour = colour_name) +
               ggplot2::scale_y_log10()
+
+            if (is.character(unique(local_data[[colour_name]])) & length(unique(local_data[[colour_name]]))>input$max_factors) {
+              p <- p + ggplot2::guides(colour = "none")
+            } else {
+              p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+            }
 
             if (input$tabs == "hf") {
               local_data <- dplyr::distinct(
@@ -908,10 +937,18 @@ visualise <- function(nacho_object) {
                 data = local_data,
                 mapping = ggplot2::aes_string(x = "Positive_factor", y = "House_factor", colour = colour_name)
               ) +
+                ggplot2::theme_grey(base_size = input$font_size) +
+                ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                 ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
                 ggplot2::labs(x = "Positive Factor", y = "Houskeeping factor", colour = colour_name) +
                 ggplot2::scale_x_log10() +
                 ggplot2::scale_y_log10()
+
+              if (is.character(unique(local_data[[colour_name]])) & length(unique(local_data[[colour_name]]))>input$max_factors) {
+                p <- p + ggplot2::guides(colour = "none")
+              } else {
+                p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+              }
             } else if (input$tabs == "norm_res") {
               out <- tibble::tibble(
                 "CodeClass" = "Average",
@@ -943,12 +980,23 @@ visualise <- function(nacho_object) {
                   group = Name
                 )
               ) +
-                ggplot2::geom_line() +
+                ggplot2::theme_grey(base_size = input$font_size) +
+                ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+                ggplot2::geom_line(na.rm = TRUE) +
                 ggplot2::facet_grid(~Status) +
                 ggplot2::scale_x_discrete(label = NULL) +
                 ggplot2::scale_y_log10(limits = c(1, NA)) +
                 ggplot2::labs(x = "Sample index", y = "Counts + 1") +
-                ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(), panel.grid.minor.x = ggplot2::element_blank())
+                ggplot2::theme(
+                  panel.grid.major.x = ggplot2::element_blank(),
+                  panel.grid.minor.x = ggplot2::element_blank()
+                )
+
+              if (is.character(unique(local_data[["Name"]])) & length(unique(local_data[["Name"]]))>input$max_factors) {
+                p <- p + ggplot2::guides(colour = "none")
+              } else {
+                p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+              }
             }
 
             p
