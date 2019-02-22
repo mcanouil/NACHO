@@ -100,12 +100,11 @@ qc_rcc <- function(
     n_comp <- (ncol(counts_df)-1)
   }
 
-  if (sum(is.na(counts_df)) > 0)
-  {
-    message("[NACHO] There are missings in your raw data, these have been replaced with zeros for plots")
+  if (anyNA(counts_df)) {
+    message("[NACHO] Missing values have been replaced with zeros for PCA.")
     counts_df_tmp <- as.matrix(counts_df)
     counts_df_tmp[is.na(counts_df_tmp)] <- 0
-  }else{
+  } else {
     counts_df_tmp <- counts_df
   }
 
