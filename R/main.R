@@ -229,7 +229,7 @@ summarize <- summarise
 #'  \item Positive Control Linearity (\code{PC}) < 0.95
 #'  \item Limit of Detection (\code{LoD}) < 2
 #'  \item Positive normalisation factor (\code{Positive_factor}) < 0.25
-#'  \item Positive normalisation factor (\code{Positive_factor}) > 0.75
+#'  \item Positive normalisation factor (\code{Positive_factor}) > 4
 #'  \item Housekeeping normalisation factor (\code{house_factor}) < 1/11
 #'  \item Housekeeping normalisation factor (\code{house_factor}) > 11
 #' }
