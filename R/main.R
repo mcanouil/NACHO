@@ -26,7 +26,13 @@ summarise <- function(
   data_directory <- normalizePath(data_directory)
 
   message("[NACHO] Importing RCC files.")
-  nacho_df <- utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+  if(is.data.frame(ssheet_csv)){
+    nacho_df <- ssheet_csv
+  }else if(is.character(ssheet_csv)){
+    nacho_df <- utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+  }else{
+    stop("[NACHO] Cannot read ssheet_csv, make sure it is a data.frame or path to csv.")
+  }
   nacho_df <- tibble::as_tibble(nacho_df)
   nacho_df[["file_path"]] <- paste(data_directory, nacho_df[[id_colname]], sep = "/")
   nacho_df[["file_exists"]] <- sapply(X = nacho_df[["file_path"]], FUN = file.exists)
@@ -579,7 +585,7 @@ visualise <- function(nacho_object) {
         if (input$tabs == "BD") {
           shiny::sliderInput(
             inputId = "threshold",
-            label = "Custom QC threshold",
+            label = sprintf("Custom QC threshold (default: %s - %s)",ranges["BD3"],ranges["BD4"]),
             min = as.numeric(ranges["BD1"]),
             max = as.numeric(ranges["BD2"]),
             value = c(
@@ -590,7 +596,7 @@ visualise <- function(nacho_object) {
         } else if (input$tabs == "FoV" | input$tabs == "LoD" | input$tabs == "PC") {
           shiny::sliderInput(
             inputId = "threshold",
-            label = "Custom QC threshold",
+            label = sprintf("Custom QC threshold (default: %s)",as.numeric(ranges[paste0(input$tabs, "3")])),
             min = as.numeric(ranges[paste0(input$tabs, "1")]),
             max = as.numeric(ranges[paste0(input$tabs, "2")]),
             value = as.numeric(ranges[paste0(input$tabs, "3")])
