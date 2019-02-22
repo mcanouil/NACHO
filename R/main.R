@@ -1028,132 +1028,141 @@ visualise <- function(nacho_object) {
             p
           },
           "norm" = {
-            shiny::req(input$colour_choice)
+            shiny::req(input$tabs%in%c("pfbt", "hf", "norm_res"))
             shiny::req(input$meta)
-            shiny::req(input$tabs)
             colour_name <- input$meta
-            local_data <- dplyr::distinct(
-              .data = nacho[, c(id_colname, "Negative_factor", "Positive_factor", colour_name)]
-            )
 
-            shiny::req(nrow(local_data)!=0)
-            p <- ggplot2::ggplot(
-              data = local_data,
-              mapping = ggplot2::aes_string(x = "Negative_factor", y = "Positive_factor", colour = colour_name)
-            ) +
-              ggplot2::theme_grey(base_size = input$font_size) +
-              ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-              ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
-              ggplot2::labs(x = "Negative Factor", y = "Positive Factor", colour = colour_name) +
-              ggplot2::scale_y_log10()
-
-            if (is.character(unique(local_data[[colour_name]])) & length(unique(local_data[[colour_name]]))>input$max_factors) {
-              p <- p + ggplot2::guides(colour = "none")
-            } else {
-              p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
-            }
-
-            if (input$tabs == "hf") {
-              shiny::req(housekeeping_norm)
-              local_data <- dplyr::distinct(
-                .data = nacho[, c(id_colname, "Positive_factor", "House_factor", colour_name)]
-              )
-
-              shiny::req(nrow(local_data)!=0)
-              p <- ggplot2::ggplot(
-                data = local_data,
-                mapping = ggplot2::aes_string(x = "Positive_factor", y = "House_factor", colour = colour_name)
-              ) +
-                ggplot2::theme_grey(base_size = input$font_size) +
-                ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-                ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
-                ggplot2::labs(x = "Positive Factor", y = "Houskeeping Factor", colour = colour_name) +
-                ggplot2::scale_x_log10() +
-                ggplot2::scale_y_log10()
-
-              if (is.character(unique(local_data[[colour_name]])) & length(unique(local_data[[colour_name]]))>input$max_factors) {
-                p <- p + ggplot2::guides(colour = "none")
-              } else {
-                p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
-              }
-            } else if (input$tabs == "norm_res") {
-              shiny::req(!is.null(input$with_smooth))
-
-              if (is.null(housekeeping_genes)) {
-                local_data <- nacho[nacho[["CodeClass"]]%in%"Positive", ]
-              } else {
-                local_data <- nacho[nacho[["Name"]] %in% housekeeping_genes, ]
-              }
-
-              local_data[["Count_Norm"]] <- normalise_counts(
-                data = local_data,
-                housekeeping_norm = housekeeping_norm
-              )
-              local_data <- dplyr::distinct(
-                .data = local_data[, c(id_colname, "Count", "Count_Norm", "Name")]
-              )
-
-              local_data <- tidyr::gather(data = local_data, key = "Status", value = "Count", c("Count", "Count_Norm"))
-              local_data[["Status"]] <- factor(
-                x = c("Count" = "Raw", "Count_Norm" = "Normalised")[local_data[["Status"]]],
-                levels = c("Count" = "Raw", "Count_Norm" = "Normalised")
-              )
-              local_data[["Count"]] <- local_data[["Count"]] + 1
-
-              shiny::req(nrow(local_data)!=0)
-              p <- ggplot2::ggplot(
-                data = local_data,
-                mapping = ggplot2::aes_string(
-                  x = id_colname,
-                  y = "Count",
-                  colour = "Name",
-                  group = "Name"
+            p <- switch(
+              EXPR = input$tabs,
+              "pfbt" = {
+                shiny::req(input$point_size, input$font_size, input$max_factors)
+                local_data <- dplyr::distinct(
+                  .data = nacho[, c(id_colname, "Negative_factor", "Positive_factor", colour_name)]
                 )
-              ) +
-                ggplot2::theme_grey(base_size = input$font_size) +
-                ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-                ggplot2::geom_line(na.rm = TRUE) +
-                ggplot2::facet_grid(~Status) +
-                ggplot2::scale_x_discrete(label = NULL) +
-                ggplot2::scale_y_log10(limits = c(1, NA)) +
-                ggplot2::labs(
-                  x = "Sample Index",
-                  y = "Counts + 1",
-                  colour = if (is.null(housekeeping_genes)) "Positive Control" else "Housekeeping Genes"
+
+                shiny::req(nrow(local_data)!=0)
+                p <- ggplot2::ggplot(
+                  data = local_data,
+                  mapping = ggplot2::aes_string(x = "Negative_factor", y = "Positive_factor", colour = colour_name)
                 ) +
-                ggplot2::theme(
-                  axis.ticks.x = ggplot2::element_blank(),
-                  panel.grid.major.x = ggplot2::element_blank(),
-                  panel.grid.minor.x = ggplot2::element_blank()
+                  ggplot2::theme_grey(base_size = input$font_size) +
+                  ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+                  ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
+                  ggplot2::labs(x = "Negative Factor", y = "Positive Factor", colour = colour_name) +
+                  ggplot2::scale_y_log10()
+
+                if (is.character(unique(local_data[[colour_name]])) & length(unique(local_data[[colour_name]]))>input$max_factors) {
+                  p <- p + ggplot2::guides(colour = "none")
+                } else {
+                  p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+                }
+
+                p
+              },
+              "hf" = {
+                shiny::req(housekeeping_norm)
+                shiny::req(input$point_size, input$font_size, input$max_factors)
+                local_data <- dplyr::distinct(
+                  .data = nacho[, c(id_colname, "Positive_factor", "House_factor", colour_name)]
                 )
 
-              if (input$with_smooth) {
-                p <- p +
-                  ggplot2::geom_smooth(
-                    mapping = ggplot2::aes(
-                      x = as.numeric(as.factor(local_data[[id_colname]])),
-                      y = local_data[["Count"]],
-                      linetype = rep("Loess", length(local_data[["Count"]]))
-                    ),
-                    colour = "black",
-                    se = TRUE,
-                    method = "loess",
-                    inherit.aes = FALSE,
-                    na.rm = TRUE
+                shiny::req(nrow(local_data)!=0)
+                p <- ggplot2::ggplot(
+                  data = local_data,
+                  mapping = ggplot2::aes_string(x = "Positive_factor", y = "House_factor", colour = colour_name)
+                ) +
+                  ggplot2::theme_grey(base_size = input$font_size) +
+                  ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+                  ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
+                  ggplot2::labs(x = "Positive Factor", y = "Houskeeping Factor", colour = colour_name) +
+                  ggplot2::scale_x_log10() +
+                  ggplot2::scale_y_log10()
+
+                if (is.character(unique(local_data[[colour_name]])) & length(unique(local_data[[colour_name]]))>input$max_factors) {
+                  p <- p + ggplot2::guides(colour = "none")
+                } else {
+                  p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+                }
+
+                p
+              },
+              "norm_res" = {
+                shiny::req(!is.null(input$with_smooth))
+                shiny::req(input$font_size, input$max_factors)
+                if (is.null(housekeeping_genes)) {
+                  local_data <- nacho[nacho[["CodeClass"]]%in%"Positive", ]
+                } else {
+                  local_data <- nacho[nacho[["Name"]] %in% housekeeping_genes, ]
+                }
+
+                local_data[["Count_Norm"]] <- normalise_counts(
+                  data = local_data,
+                  housekeeping_norm = housekeeping_norm
+                )
+                local_data <- dplyr::distinct(
+                  .data = local_data[, c(id_colname, "Count", "Count_Norm", "Name")]
+                )
+
+                local_data <- tidyr::gather(data = local_data, key = "Status", value = "Count", c("Count", "Count_Norm"))
+                local_data[["Status"]] <- factor(
+                  x = c("Count" = "Raw", "Count_Norm" = "Normalised")[local_data[["Status"]]],
+                  levels = c("Count" = "Raw", "Count_Norm" = "Normalised")
+                )
+                local_data[["Count"]] <- local_data[["Count"]] + 1
+
+                shiny::req(nrow(local_data)!=0)
+                p <- ggplot2::ggplot(
+                  data = local_data,
+                  mapping = ggplot2::aes_string(
+                    x = id_colname,
+                    y = "Count",
+                    colour = "Name",
+                    group = "Name"
+                  )
+                ) +
+                  ggplot2::theme_grey(base_size = input$font_size) +
+                  ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+                  ggplot2::geom_line(na.rm = TRUE) +
+                  ggplot2::facet_grid(~Status) +
+                  ggplot2::scale_x_discrete(label = NULL) +
+                  ggplot2::scale_y_log10(limits = c(1, NA)) +
+                  ggplot2::labs(
+                    x = "Sample Index",
+                    y = "Counts + 1",
+                    colour = if (is.null(housekeeping_genes)) "Positive Control" else "Housekeeping Genes"
                   ) +
-                  ggplot2::labs(linetype = "Smooth")
+                  ggplot2::theme(
+                    axis.ticks.x = ggplot2::element_blank(),
+                    panel.grid.major.x = ggplot2::element_blank(),
+                    panel.grid.minor.x = ggplot2::element_blank()
+                  )
+
+                if (input$with_smooth) {
+                  p <- p +
+                    ggplot2::geom_smooth(
+                      mapping = ggplot2::aes(
+                        x = as.numeric(as.factor(local_data[[id_colname]])),
+                        y = local_data[["Count"]],
+                        linetype = rep("Loess", length(local_data[["Count"]]))
+                      ),
+                      colour = "black",
+                      se = TRUE,
+                      method = "loess",
+                      inherit.aes = FALSE,
+                      na.rm = TRUE
+                    ) +
+                    ggplot2::labs(linetype = "Smooth")
+                }
+
+                if (is.character(unique(local_data[["Name"]])) & length(unique(local_data[["Name"]]))>input$max_factors) {
+                  p <- p + ggplot2::guides(colour = "none")
+                } else {
+                  p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+                }
+
+                p
               }
-
-              if (is.character(unique(local_data[["Name"]])) & length(unique(local_data[["Name"]]))>input$max_factors) {
-                p <- p + ggplot2::guides(colour = "none")
-              } else {
-                p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
-              }
-
-              p
-            }
-
-            p
+            )
           }
         )
 
