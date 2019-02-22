@@ -61,11 +61,10 @@ qc_rcc <- function(
       id_colname = id_colname,
       count_column = "count_norm"
     )
-    if(housekeeping_predict && is.null(predicted_housekeeping)){
-      message('[NACHO] Could not find suitable houskeeping genes, default housekeeping genes will be used.')
-    }
 
-    if (!is.null(predicted_housekeeping)) {
+    if (is.null(predicted_housekeeping) | length(predicted_housekeeping)==0) {
+      message('[NACHO] Could not find suitable houskeeping genes, default will be used.')
+    } else {
       housekeeping_genes <- predicted_housekeeping
       control_genes_df <- nacho_df[nacho_df[["Name"]]%in%predicted_housekeeping, ]
       control_genes_df <- format_counts(
