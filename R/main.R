@@ -1,13 +1,22 @@
 #' summarise
 #'
-#' @param data_directory [character] A character string of the directory where the data is stored
-#' @param ssheet_csv [character] Either a string with the name of the CSV of the samplesheet or a R object witht the samplesheet. Should contain a column that matches the file names in the folder
-#' @param id_colname [character] Character string of the column in ssheet_csv that matches the file names in data_directory
-#' @param housekeeping_genes [vector(character)] A vector of names of the miRNAs/mRNAs that should be used as housekeeping genes
-#' @param housekeeping_predict [logical] Boolean to indicate whether the housekeeping genes should be predicted (TRUE) or not (FALSE). Default is FALSE
-#' @param housekeeping_norm [logical] Boolean to indicate whether the housekeeping normalization should be performed
-#' @param normalisation_method [character] Either 'GEO' or 'GLM' to indicate normalization using the geometric mean or a generalized linear model
-#' @param n_comp [numeric] Number indicating the number of principal components to calculate. Cannot be more than n-1 samples
+#' @param data_directory [character] A character string of the directory where the data are stored.
+#' @param ssheet_csv [character/data.frame] Either a string with the name of the CSV of the samplesheet
+#'   or the samplesheet as a \code{data.frame}.
+#'   Should contain a column that matches the file names in the folder.
+#' @param id_colname [character] Character string of the column in \code{ssheet_csv} that matches
+#'   the file names in \code{data_directory}.
+#' @param housekeeping_genes [vector(character)] A vector of names of the miRNAs/mRNAs
+#'   that should be used as housekeeping genes. Default is \code{NULL}.
+#' @param housekeeping_predict [logical] Boolean to indicate whether the housekeeping genes
+#'   should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.
+#' @param housekeeping_norm [logical] Boolean to indicate whether the housekeeping normalisation should be performed.
+#'   Default is \code{TRUE}.
+#' @param normalisation_method [character] Either \code{"GEO"} or \code{"GLM"}.
+#'   Character string to indicate normalisation using the geometric mean (\code{"GEO"})
+#'   or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.
+#' @param n_comp [numeric] Number indicating the number of principal components to compute.
+#'  Cannot be more than n-1 samples. Default is \code{10}.
 #'
 #' @return [list]
 #' @export
@@ -51,15 +60,18 @@
 #' }
 #'
 summarise <- function(
-  data_directory = NULL,
-  ssheet_csv = NULL,
-  id_colname = NULL,
+  data_directory,
+  ssheet_csv,
+  id_colname,
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
   housekeeping_norm = TRUE,
   normalisation_method = "GEO",
   n_comp = 10
 ) {
+  if (missing(data_directory) | missing(ssheet_csv) | missing(id_colname)) {
+    stop('[NACHO] "data_directory", "ssheet_csv" and "id_colname" must be provided.')
+  }
   data_directory <- normalizePath(data_directory)
 
   message("[NACHO] Importing RCC files.")
@@ -185,7 +197,7 @@ summarize <- summarise
 
 #' normalise
 #'
-#' @param nacho_object [list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}
+#' @param nacho_object [list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.
 #' @inheritParams summarise
 #' @param remove_outliers [logical]
 #'
@@ -247,6 +259,9 @@ normalise <- function(
   normalisation_method = nacho_object[["normalisation_method"]],
   remove_outliers = TRUE
 ) {
+  if (missing(nacho_object)) {
+    stop('[NACHO] "nacho_object" must be provided.')
+  }
   mandatory_fields <- c(
     "access",
     "housekeeping_genes",
