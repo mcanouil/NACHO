@@ -490,7 +490,7 @@ visualise <- function(nacho_object) {
         shiny::req(input$maintabs)
         if (input$maintabs == "met") {
           shiny::selectInput(
-            inputId = "Attribute",
+            inputId = "attribute",
             label = "Select x-axis",
             choices = c(
               "Date",
@@ -534,7 +534,7 @@ visualise <- function(nacho_object) {
             )
           } else {
             shiny::selectInput(
-              inputId = "Attribute",
+              inputId = "meta",
               label = "Coloured by:",
               choices = c(
                 "Date",
@@ -636,7 +636,7 @@ visualise <- function(nacho_object) {
         if (input$tabs == "BD") {
           shiny::sliderInput(
             inputId = "threshold",
-            label = sprintf("Custom QC threshold (default: %s - %s)",ranges["BD3"],ranges["BD4"]),
+            label = sprintf("Custom QC threshold (default: %s - %s)", ranges["BD3"], ranges["BD4"]),
             min = as.numeric(ranges["BD1"]),
             max = as.numeric(ranges["BD2"]),
             value = c(
@@ -647,7 +647,7 @@ visualise <- function(nacho_object) {
         } else if (input$tabs == "FoV" | input$tabs == "LoD" | input$tabs == "PC") {
           shiny::sliderInput(
             inputId = "threshold",
-            label = sprintf("Custom QC threshold (default: %s)",as.numeric(ranges[paste0(input$tabs, "3")])),
+            label = sprintf("Custom QC threshold (default: %s)", as.numeric(ranges[paste0(input$tabs, "3")])),
             min = as.numeric(ranges[paste0(input$tabs, "1")]),
             max = as.numeric(ranges[paste0(input$tabs, "2")]),
             value = as.numeric(ranges[paste0(input$tabs, "3")])
@@ -713,6 +713,7 @@ visualise <- function(nacho_object) {
             shiny::req(input$tabs)
             shiny::req(input$threshold)
             shiny::req(input$tabs == "FoV" | input$tabs == "LoD" | input$tabs == "PC" | input$tabs == "BD")
+            shiny::req(input$attribute, input$meta)
 
             # Defaults for every main tab
             if (input$tabs == "BD") {
@@ -726,13 +727,21 @@ visualise <- function(nacho_object) {
               shiny::req(!all(local_data[[input$tabs]]==0))
             }
 
-            local_data <- dplyr::distinct(.data = local_data[, c(id_colname, input$Attribute, input$tabs, input$meta)])
-            outliers_data <- dplyr::distinct(.data = outliers_data[, c(id_colname, input$Attribute, input$tabs, input$meta)])
+            local_data <- dplyr::distinct(.data = local_data[, c(id_colname, input$attribute, input$tabs, input$meta)])
+            outliers_data <- dplyr::distinct(.data = outliers_data[, c(id_colname, input$attribute, input$tabs, input$meta)])
+            local_data[[input$attribute]] <- factor(
+              x = local_data[[input$attribute]],
+              levels = gtools::mixedsort(unique(local_data[[input$attribute]]))
+            )
+            outliers_data[[input$attribute]] <- factor(
+              x = outliers_data[[input$attribute]],
+              levels = gtools::mixedsort(unique(outliers_data[[input$attribute]]))
+            )
 
             shiny::req(nrow(local_data)!=0)
             p <- ggplot2::ggplot(
               data = local_data,
-              mapping = ggplot2::aes_string(x = input$Attribute, y = input$tabs, colour = input$meta)
+              mapping = ggplot2::aes_string(x = input$attribute, y = input$tabs, colour = input$meta)
             ) +
               ggplot2::theme_grey(base_size = input$font_size) +
               ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
@@ -747,7 +756,7 @@ visualise <- function(nacho_object) {
                 axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5)
               ) +
               ggplot2::labs(
-                x = input$Attribute,
+                x = input$attribute,
                 # y = paste(labels[input$tabs], units[input$tabs], sep = "\n"),
                 y = parse(text = paste0('paste("', labels[input$tabs], '", " ", ',  units[input$tabs], ")")),
                 colour = input$meta
@@ -783,7 +792,7 @@ visualise <- function(nacho_object) {
               p <- p +
                 ggbeeswarm::geom_quasirandom(
                   data = outliers_data,
-                  mapping = ggplot2::aes_string(x = input$Attribute, y = input$tabs),
+                  mapping = ggplot2::aes_string(x = input$attribute, y = input$tabs),
                   colour = "red",
                   width = 0.25,
                   size = input$outlier_size*input$point_size,
@@ -798,7 +807,7 @@ visualise <- function(nacho_object) {
               p <- p +
                 ggrepel::geom_label_repel(
                   data = outliers_data,
-                  mapping = ggplot2::aes_string(x = input$Attribute, y = input$tabs, label = id_colname),
+                  mapping = ggplot2::aes_string(x = input$attribute, y = input$tabs, label = id_colname),
                   colour = "red",
                   inherit.aes = FALSE
                 )
@@ -819,7 +828,6 @@ visualise <- function(nacho_object) {
             shiny::req(input$tabs)
             shiny::req(input$colour_choice)
             shiny::req(input$meta)
-            shiny::req(input$Attribute)
             if (input$tabs == "Control Probe Expression") {
               shiny::req(!is.null(input$with_smooth))
               local_data <- nacho[nacho[["CodeClass"]] %in% c("Positive", "Negative"), ]
@@ -871,11 +879,12 @@ visualise <- function(nacho_object) {
               p
             } else {
               shiny::req(input$point_size)
-              if (input$colour_choice) {
-                colour_name <- input$meta
-              } else {
-                colour_name <- input$Attribute
-              }
+              shiny::req(input$meta)
+              shiny::req(input$tabs)
+              shiny::req(input$font_size)
+              shiny::req(input$max_factors)
+              colour_name <- input$meta
+
               local_data <- nacho[nacho[["CodeClass"]] %in% input$tabs, ]
               local_data <- dplyr::distinct(
                 .data = local_data[, c(id_colname, "Name", "Count", colour_name)]
@@ -914,13 +923,9 @@ visualise <- function(nacho_object) {
           "vis" = {
             shiny::req(input$tabs)
             shiny::req(input$colour_choice)
-            shiny::req(input$Attribute)
             shiny::req(input$meta)
-            if (input$colour_choice) {
-              colour_name <- input$meta
-            } else {
-              colour_name <- input$Attribute
-            }
+            colour_name <- input$meta
+
             p <- switch(
               EXPR = input$tabs,
               "prin" = {
@@ -987,12 +992,8 @@ visualise <- function(nacho_object) {
                   ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
                   ggplot2::labs(
                     x = labels["MC"],
-                    # y = paste(labels["BD"], units["BD"], sep = "\n"),
                     y = parse(text = paste0('paste("', labels["BD"], '", " ", ',  units["BD"], ")")),
                     colour = colour_name
-                  ) +
-                  ggplot2::theme(
-                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1)
                   )
               },
               "MC-MedC" = {
@@ -1013,9 +1014,6 @@ visualise <- function(nacho_object) {
                     x = labels["MC"],
                     y = labels["MedC"],
                     colour = colour_name
-                  ) +
-                  ggplot2::theme(
-                    axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, vjust = 1)
                   )
               }
             )
@@ -1032,13 +1030,8 @@ visualise <- function(nacho_object) {
           "norm" = {
             shiny::req(input$colour_choice)
             shiny::req(input$meta)
-            shiny::req(input$Attribute)
             shiny::req(input$tabs)
-            if (input$colour_choice) {
-              colour_name <- input$meta
-            } else {
-              colour_name <- input$Attribute
-            }
+            colour_name <- input$meta
             local_data <- dplyr::distinct(
               .data = nacho[, c(id_colname, "Negative_factor", "Positive_factor", colour_name)]
             )
