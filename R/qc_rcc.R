@@ -61,6 +61,9 @@ qc_rcc <- function(
       id_colname = id_colname,
       count_column = "count_norm"
     )
+    if(housekeeping_predict && is.null(predicted_housekeeping)){
+      message('[NACHO] Could not find suitable houskeeping genes, default housekeeping genes will be used.')
+    }
 
     if (!is.null(predicted_housekeeping)) {
       housekeeping_genes <- predicted_housekeeping
