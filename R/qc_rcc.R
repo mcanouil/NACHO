@@ -20,10 +20,12 @@ qc_rcc <- function(
   normalisation_method,
   n_comp
 ) {
-  if (is.null(housekeeping_genes)) {
-    housekeeping_genes <- nacho_df[["Name"]][grepl("Housekeeping", nacho_df[["CodeClass"]])]
+  has_hkg <- grepl("Housekeeping", nacho_df[["CodeClass"]])
+  if (is.null(housekeeping_genes) & any(has_hkg)) {
+    housekeeping_genes <- nacho_df[["Name"]][has_hkg]
     housekeeping_genes <- unique(housekeeping_genes)
   }
+
   control_genes_df <- nacho_df[nacho_df[["Name"]]%in%housekeeping_genes | !grepl("Endogenous", nacho_df[["CodeClass"]]), ]
 
   control_genes_df <- format_counts(
