@@ -94,7 +94,17 @@ qc_rcc <- function(
     message(paste('"n_comp" has been set to "n-1:"', (ncol(counts_df)-1)))
     n_comp <- (ncol(counts_df)-1)
   }
-  pcas <- qc_pca(counts = counts_df, n_comp = n_comp)
+
+  if (sum(is.na(counts_df)) > 0)
+  {
+    message("[NACHO] There are missings in your raw data, these have been replaced with zeros for plots")
+    counts_df_tmp <- as.matrix(counts_df)
+    counts_df_tmp[is.na(counts_df_tmp)] <- 0
+  }else{
+    counts_df_tmp <- counts_df
+  }
+
+  pcas <- qc_pca(counts = counts_df_tmp, n_comp = n_comp)
 
   pcsum <- as.data.frame(t(pcas[["pcsum"]]), stringsAsFactors = FALSE)
   pcsum[["PC"]] <- sprintf("PC%02d", as.numeric(gsub("PC", "", rownames(pcsum))))
