@@ -46,7 +46,10 @@ summarise <- function(
   nacho_df[["CodeClass"]] <- gsub("Endogenous.*", "Endogenous", nacho_df[["CodeClass"]])
 
   if ("plexset_id" %in% colnames(nacho_df)) {
+    type_set <- "n8"
     nacho_df <- tidyr::unite(data = nacho_df, col = !!id_colname, id_colname, "plexset_id")
+  } else {
+    type_set <- "n1"
   }
   progress$pause(0.05)$tick()$print()
   cat("\n")
@@ -107,6 +110,8 @@ summarise <- function(
     count_column = "Count_Norm"
   )
   nacho_object[["normalised_counts"]] <- norm_counts
+
+  attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
 
   message(paste(
     "[NACHO] Returning a list.",
@@ -173,6 +178,7 @@ normalise <- function(
   }
 
   id_colname <- nacho_object[["access"]]
+  type_set <- attr(nacho_object, "RCC_type")
 
   if (!isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes)))) {
     message(
@@ -254,6 +260,10 @@ normalise <- function(
   )
   nacho_object[["normalised_counts"]] <- norm_counts
 
+  if ("RCC_type"%in%names(attributes(nacho_object))) {
+    attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
+  }
+
   message(paste(
     "[NACHO] Returning a list.",
     "  $ access              : character",
@@ -317,6 +327,7 @@ visualise <- function(nacho_object) {
   pc_sum <- nacho_object[["pc_sum"]]
   nacho <- nacho_object[["nacho"]]
   save_path_default <- nacho_object[["data_directory"]]
+  type_set <- attr(nacho_object, "RCC_type")
 
   shiny::addResourcePath("www", system.file("logo", package = "NACHO"))
 
@@ -407,12 +418,24 @@ visualise <- function(nacho_object) {
         switch(
           EXPR = input$maintabs,
           "met" = {
-            shiny::tabsetPanel(
-              id = "tabs",
-              shiny::tabPanel("Binding Density", value = "BD"),
-              shiny::tabPanel("Imaging", value = "FoV"),
-              shiny::tabPanel("Positive Control Linearity", value = "PC"),
-              shiny::tabPanel("Limit of Detection", value = "LoD")
+            switch(
+              EXPR = type_set,
+              "n1" = {
+                shiny::tabsetPanel(
+                  id = "tabs",
+                  shiny::tabPanel("Binding Density", value = "BD"),
+                  shiny::tabPanel("Imaging", value = "FoV"),
+                  shiny::tabPanel("Positive Control Linearity", value = "PC"),
+                  shiny::tabPanel("Limit of Detection", value = "LoD")
+                )
+              },
+              "n8" = {
+                shiny::tabsetPanel(
+                  id = "tabs",
+                  shiny::tabPanel("Binding Density", value = "BD"),
+                  shiny::tabPanel("Imaging", value = "FoV")
+                )
+              }
             )
           },
           "cg" = {
@@ -429,12 +452,20 @@ visualise <- function(nacho_object) {
             )
           },
           "norm" = {
-            shiny::tabsetPanel(
-              id = "tabs",
-              shiny::tabPanel("Positive Factor vs Background Threshold", value = "pfbt"),
-              shiny::tabPanel("Housekeeping Factor", value = "hf"),
-              shiny::tabPanel("Normalisation Result", value = "norm_res")
-            )
+            if (housekeeping_norm & !is.null(housekeeping_genes)) {
+              shiny::tabsetPanel(
+                id = "tabs",
+                shiny::tabPanel("Positive Factor vs Background Threshold", value = "pfbt"),
+                shiny::tabPanel("Housekeeping Factor", value = "hf"),
+                shiny::tabPanel("Normalisation Result", value = "norm_res")
+              )
+            } else {
+              shiny::tabsetPanel(
+                id = "tabs",
+                shiny::tabPanel("Positive Factor vs Background Threshold", value = "pfbt"),
+                shiny::tabPanel("Normalisation Result", value = "norm_res")
+              )
+            }
           },
           "vis" = {
             shiny::tabsetPanel(
@@ -1047,16 +1078,14 @@ visualise <- function(nacho_object) {
                 p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
               }
             } else if (input$tabs == "norm_res") {
-              shiny::req(!is.null(housekeeping_genes))
               shiny::req(!is.null(input$with_smooth))
-              out <- tibble::tibble(
-                "CodeClass" = "Average",
-                "Name" = "Mean",
-                "Accession" = "nacho",
-                "Count" = nacho[["MC"]]
-              )
-              out[[id_colname]] <- nacho[[id_colname]]
-              local_data <- dplyr::bind_rows(nacho[nacho[["Name"]] %in% housekeeping_genes, ], out)
+
+              if (is.null(housekeeping_genes)) {
+                local_data <- nacho[nacho[["CodeClass"]]%in%"Positive", ]
+              } else {
+                local_data <- nacho[nacho[["Name"]] %in% housekeeping_genes, ]
+              }
+
               local_data[["Count_Norm"]] <- normalise_counts(
                 data = local_data,
                 housekeeping_norm = housekeeping_norm
@@ -1091,7 +1120,7 @@ visualise <- function(nacho_object) {
                 ggplot2::labs(
                   x = "Sample Index",
                   y = "Counts + 1",
-                  colour = "Housekeeping Genes"
+                  colour = if (is.null(housekeeping_genes)) "Positive Control" else "Housekeeping Genes"
                 ) +
                 ggplot2::theme(
                   axis.ticks.x = ggplot2::element_blank(),
