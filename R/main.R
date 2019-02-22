@@ -93,9 +93,9 @@ summarise <- function(
   )
 
   message(
-    paste(
-      '[NACHO] Normalising data using "', normalisation_method, '" method',
-      if (housekeeping_norm) "with" else "without", "housekeeping genes."
+    paste0(
+      '[NACHO] Normalising data using "', normalisation_method, '" method ',
+      if (housekeeping_norm) "with" else "without", " housekeeping genes."
     )
   )
   nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(
