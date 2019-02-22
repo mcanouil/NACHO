@@ -11,21 +11,21 @@ summarise(data_directory = NULL, ssheet_csv = NULL,
   normalisation_method = "GEO", n_comp = 10)
 }
 \arguments{
-\item{data_directory}{[character]}
+\item{data_directory}{[character] A character string of the directory where the data is stored}
 
-\item{ssheet_csv}{[character]}
+\item{ssheet_csv}{[character] Either a string with the name of the CSV of the samplesheet or a R object witht the samplesheet. Should contain a column that matches the file names in the folder}
 
-\item{id_colname}{[character]}
+\item{id_colname}{[character] Character string of the column in ssheet_csv that matches the file names in data_directory}
 
-\item{housekeeping_genes}{[vector(character)]}
+\item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs that should be used as housekeeping genes}
 
-\item{housekeeping_predict}{[logical]}
+\item{housekeeping_predict}{[logical] Boolean to indicate whether the housekeeping genes should be predicted (TRUE) or not (FALSE). Default is FALSE}
 
-\item{housekeeping_norm}{[logical]}
+\item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalization should be performed}
 
-\item{normalisation_method}{[character]}
+\item{normalisation_method}{[character] Either 'GEO' or 'GLM' to indicate normalization using the geometric mean or a generalized linear model}
 
-\item{n_comp}{[numeric]}
+\item{n_comp}{[numeric] Number indicating the number of principal components to calculate. Cannot be more than n-1 samples}
 }
 \value{
 [list]
