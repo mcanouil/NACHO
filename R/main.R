@@ -30,7 +30,7 @@ summarise <- function(
     EXPR = class(ssheet_csv),
     "data.frame" = ssheet_csv,
     "character" = utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE),
-    stop('[NACHO] "ssheet_csv"must be a "data.frame" or path to csv.')
+    stop('[NACHO] "ssheet_csv" must be a "data.frame" or path to csv.')
   )
 
   nacho_df <- tibble::as_tibble(nacho_df)
