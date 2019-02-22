@@ -11,21 +11,29 @@ summarise(data_directory = NULL, ssheet_csv = NULL,
   normalisation_method = "GEO", n_comp = 10)
 }
 \arguments{
-\item{data_directory}{[character] A character string of the directory where the data is stored}
+\item{data_directory}{[character] A character string of the directory where the data are stored.}
 
-\item{ssheet_csv}{[character] Either a string with the name of the CSV of the samplesheet or a R object witht the samplesheet. Should contain a column that matches the file names in the folder}
+\item{ssheet_csv}{[character/data.frame] Either a string with the name of the CSV of the samplesheet
+or the samplesheet as a \code{data.frame}.
+Should contain a column that matches the file names in the folder.}
 
-\item{id_colname}{[character] Character string of the column in ssheet_csv that matches the file names in data_directory}
+\item{id_colname}{[character] Character string of the column in \code{ssheet_csv} that matches
+the file names in \code{data_directory}}
 
-\item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs that should be used as housekeeping genes}
+\item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs
+that should be used as housekeeping genes.}
 
-\item{housekeeping_predict}{[logical] Boolean to indicate whether the housekeeping genes should be predicted (TRUE) or not (FALSE). Default is FALSE}
+\item{housekeeping_predict}{[logical] Boolean to indicate whether the housekeeping genes
+should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
 
-\item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalization should be performed}
+\item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalisation should be performed}
 
-\item{normalisation_method}{[character] Either 'GEO' or 'GLM' to indicate normalization using the geometric mean or a generalized linear model}
+\item{normalisation_method}{[character] Either \code{"GEO"} or \code{"GLM"}.
+Character string to indicate normalisation using the geometric mean \code{"GEO"}
+or a generalized linear model \code{"GLM"}. Default is \code{"GEO"}.}
 
-\item{n_comp}{[numeric] Number indicating the number of principal components to calculate. Cannot be more than n-1 samples}
+\item{n_comp}{[numeric] Number indicating the number of principal components to compute.
+Cannot be more than n-1 samples.}
 }
 \value{
 [list]
