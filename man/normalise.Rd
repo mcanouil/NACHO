@@ -12,13 +12,13 @@ normalise(nacho_object,
   remove_outliers = TRUE)
 }
 \arguments{
-\item{nacho_object}{[list]}
+\item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}}
 
-\item{housekeeping_genes}{[vector(character)]}
+\item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs that should be used as housekeeping genes}
 
-\item{housekeeping_norm}{[logical]}
+\item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalization should be performed}
 
-\item{normalisation_method}{[character]}
+\item{normalisation_method}{[character] Either 'GEO' or 'GLM' to indicate normalization using the geometric mean or a generalized linear model}
 
 \item{remove_outliers}{[logical]}
 }

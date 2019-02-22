@@ -185,7 +185,7 @@ summarize <- summarise
 
 #' normalise
 #'
-#' @param nacho_object [list] List obtained from `summarise`
+#' @param nacho_object [list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}
 #' @inheritParams summarise
 #' @param remove_outliers [logical]
 #'
