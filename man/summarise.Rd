@@ -5,10 +5,10 @@
 \alias{summarize}
 \title{summarise}
 \usage{
-summarise(data_directory = NULL, ssheet_csv = NULL,
-  id_colname = NULL, housekeeping_genes = NULL,
-  housekeeping_predict = FALSE, housekeeping_norm = TRUE,
-  normalisation_method = "GEO", n_comp = 10)
+summarise(data_directory, ssheet_csv, id_colname,
+  housekeeping_genes = NULL, housekeeping_predict = FALSE,
+  housekeeping_norm = TRUE, normalisation_method = "GEO",
+  n_comp = 10)
 }
 \arguments{
 \item{data_directory}{[character] A character string of the directory where the data are stored.}
@@ -18,22 +18,23 @@ or the samplesheet as a \code{data.frame}.
 Should contain a column that matches the file names in the folder.}
 
 \item{id_colname}{[character] Character string of the column in \code{ssheet_csv} that matches
-the file names in \code{data_directory}}
+the file names in \code{data_directory}.}
 
 \item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs
-that should be used as housekeeping genes.}
+that should be used as housekeeping genes. Default is \code{NULL}.}
 
 \item{housekeeping_predict}{[logical] Boolean to indicate whether the housekeeping genes
 should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
 
-\item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalisation should be performed}
+\item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalisation should be performed.
+Default is \code{TRUE}.}
 
 \item{normalisation_method}{[character] Either \code{"GEO"} or \code{"GLM"}.
-Character string to indicate normalisation using the geometric mean \code{"GEO"}
-or a generalized linear model \code{"GLM"}. Default is \code{"GEO"}.}
+Character string to indicate normalisation using the geometric mean (\code{"GEO"})
+or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 
 \item{n_comp}{[numeric] Number indicating the number of principal components to compute.
-Cannot be more than n-1 samples.}
+Cannot be more than n-1 samples. Default is \code{10}.}
 }
 \value{
 [list]
