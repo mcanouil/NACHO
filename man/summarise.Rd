@@ -37,7 +37,27 @@ or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 Cannot be more than n-1 samples. Default is \code{10}.}
 }
 \value{
-[list]
+[list] A list containing parameters and data:
+\describe{
+  \item{access}{[character] Value passed to \code{\link{summarise}} in \code{id_colname}.}
+  \item{housekeeping_genes}{[character] Value passed to \code{\link{summarise}}.}
+  \item{housekeeping_predict}{[logical] Value passed to \code{\link{summarise}}.}
+  \item{housekeeping_norm}{[logical] Value passed to \code{\link{summarise}}.}
+  \item{normalisation_method}{[character] Value passed to \code{\link{summarise}}.}
+  \item{remove_outliers}{[logical] \code{FALSE}.}
+  \item{n_comp}{[ numeric] Value passed to \code{\link{summarise}}.}
+  \item{data_directory}{[character] Value passed to \code{\link{summarise}}.}
+  \item{pc_sum}{[data.frame] A \code{data.frame} with \code{n_comp} rows and four columns:
+   "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
+  \item{nacho}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
+  and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
+  \item{raw_counts}{[data.frame] Raw counts with probes as rows and samples as columns.
+  With \code{"CodeClass"} (first column), the type of the probes and
+  \code{"Name"} (second column), the Name of the probes.}
+  \item{normalised_counts}{[data.frame] Normalised counts with probes as rows and samples as columns.
+  With \code{"CodeClass"} (first column)), the type of the probes and
+  \code{"Name"} (second column), the name of the probes.}
+}
 }
 \description{
 summarise

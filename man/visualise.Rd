@@ -10,9 +10,6 @@ visualise(nacho_object)
 \arguments{
 \item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
 }
-\value{
-[NULL]
-}
 \description{
 visualise
 }
