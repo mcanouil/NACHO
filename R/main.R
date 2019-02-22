@@ -26,13 +26,13 @@ summarise <- function(
   data_directory <- normalizePath(data_directory)
 
   message("[NACHO] Importing RCC files.")
-  if(is.data.frame(ssheet_csv)){
-    nacho_df <- ssheet_csv
-  }else if(is.character(ssheet_csv)){
-    nacho_df <- utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE)
-  }else{
-    stop("[NACHO] Cannot read ssheet_csv, make sure it is a data.frame or path to csv.")
-  }
+  nacho_df <- switch(
+    EXPR = class(ssheet_csv),
+    "data.frame" = ssheet_csv,
+    "character" = utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE),
+    stop('[NACHO] "ssheet_csv"must be a "data.frame" or path to csv.')
+  )
+
   nacho_df <- tibble::as_tibble(nacho_df)
   nacho_df[["file_path"]] <- paste(data_directory, nacho_df[[id_colname]], sep = "/")
   nacho_df[["file_exists"]] <- sapply(X = nacho_df[["file_path"]], FUN = file.exists)
