@@ -18,7 +18,27 @@
 #' @param n_comp [numeric] Number indicating the number of principal components to compute.
 #'  Cannot be more than n-1 samples. Default is \code{10}.
 #'
-#' @return [list]
+#' @return [list] A list containing parameters and data:
+#' \describe{
+#'   \item{access}{[character] Value passed to \code{\link{summarise}} in \code{id_colname}.}
+#'   \item{housekeeping_genes}{[character] Value passed to \code{\link{summarise}}.}
+#'   \item{housekeeping_predict}{[logical] Value passed to \code{\link{summarise}}.}
+#'   \item{housekeeping_norm}{[logical] Value passed to \code{\link{summarise}}.}
+#'   \item{normalisation_method}{[character] Value passed to \code{\link{summarise}}.}
+#'   \item{remove_outliers}{[logical] \code{FALSE}.}
+#'   \item{n_comp}{[ numeric] Value passed to \code{\link{summarise}}.}
+#'   \item{data_directory}{[character] Value passed to \code{\link{summarise}}.}
+#'   \item{pc_sum}{[data.frame] A \code{data.frame} with \code{n_comp} rows and four columns:
+#'    "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
+#'   \item{nacho}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
+#'   and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
+#'   \item{raw_counts}{[data.frame] Raw counts with probes as rows and samples as columns.
+#'   With \code{"CodeClass"} (first column), the type of the probes and
+#'   \code{"Name"} (second column), the Name of the probes.}
+#'   \item{normalised_counts}{[data.frame] Normalised counts with probes as rows and samples as columns.
+#'   With \code{"CodeClass"} (first column)), the type of the probes and
+#'   \code{"Name"} (second column), the name of the probes.}
+#' }
 #' @export
 #'
 #' @examples
@@ -199,9 +219,43 @@ summarize <- summarise
 #'
 #' @param nacho_object [list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.
 #' @inheritParams summarise
-#' @param remove_outliers [logical]
+#' @param remove_outliers [logical] A boolean to indicate if outliers should be excluded.
 #'
-#' @return [list]
+#' @details Outliers definition (\code{remove_outliers}):
+#' \itemize{
+#'  \item Binding Density (\code{BD}) < 0.1
+#'  \item Binding Density (\code{BD}) > 2.25
+#'  \item Imaging (\code{FoV}) < 75
+#'  \item Positive Control Linearity (\code{PC}) < 0.95
+#'  \item Limit of Detection (\code{LoD}) < 2
+#'  \item Positive normalisation factor (\code{Positive_factor}) < 0.25
+#'  \item Positive normalisation factor (\code{Positive_factor}) > 0.75
+#'  \item Housekeeping normalisation factor (\code{house_factor}) < 1/11
+#'  \item Housekeeping normalisation factor (\code{house_factor}) > 11
+#' }
+#'
+#' @return [list] A list containing parameters and data.
+#' \describe{
+#'   \item{access}{[character] Value passed to \code{\link{summarise}} in \code{id_colname}.}
+#'   \item{housekeeping_genes}{[character] Value passed to \code{\link{summarise}} or \code{\link{normalise}}.}
+#'   \item{housekeeping_predict}{[logical] Value passed to \code{\link{summarise}}.}
+#'   \item{housekeeping_norm}{[logical] Value passed to \code{\link{summarise}} or \code{\link{normalise}}.}
+#'   \item{normalisation_method}{[character] Value passed to \code{\link{summarise}} or \code{\link{normalise}}.}
+#'   \item{remove_outliers}{[logical] Value passed to \code{\link{normalise}}.}
+#'   \item{n_comp}{[ numeric] Value passed to \code{\link{summarise}}.}
+#'   \item{data_directory}{[character] Value passed to \code{\link{summarise}}.}
+#'   \item{pc_sum}{[data.frame] A \code{data.frame} with \code{n_comp} rows and four columns:
+#'    "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
+#'   \item{nacho}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
+#'   and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
+#'   \item{raw_counts}{[data.frame] Raw counts with probes as rows and samples as columns.
+#'   With \code{"CodeClass"} (first column), the type of the probes and
+#'   \code{"Name"} (second column), the Name of the probes.}
+#'   \item{normalised_counts}{[data.frame] Normalised counts with probes as rows and samples as columns.
+#'   With \code{"CodeClass"} (first column)), the type of the probes and
+#'   \code{"Name"} (second column), the name of the probes.}
+#' }
+#'
 #' @export
 #'
 #' @examples
@@ -398,7 +452,6 @@ normalize <- normalise
 #'
 #' @inheritParams normalise
 #'
-#' @return [NULL]
 #' @export
 #'
 #' @examples
