@@ -12,7 +12,44 @@
 #' @return [list]
 #' @export
 #'
-#' @examples NULL
+#' @examples
+#' \dontrun{
+#' library(GEOquery)
+#' library(NACHO)
+#'
+#' # Import data from GEO
+#' gse <- GEOquery::getGEO(GEO = "GSE74821")
+#' targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
+#' GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
+#' utils::untar(
+#'   tarfile = paste0(tempdir(), "/GSE74821/GSE74821_RAW.tar"),
+#'   exdir = paste0(tempdir(), "/GSE74821")
+#' )
+#' targets$IDFILE <- list.files(
+#'   path = paste0(tempdir(), "/GSE74821"),
+#'   pattern = ".RCC.gz$"
+#' )
+#' targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
+#' utils::write.csv(
+#'   x = targets,
+#'   file = paste0(tempdir(), "/GSE74821/Samplesheet.csv")
+#' )
+#'
+#'
+#' # Read RCC files and format
+#' nacho <- summarise(
+#'    data_directory = paste0(tempdir(), "/GSE74821"),
+#'    ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
+#'    id_colname = "IDFILE",
+#'    housekeeping_genes = NULL,
+#'    housekeeping_predict = FALSE,
+#'    housekeeping_norm = TRUE,
+#'    normalisation_method = "GEO",
+#'    n_comp = 10
+#' )
+#'
+#' }
+#'
 summarise <- function(
   data_directory = NULL,
   ssheet_csv = NULL,
@@ -149,15 +186,60 @@ summarize <- summarise
 #' normalise
 #'
 #' @param nacho_object [list]
-#' @param housekeeping_genes [vector(character)]
-#' @param housekeeping_norm [logical]
-#' @param normalisation_method [character]
+#' @inheritParams summarise
 #' @param remove_outliers [logical]
 #'
 #' @return [list]
 #' @export
 #'
-#' @examples NULL
+#' @examples
+#' \dontrun{
+#' library(GEOquery)
+#' library(NACHO)
+#'
+#' # Import data from GEO
+#' gse <- GEOquery::getGEO(GEO = "GSE74821")
+#' targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
+#' GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
+#' utils::untar(
+#'   tarfile = paste0(tempdir(), "/GSE74821/GSE74821_RAW.tar"),
+#'   exdir = paste0(tempdir(), "/GSE74821")
+#' )
+#' targets$IDFILE <- list.files(
+#'   path = paste0(tempdir(), "/GSE74821"),
+#'   pattern = ".RCC.gz$"
+#' )
+#' targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
+#' utils::write.csv(
+#'   x = targets,
+#'   file = paste0(tempdir(), "/GSE74821/Samplesheet.csv")
+#' )
+#'
+#'
+#' # Read RCC files and format
+#' nacho <- summarise(
+#'    data_directory = paste0(tempdir(), "/GSE74821"),
+#'    ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
+#'    id_colname = "IDFILE",
+#'    housekeeping_genes = NULL,
+#'    housekeeping_predict = FALSE,
+#'    housekeeping_norm = TRUE,
+#'    normalisation_method = "GEO",
+#'    n_comp = 10
+#' )
+#'
+#'
+#' # (re)Normalise data
+#' nacho_norm <- normalise(
+#'   nacho_object = nacho,
+#'   housekeeping_genes = nacho[["housekeeping_genes"]],
+#'   housekeeping_norm = TRUE,
+#'   normalisation_method = "GEO",
+#'   remove_outliers = TRUE
+#' )
+#'
+#' }
+#'
 normalise <- function(
   nacho_object,
   housekeeping_genes = nacho_object[["housekeeping_genes"]],
@@ -299,12 +381,61 @@ normalize <- normalise
 
 #' visualise
 #'
-#' @param nacho_object [list]
+#' @inheritParams normalise
 #'
 #' @return [NULL]
 #' @export
 #'
-#' @examples NULL
+#' @examples
+#' \dontrun{
+#' library(GEOquery)
+#' library(NACHO)
+#'
+#' # Import data from GEO
+#' gse <- GEOquery::getGEO(GEO = "GSE74821")
+#' targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
+#' GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
+#' utils::untar(
+#'   tarfile = paste0(tempdir(), "/GSE74821/GSE74821_RAW.tar"),
+#'   exdir = paste0(tempdir(), "/GSE74821")
+#' )
+#' targets$IDFILE <- list.files(
+#'   path = paste0(tempdir(), "/GSE74821"),
+#'   pattern = ".RCC.gz$"
+#' )
+#' targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
+#' utils::write.csv(
+#'   x = targets,
+#'   file = paste0(tempdir(), "/GSE74821/Samplesheet.csv")
+#' )
+#'
+#'
+#' # Read RCC files and format
+#' nacho <- summarise(
+#'    data_directory = paste0(tempdir(), "/GSE74821"),
+#'    ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
+#'    id_colname = "IDFILE",
+#'    housekeeping_genes = NULL,
+#'    housekeeping_predict = FALSE,
+#'    housekeeping_norm = TRUE,
+#'    normalisation_method = "GEO",
+#'    n_comp = 10
+#' )
+#' visualise(nacho)
+#'
+#'
+#' # (re)Normalise data
+#' nacho_norm <- normalise(
+#'   nacho_object = nacho,
+#'   housekeeping_genes = nacho[["housekeeping_genes"]],
+#'   housekeeping_norm = TRUE,
+#'   normalisation_method = "GEO",
+#'   remove_outliers = TRUE
+#' )
+#' visualise(nacho_norm)
+#'
+#' }
+#'
 visualise <- function(nacho_object) {
   mandatory_fields <- c(
     "access",
