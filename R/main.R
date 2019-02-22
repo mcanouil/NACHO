@@ -1,13 +1,13 @@
 #' summarise
 #'
-#' @param data_directory [character]
-#' @param ssheet_csv [character]
-#' @param id_colname [character]
-#' @param housekeeping_genes [vector(character)]
-#' @param housekeeping_predict [logical]
-#' @param housekeeping_norm [logical]
-#' @param normalisation_method [character]
-#' @param n_comp [numeric]
+#' @param data_directory [character] A character string of the directory where the data is stored
+#' @param ssheet_csv [character] Either a string with the name of the CSV of the samplesheet or a R object witht the samplesheet. Should contain a column that matches the file names in the folder
+#' @param id_colname [character] Character string of the column in ssheet_csv that matches the file names in data_directory
+#' @param housekeeping_genes [vector(character)] A vector of names of the miRNAs/mRNAs that should be used as housekeeping genes
+#' @param housekeeping_predict [logical] Boolean to indicate whether the housekeeping genes should be predicted (TRUE) or not (FALSE). Default is FALSE
+#' @param housekeeping_norm [logical] Boolean to indicate whether the housekeeping normalization should be performed
+#' @param normalisation_method [character] Either 'GEO' or 'GLM' to indicate normalization using the geometric mean or a generalized linear model
+#' @param n_comp [numeric] Number indicating the number of principal components to calculate. Cannot be more than n-1 samples
 #'
 #' @return [list]
 #' @export
@@ -148,8 +148,8 @@ summarize <- summarise
 
 #' normalise
 #'
-#' @param nacho_object [list]
-#' @param housekeeping_genes [vector(character)]
+#' @param nacho_object [list] List obtained from `summarize`
+#' @param housekeeping_genes [vector(character)] 
 #' @param housekeeping_norm [logical]
 #' @param normalisation_method [character]
 #' @param remove_outliers [logical]
