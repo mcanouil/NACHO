@@ -52,6 +52,26 @@ summarise <- function(
   cat("\n")
 
   message("[NACHO] Performing QC and formatting data.")
+  has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
+  if (!has_hkg & is.null(housekeeping_genes) & !housekeeping_predict) {
+    if (housekeeping_norm) {
+      message(
+        paste(
+          '[NACHO] "housekeeping_norm" has been set to FALSE.',
+          "  Note:",
+          if (has_hkg) {
+            ""
+          } else {
+            "  - No default housekeeping genes available in your data;"
+          },
+          '  - "housekeeping_genes" is NULL;',
+          '  - "housekeeping_predict" is FALSE.',
+          sep = "\n"
+        )
+      )
+      housekeeping_norm <- FALSE
+    }
+  }
   nacho_object <- qc_rcc(
     data_directory = data_directory,
     nacho_df = nacho_df,
@@ -1004,6 +1024,7 @@ visualise <- function(nacho_object) {
             }
 
             if (input$tabs == "hf") {
+              shiny::req(housekeeping_norm)
               local_data <- dplyr::distinct(
                 .data = nacho[, c(id_colname, "Positive_factor", "House_factor", colour_name)]
               )
@@ -1026,6 +1047,7 @@ visualise <- function(nacho_object) {
                 p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
               }
             } else if (input$tabs == "norm_res") {
+              shiny::req(!is.null(housekeeping_genes))
               shiny::req(!is.null(input$with_smooth))
               out <- tibble::tibble(
                 "CodeClass" = "Average",
