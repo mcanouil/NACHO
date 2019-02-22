@@ -15,13 +15,14 @@ normalise(nacho_object,
 \item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
 
 \item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs
-that should be used as housekeeping genes.}
+that should be used as housekeeping genes. Default is \code{NULL}.}
 
-\item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalisation should be performed}
+\item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalisation should be performed.
+Default is \code{TRUE}.}
 
 \item{normalisation_method}{[character] Either \code{"GEO"} or \code{"GLM"}.
-Character string to indicate normalisation using the geometric mean \code{"GEO"}
-or a generalized linear model \code{"GLM"}. Default is \code{"GEO"}.}
+Character string to indicate normalisation using the geometric mean (\code{"GEO"})
+or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 
 \item{remove_outliers}{[logical]}
 }
