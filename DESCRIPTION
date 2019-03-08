@@ -2,9 +2,13 @@ Package: NACHO
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.3.0
-Authors@R: c(person("Gerard", "Bouland", role = c("aut", "cre"), email = "G.Bouland@lumc.nl"),
-  person("Roderick .C", "Slieker", role = c("aut"), email = "R.C.Slieker@lumc.nl"),
-  person("Mickaël", "Canouil", role = c("aut"), email = "***REMOVED***"))
+Authors@R: c(
+    person("Gerard", "Bouland", role = c("aut", "cre"), email = "G.Bouland@lumc.nl"),
+    person("Roderick .C", "Slieker", role = c("aut"), email = "R.C.Slieker@lumc.nl"),
+    person("Mickaël", "Canouil", role = c("aut"), email = "***REMOVED***", 
+      comment = c(ORCID = "0000-0002-3396-4549")
+    )
+  )
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: GPL-3 | file LICENSE
