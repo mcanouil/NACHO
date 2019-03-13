@@ -344,7 +344,7 @@ normalise <- function(
         '- "summarise()":\n',
         '    housekeeping_genes=c("', paste(nacho_object[["housekeeping_genes"]], collapse = '", "'), '")\n',
         '- "normalise()":\n',
-        '    housekeeping_genes=c("', paste(housekeeping_genes, collapse = '", "'), '"\n'
+        '    housekeeping_genes=c("', paste(housekeeping_genes, collapse = '", "'), '")\n'
       )
     )
   }
