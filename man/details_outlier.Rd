@@ -4,12 +4,14 @@
 \alias{details_outlier}
 \title{details_outlier}
 \usage{
-details_outlier(nacho_df, id_colname)
+details_outlier(nacho_df, id_colname, outliers_thresholds)
 }
 \arguments{
 \item{nacho_df}{[data.frame]}
 
 \item{id_colname}{[character]}
+
+\item{outliers_thresholds}{[list]}
 }
 \value{
 [list]

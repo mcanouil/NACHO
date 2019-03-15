@@ -66,6 +66,7 @@ visualise <- function(nacho_object) {
     "data_directory",
     "pc_sum",
     "nacho",
+    "outliers_thresholds",
     "raw_counts",
     "normalised_counts"
   )
@@ -83,6 +84,13 @@ visualise <- function(nacho_object) {
   nacho <- nacho_object[["nacho"]]
   save_path_default <- nacho_object[["data_directory"]]
   type_set <- attr(nacho_object, "RCC_type")
+  outliers_env <- new.env()
+  assign(x = "outliers_thresholds", value = nacho_object[["outliers_thresholds"]], envir = outliers_env)
+
+  message(
+    '[NACHO] Custom "outliers_thresholds" can be loaded for later use with:\n',
+    '  outliers_thresholds <- readRDS("', tempdir(), '/outliers_thresholds.rds")'
+  )
 
   shiny::addResourcePath("www", system.file("logo", package = "NACHO"))
 
@@ -375,17 +383,18 @@ visualise <- function(nacho_object) {
       output$interfaceG <- shiny::renderUI({
         shiny::req(input$maintabs == "met")
         shiny::req(input$BD_choice)
+        outliers_thresholds <- get(x = "outliers_thresholds", envir = outliers_env)
         ranges <- c(
-          "BD" = c(0.1, 4, 0.1, input$BD_choice),
-          "FoV" = c(50, 100, 75),
-          "LoD" = c(0, 30, 2),
-          "PC" = c(0.5, 1, 0.95)
+          "BD" = c(0.1, input$BD_choice, unname(outliers_thresholds[["BD"]])),
+          "FoV" = c(50, 100, unname(outliers_thresholds[["FoV"]])),
+          "LoD" = c(0, 30, unname(outliers_thresholds[["LoD"]])),
+          "PC" = c(0.5, 1, unname(outliers_thresholds[["PC"]]))
         )
         shiny::req(input$tabs)
         if (input$tabs == "BD") {
-          shiny::sliderInput(
+           shiny::sliderInput(
             inputId = "threshold",
-            label = sprintf("Custom QC threshold (default: %s - %s)", ranges["BD3"], ranges["BD4"]),
+            label = sprintf("Custom QC threshold (default: %s - %s)", ranges["BD1"], ranges["BD2"]),
             min = as.numeric(ranges["BD1"]),
             max = as.numeric(ranges["BD2"]),
             value = c(
@@ -404,6 +413,13 @@ visualise <- function(nacho_object) {
         }
       })
 
+      shiny::observeEvent(c(input$tabs, input$threshold), {
+        outliers_thresholds <- get(x = "outliers_thresholds", envir = outliers_env)
+        outliers_thresholds[[input$tabs]] <- input$threshold
+        assign(x = "outliers_thresholds", value = outliers_thresholds, envir = outliers_env)
+        saveRDS(object = outliers_thresholds, file = paste0(tempdir(), "/outliers_thresholds.rds"))
+      })
+
       output$interfaceH <- shiny::renderUI({
         shiny::req(input$maintabs %in% c("cg", "norm"))
         shiny::req(input$tabs %in% c("Control Probe Expression", "norm_res"))
@@ -419,7 +435,11 @@ visualise <- function(nacho_object) {
 
       output$outlier_table <- shiny::renderDataTable({
         shiny::req(input$maintabs%in%c("ot"))
-        details_out <- details_outlier(nacho_df = nacho, id_colname = id_colname)
+        details_out <- details_outlier(
+          nacho_df = nacho,
+          id_colname = id_colname,
+          outliers_thresholds = get(x = "outliers_thresholds", envir = outliers_env)
+        )
         all_out <- unique(unlist(details_out))
 
         data.frame(
