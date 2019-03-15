@@ -417,7 +417,7 @@ normalise <- function(
   )
   nacho_object[["normalised_counts"]] <- norm_counts
 
-  if ("RCC_type"%in%names(attributes(nacho_object))) {
+  if (!"RCC_type"%in%names(attributes(nacho_object))) {
     attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
   }
 
