@@ -195,7 +195,7 @@ visualise <- function(nacho_object) {
           },
           "cg" = {
             tabslist <- unique(nacho[["CodeClass"]][-grep("Endogenous", nacho[["CodeClass"]])])
-            tabslist <- c(tabslist, "Control Probe Expression")
+            tabslist <- setdiff(c(tabslist, "Control Probe Expression"), "Message")
             do.call(
               what = "tabsetPanel",
               c(
@@ -242,9 +242,9 @@ visualise <- function(nacho_object) {
             inputId = "attribute",
             label = "Select x-axis",
             choices = c(
+              "CartridgeID",
               "Date",
               "ID",
-              "CartridgeID",
               "ScannerID",
               "StagePosition"
             )
