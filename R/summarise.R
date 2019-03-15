@@ -39,6 +39,7 @@
 #'   With \code{"CodeClass"} (first column)), the type of the probes and
 #'   \code{"Name"} (second column), the name of the probes.}
 #' }
+#'
 #' @export
 #'
 #' @examples
