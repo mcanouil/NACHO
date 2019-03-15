@@ -32,6 +32,7 @@
 #'    "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
 #'   \item{nacho}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
 #'   and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
+#'   \item{outliers_thresholds}{[list] A \code{list} of the default quality-control thresholds.}
 #'   \item{raw_counts}{[data.frame] Raw counts with probes as rows and samples as columns.
 #'   With \code{"CodeClass"} (first column), the type of the probes and
 #'   \code{"Name"} (second column), the Name of the probes.}
@@ -162,6 +163,15 @@ summarise <- function(
     n_comp = n_comp
   )
 
+  nacho_object[["outliers_thresholds"]] <- list(
+    BD = c(0.1, 2.25),
+    FoV = 75,
+    LoD = 2,
+    PC = 0.95,
+    Positive_factor = c(1/4, 4),
+    House_factor = c(1/11, 11)
+  )
+
   message(
     paste0(
       '[NACHO] Normalising data using "', normalisation_method, '" method ',
@@ -201,6 +211,7 @@ summarise <- function(
     "  $ data_directory      : character",
     "  $ pc_sum              : data.frame",
     "  $ nacho               : data.frame",
+    "  $ outliers_thresholds : list",
     "  $ raw_counts          : data.frame",
     "  $ normalised_counts   : data.frame",
     sep = "\n"
