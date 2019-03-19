@@ -128,7 +128,14 @@ normalise <- function(
   id_colname <- nacho_object[["access"]]
   type_set <- attr(nacho_object, "RCC_type")
 
-  if (!isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes)))) {
+  params_changed <- c(
+    "housekeeping_genes" = !isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes))),
+    "housekeeping_predict" = nacho_object[["housekeeping_predict"]]!=housekeeping_predict,
+    "housekeeping_norm" = nacho_object[["housekeeping_norm"]]!=housekeeping_norm,
+    "normalisation_method" = nacho_object[["normalisation_method"]]!=normalisation_method
+  )
+
+  if (params_changed["housekeeping_genes"]) {
     warning(
       paste0(
         '[NACHO] Note: "housekeeping_genes" is different from the parameter used in "summarise()".\n',
@@ -140,7 +147,7 @@ normalise <- function(
     )
   }
 
-  if (nacho_object[["housekeeping_predict"]]!=housekeeping_predict) {
+  if (params_changed["housekeeping_predict"]) {
     warning(
       paste0(
         '[NACHO] Note: "housekeeping_predict" is different from the parameter used in "summarise()".\n',
@@ -152,7 +159,7 @@ normalise <- function(
     )
   }
 
-  if (nacho_object[["housekeeping_norm"]]!=housekeeping_norm) {
+  if (params_changed["housekeeping_norm"]) {
     warning(
       paste0(
         '[NACHO] Note: "housekeeping_norm" is different from the parameter used in "summarise()".\n',
@@ -164,7 +171,7 @@ normalise <- function(
     )
   }
 
-  if (nacho_object[["normalisation_method"]]!=normalisation_method) {
+  if (params_changed["normalisation_method"]) {
     warning(
       paste0(
         '[NACHO] Note: "normalisation_method" is different from the parameter used in "summarise()".\n',
@@ -186,19 +193,32 @@ normalise <- function(
       unique(nacho_object[["nacho"]][[nacho_object[["access"]]]]),
       unique(nacho_df[[nacho_object[["access"]]]])
     )
-    if (length(outliers)!=0) {
+    if (length(outliers)!=0 | any(params_changed)) {
       nacho_object <- qc_rcc(
         data_directory = nacho_object[["data_directory"]],
         nacho_df = nacho_df,
         id_colname = id_colname,
         housekeeping_genes = housekeeping_genes,
-        housekeeping_predict = FALSE,
+        housekeeping_predict = housekeeping_predict,
         housekeeping_norm = housekeeping_norm,
         normalisation_method = normalisation_method,
         n_comp = nacho_object[["n_comp"]]
       )
     }
     nacho_object[["remove_outliers"]] <- remove_outliers
+  } else {
+    if (any(params_changed)) {
+      nacho_object <- qc_rcc(
+        data_directory = nacho_object[["data_directory"]],
+        nacho_df = nacho_object$nacho,
+        id_colname = id_colname,
+        housekeeping_genes = housekeeping_genes,
+        housekeeping_predict = housekeeping_predict,
+        housekeeping_norm = housekeeping_norm,
+        normalisation_method = normalisation_method,
+        n_comp = nacho_object[["n_comp"]]
+      )
+    }
   }
 
   nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(

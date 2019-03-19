@@ -53,7 +53,11 @@ qc_rcc <- function(
       exclude_probes = probes_to_exclude
     )
 
-    tmp_counts <- dplyr::full_join(x = nacho_df, y = temp_facs, by = id_colname)
+    tmp_counts <- dplyr::full_join(
+      x = nacho_df[, c(id_colname, setdiff(colnames(nacho_df), colnames(temp_facs)))],
+      y = temp_facs,
+      by = id_colname
+    )
     tmp_counts[["count_norm"]] <- normalise_counts(data = tmp_counts, housekeeping_norm = FALSE)
 
     predicted_housekeeping <- find_housekeeping(
