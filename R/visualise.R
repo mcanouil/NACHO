@@ -487,6 +487,7 @@ visualise <- function(nacho_object) {
             shiny::req(input$threshold)
             shiny::req(input$tabs == "FoV" | input$tabs == "LoD" | input$tabs == "PC" | input$tabs == "BD")
             shiny::req(input$attribute, input$meta)
+            colour_name <- input$meta
 
             # Defaults for every main tab
             if (input$tabs == "BD") {
@@ -500,8 +501,11 @@ visualise <- function(nacho_object) {
               shiny::req(!all(local_data[[input$tabs]]==0))
             }
 
-            local_data <- dplyr::distinct(.data = local_data[, c(id_colname, input$attribute, input$tabs, input$meta)])
-            outliers_data <- dplyr::distinct(.data = outliers_data[, c(id_colname, input$attribute, input$tabs, input$meta)])
+            local_data <- dplyr::distinct(.data = local_data[, c(id_colname, input$attribute, input$tabs, colour_name)])
+            outliers_data <- dplyr::distinct(.data = outliers_data[, c(id_colname, input$attribute, input$tabs, colour_name)])
+            if (!is.character(outliers_data[[colour_name]])) {
+              outliers_data[[colour_name]] <- as.character(outliers_data[[colour_name]])
+            }
             local_data[[input$attribute]] <- factor(
               x = local_data[[input$attribute]],
               levels = gtools::mixedsort(unique(local_data[[input$attribute]]))
@@ -663,6 +667,9 @@ visualise <- function(nacho_object) {
                 .data = local_data[, c(id_colname, "Name", "Count", colour_name)]
               )
               local_data[["Count"]] <- local_data[["Count"]] + 1
+              if (!is.character(outliers_data[[colour_name]])) {
+                outliers_data[[colour_name]] <- as.character(outliers_data[[colour_name]])
+              }
 
               shiny::req(nrow(local_data)!=0)
               p <- ggplot2::ggplot(
@@ -708,6 +715,9 @@ visualise <- function(nacho_object) {
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, input$pcA_sel, input$pcB_sel, colour_name)]
                 )
+                if (!is.character(outliers_data[[colour_name]])) {
+                  outliers_data[[colour_name]] <- as.character(outliers_data[[colour_name]])
+                }
 
                 shiny::req(nrow(local_data)!=0)
                 p_point <- ggplot2::ggplot(
@@ -812,6 +822,9 @@ visualise <- function(nacho_object) {
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, "Negative_factor", "Positive_factor", colour_name)]
                 )
+                if (!is.character(outliers_data[[colour_name]])) {
+                  outliers_data[[colour_name]] <- as.character(outliers_data[[colour_name]])
+                }
 
                 shiny::req(nrow(local_data)!=0)
                 p <- ggplot2::ggplot(
