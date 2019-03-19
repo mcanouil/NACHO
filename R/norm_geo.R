@@ -2,6 +2,8 @@
 #'
 #' @param data [list(data.frame)] A \code{list} of \code{data.frame} with the count data.
 #'
+#' @keywords internal
+#'
 #' @return [vector(numeric)]
 norm_geo <- function(data) {
   geometric_mean_pos <- geometric_probes(data = data, probes_type = "Positive")

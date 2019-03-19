@@ -5,6 +5,8 @@
 #' @inheritParams normalise
 #' @param exclude_probes [vector(character)] A list of probes to exclude.
 #'
+#' @keywords internal
+#'
 #' @return [data.frame]
 factor_calculation <- function(
   nacho_df,

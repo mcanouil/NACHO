@@ -3,6 +3,8 @@
 #' @inheritParams read_tags
 #' @param content [data.frame] A \code{data.frame} created from RCC files.
 #'
+#' @keywords internal
+#'
 #' @return [data.frame]
 format_tag_content <- function(tag, content) {
   if (nrow(content)==1 & is.na(content[1, 1])) {

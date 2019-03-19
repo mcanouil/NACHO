@@ -32,3 +32,4 @@ or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 \description{
 factor_calculation
 }
+\keyword{internal}

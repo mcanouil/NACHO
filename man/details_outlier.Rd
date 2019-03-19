@@ -21,3 +21,4 @@ the file names in \code{data_directory}.}
 \description{
 details_outlier
 }
+\keyword{internal}

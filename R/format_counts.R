@@ -4,6 +4,8 @@
 #' @inheritParams summarise
 #' @param count_column [character] A \code{character} string naming the column where the counts are.
 #'
+#' @keywords internal
+#'
 #' @return [data.frame]
 format_counts <- function(data, id_colname, count_column = "Count") {
   as.data.frame(

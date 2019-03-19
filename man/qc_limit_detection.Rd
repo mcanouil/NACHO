@@ -17,3 +17,4 @@ qc_limit_detection(pos_e, negatives)
 \description{
 qc_limit_detection
 }
+\keyword{internal}

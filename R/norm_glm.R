@@ -2,6 +2,8 @@
 #'
 #' @param data [list(data.frame)] A \code{list} of \code{data.frame} with the count data.
 #'
+#' @keywords internal
+#'
 #' @return [vector(numeric)]
 norm_glm <- function(data) {
   progress <- dplyr::progress_estimated(length(data)+1)

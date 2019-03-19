@@ -2,6 +2,8 @@
 #'
 #' @param counts [data.frame] A \code{data.frame} with the count data.
 #'
+#' @keywords internal
+#'
 #' @return [vector(numeric)]
 qc_positive_control <- function(counts) {
   measured <- log2(counts[["Count"]])

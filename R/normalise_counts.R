@@ -3,6 +3,8 @@
 #' @param data [data.frame] A \code{data.frame} with the count data.
 #' @inheritParams summarise
 #'
+#' @keywords internal
+#'
 #' @return [vector(numeric)]
 normalise_counts <- function(data, housekeeping_norm) {
   out <- (data[["Count"]] - data[["Negative_factor"]]) * data[["Positive_factor"]]

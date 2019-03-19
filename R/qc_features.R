@@ -3,6 +3,8 @@
 #' @param data [data.frame] A \code{data.frame} with the count data.
 #' @inheritParams summarise
 #'
+#' @keywords internal
+#'
 #' @return [data.frame]
 qc_features <- function(data, id_colname) {
   nested_data_df <- tidyr::nest(dplyr::group_by(.data = data, get(id_colname)))

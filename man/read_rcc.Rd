@@ -15,3 +15,4 @@ read_rcc(file)
 \description{
 read_rcc
 }
+\keyword{internal}
