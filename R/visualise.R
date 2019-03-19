@@ -74,7 +74,10 @@ visualise <- function(nacho_object) {
     stop('[NACHO] Must be run in an interactive R session!')
   }
   if (!all(mandatory_fields%in%names(nacho_object))) {
-    stop('[NACHO] "summarise()" must be used before "normalise()".')
+    stop(
+      '[NACHO] Mandatory fields are missing in "', substitute(nacho_object), '"!\n',
+      '  "summarise()" and/or "normalise()" must be called before "visualise()".'
+    )
   }
 
   id_colname <- nacho_object[["access"]]
