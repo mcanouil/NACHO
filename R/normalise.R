@@ -97,7 +97,7 @@ normalise <- function(
   housekeeping_predict = nacho_object[["housekeeping_predict"]],
   housekeeping_norm = nacho_object[["housekeeping_norm"]],
   normalisation_method = nacho_object[["normalisation_method"]],
-  remove_outliers = TRUE,
+  remove_outliers = nacho_object[["remove_outliers"]],
   outliers_thresholds = nacho_object[["outliers_thresholds"]]
 ) {
   if (missing(nacho_object)) {
@@ -132,59 +132,24 @@ normalise <- function(
     "housekeeping_genes" = !isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes))),
     "housekeeping_predict" = nacho_object[["housekeeping_predict"]]!=housekeeping_predict,
     "housekeeping_norm" = nacho_object[["housekeeping_norm"]]!=housekeeping_norm,
-    "normalisation_method" = nacho_object[["normalisation_method"]]!=normalisation_method
+    "normalisation_method" = nacho_object[["normalisation_method"]]!=normalisation_method,
+    "remove_outliers" = nacho_object[["remove_outliers"]]!=remove_outliers,
+    "outliers_thresholds" = !isTRUE(all.equal(nacho_object[["outliers_thresholds"]], outliers_thresholds))
   )
 
-  if (params_changed["housekeeping_genes"]) {
-    warning(
-      paste0(
-        '[NACHO] Note: "housekeeping_genes" is different from the parameter used in "summarise()".\n',
-        '  - "summarise()":\n',
-        '      housekeeping_genes = c("', paste(nacho_object[["housekeeping_genes"]], collapse = '", "'), '")\n',
-        '  - "normalise()":\n',
-        '      housekeeping_genes = c("', paste(housekeeping_genes, collapse = '", "'), '")\n'
+  if (all(!params_changed)) {
+    message(
+      '[NACHO] Nothing was done. Parameters in "normalise()", were the same as in "', substitute(nacho_object), '".'
+    )
+    return(nacho_object)
+  } else {
+    message(
+      '[NACHO] Normalising "', substitute(nacho_object), '" with new value for parameters:\n',
+      paste(
+        paste0("  - ", names(params_changed[which(params_changed)]), " = ", params_changed[which(params_changed)]),
+        collapse = "\n"
       )
     )
-  }
-
-  if (params_changed["housekeeping_predict"]) {
-    warning(
-      paste0(
-        '[NACHO] Note: "housekeeping_predict" is different from the parameter used in "summarise()".\n',
-        '  - "summarise()":\n',
-        '      housekeeping_predict = ', nacho_object[["housekeeping_predict"]], '\n',
-        '  - "normalise()":\n',
-        '      housekeeping_predict = ', housekeeping_predict, '\n'
-      )
-    )
-  }
-
-  if (params_changed["housekeeping_norm"]) {
-    warning(
-      paste0(
-        '[NACHO] Note: "housekeeping_norm" is different from the parameter used in "summarise()".\n',
-        '  - "summarise()":\n',
-        '      housekeeping_norm = ', nacho_object[["housekeeping_norm"]], '\n',
-        '  - "normalise()":\n',
-        '      housekeeping_norm = ', housekeeping_norm, '\n'
-      )
-    )
-  }
-
-  if (params_changed["normalisation_method"]) {
-    warning(
-      paste0(
-        '[NACHO] Note: "normalisation_method" is different from the parameter used in "summarise()".\n',
-        '  - "summarise()":\n',
-        '      normalisation_method = "', nacho_object[["normalisation_method"]], '"\n',
-        '  - "normalise()":\n',
-        '      normalisation_method = "', normalisation_method, '"\n'
-      )
-    )
-  }
-
-  if (nacho_object[["remove_outliers"]]) {
-    message("[NACHO] Outliers have already been removed!")
   }
 
   if (remove_outliers & !nacho_object[["remove_outliers"]]) {
@@ -207,10 +172,12 @@ normalise <- function(
     }
     nacho_object[["remove_outliers"]] <- remove_outliers
   } else {
+    message("[NACHO] Outliers have already been removed!")
+
     if (any(params_changed)) {
       nacho_object <- qc_rcc(
         data_directory = nacho_object[["data_directory"]],
-        nacho_df = nacho_object$nacho,
+        nacho_df = nacho_object[["nacho"]],
         id_colname = id_colname,
         housekeeping_genes = housekeeping_genes,
         housekeeping_predict = housekeeping_predict,
