@@ -97,6 +97,7 @@ normalise <- function(
   housekeeping_predict = nacho_object[["housekeeping_predict"]],
   housekeeping_norm = nacho_object[["housekeeping_norm"]],
   normalisation_method = nacho_object[["normalisation_method"]],
+  n_comp = nacho_object[["n_comp"]],
   remove_outliers = nacho_object[["remove_outliers"]],
   outliers_thresholds = nacho_object[["outliers_thresholds"]]
 ) {
@@ -133,6 +134,7 @@ normalise <- function(
     "housekeeping_predict" = nacho_object[["housekeeping_predict"]]!=housekeeping_predict,
     "housekeeping_norm" = nacho_object[["housekeeping_norm"]]!=housekeeping_norm,
     "normalisation_method" = nacho_object[["normalisation_method"]]!=normalisation_method,
+    "n_comp" = nacho_object[["n_comp"]]!=n_comp,
     "remove_outliers" = nacho_object[["remove_outliers"]]!=remove_outliers,
     "outliers_thresholds" = !isTRUE(all.equal(nacho_object[["outliers_thresholds"]], outliers_thresholds))
   )
