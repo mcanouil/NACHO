@@ -15,3 +15,4 @@ norm_glm(data)
 \description{
 norm_glm
 }
+\keyword{internal}

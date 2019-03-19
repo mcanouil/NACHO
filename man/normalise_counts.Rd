@@ -18,3 +18,4 @@ Default is \code{TRUE}.}
 \description{
 normalise_counts
 }
+\keyword{internal}

@@ -24,3 +24,4 @@ that should be used as housekeeping genes. Default is \code{NULL}.}
 \description{
 geometric_housekeeping
 }
+\keyword{internal}

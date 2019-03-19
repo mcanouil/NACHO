@@ -18,3 +18,4 @@ Cannot be more than n-1 samples. Default is \code{10}.}
 \description{
 qc_pca
 }
+\keyword{internal}

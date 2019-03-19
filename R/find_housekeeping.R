@@ -4,6 +4,8 @@
 #' @inheritParams summarise
 #' @param count_column [character] A \code{character} string naming the column where the counts are.
 #'
+#' @keywords internal
+#'
 #' @return [vector(character)]
 find_housekeeping <- function(data, id_colname, count_column) {
   data <- data[unlist(lapply(c("Endogenous", "Housekeeping"), grep, x = data[["CodeClass"]])), ]

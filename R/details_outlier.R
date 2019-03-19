@@ -4,6 +4,8 @@
 #' @inheritParams summarise
 #' @inheritParams normalise
 #'
+#' @keywords internal
+#'
 #' @return [list]
 details_outlier <- function(nacho_df, id_colname, outliers_thresholds) {
   binding_thresh_logical <- which(

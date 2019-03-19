@@ -18,3 +18,4 @@ the file names in \code{data_directory}.}
 \description{
 qc_features
 }
+\keyword{internal}

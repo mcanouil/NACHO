@@ -17,3 +17,4 @@ qc_imaging(fov_counted, fov_count)
 \description{
 qc_imaging
 }
+\keyword{internal}

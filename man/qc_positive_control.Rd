@@ -15,3 +15,4 @@ qc_positive_control(counts)
 \description{
 qc_positive_control
 }
+\keyword{internal}
