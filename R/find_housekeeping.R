@@ -6,7 +6,7 @@
 #'
 #' @return [vector(character)]
 find_housekeeping <- function(data, id_colname, count_column) {
-  data <- data[grep("Endogenous", data[["CodeClass"]]), ]
+  data <- data[unlist(lapply(c("Endogenous", "Housekeeping"), grep, x = data[["CodeClass"]])), ]
   nested_data_df <- tidyr::nest(dplyr::group_by(.data = data, get(id_colname)))
   colnames(nested_data_df)[1] <- id_colname
   ratios <- lapply(
