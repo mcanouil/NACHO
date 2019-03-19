@@ -20,3 +20,4 @@ the file names in \code{data_directory}.}
 \description{
 format_counts
 }
+\keyword{internal}

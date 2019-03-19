@@ -15,3 +15,4 @@ geometric_mean(x)
 \description{
 geometric_mean
 }
+\keyword{internal}

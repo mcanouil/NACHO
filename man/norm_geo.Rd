@@ -15,3 +15,4 @@ norm_geo(data)
 \description{
 norm_geo
 }
+\keyword{internal}

@@ -4,6 +4,8 @@
 #' @param nacho_df [data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
 #'   and all computed columns, i.e., quality-control metrics and counts, with one sample per row.
 #'
+#' @keywords internal
+#'
 #' @return [list]
 qc_rcc <- function(
   data_directory,

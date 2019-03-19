@@ -6,6 +6,8 @@
 #' @param intercept [vector(numeric)] A \code{vector(numeric)} with the average counts value.
 #' @inheritParams summarise
 #'
+#' @keywords internal
+#'
 #' @return [numeric]
 geometric_housekeeping <- function(data, positive_factor, intercept, housekeeping_genes) {
   house_data <- as.data.frame(data[, c("Name", "CodeClass", "Count")])

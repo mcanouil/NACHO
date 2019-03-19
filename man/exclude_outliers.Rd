@@ -15,3 +15,4 @@ exclude_outliers(nacho_object)
 \description{
 exclude_outliers
 }
+\keyword{internal}
