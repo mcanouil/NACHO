@@ -133,9 +133,9 @@ normalise <- function(
       paste0(
         '[NACHO] Note: "housekeeping_genes" is different from the parameter used in "summarise()".\n',
         '  - "summarise()":\n',
-        '      housekeeping_genes=c("', paste(nacho_object[["housekeeping_genes"]], collapse = '", "'), '")\n',
+        '      housekeeping_genes = c("', paste(nacho_object[["housekeeping_genes"]], collapse = '", "'), '")\n',
         '  - "normalise()":\n',
-        '      housekeeping_genes=c("', paste(housekeeping_genes, collapse = '", "'), '")\n'
+        '      housekeeping_genes = c("', paste(housekeeping_genes, collapse = '", "'), '")\n'
       )
     )
   }
@@ -145,9 +145,9 @@ normalise <- function(
       paste0(
         '[NACHO] Note: "housekeeping_predict" is different from the parameter used in "summarise()".\n',
         '  - "summarise()":\n',
-        '      housekeeping_predict=', nacho_object[["housekeeping_predict"]], '\n',
+        '      housekeeping_predict = ', nacho_object[["housekeeping_predict"]], '\n',
         '  - "normalise()":\n',
-        '      housekeeping_predict=', housekeeping_predict, '\n'
+        '      housekeeping_predict = ', housekeeping_predict, '\n'
       )
     )
   }
@@ -157,9 +157,9 @@ normalise <- function(
       paste0(
         '[NACHO] Note: "housekeeping_norm" is different from the parameter used in "summarise()".\n',
         '  - "summarise()":\n',
-        '      housekeeping_norm=', nacho_object[["housekeeping_norm"]], '\n',
+        '      housekeeping_norm = ', nacho_object[["housekeeping_norm"]], '\n',
         '  - "normalise()":\n',
-        '      housekeeping_norm=', housekeeping_norm, '\n'
+        '      housekeeping_norm = ', housekeeping_norm, '\n'
       )
     )
   }
@@ -169,9 +169,9 @@ normalise <- function(
       paste0(
         '[NACHO] Note: "normalisation_method" is different from the parameter used in "summarise()".\n',
         '  - "summarise()":\n',
-        '      normalisation_method="', nacho_object[["normalisation_method"]], '"\n',
+        '      normalisation_method = "', nacho_object[["normalisation_method"]], '"\n',
         '  - "normalise()":\n',
-        '      normalisation_method="', normalisation_method, '"\n'
+        '      normalisation_method = "', normalisation_method, '"\n'
       )
     )
   }
