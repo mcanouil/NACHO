@@ -1,6 +1,6 @@
 #' qc_positive_control
 #'
-#' @param counts [data.frame]
+#' @param counts [data.frame] A \code{data.frame} with the count data.
 #'
 #' @return [vector(numeric)]
 qc_positive_control <- function(counts) {

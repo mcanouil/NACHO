@@ -7,11 +7,12 @@
 format_counts(data, id_colname, count_column = "Count")
 }
 \arguments{
-\item{data}{[data.frame]}
+\item{data}{[data.frame] A \code{data.frame} with the count data.}
 
-\item{id_colname}{[character]}
+\item{id_colname}{[character] Character string of the column in \code{ssheet_csv} that matches
+the file names in \code{data_directory}.}
 
-\item{count_column}{[character]}
+\item{count_column}{[character] A \code{character} string naming the column where the counts are.}
 }
 \value{
 [data.frame]

@@ -7,9 +7,9 @@
 format_tag_content(tag, content)
 }
 \arguments{
-\item{tag}{[character]}
+\item{tag}{[character] A \code{character} string naming the TAG field in the RCC files.}
 
-\item{content}{[data.frame]}
+\item{content}{[data.frame] A \code{data.frame} created from RCC files.}
 }
 \value{
 [data.frame]

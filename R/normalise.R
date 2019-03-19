@@ -155,7 +155,7 @@ normalise <- function(
   }
 
   if (remove_outliers & !nacho_object[["remove_outliers"]]) {
-    nacho_df <- exclude_outliers(object = nacho_object)
+    nacho_df <- exclude_outliers(nacho_object = nacho_object)
     outliers <- setdiff(
       unique(nacho_object[["nacho"]][[nacho_object[["access"]]]]),
       unique(nacho_df[[nacho_object[["access"]]]])

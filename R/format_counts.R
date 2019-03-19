@@ -1,8 +1,8 @@
 #' format_counts
 #'
-#' @param data [data.frame]
-#' @param id_colname [character]
-#' @param count_column [character]
+#' @param data [data.frame] A \code{data.frame} with the count data.
+#' @inheritParams summarise
+#' @param count_column [character] A \code{character} string naming the column where the counts are.
 #'
 #' @return [data.frame]
 format_counts <- function(data, id_colname, count_column = "Count") {

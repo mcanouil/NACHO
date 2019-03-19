@@ -1,7 +1,7 @@
 #' read_tags
 #'
-#' @param tag [character]
-#' @param raw_rcc [vector(character)]
+#' @param tag [character] A \code{character} string naming the TAG field in the RCC files.
+#' @param raw_rcc [vector(character)]  A \code{vector(character)} containing all lines from a RCC file.
 #'
 #' @return [list(data.frame)]
 read_tags <- function(tag, raw_rcc) {
