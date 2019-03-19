@@ -65,6 +65,10 @@ qc_rcc <- function(
     if (is.null(predicted_housekeeping) | length(predicted_housekeeping)==0) {
       message('[NACHO] Could not find suitable houskeeping genes, default will be used.')
     } else {
+      message(
+        '[NACHO] The following predicted housekeeping genes will be used for normalisation:\n',
+          paste0("  - ", predicted_housekeeping, collapse = "\n")
+      )
       housekeeping_genes <- predicted_housekeeping
       control_genes_df <- nacho_df[nacho_df[["Name"]]%in%predicted_housekeeping, ]
       control_genes_df <- format_counts(
