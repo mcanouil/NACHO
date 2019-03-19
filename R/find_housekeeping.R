@@ -17,8 +17,6 @@ find_housekeeping <- function(data, id_colname, count_column) {
       sample_means <- mean(.data[[count_column]])
       ratios <- log2(.data[[count_column]] / sample_means)
       names(ratios) <- .data[["Name"]]
-      # ratios <- ratios[sum(is.infinite(ratios)) / length(ratios) <= 0.05]
-      # ifelse(is.infinite(ratios), NA, ratios)
       ratios
     }
   )
