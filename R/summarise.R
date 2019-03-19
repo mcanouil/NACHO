@@ -71,12 +71,7 @@
 #' nacho <- summarise(
 #'    data_directory = paste0(tempdir(), "/GSE74821"),
 #'    ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
-#'    id_colname = "IDFILE",
-#'    housekeeping_genes = NULL,
-#'    housekeeping_predict = FALSE,
-#'    housekeeping_norm = TRUE,
-#'    normalisation_method = "GEO",
-#'    n_comp = 10
+#'    id_colname = "IDFILE"
 #' )
 #'
 #' }
