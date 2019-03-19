@@ -94,7 +94,7 @@
 normalise <- function(
   nacho_object,
   housekeeping_genes = nacho_object[["housekeeping_genes"]],
-  housekeeping_predict = nacho_object[["housekeeping_predict"]]
+  housekeeping_predict = nacho_object[["housekeeping_predict"]],
   housekeeping_norm = nacho_object[["housekeeping_norm"]],
   normalisation_method = nacho_object[["normalisation_method"]],
   remove_outliers = TRUE,
