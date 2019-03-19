@@ -94,6 +94,7 @@
 normalise <- function(
   nacho_object,
   housekeeping_genes = nacho_object[["housekeeping_genes"]],
+  housekeeping_predict = nacho_object[["housekeeping_predict"]]
   housekeeping_norm = nacho_object[["housekeeping_norm"]],
   normalisation_method = nacho_object[["normalisation_method"]],
   remove_outliers = TRUE,
@@ -118,14 +119,17 @@ normalise <- function(
     "normalised_counts"
   )
   if (!all(mandatory_fields%in%names(nacho_object))) {
-    stop('[NACHO] "summarise()" must be used before "normalise()".')
+    stop(
+      '[NACHO] Mandatory fields are missing in "', substitute(nacho_object), '"!\n',
+      '  "summarise()" must be called before "normalise()".'
+    )
   }
 
   id_colname <- nacho_object[["access"]]
   type_set <- attr(nacho_object, "RCC_type")
 
   if (!isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes)))) {
-    message(
+    warning(
       paste0(
         '[NACHO] Note: "housekeeping_genes" is different from the parameter used in "summarise()".\n',
         '- "summarise()":\n',
@@ -136,8 +140,20 @@ normalise <- function(
     )
   }
 
+  if (nacho_object[["housekeeping_predict"]]!=housekeeping_predict) {
+    warning(
+      paste0(
+        '[NACHO] Note: "housekeeping_predict" is different from the parameter used in "summarise()".\n',
+        '- "summarise()":\n',
+        '    housekeeping_predict=', nacho_object[["housekeeping_predict"]], '\n',
+        '- "normalise()":\n',
+        '    housekeeping_predict=', housekeeping_predict, '\n'
+      )
+    )
+  }
+
   if (nacho_object[["housekeeping_norm"]]!=housekeeping_norm) {
-    message(
+    warning(
       paste0(
         '[NACHO] Note: "housekeeping_norm" is different from the parameter used in "summarise()".\n',
         '- "summarise()":\n',
@@ -149,9 +165,9 @@ normalise <- function(
   }
 
   if (nacho_object[["normalisation_method"]]!=normalisation_method) {
-    message(
+    warning(
       paste0(
-        '[NACHO] Note: "normalisation_method" is different from the parameter usedin "summarise()".\n',
+        '[NACHO] Note: "normalisation_method" is different from the parameter used in "summarise()".\n',
         '- "summarise()":\n',
         '    normalisation_method="', nacho_object[["normalisation_method"]], '"\n',
         '- "normalise()":\n',
