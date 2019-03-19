@@ -1,13 +1,8 @@
 #' qc_rcc
 #'
-#' @param data_directory [character]
-#' @param nacho_df [data.frame]
-#' @param id_colname [character]
-#' @param housekeeping_genes [vector(character)]
-#' @param housekeeping_predict [logical]
-#' @param housekeeping_norm [logical]
-#' @param normalisation_method [character]
-#' @param n_comp [numeric]
+#' @inheritParams summarise
+#' @param nacho_df [data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
+#'   and all computed columns, i.e., quality-control metrics and counts, with one sample per row.
 #'
 #' @return [list]
 qc_rcc <- function(

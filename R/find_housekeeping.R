@@ -1,8 +1,8 @@
 #' find_housekeeping
 #'
-#' @param data [data.frame]
-#' @param id_colname [character]
-#' @param count_column [character]
+#' @param data [data.frame] A \code{data.frame} with the count data.
+#' @inheritParams summarise
+#' @param count_column [character] A \code{character} string naming the column where the counts are.
 #'
 #' @return [vector(character)]
 find_housekeeping <- function(data, id_colname, count_column) {

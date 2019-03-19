@@ -1,6 +1,6 @@
 #' probe_exclusion
 #'
-#' @param control_genes_df [data.frame]
+#' @param control_genes_df [data.frame] A \code{data.frame} with the count data.
 #'
 #' @return [vector(character)]
 probe_exclusion <- function(control_genes_df) {

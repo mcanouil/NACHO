@@ -1,8 +1,8 @@
 #' details_outlier
 #'
-#' @param nacho_df [data.frame]
-#' @param id_colname [character]
-#' @param outliers_thresholds [list]
+#' @inheritParams qc_rcc
+#' @inheritParams summarise
+#' @inheritParams normalise
 #'
 #' @return [list]
 details_outlier <- function(nacho_df, id_colname, outliers_thresholds) {

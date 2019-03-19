@@ -4,10 +4,10 @@
 \alias{exclude_outliers}
 \title{exclude_outliers}
 \usage{
-exclude_outliers(object)
+exclude_outliers(nacho_object)
 }
 \arguments{
-\item{object}{[nacho_set]}
+\item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
 }
 \value{
 [data.frame]
