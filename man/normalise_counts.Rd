@@ -7,9 +7,10 @@
 normalise_counts(data, housekeeping_norm)
 }
 \arguments{
-\item{data}{[data.frame]}
+\item{data}{[data.frame] A \code{data.frame} with the count data.}
 
-\item{housekeeping_norm}{[logical]}
+\item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalisation should be performed.
+Default is \code{TRUE}.}
 }
 \value{
 [vector(numeric)]

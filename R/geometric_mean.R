@@ -1,6 +1,6 @@
 #' geometric_mean
 #'
-#' @param x [numeric]
+#' @param x [numeric] A \code{numeric} or \code{vector(numeric)}.
 #'
 #' @return [numeric]
 geometric_mean <- function(x) {

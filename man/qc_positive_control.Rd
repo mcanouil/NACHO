@@ -7,7 +7,7 @@
 qc_positive_control(counts)
 }
 \arguments{
-\item{counts}{[data.frame]}
+\item{counts}{[data.frame] A \code{data.frame} with the count data.}
 }
 \value{
 [vector(numeric)]

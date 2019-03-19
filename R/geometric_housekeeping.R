@@ -1,9 +1,10 @@
 #' geometric_housekeeping
 #'
-#' @param data [data.frame]
-#' @param positive_factor [vector(numeric)]
-#' @param intercept [vector(numeric)]
-#' @param housekeeping_genes [vector(character)]
+#' @param data [data.frame] A \code{data.frame} with the count data.
+#' @param positive_factor [vector(numeric)] A \code{vector(numeric)} with the positive probe
+#'   normalisation factor.
+#' @param intercept [vector(numeric)] A \code{vector(numeric)} with the average counts value.
+#' @inheritParams summarise
 #'
 #' @return [numeric]
 geometric_housekeeping <- function(data, positive_factor, intercept, housekeeping_genes) {

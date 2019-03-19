@@ -7,9 +7,9 @@
 read_tags(tag, raw_rcc)
 }
 \arguments{
-\item{tag}{[character]}
+\item{tag}{[character] A \code{character} string naming the TAG field in the RCC files.}
 
-\item{raw_rcc}{[vector(character)]}
+\item{raw_rcc}{[vector(character)]  A \code{vector(character)} containing all lines from a RCC file.}
 }
 \value{
 [list(data.frame)]

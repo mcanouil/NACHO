@@ -1,6 +1,6 @@
 #' norm_glm
 #'
-#' @param data [list(data.frame)]
+#' @param data [list(data.frame)] A \code{list} of \code{data.frame} with the count data.
 #'
 #' @return [vector(numeric)]
 norm_glm <- function(data) {

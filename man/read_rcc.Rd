@@ -7,7 +7,7 @@
 read_rcc(file)
 }
 \arguments{
-\item{file}{[character]}
+\item{file}{[character] The name of the RCC file which the data are to be read from.}
 }
 \value{
 [tibble]

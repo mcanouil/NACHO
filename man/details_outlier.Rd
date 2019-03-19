@@ -7,11 +7,13 @@
 details_outlier(nacho_df, id_colname, outliers_thresholds)
 }
 \arguments{
-\item{nacho_df}{[data.frame]}
+\item{nacho_df}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
+and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
 
-\item{id_colname}{[character]}
+\item{id_colname}{[character] Character string of the column in \code{ssheet_csv} that matches
+the file names in \code{data_directory}.}
 
-\item{outliers_thresholds}{[list]}
+\item{outliers_thresholds}{[list] List of thresholds to exclude outliers.}
 }
 \value{
 [list]
