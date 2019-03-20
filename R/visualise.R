@@ -699,7 +699,7 @@ visualise <- function(nacho_object) {
 
               if (length(unique(local_data[["Name"]]))>10) {
                 p <- p +
-                  theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5))
+                  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5))
               }
 
               p
