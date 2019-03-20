@@ -222,14 +222,14 @@ visualise <- function(nacho_object) {
             if (housekeeping_norm & !is.null(housekeeping_genes)) {
               shiny::tabsetPanel(
                 id = "tabs",
-                shiny::tabPanel("Positive Factor vs Background Threshold", value = "pfbt"),
+                shiny::tabPanel("Positive Factor vs. Background Threshold", value = "pfbt"),
                 shiny::tabPanel("Housekeeping Factor", value = "hf"),
                 shiny::tabPanel("Normalisation Result", value = "norm_res")
               )
             } else {
               shiny::tabsetPanel(
                 id = "tabs",
-                shiny::tabPanel("Positive Factor vs Background Threshold", value = "pfbt"),
+                shiny::tabPanel("Positive Factor vs. Background Threshold", value = "pfbt"),
                 shiny::tabPanel("Normalisation Result", value = "norm_res")
               )
             }
@@ -237,8 +237,8 @@ visualise <- function(nacho_object) {
           "vis" = {
             shiny::tabsetPanel(
               id = "tabs",
-              shiny::tabPanel("Average Count vs Binding Density", value = "MC-BD"),
-              shiny::tabPanel("Average Count vs Median Count", value = "MC-MedC"),
+              shiny::tabPanel("Average Count vs. Binding Density", value = "MC-BD"),
+              shiny::tabPanel("Average Count vs. Median Count", value = "MC-MedC"),
               shiny::tabPanel("Principal Component", value = "prin")
             )
           },
@@ -765,7 +765,7 @@ visualise <- function(nacho_object) {
                 ggpubr::ggarrange(p_point, p_histo, nrow = 2, ncol = 1)
               },
               "MC-BD" = {
-                # Count vs binding
+                # Count vs. binding
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, "MC", "BD", colour_name)]
                 )
@@ -785,7 +785,7 @@ visualise <- function(nacho_object) {
                   )
               },
               "MC-MedC" = {
-                # Count vs median
+                # Count vs. median
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, "MC", "MedC", colour_name)]
                 )
