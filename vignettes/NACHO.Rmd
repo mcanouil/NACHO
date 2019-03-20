@@ -33,7 +33,7 @@ knitr::opts_chunk$set(
 
 
 ```{r logo, echo = FALSE, out.width = "150px"}
-knitr::include_graphics(path = "Nacho_logo.png")
+knitr::include_graphics(path = "nacho_hex.png")
 ```
 
 

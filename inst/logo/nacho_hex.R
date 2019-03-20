@@ -47,6 +47,7 @@ ggplot2::ggsave(
   units = "in",
   dpi = 300
 )
+file.copy(from = "./inst/logo/nacho_hex_r.png", to = "./vignettes/nacho_hex_r.png", overwrite = TRUE)
 
 
 # devtools::install_github("GuangchuangYu/hexSticker")
@@ -65,3 +66,5 @@ hexSticker::sticker(
   h_color = "goldenrod4",
   filename = "./inst/logo/nacho_hex.png"
 )
+
+file.copy(from = "./inst/logo/nacho_hex.png", to = "./vignettes/nacho_hex.png", overwrite = TRUE)
