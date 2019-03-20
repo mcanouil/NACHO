@@ -100,10 +100,9 @@ visualise <- function(nacho_object) {
 
   app <- shiny::shinyApp(
     ui = shiny::fluidPage(
-      # titlePanel(shiny::img(src = "www/Nacho_logo.png", height = 150)),
       shiny::sidebarLayout(
         shiny::sidebarPanel(width = 3,
-          shiny::div(shiny::img(src = "www/Nacho_logo.png", height = 150), align = "center"),
+          shiny::div(shiny::img(src = "www/nacho_hex.png", height = 150), align = "center"),
           shiny::br(),
           shiny::tabsetPanel(
             id = "settings",
