@@ -298,9 +298,9 @@ visualise <- function(nacho_object) {
               inputId = "meta",
               label = "Coloured by:",
               choices = c(
+                "CartridgeID",
                 "Date",
                 "ID",
-                "CartridgeID",
                 "ScannerID",
                 "StagePosition"
               )
@@ -695,6 +695,11 @@ visualise <- function(nacho_object) {
                 p <- p + ggplot2::guides(colour = "none")
               } else {
                 p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
+              }
+
+              if (length(unique(local_data[["Name"]]))>10) {
+                p <- p +
+                  theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5))
               }
 
               p
