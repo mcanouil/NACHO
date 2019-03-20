@@ -865,7 +865,7 @@ visualise <- function(nacho_object) {
                   ggplot2::theme_grey(base_size = input$font_size) +
                   ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                   ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
-                  ggplot2::labs(x = "Positive Factor", y = "Houskeeping Factor", colour = colour_name) +
+                  ggplot2::labs(x = "Positive Factor", y = "Housekeeping Factor", colour = colour_name) +
                   ggplot2::scale_x_log10() +
                   ggplot2::scale_y_log10()
 
