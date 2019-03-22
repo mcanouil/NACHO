@@ -751,8 +751,8 @@ visualise <- function(nacho_object) {
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, input$pcA_sel, input$pcB_sel, colour_name)]
                 )
-                if (!is.character(outliers_data[[colour_name]])) {
-                  outliers_data[[colour_name]] <- as.character(outliers_data[[colour_name]])
+                if (!is.character(local_data[[colour_name]])) {
+                  local_data[[colour_name]] <- as.character(local_data[[colour_name]])
                 }
 
                 shiny::req(nrow(local_data)!=0)
