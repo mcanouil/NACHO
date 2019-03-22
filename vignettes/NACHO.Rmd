@@ -1,17 +1,29 @@
 ---
 title: "NACHO"
 subtitle: "A NanoString Quality-Control Dashboard"
-author: "G.A. Bouland, Dr. R.C. Slieker and Dr. M. Canouil"
-date: '`r format(Sys.time(), "%B %d, %Y (%Hh%M)")`'
+author:
+- name: "Mickaël Canouil, Ph.D."
+  affiliation: "Université de Lille, CNRS UMR 8199 - EGID, Institut Pasteur de Lille, Lille, France."
+  email: "mickael.canouil@cnrs.fr"
+- name: "Gerard A. Bouland"
+  affiliation: &id "Department of Cell and Chemical Biology, Leiden University Medical Center, 2333ZC, Leiden, The Netherlands"
+- name: "Roderick C. Slieker, Ph.D."
+  affiliation: 
+    - *id
+    - "Department of Epidemiology and Biostatistics, Amsterdam Public Health Institute, Amsterdam UMC, VU University Medical Center, Amsterdam, the Netherlands"
+date: '`r format(Sys.time(), "%B %d, %Y")`'
 output: 
   rmarkdown::html_vignette:
     number_sections: true
+    toc: true
+    toc_depth: 2
 vignette: >
   %\VignetteIndexEntry{NACHO}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
+# Introduction
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -36,26 +48,30 @@ knitr::opts_chunk$set(
 knitr::include_graphics(path = "nacho_hex.png")
 ```
 
-
 # Introduction
 
-**NACHO** (NanoString Quality Control Dashboard) is developed for NanoString nCounter data.  
-NanoString nCounter data are gene expression assays where there is no need for the use of enzymes or amplification protocols and work with fluorescent barcodes.  
-Each barcode is assigned a mRNA/miRNA which after bonding with its target can be counted.  
+*NACHO* (NanoString Quality Control Dashboard) is developed for NanoString nCounter data. 
+NanoString nCounter data is a mRNA or miRNA expression assay and works with fluorescent barcodes. 
+Each barcode is assigned a mRNA/miRNA, which can be counted after bonding with its target. 
 As a result each count of a specific barcode represents the presence of its target mRNA/miRNA. 
 
-**NACHO** is able to analyse the exported NanoString nCounter data and facilitates the user in performing a quality control.  
-**NACHO** does this by visualising Quality Control metrics, expression of control genes, principal components and sample specific size factors in an interactive web application.  
-With the use of two convenient function calls RCC files are summarised and visualised, namely; `summarise()` and `visualise()`.  
-**NACHO** also includes a function; `normalise()`, which calculates sample specific size factors and normalises the data. 
-`normalise()` creates a list in which your settings, the raw counts and normalised counts are stored.
+*NACHO* is able to load, visualise and normalise the exported NanoString nCounter data and facilitates the user in performing a quality control. 
+*NACHO* does this by visualising Quality Control metrics, expression of control genes, principal components and sample specific size factors in an interactive web application. 
+With the use of two functions, RCC files are summarised and visualised, namely: `summarise()` and `visualise()`. 
+The `summarise()` function is used to preprocess the data. 
+The `visualise()` function initiates a RStudio Shiny-based dashboard that visualises all relevant QC plots.
 
-To display the usage and utility of **NACHO**, we show three examples in which the above mentioned functions are used and the result is briefly examined.  
-**NACHO** comes with presummarised data and in the first example we use this data to call the interactive web application with the use of `visualise()`.  
+*NACHO* also includes a function `normalise()`, which calculates sample specific size factors and normalises the data. `normalise()` creates a list in which your settings, the raw counts and normalised counts are stored.
+
+# Example
+
+To display the usage and utility of *NACHO*, we show three examples in which the above mentioned functions are used and the results are briefly examined. 
+*NACHO* comes with presummarised data and in the first example we use this data to call the interactive web application with the use of `visualise()`. 
 In the second example we show the process of going from raw RCC files to visualisations with a data set queried from **GEO** using `GEOquery`.  
+
 In the third example we use the summarised data from second example to calculate the sample specific size factors using `normalise()` and its added functionality to predict housekeeping genes.
 
-Besides creating interactive visualisations, **NACHO** also identifies poorly performing samples which can be seen under the Outlier Table tab in the interactive web application.  
+Besides creating interactive visualisations, *NACHO* also identifies poorly performing samples which can be seen under the Outlier Table tab in the interactive web application.  
 While calling `normalise()` the user has the possibility to remove these outliers before size factor calculation.
 
 
@@ -66,36 +82,30 @@ While calling `normalise()` the user has the possibility to remove these outlier
 This example shows how to use summarised data to call the interactive web application.  
 The raw data used in the summarisation is from a study of Liu MC et al. [1] and was acquired from the NCBI GEO public database [2].
 
-```{r ex1}
+```{r ex1, eval = FALSE}
 library(NACHO)
 data(GSE74821)
-my_nacho <- GSE74821
+visualise(GSE74821)
 ```
 
 ## NanoString nCounter data from GEO
 
 Numerous NanoString nCounter data sets are available from GEO.  
-In this example we use a mRNA dataset from the study of Liu M.C et al. [1] with the GEO accession number: **GSE74821**.  
+In this example we use a mRNA dataset from the study of *Bruce* et al. [2] with the GEO accession number: **GSE70970**. 
 The data is extracted and prepared using the following code.
 
 ```{r ex2, results = "hide", message = FALSE, warning = FALSE}
 library(GEOquery)
-gse <- GEOquery::getGEO(GEO = "GSE74821")
-targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
-GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
-utils::untar(
-  tarfile = paste0(tempdir(), "/GSE74821/GSE74821_RAW.tar"),
-  exdir = paste0(tempdir(), "/GSE74821")
-)
-targets$IDFILE <- list.files(
-  path = paste0(tempdir(), "/GSE74821"),
-  pattern = ".RCC.gz$"
-)
-targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
-utils::write.csv(
-  x = targets,
-  file = paste0(tempdir(), "/GSE74821/Samplesheet.csv")
-)
+# Download data
+gse <- getGEO("GSE70970")
+# Get phenotypes
+targets <- pData(phenoData(gse[[1]]))
+getGEOSuppFiles("GSE70970")
+# Unzip data
+untar("GSE70970/GSE70970_RAW.tar", exdir = "GSE70970/Data")
+# Add IDs
+IDs <- list.files("GSE70970/Data")
+targets$IDFILE <- IDs
 ```
 
 After we extracted the dataset to the `./Data` directory, the `Samplesheet.csv` is written containing a column with the exact names of the files for each sample. Subsequently `summarise()` is called.  
@@ -104,140 +114,69 @@ The following two arguments consecutively indicate which housekeeping genes and 
 
 ```{r ex3}
 library(NACHO)
-my_nacho <- summarise(
-  data_directory = paste0(tempdir(), "/GSE74821"),
-  ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
-  id_colname = "IDFILE",
-  housekeeping_genes = NULL,
-  housekeeping_predict = FALSE,
-  housekeeping_norm = TRUE,
-  normalisation_method = "GLM",
-  n_comp = 10
-)
+GSE70970_sum <- summarise(
+  data_directory = "GSE70970/Data/", # Where the data is
+  ssheet_csv = targets, # The samplesheet
+  normalisation_method="GEO", # Geometric mean or GLM
+  housekeeping_genes = NULL, # Custom list of housekeeping genes
+  id_colname = "IDFILE", # Name of the column that contains the identfiers
+  housekeeping_predict = TRUE, # Predict the housekeeping genes based on the data?
+  n_comp = 5
+) # Number indicating the number of principal components to compute. 
 ```
-
 
 # The `visualise()` function
 
 When the summarisation is done, the summarised (or normalised) data can be visualised using the `visualise()` function as can be seen in the following chunk of code.
 
-Once `visualise()` is called, the web application that opens should look something like Figure 1. 
-In this figure the **........**
-
-```{r screen, fig.cap = "Screenshot of **NACHO**", eval = FALSE, echo = FALSE}
-# webshot::appshot(
-#   app = visualise(my_nacho), 
-#   file = paste0(tempdir(), "/nacho_screen.png")
-# )
-knitr::include_graphics(paste0(tempdir(), "/nacho_screen.png"))
+```{r, eval = FALSE}
+visualise(GSE70970_sum)
 ```
 
-On the left there are widgets that control the interactive plotting area.  
-These widgets differ dependent on which main tab is chosen.  
-The second layer of tabs is also interactive and changes based on which main tab is chosen.  
+On the left there are widgets that control the interactive plotting area. 
+These widgets differ dependent on which main tab is chosen. 
+The second layer of tabs is also interactive and changes based on which main tab is chosen. 
 Each sample in the plots can be coloured based on either technical specifications which are included in the RCC files or based on specifications of your own choosing, though these specifications need to be included in the samplesheet.
-
-```{r ex_vis}
-visualise(my_nacho)
-```
-
 
 # The `normalise()` function
 
-**NACHO** is equipped with an algorithm which can discover housekeeping genes within your own dataset.  
-**NACHO** finds the five best suitable housekeeping genes, however, it is possible that one of these five genes might not be suitable, which is why a subset of these discovered housekeeping genes might work better in some cases.  
-For this example we use the **GSE74821** dataset from the previous example.
-
-```{r ex4}
-library(NACHO)
-my_nacho <- summarise(
-  data_directory = paste0(tempdir(), "/GSE74821"),
-  ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
-  id_colname = "IDFILE", 
-  housekeeping_genes = NULL,
-  housekeeping_predict = TRUE,
-  housekeeping_norm = TRUE,
-  normalisation_method = "GLM", 
-  n_comp = 10
-)
-```
-
-The discovered housekeeping genes are saved in a global variable named **predicted_housekeeping**.  
-This gives the user absolute control over which housekeeping genes are used.  
-For instance, the suitablity of the discovered housekeeping genes can manually be checked.
+*NACHO* is allows the discovery of housekeeping genes within your own dataset. 
+*NACHO* finds the five best suitable housekeeping genes, however, it is possible that one of these five genes might not be suitable, which is why a subset of these discovered housekeeping genes might work better in some cases. 
+For this example we use the **GSE70970** dataset from the previous example. 
+The discovered housekeeping genes are saved in a global variable named **predicted_housekeeping**. 
 
 ```{r ex5}
-print(my_nacho[["housekeeping_genes"]])
+print(GSE70970_sum[["housekeeping_genes"]])
 ```
 
-Let's say  _`r my_nacho[["housekeeping_genes"]][1]`_ and _`r my_nacho[["housekeeping_genes"]][2]`_ are not suitable, therefore, you want to exclude these genes from the normalisation process.
+Let's say  _`r GSE70970_sum[["housekeeping_genes"]][1]`_ and _`r GSE70970_sum[["housekeeping_genes"]][2]`_ are not suitable, therefore, you want to exclude these genes from the normalisation process.
 
 ```{r ex6}
-my_housekeeping <- my_nacho[["housekeeping_genes"]][-c(1, 2)]
+my_housekeeping <- GSE70970_sum[["housekeeping_genes"]][-c(1, 2)]
 print(my_housekeeping)
 ```
 
-The next step is the actual normalisation.  
-The first argument requires the summary which is created with the `summarise()` function.  
-The second arugument requires a vector of gene names.  
-In this case it is a subset of the discovered housekeeping genes we just made.  
-With the third argument the user has the choice to remove the outliers.  
+The next step is the actual normalisation. 
+The first argument requires the summary which is created with the `summarise()` function. 
+The second arugument requires a vector of gene names. 
+In this case it is a subset of the discovered housekeeping genes we just made. With the third argument the user has the choice to remove the outliers. 
 Lastly the normalisation method can be choosed.  
-Here the user has a choice between `"GLM"` or `"GEO"`.  
+Here the user has a choice between `"GLM"` or `"GEO"`. 
 The differences between normalisation methods are nuanced, however, a preference for either method are use case specific.  
 In this example `"GLM"` is used.
 
 ```{r ex7}
-my_nacho_improved <- normalise(
-  nacho_object = my_nacho,
+GSE70970_norm <- normalise(
+  nacho_object = GSE70970_sum,
   housekeeping_genes = my_housekeeping,
   housekeeping_norm = TRUE,
-  normalisation_method = "GLM", 
+  normalisation_method = "GEO", 
   remove_outliers = TRUE
 )
 ```
 
-`normalise()` returns a `list` object (same as `summarise()`) with `raw_counts` and `normalised_counts` slots filled with the raw and normalised counts.  
-Both counts are also in the `nacho` data.frame.
-
-
-<!-- In _Table 1_ the calculated normalisation values can be seen.  -->
-<!-- Here the first five sample are rendered.  -->
-<!-- The positive scaling factors are caluculated using the `"GLM"` method as indicated when the `normalise()` function was called.  -->
-<!-- The same is true for the background signal.  -->
-<!-- The housekeeping factor was calulated using a subset of the discovered housekeeping genes. -->
-
-<!-- ```{r ex9} -->
-<!-- table_data1 <- as.matrix(my_data$scaling[1:5, ]) -->
-<!-- colnames(table_data1) <- c("Positive Factor", "Background Signal", "Housekeeping Factor") -->
-<!-- rownames(table_data1) <- c("GSM1934697", "GSM1934698", "GSM1934699", "GSM1934700", "GSM1934701") -->
-<!-- stargazer::stargazer(table_data1, type = "html", title = "Normalisation values", header = FALSE) -->
-<!-- ``` -->
-
-<!-- In _Table 2_ the untransformed counts of the first five samples and first five genes are rendered. Some gene analysis packages require raw counts together with scaling factors. -->
-
-<!-- ```{r ex10} -->
-<!-- table_data2 <- my_data$counts[1:5, 1:5] -->
-<!-- colnames(table_data2) <- c("GSM1934697", "GSM1934698", "GSM1934699", "GSM1934700", "GSM1934701") -->
-<!-- stargazer::stargazer(table_data2, type = "html", title = "Raw counts", header = FALSE) -->
-<!-- ``` -->
-
-<!-- While other packages or analysis methods require already transformed data, which can be seen in _Table 3_.  -->
-<!-- In this Table, the sample specific scaling factors are applied on the counts and thereby transformed. -->
-
-<!-- ```{r ex11} -->
-<!-- table_data3 <- as.matrix(my_data$normalised[1:5, 1:5]) -->
-<!-- colnames(table_data3) <- c("GSM1934697", "GSM1934698", "GSM1934699", "GSM1934700", "GSM1934701") -->
-<!-- stargazer::stargazer(table_data3, type = "html", title = "Transformed counts", header = FALSE) -->
-<!-- ``` -->
-
-
-# Session info
-
-```{r session, results = "markup"}
-sessioninfo::session_info()
-```
-
+`normalise()` returns a `list` object (same as `summarise()`) with `raw_counts` and `normalised_counts` slots filled with the raw and normalised counts. 
+Both counts are also in the *NACHO* data.frame.
 
 # References
 
