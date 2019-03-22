@@ -231,8 +231,7 @@ visualise <- function(nacho_object) {
             )
           },
           "about" = {
-            shiny::tabPanel(title = "About",
-                            shiny::includeHTML(file.path(path.package("NACHO"), "doc", "NACHO.html")))
+            shiny::includeMarkdown(file.path(path.package("NACHO"), "doc", "NACHO.Rmd"))
           }
         )
       })
