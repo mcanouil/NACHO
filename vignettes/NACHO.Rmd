@@ -39,6 +39,11 @@ While calling `normalise()` the user has the possibility to remove these outlier
 This example shows how to use summarised data to call the interactive web application.  
 The raw data used in the summarisation is from a study of Liu MC et al. [1] and was acquired from the NCBI GEO public database [2].
 
+```{r, setup, echo=FALSE}
+knitr::opts_knit$set(root.dir = "/Users/roderick/Documents/Projecten en papers/")
+```
+
+
 ```{r ex1, eval=FALSE}
 library(NACHO)
 data(GSE74821)
