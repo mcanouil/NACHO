@@ -1,13 +1,10 @@
 #' qc_rcc
 #'
-#' @param data_directory [character]
-#' @param nacho_df [data.frame]
-#' @param id_colname [character]
-#' @param housekeeping_genes [vector(character)]
-#' @param housekeeping_predict [logical]
-#' @param housekeeping_norm [logical]
-#' @param normalisation_method [character]
-#' @param n_comp [numeric]
+#' @inheritParams summarise
+#' @param nacho_df [data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
+#'   and all computed columns, i.e., quality-control metrics and counts, with one sample per row.
+#'
+#' @keywords internal
 #'
 #' @return [list]
 qc_rcc <- function(
@@ -53,7 +50,11 @@ qc_rcc <- function(
       exclude_probes = probes_to_exclude
     )
 
-    tmp_counts <- dplyr::full_join(x = nacho_df, y = temp_facs, by = id_colname)
+    tmp_counts <- dplyr::full_join(
+      x = nacho_df[, c(id_colname, setdiff(colnames(nacho_df), colnames(temp_facs)))],
+      y = temp_facs,
+      by = id_colname
+    )
     tmp_counts[["count_norm"]] <- normalise_counts(data = tmp_counts, housekeeping_norm = FALSE)
 
     predicted_housekeeping <- find_housekeeping(
@@ -65,6 +66,10 @@ qc_rcc <- function(
     if (is.null(predicted_housekeeping) | length(predicted_housekeeping)==0) {
       message('[NACHO] Could not find suitable houskeeping genes, default will be used.')
     } else {
+      message(
+        '[NACHO] The following predicted housekeeping genes will be used for normalisation:\n',
+          paste0("  - ", predicted_housekeeping, collapse = "\n")
+      )
       housekeeping_genes <- predicted_housekeeping
       control_genes_df <- nacho_df[nacho_df[["Name"]]%in%predicted_housekeeping, ]
       control_genes_df <- format_counts(

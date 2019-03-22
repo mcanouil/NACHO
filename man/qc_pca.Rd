@@ -7,9 +7,10 @@
 qc_pca(counts, n_comp = 10)
 }
 \arguments{
-\item{counts}{[data.frame]}
+\item{counts}{[data.frame] A \code{data.frame} with the count data.}
 
-\item{n_comp}{[numeric]}
+\item{n_comp}{[numeric] Number indicating the number of principal components to compute.
+Cannot be more than n-1 samples. Default is \code{10}.}
 }
 \value{
 [list(data.frame)]
@@ -17,3 +18,4 @@ qc_pca(counts, n_comp = 10)
 \description{
 qc_pca
 }
+\keyword{internal}

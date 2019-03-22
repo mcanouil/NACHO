@@ -32,6 +32,7 @@
 #'    "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
 #'   \item{nacho}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
 #'   and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
+#'   \item{outliers_thresholds}{[list] A \code{list} of the default quality-control thresholds.}
 #'   \item{raw_counts}{[data.frame] Raw counts with probes as rows and samples as columns.
 #'   With \code{"CodeClass"} (first column), the type of the probes and
 #'   \code{"Name"} (second column), the Name of the probes.}
@@ -70,12 +71,7 @@
 #' nacho <- summarise(
 #'    data_directory = paste0(tempdir(), "/GSE74821"),
 #'    ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
-#'    id_colname = "IDFILE",
-#'    housekeeping_genes = NULL,
-#'    housekeeping_predict = FALSE,
-#'    housekeeping_norm = TRUE,
-#'    normalisation_method = "GEO",
-#'    n_comp = 10
+#'    id_colname = "IDFILE"
 #' )
 #'
 #' }
@@ -132,24 +128,22 @@ summarise <- function(
 
   message("[NACHO] Performing QC and formatting data.")
   has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
-  if (!has_hkg & is.null(housekeeping_genes) & !housekeeping_predict) {
-    if (housekeeping_norm) {
-      message(
-        paste(
-          '[NACHO] "housekeeping_norm" has been set to FALSE.',
-          "  Note:",
-          if (has_hkg) {
-            ""
-          } else {
-            "  - No default housekeeping genes available in your data;"
-          },
-          '  - "housekeeping_genes" is NULL;',
-          '  - "housekeeping_predict" is FALSE.',
-          sep = "\n"
-        )
+  if (!has_hkg & is.null(housekeeping_genes) & !housekeeping_predict & housekeeping_norm) {
+    message(
+      paste(
+        '[NACHO] "housekeeping_norm" has been set to FALSE.',
+        "  Note:",
+        if (has_hkg) {
+          ""
+        } else {
+          "  - No default housekeeping genes available in your data;"
+        },
+        '  - "housekeeping_genes" is NULL;',
+        '  - "housekeeping_predict" is FALSE.',
+        sep = "\n"
       )
-      housekeeping_norm <- FALSE
-    }
+    )
+    housekeeping_norm <- FALSE
   }
   nacho_object <- qc_rcc(
     data_directory = data_directory,
@@ -160,6 +154,15 @@ summarise <- function(
     housekeeping_norm = housekeeping_norm,
     normalisation_method = normalisation_method,
     n_comp = n_comp
+  )
+
+  nacho_object[["outliers_thresholds"]] <- list(
+    BD = c(0.1, 2.25),
+    FoV = 75,
+    LoD = 2,
+    PC = 0.95,
+    Positive_factor = c(1/4, 4),
+    House_factor = c(1/11, 11)
   )
 
   message(
@@ -201,6 +204,7 @@ summarise <- function(
     "  $ data_directory      : character",
     "  $ pc_sum              : data.frame",
     "  $ nacho               : data.frame",
+    "  $ outliers_thresholds : list",
     "  $ raw_counts          : data.frame",
     "  $ normalised_counts   : data.frame",
     sep = "\n"

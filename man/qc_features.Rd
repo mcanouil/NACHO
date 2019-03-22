@@ -7,9 +7,10 @@
 qc_features(data, id_colname)
 }
 \arguments{
-\item{data}{[data.frame]}
+\item{data}{[data.frame] A \code{data.frame} with the count data.}
 
-\item{id_colname}{[character]}
+\item{id_colname}{[character] Character string of the column in \code{ssheet_csv} that matches
+the file names in \code{data_directory}.}
 }
 \value{
 [data.frame]
@@ -17,3 +18,4 @@ qc_features(data, id_colname)
 \description{
 qc_features
 }
+\keyword{internal}

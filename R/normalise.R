@@ -3,6 +3,7 @@
 #' @param nacho_object [list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.
 #' @inheritParams summarise
 #' @param remove_outliers [logical] A boolean to indicate if outliers should be excluded.
+#' @param outliers_thresholds [list] List of thresholds to exclude outliers.
 #'
 #' @details Outliers definition (\code{remove_outliers}):
 #' \itemize{
@@ -31,6 +32,7 @@
 #'    "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
 #'   \item{nacho}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
 #'   and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
+#'   \item{outliers_thresholds}{[list] A \code{list} of the quality-control thresholds used.}
 #'   \item{raw_counts}{[data.frame] Raw counts with probes as rows and samples as columns.
 #'   With \code{"CodeClass"} (first column), the type of the probes and
 #'   \code{"Name"} (second column), the Name of the probes.}
@@ -69,21 +71,21 @@
 #' nacho <- summarise(
 #'    data_directory = paste0(tempdir(), "/GSE74821"),
 #'    ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
-#'    id_colname = "IDFILE",
-#'    housekeeping_genes = NULL,
-#'    housekeeping_predict = FALSE,
-#'    housekeeping_norm = TRUE,
-#'    normalisation_method = "GEO",
-#'    n_comp = 10
+#'    id_colname = "IDFILE"
 #' )
 #'
 #'
-#' # (re)Normalise data
+#' # (re)Normalise data by removing outliers
 #' nacho_norm <- normalise(
 #'   nacho_object = nacho,
-#'   housekeeping_genes = nacho[["housekeeping_genes"]],
-#'   housekeeping_norm = TRUE,
-#'   normalisation_method = "GEO",
+#'   remove_outliers = TRUE
+#' )
+#'
+#'
+#' # (re)Normalise data with "GLM" method and removing outliers
+#' nacho_norm <- normalise(
+#'   nacho_object = nacho,
+#'   normalisation_method = "GLM"
 #'   remove_outliers = TRUE
 #' )
 #'
@@ -92,9 +94,12 @@
 normalise <- function(
   nacho_object,
   housekeeping_genes = nacho_object[["housekeeping_genes"]],
+  housekeeping_predict = nacho_object[["housekeeping_predict"]],
   housekeeping_norm = nacho_object[["housekeeping_norm"]],
   normalisation_method = nacho_object[["normalisation_method"]],
-  remove_outliers = TRUE
+  n_comp = nacho_object[["n_comp"]],
+  remove_outliers = nacho_object[["remove_outliers"]],
+  outliers_thresholds = nacho_object[["outliers_thresholds"]]
 ) {
   if (missing(nacho_object)) {
     stop('[NACHO] "nacho_object" must be provided.')
@@ -110,75 +115,79 @@ normalise <- function(
     "data_directory",
     "pc_sum",
     "nacho",
+    "outliers_thresholds",
     "raw_counts",
     "normalised_counts"
   )
   if (!all(mandatory_fields%in%names(nacho_object))) {
-    stop('[NACHO] "summarise()" must be used before "normalise()".')
+    stop(
+      '[NACHO] Mandatory fields are missing in "', substitute(nacho_object), '"!\n',
+      '  "summarise()" must be called before "normalise()".'
+    )
   }
 
   id_colname <- nacho_object[["access"]]
   type_set <- attr(nacho_object, "RCC_type")
 
-  if (!isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes)))) {
+  params_changed <- c(
+    "housekeeping_genes" = !isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes))),
+    "housekeeping_predict" = nacho_object[["housekeeping_predict"]]!=housekeeping_predict,
+    "housekeeping_norm" = nacho_object[["housekeeping_norm"]]!=housekeeping_norm,
+    "normalisation_method" = nacho_object[["normalisation_method"]]!=normalisation_method,
+    "n_comp" = nacho_object[["n_comp"]]!=n_comp,
+    "remove_outliers" = nacho_object[["remove_outliers"]]!=remove_outliers,
+    "outliers_thresholds" = !isTRUE(all.equal(nacho_object[["outliers_thresholds"]], outliers_thresholds))
+  )
+
+  if (all(!params_changed)) {
     message(
-      paste0(
-        '[NACHO] Note: "housekeeping_genes" is different from the parameter used in "summarise()".\n',
-        '- "summarise()":\n',
-        '    housekeeping_genes=c("', paste(nacho_object[["housekeeping_genes"]], collapse = '", "'), '")\n',
-        '- "normalise()":\n',
-        '    housekeeping_genes=c("', paste(housekeeping_genes, collapse = '", "'), '")\n'
+      '[NACHO] Nothing was done. Parameters in "normalise()", were the same as in "', substitute(nacho_object), '".'
+    )
+    return(nacho_object)
+  } else {
+    message(
+      '[NACHO] Normalising "', substitute(nacho_object), '" with new value for parameters:\n',
+      paste(
+        paste0("  - ", names(params_changed[which(params_changed)]), " = ", params_changed[which(params_changed)]),
+        collapse = "\n"
       )
     )
-  }
-
-  if (nacho_object[["housekeeping_norm"]]!=housekeeping_norm) {
-    message(
-      paste0(
-        '[NACHO] Note: "housekeeping_norm" is different from the parameter used in "summarise()".\n',
-        '- "summarise()":\n',
-        '    housekeeping_norm=', nacho_object[["housekeeping_norm"]], '\n',
-        '- "normalise()":\n',
-        '    housekeeping_norm=', housekeeping_norm, '\n'
-      )
-    )
-  }
-
-  if (nacho_object[["normalisation_method"]]!=normalisation_method) {
-    message(
-      paste0(
-        '[NACHO] Note: "normalisation_method" is different from the parameter usedin "summarise()".\n',
-        '- "summarise()":\n',
-        '    normalisation_method="', nacho_object[["normalisation_method"]], '"\n',
-        '- "normalise()":\n',
-        '    normalisation_method="', normalisation_method, '"\n'
-      )
-    )
-  }
-
-  if (nacho_object[["remove_outliers"]]) {
-    message("[NACHO] Outliers have already been removed!")
   }
 
   if (remove_outliers & !nacho_object[["remove_outliers"]]) {
-    nacho_df <- exclude_outliers(object = nacho_object)
+    nacho_df <- exclude_outliers(nacho_object = nacho_object)
     outliers <- setdiff(
       unique(nacho_object[["nacho"]][[nacho_object[["access"]]]]),
       unique(nacho_df[[nacho_object[["access"]]]])
     )
-    if (length(outliers)!=0) {
+    if (length(outliers)!=0 | any(params_changed)) {
       nacho_object <- qc_rcc(
         data_directory = nacho_object[["data_directory"]],
         nacho_df = nacho_df,
         id_colname = id_colname,
         housekeeping_genes = housekeeping_genes,
-        housekeeping_predict = FALSE,
+        housekeeping_predict = housekeeping_predict,
         housekeeping_norm = housekeeping_norm,
         normalisation_method = normalisation_method,
         n_comp = nacho_object[["n_comp"]]
       )
     }
     nacho_object[["remove_outliers"]] <- remove_outliers
+  } else {
+    message("[NACHO] Outliers have already been removed!")
+
+    if (any(params_changed)) {
+      nacho_object <- qc_rcc(
+        data_directory = nacho_object[["data_directory"]],
+        nacho_df = nacho_object[["nacho"]],
+        id_colname = id_colname,
+        housekeeping_genes = housekeeping_genes,
+        housekeeping_predict = housekeeping_predict,
+        housekeeping_norm = housekeeping_norm,
+        normalisation_method = normalisation_method,
+        n_comp = nacho_object[["n_comp"]]
+      )
+    }
   }
 
   nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(
