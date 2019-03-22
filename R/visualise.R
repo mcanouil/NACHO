@@ -96,7 +96,7 @@ visualise <- function(nacho_object) {
     '  outliers_thresholds <- readRDS("', tempdir(), '/outliers_thresholds.rds")'
   )
 
-  shiny::addResourcePath("www", system.file("logo", package = "NACHO"))
+  shiny::addResourcePath("www", system.file("man", "logo", package = "NACHO"))
 
   app <- shiny::shinyApp(
     ui = shiny::fluidPage(
@@ -666,8 +666,8 @@ visualise <- function(nacho_object) {
                 .data = local_data[, c(id_colname, "Name", "Count", colour_name)]
               )
               local_data[["Count"]] <- local_data[["Count"]] + 1
-              if (!is.character(outliers_data[[colour_name]])) {
-                outliers_data[[colour_name]] <- as.character(outliers_data[[colour_name]])
+              if (!is.character(local_data[[colour_name]])) {
+                local_data[[colour_name]] <- as.character(local_data[[colour_name]])
               }
 
               shiny::req(nrow(local_data)!=0)
