@@ -7,9 +7,10 @@
 geometric_probes(data, probes_type)
 }
 \arguments{
-\item{data}{[list(data.frame)]}
+\item{data}{[list(data.frame)] A \code{list} of \code{data.frame} with the count data.}
 
-\item{probes_type}{[character]}
+\item{probes_type}{[character] A \code{character} string naming the probe type,
+i.e., "Positive" or "Negative"}
 }
 \value{
 [numeric]
@@ -17,3 +18,4 @@ geometric_probes(data, probes_type)
 \description{
 geometric_probes
 }
+\keyword{internal}

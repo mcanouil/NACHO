@@ -1,7 +1,9 @@
 #' qc_pca
 #'
-#' @param counts [data.frame]
-#' @param n_comp [numeric]
+#' @param counts [data.frame] A \code{data.frame} with the count data.
+#' @inheritParams summarise
+#'
+#' @keywords internal
 #'
 #' @return [list(data.frame)]
 qc_pca <- function(counts, n_comp = 10) {

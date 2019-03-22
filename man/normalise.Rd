@@ -7,15 +7,21 @@
 \usage{
 normalise(nacho_object,
   housekeeping_genes = nacho_object[["housekeeping_genes"]],
+  housekeeping_predict = nacho_object[["housekeeping_predict"]],
   housekeeping_norm = nacho_object[["housekeeping_norm"]],
   normalisation_method = nacho_object[["normalisation_method"]],
-  remove_outliers = TRUE)
+  n_comp = nacho_object[["n_comp"]],
+  remove_outliers = nacho_object[["remove_outliers"]],
+  outliers_thresholds = nacho_object[["outliers_thresholds"]])
 }
 \arguments{
 \item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
 
 \item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs
 that should be used as housekeeping genes. Default is \code{NULL}.}
+
+\item{housekeeping_predict}{[logical] Boolean to indicate whether the housekeeping genes
+should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
 
 \item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalisation should be performed.
 Default is \code{TRUE}.}
@@ -24,7 +30,12 @@ Default is \code{TRUE}.}
 Character string to indicate normalisation using the geometric mean (\code{"GEO"})
 or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 
+\item{n_comp}{[numeric] Number indicating the number of principal components to compute.
+Cannot be more than n-1 samples. Default is \code{10}.}
+
 \item{remove_outliers}{[logical] A boolean to indicate if outliers should be excluded.}
+
+\item{outliers_thresholds}{[list] List of thresholds to exclude outliers.}
 }
 \value{
 [list] A list containing parameters and data.
@@ -41,6 +52,7 @@ or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
    "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
   \item{nacho}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
   and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
+  \item{outliers_thresholds}{[list] A \code{list} of the quality-control thresholds used.}
   \item{raw_counts}{[data.frame] Raw counts with probes as rows and samples as columns.
   With \code{"CodeClass"} (first column), the type of the probes and
   \code{"Name"} (second column), the Name of the probes.}
@@ -94,21 +106,21 @@ utils::write.csv(
 nacho <- summarise(
    data_directory = paste0(tempdir(), "/GSE74821"),
    ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
-   id_colname = "IDFILE",
-   housekeeping_genes = NULL,
-   housekeeping_predict = FALSE,
-   housekeeping_norm = TRUE,
-   normalisation_method = "GEO",
-   n_comp = 10
+   id_colname = "IDFILE"
 )
 
 
-# (re)Normalise data
+# (re)Normalise data by removing outliers
 nacho_norm <- normalise(
   nacho_object = nacho,
-  housekeeping_genes = nacho[["housekeeping_genes"]],
-  housekeeping_norm = TRUE,
-  normalisation_method = "GEO",
+  remove_outliers = TRUE
+)
+
+
+# (re)Normalise data with "GLM" method and removing outliers
+nacho_norm <- normalise(
+  nacho_object = nacho,
+  normalisation_method = "GLM"
   remove_outliers = TRUE
 )
 

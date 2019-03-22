@@ -7,9 +7,9 @@
 qc_limit_detection(pos_e, negatives)
 }
 \arguments{
-\item{pos_e}{[numeric]}
+\item{pos_e}{[numeric] Position of Positive probe "POS_E", i.e., a too low expressed probe.}
 
-\item{negatives}{[vector(numeric)]}
+\item{negatives}{[vector(numeric)] A \code{vector(numeric)} with the count data from the Negatives probes.}
 }
 \value{
 [numeric]
@@ -17,3 +17,4 @@ qc_limit_detection(pos_e, negatives)
 \description{
 qc_limit_detection
 }
+\keyword{internal}

@@ -1,7 +1,9 @@
 #' normalise_counts
 #'
-#' @param data [data.frame]
-#' @param housekeeping_norm [logical]
+#' @param data [data.frame] A \code{data.frame} with the count data.
+#' @inheritParams summarise
+#'
+#' @keywords internal
 #'
 #' @return [vector(numeric)]
 normalise_counts <- function(data, housekeeping_norm) {

@@ -1,11 +1,11 @@
 #' factor_calculation
 #'
-#' @param nacho_df [data.frame]
-#' @param id_colname [character]
-#' @param housekeeping_genes [vector(character)]
-#' @param housekeeping_predict [logical]
-#' @param normalisation_method [character]
-#' @param exclude_probes [vector(character)]
+#' @inheritParams qc_rcc
+#' @inheritParams summarise
+#' @inheritParams normalise
+#' @param exclude_probes [vector(character)] A list of probes to exclude.
+#'
+#' @keywords internal
 #'
 #' @return [data.frame]
 factor_calculation <- function(

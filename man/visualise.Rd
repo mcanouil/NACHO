@@ -41,22 +41,23 @@ utils::write.csv(
 nacho <- summarise(
    data_directory = paste0(tempdir(), "/GSE74821"),
    ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
-   id_colname = "IDFILE",
-   housekeeping_genes = NULL,
-   housekeeping_predict = FALSE,
-   housekeeping_norm = TRUE,
-   normalisation_method = "GEO",
-   n_comp = 10
+   id_colname = "IDFILE"
 )
 visualise(nacho)
 
 
-# (re)Normalise data
+# (re)Normalise data by removing outliers
 nacho_norm <- normalise(
   nacho_object = nacho,
-  housekeeping_genes = nacho[["housekeeping_genes"]],
-  housekeeping_norm = TRUE,
-  normalisation_method = "GEO",
+  remove_outliers = TRUE
+)
+visualise(nacho_norm)
+
+
+# (re)Normalise data with "GLM" method and removing outliers
+nacho_norm <- normalise(
+  nacho_object = nacho,
+  normalisation_method = "GLM"
   remove_outliers = TRUE
 )
 visualise(nacho_norm)

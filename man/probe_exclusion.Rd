@@ -7,7 +7,7 @@
 probe_exclusion(control_genes_df)
 }
 \arguments{
-\item{control_genes_df}{[data.frame]}
+\item{control_genes_df}{[data.frame] A \code{data.frame} with the count data.}
 }
 \value{
 [vector(character)]
@@ -15,3 +15,4 @@ probe_exclusion(control_genes_df)
 \description{
 probe_exclusion
 }
+\keyword{internal}

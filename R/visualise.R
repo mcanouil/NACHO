@@ -32,22 +32,23 @@
 #' nacho <- summarise(
 #'    data_directory = paste0(tempdir(), "/GSE74821"),
 #'    ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
-#'    id_colname = "IDFILE",
-#'    housekeeping_genes = NULL,
-#'    housekeeping_predict = FALSE,
-#'    housekeeping_norm = TRUE,
-#'    normalisation_method = "GEO",
-#'    n_comp = 10
+#'    id_colname = "IDFILE"
 #' )
 #' visualise(nacho)
 #'
 #'
-#' # (re)Normalise data
+#' # (re)Normalise data by removing outliers
 #' nacho_norm <- normalise(
 #'   nacho_object = nacho,
-#'   housekeeping_genes = nacho[["housekeeping_genes"]],
-#'   housekeeping_norm = TRUE,
-#'   normalisation_method = "GEO",
+#'   remove_outliers = TRUE
+#' )
+#' visualise(nacho_norm)
+#'
+#'
+#' # (re)Normalise data with "GLM" method and removing outliers
+#' nacho_norm <- normalise(
+#'   nacho_object = nacho,
+#'   normalisation_method = "GLM"
 #'   remove_outliers = TRUE
 #' )
 #' visualise(nacho_norm)
@@ -66,6 +67,7 @@ visualise <- function(nacho_object) {
     "data_directory",
     "pc_sum",
     "nacho",
+    "outliers_thresholds",
     "raw_counts",
     "normalised_counts"
   )
@@ -73,7 +75,10 @@ visualise <- function(nacho_object) {
     stop('[NACHO] Must be run in an interactive R session!')
   }
   if (!all(mandatory_fields%in%names(nacho_object))) {
-    stop('[NACHO] "summarise()" must be used before "normalise()".')
+    stop(
+      '[NACHO] Mandatory fields are missing in "', substitute(nacho_object), '"!\n',
+      '  "summarise()" and/or "normalise()" must be called before "visualise()".'
+    )
   }
 
   id_colname <- nacho_object[["access"]]
@@ -83,15 +88,21 @@ visualise <- function(nacho_object) {
   nacho <- nacho_object[["nacho"]]
   save_path_default <- nacho_object[["data_directory"]]
   type_set <- attr(nacho_object, "RCC_type")
+  outliers_env <- new.env()
+  assign(x = "outliers_thresholds", value = nacho_object[["outliers_thresholds"]], envir = outliers_env)
 
-  shiny::addResourcePath("www", system.file("logo", package = "NACHO"))
+  message(
+    '[NACHO] Custom "outliers_thresholds" can be loaded for later use with:\n',
+    '  outliers_thresholds <- readRDS("', tempdir(), '/outliers_thresholds.rds")'
+  )
+
+  shiny::addResourcePath("www", system.file("man", "logo", package = "NACHO"))
 
   app <- shiny::shinyApp(
     ui = shiny::fluidPage(
-      # titlePanel(shiny::img(src = "www/Nacho_logo.png", height = 150)),
       shiny::sidebarLayout(
         shiny::sidebarPanel(width = 3,
-          shiny::div(shiny::img(src = "www/Nacho_logo.png", height = 150), align = "center"),
+          shiny::div(shiny::img(src = "www/nacho_hex.png", height = 150), align = "center"),
           shiny::br(),
           shiny::tabsetPanel(
             id = "settings",
@@ -210,14 +221,14 @@ visualise <- function(nacho_object) {
             if (housekeeping_norm & !is.null(housekeeping_genes)) {
               shiny::tabsetPanel(
                 id = "tabs",
-                shiny::tabPanel("Positive Factor vs Background Threshold", value = "pfbt"),
+                shiny::tabPanel("Positive Factor vs. Background Threshold", value = "pfbt"),
                 shiny::tabPanel("Housekeeping Factor", value = "hf"),
                 shiny::tabPanel("Normalisation Result", value = "norm_res")
               )
             } else {
               shiny::tabsetPanel(
                 id = "tabs",
-                shiny::tabPanel("Positive Factor vs Background Threshold", value = "pfbt"),
+                shiny::tabPanel("Positive Factor vs. Background Threshold", value = "pfbt"),
                 shiny::tabPanel("Normalisation Result", value = "norm_res")
               )
             }
@@ -225,13 +236,14 @@ visualise <- function(nacho_object) {
           "vis" = {
             shiny::tabsetPanel(
               id = "tabs",
-              shiny::tabPanel("Average Count vs Binding Density", value = "MC-BD"),
-              shiny::tabPanel("Average Count vs Median Count", value = "MC-MedC"),
+              shiny::tabPanel("Average Count vs. Binding Density", value = "MC-BD"),
+              shiny::tabPanel("Average Count vs. Median Count", value = "MC-MedC"),
               shiny::tabPanel("Principal Component", value = "prin")
             )
           },
           "about" = {
-            shiny::includeMarkdown(file.path(path.package("NACHO"), "doc", "NACHO.Rmd"))
+            # shiny::includeMarkdown(file.path(path.package("NACHO"), "doc", "NACHO.Rmd"))
+            shiny::includeMarkdown(system.file("vignettes", "NACHO.Rmd", package = "NACHO"))
           }
         )
       })
@@ -288,9 +300,9 @@ visualise <- function(nacho_object) {
               inputId = "meta",
               label = "Coloured by:",
               choices = c(
+                "CartridgeID",
                 "Date",
                 "ID",
-                "CartridgeID",
                 "ScannerID",
                 "StagePosition"
               )
@@ -377,17 +389,18 @@ visualise <- function(nacho_object) {
       output$interfaceG <- shiny::renderUI({
         shiny::req(input$maintabs == "met")
         shiny::req(input$BD_choice)
+        outliers_thresholds <- get(x = "outliers_thresholds", envir = outliers_env)
         ranges <- c(
-          "BD" = c(0.1, 4, 0.1, input$BD_choice),
-          "FoV" = c(50, 100, 75),
-          "LoD" = c(0, 30, 2),
-          "PC" = c(0.5, 1, 0.95)
+          "BD" = c(0.1, input$BD_choice, unname(outliers_thresholds[["BD"]])),
+          "FoV" = c(50, 100, unname(outliers_thresholds[["FoV"]])),
+          "LoD" = c(0, 30, unname(outliers_thresholds[["LoD"]])),
+          "PC" = c(0.5, 1, unname(outliers_thresholds[["PC"]]))
         )
         shiny::req(input$tabs)
         if (input$tabs == "BD") {
-          shiny::sliderInput(
+           shiny::sliderInput(
             inputId = "threshold",
-            label = sprintf("Custom QC threshold (default: %s - %s)", ranges["BD3"], ranges["BD4"]),
+            label = sprintf("Custom QC threshold (default: %s - %s)", ranges["BD1"], ranges["BD2"]),
             min = as.numeric(ranges["BD1"]),
             max = as.numeric(ranges["BD2"]),
             value = c(
@@ -406,6 +419,13 @@ visualise <- function(nacho_object) {
         }
       })
 
+      shiny::observeEvent(c(input$tabs, input$threshold), {
+        outliers_thresholds <- get(x = "outliers_thresholds", envir = outliers_env)
+        outliers_thresholds[[input$tabs]] <- input$threshold
+        assign(x = "outliers_thresholds", value = outliers_thresholds, envir = outliers_env)
+        saveRDS(object = outliers_thresholds, file = paste0(tempdir(), "/outliers_thresholds.rds"))
+      })
+
       output$interfaceH <- shiny::renderUI({
         shiny::req(input$maintabs %in% c("cg", "norm"))
         shiny::req(input$tabs %in% c("Control Probe Expression", "norm_res"))
@@ -421,7 +441,11 @@ visualise <- function(nacho_object) {
 
       output$outlier_table <- shiny::renderDataTable({
         shiny::req(input$maintabs%in%c("ot"))
-        details_out <- details_outlier(nacho_df = nacho, id_colname = id_colname)
+        details_out <- details_outlier(
+          nacho_df = nacho,
+          id_colname = id_colname,
+          outliers_thresholds = get(x = "outliers_thresholds", envir = outliers_env)
+        )
         all_out <- unique(unlist(details_out))
 
         data.frame(
@@ -465,6 +489,7 @@ visualise <- function(nacho_object) {
             shiny::req(input$threshold)
             shiny::req(input$tabs == "FoV" | input$tabs == "LoD" | input$tabs == "PC" | input$tabs == "BD")
             shiny::req(input$attribute, input$meta)
+            colour_name <- input$meta
 
             # Defaults for every main tab
             if (input$tabs == "BD") {
@@ -478,8 +503,11 @@ visualise <- function(nacho_object) {
               shiny::req(!all(local_data[[input$tabs]]==0))
             }
 
-            local_data <- dplyr::distinct(.data = local_data[, c(id_colname, input$attribute, input$tabs, input$meta)])
-            outliers_data <- dplyr::distinct(.data = outliers_data[, c(id_colname, input$attribute, input$tabs, input$meta)])
+            local_data <- dplyr::distinct(.data = local_data[, c(id_colname, input$attribute, input$tabs, colour_name)])
+            outliers_data <- dplyr::distinct(.data = outliers_data[, c(id_colname, input$attribute, input$tabs, colour_name)])
+            if (!is.character(outliers_data[[colour_name]])) {
+              outliers_data[[colour_name]] <- as.character(outliers_data[[colour_name]])
+            }
             local_data[[input$attribute]] <- factor(
               x = local_data[[input$attribute]],
               levels = gtools::mixedsort(unique(local_data[[input$attribute]]))
@@ -641,6 +669,9 @@ visualise <- function(nacho_object) {
                 .data = local_data[, c(id_colname, "Name", "Count", colour_name)]
               )
               local_data[["Count"]] <- local_data[["Count"]] + 1
+              if (!is.character(local_data[[colour_name]])) {
+                local_data[[colour_name]] <- as.character(local_data[[colour_name]])
+              }
 
               shiny::req(nrow(local_data)!=0)
               p <- ggplot2::ggplot(
@@ -668,6 +699,11 @@ visualise <- function(nacho_object) {
                 p <- p + ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2))
               }
 
+              if (length(unique(local_data[["Name"]]))>10) {
+                p <- p +
+                  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5))
+              }
+
               p
             }
           },
@@ -686,6 +722,9 @@ visualise <- function(nacho_object) {
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, input$pcA_sel, input$pcB_sel, colour_name)]
                 )
+                if (!is.character(outliers_data[[colour_name]])) {
+                  outliers_data[[colour_name]] <- as.character(outliers_data[[colour_name]])
+                }
 
                 shiny::req(nrow(local_data)!=0)
                 p_point <- ggplot2::ggplot(
@@ -728,7 +767,7 @@ visualise <- function(nacho_object) {
                 ggpubr::ggarrange(p_point, p_histo, nrow = 2, ncol = 1)
               },
               "MC-BD" = {
-                # Count vs binding
+                # Count vs. binding
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, "MC", "BD", colour_name)]
                 )
@@ -748,7 +787,7 @@ visualise <- function(nacho_object) {
                   )
               },
               "MC-MedC" = {
-                # Count vs median
+                # Count vs. median
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, "MC", "MedC", colour_name)]
                 )
@@ -790,6 +829,9 @@ visualise <- function(nacho_object) {
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, "Negative_factor", "Positive_factor", colour_name)]
                 )
+                if (!is.character(outliers_data[[colour_name]])) {
+                  outliers_data[[colour_name]] <- as.character(outliers_data[[colour_name]])
+                }
 
                 shiny::req(nrow(local_data)!=0)
                 p <- ggplot2::ggplot(
@@ -825,7 +867,7 @@ visualise <- function(nacho_object) {
                   ggplot2::theme_grey(base_size = input$font_size) +
                   ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
                   ggplot2::geom_point(size = input$point_size, na.rm = TRUE) +
-                  ggplot2::labs(x = "Positive Factor", y = "Houskeeping Factor", colour = colour_name) +
+                  ggplot2::labs(x = "Positive Factor", y = "Housekeeping Factor", colour = colour_name) +
                   ggplot2::scale_x_log10() +
                   ggplot2::scale_y_log10()
 

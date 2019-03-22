@@ -7,7 +7,7 @@
 norm_glm(data)
 }
 \arguments{
-\item{data}{[list(data.frame)]}
+\item{data}{[list(data.frame)] A \code{list} of \code{data.frame} with the count data.}
 }
 \value{
 [vector(numeric)]
@@ -15,3 +15,4 @@ norm_glm(data)
 \description{
 norm_glm
 }
+\keyword{internal}
