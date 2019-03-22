@@ -241,7 +241,10 @@ visualise <- function(nacho_object) {
               shiny::tabPanel("Principal Component", value = "prin")
             )
           },
-          "about" = {shiny::p(shiny::br(), "Work in progress!")}
+          "about" = {
+            # shiny::includeMarkdown(file.path(path.package("NACHO"), "doc", "NACHO.Rmd"))
+            shiny::includeMarkdown(system.file("vignettes", "NACHO.Rmd", package = "NACHO"))
+          }
         )
       })
 
