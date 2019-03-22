@@ -34,10 +34,9 @@ With the use of two functions, RCC files are summarised and visualised, namely: 
 ## Installation
 
 ```{r, eval = FALSE}
-# The easiest way to get NACHO is to install the whole tidyverse:
-install.packages("tidyverse")
-# Alternatively, install just NACHO:
+# Install NACHO from CRAN (not yet on CRAN):
 install.packages("NACHO")
+
 # Or the the development version from GitHub:
 # install.packages("devtools")
 devtools::install_github("mcanouil/NACHO")
