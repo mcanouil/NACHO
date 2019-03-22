@@ -230,7 +230,10 @@ visualise <- function(nacho_object) {
               shiny::tabPanel("Principal Component", value = "prin")
             )
           },
-          "about" = {shiny::p(shiny::br(), "Work in progress!")}
+          "about" = {
+            shiny::tabPanel(title = "About",
+                            shiny::includeHTML(file.path(path.package("NACHO"), "doc", "NACHO.html")))
+          }
         )
       })
 
