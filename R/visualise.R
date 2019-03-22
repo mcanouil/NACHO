@@ -96,13 +96,13 @@ visualise <- function(nacho_object) {
     '  outliers_thresholds <- readRDS("', tempdir(), '/outliers_thresholds.rds")'
   )
 
-  shiny::addResourcePath("www", system.file("man", "logo", package = "NACHO"))
+  shiny::addResourcePath("logo", system.file("help", "figures", package = "NACHO"))
 
   app <- shiny::shinyApp(
     ui = shiny::fluidPage(
       shiny::sidebarLayout(
         shiny::sidebarPanel(width = 3,
-          shiny::div(shiny::img(src = "www/nacho_hex.png", height = 150), align = "center"),
+          shiny::div(shiny::img(src = "logo/nacho_hex.png", height = 150), align = "center"),
           shiny::br(),
           shiny::tabsetPanel(
             id = "settings",
@@ -242,8 +242,37 @@ visualise <- function(nacho_object) {
             )
           },
           "about" = {
-            # shiny::includeMarkdown(file.path(path.package("NACHO"), "doc", "NACHO.Rmd"))
-            shiny::includeMarkdown(system.file("vignettes", "NACHO.Rmd", package = "NACHO"))
+            vignette_exists <- system.file("doc", "NACHO.Rmd", package = "NACHO")
+            if (nchar(vignette_exists)==0) {
+              p("The vignette was not build.")
+            }
+
+            p(
+              shiny::br(),
+              shiny::em("NACHO"), " (NanoString Quality Control Dashboard) is developed for NanoString nCounter data.",
+              shiny::br(),
+              "NanoString nCounter data is a mRNA or miRNA expression assay and works with fluorescent barcodes.",
+              shiny::br(),
+              "Each barcode is assigned a mRNA/miRNA, which can be counted after bonding with its target.",
+              shiny::br(),
+              "As a result each count of a specific barcode represents the presence of its target mRNA/miRNA.",
+              shiny::br(),
+              shiny::br(),
+              shiny::em("NACHO"), ' is able to load, visualise and normalise the exported NanoString nCounter data and facilitates the user in performing a quality control.',
+              shiny::br(),
+              shiny::em("NACHO"), ' does this by visualising Quality Control metrics, expression of control genes, principal components and sample specific size factors in an interactive web application.',
+              shiny::br(),
+              'With the use of two functions, RCC files are summarised and visualised, namely: ', shiny::code("summarise()"), ' and ', shiny::code("visualise()"), '.',
+              shiny::br(),
+              'The ', shiny::code("summarise()"), ' function is used to preprocess the data.',
+              shiny::br(),
+              'The ', shiny::code("visualise()"), ' function initiates a RStudio Shiny-based dashboard that visualises all relevant QC plots.',
+              shiny::br(),
+              shiny::br(),
+              shiny::em("NACHO"), ' also includes a function ', shiny::code("normalise()"), ', which calculates sample specific size factors and normalises the data.',
+              shiny::br(),
+              shiny::code("normalise()"), ' creates a list in which your settings, the raw counts and normalised counts are stored.'
+            )
           }
         )
       })
@@ -829,8 +858,8 @@ visualise <- function(nacho_object) {
                 local_data <- dplyr::distinct(
                   .data = nacho[, c(id_colname, "Negative_factor", "Positive_factor", colour_name)]
                 )
-                if (!is.character(outliers_data[[colour_name]])) {
-                  outliers_data[[colour_name]] <- as.character(outliers_data[[colour_name]])
+                if (!is.character(local_data[[colour_name]])) {
+                  local_data[[colour_name]] <- as.character(local_data[[colour_name]])
                 }
 
                 shiny::req(nrow(local_data)!=0)
