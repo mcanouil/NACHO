@@ -23,11 +23,13 @@ As a result each count of a specific barcode represents the presence of its targ
 *NACHO* is able to load, visualise and normalise the exported NanoString nCounter data and facilitates the user in performing a quality control. 
 *NACHO* does this by visualising Quality Control metrics, expression of control genes, principal components and sample specific size factors in an interactive web application. 
 With the use of two functions, RCC files are summarised and visualised, namely: `summarise()` and `visualise()`. 
-The `summarise()` function is used to preprocess the data. 
-The `visualise()` function initiates a RStudio Shiny-based dashboard that visualises all relevant QC plots.
+
+* The `summarise()` function is used to preprocess the data. 
+* The `visualise()` function initiates a RStudio Shiny-based dashboard that visualises all relevant QC plots.
 
 *NACHO* also includes a function `normalise()`, which calculates sample specific size factors and normalises the data.
-`normalise()` creates a list in which your settings, the raw counts and normalised counts are stored.
+
+* The`normalise()` function creates a list in which your settings, the raw counts and normalised counts are stored.
 
 ## Installation
 
