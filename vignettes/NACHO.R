@@ -1,35 +1,55 @@
-## ---- setup, echo=FALSE--------------------------------------------------
-knitr::opts_knit$set(root.dir = "/Users/roderick/Documents/Projecten en papers/")
+## ----setup, include = FALSE----------------------------------------------
+knitr::opts_chunk$set(
+  eval = TRUE,
+  collapse = TRUE,
+  results = "asis",
+  include = TRUE,
+  echo = TRUE,
+  warning = TRUE,
+  message = TRUE,
+  error = TRUE,
+  tidy = FALSE,
+  crop = TRUE,
+  autodep = TRUE,
+  fig.align = 'center',
+  fig.pos = '!h',
+  cache = FALSE
+)
 
-## ----ex1, eval=FALSE-----------------------------------------------------
+## ----logo, echo = FALSE, out.width = "150px"-----------------------------
+knitr::include_graphics(path = "nacho_hex.png")
+
+## ----ex1, eval = FALSE---------------------------------------------------
 #  library(NACHO)
 #  data(GSE74821)
 #  visualise(GSE74821)
 
 ## ----ex2, results = "hide", message = FALSE, warning = FALSE-------------
 library(GEOquery)
-#Download data
+# Download data
 gse <- getGEO("GSE70970")
-#Get phenotypes
+# Get phenotypes
 targets <- pData(phenoData(gse[[1]]))
 getGEOSuppFiles("GSE70970")
-#Unzip data
+# Unzip data
 untar("GSE70970/GSE70970_RAW.tar", exdir = "GSE70970/Data")
-#Add IDs
+# Add IDs
 IDs <- list.files("GSE70970/Data")
 targets$IDFILE <- IDs
 
 ## ----ex3-----------------------------------------------------------------
 library(NACHO)
-GSE70970_sum <- summarize(data_directory =  "GSE70970/Data/", # Where the data is
-                 ssheet_csv = targets, # The samplesheet
-                 normalisation_method="GEO", # Geometric mean or GLM
-                 housekeeping_genes = NULL, # Custom list of housekeeping genes
-                 id_colname = "IDFILE", # Name of the column that contains the identfiers
-                 housekeeping_predict = TRUE, # Predict the housekeeping genes based on the data?
-                 n_comp=5) # Number indicating the number of principal components to compute. 
+GSE70970_sum <- summarise(
+  data_directory = "GSE70970/Data/", # Where the data is
+  ssheet_csv = targets, # The samplesheet
+  normalisation_method = "GEO", # Geometric mean or GLM
+  housekeeping_genes = NULL, # Custom list of housekeeping genes
+  id_colname = "IDFILE", # Name of the column that contains the identfiers
+  housekeeping_predict = TRUE, # Predict the housekeeping genes based on the data?
+  n_comp = 5 # Number indicating the number of principal components to compute. 
+)
 
-## ---- eval=FALSE---------------------------------------------------------
+## ---- eval = FALSE-------------------------------------------------------
 #  visualise(GSE70970_sum)
 
 ## ----ex5-----------------------------------------------------------------
@@ -47,4 +67,7 @@ GSE70970_norm <- normalise(
   normalisation_method = "GEO", 
   remove_outliers = TRUE
 )
+
+## ---- echo = FALSE, results = "hide"-------------------------------------
+unlink("GSE70970", recursive = TRUE)
 
