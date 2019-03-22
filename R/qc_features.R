@@ -1,7 +1,9 @@
 #' qc_features
 #'
-#' @param data [data.frame]
-#' @param id_colname [character]
+#' @param data [data.frame] A \code{data.frame} with the count data.
+#' @inheritParams summarise
+#'
+#' @keywords internal
 #'
 #' @return [data.frame]
 qc_features <- function(data, id_colname) {

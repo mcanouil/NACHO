@@ -51,6 +51,7 @@ Cannot be more than n-1 samples. Default is \code{10}.}
    "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
   \item{nacho}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
   and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
+  \item{outliers_thresholds}{[list] A \code{list} of the default quality-control thresholds.}
   \item{raw_counts}{[data.frame] Raw counts with probes as rows and samples as columns.
   With \code{"CodeClass"} (first column), the type of the probes and
   \code{"Name"} (second column), the Name of the probes.}
@@ -90,12 +91,7 @@ utils::write.csv(
 nacho <- summarise(
    data_directory = paste0(tempdir(), "/GSE74821"),
    ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
-   id_colname = "IDFILE",
-   housekeeping_genes = NULL,
-   housekeeping_predict = FALSE,
-   housekeeping_norm = TRUE,
-   normalisation_method = "GEO",
-   n_comp = 10
+   id_colname = "IDFILE"
 )
 
 }

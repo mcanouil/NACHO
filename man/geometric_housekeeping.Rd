@@ -8,13 +8,15 @@ geometric_housekeeping(data, positive_factor, intercept,
   housekeeping_genes)
 }
 \arguments{
-\item{data}{[data.frame]}
+\item{data}{[data.frame] A \code{data.frame} with the count data.}
 
-\item{positive_factor}{[vector(numeric)]}
+\item{positive_factor}{[vector(numeric)] A \code{vector(numeric)} with the positive probe
+normalisation factor.}
 
-\item{intercept}{[vector(numeric)]}
+\item{intercept}{[vector(numeric)] A \code{vector(numeric)} with the average counts value.}
 
-\item{housekeeping_genes}{[vector(character)]}
+\item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs
+that should be used as housekeeping genes. Default is \code{NULL}.}
 }
 \value{
 [numeric]
@@ -22,3 +24,4 @@ geometric_housekeeping(data, positive_factor, intercept,
 \description{
 geometric_housekeeping
 }
+\keyword{internal}

@@ -7,9 +7,9 @@
 qc_imaging(fov_counted, fov_count)
 }
 \arguments{
-\item{fov_counted}{[numeric]}
+\item{fov_counted}{[numeric] Values from "lane_FovCounted" in the RCC files.}
 
-\item{fov_count}{[numeric]}
+\item{fov_count}{[numeric] Values from "lane_FovCount" in the RCC files.}
 }
 \value{
 [numeric]
@@ -17,3 +17,4 @@ qc_imaging(fov_counted, fov_count)
 \description{
 qc_imaging
 }
+\keyword{internal}

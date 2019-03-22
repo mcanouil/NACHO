@@ -1,16 +1,25 @@
 Package: NACHO
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.3.1
+Title: A NanoString Quality Control Dashboard
+Version: 0.4.0.9000
 Authors@R: c(
-    person("Gerard", "Bouland", role = c("aut"), email = "G.Bouland@lumc.nl"),
-    person("Roderick .C", "Slieker", role = c("aut"), email = "R.C.Slieker@lumc.nl"),
-    person("Mickaël", "Canouil", role = c("aut","cre"), email = "mickael.canouil@cnrs.fr", 
+    person(given = "Mickaël", family = "Canouil", role = c("aut", "cre"), email = "mickael.canouil@cnrs.fr", 
       comment = c(ORCID = "0000-0002-3396-4549")
-    )
+    ),
+    person(given = "Roderick", family = "Slieker", role = "aut", email = "R.C.Slieker@lumc.nl",
+      comment = c(ORCID = "0000-0003-0961-9152")
+    ),
+    person(given = "Gerard", family = "Bouland", role = "aut", email = "G.A.Bouland@lumc.nl")
   )
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: NACHO (NanoString Quality Control Dashboard) is developed for NanoString nCounter data. 
+    NanoString nCounter data are gene expression assays where there is no need for the use of enzymes 
+    or amplification protocols and work with fluorescent barcodes. 
+    Each barcode is assigned a mRNA/miRNA which after bonding with its target can be counted. 
+    As a result each count of a specific barcode represents the presence of its target mRNA/miRNA.  
+    NACHO is able to analyse the exported NanoString nCounter data and facilitates 
+    the user in performing a quality control.  
+    NACHO does this by visualising Quality Control metrics, expression of control genes, 
+    principal components and sample specific size factors in an interactive web application. 
 License: GPL-3 | file LICENSE
 Depends: R (>= 3.5.0)
 Imports:
@@ -24,15 +33,13 @@ Imports:
   ggbeeswarm,
   ggrepel,
   ggpubr,
-  knitr,
-  rmarkdown,
   gtools
 Suggests:
   Biobase,
   GEOquery,
   utils,
   sessioninfo,
-  knitr, 
+  knitr,
   rmarkdown
 Encoding: UTF-8
 LazyData: true

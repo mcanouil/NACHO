@@ -1,6 +1,8 @@
 #' read_rcc
 #'
-#' @param file [character]
+#' @param file [character] The name of the RCC file which the data are to be read from.
+#'
+#' @keywords internal
 #'
 #' @return [tibble]
 read_rcc <- function(file) {

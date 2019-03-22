@@ -7,7 +7,7 @@
 geometric_mean(x)
 }
 \arguments{
-\item{x}{[numeric]}
+\item{x}{[numeric] A \code{numeric} or \code{vector(numeric)}.}
 }
 \value{
 [numeric]
@@ -15,3 +15,4 @@ geometric_mean(x)
 \description{
 geometric_mean
 }
+\keyword{internal}
