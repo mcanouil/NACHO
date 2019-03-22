@@ -1,3 +1,6 @@
+## ---- setup, echo=FALSE--------------------------------------------------
+knitr::opts_knit$set(root.dir = "/Users/roderick/Documents/Projecten en papers/")
+
 ## ----ex1, eval=FALSE-----------------------------------------------------
 #  library(NACHO)
 #  data(GSE74821)
