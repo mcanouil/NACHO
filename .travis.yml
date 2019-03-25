@@ -15,13 +15,12 @@ before_install:
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
   - Rscript -e 'update.packages(ask = FALSE)'
 
-
 r_github_packages:
   - r-lib/pkgdown
+  - r-lib/covr
 
 bioc_packages:
   - GEOquery
-  - BiocVersion
 
 matrix:
   include:
