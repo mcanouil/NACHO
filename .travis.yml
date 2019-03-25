@@ -5,8 +5,9 @@ sudo: true
 
 env:
   global:
-- _R_CHECK_FORCE_SUGGESTS_=false
-
+  - _R_CHECK_FORCE_SUGGESTS_=false
+  - R_REMOTES_NO_ERRORS_FROM_WARNINGS=true
+  - _R_CHECK_SYSTEM_CLOCK_=FALSE
 
 before_install:
   - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
@@ -15,17 +16,24 @@ before_install:
   - Rscript -e 'update.packages(ask = FALSE)'
 
 
-r_github_packages: r-lib/pkgdown
+r_github_packages:
+  - r-lib/pkgdown
 
+bioc_packages:
+  - GEOquery
+  - BiocVersion
 
 matrix:
   include:
   - r: devel
+    - bioc-devel
   - r: release
-   after_success:
-     - Rscript -e 'covr::codecov()'
+    - bioc-release
+    after_success:
+    - Rscript -e 'covr::codecov()'
   #   deploy:
   #     provider: script
   #     script: Rscript -e 'pkgdown::deploy_site_github(verbose = TRUE, lazy = FALSE, run_dont_run = FALSE)'
   #     skip_cleanup: true
   - r: oldrel
+    - bioc-release
