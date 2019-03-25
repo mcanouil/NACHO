@@ -92,12 +92,14 @@ library(GEOquery)
 gse <- getGEO("GSE70970")
 # Get phenotypes
 targets <- pData(phenoData(gse[[1]]))
-getGEOSuppFiles("GSE70970")
+getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
 # Unzip data
-untar("GSE70970/GSE70970_RAW.tar", exdir = "GSE70970/Data")
+untar(
+  tarfile = paste0(tempdir(), "/GSE70970/GSE70970_RAW.tar"), 
+  exdir = paste0(tempdir(), "/GSE70970/Data")
+)
 # Add IDs
-IDs <- list.files("GSE70970/Data")
-targets$IDFILE <- IDs
+targets$IDFILE <- list.files(paste0(tempdir(), "/GSE70970/Data"))
 ```
 
 After we extracted the dataset to the `./Data` directory, the `Samplesheet.csv` is written containing a column with the exact names of the files for each sample. Subsequently `summarise()` is called.  
@@ -107,7 +109,7 @@ The following two arguments consecutively indicate which housekeeping genes and 
 ```{r ex3}
 library(NACHO)
 GSE70970_sum <- summarise(
-  data_directory = "GSE70970/Data/", # Where the data is
+  data_directory = paste0(tempdir(), "/GSE70970/Data"), # Where the data is
   ssheet_csv = targets, # The samplesheet
   normalisation_method = "GEO", # Geometric mean or GLM
   housekeeping_genes = NULL, # Custom list of housekeeping genes
