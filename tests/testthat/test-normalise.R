@@ -1,7 +1,7 @@
 context("normalise()")
 
 test_that("normalise", {
-  normalise(
+  res <- normalise(
     nacho_object = GSE74821,
     housekeeping_genes = NULL,
     housekeeping_predict = FALSE,
@@ -18,4 +18,5 @@ test_that("normalise", {
       House_factor = c(1/11, 11)
     )
   )
+  expect_identical(class(res), "list")
 })
