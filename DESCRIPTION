@@ -37,12 +37,13 @@ Imports:
   ggpubr,
   gtools
 Suggests:
-  Biobase,
-  GEOquery,
-  utils,
-  sessioninfo,
-  knitr,
-  rmarkdown
+    Biobase,
+    GEOquery,
+    utils,
+    sessioninfo,
+    knitr,
+    rmarkdown,
+    testthat
 LazyData: true
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = FALSE)
