@@ -3,6 +3,8 @@
 NACHO <img src="man/figures/nacho_hex.png" align="right" width="120" />
 =======================================================================
 
+[![Travis-CI Build Status](https://travis-ci.org/mcanouil/NACHO.svg?branch=master)](https://travis-ci.org/mcanouil/NACHO) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/NACHO?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/NACHO) [![Coverage Status](https://img.shields.io/codecov/c/github/mcanouil/NACHO/master.svg)](https://codecov.io/github/mcanouil/NACHO?branch=master) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/NACHO)](https://cran.r-project.org/package=NACHO) [![CRAN\_Download\_Badge](http://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
+
 Overview
 --------
 
