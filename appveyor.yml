@@ -42,4 +42,4 @@ artifacts:
     name: Bits
 
   - path: '\*_*.zip'
-name: Bit
+    name: Bit
