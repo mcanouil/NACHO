@@ -21,6 +21,8 @@ Description: NACHO (NanoString Quality Control Dashboard) is developed for NanoS
     NACHO does this by visualising Quality Control metrics, expression of control genes, 
     principal components and sample specific size factors in an interactive web application. 
 License: GPL-3 | file LICENSE
+URL: https://github.com/mcanouil/NACHO
+BugReports: https://github.com/mcanouil/NACHO/issues
 Depends: R (>= 3.5.0)
 Imports:
   tibble,
@@ -41,7 +43,8 @@ Suggests:
   sessioninfo,
   knitr,
   rmarkdown
-Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
+Roxygen: list(markdown = FALSE)
 VignetteBuilder: knitr
+Encoding: UTF-8
