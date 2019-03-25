@@ -6,6 +6,7 @@ init:
         $ErrorActionPreference = "Stop"
         Invoke-WebRequest http://raw.github.com/krlmlr/r-appveyor/master/scripts/appveyor-tool.ps1 -OutFile "..\appveyor-tool.ps1"
         Import-Module '..\appveyor-tool.ps1'
+
 install:
   ps: Bootstrap
 
@@ -14,9 +15,16 @@ environment:
   global:
     USE_RTOOLS: true
 
+
+environment:
+  global:
+    _R_CHECK_FORCE_SUGGESTS_: false
+
 build_script:
-  - travis-tool.sh install_bioc_deps
+  - travis-tool.sh install_bioc BiocVersion GEOquery
   - travis-tool.sh install_bioc GEOquery
+  - travis-tool.sh install_bioc_deps
+  - travis-tool.sh install_deps
 
 test_script:
   - travis-tool.sh run_tests
