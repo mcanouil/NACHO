@@ -14,15 +14,10 @@ install:
 environment:
   global:
     USE_RTOOLS: true
-
-
-environment:
-  global:
     _R_CHECK_FORCE_SUGGESTS_: false
 
 build_script:
   - travis-tool.sh install_bioc BiocVersion GEOquery
-  - travis-tool.sh install_bioc GEOquery
   - travis-tool.sh install_bioc_deps
   - travis-tool.sh install_deps
 
