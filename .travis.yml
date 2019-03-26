@@ -28,7 +28,7 @@ matrix:
   - r: release
     deploy:
       provider: script
-      script: Rscript -e 'pkgdown::deploy_site_github(verbose = TRUE, lazy = FALSE, run_dont_run = FALSE)'
+      script: Rscript -e 'pkgdown::deploy_site_github(verbose = TRUE)'
       skip_cleanup: true
   - r: 3.5
 
