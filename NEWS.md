@@ -1,16 +1,19 @@
 # NACHO 0.5.0.9000
 
-* Add a README
+## New features
 
-* Add logo
-
-* Change in package title with capital letters corresponding to NACHO
-
-* Add tests using testthat
-
+* `summarise()` imports and pre-process RCC files
+* `normalise()` allows to change settings used in `summarise()` and exclude outliers
 * `visualise()` allows customisation of the quality thresholds
-
 * Minor changes
+
+## Minor improvements and fixes
+
+* Add a README
+* Add logo
+* In `summarise()`, `ssheet_csv` can take a data.frame or a csv file
+* Change in package title with capital letters corresponding to NACHO
+* Add tests using testthat
 
 
 # NACHO 0.4.0
