@@ -25,7 +25,7 @@ matrix:
   include:
   - r: devel
   - r: release
-    after_success: Rscript -e 'covr::coveralls()'
+    after_success: Rscript -e 'covr::coveralls(); covr::codecov()'
     before_deploy: Rscript -e 'remotes::install_cran("pkgdown")'
     deploy:
       provider: script
@@ -34,7 +34,7 @@ matrix:
   - r: 3.5
 
 after_success:
-  - Rscript -e 'covr::coveralls()'
+  - Rscript -e 'covr::coveralls(); covr::codecov()'
 
 notifications:
   email:
