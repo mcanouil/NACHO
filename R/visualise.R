@@ -81,6 +81,7 @@ visualise <- function(nacho_object) {
     stop('[NACHO] Must be run in an interactive R session!')
   }
 
+  # nocov start
   id_colname <- nacho_object[["access"]]
   housekeeping_genes <- nacho_object[["housekeeping_genes"]]
   housekeeping_norm <- nacho_object[["housekeeping_norm"]]
@@ -994,6 +995,7 @@ visualise <- function(nacho_object) {
   )
 
   shiny::runApp(app)
+  # nocov end
 }
 
 
