@@ -1,14 +1,47 @@
 # NACHO 0.5.0.9000
 
-  * `render()`function
+* Minor changes
 
 
 # NACHO 0.5.0
 
-## New features
+* `visualise()` allows customisation of the quality thresholds
 
-* The `summarise()` function to import and preprocess RCC files from NanoString nCounter
 
-* The `normalise()` function to (re-)normalise the data and possibly exclude outliers
+# NACHO 0.4.0
 
-* The `visualise()` function to visualise quality measurements and customise quality threshold
+* Fix major errors, bad behaviour and typos
+
+
+# NACHO 0.3.1
+
+* Add and fill roxygen documentation
+
+
+# NACHO 0.3.0 
+
+* Code optimisation in `normalise()` (and internal functions) 
+
+* `visualise()` replaces the Shiny app
+
+
+# NACHO 0.2.2
+
+* Remove S4 class => Back to list object
+
+
+# NACHO 0.2.1
+
+* Rewrite GEO dataset
+
+
+# NACHO 0.2.0
+
+* Complete rewrite of `summarise()` and `normalise()` (and all internal functions)
+
+* Add S4 class object
+
+
+# NACHO 0.1.0
+
+* First version
