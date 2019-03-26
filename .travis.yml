@@ -7,7 +7,7 @@ env:
   global:
   - _R_CHECK_FORCE_SUGGESTS_=false
   - R_REMOTES_NO_ERRORS_FROM_WARNINGS=true
-  - _R_CHECK_SYSTEM_CLOCK_=FALSE
+  - _R_CHECK_SYSTEM_CLOCK_=false
 
 before_install:
   - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
@@ -25,14 +25,11 @@ bioc_packages:
 matrix:
   include:
   - r: devel
-    - bioc-devel
   - r: release
-    - bioc-release
     after_success:
     - Rscript -e 'covr::codecov()'
     deploy:
       provider: script
       script: Rscript -e 'pkgdown::deploy_site_github(verbose = TRUE, lazy = FALSE, run_dont_run = FALSE)'
       skip_cleanup: true
-  - r: oldrel
-    - bioc-release
+  - r: 3.5
