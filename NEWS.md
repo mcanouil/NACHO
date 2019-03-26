@@ -1,11 +1,16 @@
 # NACHO 0.5.0.9000
 
-* Minor changes
+* Add a README
 
+* Add logo
 
-# NACHO 0.5.0
+* Change in package title with capital letters corresponding to NACHO
+
+* Add tests using testthat
 
 * `visualise()` allows customisation of the quality thresholds
+
+* Minor changes
 
 
 # NACHO 0.4.0
