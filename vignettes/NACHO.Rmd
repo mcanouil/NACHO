@@ -4,6 +4,8 @@ subtitle: "A NanoString Quality-Control Dashboard"
 author: "Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D."
 email: "***REMOVED***"
 date: '`r format(Sys.time(), "%B %d, %Y")`'
+bibliography: nacho.bib
+link-citations: true
 output: 
   rmarkdown::html_vignette:
     number_sections: true
@@ -87,7 +89,7 @@ While calling `normalise()` the user has the possibility to remove these outlier
 ### Presummarised data from *NACHO*
 
 This example shows how to use summarised data to call the interactive web application.  
-The raw data used in the summarisation is from a study of Liu MC et al. [1] and was acquired from the NCBI GEO public database [2].
+The raw data used in the summarisation is from a study of Liu MC et al. [@liu_pam50_2016] and was acquired from the NCBI GEO public database [@barrett_ncbi_2013].
 
 ```{r ex1, eval = FALSE}
 library(NACHO)
@@ -98,7 +100,7 @@ visualise(GSE74821)
 ### Raw data from GEO
 
 Numerous NanoString nCounter data sets are available from GEO.  
-In this example we use a mRNA dataset from the study of *Bruce* et al. [2] with the GEO accession number: **GSE70970**. 
+In this example we use a mRNA dataset from the study of *Bruce* et al. [@bruce_identification_2015] with the GEO accession number: **GSE70970** [@barrett_ncbi_2013]. 
 The data is extracted and prepared using the following code.
 
 ```{r ex2, results = "hide", message = FALSE, warning = FALSE}
@@ -135,6 +137,10 @@ GSE70970_sum <- summarise(
   normalisation_method = "GEO", # Geometric mean or GLM
   n_comp = 5 # Number indicating the number of principal components to compute. 
 )
+```
+
+```{r, echo = FALSE, results = "hide"}
+unlink(paste0(tempdir(), "/GSE70970"), recursive = TRUE)
 ```
 
 ## The `visualise()` function
@@ -191,16 +197,4 @@ GSE70970_norm <- normalise(
 Both counts are also in the *NACHO* data.frame.
 
 # References
-
-[1] Liu MC, Pitcher BN, Mardis ER, Davies SR, Friedman PN, Snider JE, Vickery TL, Reed JP, DeSchryver K, Singh B, Gradishar WJ, Perez EA, Martino S, Citron ML, Norton L, Winer EP, Hudis CA, Carey LA, Bernard PS, Nielsen TO, Perou CM, Ellis MJ, Barry WT. PAM50 gene signatures and breast cancer prognosis with adjuvant anthracycline- and taxane-based chemotherapy: correlative analysis of C9741 (Alliance). Npj Breast Cancer 2:15023 (2016) http://dx.doi.org/10.1038/npjbcancer.2015.23
-
-[2] Barrett T, Wilhite SE, Ledoux P, Evangelista C, Kim IF, Tomashevsky M, Marshall KA, Phillippy KH, Sherman PM, Holko M, Yefanov A, Lee H, Zhang N, Robertson CL, Serova N, Davis S, Soboleva A.
-NCBI GEO: archive for functional genomics data sets--update.
-Nucleic Acids Res. 2013 Jan;41(Database issue):D991-5.
-
-[3] Bruce JP, Hui AB, Shi W, Perez-Ordonez B et al. Identification of a microRNA signature associated with risk of distant metastasis in nasopharyngeal carcinoma. Oncotarget 2015 Feb 28;6(6):4537-50. PMID: 25738365
-
-```{r, echo = FALSE, results = "hide"}
-unlink("GSE70970", recursive = TRUE)
-```
 

@@ -14,6 +14,7 @@
 * In `summarise()`, `ssheet_csv` can take a data.frame or a csv file
 * Change in package title with capital letters corresponding to NACHO
 * Add tests using testthat
+* Vignette uses bib file for references
 
 
 # NACHO 0.4.0
