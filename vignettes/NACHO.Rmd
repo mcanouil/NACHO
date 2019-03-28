@@ -1,6 +1,6 @@
 ---
 title: 'NACHO'
-subtitle: "A NanoString Quality-Control Dashboard"
+subtitle: "A NAnostring quality Control dasHbOard"
 author: "Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D."
 email: "***REMOVED***"
 date: '`r format(Sys.time(), "%B %d, %Y")`'

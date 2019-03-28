@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# NACHO <img src="man/figures/nacho_hex.png" align="right" width="120" />
+# NACHO: a NAnostring quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" />
 
 [![Travis-CI Build Status](https://travis-ci.org/mcanouil/NACHO.svg?branch=master)](https://travis-ci.org/mcanouil/NACHO)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/NACHO?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/NACHO)
