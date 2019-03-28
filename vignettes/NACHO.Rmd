@@ -1,5 +1,5 @@
 ---
-title: "NACHO"
+title: 'NACHO'
 subtitle: "A NanoString Quality-Control Dashboard"
 author: "Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D."
 email: "***REMOVED***"
@@ -36,10 +36,21 @@ knitr::opts_chunk$set(
 )
 ```
 
-
 ```{r logo, echo = FALSE, out.width = "150px"}
 knitr::include_graphics(path = "nacho_hex.png")
 ```
+
+# Installation
+
+```{r, eval = FALSE}
+# Install NACHO from CRAN:
+install.packages("NACHO")
+
+# Or the the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("mcanouil/NACHO")
+```
+
 
 # Overview
 
@@ -62,17 +73,6 @@ With the use of two functions, RCC files are summarised and visualised, namely: 
 * The `normalise()` function creates a list in which your settings, the raw counts and normalised counts are stored.
 
 
-# Installation
-
-```{r, eval = FALSE}
-# Install NACHO from CRAN:
-install.packages("NACHO")
-
-# Or the the development version from GitHub:
-# install.packages("devtools")
-devtools::install_github("mcanouil/NACHO")
-```
-
 # An example
 
 To display the usage and utility of *NACHO*, we show three examples in which the above mentioned functions are used and the results are briefly examined. 
@@ -89,7 +89,7 @@ While calling `normalise()` the user has the possibility to remove these outlier
 ### Presummarised data from *NACHO*
 
 This example shows how to use summarised data to call the interactive web application.  
-The raw data used in the summarisation is from a study of Liu MC et al. [@liu_pam50_2016] and was acquired from the NCBI GEO public database [@barrett_ncbi_2013].
+The raw data used in the summarisation is from a study of @liu_pam50_2016 and was acquired from the NCBI GEO public database [@barrett_ncbi_2013].
 
 ```{r ex1, eval = FALSE}
 library(NACHO)
@@ -99,8 +99,8 @@ visualise(GSE74821)
 
 ### Raw data from GEO
 
-Numerous NanoString nCounter data sets are available from GEO.  
-In this example we use a mRNA dataset from the study of *Bruce* et al. [@bruce_identification_2015] with the GEO accession number: **GSE70970** [@barrett_ncbi_2013]. 
+Numerous NanoString nCounter data sets are available from GEO [@barrett_ncbi_2013].  
+In this example we use a mRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
 The data is extracted and prepared using the following code.
 
 ```{r ex2, results = "hide", message = FALSE, warning = FALSE}
