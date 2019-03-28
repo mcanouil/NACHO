@@ -5,6 +5,18 @@ NACHO <img src="man/figures/nacho_hex.png" align="right" width="120" />
 
 [![Travis-CI Build Status](https://travis-ci.org/mcanouil/NACHO.svg?branch=master)](https://travis-ci.org/mcanouil/NACHO) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/NACHO?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/NACHO) [![Coverage Status (codecov)](https://codecov.io/gh/mcanouil/NACHO/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO) [![Coverage Status (coveralls)](https://coveralls.io/repos/github/mcanouil/NACHO/badge.svg?branch=master)](https://coveralls.io/github/mcanouil/NACHO?branch=master) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/NACHO)](https://cran.r-project.org/package=NACHO) [![CRAN\_Download\_Badge](http://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
 
+Installation
+------------
+
+``` r
+# Install NACHO from CRAN:
+install.packages("NACHO")
+
+# Or the the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("mcanouil/NACHO")
+```
+
 Overview
 --------
 
@@ -25,14 +37,4 @@ With the use of two functions, RCC files are summarised and visualised, namely: 
 
 -   The `normalise()` function creates a list in which your settings, the raw counts and normalised counts are stored.
 
-Installation
-------------
-
-``` r
-# Install NACHO from CRAN:
-install.packages("NACHO")
-
-# Or the the development version from GitHub:
-# install.packages("devtools")
-devtools::install_github("mcanouil/NACHO")
-```
+For more `vignette("NACHO")`
