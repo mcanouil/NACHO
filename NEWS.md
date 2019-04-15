@@ -3,6 +3,8 @@
 ## Minor improvements and fixes
 
 * Bold letters for **NACHO** in title.
+* In `DESCRIPTION`, title and description updated for CRAN.
+* Add NanoString reference in `DESCRIPTION` and vignette
 
 
 # NACHO 0.5.2
