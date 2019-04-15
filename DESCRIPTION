@@ -1,7 +1,7 @@
 Package: NACHO
 Type: Package
 Title: NAnostring quality Control dasHbOard
-Version: 0.5.0.9000
+Version: 0.5.0
 Authors@R: c(
     person(given = "Mickaël", family = "Canouil", role = c("aut", "cre"), email = "mickael.canouil@cnrs.fr", 
       comment = c(ORCID = "0000-0002-3396-4549")
@@ -21,7 +21,7 @@ Description: NACHO (NanoString Quality Control Dashboard) is developed for NanoS
     NACHO does this by visualising Quality Control metrics, expression of control genes, 
     principal components and sample specific size factors in an interactive web application. 
 License: GPL-3 | file LICENSE
-URL: https://github.com/mcanouil/NACHO
+URL: https://mcanouil.github.io/NACHO
 BugReports: https://github.com/mcanouil/NACHO/issues
 Depends: R (>= 3.5.0)
 Imports:
