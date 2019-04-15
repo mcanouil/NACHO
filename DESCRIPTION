@@ -1,7 +1,7 @@
 Package: NACHO
 Type: Package
 Title: NAnostring quality Control dasHbOard
-Version: 0.5.0
+Version: 0.5.1
 Authors@R: c(
     person(given = "Mickaël", family = "Canouil", role = c("aut", "cre"), email = "***REMOVED***", 
       comment = c(ORCID = "0000-0002-3396-4549")
