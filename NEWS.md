@@ -1,4 +1,4 @@
-# NACHO 0.5.0.9000
+# NACHO 0.5.0
 
 ## New features
 
@@ -15,6 +15,7 @@
 * Change in package title with capital letters corresponding to NACHO
 * Add tests using testthat
 * Vignette uses bib file for references
+* Update URL in DESCRIPTION
 
 
 # NACHO 0.4.0
