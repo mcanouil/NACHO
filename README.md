@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Nanostring Quality-Control Dashboard <img src="man/figures/nacho_hex.png" align="right" width="120" />
+# Nanostring Quality Control Dashboard <img src="man/figures/nacho_hex.png" align="right" width="120" />
 
 [![Travis-CI Build
 Status](https://travis-ci.org/mcanouil/NACHO.svg?branch=master)](https://travis-ci.org/mcanouil/NACHO)
