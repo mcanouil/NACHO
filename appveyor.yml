@@ -12,7 +12,7 @@ install:
 
 
 # Adapt as necessary starting from here
-version: 0.5.0.{build}
+version: 0.5.1.{build}
 
 
 environment:
