@@ -1,3 +1,10 @@
+# NACHO 0.5.2
+
+## Minor improvements and fixes
+
+* In `DESCRIPTION`, title and description updated for CRAN
+
+
 # NACHO 0.5.1
 
 ## Minor improvements and fixes

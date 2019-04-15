@@ -1,7 +1,7 @@
 Package: NACHO
 Type: Package
-Title: NAnostring quality Control dasHbOard
-Version: 0.5.1
+Title: NACHO: a NanoString Quality-Control Dashboard
+Version: 0.5.2
 Authors@R: c(
     person(given = "Mickaël", family = "Canouil", role = c("aut", "cre"), email = "***REMOVED***", 
       comment = c(ORCID = "0000-0002-3396-4549")
@@ -11,7 +11,7 @@ Authors@R: c(
     ),
     person(given = "Gerard", family = "Bouland", role = "aut", email = "G.A.Bouland@lumc.nl")
   )
-Description: NACHO (NanoString Quality Control Dashboard) is developed for NanoString nCounter data. 
+Description: This package is developed for NanoString nCounter data. 
     NanoString nCounter data are gene expression assays where there is no need for the use of enzymes 
     or amplification protocols and work with fluorescent barcodes. 
     Each barcode is assigned a mRNA/miRNA which after bonding with its target can be counted. 
