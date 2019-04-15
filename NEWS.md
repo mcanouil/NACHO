@@ -1,3 +1,11 @@
+# NACHO 0.5.1
+
+## Minor improvements and fixes
+
+* Vignette uses bib file for references
+* Update URL in DESCRIPTION
+
+
 # NACHO 0.5.0
 
 ## New features
@@ -14,8 +22,6 @@
 * In `summarise()`, `ssheet_csv` can take a data.frame or a csv file
 * Change in package title with capital letters corresponding to NACHO
 * Add tests using testthat
-* Vignette uses bib file for references
-* Update URL in DESCRIPTION
 
 
 # NACHO 0.4.0
