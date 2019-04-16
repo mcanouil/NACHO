@@ -44,6 +44,15 @@
 #' @export
 #'
 #' @examples
+#'
+#' data(GSE74821)
+#' GSE74821_norm <- normalise(
+#'   nacho_object = GSE74821,
+#'   housekeeping_norm = TRUE,
+#'   normalisation_method = "GEO",
+#'   remove_outliers = TRUE
+#' )
+#'
 #' \dontrun{
 #' library(GEOquery)
 #' library(NACHO)

@@ -39,7 +39,7 @@ its target mRNA/miRNA.
 *NACHO* is able to load, visualise and normalise the exported NanoString
 nCounter data and facilitates the user in performing a quality
 control.  
-*NACHO* does this by visualising Quality Control metrics, expression of
+*NACHO* does this by visualising quality control metrics, expression of
 control genes, principal components and sample specific size factors in
 an interactive web application.
 
