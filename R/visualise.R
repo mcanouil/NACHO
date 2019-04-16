@@ -5,6 +5,13 @@
 #' @export
 #'
 #' @examples
+#'
+#' data(GSE74821)
+#' \dontrun{
+#' # Must be run in an interactive R session!
+#' visualise(GSE74821)
+#' }
+#'
 #' \dontrun{
 #' library(GEOquery)
 #' library(NACHO)
