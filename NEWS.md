@@ -1,3 +1,13 @@
+# NACHO 0.5.4
+
+## Minor improvements and fixes
+
+* In `R/normalise.R`, add short running example for `normalise()`.
+* In `R/visualise.R`, add short running example for `visualise()`.
+* In `DESCRIPTION`, description updated for CRAN, by removing some capital letters 
+ and put **NACHO** between single quotes.
+
+
 # NACHO 0.5.3
 
 ## Minor improvements and fixes
