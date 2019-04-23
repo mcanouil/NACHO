@@ -52,7 +52,7 @@
 #'   # (re)Normalise data with "GLM" method and removing outliers
 #'   nacho_norm <- normalise(
 #'     nacho_object = nacho,
-#'     normalisation_method = "GLM"
+#'     normalisation_method = "GLM",
 #'     remove_outliers = TRUE
 #'   )
 #'   visualise(nacho_norm)
