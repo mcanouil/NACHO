@@ -7,6 +7,7 @@
 * In `R/visualise.R`, put example in `if (interactive()) {...}` instead of `\dontrun{...}`.
 * In `DESCRIPTION` and `README`, description updated for CRAN, by adding "messenger-RNA/micro-RNA".
 
+
 # NACHO 0.5.4
 
 ## Minor improvements and fixes
