@@ -29,8 +29,8 @@ devtools::install_github("mcanouil/NACHO")
 
 *NACHO* (**NA**nostring quality **C**ontrol das**H**b**O**ard) is
 developed for NanoString nCounter data.  
-NanoString nCounter data is a mRNA or miRNA expression assay and works
-with fluorescent barcodes.  
+NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA)
+expression assay and works with fluorescent barcodes.  
 Each barcode is assigned a mRNA/miRNA, which can be counted after
 bonding with its target.  
 As a result each count of a specific barcode represents the presence of
