@@ -1,7 +1,7 @@
 Package: NACHO
 Type: Package
 Title: NanoString Quality Control Dashboard
-Version: 0.5.5
+Version: 0.5.6
 Authors@R: c(
     person(given = "Mickaël", family = "Canouil", role = c("aut", "cre"), email = "***REMOVED***", 
       comment = c(ORCID = "0000-0002-3396-4549")
