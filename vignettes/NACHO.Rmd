@@ -103,7 +103,19 @@ Numerous NanoString nCounter data sets are available from GEO [@barrett_ncbi_201
 In this example we use a mRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
 The data is extracted and prepared using the following code.
 
-```{r ex2, results = "hide", message = FALSE, warning = FALSE}
+```{r geo_down, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
+gse <- try({GEOquery::getGEO("GSE70970")}, silent = TRUE)
+if (class(gse)=="try-error") { # when GEOquery is down
+  cons <- showConnections(all = TRUE)
+  icons <- which(grepl("GSE70970", cons[, "description"])) - 1
+  for (icon in icons) close(getConnection(icon))
+  cat(
+    "Note: `GEOquery` seems to be currently down. Thus, the following code was not executed.\n"
+  )
+}
+```
+
+```{r ex2, results = "hide", message = FALSE, warning = FALSE, eval = class(gse)!="try-error"}
 library(GEOquery)
 # Download data
 gse <- getGEO("GSE70970")
@@ -126,7 +138,7 @@ After we extracted the dataset to the `paste0(tempdir(), "/GSE70970/Data")` dire
 The first argument requires the path to the directory containing the RCC files, the second argument is the location of samplesheet followed by third argument with the column name containing the exact names of the files.  
 The `housekeeping_genes` and `normalisation_method`  arguments respectively indicate which housekeeping genes and normalisation method should be used.
 
-```{r ex3}
+```{r ex3, eval = class(gse)!="try-error"}
 library(NACHO)
 GSE70970_sum <- summarise(
   data_directory = paste0(tempdir(), "/GSE70970/Data"), # Where the data is
@@ -139,7 +151,7 @@ GSE70970_sum <- summarise(
 )
 ```
 
-```{r, echo = FALSE, results = "hide"}
+```{r, echo = FALSE, results = "hide", eval = class(gse)!="try-error"}
 unlink(paste0(tempdir(), "/GSE70970"), recursive = TRUE)
 ```
 
@@ -163,13 +175,20 @@ Each sample in the plots can be coloured based on either technical specification
 For this example we use the **GSE70970** dataset from the previous example. 
 The discovered housekeeping genes are saved in a global variable named **predicted_housekeeping**. 
 
-```{r ex5}
+```{r ex5, eval = class(gse)!="try-error"}
 print(GSE70970_sum[["housekeeping_genes"]])
 ```
 
-Let's say  _`r GSE70970_sum[["housekeeping_genes"]][1]`_ and _`r GSE70970_sum[["housekeeping_genes"]][2]`_ are not suitable, therefore, you want to exclude these genes from the normalisation process.
+```{r in_text, eval = class(gse)!="try-error", echo = FALSE}
+cat(
+  "Let's say _", GSE70970_sum[["housekeeping_genes"]][1], 
+  "_ and _", GSE70970_sum[["housekeeping_genes"]][2], 
+  "_ are not suitable, therefore, you want to exclude these genes from the normalisation process.",
+  sep = ""
+)
+```
 
-```{r ex6}
+```{r ex6, eval = class(gse)!="try-error"}
 my_housekeeping <- GSE70970_sum[["housekeeping_genes"]][-c(1, 2)]
 print(my_housekeeping)
 ```
@@ -183,7 +202,7 @@ Here the user has a choice between `"GLM"` or `"GEO"`.
 The differences between normalisation methods are nuanced, however, a preference for either method are use case specific.  
 In this example `"GLM"` is used.
 
-```{r ex7}
+```{r ex7, eval = class(gse)!="try-error"}
 GSE70970_norm <- normalise(
   nacho_object = GSE70970_sum,
   housekeeping_genes = my_housekeeping,
