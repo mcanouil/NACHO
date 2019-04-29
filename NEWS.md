@@ -3,7 +3,7 @@
 ## Minor improvements and fixes
 
 * In `tests/testthat/test-summarise.R`, add condition to handle when `GEOQuery` is down and cannot retrieve online data.
-* In `vignettes/nACHO.Rmd`, add condition to handle when `GEOQuery` is down and cannot retrieve online data.
+* In `vignettes/NACHO.Rmd`, add condition to handle when `GEOQuery` is down and cannot retrieve online data.
 
 
 # NACHO 0.5.5
