@@ -1,6 +1,4 @@
-# NACHO 0.5.7
-
-## Minor improvements and fixes
+# NACHO (development version)
 
 # NACHO 0.5.6
 
