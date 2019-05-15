@@ -32,6 +32,7 @@ matrix:
       script: Rscript -e 'pkgdown::deploy_site_github()'
       skip_cleanup: true
   - r: 3.5
+  - r: 3.6
 
 after_success:
   - Rscript -e 'covr::coveralls(); covr::codecov()'
