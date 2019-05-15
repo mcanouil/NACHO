@@ -9,11 +9,10 @@ Status](https://travis-ci.org/mcanouil/NACHO.svg?branch=master)](https://travis-
 Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/NACHO?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/NACHO)
 [![Coverage Status
 (codecov)](https://codecov.io/gh/mcanouil/NACHO/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO)
-[![Coverage Status
-(coveralls)](https://coveralls.io/repos/github/mcanouil/NACHO/badge.svg?branch=master)](https://coveralls.io/github/mcanouil/NACHO?branch=master)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/NACHO?color=brightgreen)](https://cran.r-project.org/package=NACHO)
-<!--[![CRAN_Download_month](http://cranlogs.r-pkg.org/badges/NACHO?color=brightgreen)](https://cran.r-project.org/package=NACHO)-->
 [![CRAN\_Download\_total](http://cranlogs.r-pkg.org/badges/grand-total/NACHO?color=brightgreen)](https://cran.r-project.org/package=NACHO)
+<!--[![CRAN_Download_month](http://cranlogs.r-pkg.org/badges/NACHO?color=brightgreen)](https://cran.r-project.org/package=NACHO)-->
+<!--[![Coverage Status (coveralls)](https://coveralls.io/repos/github/mcanouil/NACHO/badge.svg?branch=master)](https://coveralls.io/github/mcanouil/NACHO?branch=master)-->
 
 ## Installation
 
