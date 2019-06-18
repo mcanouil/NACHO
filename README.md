@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![GitHub
-tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=Github)](https://github.com/mcanouil/NACHO)
+tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=%22latest%20tag%22)](https://github.com/mcanouil/NACHO)
 [![Travis-CI Build
 Status](https://travis-ci.org/mcanouil/NACHO.svg?branch=master)](https://travis-ci.org/mcanouil/NACHO)
 [![AppVeyor Build
