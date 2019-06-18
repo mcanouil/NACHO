@@ -10,7 +10,7 @@ Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/NACHO?branch
 [![Coverage Status
 (codecov)](https://codecov.io/gh/mcanouil/NACHO/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO)
 [![CII Best
-Practices](https://bestpractices.coreinfrastructure.org/projects/2719/badge)](https://bestpractices.coreinfrastructure.org/projects/2719)  
+Practices](https://bestpractices.coreinfrastructure.org/projects/2719/badge)](https://bestpractices.coreinfrastructure.org/projects/2719)
 [![GitHub
 tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=Github)](https://github.com/mcanouil/NACHO)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
