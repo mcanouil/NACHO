@@ -5,6 +5,8 @@
 
 <!-- badges: start -->
 
+[![Lifecycle:
+maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 [![GitHub
 tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=%22latest%20tag%22)](https://github.com/mcanouil/NACHO)
 [![Travis-CI Build
