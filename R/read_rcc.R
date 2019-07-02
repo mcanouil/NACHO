@@ -26,7 +26,7 @@ read_rcc <- function(file) {
       control_probes <- .data[.data[["CodeClass"]]%in%c("Negative", "Positive"), ]
       sample_list <- split(
         x = .data[!.data[["CodeClass"]]%in%c("Negative", "Positive"), ],
-        f = .data[["CodeClass"]][!.data[["CodeClass"]]%in%c("Negative", "Positive")]
+        f = gsub("Endogenous|Housekeeping", "", .data[["CodeClass"]][!.data[["CodeClass"]]%in%c("Negative", "Positive")])
       )
       .data <- lapply(X = sample_list, FUN = rbind, control_probes)
     }
@@ -41,14 +41,17 @@ read_rcc <- function(file) {
     rcc_tbl[["plexset_id"]] <- paste0("S", 1:8)
   }
 
-  # remove NOTE: 'no visible binding for global variable' though it's a bit ugly
   column_to_unnest <- c("Header", "Sample_Attributes", "Lane_Attributes", "Messages")
-  tidyr::unnest(
+
+  out <- tidyr::unnest(
     data = rcc_tbl,
     Header = get(column_to_unnest[1]),
     Sample_Attributes = get(column_to_unnest[2]),
     Lane_Attributes = get(column_to_unnest[3]),
-    Messages = get(column_to_unnest[4]),
+    # Messages = get(column_to_unnest[4]),
     .drop = FALSE
   )
+  out[["Messages"]] <- gsub("messages_;", "", sapply(out[["Messages"]], names))
+
+  out
 }
