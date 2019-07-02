@@ -1,5 +1,10 @@
 # NACHO 0.5.7
 
+## New features
+
+* `render_nacho()` render figures from `visualise()` in a rmarkdown friendly output.  
+    Call to `render_nacho()` can be included directly in a rmarkdown chunk.
+
 ## Minor improvements and fixes
 
 * In `R/read_rcc.R`, `R/summarise.R`, fix issue (#1) when PlexSet RCC files could not be read.

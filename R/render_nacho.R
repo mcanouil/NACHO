@@ -11,35 +11,35 @@
 #' @examples
 #' \dontrun{
 #' library(NACHO)
-#' 
+#'
 #' data(GSE74821)
-#' 
+#'
 #' render_nacho(nacho_object = GSE74821)
 #' }
 render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALSE) {
   if (is.numeric(nacho_object$nacho[[colour_name]])) {
     nacho_object$nacho[[colour_name]] <- as.character(nacho_object$nacho[[colour_name]])
   }
-  
-  cat("# NanoString Quality-Control (NACHO) {.tabset}\n\n")
+
+  cat("# NanoString Quality-Control (NACHO)\n\n")
   cat(paste0("<center>![](", system.file("help", "figures", "nacho_hex.png", package = "NACHO"), "){width=150px}</center>"))
-  
+
   cat("\n\n")
-  cat("## RCC Summary {-}\n\n")
+  cat("## RCC Summary\n\n")
   cat('  - Samples:', length(unique(nacho_object$nacho[[nacho_object$access]])), "\n")
-  genes <- table(nacho_object$nacho[["CodeClass"]]) / 
+  genes <- table(nacho_object$nacho[["CodeClass"]]) /
     length(unique(nacho_object$nacho[[nacho_object$access]]))
   cat(paste0("  - ", names(genes), ": ", genes, "\n"))
-  
-  
+
+
   cat("\n\n")
-  cat("## Settings {-}\n\n")
+  cat("## Settings\n\n")
   cat('  - Predict housekeeping genes:', nacho_object$housekeeping_predict, "\n")
   cat('  - Normalise using housekeeping genes:', nacho_object$housekeeping_norm, "\n")
   cat(
-    '  - Housekeeping genes available:', 
+    '  - Housekeeping genes available:',
     paste(nacho_object$housekeeping_genes[-length(nacho_object$housekeeping_genes)], collapse = ", "),
-    "and", 
+    "and",
     nacho_object$housekeeping_genes[length(nacho_object$housekeeping_genes)], "\n"
   )
   cat('  - Normalise using:', nacho_object$normalisation_method, "\n")
@@ -47,29 +47,29 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
   cat('  - Remove outliers:', nacho_object$remove_outliers, "\n")
   cat(
     "\n",
-    '    + ', 'Binding Density (BD) <', 
+    '    + ', 'Binding Density (BD) <',
       round(nacho_object$outliers_thresholds[["BD"]][1], 3), '\n',
-    '    + ', 'Binding Density (BD) >', 
+    '    + ', 'Binding Density (BD) >',
       round(nacho_object$outliers_thresholds[["BD"]][2], 3), '\n',
-    '    + ', 'Imaging (FoV) <', 
+    '    + ', 'Imaging (FoV) <',
       round(nacho_object$outliers_thresholds[["FoV"]], 3), '\n',
-    '    + ', 'Positive Control Linearity (PC) <', 
+    '    + ', 'Positive Control Linearity (PC) <',
       round(nacho_object$outliers_thresholds[["PC"]], 3), '\n',
-    '    + ', 'Limit of Detection (LoD) <', 
+    '    + ', 'Limit of Detection (LoD) <',
       round(nacho_object$outliers_thresholds[["LoD"]], 3), '\n',
-    '    + ', 'Positive normalisation factor (Positive_factor) <', 
+    '    + ', 'Positive normalisation factor (Positive_factor) <',
       round(nacho_object$outliers_thresholds[["Positive_factor"]][1], 3), '\n',
-    '    + ', 'Positive normalisation factor (Positive_factor) >', 
+    '    + ', 'Positive normalisation factor (Positive_factor) >',
       round(nacho_object$outliers_thresholds[["Positive_factor"]][2], 3), '\n',
-    '    + ', 'Housekeeping normalisation factor (house_factor) <', 
+    '    + ', 'Housekeeping normalisation factor (house_factor) <',
       round(nacho_object$outliers_thresholds[["House_factor"]][1], 3), '\n',
-    '    + ', 'Housekeeping normalisation factor (house_factor) >', 
+    '    + ', 'Housekeeping normalisation factor (house_factor) >',
       round(nacho_object$outliers_thresholds[["House_factor"]][2], 3), '\n'
   )
-  
-  
+
+
   cat("\n\n")
-  cat("## QC Metrics {- .tabset}\n\n")
+  cat("## QC Metrics\n\n")
   labels <- c(
     "MC" = "Average Counts",
     "MedC" = "Median Counts",
@@ -85,27 +85,32 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
     "LoD" = '"(Z)"'
   )
 
-  
-  for (imetric in c("BD", "FoV", "PC", "LoD")) {
+  metrics <- switch(
+    EXPR = attr(earlytemp, "RCC_type"),
+    "n1" = c("BD", "FoV", "PC", "LoD"),
+    "n8" = c("BD", "FoV")
+  )
+
+  for (imetric in metrics) {
     cat("\n\n")
-    cat("###", labels[imetric], "{-}\n\n")
+    cat("###", labels[imetric], "\n\n")
     p <- ggplot2::ggplot(
-      data = nacho_object$nacho %>% 
+      data = nacho_object$nacho %>%
         dplyr::select(
-          CartridgeID, 
-          !!colour_name, 
-          !!nacho_object$access, 
+          CartridgeID,
+          !!colour_name,
+          !!nacho_object$access,
           !!imetric
-        ) %>% 
+        ) %>%
         dplyr::distinct(),
       mapping = ggplot2::aes_string(
-        x = "CartridgeID", 
-        y = imetric, 
+        x = "CartridgeID",
+        y = imetric,
         colour = colour_name
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggbeeswarm::geom_quasirandom(width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
+      ggbeeswarm::geom_quasirandom(size = 0.1, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
       {if (!legend) ggplot2::guides(colour = "none")} +
       ggplot2::labs(
         x = "CartridgeID",
@@ -117,28 +122,28 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
         colour = "firebrick2",
         linetype = "longdash"
       )
-    
+
     print(p)
     cat("\n")
   }
-  
-  
+
+
   cat("\n\n")
-  cat("## Control Genes {- .tabset}\n\n")
+  cat("## Control Genes\n\n")
   for (icodeclass in c("Positive", "Negative", "Housekeeping")) {
     cat("\n\n")
-    cat("###", icodeclass, "{-}\n\n")
+    cat("###", icodeclass, "\n\n")
     p <- ggplot2::ggplot(
-      data = nacho_object$nacho %>% 
-        dplyr::filter(CodeClass %in% icodeclass) %>% 
+      data = nacho_object$nacho %>%
+        dplyr::filter(CodeClass %in% icodeclass) %>%
         dplyr::select(
-          CartridgeID, 
-          !!colour_name, 
-          !!nacho_object$access, 
-          !!imetric, 
-          Name, 
+          CartridgeID,
+          !!colour_name,
+          !!nacho_object$access,
+          !!imetric,
+          Name,
           Count
-        ) %>% 
+        ) %>%
         dplyr::distinct(),
       mapping = ggplot2::aes_string(
         x = "Name",
@@ -147,7 +152,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggbeeswarm::geom_quasirandom(width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
+      ggbeeswarm::geom_quasirandom(size = 0.1, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
       ggplot2::scale_y_log10(limits = c(1, NA)) +
       ggplot2::labs(
         x = if (icodeclass%in%c("Negative", "Positive")) "Control Name" else "Gene Name",
@@ -155,36 +160,36 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       ) +
       {if (!legend) guides(colour = "none")} +
       ggplot2::theme(axis.text.x = ggplot2::element_text(face = "italic"))
-   
-    number_ticks_x <- nacho_object$nacho %>% 
-      dplyr::filter(CodeClass %in% icodeclass) %>% 
-      .$Name %>% 
-      unique() %>% 
+
+    number_ticks_x <- nacho_object$nacho %>%
+      dplyr::filter(CodeClass %in% icodeclass) %>%
+      .$Name %>%
+      unique() %>%
       length()
-    
+
     if (number_ticks_x > 10 | legend) {
       p <- p +
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5))
     }
-    
+
     print(p)
     cat("\n")
   }
-  
+
 
   cat("\n\n")
-  cat("### Control Probe Expression {-}\n\n")
+  cat("### Control Probe Expression\n\n")
   p <- ggplot2::ggplot(
-    data = nacho_object$nacho %>% 
-      dplyr::filter(CodeClass%in%c("Positive", "Negative")) %>% 
+    data = nacho_object$nacho %>%
+      dplyr::filter(CodeClass%in%c("Positive", "Negative")) %>%
       dplyr::select(
-        CartridgeID, 
-        !!colour_name, 
-        !!nacho_object$access, 
-        CodeClass, 
-        Name, 
+        CartridgeID,
+        !!colour_name,
+        !!nacho_object$access,
+        CodeClass,
+        Name,
         Count
-      ) %>% 
+      ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes_string(
       x = nacho_object$access,
@@ -207,145 +212,145 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
     {if (!legend) ggplot2::guides(colour = "none")}
   print(p)
   cat("\n")
-  
-  
+
+
   cat("\n\n")
-  cat("## QC Visuals {- .tabset}\n\n")
-  
+  cat("## QC Visuals\n\n")
+
   cat("\n\n")
-  cat("### Average Count vs. Binding Density {-}\n\n")
-  p <- nacho_object$nacho %>% 
+  cat("### Average Count vs. Binding Density\n\n")
+  p <- nacho_object$nacho %>%
     dplyr::select(
-      CartridgeID, 
-      !!colour_name, 
-      !!nacho_object$access, 
-      MC, 
+      CartridgeID,
+      !!colour_name,
+      !!nacho_object$access,
+      MC,
       BD
-    ) %>% 
-    dplyr::distinct() %>% 
+    ) %>%
+    dplyr::distinct() %>%
     ggplot2::ggplot(
       mapping = ggplot2::aes_string(
-        x = "MC", 
-        y = "BD", 
+        x = "MC",
+        y = "BD",
         colour = colour_name
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggplot2::geom_point(na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
       ggplot2::labs(
         x = labels["MC"],
         y = parse(text = paste0('paste("', labels["BD"], '", " ", ',  units["BD"], ")"))
       )
   print(p)
   cat("\n")
-  
-  
+
+
   cat("\n")
   cat("\n\n")
-  cat("### Average Count vs. Median Count {-}\n\n")
-  p <- nacho_object$nacho %>% 
+  cat("### Average Count vs. Median Count\n\n")
+  p <- nacho_object$nacho %>%
     dplyr::select(
-      CartridgeID, 
-      !!colour_name, 
+      CartridgeID,
+      !!colour_name,
       !!nacho_object$access,
-      MC, 
+      MC,
       MedC
-    ) %>% 
+    ) %>%
     dplyr::distinct() %>%
     ggplot2::ggplot(
       mapping = ggplot2::aes_string(
-        x = "MC", 
-        y = "MedC", 
+        x = "MC",
+        y = "MedC",
         colour = colour_name
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggplot2::geom_point( na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
       ggplot2::labs(
         x = labels["MC"],
         y = labels["MedC"]
       )
   print(p)
   cat("\n")
-  
-  
+
+
   cat("\n")
   cat("\n\n")
-  cat("### Principal Component {- .tabset}\n\n")
-  
+  cat("### Principal Component\n\n")
+
   cat("\n\n")
-  cat("#### PC1 vs. PC2 {-}\n\n")
-  p <- nacho_object$nacho %>% 
+  cat("#### PC1 vs. PC2\n\n")
+  p <- nacho_object$nacho %>%
     dplyr::select(
-      CartridgeID, 
-      !!colour_name, 
-      !!nacho_object$access, 
+      CartridgeID,
+      !!colour_name,
+      !!nacho_object$access,
       paste0("PC", 1:2)
-    ) %>% 
-    dplyr::distinct() %>% 
+    ) %>%
+    dplyr::distinct() %>%
     ggplot2::ggplot(
       mapping = ggplot2::aes_string(
-        x = "PC1", 
-        y = "PC2", 
+        x = "PC1",
+        y = "PC2",
         colour = colour_name
       )
     ) +
-      ggplot2::geom_point(na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
       ggplot2::stat_ellipse(na.rm = TRUE) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
       {if (!legend) ggplot2::guides(colour = "none")}
   print(p)
   cat("\n")
-  
+
   cat("\n\n")
-  cat("#### Factorial planes {-}\n\n")
+  cat("#### Factorial planes\n\n")
   p <- dplyr::full_join(
-    x = nacho_object$nacho %>% 
+    x = nacho_object$nacho %>%
       dplyr::select(
-        CartridgeID, 
-        !!colour_name, 
-        !!nacho_object$access, 
+        CartridgeID,
+        !!colour_name,
+        !!nacho_object$access,
         paste0("PC", 1:min(nacho_object$n_comp, 5))
-      ) %>% 
-      dplyr::distinct() %>% 
+      ) %>%
+      dplyr::distinct() %>%
       tidyr::gather(key = "X.PC", value = "X", paste0("PC", 1:min(nacho_object$n_comp, 5))),
-    y = nacho_object$nacho %>% 
+    y = nacho_object$nacho %>%
       dplyr::select(
-        CartridgeID, 
-        !!colour_name, 
-        !!nacho_object$access, 
+        CartridgeID,
+        !!colour_name,
+        !!nacho_object$access,
         paste0("PC", 1:min(nacho_object$n_comp, 5))
-      ) %>% 
-      dplyr::distinct() %>% 
+      ) %>%
+      dplyr::distinct() %>%
       tidyr::gather(key = "Y.PC", value = "Y", paste0("PC", 1:min(nacho_object$n_comp, 5))),
     by = unique(c("CartridgeID", nacho_object$access, colour_name))
-  ) %>% 
-    dplyr::filter(as.numeric(gsub("PC", "", X.PC)) < as.numeric(gsub("PC", "", Y.PC))) %>% 
+  ) %>%
+    dplyr::filter(as.numeric(gsub("PC", "", X.PC)) < as.numeric(gsub("PC", "", Y.PC))) %>%
     ggplot2::ggplot(
       mapping = ggplot2::aes_string(
-        x = "X", 
-        y = "Y", 
+        x = "X",
+        y = "Y",
         colour = colour_name
       )
     ) +
-      ggplot2::geom_point(na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
       ggplot2::stat_ellipse(na.rm = TRUE) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
       ggplot2::labs(x = NULL, y = NULL) +
       ggplot2::facet_grid(
-        rows = ggplot2::vars(Y.PC), 
-        cols = ggplot2::vars(X.PC), 
+        rows = ggplot2::vars(Y.PC),
+        cols = ggplot2::vars(X.PC),
         scales = "free"
       ) +
       {if (!legend) ggplot2::guides(colour = "none")}
   print(p)
   cat("\n")
-  
+
   cat("\n\n")
-  cat("#### Inertia {-}\n\n")
-  p <- nacho_object$pc_sum %>% 
-    dplyr::rename(ProportionofVariance = `Proportion of Variance`) %>% 
-    dplyr::mutate(PoV = scales::percent(ProportionofVariance)) %>% 
+  cat("#### Inertia\n\n")
+  p <- nacho_object$pc_sum %>%
+    dplyr::rename(ProportionofVariance = `Proportion of Variance`) %>%
+    dplyr::mutate(PoV = scales::percent(ProportionofVariance)) %>%
     ggplot2::ggplot(
       mapping = ggplot2::aes_string(x = "PC", y = "ProportionofVariance")
     ) +
@@ -363,96 +368,96 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       ggplot2::labs(x = "Number of Principal Component", y = "Proportion of Variance")
   print(p)
   cat("\n")
-  
-  
+
+
   cat("\n\n")
-  cat("## Normalisation Factors {- .tabset}\n\n")
-  
+  cat("## Normalisation Factors\n\n")
+
   cat("\n\n")
-  cat("### Positive Factor vs. Background Threshold {-}\n\n")
-  p <- nacho_object$nacho %>% 
+  cat("### Positive Factor vs. Background Threshold\n\n")
+  p <- nacho_object$nacho %>%
     dplyr::select(
-      CartridgeID, 
-      !!colour_name, 
-      !!nacho_object$access, 
-      Negative_factor, 
+      CartridgeID,
+      !!colour_name,
+      !!nacho_object$access,
+      Negative_factor,
       Positive_factor
-    ) %>% 
-    dplyr::distinct() %>% 
+    ) %>%
+    dplyr::distinct() %>%
     ggplot2::ggplot(
       mapping = ggplot2::aes_string(
-        x = "Negative_factor", 
-        y = "Positive_factor", 
+        x = "Negative_factor",
+        y = "Positive_factor",
         colour = colour_name
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggplot2::geom_point(na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
       ggplot2::labs(x = "Negative Factor", y = "Positive Factor") +
       ggplot2::scale_y_log10()
   print(p)
   cat("\n")
-  
-  
+
+
   cat("\n\n")
-  cat("### Housekeeping Factor {-}\n\n")
-  p <- nacho_object$nacho %>% 
+  cat("### Housekeeping Factor\n\n")
+  p <- nacho_object$nacho %>%
     dplyr::select(
-      CartridgeID, 
-      !!colour_name, 
-      !!nacho_object$access, 
-      House_factor, 
+      CartridgeID,
+      !!colour_name,
+      !!nacho_object$access,
+      House_factor,
       Positive_factor
-    ) %>% 
-    dplyr::distinct() %>% 
+    ) %>%
+    dplyr::distinct() %>%
     ggplot2::ggplot(
       mapping = ggplot2::aes_string(
-        x = "Positive_factor", 
-        y = "House_factor", 
+        x = "Positive_factor",
+        y = "House_factor",
         colour = colour_name
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggplot2::geom_point(na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
       ggplot2::labs(x = "Positive Factor", y = "Houskeeping Factor") +
       ggplot2::scale_x_log10() +
       ggplot2::scale_y_log10()
   print(p)
   cat("\n")
-  
+
   cat("\n\n")
-  cat("### Normalisation Result {-}\n\n")
-  p <- nacho_object$nacho %>% 
+  cat("### Normalisation Result\n\n")
+  p <- nacho_object$nacho %>%
     dplyr::select(
-      CartridgeID, 
-      !!nacho_object$access, 
-      Count, 
-      Count_Norm, 
+      CartridgeID,
+      !!nacho_object$access,
+      Count,
+      Count_Norm,
       Name
-    ) %>% 
-    dplyr::distinct() %>% 
+    ) %>%
+    dplyr::distinct() %>%
     dplyr::filter(
       if (is.null(nacho_object$housekeeping_genes)) {
-        CodeClass%in%"Positive" 
+        CodeClass%in%"Positive"
       } else {
         Name%in%nacho_object$housekeeping_genes
       }
-    ) %>% 
-    tidyr::gather(key = "Status", value = "Count", c("Count", "Count_Norm")) %>% 
+    ) %>%
+    tidyr::gather(key = "Status", value = "Count", c("Count", "Count_Norm")) %>%
     dplyr::mutate(
       Status = factor(
         x = c("Count" = "Raw", "Count_Norm" = "Normalised")[Status],
         levels = c("Count" = "Raw", "Count_Norm" = "Normalised")
       ),
       Count = Count + 1
-    ) %>% 
+    ) %>%
     ggplot2::ggplot(
       mapping = ggplot2::aes_string(
         x = nacho_object$access,
         y = "Count"
       )
     ) +
-      ggplot2::geom_line(mapping = ggplot2::aes_string(colour = "Name", group = "Name"), na.rm = TRUE) +
+      ggplot2::geom_line(mapping = ggplot2::aes_string(colour = "Name", group = "Name"), size = 0.1, na.rm = TRUE) +
       ggplot2::facet_grid(cols = ggplot2::vars(Status)) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
       ggplot2::scale_x_discrete(label = NULL) +
@@ -466,7 +471,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
         axis.ticks.x = ggplot2::element_blank(),
         panel.grid.major.x = ggplot2::element_blank(),
         panel.grid.minor.x = ggplot2::element_blank()
-      ) + 
+      ) +
       {if (!legend |  length(nacho_object$housekeeping_genes)>10) ggplot2::guides(colour = "none")} +
       ggplot2::geom_smooth(
         mapping = ggplot2::aes(
@@ -480,7 +485,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       ggplot2::labs(linetype = "Smooth")
   print(p)
   cat("\n")
-  
-  
+
+
   invisible()
 }
