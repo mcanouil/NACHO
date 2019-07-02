@@ -1,3 +1,10 @@
+# NACHO 0.5.7
+
+## Minor improvements and fixes
+
+* In `R/read_rcc.R`, `R/summarise.R`, fix issue (#1) when PlexSet RCC files could not be read.
+
+
 # NACHO 0.5.6
 
 ## Minor improvements and fixes

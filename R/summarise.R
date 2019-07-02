@@ -100,27 +100,52 @@ summarise <- function(
 
   nacho_df <- tibble::as_tibble(nacho_df)
   nacho_df[["file_path"]] <- paste(data_directory, nacho_df[[id_colname]], sep = "/")
-  nacho_df[["file_exists"]] <- sapply(X = nacho_df[["file_path"]], FUN = file.exists)
-  progress <- dplyr::progress_estimated(length(nacho_df[["file_path"]]) + 2)
-  nacho_df[["rcc_content"]] <- lapply(
-    X = nacho_df[["file_path"]],
-    FUN = function(ifile) {
-      progress$tick()$print()
-      read_rcc(file = ifile)
-    }
-  )
-  progress$pause(0.05)$tick()$print()
+
+  if (!all(sapply(X = nacho_df[["file_path"]], FUN = file.exists))) {
+    stop('[NACHO] Not all values from "id_colname" are mapped to a RCC file.')
+  }
+
+  if (anyDuplicated(nacho_df[[id_colname]])!=0 & !"plexset_id"%in%colnames(nacho_df)) {
+    stop(
+      '[NACHO] "id_colname" contains duplicates and "plexset_id" was not provided.\n',
+      '  For PlexSet RCC files, "plexset_id" column is required to identify samples.'
+    )
+  }
 
   column_to_unnest <- c("rcc_content", "Code_Summary")
-  nacho_df <- tidyr::unnest(data = nacho_df, rcc_content = get(column_to_unnest[1]), .drop = FALSE)
-  nacho_df <- tidyr::unnest(data = nacho_df, Code_Summary = get(column_to_unnest[2]), .drop = FALSE)
-  nacho_df[["CodeClass"]] <- gsub("Endogenous.*", "Endogenous", nacho_df[["CodeClass"]])
 
-  if ("plexset_id" %in% colnames(nacho_df)) {
+  if (anyDuplicated(nacho_df[[id_colname]])!=0) {
     type_set <- "n8"
+    nacho_df_uniq <- unique(nacho_df[, c(id_colname, "file_path")])
+    progress <- dplyr::progress_estimated(length(nacho_df_uniq[["file_path"]]) + 1)
+    nacho_df_uniq[["rcc_content"]] <-  lapply(
+      X = nacho_df_uniq[["file_path"]],
+      FUN = function(ifile) {
+        progress$tick()$print()
+        read_rcc(file = ifile)
+      }
+    )
+    nacho_df_uniq <- tidyr::unnest(data = nacho_df_uniq, rcc_content = get(column_to_unnest[1]), .drop = FALSE)
+    nacho_df <- dplyr::left_join(
+      x = nacho_df,
+      y = nacho_df_uniq,
+      by = c(id_colname, "file_path", "plexset_id")
+    )
+    nacho_df <- tidyr::unnest(data = nacho_df, Code_Summary = get(column_to_unnest[2]), .drop = FALSE)
+    nacho_df[["CodeClass"]] <- gsub("[0-8]+s$", "", nacho_df[["CodeClass"]])
     nacho_df <- tidyr::unite(data = nacho_df, col = !!id_colname, id_colname, "plexset_id")
   } else {
     type_set <- "n1"
+    progress <- dplyr::progress_estimated(length(nacho_df[["file_path"]]) + 1)
+    nacho_df[["rcc_content"]] <- lapply(
+      X = nacho_df[["file_path"]],
+      FUN = function(ifile) {
+        progress$tick()$print()
+        read_rcc(file = ifile)
+      }
+    )
+    nacho_df <- tidyr::unnest(data = nacho_df, rcc_content = get(column_to_unnest[1]), .drop = FALSE)
+    nacho_df <- tidyr::unnest(data = nacho_df, Code_Summary = get(column_to_unnest[2]), .drop = FALSE)
   }
   progress$pause(0.05)$tick()$print()
   cat("\n")
