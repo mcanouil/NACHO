@@ -34,7 +34,8 @@ Imports:
     ggbeeswarm,
     ggrepel,
     ggpubr,
-    gtools
+    gtools,
+    magrittr
 Suggests:
     covr,
     Biobase,
