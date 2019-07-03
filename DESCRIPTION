@@ -20,7 +20,7 @@ Description: NanoString nCounter data are gene expression assays where there is 
     'NACHO' does this by visualising quality control metrics, expression of control genes, 
     principal components and sample specific size factors in an interactive web application. 
 License: GPL-3 | file LICENSE
-URL: https://mcanouil.github.io/NACHO
+URL: https://github.com/mcanouil/NACHO, https://mcanouil.github.io/NACHO
 BugReports: https://github.com/mcanouil/NACHO/issues
 Depends: R (>= 3.5.0)
 Imports:
