@@ -1,4 +1,4 @@
-# NACHO 0.5.7
+# NACHO 0.6.0
 
 ## New features
 
