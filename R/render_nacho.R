@@ -3,8 +3,23 @@
 #' @inheritParams normalise
 #' @param colour_name [character] Character string of the column in \code{ssheet_csv}
 #'   or more generally in \code{nacho_object$nacho}.
+#' @param output_file [character] The name of the output file.
+#'   If using `NULL` then the output filename will be based on filename for the input file.
+#'   If a filename is provided, a path to the output file can also be provided.
+#'   Note that the `output_dir` option allows for specifying the output file path as well,
+#'   however, if also specifying the path, the directory must exist.
+#'   If `output_file` is specified but does not have a file extension,
+#'   an extension will be automatically added according to the output format.
+#'   To avoid the automatic file extension, put the output_file value in `I()`, e.g., I('my-output').
+#' @param output_dir [character] The output directory for the rendered output_file.
+#'   This allows for a choice of an alternate directory to which the output file should be written
+#'   (the default output directory is the working directory).
+#'   If a path is provided with a filename in `output_file` the directory specified here will take precedence.
+#'   Please note that any directory path provided will create any necessary directories if they do not exist.
 #' @param legend [logical] Boolean to indicate whether the plot legends should
 #'   be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.
+#' @keep_rmd [logical] Boolean to indicate whether the Rmd file used to produce the HTML report
+#'   is copied to the directory provided in `output_dir`
 #'
 #' @export
 #'
@@ -16,24 +31,139 @@
 #'
 #' render_nacho(nacho_object = GSE74821)
 #' }
-render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALSE) {
+#'
+render_nacho <- function(
+  nacho_object,
+  colour_name = "CartridgeID",
+  output_file = "NACHO_QC.html",
+  output_dir = NULL,
+  legend = FALSE,
+  keep_rmd = FALSE
+) {
+  if (is.null(output_dir)) output_dir <- getwd()
+
+  temp_file <- tempfile()
+
+  temp_file_rmd <- paste0(temp_file, ".Rmd")
+  temp_file_data <- paste0(temp_file, ".Rdata")
+
+  cat(
+    '---',
+    'title: "NanoString Quality-Control Report"',
+    # 'author: "[NACHO](https://mcanouil.github.io/NACHO)"',
+    'output:',
+    '  html_document:',
+    '    theme: simplex',
+    '    toc: true',
+    '    toc_depth: 2',
+    '    toc_float:' ,
+    '      collapsed: false',
+    '    fig_width: 6.3',
+    '    fig_height: 4.7',
+    '    number_sections: true',
+    '    self_contained: true',
+    '    mathjax: default',
+    '    df_print: kable',
+    '---',
+    sep = "\n",
+    file = temp_file_rmd,
+    append = FALSE
+  )
+
+  cat(
+    '\n',
+    paste0(
+      '<a href = "https://mcanouil.github.io/NACHO"><center>![](',
+      system.file("help", "figures", "nacho_hex.png", package = "NACHO"),
+      '){width=150px}</center></a>'
+    ),
+    file = temp_file_rmd,
+    append = TRUE
+  )
+
+  save(list = c("nacho_object", "colour_name", "legend"), file = temp_file_data)
+
+  cat(
+    '\n',
+    '```{r setup, include = FALSE}',
+    'options(stringsAsFactors = FALSE)',
+    'knitr::opts_chunk$set(',
+    '  results = "asis",',
+    '  include = TRUE,',
+    '  echo = FALSE,',
+    '  warning = FALSE,',
+    '  message = FALSE,',
+    '  tidy = FALSE,',
+    '  crop = TRUE,',
+    '  autodep = TRUE',
+    ')',
+    '```',
+    sep = "\n",
+    file = temp_file_rmd,
+    append = TRUE
+  )
+
+  cat(
+    '\n',
+    '```{r nacho_qc}',
+    'nacho_env <- new.env()',
+    paste0('load("', temp_file_data, '", envir = nacho_env)'),
+    'print_nacho(',
+    '  nacho_object = nacho_env[["nacho_object"]],',
+    '  colour_name = nacho_env[["colour_name"]],',
+    '  legend = nacho_env[["legend"]]',
+    ')',
+    '```',
+    sep = "\n",
+    file = temp_file_rmd,
+    append = TRUE
+  )
+
+  cat(
+    "\n\n# R session information\n",
+    '```{r session_info, results = "markup"}',
+    'options("width" = 110)',
+    'sessioninfo::session_info()',
+    '```',
+    sep = "\n",
+    file = temp_file_rmd,
+    append = TRUE
+  )
+
+  if (keep_rmd) file.copy(from = temp_file_rmd, to = paste0(output_dir, "/", gsub(".html", ".Rmd", output_file)))
+
+  rmarkdown::render(
+    input = temp_file_rmd,
+    output_file = output_file,
+    output_dir = output_dir,
+    encoding = 'UTF-8'
+  )
+
+  unlink(temp_file_data)
+  unlink(temp_file_rmd)
+  invisible()
+}
+
+
+#' print_nacho
+#'
+#' @inheritParams render_nacho
+#'
+#' @keywords internal
+#'
+#' @return NULL
+print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALSE) {
   if (is.numeric(nacho_object$nacho[[colour_name]])) {
     nacho_object$nacho[[colour_name]] <- as.character(nacho_object$nacho[[colour_name]])
   }
 
-  cat("# NanoString Quality-Control (NACHO)\n\n")
-  cat(paste0("<center>![](", system.file("help", "figures", "nacho_hex.png", package = "NACHO"), "){width=150px}</center>"))
-
-  cat("\n\n")
-  cat("## RCC Summary\n\n")
+  cat("\n\n# RCC Summary\n\n")
   cat('  - Samples:', length(unique(nacho_object$nacho[[nacho_object$access]])), "\n")
   genes <- table(nacho_object$nacho[["CodeClass"]]) /
     length(unique(nacho_object$nacho[[nacho_object$access]]))
   cat(paste0("  - ", names(genes), ": ", genes, "\n"))
 
-
-  cat("\n\n")
-  cat("## Settings\n\n")
+  cat("\n\n# Settings\n\n")
   cat('  - Predict housekeeping genes:', nacho_object$housekeeping_predict, "\n")
   cat('  - Normalise using housekeeping genes:', nacho_object$housekeeping_norm, "\n")
   cat(
@@ -67,9 +197,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       round(nacho_object$outliers_thresholds[["House_factor"]][2], 3), '\n'
   )
 
-
-  cat("\n\n")
-  cat("## QC Metrics\n\n")
+  cat("\n\n# QC Metrics\n\n")
   labels <- c(
     "MC" = "Average Counts",
     "MedC" = "Median Counts",
@@ -86,14 +214,13 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
   )
 
   metrics <- switch(
-    EXPR = attr(earlytemp, "RCC_type"),
+    EXPR = attr(nacho_object, "RCC_type"),
     "n1" = c("BD", "FoV", "PC", "LoD"),
     "n8" = c("BD", "FoV")
   )
 
   for (imetric in metrics) {
-    cat("\n\n")
-    cat("###", labels[imetric], "\n\n")
+    cat("\n\n##", labels[imetric], "\n\n")
     p <- ggplot2::ggplot(
       data = nacho_object$nacho %>%
         dplyr::select(
@@ -110,7 +237,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggbeeswarm::geom_quasirandom(size = 0.1, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
+      ggbeeswarm::geom_quasirandom(size = 0.5, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
       {if (!legend) ggplot2::guides(colour = "none")} +
       ggplot2::labs(
         x = "CartridgeID",
@@ -127,12 +254,10 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
     cat("\n")
   }
 
-
-  cat("\n\n")
-  cat("## Control Genes\n\n")
+  cat("\n\n# Control Genes\n\n")
   for (icodeclass in c("Positive", "Negative", "Housekeeping")) {
     cat("\n\n")
-    cat("###", icodeclass, "\n\n")
+    cat("##", icodeclass, "\n\n")
     p <- ggplot2::ggplot(
       data = nacho_object$nacho %>%
         dplyr::filter(CodeClass %in% icodeclass) %>%
@@ -152,13 +277,13 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggbeeswarm::geom_quasirandom(size = 0.1, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
+      ggbeeswarm::geom_quasirandom(size = 0.5, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
       ggplot2::scale_y_log10(limits = c(1, NA)) +
       ggplot2::labs(
         x = if (icodeclass%in%c("Negative", "Positive")) "Control Name" else "Gene Name",
         y = "Counts + 1"
       ) +
-      {if (!legend) guides(colour = "none")} +
+      {if (!legend) ggplot2::guides(colour = "none")} +
       ggplot2::theme(axis.text.x = ggplot2::element_text(face = "italic"))
 
     number_ticks_x <- nacho_object$nacho %>%
@@ -176,9 +301,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
     cat("\n")
   }
 
-
-  cat("\n\n")
-  cat("### Control Probe Expression\n\n")
+  cat("\n\n## Control Probe Expression\n\n")
   p <- ggplot2::ggplot(
     data = nacho_object$nacho %>%
       dplyr::filter(CodeClass%in%c("Positive", "Negative")) %>%
@@ -213,12 +336,9 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
   print(p)
   cat("\n")
 
+  cat("\n\n# QC Visuals\n\n")
 
-  cat("\n\n")
-  cat("## QC Visuals\n\n")
-
-  cat("\n\n")
-  cat("### Average Count vs. Binding Density\n\n")
+  cat("\n\n## Average Count vs. Binding Density\n\n")
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
@@ -236,7 +356,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.5, na.rm = TRUE) +
       ggplot2::labs(
         x = labels["MC"],
         y = parse(text = paste0('paste("', labels["BD"], '", " ", ',  units["BD"], ")"))
@@ -244,10 +364,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
   print(p)
   cat("\n")
 
-
-  cat("\n")
-  cat("\n\n")
-  cat("### Average Count vs. Median Count\n\n")
+  cat("\n\n## Average Count vs. Median Count\n\n")
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
@@ -265,7 +382,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.5, na.rm = TRUE) +
       ggplot2::labs(
         x = labels["MC"],
         y = labels["MedC"]
@@ -273,13 +390,8 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
   print(p)
   cat("\n")
 
-
-  cat("\n")
-  cat("\n\n")
-  cat("### Principal Component\n\n")
-
-  cat("\n\n")
-  cat("#### PC1 vs. PC2\n\n")
+  cat("\n\n## Principal Component\n\n")
+  cat("\n\n### PC1 vs. PC2\n\n")
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
@@ -295,15 +407,14 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
         colour = colour_name
       )
     ) +
-      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.5, na.rm = TRUE) +
       ggplot2::stat_ellipse(na.rm = TRUE) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
       {if (!legend) ggplot2::guides(colour = "none")}
   print(p)
   cat("\n")
 
-  cat("\n\n")
-  cat("#### Factorial planes\n\n")
+  cat("\n\n### Factorial planes\n\n")
   p <- dplyr::full_join(
     x = nacho_object$nacho %>%
       dplyr::select(
@@ -333,7 +444,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
         colour = colour_name
       )
     ) +
-      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.5, na.rm = TRUE) +
       ggplot2::stat_ellipse(na.rm = TRUE) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
       ggplot2::labs(x = NULL, y = NULL) +
@@ -346,8 +457,7 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
   print(p)
   cat("\n")
 
-  cat("\n\n")
-  cat("#### Inertia\n\n")
+  cat("\n\n### Inertia\n\n")
   p <- nacho_object$pc_sum %>%
     dplyr::rename(ProportionofVariance = `Proportion of Variance`) %>%
     dplyr::mutate(PoV = scales::percent(ProportionofVariance)) %>%
@@ -369,12 +479,9 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
   print(p)
   cat("\n")
 
+  cat("\n\n# Normalisation Factors\n\n")
 
-  cat("\n\n")
-  cat("## Normalisation Factors\n\n")
-
-  cat("\n\n")
-  cat("### Positive Factor vs. Background Threshold\n\n")
+  cat("\n\n## Positive Factor vs. Background Threshold\n\n")
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
@@ -392,15 +499,13 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.5, na.rm = TRUE) +
       ggplot2::labs(x = "Negative Factor", y = "Positive Factor") +
       ggplot2::scale_y_log10()
   print(p)
   cat("\n")
 
-
-  cat("\n\n")
-  cat("### Housekeeping Factor\n\n")
+  cat("\n\n## Housekeeping Factor\n\n")
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
@@ -418,15 +523,14 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
-      ggplot2::geom_point(size = 0.1, na.rm = TRUE) +
+      ggplot2::geom_point(size = 0.5, na.rm = TRUE) +
       ggplot2::labs(x = "Positive Factor", y = "Houskeeping Factor") +
       ggplot2::scale_x_log10() +
       ggplot2::scale_y_log10()
   print(p)
   cat("\n")
 
-  cat("\n\n")
-  cat("### Normalisation Result\n\n")
+  cat("\n\n## Normalisation Result\n\n")
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
@@ -485,7 +589,6 @@ render_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FAL
       ggplot2::labs(linetype = "Smooth")
   print(p)
   cat("\n")
-
 
   invisible()
 }
