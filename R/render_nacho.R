@@ -18,7 +18,7 @@
 #'   Please note that any directory path provided will create any necessary directories if they do not exist.
 #' @param legend [logical] Boolean to indicate whether the plot legends should
 #'   be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.
-#' @keep_rmd [logical] Boolean to indicate whether the Rmd file used to produce the HTML report
+#' @param keep_rmd [logical] Boolean to indicate whether the Rmd file used to produce the HTML report
 #'   is copied to the directory provided in `output_dir`
 #'
 #' @export
