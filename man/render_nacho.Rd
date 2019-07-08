@@ -4,7 +4,9 @@
 \alias{render_nacho}
 \title{render_nacho}
 \usage{
-render_nacho(nacho_object, colour_name = "CartridgeID", legend = FALSE)
+render_nacho(nacho_object, colour_name = "CartridgeID",
+  output_file = "NACHO_QC.html", output_dir = NULL, legend = FALSE,
+  keep_rmd = FALSE)
 }
 \arguments{
 \item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
@@ -12,8 +14,26 @@ render_nacho(nacho_object, colour_name = "CartridgeID", legend = FALSE)
 \item{colour_name}{[character] Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho}.}
 
+\item{output_file}{[character] The name of the output file.
+If using `NULL` then the output filename will be based on filename for the input file.
+If a filename is provided, a path to the output file can also be provided.
+Note that the `output_dir` option allows for specifying the output file path as well,
+however, if also specifying the path, the directory must exist.
+If `output_file` is specified but does not have a file extension,
+an extension will be automatically added according to the output format.
+To avoid the automatic file extension, put the output_file value in `I()`, e.g., I('my-output').}
+
+\item{output_dir}{[character] The output directory for the rendered output_file.
+This allows for a choice of an alternate directory to which the output file should be written
+(the default output directory is the working directory).
+If a path is provided with a filename in `output_file` the directory specified here will take precedence.
+Please note that any directory path provided will create any necessary directories if they do not exist.}
+
 \item{legend}{[logical] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
+
+\item{keep_rmd}{[logical] Boolean to indicate whether the Rmd file used to produce the HTML report
+is copied to the directory provided in `output_dir`}
 }
 \description{
 render_nacho
@@ -26,4 +46,5 @@ data(GSE74821)
 
 render_nacho(nacho_object = GSE74821)
 }
+
 }
