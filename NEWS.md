@@ -2,8 +2,7 @@
 
 ## New features
 
-* `render_nacho()` render figures from `visualise()` in a rmarkdown friendly output.  
-    Call to `render_nacho()` can be included directly in a rmarkdown chunk.
+* `render_nacho()` render figures from `visualise()` in a HTML friendly output.
 
 ## Minor improvements and fixes
 
