@@ -2,7 +2,7 @@
 
 ## New features
 
-* `render_nacho()` render figures from `visualise()` in a HTML friendly output.
+* `render()` render figures from `visualise()` in a HTML friendly output.
 
 ## Minor improvements and fixes
 
