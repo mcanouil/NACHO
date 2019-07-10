@@ -40,7 +40,7 @@ render_nacho <- function(
   legend = FALSE,
   keep_rmd = FALSE
 ) {
-  temp_file <- tempfile()
+  temp_file <- normalizePath(tempfile(), mustWork = FALSE)
   if (is.null(output_dir)) output_dir <- dirname(temp_file)
 
   temp_file_rmd <- paste0(temp_file, ".Rmd")
