@@ -1,5 +1,8 @@
 #' normalise
 #'
+#' This function creates a list in which your settings, the raw counts and normalised counts are stored,
+#' using the result from a call to `summarise()`.
+#'
 #' @param nacho_object [list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.
 #' @inheritParams summarise
 #' @param remove_outliers [logical] A boolean to indicate if outliers should be excluded.
