@@ -105,7 +105,7 @@ render_nacho <- function(
     '\n',
     '```{r nacho_qc}',
     'nacho_env <- new.env()',
-    paste0('load("', temp_file_data, '", envir = nacho_env)'),
+    paste0('load("', normalizePath(temp_file_data), '", envir = nacho_env)'),
     'print_nacho(',
     '  nacho_object = nacho_env[["nacho_object"]],',
     '  colour = nacho_env[["colour"]],',
