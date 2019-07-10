@@ -44,6 +44,7 @@
 #' @export
 #'
 #' @examples
+#'
 #' if (interactive()) {
 #'   library(GEOquery)
 #'   library(NACHO)
