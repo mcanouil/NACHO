@@ -1,8 +1,8 @@
 #' render_nacho
 #'
 #' @inheritParams normalise
-#' @param colour_name [character] Character string of the column in \code{ssheet_csv}
-#'   or more generally in \code{nacho_object$nacho}.
+#' @param colour [character] Character string of the column in \code{ssheet_csv}
+#'   or more generally in \code{nacho_object$nacho} to be used as grouping colour.
 #' @param output_file [character] The name of the output file.
 #'   If using `NULL` then the output filename will be based on filename for the input file.
 #'   If a filename is provided, a path to the output file can also be provided.
@@ -34,7 +34,7 @@
 #'
 render_nacho <- function(
   nacho_object,
-  colour_name = "CartridgeID",
+  colour = "CartridgeID",
   output_file = "NACHO_QC.html",
   output_dir = getwd(),
   legend = FALSE,
@@ -79,7 +79,7 @@ render_nacho <- function(
     append = TRUE
   )
 
-  save(list = c("nacho_object", "colour_name", "legend"), file = temp_file_data)
+  save(list = c("nacho_object", "colour", "legend"), file = temp_file_data)
 
   cat(
     '\n',
@@ -108,7 +108,7 @@ render_nacho <- function(
     paste0('load("', temp_file_data, '", envir = nacho_env)'),
     'print_nacho(',
     '  nacho_object = nacho_env[["nacho_object"]],',
-    '  colour_name = nacho_env[["colour_name"]],',
+    '  colour = nacho_env[["colour"]],',
     '  legend = nacho_env[["legend"]]',
     ')',
     '```',
@@ -150,9 +150,9 @@ render_nacho <- function(
 #' @keywords internal
 #'
 #' @return NULL
-print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALSE) {
-  if (is.numeric(nacho_object$nacho[[colour_name]])) {
-    nacho_object$nacho[[colour_name]] <- as.character(nacho_object$nacho[[colour_name]])
+print_nacho <- function(nacho_object, colour = "CartridgeID", legend = FALSE) {
+  if (is.numeric(nacho_object$nacho[[colour]])) {
+    nacho_object$nacho[[colour]] <- as.character(nacho_object$nacho[[colour]])
   }
 
   cat("\n\n# RCC Summary\n\n")
@@ -271,11 +271,12 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
 
   for (imetric in metrics) {
     cat("\n\n##", labels[imetric], "\n\n")
+    cat(details[imetric], "\n")
     p <- ggplot2::ggplot(
       data = nacho_object$nacho %>%
         dplyr::select(
           CartridgeID,
-          !!colour_name,
+          !!colour,
           !!nacho_object$access,
           !!imetric
         ) %>%
@@ -283,7 +284,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
       mapping = ggplot2::aes_string(
         x = "CartridgeID",
         y = imetric,
-        colour = colour_name
+        colour = colour
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
@@ -313,7 +314,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
         dplyr::filter(CodeClass %in% icodeclass) %>%
         dplyr::select(
           CartridgeID,
-          !!colour_name,
+          !!colour,
           !!nacho_object$access,
           !!imetric,
           Name,
@@ -323,7 +324,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
       mapping = ggplot2::aes_string(
         x = "Name",
         y = "Count",
-        colour = colour_name
+        colour = colour
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
@@ -357,7 +358,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
       dplyr::filter(CodeClass%in%c("Positive", "Negative")) %>%
       dplyr::select(
         CartridgeID,
-        !!colour_name,
+        !!colour,
         !!nacho_object$access,
         CodeClass,
         Name,
@@ -392,7 +393,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
-      !!colour_name,
+      !!colour,
       !!nacho_object$access,
       MC,
       BD
@@ -402,7 +403,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
       mapping = ggplot2::aes_string(
         x = "MC",
         y = "BD",
-        colour = colour_name
+        colour = colour
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
@@ -418,7 +419,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
-      !!colour_name,
+      !!colour,
       !!nacho_object$access,
       MC,
       MedC
@@ -428,7 +429,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
       mapping = ggplot2::aes_string(
         x = "MC",
         y = "MedC",
-        colour = colour_name
+        colour = colour
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
@@ -445,7 +446,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
-      !!colour_name,
+      !!colour,
       !!nacho_object$access,
       paste0("PC", 1:2)
     ) %>%
@@ -454,7 +455,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
       mapping = ggplot2::aes_string(
         x = "PC1",
         y = "PC2",
-        colour = colour_name
+        colour = colour
       )
     ) +
       ggplot2::geom_point(size = 0.5, na.rm = TRUE) +
@@ -469,7 +470,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
     x = nacho_object$nacho %>%
       dplyr::select(
         CartridgeID,
-        !!colour_name,
+        !!colour,
         !!nacho_object$access,
         paste0("PC", 1:min(nacho_object$n_comp, 5))
       ) %>%
@@ -478,20 +479,20 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
     y = nacho_object$nacho %>%
       dplyr::select(
         CartridgeID,
-        !!colour_name,
+        !!colour,
         !!nacho_object$access,
         paste0("PC", 1:min(nacho_object$n_comp, 5))
       ) %>%
       dplyr::distinct() %>%
       tidyr::gather(key = "Y.PC", value = "Y", paste0("PC", 1:min(nacho_object$n_comp, 5))),
-    by = unique(c("CartridgeID", nacho_object$access, colour_name))
+    by = unique(c("CartridgeID", nacho_object$access, colour))
   ) %>%
     dplyr::filter(as.numeric(gsub("PC", "", X.PC)) < as.numeric(gsub("PC", "", Y.PC))) %>%
     ggplot2::ggplot(
       mapping = ggplot2::aes_string(
         x = "X",
         y = "Y",
-        colour = colour_name
+        colour = colour
       )
     ) +
       ggplot2::geom_point(size = 0.5, na.rm = TRUE) +
@@ -535,7 +536,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
-      !!colour_name,
+      !!colour,
       !!nacho_object$access,
       Negative_factor,
       Positive_factor
@@ -545,7 +546,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
       mapping = ggplot2::aes_string(
         x = "Negative_factor",
         y = "Positive_factor",
-        colour = colour_name
+        colour = colour
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
@@ -559,7 +560,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
   p <- nacho_object$nacho %>%
     dplyr::select(
       CartridgeID,
-      !!colour_name,
+      !!colour,
       !!nacho_object$access,
       House_factor,
       Positive_factor
@@ -569,7 +570,7 @@ print_nacho <- function(nacho_object, colour_name = "CartridgeID", legend = FALS
       mapping = ggplot2::aes_string(
         x = "Positive_factor",
         y = "House_factor",
-        colour = colour_name
+        colour = colour
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
