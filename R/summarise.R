@@ -1,5 +1,7 @@
 #' summarise
 #'
+#' This function is used to preprocess the data from NanoString nCounter.
+#'
 #' @param data_directory [character] A character string of the directory where the data are stored.
 #' @param ssheet_csv [character/data.frame] Either a string with the name of the CSV of the samplesheet
 #'   or the samplesheet as a \code{data.frame}.

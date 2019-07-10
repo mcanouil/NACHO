@@ -1,5 +1,9 @@
 #' render
 #'
+#' This function create a `Rmarkdown` script and render it as a HTML document.
+#' The HTML document is a quality-control report using all the metrics from `visualise()`
+#' based on recommendations from NanoString.
+#'
 #' @inheritParams normalise
 #' @param colour [character] Character string of the column in \code{ssheet_csv}
 #'   or more generally in \code{nacho_object$nacho} to be used as grouping colour.
@@ -147,6 +151,10 @@ render <- function(
 
 
 #' print_nacho
+#'
+#' This function allows to print text and figures from the results of a call to `summarise()`
+#' or `normalise()`.
+#' It is intended to be used in a `Rmarkdown` chunk.
 #'
 #' @inheritParams render
 #'

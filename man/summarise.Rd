@@ -61,7 +61,7 @@ Cannot be more than n-1 samples. Default is \code{10}.}
 }
 }
 \description{
-summarise
+This function is used to preprocess the data from NanoString nCounter.
 }
 \examples{
 

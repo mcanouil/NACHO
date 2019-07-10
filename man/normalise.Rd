@@ -62,7 +62,8 @@ Cannot be more than n-1 samples. Default is \code{10}.}
 }
 }
 \description{
-normalise
+This function creates a list in which your settings, the raw counts and normalised counts are stored,
+using the result from a call to `summarise()`.
 }
 \details{
 Outliers definition (\code{remove_outliers}):
