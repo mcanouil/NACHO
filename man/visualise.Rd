@@ -11,7 +11,9 @@ visualise(nacho_object)
 \item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
 }
 \description{
-visualise
+This function allows to visualise several quality-control metrics
+in an interactive `shiny` application, in which thresholds can be customised
+and exported to the global environment.
 }
 \examples{
 

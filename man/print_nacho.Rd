@@ -16,6 +16,8 @@ or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 }
 \description{
-print_nacho
+This function allows to print text and figures from the results of a call to `summarise()`
+or `normalise()`.
+It is intended to be used in a `Rmarkdown` chunk.
 }
 \keyword{internal}

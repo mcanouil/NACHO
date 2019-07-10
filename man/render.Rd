@@ -36,7 +36,9 @@ be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 is copied to the directory provided in `output_dir`. Default is \code{FALSE}.}
 }
 \description{
-render
+This function create a `Rmarkdown` script and render it as a HTML document.
+The HTML document is a quality-control report using all the metrics from `visualise()`
+based on recommendations from NanoString.
 }
 \examples{
 

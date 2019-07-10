@@ -59,8 +59,9 @@ With the use of two functions, RCC files are summarised and visualised,
 namely: `summarise()` and `visualise()`.
 
   - The `summarise()` function is used to preprocess the data.
-  - The `visualise()` function initiates a RStudio Shiny-based dashboard
-    that visualises all relevant QC plots.
+  - The `visualise()` function initiates a [Shiny-based
+    dashboard](https://shiny.rstudio.com/) that visualises all relevant
+    QC plots.
 
 *NACHO* also includes a function `normalise()`, which calculates sample
 specific size factors and normalises the data.
@@ -69,10 +70,10 @@ specific size factors and normalises the data.
     the raw counts and normalised counts are stored.
 
 In addition (since v0.6.0) **NACHO** allows to `render()` a full
-quality-control report based on the results of a call to `summarise()`
-or `normalise()`.
+quality-control report (html) based on the results of a call to
+`summarise()` or `normalise()`.
 
-For more `vignette("NACHO")`
+For more `vignette("NACHO")`.
 
 ## Getting help
 
