@@ -40,7 +40,7 @@ render_nacho <- function(
   legend = FALSE,
   keep_rmd = FALSE
 ) {
-  temp_file <- tempfile()
+  temp_file <- normalizePath(tempfile())
 
   temp_file_rmd <- paste0(temp_file, ".Rmd")
   temp_file_data <- paste0(temp_file, ".Rdata")
@@ -128,12 +128,17 @@ render_nacho <- function(
     append = TRUE
   )
 
-  if (keep_rmd) file.copy(from = temp_file_rmd, to = paste0(output_dir, "/", gsub(".html", ".Rmd", output_file)))
+  if (keep_rmd) {
+    file.copy(
+      from = temp_file_rmd,
+      to = normalizePath(paste0(output_dir, "/", gsub(".html", ".Rmd", output_file)))
+    )
+  }
 
   rmarkdown::render(
     input = temp_file_rmd,
     output_file = output_file,
-    output_dir = output_dir,
+    output_dir = normalizePath(output_dir),
     encoding = "UTF-8"
   )
 
