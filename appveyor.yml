@@ -21,7 +21,6 @@ environment:
     USE_RTOOLS: true
     _R_CHECK_FORCE_SUGGESTS_: false
     BIOC_USE_DEVEL: FALSE
-    NOT_CRAN: true
 
 before_test:
   - cinst pandoc
