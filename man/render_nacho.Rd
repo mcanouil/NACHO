@@ -4,15 +4,15 @@
 \alias{render_nacho}
 \title{render_nacho}
 \usage{
-render_nacho(nacho_object, colour_name = "CartridgeID",
-  output_file = "NACHO_QC.html", output_dir = NULL, legend = FALSE,
-  keep_rmd = FALSE)
+render_nacho(nacho_object, colour = "CartridgeID",
+  output_file = "NACHO_QC.html", output_dir = getwd(),
+  legend = FALSE, keep_rmd = FALSE)
 }
 \arguments{
 \item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
 
-\item{colour_name}{[character] Character string of the column in \code{ssheet_csv}
-or more generally in \code{nacho_object$nacho}.}
+\item{colour}{[character] Character string of the column in \code{ssheet_csv}
+or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 
 \item{output_file}{[character] The name of the output file.
 If using `NULL` then the output filename will be based on filename for the input file.
@@ -25,7 +25,7 @@ To avoid the automatic file extension, put the output_file value in `I()`, e.g.,
 
 \item{output_dir}{[character] The output directory for the rendered output_file.
 This allows for a choice of an alternate directory to which the output file should be written
-(the default output directory is the working directory).
+(the default output directory is the working directory, i.e., `getwd()`).
 If a path is provided with a filename in `output_file` the directory specified here will take precedence.
 Please note that any directory path provided will create any necessary directories if they do not exist.}
 
