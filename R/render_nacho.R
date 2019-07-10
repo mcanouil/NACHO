@@ -13,7 +13,7 @@
 #'   To avoid the automatic file extension, put the output_file value in `I()`, e.g., I('my-output').
 #' @param output_dir [character] The output directory for the rendered output_file.
 #'   This allows for a choice of an alternate directory to which the output file should be written
-#'   (the default output directory is the working directory).
+#'   (the default output directory is the working directory, i.e., `getwd()`).
 #'   If a path is provided with a filename in `output_file` the directory specified here will take precedence.
 #'   Please note that any directory path provided will create any necessary directories if they do not exist.
 #' @param legend [logical] Boolean to indicate whether the plot legends should
@@ -36,12 +36,10 @@ render_nacho <- function(
   nacho_object,
   colour_name = "CartridgeID",
   output_file = "NACHO_QC.html",
-  output_dir = NULL,
+  output_dir = getwd(),
   legend = FALSE,
   keep_rmd = FALSE
 ) {
-  if (is.null(output_dir)) output_dir <- getwd()
-
   temp_file <- tempfile()
 
   temp_file_rmd <- paste0(temp_file, ".Rmd")
