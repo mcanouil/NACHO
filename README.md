@@ -33,8 +33,8 @@ checks\_worst](https://cranchecks.info/badges/worst/NACHO)](https://cran.r-proje
 install.packages("NACHO")
 
 # Or the the development version from GitHub:
-# install.packages("devtools")
-devtools::install_github("mcanouil/NACHO")
+# install.packages("remotes")
+remotes::install_github("mcanouil/NACHO")
 ```
 
 ## Overview
