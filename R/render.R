@@ -173,6 +173,7 @@ render <- function(
 #'
 #' @return NULL
 #' @export
+#' @rdname render
 print_nacho <- function(nacho_object, colour = "CartridgeID", size = 0.5, show_legend = FALSE) {
   if (is.numeric(nacho_object$nacho[[colour]])) {
     nacho_object$nacho[[colour]] <- as.character(nacho_object$nacho[[colour]])
