@@ -25,8 +25,6 @@
 #' @param size [numeric] A numeric controlling point (`geom_point` or `geom_beeswarm`)
 #'   or line (`geom_linetype`) size n `ggplot2`
 #'
-#' @keywords internal
-#'
 #' @return NULL
 #' @export
 #'
