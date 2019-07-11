@@ -2,7 +2,7 @@ context("render()")
 
 test_that("Default parameters", {
   expect_true(
-    object = render(nacho_object = GSE74821, output_dir = tempdir())
+    object = render(nacho_object = GSE74821, output_dir = NULL)
   )
 })
 

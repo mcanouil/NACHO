@@ -5,7 +5,7 @@
 \title{render}
 \usage{
 render(nacho_object, colour = "CartridgeID",
-  output_file = "NACHO_QC.html", output_dir = getwd(),
+  output_file = "NACHO_QC.html", output_dir = getwd(), size = 0.5,
   show_legend = TRUE, keep_rmd = FALSE)
 }
 \arguments{
@@ -28,6 +28,9 @@ This allows for a choice of an alternate directory to which the output file shou
 (the default output directory is the working directory, i.e., `getwd()`).
 If a path is provided with a filename in `output_file` the directory specified here will take precedence.
 Please note that any directory path provided will create any necessary directories if they do not exist.}
+
+\item{size}{[numeric] A numeric controlling point (`geom_point` or `geom_beeswarm`)
+or line (`geom_linetype`) size n `ggplot2`}
 
 \item{show_legend}{[logical] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
