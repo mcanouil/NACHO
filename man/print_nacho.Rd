@@ -4,13 +4,17 @@
 \alias{print_nacho}
 \title{print_nacho}
 \usage{
-print_nacho(nacho_object, colour = "CartridgeID", show_legend = FALSE)
+print_nacho(nacho_object, colour = "CartridgeID", size = 0.5,
+  show_legend = FALSE)
 }
 \arguments{
 \item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
 
 \item{colour}{[character] Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
+
+\item{size}{[numeric] A numeric controlling point (`geom_point` or `geom_beeswarm`)
+or line (`geom_linetype`) size n `ggplot2`}
 
 \item{show_legend}{[logical] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
