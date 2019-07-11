@@ -71,11 +71,10 @@ sample specific size factors and normalises the data.
 
 In addition (since v0.6.0) **NACHO** includes two additional functions:
 
-  - The `render()` function is used to render a full quality-control
-    report (HTML) based on the results of a call to `summarise()` or
-    `normalise()`.
-  - The `plot()` function is used to draw any quality-control metrics
-    from `visualise()` and `render()`.
+  - The `render()` function renders a full quality-control report (HTML)
+    based on the results of a call to `summarise()` or `normalise()`.
+  - The `plot()` function draws any quality-control metrics from
+    `visualise()` and `render()`.
 
 For more `vignette("NACHO")`.
 
