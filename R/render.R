@@ -327,7 +327,6 @@ print_nacho <- function(nacho_object, colour = "CartridgeID", show_legend = FALS
           "CartridgeID",
           !!colour,
           !!nacho_object$access,
-          !!imetric,
           "Name",
           "Count"
         ) %>%
