@@ -141,7 +141,8 @@ render <- function(
     input = temp_file_rmd,
     output_file = output_file,
     output_dir = output_dir,
-    encoding = "UTF-8"
+    encoding = "UTF-8",
+    quiet = TRUE
   )
 
   unlink(temp_file_data)
