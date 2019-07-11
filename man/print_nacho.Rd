@@ -20,4 +20,3 @@ This function allows to print text and figures from the results of a call to `su
 or `normalise()`.
 It is intended to be used in a `Rmarkdown` chunk.
 }
-\keyword{internal}
