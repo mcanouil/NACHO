@@ -416,44 +416,52 @@ visualise <- function(nacho_object) {
 
       output$interfaceC <- shiny::renderUI({
         shiny::req(input$maintabs %in% c("met", "vis"))
-        if (input$maintabs == "met") {
-          shiny::div(
-            shiny::checkboxInput(
-              inputId = "outlier",
-              label = "View outliers",
-              value = TRUE
-            ),
-            align = "center"
-          )
-        } else if (input$maintabs == "vis") {
-          shiny::req(input$tabs == "prin")
-          shiny::selectInput(
-            inputId = "pcA_sel",
-            label = "PC on x-axis:",
-            choices = grep("^PC[0-9]+$", colnames(nacho), value = TRUE)
-          )
-        }
+        switch(
+          EXPR = input$maintabs,
+         "met" = {
+            shiny::div(
+              shiny::checkboxInput(
+                inputId = "outlier",
+                label = "View outliers",
+                value = TRUE
+              ),
+              align = "center"
+            )
+          },
+          "vis" = {
+            shiny::req(input$tabs == "prin")
+            shiny::selectInput(
+              inputId = "pcA_sel",
+              label = "PC on x-axis:",
+              choices = grep("^PC[0-9]+$", colnames(nacho), value = TRUE)
+            )
+          }
+        )
       })
 
       output$interfaceD <- shiny::renderUI({
         shiny::req(input$maintabs %in% c("met", "vis"))
-        if (input$maintabs == "met") {
-          shiny::div(
-            shiny::checkboxInput(
-              inputId = "outlab",
-              label = "View outlier labels"
-            ),
-            align = "center"
-          )
-        } else if (input$maintabs == "vis") {
-          shiny::req(input$tabs == "prin")
-          shiny::selectInput(
-            inputId = "pcB_sel",
-            label = "PC on y-axis:",
-            choices = grep("^PC[0-9]+$", colnames(nacho), value = TRUE),
-            selected = grep("^PC[0-9]+$", colnames(nacho), value = TRUE)[2]
-          )
-        }
+        switch(
+          EXPR = input$maintabs,
+         "met" = {
+            shiny::div(
+              shiny::checkboxInput(
+                inputId = "outlab",
+                label = "View outlier labels"
+              ),
+              align = "center"
+            )
+          },
+          "vis" = {
+            shiny::req(input$tabs == "prin")
+            shiny::selectInput(
+              inputId = "pcB_sel",
+              label = "PC on y-axis:",
+              choices = grep("^PC[0-9]+$", colnames(nacho), value = TRUE),
+              selected = grep("^PC[0-9]+$", colnames(nacho), value = TRUE)[2]
+            )
+          }
+        )
       })
 
       output$interfaceE1 <- shiny::renderUI({
