@@ -1,8 +1,29 @@
 #' plot
 #'
-#' @param x [character]
+#' This function allows to plot any qualit-control figures available
+#' within the shiny app using `visualise()` or in the HTML report from `render()`.
+#'
+#' @param x [character] Character string naming the quality-control metrics to plot from `nacho_object`.
+#'   The possible values are:
+#'     * "BD" (Binding Density)
+#'     * "FoV" (Imaging)
+#'     * "PC" (Positive Control Linearity)
+#'     * "LoD" (Limit of Detection)
+#'     * "Positive" (Positive Controls)
+#'     * "Negative" (Negative Controls)
+#'     * "Housekeeping" (Housekeeping Genes)
+#'     * "PN" (Positive Controls vs. Negative Controls)
+#'     * "ACBD" (Average Counts vs. Binding Density)
+#'     * "ACMC" (Average Counts vs. Median Counts)
+#'     * "PCA12" (Principal Component 1 vs. 2)
+#'     * "PCAi" (Principal Component scree plot)
+#'     * "PCA" (Principal Components planes)
+#'     * "PFNF" (Positive Factor vs. Negative Factor)
+#'     * "HF" (Housekeeping Factor)
+#'     * "NORM" (Normalisation Factor)
 #' @inheritParams render
-#' @param size [numeric]
+#' @param size [numeric] A numeric controlling point (`geom_point` or `geom_beeswarm`)
+#'   or line (`geom_linetype`) size n `ggplot2`
 #'
 #' @keywords internal
 #'
@@ -34,7 +55,7 @@ plot <- function(x, nacho_object, colour = "CartridgeID", size = 0.5, show_legen
     "PCA12" = plot_pca12(x, nacho_object, colour, size, show_legend),
     "PCAi" = plot_pcai(x, nacho_object, colour, size, show_legend),
     "PCA" = plot_pca(x, nacho_object, colour, size, show_legend),
-    "PFBT" = plot_pfbt(x, nacho_object, colour, size, show_legend),
+    "PFNF" = plot_pfnf(x, nacho_object, colour, size, show_legend),
     "HF" = plot_hf(x, nacho_object, colour, size, show_legend),
     "NORM" = plot_norm(x, nacho_object, colour, size, show_legend),
     stop(
@@ -44,7 +65,7 @@ plot <- function(x, nacho_object, colour = "CartridgeID", size = 0.5, show_legen
         '  * "Positive", "Negative", "Housekeeping", "PN"',
         '  * "ACBD", "ACMC"',
         '  * "PCA12", "PCAi", "PCA"',
-        '  * "PFBT", "HF", "NORM',
+        '  * "PFB", "HF", "NORM"',
         sep = "\n"
       )
     )
@@ -424,14 +445,14 @@ plot_pcai <- function(
 }
 
 
-#' plot_pfbt
+#' plot_pfnf
 #'
 #' @inheritParams plot
 #'
 #' @keywords internal
 #'
 #' @return NULL
-plot_pfbt <- function(
+plot_pfnf <- function(
   x,
   nacho_object,
   colour,
