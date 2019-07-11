@@ -7,14 +7,32 @@
 plot_pn(x, nacho_object, colour, size, show_legend)
 }
 \arguments{
-\item{x}{[character]}
+\item{x}{[character] Character string naming the quality-control metrics to plot from `nacho_object`.
+The possible values are:
+  * "BD" (Binding Density)
+  * "FoV" (Imaging)
+  * "PC" (Positive Control Linearity)
+  * "LoD" (Limit of Detection)
+  * "Positive" (Positive Controls)
+  * "Negative" (Negative Controls)
+  * "Housekeeping" (Housekeeping Genes)
+  * "PN" (Positive Controls vs. Negative Controls)
+  * "ACBD" (Average Counts vs. Binding Density)
+  * "ACMC" (Average Counts vs. Median Counts)
+  * "PCA12" (Principal Component 1 vs. 2)
+  * "PCAi" (Principal Component scree plot)
+  * "PCA" (Principal Components planes)
+  * "PFNF" (Positive Factor vs. Negative Factor)
+  * "HF" (Housekeeping Factor)
+  * "NORM" (Normalisation Factor)}
 
 \item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
 
 \item{colour}{[character] Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 
-\item{size}{[numeric]}
+\item{size}{[numeric] A numeric controlling point (`geom_point` or `geom_beeswarm`)
+or line (`geom_linetype`) size n `ggplot2`}
 
 \item{show_legend}{[logical] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}

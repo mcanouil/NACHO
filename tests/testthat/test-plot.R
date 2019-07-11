@@ -5,7 +5,7 @@ metrics <- c(
   "Positive", "Negative", "Housekeeping",
   "PN", "ACBD", "ACMC",
   "PCA12", "PCAi", "PCA",
-  "PFBT", "HF", "NORM"
+  "PFNF", "HF", "NORM"
 )
 for (imetric in metrics) {
   test_that(paste("Default parameters for", imetric), {
