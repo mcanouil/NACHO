@@ -300,7 +300,7 @@ visualise <- function(nacho_object) {
               "StagePosition"
             )
           )
-        } else if (input$maintabs == "vis" | input$maintabs == "norm" | input$maintabs == "cg") {
+        } else if (input$maintabs %in% c("vis", "norm", "cg")) {
           shiny::radioButtons(
             inputId = "colour_choice",
             label = "Select colour attributes:",
@@ -323,7 +323,7 @@ visualise <- function(nacho_object) {
             choices = colour_variables,
             selected = "CodeClass"
           )
-        } else if (input$maintabs == "vis" | input$maintabs == "norm" | input$maintabs == "cg") {
+        } else if (input$maintabs %in% c("vis", "norm", "cg")) {
            colour <- ifelse(is.null(input$colour_choice), TRUE, input$colour_choice)
           if (colour) {
             shiny::selectInput(
@@ -349,7 +349,7 @@ visualise <- function(nacho_object) {
       })
 
       output$interfaceC <- shiny::renderUI({
-        shiny::req(input$maintabs%in%c("met", "vis"))
+        shiny::req(input$maintabs %in% c("met", "vis"))
         if (input$maintabs == "met") {
           shiny::div(
             shiny::checkboxInput(
@@ -370,7 +370,7 @@ visualise <- function(nacho_object) {
       })
 
       output$interfaceD <- shiny::renderUI({
-        shiny::req(input$maintabs%in%c("met", "vis"))
+        shiny::req(input$maintabs %in% c("met", "vis"))
         if (input$maintabs == "met") {
           shiny::div(
             shiny::checkboxInput(
@@ -445,7 +445,7 @@ visualise <- function(nacho_object) {
               as.numeric(ranges["BD4"])
             )
           )
-        } else if (input$tabs == "FoV" | input$tabs == "LoD" | input$tabs == "PC") {
+        } else if (input$tabs %in% c("FoV", "LoD", "PC")) {
           shiny::sliderInput(
             inputId = "threshold",
             label = sprintf("Custom QC threshold (default: %s)", as.numeric(ranges[paste0(input$tabs, "3")])),
@@ -477,7 +477,7 @@ visualise <- function(nacho_object) {
       })
 
       output$outlier_table <- shiny::renderDataTable({
-        shiny::req(input$maintabs%in%c("ot"))
+        shiny::req(input$maintabs == "ot")
         details_out <- details_outlier(
           nacho_df = nacho,
           id_colname = id_colname,
@@ -497,7 +497,7 @@ visualise <- function(nacho_object) {
       })
 
       output$all <- shiny::renderPlot({
-        shiny::req(!input$maintabs%in%c("ot", "about"))
+        shiny::req(!input$maintabs %in% c("ot", "about"))
         # Prepare axis text
         labels <- c(
           "MC" = "Average Counts",
@@ -532,7 +532,7 @@ visualise <- function(nacho_object) {
             if (input$tabs == "BD") {
               local_data <- nacho[nacho[[input$tabs]] >= input$threshold[1] & nacho[[input$tabs]] <= input$threshold[2], ]
               outliers_data <- nacho[nacho[[input$tabs]] <= input$threshold[1] | nacho[[input$tabs]] >= input$threshold[2], ]
-            } else if (input$tabs == "FoV" | input$tabs == "LoD" | input$tabs == "PC") {
+            } else if (input$tabs %in% c("FoV", "LoD", "PC")) {
               local_data <- nacho[nacho[[input$tabs]] >= input$threshold[1], ]
               outliers_data <- nacho[nacho[[input$tabs]] <= input$threshold[1], ]
             }
@@ -573,7 +573,6 @@ visualise <- function(nacho_object) {
               ) +
               ggplot2::labs(
                 x = input$attribute,
-                # y = paste(labels[input$tabs], units[input$tabs], sep = "\n"),
                 y = parse(text = paste0('paste("', labels[input$tabs], '", " ", ',  units[input$tabs], ")")),
                 colour = input$meta
               )
@@ -855,7 +854,7 @@ visualise <- function(nacho_object) {
             p
           },
           "norm" = {
-            shiny::req(input$tabs%in%c("pfbt", "hf", "norm_res"))
+            shiny::req(input$tabs %in% c("pfbt", "hf", "norm_res"))
             shiny::req(input$meta)
             colour_name <- input$meta
 
@@ -1002,7 +1001,6 @@ visualise <- function(nacho_object) {
   )
 
   shiny::runApp(app)
-  # nocov end
 }
 
 
