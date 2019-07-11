@@ -3,6 +3,7 @@
 export("%>%")
 export(normalise)
 export(normalize)
+export(plot)
 export(render)
 export(summarise)
 export(summarize)
