@@ -4,10 +4,15 @@
 \alias{plot_norm}
 \title{plot_norm}
 \usage{
-plot_norm(nacho_object, size = 0.1, show_legend = TRUE)
+plot_norm(x, nacho_object, colour, size, show_legend)
 }
 \arguments{
+\item{x}{[character]}
+
 \item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
+
+\item{colour}{[character] Character string of the column in \code{ssheet_csv}
+or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 
 \item{size}{[numeric]}
 

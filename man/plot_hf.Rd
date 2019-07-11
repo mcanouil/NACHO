@@ -4,10 +4,11 @@
 \alias{plot_hf}
 \title{plot_hf}
 \usage{
-plot_hf(nacho_object, colour = "CartridgeID", size = 0.5,
-  show_legend = TRUE)
+plot_hf(x, nacho_object, colour, size, show_legend)
 }
 \arguments{
+\item{x}{[character]}
+
 \item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
 
 \item{colour}{[character] Character string of the column in \code{ssheet_csv}

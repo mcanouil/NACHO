@@ -4,8 +4,7 @@
 \alias{plot_metrics}
 \title{plot_metrics}
 \usage{
-plot_metrics(x, nacho_object, colour = "CartridgeID", size = 0.5,
-  show_legend = TRUE)
+plot_metrics(x, nacho_object, colour, size, show_legend)
 }
 \arguments{
 \item{x}{[character]}
