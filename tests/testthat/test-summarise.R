@@ -1,8 +1,6 @@
 context("summarise()")
 
 test_that("missing directory", {
-  # library(GEOquery)
-  # library(NACHO) # devtools::load_all("NACHO")
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
@@ -28,8 +26,6 @@ test_that("missing directory", {
 })
 
 test_that("missing sample sheet", {
-  # library(GEOquery)
-  # library(NACHO) # devtools::load_all("NACHO")
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
@@ -57,8 +53,6 @@ test_that("missing sample sheet", {
 
 
 test_that("missing id_colname", {
-  # library(GEOquery)
-  # library(NACHO) # devtools::load_all("NACHO")
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
@@ -84,8 +78,6 @@ test_that("missing id_colname", {
 })
 
 test_that("no housekeeping norm", {
-  # library(GEOquery)
-  # library(NACHO) # devtools::load_all("NACHO")
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
@@ -107,13 +99,11 @@ test_that("no housekeeping norm", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_identical(class(GSE74821), "list")
+    expect_type(GSE74821, "list")
   }
 })
 
 test_that("no housekeeping norm and prediction", {
-  # library(GEOquery)
-  # library(NACHO) # devtools::load_all("NACHO")
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
@@ -135,15 +125,13 @@ test_that("no housekeeping norm and prediction", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_identical(class(GSE74821), "list")
+    expect_type(GSE74821, "list")
   }
 })
 
 
 
 test_that("using GEO GSE74821", {
-  # library(GEOquery)
-  # library(NACHO) # devtools::load_all("NACHO")
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
@@ -165,13 +153,11 @@ test_that("using GEO GSE74821", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_identical(class(GSE74821), "list")
+    expect_type(GSE74821, "list")
   }
 })
 
 test_that("using GEO GSE74821 with prediction", {
-  # library(GEOquery)
-  # library(NACHO) # devtools::load_all("NACHO")
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
@@ -193,14 +179,12 @@ test_that("using GEO GSE74821 with prediction", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_identical(class(GSE74821), "list")
+    expect_type(GSE74821, "list")
   }
 })
 
 
 test_that("using GEO GSE70970", {
-  # library(GEOquery)
-  # library(NACHO) # devtools::load_all("NACHO")
   gse <- try({GEOquery::getGEO(GEO = "GSE70970")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
@@ -222,13 +206,11 @@ test_that("using GEO GSE70970", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_identical(class(GSE70970), "list")
+    expect_type(GSE70970, "list")
   }
 })
 
 test_that("using GEO GSE70970 with prediction", {
-  # library(GEOquery)
-  # library(NACHO) # devtools::load_all("NACHO")
   gse <- try({GEOquery::getGEO(GEO = "GSE70970")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
@@ -250,6 +232,6 @@ test_that("using GEO GSE70970 with prediction", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_identical(class(GSE70970), "list")
+    expect_type(GSE70970, "list")
   }
 })
