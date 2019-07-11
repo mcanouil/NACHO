@@ -16,26 +16,38 @@
 #' plot(x = "PCA", nacho_object = GSE74821)
 #'
 plot <- function(x, nacho_object, colour = "CartridgeID", size = 0.5, show_legend = TRUE) {
-  # attr(nacho_object, "RCC_type")
+  if (attr(nacho_object, "RCC_type") == "n8" & x %in% c("PC", "LoD")) {
+    stop('[NACHO] "PC" and "LoD" are not available for the provided NanoString dataset.')
+  }
   switch(
     EXPR = x,
-    "BD" = plot_metrics(x = x, nacho_object, colour, size, show_legend),
-    "FoV" = plot_metrics(x = x, nacho_object, colour, size, show_legend),
-    "PC" = plot_metrics(x = x, nacho_object, colour, size, show_legend),
-    "LoD" = plot_metrics(x = x, nacho_object, colour, size, show_legend),
-    "Positive" = plot_cg(x = x, nacho_object, colour, size, show_legend),
-    "Negative" = plot_cg(x = x, nacho_object, colour, size, show_legend),
-    "Housekeeping" = plot_cg(x = x, nacho_object, colour, size, show_legend),
-    "PN" = plot_pn(x = x, nacho_object, colour, size, show_legend),
-    "ACBD" = plot_acbd(x = x, nacho_object, colour, size, show_legend),
-    "ACMC" = plot_acmc(x = x, nacho_object, colour, size, show_legend),
-    "PCA12" = plot_pca12(x = x, nacho_object, colour, size, show_legend),
-    "PCAi" = plot_pcai(x = x, nacho_object, colour, size, show_legend),
-    "PCA" = plot_pca(x = x, nacho_object, colour, size, show_legend),
-    "PFBT" = plot_pfbt(x = x, nacho_object, colour, size, show_legend),
-    "HF" = plot_hf(x = x, nacho_object, colour, size, show_legend),
-    "NORM" = plot_norm(x = x, nacho_object, colour, size, show_legend),
-    stop()
+    "BD" = plot_metrics(x, nacho_object, colour, size, show_legend),
+    "FoV" = plot_metrics(x, nacho_object, colour, size, show_legend),
+    "PC" = plot_metrics(x, nacho_object, colour, size, show_legend),
+    "LoD" = plot_metrics(x, nacho_object, colour, size, show_legend),
+    "Positive" = plot_cg(x, nacho_object, colour, size, show_legend),
+    "Negative" = plot_cg(x, nacho_object, colour, size, show_legend),
+    "Housekeeping" = plot_cg(x, nacho_object, colour, size, show_legend),
+    "PN" = plot_pn(x, nacho_object, colour, size, show_legend),
+    "ACBD" = plot_acbd(x, nacho_object, colour, size, show_legend),
+    "ACMC" = plot_acmc(x, nacho_object, colour, size, show_legend),
+    "PCA12" = plot_pca12(x, nacho_object, colour, size, show_legend),
+    "PCAi" = plot_pcai(x, nacho_object, colour, size, show_legend),
+    "PCA" = plot_pca(x, nacho_object, colour, size, show_legend),
+    "PFBT" = plot_pfbt(x, nacho_object, colour, size, show_legend),
+    "HF" = plot_hf(x, nacho_object, colour, size, show_legend),
+    "NORM" = plot_norm(x, nacho_object, colour, size, show_legend),
+    stop(
+      paste(
+        '[NACHO] "x" must be one of the following possible values:',
+        '  * "BD", "FoV", "PC", "LoD"',
+        '  * "Positive", "Negative", "Housekeeping", "PN"',
+        '  * "ACBD", "ACMC"',
+        '  * "PCA12", "PCAi", "PCA"',
+        '  * "PFBT", "HF", "NORM',
+        sep = "\n"
+      )
+    )
   )
 }
 
