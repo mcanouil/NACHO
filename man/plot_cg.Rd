@@ -4,8 +4,7 @@
 \alias{plot_cg}
 \title{plot_cg}
 \usage{
-plot_cg(x, nacho_object, colour = "CartridgeID", size = 0.5,
-  show_legend = TRUE)
+plot_cg(x, nacho_object, colour, size, show_legend)
 }
 \arguments{
 \item{x}{[character]}
