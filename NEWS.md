@@ -3,6 +3,8 @@
 ## New features
 
 * `render()` render figures from `visualise()` in a HTML friendly output.
+* `plot()` allows to plot a chosen QC plot available in the shiny app (`visualise()`) and/or
+  in the HTML report (`render()`).
 
 ## Minor improvements and fixes
 
