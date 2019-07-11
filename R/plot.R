@@ -8,8 +8,35 @@
 #'
 #' @return NULL
 #' @export
+#'
+#' @examples
+#'
+#' data(GSE74821)
+#' plot(x = "BD", nacho_object = GSE74821)
+#' plot(x = "PCA", nacho_object = GSE74821)
+#'
 plot <- function(x, nacho_object, colour = "CartridgeID", size = 0.5, show_legend = TRUE) {
-
+  # attr(nacho_object, "RCC_type")
+  switch(
+    EXPR = x,
+    "BD" = plot_metrics(x = x, nacho_object, colour, size, show_legend),
+    "FoV" = plot_metrics(x = x, nacho_object, colour, size, show_legend),
+    "PC" = plot_metrics(x = x, nacho_object, colour, size, show_legend),
+    "LoD" = plot_metrics(x = x, nacho_object, colour, size, show_legend),
+    "Positive" = plot_cg(x = x, nacho_object, colour, size, show_legend),
+    "Negative" = plot_cg(x = x, nacho_object, colour, size, show_legend),
+    "Housekeeping" = plot_cg(x = x, nacho_object, colour, size, show_legend),
+    "PN" = plot_pn(x = x, nacho_object, colour, size, show_legend),
+    "ACBD" = plot_acbd(x = x, nacho_object, colour, size, show_legend),
+    "ACMC" = plot_acmc(x = x, nacho_object, colour, size, show_legend),
+    "PCA12" = plot_pca12(x = x, nacho_object, colour, size, show_legend),
+    "PCAi" = plot_pcai(x = x, nacho_object, colour, size, show_legend),
+    "PCA" = plot_pca(x = x, nacho_object, colour, size, show_legend),
+    "PFBT" = plot_pfbt(x = x, nacho_object, colour, size, show_legend),
+    "HF" = plot_hf(x = x, nacho_object, colour, size, show_legend),
+    "NORM" = plot_norm(x = x, nacho_object, colour, size, show_legend),
+    stop()
+  )
 }
 
 #' plot_metrics
@@ -22,9 +49,9 @@ plot <- function(x, nacho_object, colour = "CartridgeID", size = 0.5, show_legen
 plot_metrics <- function(
   x,
   nacho_object,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   labels <- c(
     "BD" = "Binding Density",
@@ -79,9 +106,9 @@ plot_metrics <- function(
 plot_cg <- function(
   x,
   nacho_object,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   p <- ggplot2::ggplot(
     data = nacho_object$nacho %>%
@@ -126,17 +153,19 @@ plot_cg <- function(
 }
 
 
-#' plot_cpe
+#' plot_pn
 #'
 #' @inheritParams plot
 #'
 #' @keywords internal
 #'
 #' @return NULL
-plot_cpe <- function(
+plot_pn <- function(
+  x,
   nacho_object,
-  colour = "CartridgeID",
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
@@ -180,10 +209,11 @@ plot_cpe <- function(
 #'
 #' @return NULL
 plot_acbd <- function(
+  x,
   nacho_object,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   nacho_object$nacho %>%
     dplyr::select(
@@ -219,10 +249,11 @@ plot_acbd <- function(
 #'
 #' @return NULL
 plot_acmc <- function(
+  x,
   nacho_object,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   nacho_object$nacho %>%
     dplyr::select(
@@ -250,18 +281,19 @@ plot_acmc <- function(
 }
 
 
-#' plot_pc12
+#' plot_pca12
 #'
 #' @inheritParams plot
 #'
 #' @keywords internal
 #'
 #' @return NULL
-plot_pc12 <- function(
+plot_pca12 <- function(
+  x,
   nacho_object,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   nacho_object$nacho %>%
     dplyr::select(
@@ -294,10 +326,11 @@ plot_pc12 <- function(
 #'
 #' @return NULL
 plot_pca <- function(
+  x,
   nacho_object,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   dplyr::full_join(
     x = nacho_object$nacho %>%
@@ -344,18 +377,19 @@ plot_pca <- function(
 }
 
 
-#' plot_inertia
+#' plot_pcai
 #'
 #' @inheritParams plot
 #'
 #' @keywords internal
 #'
 #' @return NULL
-plot_inertia <- function(
+plot_pcai <- function(
+  x,
   nacho_object,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   nacho_object$pc_sum %>%
     dplyr::mutate(PoV = scales::percent(!!dplyr::sym("Proportion of Variance"))) %>%
@@ -386,10 +420,11 @@ plot_inertia <- function(
 #'
 #' @return NULL
 plot_pfbt <- function(
+  x,
   nacho_object,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   nacho_object$nacho %>%
     dplyr::select(
@@ -423,10 +458,11 @@ plot_pfbt <- function(
 #'
 #' @return NULL
 plot_hf <- function(
+  x,
   nacho_object,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   nacho_object$nacho %>%
     dplyr::select(
@@ -461,9 +497,11 @@ plot_hf <- function(
 #'
 #' @return NULL
 plot_norm <- function(
+  x,
   nacho_object,
-  size = 0.1,
-  show_legend = TRUE
+  colour,
+  size,
+  show_legend
 ) {
   nacho_object$nacho %>%
     dplyr::select(
