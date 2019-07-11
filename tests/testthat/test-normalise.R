@@ -4,7 +4,7 @@ test_that("default settings", {
   res <- normalise(
     nacho_object = GSE74821
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 test_that("missing nacho", {
@@ -36,7 +36,7 @@ test_that("No POS_E", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 test_that("genes not null", {
@@ -57,7 +57,7 @@ test_that("genes not null", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 test_that("predict TRUE", {
@@ -78,7 +78,7 @@ test_that("predict TRUE", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 test_that("norm TRUE", {
@@ -99,7 +99,7 @@ test_that("norm TRUE", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 test_that("method GLM", {
@@ -120,7 +120,7 @@ test_that("method GLM", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 test_that("n_comp 2", {
@@ -141,7 +141,7 @@ test_that("n_comp 2", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 test_that("n_comp 10", {
@@ -162,7 +162,7 @@ test_that("n_comp 10", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 test_that("outliers TRUE", {
@@ -183,7 +183,7 @@ test_that("outliers TRUE", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 
@@ -200,7 +200,7 @@ test_that("Test outliers", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 
@@ -223,7 +223,7 @@ test_that("All LoD to zero", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 test_that("All PC to zero", {
@@ -245,7 +245,7 @@ test_that("All PC to zero", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 test_that("housekeeping_norm to FALSE and remove_outliers to TRUE", {
@@ -267,7 +267,7 @@ test_that("housekeeping_norm to FALSE and remove_outliers to TRUE", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })
 
 
@@ -290,5 +290,5 @@ test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
       House_factor = c(1/11, 11)
     )
   )
-  expect_identical(class(res), "list")
+  expect_type(res, "list")
 })

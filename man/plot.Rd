@@ -23,4 +23,11 @@ be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 \description{
 plot
 }
+\examples{
+
+data(GSE74821)
+plot(x = "BD", nacho_object = GSE74821)
+plot(x = "PCA", nacho_object = GSE74821)
+
+}
 \keyword{internal}
