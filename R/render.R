@@ -81,7 +81,7 @@ render <- function(
   #   full.names = TRUE
   # ), value = TRUE)
 
-  nacho_hex <- system.file("help", "figures", package = "NACHO")
+  nacho_hex <- system.file("help", "figures", "nacho_hex.png", package = "NACHO")
 
   cat(
     '\n<center>[![](', nacho_hex, '){width=150px}](https://mcanouil.github.io/NACHO)</center>',
