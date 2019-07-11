@@ -1,22 +1,19 @@
 context("render()")
 
 test_that("Default parameters", {
-  expect_message(
-    object = render(nacho_object = GSE74821, output_dir = NULL),
-    regexp = "Output created"
+  expect_true(
+    object = render(nacho_object = GSE74821, output_dir = tempdir())
   )
 })
 
 test_that("with legend", {
-  expect_message(
-    object = render(nacho_object = GSE74821, output_dir = NULL, show_legend = TRUE),
-    regexp = "Output created"
+  expect_true(
+    render(nacho_object = GSE74821, output_dir = NULL, show_legend = TRUE)
   )
 })
 
 test_that("with Rmd", {
-  expect_message(
-    object = render(nacho_object = GSE74821, output_dir = NULL, keep_rmd = TRUE),
-    regexp = "Output created"
+  expect_true(
+    render(nacho_object = GSE74821, output_dir = NULL, keep_rmd = TRUE)
   )
 })

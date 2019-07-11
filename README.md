@@ -63,15 +63,19 @@ namely: `summarise()` and `visualise()`.
     dashboard](https://shiny.rstudio.com/) that visualises all relevant
     QC plots.
 
-*NACHO* also includes a function `normalise()`, which calculates sample
-specific size factors and normalises the data.
+*NACHO* also includes a function `normalise()`, which (re)calculates
+sample specific size factors and normalises the data.
 
   - The `normalise()` function creates a list in which your settings,
     the raw counts and normalised counts are stored.
 
-In addition (since v0.6.0) **NACHO** allows to `render()` a full
-quality-control report (html) based on the results of a call to
-`summarise()` or `normalise()`.
+In addition (since v0.6.0) **NACHO** includes two additional functions:
+
+  - The `render()` function is used to render a full quality-control
+    report (HTML) based on the results of a call to `summarise()` or
+    `normalise()`.
+  - The `plot()` function is used to draw any quality-control metrics
+    from `visualise()` and `render()`.
 
 For more `vignette("NACHO")`.
 

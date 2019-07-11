@@ -35,6 +35,9 @@ be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 \item{keep_rmd}{[logical] Boolean to indicate whether the Rmd file used to produce the HTML report
 is copied to the directory provided in `output_dir`. Default is \code{FALSE}.}
 }
+\value{
+[logical] A logical indicating success or failure.
+}
 \description{
 This function create a `Rmarkdown` script and render it as a HTML document.
 The HTML document is a quality-control report using all the metrics from `visualise()`
