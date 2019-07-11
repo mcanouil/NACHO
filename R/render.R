@@ -74,12 +74,14 @@ render <- function(
     append = FALSE
   )
 
-  nacho_hex <- grep("figures", list.files(
-    path = system.file(package = "NACHO"),
-    pattern = "nacho_hex.png",
-    recursive = TRUE,
-    full.names = TRUE
-  ), value = TRUE)
+  # nacho_hex <- grep("figures", list.files(
+  #   path = system.file(package = "NACHO"),
+  #   pattern = "nacho_hex.png",
+  #   recursive = TRUE,
+  #   full.names = TRUE
+  # ), value = TRUE)
+
+  nacho_hex <- system.file("help", "figures", package = "NACHO")
 
   cat(
     '\n<center>[![](', nacho_hex, '){width=150px}](https://mcanouil.github.io/NACHO)</center>',
@@ -230,16 +232,6 @@ print_nacho <- function(nacho_object, colour = "CartridgeID", size = 0.5, show_l
     "LoD" = '"(Z)"'
   )
   details <- c(
-    "FoV" = paste(
-      "Each individual lane scanned on an nCounter system is divided into a few hundred imaging sections, called Fields of View (**FOV**), the exact number of which will depend on the system being used (*i.e.*, **MAX/FLEX** or **SPRINT**), and the scanner settings selected by the user.",
-      "The system images these FOVs separately, and sums the barcode counts of all **FOV**s from a single lane to form the final raw data count for each unique barcode target.",
-      "Finally, the system reports the number of **FOV**s successfully imaged as FOV Counted.",
-      "\n",
-      "Significant discrepancy between the number of **FOV** for which imaging was attempted (**FOV Count**) and for which imaging was successful (**FOV Counted**) may indicate an issue with imaging performance.",
-      "Recommended percentage of registered FOVs (*i.e.*, **FOV Counted** over **FOV Count**) is `75 %`.",
-      "Lanes will be flagged if this percentage is lower.",
-      sep = "\n"
-    ),
     "BD" = paste(
       "The imaging unit only counts the codes that are unambiguously distinguishable.",
       "It simply will not count codes that overlap within an image.",
@@ -259,6 +251,16 @@ print_nacho <- function(nacho_object, colour = "CartridgeID", size = 0.5, show_l
       "A **Binding Density** significantly greater than the upper limit in either range is indicative of overlapping reporters on the slide surface.",
       "The counts observed in lanes with a **Binding Density** at this level may have had significant numbers of codes ignored, which could potentially affect quantification and linearity of the assay.",
       "Some of the factors that may contribute to increased **Binding Density** are listed in the Factors affecting **Binding Density** box.",
+      sep = "\n"
+    ),
+    "FoV" = paste(
+      "Each individual lane scanned on an nCounter system is divided into a few hundred imaging sections, called Fields of View (**FOV**), the exact number of which will depend on the system being used (*i.e.*, **MAX/FLEX** or **SPRINT**), and the scanner settings selected by the user.",
+      "The system images these FOVs separately, and sums the barcode counts of all **FOV**s from a single lane to form the final raw data count for each unique barcode target.",
+      "Finally, the system reports the number of **FOV**s successfully imaged as FOV Counted.",
+      "\n",
+      "Significant discrepancy between the number of **FOV** for which imaging was attempted (**FOV Count**) and for which imaging was successful (**FOV Counted**) may indicate an issue with imaging performance.",
+      "Recommended percentage of registered FOVs (*i.e.*, **FOV Counted** over **FOV Count**) is `75 %`.",
+      "Lanes will be flagged if this percentage is lower.",
       sep = "\n"
     ),
     "PC" = paste(
