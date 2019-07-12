@@ -3,7 +3,7 @@
 \name{render}
 \alias{render}
 \alias{print_nacho}
-\title{render}
+\title{Render a HTML report from \link{summarise} or \link{normalise}}
 \usage{
 render(nacho_object, colour = "CartridgeID",
   output_file = "NACHO_QC.html", output_dir = getwd(), size = 0.5,
@@ -42,9 +42,6 @@ be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 \item{keep_rmd}{[\link{logical}] Boolean to indicate whether the Rmd file used to produce the HTML report
 is copied to the directory provided in \code{output_dir}. Default is \code{FALSE}.}
 }
-\value{
-[\link{logical}] A logical indicating success (\code{TRUE}) or failure (\code{FALSE}).
-}
 \description{
 This function create a \code{Rmarkdown} script and render it as a HTML document.
 The HTML document is a quality-control report using all the metrics from \link{visualise}
@@ -58,5 +55,9 @@ It is intended to be used in a \code{Rmarkdown} chunk.
 
 data(GSE74821)
 render(nacho_object = GSE74821, output_dir = NULL)
+
+
+data(GSE74821)
+print_nacho(GSE74821, colour = "CartridgeID", size = 0.5, show_legend = TRUE)
 
 }
