@@ -1,12 +1,12 @@
 #' qc_features
 #'
-#' @param data [data.frame] A `data.frame` with the count data.
+#' @param data [[data.frame]] A `data.frame` with the count data.
 #' @inheritParams summarise
 #'
 #' @keywords internal
 #' @usage NULL
 #'
-#' @return [data.frame]
+#' @return [[data.frame]]
 qc_features <- function(data, id_colname) {
   nested_data_df <- tidyr::nest(dplyr::group_by(.data = data, get(id_colname)))
   colnames(nested_data_df)[1] <- id_colname

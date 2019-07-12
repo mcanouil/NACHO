@@ -4,13 +4,13 @@
 \alias{qc_features}
 \title{qc_features}
 \arguments{
-\item{data}{\link{data.frame} A \code{data.frame} with the count data.}
+\item{data}{[\link{data.frame}] A \code{data.frame} with the count data.}
 
-\item{id_colname}{\link{character} Character string of the column in \code{ssheet_csv} that matches
+\item{id_colname}{[\link{character}] Character string of the column in \code{ssheet_csv} that matches
 the file names in \code{data_directory}.}
 }
 \value{
-\link{data.frame}
+[\link{data.frame}]
 }
 \description{
 qc_features

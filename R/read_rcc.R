@@ -1,11 +1,11 @@
 #' read_rcc
 #'
-#' @param file [character] The name of the RCC file which the data are to be read from.
+#' @param file [[character]] The name of the RCC file which the data are to be read from.
 #'
 #' @keywords internal
 #' @usage NULL
 #'
-#' @return [tibble]
+#' @return [[tibble]]
 read_rcc <- function(file) {
   tags <- c(
     "Header", "Sample_Attributes", "Lane_Attributes", "Code_Summary", "Messages"

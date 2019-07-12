@@ -4,12 +4,12 @@
 \alias{qc_imaging}
 \title{qc_imaging}
 \arguments{
-\item{fov_counted}{\link{numeric} Values from "lane_FovCounted" in the RCC files.}
+\item{fov_counted}{[\link{numeric}] Values from "lane_FovCounted" in the RCC files.}
 
-\item{fov_count}{\link{numeric} Values from "lane_FovCount" in the RCC files.}
+\item{fov_count}{[\link{numeric}] Values from "lane_FovCount" in the RCC files.}
 }
 \value{
-\link{numeric}
+[\link{numeric}]
 }
 \description{
 qc_imaging

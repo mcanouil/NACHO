@@ -1,11 +1,11 @@
 #' norm_geo
 #'
-#' @param data [data.frame] A `list` of `data.frame` with the count data.
+#' @param data [[data.frame]] A `list` of `data.frame` with the count data.
 #'
 #' @keywords internal
 #' @usage NULL
 #'
-#' @return [list]
+#' @return [[list]]
 norm_geo <- function(data) {
   geometric_mean_pos <- geometric_probes(data = data, probes_type = "Positive")
   geometric_mean_neg <- geometric_probes(data = data, probes_type = "Negative")

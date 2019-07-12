@@ -4,13 +4,13 @@
 \alias{normalise_counts}
 \title{normalise_counts}
 \arguments{
-\item{data}{\link{data.frame} A \code{data.frame} with the count data.}
+\item{data}{[\link{data.frame}] A \code{data.frame} with the count data.}
 
-\item{housekeeping_norm}{\link{logical} Boolean to indicate whether the housekeeping normalisation should be performed.
+\item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation should be performed.
 Default is \code{TRUE}.}
 }
 \value{
-\link{numeric}
+[\link{numeric}]
 }
 \description{
 normalise_counts

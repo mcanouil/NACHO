@@ -2,7 +2,7 @@
 #'
 #' NanoString nCounter RUO-PAM50 Gene Expression Custom CodeSet
 #'
-#' @format A 'list' object
+#' @format A [[list]] object
 #' @source [GSE74821](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821)
 "GSE74821"
 

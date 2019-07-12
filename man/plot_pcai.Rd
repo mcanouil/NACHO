@@ -7,7 +7,7 @@
 plot_pcai(x, nacho_object, colour, size, show_legend)
 }
 \arguments{
-\item{x}{\link{character} Character string naming the quality-control metrics to plot from \code{nacho_object}.
+\item{x}{[\link{character}] Character string naming the quality-control metrics to plot from \code{nacho_object}.
 The possible values are:
 \itemize{
 \item \code{"BD"} (Binding Density)
@@ -28,15 +28,15 @@ The possible values are:
 \item \code{"NORM"} (Normalisation Factor)
 }}
 
-\item{nacho_object}{\link{list} List obtained from \code{summarise or }normalise`.}
+\item{nacho_object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
 
-\item{colour}{\link{character} Character string of the column in \code{ssheet_csv}
+\item{colour}{[\link{character}] Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 
-\item{size}{\link{numeric} A numeric controlling point (\code{geom_point} or \code{geom_beeswarm})
-or line (\code{geom_linetype}) size n \code{ggplot2}}
+\item{size}{[\link{numeric}] A \code{numeric} controlling point size (\link{geom_point} or \link{geom_beeswarm})
+or line size (\link{geom_line}).}
 
-\item{show_legend}{\link{logical} Boolean to indicate whether the plot legends should
+\item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 }
 \description{

@@ -1,12 +1,12 @@
 #' read_tags
 #'
-#' @param tag [character] A `character` string naming the TAG field in the RCC files.
-#' @param raw_rcc [character]  A `character` vector containing all lines from a RCC file.
+#' @param tag [[character]] A `character` string naming the TAG field in the RCC files.
+#' @param raw_rcc [[character]]  A `character` vector containing all lines from a RCC file.
 #'
 #' @keywords internal
 #' @usage NULL
 #'
-#' @return [list]
+#' @return [[list]]
 read_tags <- function(tag, raw_rcc) {
   positions <- grep(pattern = tag, x = raw_rcc)
   if ((positions[2]-positions[1])!=1) {

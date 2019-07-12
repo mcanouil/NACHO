@@ -4,10 +4,10 @@
 \alias{norm_glm}
 \title{norm_glm}
 \arguments{
-\item{data}{\link{data.frame} A \code{list} of \code{data.frame} with the count data.}
+\item{data}{[\link{data.frame}] A \code{list} of \code{data.frame} with the count data.}
 }
 \value{
-\link{list}
+[\link{list}]
 }
 \description{
 norm_glm

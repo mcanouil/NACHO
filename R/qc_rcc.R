@@ -1,13 +1,13 @@
 #' qc_rcc
 #'
 #' @inheritParams summarise
-#' @param nacho_df [data.frame] A `data.frame` with all columns from the sample sheet `ssheet_csv`
+#' @param nacho_df [[data.frame]] A `data.frame` with all columns from the sample sheet `ssheet_csv`
 #'   and all computed columns, *i.e.*, quality-control metrics and counts, with one sample per row.
 #'
 #' @keywords internal
 #' @usage NULL
 #'
-#' @return [list]
+#' @return [[list]]
 qc_rcc <- function(
   data_directory,
   nacho_df,

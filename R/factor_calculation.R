@@ -3,12 +3,12 @@
 #' @inheritParams qc_rcc
 #' @inheritParams summarise
 #' @inheritParams normalise
-#' @param exclude_probes [character] A vector of probes to exclude.
+#' @param exclude_probes [[character]] A vector of probes to exclude.
 #'
 #' @keywords internal
 #' @usage NULL
 #'
-#' @return [data.frame]
+#' @return [[data.frame]]
 factor_calculation <- function(
   nacho_df,
   id_colname,
