@@ -1,12 +1,12 @@
 #' qc_pca
 #'
-#' @param counts [data.frame] A `data.frame` with the count data.
+#' @param counts [[data.frame]] A `data.frame` with the count data.
 #' @inheritParams summarise
 #'
 #' @keywords internal
 #' @usage NULL
 #'
-#' @return [list]
+#' @return [[list]]
 qc_pca <- function(counts, n_comp = 10) {
   pc <- stats::prcomp(log(counts + 1))
   pc_sum <- summary(pc)

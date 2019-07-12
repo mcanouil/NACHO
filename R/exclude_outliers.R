@@ -4,7 +4,7 @@
 #'
 #' @keywords internal
 #'
-#' @return [data.frame]
+#' @return [[data.frame]]
 exclude_outliers <- function(nacho_object) {
   nacho_df <- nacho_object[["nacho"]]
   id_colname <- nacho_object[["access"]]

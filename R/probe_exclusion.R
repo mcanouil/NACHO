@@ -1,11 +1,11 @@
 #' probe_exclusion
 #'
-#' @param control_genes_df [data.frame] A `data.frame` with the count data.
+#' @param control_genes_df [[data.frame]] A `data.frame` with the count data.
 #'
 #' @keywords internal
 #' @usage NULL
 #'
-#' @return [character]
+#' @return [[character]]
 probe_exclusion <- function(control_genes_df) {
   count_columns <- sapply(X = control_genes_df, FUN = is.numeric)
   local_neg <- control_genes_df[control_genes_df[["CodeClass"]]%in%"Negative", count_columns]

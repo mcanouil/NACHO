@@ -1,9 +1,9 @@
 #' plot
 #'
 #' This function allows to plot any qualit-control figures available
-#' within the shiny app using `visualise()` or in the HTML report from `render()`.
+#' within the shiny app using [visualise] or in the HTML report from [render].
 #'
-#' @param x [character] Character string naming the quality-control metrics to plot from `nacho_object`.
+#' @param x [[character]] Character string naming the quality-control metrics to plot from `nacho_object`.
 #'  The possible values are:
 #'
 #'    * `"BD"` (Binding Density)
@@ -24,8 +24,8 @@
 #'    * `"NORM"` (Normalisation Factor)
 #'
 #' @inheritParams render
-#' @param size [numeric] A numeric controlling point (`geom_point` or `geom_beeswarm`)
-#'   or line (`geom_linetype`) size n `ggplot2`
+#' @param size [[numeric]] A `numeric` controlling point size ([geom_point] or [geom_beeswarm])
+#'   or line size ([geom_line]).
 #'
 #' @return NULL
 #' @export

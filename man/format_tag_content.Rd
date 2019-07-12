@@ -4,7 +4,7 @@
 \alias{format_tag_content}
 \title{format_tag_content}
 \arguments{
-\item{tag}{\link{character} A \code{character} string naming the TAG field in the RCC files.}
+\item{tag}{[\link{character}] A \code{character} string naming the TAG field in the RCC files.}
 
 \item{content}{\link{data.frame} A \code{data.frame} created from RCC files.}
 }

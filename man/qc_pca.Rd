@@ -4,13 +4,13 @@
 \alias{qc_pca}
 \title{qc_pca}
 \arguments{
-\item{counts}{\link{data.frame} A \code{data.frame} with the count data.}
+\item{counts}{[\link{data.frame}] A \code{data.frame} with the count data.}
 
-\item{n_comp}{\link{numeric} Number indicating the number of principal components to compute.
+\item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
 }
 \value{
-\link{list}
+[\link{list}]
 }
 \description{
 qc_pca

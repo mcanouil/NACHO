@@ -4,32 +4,32 @@
 \alias{qc_rcc}
 \title{qc_rcc}
 \arguments{
-\item{data_directory}{\link{character} A character string of the directory where the data are stored.}
+\item{data_directory}{[\link{character}] A character string of the directory where the data are stored.}
 
-\item{nacho_df}{\link{data.frame} A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
+\item{nacho_df}{[\link{data.frame}] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
 and all computed columns, \emph{i.e.}, quality-control metrics and counts, with one sample per row.}
 
-\item{id_colname}{\link{character} Character string of the column in \code{ssheet_csv} that matches
+\item{id_colname}{[\link{character}] Character string of the column in \code{ssheet_csv} that matches
 the file names in \code{data_directory}.}
 
-\item{housekeeping_genes}{\link{character} A vector of names of the miRNAs/mRNAs
+\item{housekeeping_genes}{[\link{character}] A vector of names of the miRNAs/mRNAs
 that should be used as housekeeping genes. Default is \code{NULL}.}
 
-\item{housekeeping_predict}{\link{logical} Boolean to indicate whether the housekeeping genes
+\item{housekeeping_predict}{[\link{logical}] Boolean to indicate whether the housekeeping genes
 should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
 
-\item{housekeeping_norm}{\link{logical} Boolean to indicate whether the housekeeping normalisation should be performed.
+\item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation should be performed.
 Default is \code{TRUE}.}
 
-\item{normalisation_method}{\link{character} Either \code{"GEO"} or \code{"GLM"}.
+\item{normalisation_method}{[\link{character}] Either \code{"GEO"} or \code{"GLM"}.
 Character string to indicate normalisation using the geometric mean (\code{"GEO"})
 or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 
-\item{n_comp}{\link{numeric} Number indicating the number of principal components to compute.
+\item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
 }
 \value{
-\link{list}
+[\link{list}]
 }
 \description{
 qc_rcc

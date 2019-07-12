@@ -4,12 +4,12 @@
 \alias{read_tags}
 \title{read_tags}
 \arguments{
-\item{tag}{\link{character} A \code{character} string naming the TAG field in the RCC files.}
+\item{tag}{[\link{character}] A \code{character} string naming the TAG field in the RCC files.}
 
-\item{raw_rcc}{\link{character}  A \code{character} vector containing all lines from a RCC file.}
+\item{raw_rcc}{[\link{character}]  A \code{character} vector containing all lines from a RCC file.}
 }
 \value{
-\link{list}
+[\link{list}]
 }
 \description{
 read_tags

@@ -4,10 +4,10 @@
 \alias{geometric_mean}
 \title{geometric_mean}
 \arguments{
-\item{x}{\link{numeric} A \code{numeric} or a \code{numeric} vector.}
+\item{x}{[^\link{numeric}] A \code{numeric} or a \code{numeric} vector.}
 }
 \value{
-\link{numeric}
+[^\link{numeric}]
 }
 \description{
 geometric_mean

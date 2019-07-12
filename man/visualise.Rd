@@ -8,11 +8,11 @@
 visualise(nacho_object)
 }
 \arguments{
-\item{nacho_object}{\link{list} List obtained from \code{summarise or }normalise`.}
+\item{nacho_object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
 }
 \description{
 This function allows to visualise several quality-control metrics
-in an interactive \code{shiny} application, in which thresholds can be customised
+in an interactive \link{shiny} application, in which thresholds can be customised
 and exported to the global environment.
 }
 \examples{
