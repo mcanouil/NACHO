@@ -3,9 +3,10 @@
 #' @inheritParams qc_rcc
 #' @inheritParams summarise
 #' @inheritParams normalise
-#' @param exclude_probes [vector(character)] A list of probes to exclude.
+#' @param exclude_probes [character] A vector of probes to exclude.
 #'
 #' @keywords internal
+#' @usage NULL
 #'
 #' @return [data.frame]
 factor_calculation <- function(

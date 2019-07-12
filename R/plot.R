@@ -4,23 +4,25 @@
 #' within the shiny app using `visualise()` or in the HTML report from `render()`.
 #'
 #' @param x [character] Character string naming the quality-control metrics to plot from `nacho_object`.
-#'   The possible values are:
-#'     * "BD" (Binding Density)
-#'     * "FoV" (Imaging)
-#'     * "PC" (Positive Control Linearity)
-#'     * "LoD" (Limit of Detection)
-#'     * "Positive" (Positive Controls)
-#'     * "Negative" (Negative Controls)
-#'     * "Housekeeping" (Housekeeping Genes)
-#'     * "PN" (Positive Controls vs. Negative Controls)
-#'     * "ACBD" (Average Counts vs. Binding Density)
-#'     * "ACMC" (Average Counts vs. Median Counts)
-#'     * "PCA12" (Principal Component 1 vs. 2)
-#'     * "PCAi" (Principal Component scree plot)
-#'     * "PCA" (Principal Components planes)
-#'     * "PFNF" (Positive Factor vs. Negative Factor)
-#'     * "HF" (Housekeeping Factor)
-#'     * "NORM" (Normalisation Factor)
+#'  The possible values are:
+#'
+#'    * `"BD"` (Binding Density)
+#'    * `"FoV"` (Imaging)
+#'    * `"PC"` (Positive Control Linearity)
+#'    * `"LoD"` (Limit of Detection)
+#'    * `"Positive"` (Positive Controls)
+#'    * `"Negative"` (Negative Controls)
+#'    * `"Housekeeping"` (Housekeeping Genes)
+#'    * `"PN"` (Positive Controls vs. Negative Controls)
+#'    * `"ACBD"` (Average Counts vs. Binding Density)
+#'    * `"ACMC"` (Average Counts vs. Median Counts)
+#'    * `"PCA12"` (Principal Component 1 vs. 2)
+#'    * `"PCAi"` (Principal Component scree plot)
+#'    * `"PCA"` (Principal Components planes)
+#'    * `"PFNF"` (Positive Factor vs. Negative Factor)
+#'    * `"HF"` (Housekeeping Factor)
+#'    * `"NORM"` (Normalisation Factor)
+#'
 #' @inheritParams render
 #' @param size [numeric] A numeric controlling point (`geom_point` or `geom_beeswarm`)
 #'   or line (`geom_linetype`) size n `ggplot2`
