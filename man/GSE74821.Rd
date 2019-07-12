@@ -4,7 +4,7 @@
 \name{GSE74821}
 \alias{GSE74821}
 \title{Presummarised data from GSE74821 (20 samples).}
-\format{A 'list' object}
+\format{A [\link{list}] object}
 \source{
 \href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821}{GSE74821}
 }

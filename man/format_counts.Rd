@@ -4,15 +4,15 @@
 \alias{format_counts}
 \title{format_counts}
 \arguments{
-\item{data}{\link{data.frame} A \code{data.frame} with the count data.}
+\item{data}{[\link{data.frame}] A \code{data.frame} with the count data.}
 
-\item{id_colname}{\link{character} Character string of the column in \code{ssheet_csv} that matches
+\item{id_colname}{[\link{character}] Character string of the column in \code{ssheet_csv} that matches
 the file names in \code{data_directory}.}
 
-\item{count_column}{\link{character} A \code{character} string naming the column where the counts are.}
+\item{count_column}{[\link{character}] A \code{character} string naming the column where the counts are.}
 }
 \value{
-\link{data.frame}
+[\link{data.frame}]
 }
 \description{
 format_counts

@@ -7,7 +7,7 @@
 #' @keywords internal
 #' @usage NULL
 #'
-#' @return [list]
+#' @return [[list]]
 details_outlier <- function(nacho_df, id_colname, outliers_thresholds) {
   binding_thresh_logical <- which(
     nacho_df[["BD"]] > outliers_thresholds[["BD"]][2] |

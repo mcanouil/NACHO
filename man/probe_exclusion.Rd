@@ -4,10 +4,10 @@
 \alias{probe_exclusion}
 \title{probe_exclusion}
 \arguments{
-\item{control_genes_df}{\link{data.frame} A \code{data.frame} with the count data.}
+\item{control_genes_df}{[\link{data.frame}] A \code{data.frame} with the count data.}
 }
 \value{
-\link{character}
+[\link{character}]
 }
 \description{
 probe_exclusion

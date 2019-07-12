@@ -1,14 +1,14 @@
 #' render
 #'
 #' This function create a `Rmarkdown` script and render it as a HTML document.
-#' The HTML document is a quality-control report using all the metrics from `visualise()`
+#' The HTML document is a quality-control report using all the metrics from [visualise]
 #' based on recommendations from NanoString.
 #'
 #' @inheritParams normalise
 #' @inheritParams plot
-#' @param colour [character] Character string of the column in `ssheet_csv`
+#' @param colour [[character]] Character string of the column in `ssheet_csv`
 #'   or more generally in `nacho_object$nacho` to be used as grouping colour.
-#' @param output_file [character] The name of the output file.
+#' @param output_file [[character]] The name of the output file.
 #'   If using `NULL` then the output filename will be based on filename for the input file.
 #'   If a filename is provided, a path to the output file can also be provided.
 #'   Note that the `output_dir` option allows for specifying the output file path as well,
@@ -16,17 +16,17 @@
 #'   If `output_file` is specified but does not have a file extension,
 #'   an extension will be automatically added according to the output format.
 #'   To avoid the automatic file extension, put the `output_file` value in `I()`, *e.g.*, `I('my-output')`.
-#' @param output_dir [character] The output directory for the rendered output_file.
+#' @param output_dir [[character]] The output directory for the rendered output_file.
 #'   This allows for a choice of an alternate directory to which the output file should be written
 #'   (the default output directory is the working directory, *i.e.*, `getwd()`).
 #'   If a path is provided with a filename in `output_file` the directory specified here will take precedence.
 #'   Please note that any directory path provided will create any necessary directories if they do not exist.
-#' @param show_legend [logical] Boolean to indicate whether the plot legends should
+#' @param show_legend [[logical]] Boolean to indicate whether the plot legends should
 #'   be plotted (`TRUE`) or not (`FALSE`). Default is `TRUE`.
-#' @param keep_rmd [logical] Boolean to indicate whether the Rmd file used to produce the HTML report
+#' @param keep_rmd [[logical]] Boolean to indicate whether the Rmd file used to produce the HTML report
 #'   is copied to the directory provided in `output_dir`. Default is `FALSE`.
 #'
-#' @return [logical] A logical indicating success or failure.
+#' @return [[logical]] A logical indicating success (`TRUE`) or failure (`FALSE`).
 #'
 #' @export
 #'

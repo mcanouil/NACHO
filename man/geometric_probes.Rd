@@ -4,13 +4,13 @@
 \alias{geometric_probes}
 \title{geometric_probes}
 \arguments{
-\item{data}{\link{data.frame} A \code{list} of \code{data.frame} with the count data.}
+\item{data}{[\link{data.frame}] A \code{list} of \code{data.frame} with the count data.}
 
-\item{probes_type}{\link{character} A \code{character} string naming the probe type,
+\item{probes_type}{[\link{character}] A \code{character} string naming the probe type,
 \emph{i.e.}, \code{"Positive"} or \code{"Negative"}.}
 }
 \value{
-\link{numeric}
+[\link{numeric}]
 }
 \description{
 geometric_probes
