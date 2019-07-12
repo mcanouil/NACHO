@@ -1,4 +1,4 @@
-#' summarise data from RCC NanoString files and normalise
+#' Summarise data from RCC NanoString files (and normalise them)
 #'
 #' This function is used to preprocess the data from NanoString nCounter.
 #'
