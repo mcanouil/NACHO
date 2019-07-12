@@ -3,7 +3,7 @@
 \name{visualise}
 \alias{visualise}
 \alias{visualize}
-\title{Visualise NanoString data and QC metrics using shiny app}
+\title{Visualise quality-control metrics using a shiny app}
 \usage{
 visualise(nacho_object)
 }

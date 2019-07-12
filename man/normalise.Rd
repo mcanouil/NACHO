@@ -3,7 +3,7 @@
 \name{normalise}
 \alias{normalise}
 \alias{normalize}
-\title{normalise}
+\title{(re)Normalise a dataset read from \link{summarise}}
 \usage{
 normalise(nacho_object,
   housekeeping_genes = nacho_object[["housekeeping_genes"]],

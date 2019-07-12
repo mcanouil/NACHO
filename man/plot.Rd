@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plot}
 \alias{plot}
-\title{plot}
+\title{Draw quality-control metrics and thresholds}
 \usage{
 plot(x, nacho_object, colour = "CartridgeID", size = 0.5,
   show_legend = TRUE)

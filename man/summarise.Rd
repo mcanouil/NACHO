@@ -3,7 +3,7 @@
 \name{summarise}
 \alias{summarise}
 \alias{summarize}
-\title{summarise data from RCC NanoString files and normalise}
+\title{Summarise data from RCC NanoString files (and normalise them)}
 \usage{
 summarise(data_directory, ssheet_csv, id_colname,
   housekeeping_genes = NULL, housekeeping_predict = FALSE,

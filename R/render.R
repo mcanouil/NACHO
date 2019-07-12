@@ -26,7 +26,7 @@
 #' @param keep_rmd [[logical]] Boolean to indicate whether the Rmd file used to produce the HTML report
 #'   is copied to the directory provided in `output_dir`. Default is `FALSE`.
 #'
-#' @return [[logical]] A logical indicating success (`TRUE`) or failure (`FALSE`).
+#' @return NULL
 #'
 #' @export
 #'
@@ -74,14 +74,15 @@ render <- function(
     append = FALSE
   )
 
-  # nacho_hex <- grep("figures", list.files(
-  #   path = system.file(package = "NACHO"),
-  #   pattern = "nacho_hex.png",
-  #   recursive = TRUE,
-  #   full.names = TRUE
-  # ), value = TRUE)
-
   nacho_hex <- system.file("help", "figures", "nacho_hex.png", package = "NACHO")
+  if (!file.exists(nacho_hex)) {
+    nacho_hex <- grep("figures", list.files(
+      path = system.file(package = "NACHO"),
+      pattern = "nacho_hex.png",
+      recursive = TRUE,
+      full.names = TRUE
+    ), value = TRUE)
+  }
 
   cat(
     '\n<center>[![](', nacho_hex, '){width=150px}](https://mcanouil.github.io/NACHO)</center>',
@@ -148,17 +149,17 @@ render <- function(
     )
   }
 
-  out_status <- try({rmarkdown::render(
+  rmarkdown::render(
     input = temp_file_rmd,
     output_file = output_file,
     output_dir = output_dir,
     encoding = "UTF-8",
     quiet = TRUE
-  )}, silent = TRUE)
+  )
 
   unlink(temp_file_data)
   unlink(temp_file_rmd)
-  invisible(class(out_status)!="try-error")
+  invisible()
 }
 
 
@@ -174,6 +175,12 @@ render <- function(
 #' @return NULL
 #' @export
 #' @rdname render
+#'
+#' @examples
+#'
+#' data(GSE74821)
+#' print_nacho(GSE74821, colour = "CartridgeID", size = 0.5, show_legend = TRUE)
+#'
 print_nacho <- function(nacho_object, colour = "CartridgeID", size = 0.5, show_legend = FALSE) {
   if (is.numeric(nacho_object$nacho[[colour]])) {
     nacho_object$nacho[[colour]] <- as.character(nacho_object$nacho[[colour]])
