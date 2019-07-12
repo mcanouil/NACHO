@@ -1,4 +1,4 @@
-#' render
+#' Render a HTML report from [summarise] or [normalise]
 #'
 #' This function create a `Rmarkdown` script and render it as a HTML document.
 #' The HTML document is a quality-control report using all the metrics from [visualise]

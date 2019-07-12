@@ -1,4 +1,4 @@
-#' normalise
+#' (re)Normalise a dataset read from [summarise]
 #'
 #' This function creates a list in which your settings, the raw counts and normalised counts are stored,
 #' using the result from a call to [summarise].
