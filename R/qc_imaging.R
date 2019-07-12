@@ -4,6 +4,7 @@
 #' @param fov_count [numeric] Values from "lane_FovCount" in the RCC files.
 #'
 #' @keywords internal
+#' @usage NULL
 #'
 #' @return [numeric]
 qc_imaging <- function(fov_counted, fov_count) {

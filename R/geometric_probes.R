@@ -1,10 +1,11 @@
 #' geometric_probes
 #'
-#' @param data [list(data.frame)] A \code{list} of \code{data.frame} with the count data.
-#' @param probes_type [character] A \code{character} string naming the probe type,
-#'   i.e., "Positive" or "Negative"
+#' @param data [data.frame] A `list` of `data.frame` with the count data.
+#' @param probes_type [character] A `character` string naming the probe type,
+#'   *i.e.*, `"Positive"` or `"Negative"`.
 #'
 #' @keywords internal
+#' @usage NULL
 #'
 #' @return [numeric]
 geometric_probes <- function(data, probes_type) {

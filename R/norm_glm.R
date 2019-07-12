@@ -1,10 +1,11 @@
 #' norm_glm
 #'
-#' @param data [list(data.frame)] A \code{list} of \code{data.frame} with the count data.
+#' @param data [data.frame] A `list` of `data.frame` with the count data.
 #'
 #' @keywords internal
+#' @usage NULL
 #'
-#' @return [vector(numeric)]
+#' @return [list]
 norm_glm <- function(data) {
   progress <- dplyr::progress_estimated(length(data)+1)
   glms <- sapply(

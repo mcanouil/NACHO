@@ -1,9 +1,10 @@
 #' format_tag_content
 #'
 #' @inheritParams read_tags
-#' @param content [data.frame] A \code{data.frame} created from RCC files.
+#' @param content [data.frame] A `data.frame` created from RCC files.
 #'
 #' @keywords internal
+#' @usage NULL
 #'
 #' @return [data.frame]
 format_tag_content <- function(tag, content) {
