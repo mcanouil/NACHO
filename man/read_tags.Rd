@@ -3,16 +3,13 @@
 \name{read_tags}
 \alias{read_tags}
 \title{read_tags}
-\usage{
-read_tags(tag, raw_rcc)
-}
 \arguments{
-\item{tag}{[character] A \code{character} string naming the TAG field in the RCC files.}
+\item{tag}{\link{character} A \code{character} string naming the TAG field in the RCC files.}
 
-\item{raw_rcc}{[vector(character)]  A \code{vector(character)} containing all lines from a RCC file.}
+\item{raw_rcc}{\link{character}  A \code{character} vector containing all lines from a RCC file.}
 }
 \value{
-[list(data.frame)]
+\link{list}
 }
 \description{
 read_tags

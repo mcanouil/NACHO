@@ -3,16 +3,13 @@
 \name{qc_limit_detection}
 \alias{qc_limit_detection}
 \title{qc_limit_detection}
-\usage{
-qc_limit_detection(pos_e, negatives)
-}
 \arguments{
-\item{pos_e}{[numeric] Position of Positive probe "POS_E", i.e., a too low expressed probe.}
+\item{pos_e}{\link{numeric} Position of Positive probe "POS_E", \emph{i.e.}, a too low expressed probe.}
 
-\item{negatives}{[vector(numeric)] A \code{vector(numeric)} with the count data from the Negatives probes.}
+\item{negatives}{\link{numeric} A \code{numeric} vector with the count data from the Negatives probes.}
 }
 \value{
-[numeric]
+\link{numeric}
 }
 \description{
 qc_limit_detection

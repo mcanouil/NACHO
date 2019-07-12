@@ -3,16 +3,13 @@
 \name{qc_imaging}
 \alias{qc_imaging}
 \title{qc_imaging}
-\usage{
-qc_imaging(fov_counted, fov_count)
-}
 \arguments{
-\item{fov_counted}{[numeric] Values from "lane_FovCounted" in the RCC files.}
+\item{fov_counted}{\link{numeric} Values from "lane_FovCounted" in the RCC files.}
 
-\item{fov_count}{[numeric] Values from "lane_FovCount" in the RCC files.}
+\item{fov_count}{\link{numeric} Values from "lane_FovCount" in the RCC files.}
 }
 \value{
-[numeric]
+\link{numeric}
 }
 \description{
 qc_imaging

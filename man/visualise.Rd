@@ -3,16 +3,16 @@
 \name{visualise}
 \alias{visualise}
 \alias{visualize}
-\title{visualise}
+\title{Visualise NanoString data and QC metrics using shiny app}
 \usage{
 visualise(nacho_object)
 }
 \arguments{
-\item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
+\item{nacho_object}{\link{list} List obtained from \code{summarise or }normalise`.}
 }
 \description{
 This function allows to visualise several quality-control metrics
-in an interactive `shiny` application, in which thresholds can be customised
+in an interactive \code{shiny} application, in which thresholds can be customised
 and exported to the global environment.
 }
 \examples{

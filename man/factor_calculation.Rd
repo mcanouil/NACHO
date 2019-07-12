@@ -3,31 +3,27 @@
 \name{factor_calculation}
 \alias{factor_calculation}
 \title{factor_calculation}
-\usage{
-factor_calculation(nacho_df, id_colname, housekeeping_genes,
-  housekeeping_predict, normalisation_method, exclude_probes)
-}
 \arguments{
-\item{nacho_df}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
-and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
+\item{nacho_df}{\link{data.frame} A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
+and all computed columns, \emph{i.e.}, quality-control metrics and counts, with one sample per row.}
 
-\item{id_colname}{[character] Character string of the column in \code{ssheet_csv} that matches
+\item{id_colname}{\link{character} Character string of the column in \code{ssheet_csv} that matches
 the file names in \code{data_directory}.}
 
-\item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs
+\item{housekeeping_genes}{\link{character} A vector of names of the miRNAs/mRNAs
 that should be used as housekeeping genes. Default is \code{NULL}.}
 
-\item{housekeeping_predict}{[logical] Boolean to indicate whether the housekeeping genes
+\item{housekeeping_predict}{\link{logical} Boolean to indicate whether the housekeeping genes
 should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
 
-\item{normalisation_method}{[character] Either \code{"GEO"} or \code{"GLM"}.
+\item{normalisation_method}{\link{character} Either \code{"GEO"} or \code{"GLM"}.
 Character string to indicate normalisation using the geometric mean (\code{"GEO"})
 or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 
-\item{exclude_probes}{[vector(character)] A list of probes to exclude.}
+\item{exclude_probes}{\link{character} A vector of probes to exclude.}
 }
 \value{
-[data.frame]
+\link{data.frame}
 }
 \description{
 factor_calculation
