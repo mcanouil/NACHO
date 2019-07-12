@@ -7,10 +7,10 @@
 exclude_outliers(nacho_object)
 }
 \arguments{
-\item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
+\item{nacho_object}{\link{list} List obtained from \code{summarise or }normalise`.}
 }
 \value{
-[data.frame]
+\link{data.frame}
 }
 \description{
 exclude_outliers

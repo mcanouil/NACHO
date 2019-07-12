@@ -3,7 +3,7 @@
 \name{summarise}
 \alias{summarise}
 \alias{summarize}
-\title{summarise}
+\title{summarise data from RCC NanoString files and normalise}
 \usage{
 summarise(data_directory, ssheet_csv, id_colname,
   housekeeping_genes = NULL, housekeeping_predict = FALSE,
@@ -11,54 +11,30 @@ summarise(data_directory, ssheet_csv, id_colname,
   n_comp = 10)
 }
 \arguments{
-\item{data_directory}{[character] A character string of the directory where the data are stored.}
+\item{data_directory}{\link{character} A character string of the directory where the data are stored.}
 
-\item{ssheet_csv}{[character/data.frame] Either a string with the name of the CSV of the samplesheet
+\item{ssheet_csv}{\link{character} or \link{data.frame} Either a string with the name of the CSV of the samplesheet
 or the samplesheet as a \code{data.frame}.
 Should contain a column that matches the file names in the folder.}
 
-\item{id_colname}{[character] Character string of the column in \code{ssheet_csv} that matches
+\item{id_colname}{\link{character} Character string of the column in \code{ssheet_csv} that matches
 the file names in \code{data_directory}.}
 
-\item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs
+\item{housekeeping_genes}{\link{character} A vector of names of the miRNAs/mRNAs
 that should be used as housekeeping genes. Default is \code{NULL}.}
 
-\item{housekeeping_predict}{[logical] Boolean to indicate whether the housekeeping genes
+\item{housekeeping_predict}{\link{logical} Boolean to indicate whether the housekeeping genes
 should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
 
-\item{housekeeping_norm}{[logical] Boolean to indicate whether the housekeeping normalisation should be performed.
+\item{housekeeping_norm}{\link{logical} Boolean to indicate whether the housekeeping normalisation should be performed.
 Default is \code{TRUE}.}
 
-\item{normalisation_method}{[character] Either \code{"GEO"} or \code{"GLM"}.
+\item{normalisation_method}{\link{character} Either \code{"GEO"} or \code{"GLM"}.
 Character string to indicate normalisation using the geometric mean (\code{"GEO"})
 or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 
-\item{n_comp}{[numeric] Number indicating the number of principal components to compute.
+\item{n_comp}{\link{numeric} Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
-}
-\value{
-[list] A list containing parameters and data:
-\describe{
-  \item{access}{[character] Value passed to \code{\link{summarise}} in \code{id_colname}.}
-  \item{housekeeping_genes}{[character] Value passed to \code{\link{summarise}}.}
-  \item{housekeeping_predict}{[logical] Value passed to \code{\link{summarise}}.}
-  \item{housekeeping_norm}{[logical] Value passed to \code{\link{summarise}}.}
-  \item{normalisation_method}{[character] Value passed to \code{\link{summarise}}.}
-  \item{remove_outliers}{[logical] \code{FALSE}.}
-  \item{n_comp}{[ numeric] Value passed to \code{\link{summarise}}.}
-  \item{data_directory}{[character] Value passed to \code{\link{summarise}}.}
-  \item{pc_sum}{[data.frame] A \code{data.frame} with \code{n_comp} rows and four columns:
-   "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
-  \item{nacho}{[data.frame] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
-  and all computed columns, i.e., quality-control metrics and counts, with one sample per row.}
-  \item{outliers_thresholds}{[list] A \code{list} of the default quality-control thresholds.}
-  \item{raw_counts}{[data.frame] Raw counts with probes as rows and samples as columns.
-  With \code{"CodeClass"} (first column), the type of the probes and
-  \code{"Name"} (second column), the Name of the probes.}
-  \item{normalised_counts}{[data.frame] Normalised counts with probes as rows and samples as columns.
-  With \code{"CodeClass"} (first column)), the type of the probes and
-  \code{"Name"} (second column), the name of the probes.}
-}
 }
 \description{
 This function is used to preprocess the data from NanoString nCounter.

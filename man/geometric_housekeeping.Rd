@@ -3,23 +3,18 @@
 \name{geometric_housekeeping}
 \alias{geometric_housekeeping}
 \title{geometric_housekeeping}
-\usage{
-geometric_housekeeping(data, positive_factor, intercept,
-  housekeeping_genes)
-}
 \arguments{
-\item{data}{[data.frame] A \code{data.frame} with the count data.}
+\item{data}{\link{data.frame} A \code{data.frame} with the count data.}
 
-\item{positive_factor}{[vector(numeric)] A \code{vector(numeric)} with the positive probe
-normalisation factor.}
+\item{positive_factor}{\link{numeric} A \code{numeric} vector with the positive probe normalisation factor.}
 
-\item{intercept}{[vector(numeric)] A \code{vector(numeric)} with the average counts value.}
+\item{intercept}{\link{numeric} A \code{numeric} vector with the average counts value.}
 
-\item{housekeeping_genes}{[vector(character)] A vector of names of the miRNAs/mRNAs
+\item{housekeeping_genes}{\link{character} A vector of names of the miRNAs/mRNAs
 that should be used as housekeeping genes. Default is \code{NULL}.}
 }
 \value{
-[numeric]
+\link{numeric}
 }
 \description{
 geometric_housekeeping

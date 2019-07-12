@@ -7,34 +7,36 @@
 plot_acbd(x, nacho_object, colour, size, show_legend)
 }
 \arguments{
-\item{x}{[character] Character string naming the quality-control metrics to plot from `nacho_object`.
+\item{x}{\link{character} Character string naming the quality-control metrics to plot from \code{nacho_object}.
 The possible values are:
-  * "BD" (Binding Density)
-  * "FoV" (Imaging)
-  * "PC" (Positive Control Linearity)
-  * "LoD" (Limit of Detection)
-  * "Positive" (Positive Controls)
-  * "Negative" (Negative Controls)
-  * "Housekeeping" (Housekeeping Genes)
-  * "PN" (Positive Controls vs. Negative Controls)
-  * "ACBD" (Average Counts vs. Binding Density)
-  * "ACMC" (Average Counts vs. Median Counts)
-  * "PCA12" (Principal Component 1 vs. 2)
-  * "PCAi" (Principal Component scree plot)
-  * "PCA" (Principal Components planes)
-  * "PFNF" (Positive Factor vs. Negative Factor)
-  * "HF" (Housekeeping Factor)
-  * "NORM" (Normalisation Factor)}
+\itemize{
+\item \code{"BD"} (Binding Density)
+\item \code{"FoV"} (Imaging)
+\item \code{"PC"} (Positive Control Linearity)
+\item \code{"LoD"} (Limit of Detection)
+\item \code{"Positive"} (Positive Controls)
+\item \code{"Negative"} (Negative Controls)
+\item \code{"Housekeeping"} (Housekeeping Genes)
+\item \code{"PN"} (Positive Controls vs. Negative Controls)
+\item \code{"ACBD"} (Average Counts vs. Binding Density)
+\item \code{"ACMC"} (Average Counts vs. Median Counts)
+\item \code{"PCA12"} (Principal Component 1 vs. 2)
+\item \code{"PCAi"} (Principal Component scree plot)
+\item \code{"PCA"} (Principal Components planes)
+\item \code{"PFNF"} (Positive Factor vs. Negative Factor)
+\item \code{"HF"} (Housekeeping Factor)
+\item \code{"NORM"} (Normalisation Factor)
+}}
 
-\item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
+\item{nacho_object}{\link{list} List obtained from \code{summarise or }normalise`.}
 
-\item{colour}{[character] Character string of the column in \code{ssheet_csv}
+\item{colour}{\link{character} Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 
-\item{size}{[numeric] A numeric controlling point (`geom_point` or `geom_beeswarm`)
-or line (`geom_linetype`) size n `ggplot2`}
+\item{size}{\link{numeric} A numeric controlling point (\code{geom_point} or \code{geom_beeswarm})
+or line (\code{geom_linetype}) size n \code{ggplot2}}
 
-\item{show_legend}{[logical] Boolean to indicate whether the plot legends should
+\item{show_legend}{\link{logical} Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 }
 \description{

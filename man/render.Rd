@@ -2,49 +2,57 @@
 % Please edit documentation in R/render.R
 \name{render}
 \alias{render}
+\alias{print_nacho}
 \title{render}
 \usage{
 render(nacho_object, colour = "CartridgeID",
   output_file = "NACHO_QC.html", output_dir = getwd(), size = 0.5,
   show_legend = TRUE, keep_rmd = FALSE)
+
+print_nacho(nacho_object, colour = "CartridgeID", size = 0.5,
+  show_legend = FALSE)
 }
 \arguments{
-\item{nacho_object}{[list] List obtained from \code{\link{summarise}} or \code{\link{normalise}}.}
+\item{nacho_object}{\link{list} List obtained from \code{summarise or }normalise`.}
 
-\item{colour}{[character] Character string of the column in \code{ssheet_csv}
+\item{colour}{\link{character} Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 
-\item{output_file}{[character] The name of the output file.
-If using `NULL` then the output filename will be based on filename for the input file.
+\item{output_file}{\link{character} The name of the output file.
+If using \code{NULL} then the output filename will be based on filename for the input file.
 If a filename is provided, a path to the output file can also be provided.
-Note that the `output_dir` option allows for specifying the output file path as well,
+Note that the \code{output_dir} option allows for specifying the output file path as well,
 however, if also specifying the path, the directory must exist.
-If `output_file` is specified but does not have a file extension,
+If \code{output_file} is specified but does not have a file extension,
 an extension will be automatically added according to the output format.
-To avoid the automatic file extension, put the output_file value in `I()`, e.g., I('my-output').}
+To avoid the automatic file extension, put the \code{output_file} value in \code{I()}, \emph{e.g.}, \code{I('my-output')}.}
 
-\item{output_dir}{[character] The output directory for the rendered output_file.
+\item{output_dir}{\link{character} The output directory for the rendered output_file.
 This allows for a choice of an alternate directory to which the output file should be written
-(the default output directory is the working directory, i.e., `getwd()`).
-If a path is provided with a filename in `output_file` the directory specified here will take precedence.
+(the default output directory is the working directory, \emph{i.e.}, \code{getwd()}).
+If a path is provided with a filename in \code{output_file} the directory specified here will take precedence.
 Please note that any directory path provided will create any necessary directories if they do not exist.}
 
-\item{size}{[numeric] A numeric controlling point (`geom_point` or `geom_beeswarm`)
-or line (`geom_linetype`) size n `ggplot2`}
+\item{size}{\link{numeric} A numeric controlling point (\code{geom_point} or \code{geom_beeswarm})
+or line (\code{geom_linetype}) size n \code{ggplot2}}
 
-\item{show_legend}{[logical] Boolean to indicate whether the plot legends should
+\item{show_legend}{\link{logical} Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 
-\item{keep_rmd}{[logical] Boolean to indicate whether the Rmd file used to produce the HTML report
-is copied to the directory provided in `output_dir`. Default is \code{FALSE}.}
+\item{keep_rmd}{\link{logical} Boolean to indicate whether the Rmd file used to produce the HTML report
+is copied to the directory provided in \code{output_dir}. Default is \code{FALSE}.}
 }
 \value{
-[logical] A logical indicating success or failure.
+\link{logical} A logical indicating success or failure.
 }
 \description{
-This function create a `Rmarkdown` script and render it as a HTML document.
-The HTML document is a quality-control report using all the metrics from `visualise()`
+This function create a \code{Rmarkdown} script and render it as a HTML document.
+The HTML document is a quality-control report using all the metrics from \code{visualise()}
 based on recommendations from NanoString.
+
+This function allows to print text and figures from the results of a call to \code{summarise()}
+or \code{normalise()}.
+It is intended to be used in a \code{Rmarkdown} chunk.
 }
 \examples{
 

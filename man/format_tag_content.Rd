@@ -3,16 +3,13 @@
 \name{format_tag_content}
 \alias{format_tag_content}
 \title{format_tag_content}
-\usage{
-format_tag_content(tag, content)
-}
 \arguments{
-\item{tag}{[character] A \code{character} string naming the TAG field in the RCC files.}
+\item{tag}{\link{character} A \code{character} string naming the TAG field in the RCC files.}
 
-\item{content}{[data.frame] A \code{data.frame} created from RCC files.}
+\item{content}{\link{data.frame} A \code{data.frame} created from RCC files.}
 }
 \value{
-[data.frame]
+\link{data.frame}
 }
 \description{
 format_tag_content

@@ -3,14 +3,11 @@
 \name{qc_positive_control}
 \alias{qc_positive_control}
 \title{qc_positive_control}
-\usage{
-qc_positive_control(counts)
-}
 \arguments{
-\item{counts}{[data.frame] A \code{data.frame} with the count data.}
+\item{counts}{\link{data.frame} A \code{data.frame} with the count data.}
 }
 \value{
-[vector(numeric)]
+\link{numeric}
 }
 \description{
 qc_positive_control
