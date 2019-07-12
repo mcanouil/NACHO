@@ -3,14 +3,11 @@
 \name{norm_geo}
 \alias{norm_geo}
 \title{norm_geo}
-\usage{
-norm_geo(data)
-}
 \arguments{
-\item{data}{[list(data.frame)] A \code{list} of \code{data.frame} with the count data.}
+\item{data}{\link{data.frame} A \code{list} of \code{data.frame} with the count data.}
 }
 \value{
-[vector(numeric)]
+\link{list}
 }
 \description{
 norm_geo

@@ -3,14 +3,11 @@
 \name{probe_exclusion}
 \alias{probe_exclusion}
 \title{probe_exclusion}
-\usage{
-probe_exclusion(control_genes_df)
-}
 \arguments{
-\item{control_genes_df}{[data.frame] A \code{data.frame} with the count data.}
+\item{control_genes_df}{\link{data.frame} A \code{data.frame} with the count data.}
 }
 \value{
-[vector(character)]
+\link{character}
 }
 \description{
 probe_exclusion

@@ -3,14 +3,11 @@
 \name{geometric_mean}
 \alias{geometric_mean}
 \title{geometric_mean}
-\usage{
-geometric_mean(x)
-}
 \arguments{
-\item{x}{[numeric] A \code{numeric} or \code{vector(numeric)}.}
+\item{x}{\link{numeric} A \code{numeric} or a \code{numeric} vector.}
 }
 \value{
-[numeric]
+\link{numeric}
 }
 \description{
 geometric_mean

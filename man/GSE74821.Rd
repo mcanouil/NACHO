@@ -6,7 +6,7 @@
 \title{Presummarised data from GSE74821 (20 samples).}
 \format{A 'list' object}
 \source{
-\url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821}
+\href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821}{GSE74821}
 }
 \usage{
 GSE74821

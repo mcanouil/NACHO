@@ -3,14 +3,11 @@
 \name{read_rcc}
 \alias{read_rcc}
 \title{read_rcc}
-\usage{
-read_rcc(file)
-}
 \arguments{
-\item{file}{[character] The name of the RCC file which the data are to be read from.}
+\item{file}{\link{character} The name of the RCC file which the data are to be read from.}
 }
 \value{
-[tibble]
+\link{tibble}
 }
 \description{
 read_rcc
