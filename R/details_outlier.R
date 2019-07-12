@@ -5,6 +5,7 @@
 #' @inheritParams normalise
 #'
 #' @keywords internal
+#' @usage NULL
 #'
 #' @return [list]
 details_outlier <- function(nacho_df, id_colname, outliers_thresholds) {
