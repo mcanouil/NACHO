@@ -1,12 +1,13 @@
 #' find_housekeeping
 #'
-#' @param data [data.frame] A \code{data.frame} with the count data.
+#' @param data [data.frame] A `data.frame` with the count data.
 #' @inheritParams summarise
-#' @param count_column [character] A \code{character} string naming the column where the counts are.
+#' @param count_column [character] A `character` string naming the column where the counts are.
 #'
 #' @keywords internal
+#' @usage NULL
 #'
-#' @return [vector(character)]
+#' @return [character]
 find_housekeeping <- function(data, id_colname, count_column) {
   data <- data[unlist(lapply(c("Endogenous", "Housekeeping"), grep, x = data[["CodeClass"]])), ]
   nested_data_df <- tidyr::nest(dplyr::group_by(.data = data, get(id_colname)))

@@ -1,4 +1,4 @@
-#' visualise
+#' Visualise NanoString data and QC metrics using shiny app
 #'
 #' This function allows to visualise several quality-control metrics
 #' in an interactive `shiny` application, in which thresholds can be customised
