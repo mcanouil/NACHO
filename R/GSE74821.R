@@ -3,11 +3,11 @@
 #' NanoString nCounter RUO-PAM50 Gene Expression Custom CodeSet
 #'
 #' @format A 'list' object
-#' @source \url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821}
+#' @source [GSE74821](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821)
 "GSE74821"
 
 # library(GEOquery)
-# library(NACHO) # devtools::load_all("NACHO")
+# library(NACHO)
 #
 # gse <- GEOquery::getGEO(GEO = "GSE74821")
 # targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
