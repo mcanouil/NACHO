@@ -237,6 +237,8 @@ summarise <- function(
     sep = "\n"
   ))
 
+  class(nacho_object) <- "nacho"
+
   nacho_object
 }
 
