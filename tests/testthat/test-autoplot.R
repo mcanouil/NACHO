@@ -1,4 +1,4 @@
-context("plot()")
+context("autoplot()")
 
 metrics <- c(
   "BD", "FoV", "PC", "LoD",
@@ -10,7 +10,7 @@ metrics <- c(
 for (imetric in metrics) {
   test_that(paste("Default parameters for", imetric), {
     expect_s3_class(
-      object = plot(x = imetric, nacho_object = GSE74821),
+      object = autoplot.nacho(object = GSE74821, x = imetric),
       class = "ggplot"
     )
   })
@@ -19,7 +19,7 @@ for (imetric in metrics) {
 for (imetric in metrics) {
   test_that(paste("show_legend to FALSE parameters for", imetric), {
     expect_s3_class(
-      object = plot(x = imetric, nacho_object = GSE74821, show_legend = FALSE),
+      object = autoplot.nacho(object = GSE74821, x = imetric, show_legend = FALSE),
       class = "ggplot"
     )
   })
