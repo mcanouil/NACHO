@@ -3,6 +3,7 @@
 #' This function allows to plot any qualit-control figures available
 #' within the shiny app using [visualise] or in the HTML report from [render].
 #'
+#' @inheritParams render
 #' @param x [[character]] Character string naming the quality-control metrics to plot from `nacho_object`.
 #'  The possible values are:
 #'
@@ -23,41 +24,51 @@
 #'    * `"HF"` (Housekeeping Factor)
 #'    * `"NORM"` (Normalisation Factor)
 #'
-#' @inheritParams render
-#' @param size [[numeric]] A `numeric` controlling point size ([geom_point] or [geom_beeswarm])
-#'   or line size ([geom_line]).
-#'
 #' @return NULL
 #' @export
+#' @rdname autoplot
 #'
 #' @examples
 #'
 #' data(GSE74821)
-#' plot(x = "BD", nacho_object = GSE74821)
-#' plot(x = "PCA", nacho_object = GSE74821)
+#' autoplot(GSE74821, x = "BD")
+#' autoplot(GSE74821, x = "PCA")
 #'
-plot <- function(x, nacho_object, colour = "CartridgeID", size = 0.5, show_legend = TRUE) {
-  if (attr(nacho_object, "RCC_type") == "n8" & x %in% c("PC", "LoD")) {
+autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_legend = TRUE, ...) {
+  if (missing(x)) {
+    stop(
+      paste(
+        '[NACHO] "x" is missing. It must be one of the following possible values:',
+        '  * "BD", "FoV", "PC", "LoD"',
+        '  * "Positive", "Negative", "Housekeeping", "PN"',
+        '  * "ACBD", "ACMC"',
+        '  * "PCA12", "PCAi", "PCA"',
+        '  * "PFB", "HF", "NORM"',
+        sep = "\n"
+      )
+    )
+  }
+  if (attr(object, "RCC_type") == "n8" & x %in% c("PC", "LoD")) {
     stop('[NACHO] "PC" and "LoD" are not available for the provided NanoString dataset.')
   }
   switch(
     EXPR = x,
-    "BD" = plot_metrics(x, nacho_object, colour, size, show_legend),
-    "FoV" = plot_metrics(x, nacho_object, colour, size, show_legend),
-    "PC" = plot_metrics(x, nacho_object, colour, size, show_legend),
-    "LoD" = plot_metrics(x, nacho_object, colour, size, show_legend),
-    "Positive" = plot_cg(x, nacho_object, colour, size, show_legend),
-    "Negative" = plot_cg(x, nacho_object, colour, size, show_legend),
-    "Housekeeping" = plot_cg(x, nacho_object, colour, size, show_legend),
-    "PN" = plot_pn(x, nacho_object, colour, size, show_legend),
-    "ACBD" = plot_acbd(x, nacho_object, colour, size, show_legend),
-    "ACMC" = plot_acmc(x, nacho_object, colour, size, show_legend),
-    "PCA12" = plot_pca12(x, nacho_object, colour, size, show_legend),
-    "PCAi" = plot_pcai(x, nacho_object, colour, size, show_legend),
-    "PCA" = plot_pca(x, nacho_object, colour, size, show_legend),
-    "PFNF" = plot_pfnf(x, nacho_object, colour, size, show_legend),
-    "HF" = plot_hf(x, nacho_object, colour, size, show_legend),
-    "NORM" = plot_norm(x, nacho_object, colour, size, show_legend),
+    "BD" = plot_metrics(x, nacho_object = object, colour, size, show_legend),
+    "FoV" = plot_metrics(x, nacho_object = object, colour, size, show_legend),
+    "PC" = plot_metrics(x, nacho_object = object, colour, size, show_legend),
+    "LoD" = plot_metrics(x, nacho_object = object, colour, size, show_legend),
+    "Positive" = plot_cg(x, nacho_object = object, colour, size, show_legend),
+    "Negative" = plot_cg(x, nacho_object = object, colour, size, show_legend),
+    "Housekeeping" = plot_cg(x, nacho_object = object, colour, size, show_legend),
+    "PN" = plot_pn(x, nacho_object = object, colour, size, show_legend),
+    "ACBD" = plot_acbd(x, nacho_object = object, colour, size, show_legend),
+    "ACMC" = plot_acmc(x, nacho_object = object, colour, size, show_legend),
+    "PCA12" = plot_pca12(x, nacho_object = object, colour, size, show_legend),
+    "PCAi" = plot_pcai(x, nacho_object = object, colour, size, show_legend),
+    "PCA" = plot_pca(x, nacho_object = object, colour, size, show_legend),
+    "PFNF" = plot_pfnf(x, nacho_object = object, colour, size, show_legend),
+    "HF" = plot_hf(x, nacho_object = object, colour, size, show_legend),
+    "NORM" = plot_norm(x, nacho_object = object, colour, size, show_legend),
     stop(
       paste(
         '[NACHO] "x" must be one of the following possible values:',
@@ -74,7 +85,7 @@ plot <- function(x, nacho_object, colour = "CartridgeID", size = 0.5, show_legen
 
 #' plot_metrics
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
@@ -131,7 +142,7 @@ plot_metrics <- function(
 
 #' plot_cg
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
@@ -188,7 +199,7 @@ plot_cg <- function(
 
 #' plot_pn
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
@@ -236,7 +247,7 @@ plot_pn <- function(
 
 #' plot_acbd
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
@@ -276,7 +287,7 @@ plot_acbd <- function(
 
 #' plot_acmc
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
@@ -316,7 +327,7 @@ plot_acmc <- function(
 
 #' plot_pca12
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
@@ -353,7 +364,7 @@ plot_pca12 <- function(
 
 #' plot_pca
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
@@ -412,7 +423,7 @@ plot_pca <- function(
 
 #' plot_pcai
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
@@ -447,7 +458,7 @@ plot_pcai <- function(
 
 #' plot_pfnf
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
@@ -485,7 +496,7 @@ plot_pfnf <- function(
 
 #' plot_hf
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
@@ -524,7 +535,7 @@ plot_hf <- function(
 
 #' plot_norm
 #'
-#' @inheritParams plot
+#' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
 #'
