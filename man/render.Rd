@@ -2,15 +2,11 @@
 % Please edit documentation in R/render.R
 \name{render}
 \alias{render}
-\alias{print_nacho}
 \title{Render a HTML report from \link{summarise} or \link{normalise}}
 \usage{
 render(nacho_object, colour = "CartridgeID",
-  output_file = "NACHO_QC.html", output_dir = getwd(), size = 0.5,
-  show_legend = TRUE, keep_rmd = FALSE)
-
-print_nacho(nacho_object, colour = "CartridgeID", size = 0.5,
-  show_legend = FALSE)
+  output_file = "NACHO_QC.html", output_dir = ".", size = 0.5,
+  show_legend = TRUE, clean = TRUE)
 }
 \arguments{
 \item{nacho_object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
@@ -29,7 +25,7 @@ To avoid the automatic file extension, put the \code{output_file} value in \code
 
 \item{output_dir}{[\link{character}] The output directory for the rendered output_file.
 This allows for a choice of an alternate directory to which the output file should be written
-(the default output directory is the working directory, \emph{i.e.}, \code{getwd()}).
+(the default output directory is the working directory, \emph{i.e.}, \code{.}).
 If a path is provided with a filename in \code{output_file} the directory specified here will take precedence.
 Please note that any directory path provided will create any necessary directories if they do not exist.}
 
@@ -39,25 +35,17 @@ or line size (\link{geom_line}).}
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 
-\item{keep_rmd}{[\link{logical}] Boolean to indicate whether the Rmd file used to produce the HTML report
-is copied to the directory provided in \code{output_dir}. Default is \code{FALSE}.}
+\item{clean}{[\link{logical}] Boolean to indicate whether the Rmd and Rdata file used to produce the HTML report
+are removed from \code{output_dir}. Default is \code{TRUE}.}
 }
 \description{
 This function create a \code{Rmarkdown} script and render it as a HTML document.
 The HTML document is a quality-control report using all the metrics from \link{visualise}
 based on recommendations from NanoString.
-
-This function allows to print text and figures from the results of a call to \code{summarise()}
-or \code{normalise()}.
-It is intended to be used in a \code{Rmarkdown} chunk.
 }
 \examples{
 
 data(GSE74821)
-render(nacho_object = GSE74821, output_dir = NULL)
-
-
-data(GSE74821)
-print_nacho(GSE74821, colour = "CartridgeID", size = 0.5, show_legend = TRUE)
+render(GSE74821)
 
 }
