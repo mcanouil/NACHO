@@ -72,8 +72,9 @@ sample specific size factors and normalises the data.
 In addition (since v0.6.0) **NACHO** includes two additional functions:
 
   - The `render()` function renders a full quality-control report (HTML)
-    based on the results of a call to `summarise()` or `normalise()`.
-  - The `plot()` function draws any quality-control metrics from
+    based on the results of a call to `summarise()` or `normalise()`
+    (using `print()` in A Rmarkdown chunk).
+  - The `autoplot()` function draws any quality-control metrics from
     `visualise()` and `render()`.
 
 For more `vignette("NACHO")`.
