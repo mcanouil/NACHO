@@ -2,13 +2,16 @@
 
 ## New features
 
-* `render()` render figures from `visualise()` in a HTML friendly output.
-* `plot()` allows to plot a chosen QC plot available in the shiny app (`visualise()`) and/or
+* `autoplot()` allows to plot a chosen QC plot available in the shiny app (`visualise()`) and/or
   in the HTML report (`render()`).
+* `print()` allows to print text and figures formatted using markdown (mainly to be used in a Rmakrdown chunk).
+* `render()` render figures from `visualise()` in a HTML friendly output.
 
 ## Minor improvements and fixes
 
 * In `R/read_rcc.R`, `R/summarise.R`, fix issue (#1) when PlexSet RCC files could not be read.
+* In `R/summarise.R`, object returned is of S3 class "nacho" for ease of use of `autoplot()`.
+* In `R/normalise.R`, object returned is of S3 class "nacho" for ease of use of `autoplot()`.
 
 
 # NACHO 0.5.6
