@@ -50,6 +50,7 @@ within the shiny app using \link{visualise} or in the HTML report from \link{ren
 
 data(GSE74821)
 autoplot(GSE74821, x = "BD")
-autoplot(GSE74821, x = "PCA")
+autoplot(GSE74821, x = "PCA12")
+autoplot(GSE74821, x = "NORM")
 
 }
