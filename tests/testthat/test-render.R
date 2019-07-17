@@ -1,5 +1,3 @@
-context("render()")
-
 test_that("Default parameters", {
   out <- suppressWarnings(render(nacho_object = GSE74821))
   expect_null(out)
