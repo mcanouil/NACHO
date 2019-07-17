@@ -547,6 +547,14 @@ plot_norm <- function(
   size,
   show_legend
 ) {
+  if (is.null(nacho_object$housekeeping_genes)) {
+    probe_var <- dplyr::sym("CodeClass")
+    probe_type <- "Positive"
+  } else {
+    probe_var <- dplyr::sym("Name")
+    probe_type <- nacho_object$housekeeping_genes
+  }
+
   nacho_object$nacho %>%
     dplyr::select(
       "CartridgeID",
@@ -556,13 +564,7 @@ plot_norm <- function(
       "Name"
     ) %>%
     dplyr::distinct() %>%
-    dplyr::filter(
-      if (is.null(nacho_object$housekeeping_genes)) {
-        !!dplyr::sym("CodeClass") %in% "Positive"
-      } else {
-        !!dplyr::sym("Name") %in% nacho_object$housekeeping_genes
-      }
-    ) %>%
+    dplyr::filter(!!probe_var %in% !!probe_type) %>%
     tidyr::gather(key = "Status", value = "Count", c("Count", "Count_Norm")) %>%
     dplyr::mutate(
       Status = factor(
@@ -606,5 +608,5 @@ plot_norm <- function(
         se = TRUE,
         method = "loess"
       ) +
-      {if (!show_legend |  length(nacho_object$housekeeping_genes)>10) ggplot2::guides(colour = "none")}
+      {if (!(show_legend & length(nacho_object$housekeeping_genes)<=10)) ggplot2::guides(colour = "none")}
 }
