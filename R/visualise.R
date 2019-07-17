@@ -1075,6 +1075,7 @@ visualise <- function(nacho_object) {
   )
 
   shiny::runApp(app)
+  # nocov end
 }
 
 
