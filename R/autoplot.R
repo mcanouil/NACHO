@@ -24,6 +24,8 @@
 #'    * `"HF"` (Housekeeping Factor)
 #'    * `"NORM"` (Normalisation Factor)
 #'
+#' @param ... Other arguments (Not used).
+#'
 #' @return NULL
 #' @export
 #'
