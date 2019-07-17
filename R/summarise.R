@@ -75,7 +75,6 @@
 #'     ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
 #'     id_colname = "IDFILE"
 #'   )
-#'
 #' }
 #'
 summarise <- function(
