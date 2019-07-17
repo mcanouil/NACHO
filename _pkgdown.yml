@@ -4,3 +4,7 @@ template:
 
 development:
   mode: auto
+
+authors:
+  Mickaël Canouil:
+    href: http://mickael.canouil.fr
