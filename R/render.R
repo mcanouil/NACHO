@@ -113,7 +113,7 @@ render <- function(
     '  x = params[["nacho_object"]],',
     paste0('  colour = "', colour, '",'),
     paste0('  size = ', size, ','),
-    paste0('  show_legend = ', show_legend),
+    paste0('  show_legend = ', show_legend, ','),
     '  echo = TRUE',
     ')',
     '```',
