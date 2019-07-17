@@ -1,4 +1,4 @@
-#' Draw quality-control metrics and thresholds
+#' Plot quality-control metrics and thresholds
 #'
 #' This function allows to plot any qualit-control figures available
 #' within the shiny app using [visualise] or in the HTML report from [render].
@@ -26,7 +26,6 @@
 #'
 #' @return NULL
 #' @export
-#' @rdname autoplot
 #'
 #' @examples
 #'
