@@ -14,14 +14,7 @@ render(nacho_object, colour = "CartridgeID",
 \item{colour}{[\link{character}] Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 
-\item{output_file}{[\link{character}] The name of the output file.
-If using \code{NULL} then the output filename will be based on filename for the input file.
-If a filename is provided, a path to the output file can also be provided.
-Note that the \code{output_dir} option allows for specifying the output file path as well,
-however, if also specifying the path, the directory must exist.
-If \code{output_file} is specified but does not have a file extension,
-an extension will be automatically added according to the output format.
-To avoid the automatic file extension, put the \code{output_file} value in \code{I()}, \emph{e.g.}, \code{I('my-output')}.}
+\item{output_file}{[\link{character}] The name of the output file.}
 
 \item{output_dir}{[\link{character}] The output directory for the rendered output_file.
 This allows for a choice of an alternate directory to which the output file should be written
