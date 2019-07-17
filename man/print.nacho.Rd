@@ -22,7 +22,7 @@ be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 \item{echo}{[\link{logical}] A boolean to indicate whether text and plots should be printed.
 Mainly for use within a Rmarkdown chunk.}
 
-\item{...}{not used.}
+\item{...}{Other arguments (Not used).}
 }
 \description{
 This function allows to print text and figures from the results of a call to \code{summarise()}

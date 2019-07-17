@@ -37,6 +37,8 @@ or line size (\link{geom_line}).}
 
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
+
+\item{...}{Other arguments (Not used).}
 }
 \description{
 This function allows to plot any qualit-control figures available
