@@ -22,7 +22,7 @@ be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 \item{echo}{[\link{logical}] A boolean to indicate whether text and plots should be printed.
 Mainly for use within a Rmarkdown chunk.}
 
-\item{title_level}{[\link{numeric}] A numeric to indicate the title level to start using markdown style,
+\item{title_level}{[\link{numeric}] A numeric to indicate the title level to start with, using markdown style,
 \emph{i.e.}, the number of "#".}
 
 \item{...}{Other arguments (Not used).}
@@ -35,6 +35,6 @@ It is intended to be used in a \code{Rmarkdown} chunk.
 \examples{
 
 data(GSE74821)
-print(GSE74821, colour = "CartridgeID", size = 0.5, show_legend = TRUE)
+print(GSE74821)
 
 }
