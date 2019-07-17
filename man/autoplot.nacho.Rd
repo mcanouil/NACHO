@@ -8,6 +8,8 @@
   show_legend = TRUE, ...)
 }
 \arguments{
+\item{object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
+
 \item{x}{[\link{character}] Character string naming the quality-control metrics to plot from \code{nacho_object}.
 The possible values are:
 \itemize{

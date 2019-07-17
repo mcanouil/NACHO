@@ -275,7 +275,7 @@ visualise <- function(nacho_object) {
                 '\n',
                 'In addition (since v0.6.0) **NACHO** includes two (three) additional functions:',
                 '\n',
-                '* The `render()` function renders a full quality-control report (HTML) based on the results of a call to `summarise()` or `normalise()` (using `print()` in A Rmarkdown chunk).',
+                '* The `render()` function renders a full quality-control report (HTML) based on the results of a call to `summarise()` or `normalise()` (using `print()` in a Rmarkdown chunk).',
                 '* The `autoplot()` function draws any quality-control metrics from `visualise()` and `render()`.',
                 '\n',
                 'For more `vignette("NACHO")`.',
