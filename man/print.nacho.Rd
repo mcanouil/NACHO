@@ -5,7 +5,7 @@
 \title{Print method for nacho object}
 \usage{
 \method{print}{nacho}(x, colour = "CartridgeID", size = 0.5,
-  show_legend = FALSE, echo = FALSE, ...)
+  show_legend = FALSE, echo = FALSE, title_level = 1, ...)
 }
 \arguments{
 \item{x}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
@@ -21,6 +21,9 @@ be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 
 \item{echo}{[\link{logical}] A boolean to indicate whether text and plots should be printed.
 Mainly for use within a Rmarkdown chunk.}
+
+\item{title_level}{[\link{numeric}] A numeric to indicate the title level to start using markdown style,
+\emph{i.e.}, the number of "#".}
 
 \item{...}{Other arguments (Not used).}
 }
