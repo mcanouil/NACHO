@@ -9,7 +9,7 @@
 #' @inheritParams autoplot.nacho
 #' @param echo [[logical]] A boolean to indicate whether text and plots should be printed.
 #'   Mainly for use within a Rmarkdown chunk.
-#' @param title_level [[numeric]] A numeric to indicate the title level to start using markdown style,
+#' @param title_level [[numeric]] A numeric to indicate the title level to start with, using markdown style,
 #'   *i.e.*, the number of "#".
 #' @param ... Other arguments (Not used).
 #'
