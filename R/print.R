@@ -9,6 +9,8 @@
 #' @inheritParams autoplot.nacho
 #' @param echo [[logical]] A boolean to indicate whether text and plots should be printed.
 #'   Mainly for use within a Rmarkdown chunk.
+#' @param title_level [[numeric]] A numeric to indicate the title level to start using markdown style,
+#'   *i.e.*, the number of "#".
 #' @param ... Other arguments (Not used).
 #'
 #' @return NULL
@@ -19,20 +21,21 @@
 #' data(GSE74821)
 #' print(GSE74821, colour = "CartridgeID", size = 0.5, show_legend = TRUE)
 #'
-print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FALSE, echo = FALSE, ...) {
+print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FALSE, echo = FALSE, title_level = 1, ...) {
   if (!echo) return(str(x, 1))
 
   if (is.numeric(x$nacho[[colour]])) {
     x$nacho[[colour]] <- as.character(x$nacho[[colour]])
   }
+  prefix_title <- function(title_level, x) paste0("\n\n", rep("#", title_level + x))
 
-  cat("\n\n# RCC Summary\n\n")
+  cat(prefix_title(title_level, 0), "RCC Summary\n\n")
   cat('  - Samples:', length(unique(x$nacho[[x$access]])), "\n")
   genes <- table(x$nacho[["CodeClass"]]) /
     length(unique(x$nacho[[x$access]]))
   cat(paste0("  - ", names(genes), ": ", genes, "\n"))
 
-  cat("\n\n# Settings\n\n")
+  cat(prefix_title(title_level, 0), "Settings\n\n")
   cat('  - Predict housekeeping genes:', x$housekeeping_predict, "\n")
   cat('  - Normalise using housekeeping genes:', x$housekeeping_norm, "\n")
   cat(
@@ -66,7 +69,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
       round(x$outliers_thresholds[["House_factor"]][2], 3), '\n'
   )
 
-  cat("\n\n# QC Metrics\n\n")
+  cat(prefix_title(title_level, 0), "QC Metrics\n\n")
   labels <- c(
     "BD" = "Binding Density",
     "FoV" = "Field of View (Imaging)",
@@ -144,7 +147,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   )
 
   for (imetric in metrics) {
-    cat("\n\n##", labels[imetric], "\n\n")
+    cat(prefix_title(title_level, 1), labels[imetric], "\n\n")
     cat(details[imetric], "\n")
     print(autoplot.nacho(
       x = imetric,
@@ -156,10 +159,9 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
     cat("\n")
   }
 
-  cat("\n\n# Control Genes\n\n")
+  cat(prefix_title(title_level, 0), "Control Genes\n\n")
   for (icodeclass in c("Positive", "Negative", "Housekeeping")) {
-    cat("\n\n")
-    cat("##", icodeclass, "\n\n")
+    cat(prefix_title(title_level, 1), icodeclass, "\n\n")
     print(autoplot.nacho(
       x = imetric,
       object = x,
@@ -170,7 +172,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
     cat("\n")
   }
 
-  cat("\n\n## Control Probe Expression\n\n")
+  cat(prefix_title(title_level, 1), "Control Probe Expression\n\n")
   print(autoplot.nacho(
     x = "PN",
     object = x,
@@ -180,9 +182,9 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   ))
   cat("\n")
 
-  cat("\n\n# QC Visuals\n\n")
+  cat(prefix_title(title_level, 0), "QC Visuals\n\n")
 
-  cat("\n\n## Average Count vs. Binding Density\n\n")
+  cat(prefix_title(title_level, 1), "Average Count vs. Binding Density\n\n")
   print(autoplot.nacho(
     x = "ACBD",
     object = x,
@@ -192,7 +194,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   ))
   cat("\n")
 
-  cat("\n\n## Average Count vs. Median Count\n\n")
+  cat(prefix_title(title_level, 1), "Average Count vs. Median Count\n\n")
   print(autoplot.nacho(
     x = "ACMC",
     object = x,
@@ -202,8 +204,8 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   ))
   cat("\n")
 
-  cat("\n\n## Principal Component\n\n")
-  cat("\n\n### PC1 vs. PC2\n\n")
+  cat(prefix_title(title_level, 1), "Principal Component\n\n")
+  cat(prefix_title(title_level, 2), "PC1 vs. PC2\n\n")
   print(autoplot.nacho(
     x = "PCA12",
     object = x,
@@ -213,7 +215,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   ))
   cat("\n")
 
-  cat("\n\n### Factorial planes\n\n")
+  cat(prefix_title(title_level, 2), "Factorial planes\n\n")
   print(autoplot.nacho(
     x = "PCA",
     object = x,
@@ -223,7 +225,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   ))
   cat("\n")
 
-  cat("\n\n### Inertia\n\n")
+  cat(prefix_title(title_level, 2), "Inertia\n\n")
   print(autoplot.nacho(
     x = "PCAi",
     object = x,
@@ -233,9 +235,9 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   ))
   cat("\n")
 
-  cat("\n\n# Normalisation Factors\n\n")
+  cat(prefix_title(title_level, 0), "Normalisation Factors\n\n")
 
-  cat("\n\n## Positive Factor vs. Background Threshold\n\n")
+  cat(prefix_title(title_level, 1), "Positive Factor vs. Background Threshold\n\n")
  print(autoplot.nacho(
     x = "PFNF",
     object = x,
@@ -245,7 +247,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   ))
   cat("\n")
 
-  cat("\n\n## Housekeeping Factor\n\n")
+  cat(prefix_title(title_level, 1), "Housekeeping Factor\n\n")
   print(autoplot.nacho(
     x = "HF",
     object = x,
@@ -255,7 +257,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   ))
   cat("\n")
 
-  cat("\n\n## Normalisation Result\n\n")
+  cat(prefix_title(title_level, 1), "Normalisation Result\n\n")
   print(autoplot.nacho(
     x = "NORM",
     object = x,
