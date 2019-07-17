@@ -19,7 +19,7 @@
 #' @examples
 #'
 #' data(GSE74821)
-#' print(GSE74821, colour = "CartridgeID", size = 0.5, show_legend = TRUE)
+#' print(GSE74821)
 #'
 print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FALSE, echo = FALSE, title_level = 1, ...) {
   if (!echo) return(utils::str(x, 1))
