@@ -114,6 +114,7 @@ render <- function(
     paste0('  colour = "', colour, '",'),
     paste0('  size = ', size, ','),
     paste0('  show_legend = ', show_legend),
+    '  echo = TRUE',
     ')',
     '```',
     sep = "\n",
