@@ -297,6 +297,8 @@ render(
 )
 ```
 
+The underneath function `print()`can be used directly within any Rmakrdown chunk, setting the parameter `echo = TRUE`.
+
 ```{r}
 print(
   x = GSE74821, 
