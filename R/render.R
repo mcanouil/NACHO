@@ -25,8 +25,10 @@
 #'
 #' @examples
 #'
-#' data(GSE74821)
-#' render(GSE74821)
+#' if (interactive()) {
+#'   data(GSE74821)
+#'   render(GSE74821)
+#' }
 #'
 render <- function(
   nacho_object,
