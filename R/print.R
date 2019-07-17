@@ -1,4 +1,4 @@
-#' print.nacho
+#' Print method for nacho object
 #'
 #' This function allows to print text and figures from the results of a call to `summarise()`
 #' or `normalise()`.
@@ -7,6 +7,8 @@
 #' @param x [[list]] List obtained from [summarise] or [normalise].
 #' @inheritParams render
 #' @inheritParams autoplot.nacho
+#' @param echo [[logical]] A boolean to indicate whether text and plots should be printed.
+#'   Mainly for use within a Rmarkdown chunk.
 #' @param ... not used.
 #'
 #' @return NULL
@@ -17,7 +19,9 @@
 #' data(GSE74821)
 #' print(GSE74821, colour = "CartridgeID", size = 0.5, show_legend = TRUE)
 #'
-print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FALSE, ...) {
+print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FALSE, echo = FALSE, ...) {
+  if (!echo) return(str(x, 1))
+
   if (is.numeric(x$nacho[[colour]])) {
     x$nacho[[colour]] <- as.character(x$nacho[[colour]])
   }
