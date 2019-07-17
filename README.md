@@ -69,7 +69,8 @@ sample specific size factors and normalises the data.
   - The `normalise()` function creates a list in which your settings,
     the raw counts and normalised counts are stored.
 
-In addition (since v0.6.0) **NACHO** includes two additional functions:
+In addition (since v0.6.0) **NACHO** includes two (three) additional
+functions:
 
   - The `render()` function renders a full quality-control report (HTML)
     based on the results of a call to `summarise()` or `normalise()`
