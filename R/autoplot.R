@@ -4,6 +4,7 @@
 #' within the shiny app using [visualise] or in the HTML report from [render].
 #'
 #' @inheritParams render
+#' @param object [[list]] List obtained from [summarise] or [normalise].
 #' @param x [[character]] Character string naming the quality-control metrics to plot from `nacho_object`.
 #'  The possible values are:
 #'
