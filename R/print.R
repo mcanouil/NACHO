@@ -22,7 +22,7 @@
 #' print(GSE74821, colour = "CartridgeID", size = 0.5, show_legend = TRUE)
 #'
 print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FALSE, echo = FALSE, title_level = 1, ...) {
-  if (!echo) return(str(x, 1))
+  if (!echo) return(utils::str(x, 1))
 
   if (is.numeric(x$nacho[[colour]])) {
     x$nacho[[colour]] <- as.character(x$nacho[[colour]])
