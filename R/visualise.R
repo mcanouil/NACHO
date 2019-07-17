@@ -256,12 +256,12 @@ visualise <- function(nacho_object) {
             }
             details <- c(
               "NACHO" = paste(
-                '*NACHO* (**NA**nostring quality **C**ontrol das**H**b**O**ard) is developed for NanoString nCounter data.',
-                'NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA) expression assay and works with fluorescent barcodes.',
-                'Each barcode is assigned a mRNA/miRNA, which can be counted after bonding with its target.',
+                '*NACHO* (**NA**nostring quality **C**ontrol das**H**b**O**ard) is developed for NanoString nCounter data.  ',
+                'NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA) expression assay and works with fluorescent barcodes.  ',
+                'Each barcode is assigned a mRNA/miRNA, which can be counted after bonding with its target.  ',
                 'As a result each count of a specific barcode represents the presence of its target mRNA/miRNA.',
                 '\n',
-                '*NACHO* is able to load, visualise and normalise the exported NanoString nCounter data and facilitates the user in performing a quality control.',
+                '*NACHO* is able to load, visualise and normalise the exported NanoString nCounter data and facilitates the user in performing a quality control.  ',
                 '*NACHO* does this by visualising quality control metrics, expression of control genes, principal components and sample specific size factors in an interactive web application.',
                 '\n',
                 'With the use of two functions, RCC files are summarised and visualised, namely: `summarise()` and `visualise()`.',
@@ -273,10 +273,10 @@ visualise <- function(nacho_object) {
                 '\n',
                 '* The `normalise()` function creates a list in which your settings, the raw counts and normalised counts are stored.',
                 '\n',
-                'In addition (since v0.6.0) **NACHO** includes two additional functions:',
+                'In addition (since v0.6.0) **NACHO** includes two (three) additional functions:',
                 '\n',
-                '* The `render()` function renders a full quality-control report (HTML) based on the results of a call to `summarise()` or `normalise()`.',
-                '* The `plot()` function draws any quality-control metrics from `visualise()` and `render()`.',
+                '* The `render()` function renders a full quality-control report (HTML) based on the results of a call to `summarise()` or `normalise()` (using `print()` in A Rmarkdown chunk).',
+                '* The `autoplot()` function draws any quality-control metrics from `visualise()` and `render()`.',
                 '\n',
                 'For more `vignette("NACHO")`.',
                 sep = "\n"
