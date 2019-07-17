@@ -34,7 +34,8 @@
 #'
 #' data(GSE74821)
 #' autoplot(GSE74821, x = "BD")
-#' autoplot(GSE74821, x = "PCA")
+#' autoplot(GSE74821, x = "PCA12")
+#' autoplot(GSE74821, x = "NORM")
 #'
 autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_legend = TRUE, ...) {
   if (missing(x)) {
