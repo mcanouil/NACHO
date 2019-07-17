@@ -2,10 +2,10 @@
 % Please edit documentation in R/print.R
 \name{print.nacho}
 \alias{print.nacho}
-\title{print.nacho}
+\title{Print method for nacho object}
 \usage{
 \method{print}{nacho}(x, colour = "CartridgeID", size = 0.5,
-  show_legend = FALSE, ...)
+  show_legend = FALSE, echo = FALSE, ...)
 }
 \arguments{
 \item{x}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
@@ -18,6 +18,9 @@ or line size (\link{geom_line}).}
 
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
+
+\item{echo}{[\link{logical}] A boolean to indicate whether text and plots should be printed.
+Mainly for use within a Rmarkdown chunk.}
 
 \item{...}{not used.}
 }
