@@ -9,7 +9,7 @@
 #' @inheritParams autoplot.nacho
 #' @param echo [[logical]] A boolean to indicate whether text and plots should be printed.
 #'   Mainly for use within a Rmarkdown chunk.
-#' @param ... not used.
+#' @param ... Other arguments (Not used).
 #'
 #' @return NULL
 #' @export
