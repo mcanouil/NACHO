@@ -27,7 +27,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   if (is.numeric(x$nacho[[colour]])) {
     x$nacho[[colour]] <- as.character(x$nacho[[colour]])
   }
-  prefix_title <- function(title_level, x) paste0("\n\n", rep("#", title_level + x))
+  prefix_title <- function(title_level, x) paste(c("\n\n", rep("#", title_level + x)), collapse = "")
 
   cat(prefix_title(title_level, 0), "RCC Summary\n\n")
   cat('  - Samples:', length(unique(x$nacho[[x$access]])), "\n")
