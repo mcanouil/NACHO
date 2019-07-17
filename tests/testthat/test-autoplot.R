@@ -1,3 +1,15 @@
+test_that(paste(imetric, 'Missing "x"', sep = " - "), {
+  expect_error(
+    object = autoplot(object = GSE74821)
+  )
+})
+
+test_that(paste(imetric, 'Wrong "x"', sep = " - "), {
+  expect_error(
+    object = autoplot(object = GSE74821, x = "FAKE_VALUE")
+  )
+})
+
 metrics <- c(
   "BD", "FoV", "PC", "LoD",
   "Positive", "Negative", "Housekeeping",
