@@ -11,6 +11,8 @@ output:
     number_sections: true
     toc: true
     toc_depth: 2
+    fig_width: 6.3
+    fig_height: 4.7
 vignette: >
   %\VignetteIndexEntry{NACHO}
   %\VignetteEngine{knitr::rmarkdown}
@@ -27,9 +29,9 @@ knitr::opts_chunk$set(
   warning = TRUE,
   message = TRUE,
   error = TRUE,
-  tidy = FALSE,
-  crop = TRUE,
-  autodep = TRUE,
+  # tidy = FALSE,
+  # crop = TRUE,
+  # autodep = TRUE,
   fig.align = 'center',
   fig.pos = '!h',
   cache = FALSE
@@ -251,7 +253,7 @@ The possible metrics (`x`) are:
 * `"HF"` (Housekeeping Factor)
 * `"NORM"` (Normalisation Factor)
 
-```{r, include = FALSE}
+```{r, echo = FALSE}
 metrics <- c(
   "BD" = "Binding Density",
   "FoV" = "Imaging",
@@ -272,7 +274,7 @@ metrics <- c(
 )
 
 for (imetric in seq_along(metrics)) {
-  cat("###", metrics[imetric], "\n")
+  cat("\n\n###", metrics[imetric], "\n\n")
   print(autoplot(object = GSE74821, x = names(metrics[imetric])))
   cat("\n")
 }
@@ -297,11 +299,11 @@ render(
 
 ```{r}
 print(
-  x, 
+  x = GSE74821, 
   colour = "CartridgeID", 
   size = 0.5, 
   show_legend = TRUE, 
-  echo = FALSE, 
+  echo = TRUE, 
   title_level = 3
 )
 ```
