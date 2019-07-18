@@ -141,7 +141,7 @@ plot_metrics <- function(
     ggplot2::geom_rect(
       data = dplyr::tibble(
         ymin = nacho_object$outliers_thresholds[[x]],
-        ymax = c(-Inf, Inf)[seq_along(ymin)]
+        ymax = c(-Inf, Inf)[seq_along(!!dplyr::sym("ymin"))]
       ),
       mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = !!ggplot2::sym("ymin"), ymax = !!ggplot2::sym("ymax")),
       fill = "firebrick2",
