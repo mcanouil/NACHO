@@ -4,7 +4,7 @@
 \alias{plot_cg}
 \title{plot_cg}
 \usage{
-plot_cg(x, nacho_object, colour, size, show_legend)
+plot_cg(nacho_object, x, colour, size, show_legend)
 }
 \arguments{
 \item{x}{[\link{character}] Character string naming the quality-control metrics to plot from \code{nacho_object}.

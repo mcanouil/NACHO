@@ -4,7 +4,7 @@
 \alias{plot_pn}
 \title{plot_pn}
 \usage{
-plot_pn(x, nacho_object, colour, size, show_legend)
+plot_pn(nacho_object, x, colour, size, show_legend)
 }
 \arguments{
 \item{x}{[\link{character}] Character string naming the quality-control metrics to plot from \code{nacho_object}.
