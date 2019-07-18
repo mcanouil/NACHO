@@ -4,7 +4,7 @@
 \alias{plot_metrics}
 \title{plot_metrics}
 \usage{
-plot_metrics(x, nacho_object, colour, size, show_legend)
+plot_metrics(nacho_object, x, colour, size, show_legend, attribute)
 }
 \arguments{
 \item{x}{[\link{character}] Character string naming the quality-control metrics to plot from \code{nacho_object}.
@@ -36,6 +36,8 @@ or line size (\link{geom_line}).}
 
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
+
+\item{attribute}{[\link{character}] A character string to indicate which RCC attributes should be used}
 }
 \description{
 plot_metrics
