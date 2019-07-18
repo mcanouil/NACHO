@@ -186,7 +186,7 @@ plot_cg <- function(
       dplyr::distinct(),
     mapping = ggplot2::aes(
       x = !!ggplot2::sym("Name"),
-      y = !!ggplot2::sym("Count"),
+      y = !!ggplot2::sym("Count") + 1,
       colour = !!ggplot2::sym(colour)
     )
   ) +
@@ -244,7 +244,7 @@ plot_pn <- function(
       dplyr::distinct(),
     mapping = ggplot2::aes(
       x = !!ggplot2::sym(nacho_object$access),
-      y = !!ggplot2::sym("Count"),
+      y = !!ggplot2::sym("Count") + 1,
       colour = !!ggplot2::sym("Name"),
       group = !!ggplot2::sym("Name")
     )
