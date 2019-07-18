@@ -138,6 +138,17 @@ plot_metrics <- function(
       x = attribute,
       y = parse(text = paste0('paste("', labels[x], '", " ", ',  units[x], ")"))
     ) +
+    ggplot2::geom_rect(
+      data = dplyr::tibble(
+        ymin = nacho_object$outliers_thresholds[[x]],
+        ymax = c(-Inf, Inf)[seq_along(ymin)]
+      ),
+      mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = !!ggplot2::sym("ymin"), ymax = !!ggplot2::sym("ymax")),
+      fill = "firebrick2",
+      alpha = 0.2,
+      colour = "transparent",
+      inherit.aes = FALSE
+    ) +
     ggplot2::geom_hline(
       data = dplyr::tibble(value = nacho_object$outliers_thresholds[[x]]),
       mapping = ggplot2::aes(yintercept = !!ggplot2::sym("value")),
