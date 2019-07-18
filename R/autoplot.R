@@ -56,22 +56,22 @@ autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_l
   }
   switch(
     EXPR = x,
-    "BD" = plot_metrics(x, nacho_object = object, colour, size, show_legend),
-    "FoV" = plot_metrics(x, nacho_object = object, colour, size, show_legend),
-    "PC" = plot_metrics(x, nacho_object = object, colour, size, show_legend),
-    "LoD" = plot_metrics(x, nacho_object = object, colour, size, show_legend),
-    "Positive" = plot_cg(x, nacho_object = object, colour, size, show_legend),
-    "Negative" = plot_cg(x, nacho_object = object, colour, size, show_legend),
-    "Housekeeping" = plot_cg(x, nacho_object = object, colour, size, show_legend),
-    "PN" = plot_pn(x, nacho_object = object, colour, size, show_legend),
-    "ACBD" = plot_acbd(x, nacho_object = object, colour, size, show_legend),
-    "ACMC" = plot_acmc(x, nacho_object = object, colour, size, show_legend),
-    "PCA12" = plot_pca12(x, nacho_object = object, colour, size, show_legend),
-    "PCAi" = plot_pcai(x, nacho_object = object, colour, size, show_legend),
-    "PCA" = plot_pca(x, nacho_object = object, colour, size, show_legend),
-    "PFNF" = plot_pfnf(x, nacho_object = object, colour, size, show_legend),
-    "HF" = plot_hf(x, nacho_object = object, colour, size, show_legend),
-    "NORM" = plot_norm(x, nacho_object = object, colour, size, show_legend),
+    "BD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, ...),
+    "FoV" = plot_metrics(nacho_object = object, x, colour, size, show_legend, ...),
+    "PC" = plot_metrics(nacho_object = object, x, colour, size, show_legend, ...),
+    "LoD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, ...),
+    "Positive" = plot_cg(nacho_object = object, x, colour, size, show_legend),
+    "Negative" = plot_cg(nacho_object = object, x, colour, size, show_legend),
+    "Housekeeping" = plot_cg(nacho_object = object, x, colour, size, show_legend),
+    "PN" = plot_pn(nacho_object = object, x, colour, size, show_legend),
+    "ACBD" = plot_acbd(nacho_object = object, x, colour, size, show_legend),
+    "ACMC" = plot_acmc(nacho_object = object, x, colour, size, show_legend),
+    "PCA12" = plot_pca12(nacho_object = object, x, colour, size, show_legend),
+    "PCAi" = plot_pcai(nacho_object = object, x, colour, size, show_legend),
+    "PCA" = plot_pca(nacho_object = object, x, colour, size, show_legend),
+    "PFNF" = plot_pfnf(nacho_object = object, x, colour, size, show_legend),
+    "HF" = plot_hf(nacho_object = object, x, colour, size, show_legend),
+    "NORM" = plot_norm(nacho_object = object, x, colour, size, show_legend),
     stop(
       paste(
         '[NACHO] "x" must be one of the following possible values:',
@@ -89,17 +89,21 @@ autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_l
 #' plot_metrics
 #'
 #' @inheritParams autoplot.nacho
+#' @param attribute [[character]] A character string to indicate which RCC attributes should be used
 #'
 #' @keywords internal
 #'
 #' @return NULL
 plot_metrics <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
-  show_legend
+  show_legend,
+  attribute
 ) {
+  if (missing(attribute)) attribute <- "CartridgeID"
+
   labels <- c(
     "BD" = "Binding Density",
     "FoV" = "Field of View",
@@ -118,11 +122,12 @@ plot_metrics <- function(
         "CartridgeID",
         !!colour,
         !!nacho_object$access,
-        !!x
+        !!x,
+        !!attribute
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
-      x = !!ggplot2::sym("CartridgeID"),
+      x = !!ggplot2::sym(attribute),
       y = !!ggplot2::sym(x),
       colour = !!ggplot2::sym(colour)
     )
@@ -130,7 +135,7 @@ plot_metrics <- function(
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
     ggbeeswarm::geom_quasirandom(size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
     ggplot2::labs(
-      x = "CartridgeID",
+      x = attribute,
       y = parse(text = paste0('paste("', labels[x], '", " ", ',  units[x], ")"))
     ) +
     ggplot2::geom_hline(
@@ -151,8 +156,8 @@ plot_metrics <- function(
 #'
 #' @return NULL
 plot_cg <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
   show_legend
@@ -208,8 +213,8 @@ plot_cg <- function(
 #'
 #' @return NULL
 plot_pn <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
   show_legend
@@ -256,8 +261,8 @@ plot_pn <- function(
 #'
 #' @return NULL
 plot_acbd <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
   show_legend
@@ -296,8 +301,8 @@ plot_acbd <- function(
 #'
 #' @return NULL
 plot_acmc <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
   show_legend
@@ -336,8 +341,8 @@ plot_acmc <- function(
 #'
 #' @return NULL
 plot_pca12 <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
   show_legend
@@ -373,8 +378,8 @@ plot_pca12 <- function(
 #'
 #' @return NULL
 plot_pca <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
   show_legend
@@ -432,8 +437,8 @@ plot_pca <- function(
 #'
 #' @return NULL
 plot_pcai <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
   show_legend
@@ -467,8 +472,8 @@ plot_pcai <- function(
 #'
 #' @return NULL
 plot_pfnf <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
   show_legend
@@ -505,8 +510,8 @@ plot_pfnf <- function(
 #'
 #' @return NULL
 plot_hf <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
   show_legend
@@ -544,8 +549,8 @@ plot_hf <- function(
 #'
 #' @return NULL
 plot_norm <- function(
-  x,
   nacho_object,
+  x,
   colour,
   size,
   show_legend
