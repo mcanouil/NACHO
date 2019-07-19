@@ -5,7 +5,7 @@
 \title{Plot quality-control metrics and thresholds}
 \usage{
 \method{autoplot}{nacho}(object, x, colour = "CartridgeID", size = 0.5,
-  show_legend = TRUE, ...)
+  show_legend = TRUE, attribute = NULL, ...)
 }
 \arguments{
 \item{object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
@@ -39,6 +39,8 @@ or line size (\link{geom_line}).}
 
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
+
+\item{attribute}{[\link{character}] A character string to indicate which RCC attributes should be used}
 
 \item{...}{Other arguments (Not used).}
 }
