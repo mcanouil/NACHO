@@ -25,6 +25,8 @@
 #'    * `"HF"` (Housekeeping Factor)
 #'    * `"NORM"` (Normalisation Factor)
 #'
+#' @param attribute [[character]] A character string to indicate which RCC attributes should be used
+#'
 #' @param ... Other arguments (Not used).
 #'
 #' @return NULL
@@ -37,8 +39,8 @@
 #' autoplot(GSE74821, x = "PCA12")
 #' autoplot(GSE74821, x = "NORM")
 #'
-autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_legend = TRUE, ...) {
-  if (missing(x)) {
+autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_legend = TRUE, attribute = NULL, ...) {
+  if (missing(x) | is.null(x)) {
     stop(
       paste(
         '[NACHO] "x" is missing. It must be one of the following possible values:',
@@ -51,15 +53,17 @@ autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_l
       )
     )
   }
+  if (is.null(attribute)) attribute <- "CartridgeID"
+
   if (attr(object, "RCC_type") == "n8" & x %in% c("PC", "LoD")) {
     stop('[NACHO] "PC" and "LoD" are not available for the provided NanoString dataset.')
   }
   switch(
     EXPR = x,
-    "BD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, ...),
-    "FoV" = plot_metrics(nacho_object = object, x, colour, size, show_legend, ...),
-    "PC" = plot_metrics(nacho_object = object, x, colour, size, show_legend, ...),
-    "LoD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, ...),
+    "BD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
+    "FoV" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
+    "PC" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
+    "LoD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
     "Positive" = plot_cg(nacho_object = object, x, colour, size, show_legend),
     "Negative" = plot_cg(nacho_object = object, x, colour, size, show_legend),
     "Housekeeping" = plot_cg(nacho_object = object, x, colour, size, show_legend),
@@ -89,7 +93,6 @@ autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_l
 #' plot_metrics
 #'
 #' @inheritParams autoplot.nacho
-#' @param attribute [[character]] A character string to indicate which RCC attributes should be used
 #'
 #' @keywords internal
 #'
@@ -102,7 +105,7 @@ plot_metrics <- function(
   show_legend,
   attribute
 ) {
-  if (missing(attribute)) attribute <- "CartridgeID"
+  if (missing(attribute) | is.null(attribute)) attribute <- "CartridgeID"
 
   labels <- c(
     "BD" = "Binding Density",
