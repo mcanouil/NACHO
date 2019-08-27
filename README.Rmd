@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
-[![GitHub tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label="latest tag")](https://github.com/mcanouil/NACHO)
+[![GitHub tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest tag)](https://github.com/mcanouil/NACHO)
 [![Travis-CI Build Status](https://travis-ci.org/mcanouil/NACHO.svg?branch=master)](https://travis-ci.org/mcanouil/NACHO)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/NACHO?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/NACHO)
 [![Coverage Status (codecov)](https://codecov.io/gh/mcanouil/NACHO/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO)
@@ -66,6 +66,18 @@ In addition (since v0.6.0) *NACHO* includes two (three) additional functions:
 * The `autoplot()` function draws any quality-control metrics from `visualise()` and `render()`.
 
 For more `vignette("NACHO")`.
+
+
+## Citing NACHO
+
+```{r, echo = FALSE, results = "asis"}
+print(citation("NACHO"), "html")
+```
+
+```{r, echo = FALSE, comment = ""}
+print(citation("NACHO"), "bibtex")
+```
+
 
 ## Getting help
 
