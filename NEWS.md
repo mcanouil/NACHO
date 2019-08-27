@@ -1,5 +1,9 @@
 # NACHO 0.6.0
 
+## Citation
+
+* 
+
 ## New features
 
 * `autoplot()` allows to plot a chosen QC plot available in the shiny app (`visualise()`) and/or

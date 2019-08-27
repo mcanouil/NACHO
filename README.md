@@ -8,7 +8,7 @@
 [![Lifecycle:
 maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 [![GitHub
-tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=%22latest%20tag%22)](https://github.com/mcanouil/NACHO)
+tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest%20tag)](https://github.com/mcanouil/NACHO)
 [![Travis-CI Build
 Status](https://travis-ci.org/mcanouil/NACHO.svg?branch=master)](https://travis-ci.org/mcanouil/NACHO)
 [![AppVeyor Build
@@ -79,6 +79,29 @@ functions:
     `visualise()` and `render()`.
 
 For more `vignette("NACHO")`.
+
+## Citing NACHO
+
+<p>
+
+Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
+“NACHO: a R package for quality-control of NanoString nCounter data.”
+<em>Bioinformatics</em>, <b>1–2</b>. ISSN 1367-4803, doi:
+<a href="https://doi.org/10.1093/bioinformatics/btz647">10.1093/bioinformatics/btz647</a>.
+
+</p>
+
+    @Article{,
+      title = {NACHO: a R package for quality-control of NanoString nCounter data},
+      author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen Hart and Roderick Slieker},
+      journal = {Bioinformatics},
+      address = {Oxford, England},
+      year = {2019},
+      month = {aug},
+      volume = {1–2},
+      issn = {1367-4803},
+      doi = {10.1093/bioinformatics/btz647},
+    }
 
 ## Getting help
 
