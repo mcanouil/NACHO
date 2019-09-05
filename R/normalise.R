@@ -220,6 +220,8 @@ normalise <- function(
     attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
   }
 
+  nacho_object[["outliers_thresholds"]] <- outliers_thresholds
+
   message(paste(
     "[NACHO] Returning a list.",
     "  $ access              : character",
