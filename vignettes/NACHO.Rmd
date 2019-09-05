@@ -23,7 +23,7 @@ vignette: >
 knitr::opts_chunk$set(
   eval = TRUE,
   collapse = TRUE,
-  results = "asis",
+  # results = "asis",
   include = TRUE,
   echo = TRUE,
   warning = TRUE,
@@ -184,7 +184,7 @@ The discovered housekeeping genes are saved in the result object as **predicted_
 print(GSE70970_sum[["housekeeping_genes"]])
 ```
 
-```{r in_text, eval = class(gse)!="try-error", echo = FALSE}
+```{r in_text, eval = class(gse)!="try-error", echo = FALSE, results = "asis"}
 cat(
   "Let's say _", GSE70970_sum[["housekeeping_genes"]][1], 
   "_ and _", GSE70970_sum[["housekeeping_genes"]][2], 
@@ -254,7 +254,7 @@ The possible metrics (`x`) are:
 * `"HF"` (Housekeeping Factor)
 * `"NORM"` (Normalisation Factor)
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, results = "asis"}
 metrics <- c(
   "BD" = "Binding Density",
   "FoV" = "Imaging",
@@ -300,7 +300,7 @@ render(
 
 The underneath function `print()`can be used directly within any Rmarkdown chunk, setting the parameter `echo = TRUE`.
 
-```{r}
+```{r, results = "asis"}
 print(
   x = GSE74821, 
   colour = "CartridgeID", 
