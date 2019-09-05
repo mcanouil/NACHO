@@ -232,6 +232,7 @@ normalise <- function(
     "  $ data_directory      : character",
     "  $ pc_sum              : data.frame",
     "  $ nacho               : data.frame",
+    "  $ outliers_thresholds : list",
     "  $ raw_counts          : data.frame",
     "  $ normalised_counts   : data.frame",
     sep = "\n"
