@@ -23,6 +23,7 @@
 * In `vignettes/NACHO.Rmd`, 
     - fix several typos.
     - add sections for `autoplot()`, `print()` and `render()`.
+    - fix chunk output (*i.e.*, remove default `results = "asis"`).
 
 
 # NACHO 0.5.6
