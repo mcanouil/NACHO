@@ -80,21 +80,21 @@ In addition (since v0.6.0) *NACHO* includes two (three) additional functions:
 
 # An example
 
-To display the usage and utility of *NACHO*, we show three examples in which the above mentioned functions are used and the results are briefly examined. 
-*NACHO* comes with presummarised data and in the first example we use this data to call the interactive web application with the use of `visualise()`. 
-In the second example we show the process of going from raw RCC files to visualisations with a data set queried from **GEO** using `GEOquery`.  
+To display the usage and utility of *NACHO*, we show three examples in which the above mentioned functions are used and the results are briefly examined.
 
-In the third example we use the summarised data from second example to calculate the sample specific size factors using `normalise()` and its added functionality to predict housekeeping genes.
+*NACHO* comes with presummarised data and in the first example we use this dataset to call the interactive web application using `visualise()`.  
+In the second example, we show the process of going from raw RCC files to visualisations with a dataset queried from **GEO** using `GEOquery`.  
+In the third example, we use the summarised dataset from the second example to calculate the sample specific size factors using `normalise()` and its added functionality to predict housekeeping genes.
 
 Besides creating interactive visualisations, *NACHO* also identifies poorly performing samples which can be seen under the Outlier Table tab in the interactive web application.  
-While calling `normalise()` the user has the possibility to remove these outliers before size factor calculation.
+While calling `normalise()`, the user has the possibility to remove these outliers before size factor calculation.
 
 ## Get NanoString nCounter data
 
 ### Presummarised data from *NACHO*
 
 This example shows how to use summarised data to call the interactive web application.  
-The raw data used in the summarisation is from a study of @liu_pam50_2016 and was acquired from the NCBI GEO public database [@barrett_ncbi_2013].
+The raw data used is from a study of @liu_pam50_2016 and was acquired from the NCBI GEO public database [@barrett_ncbi_2013].
 
 ```{r ex1, eval = FALSE}
 library(NACHO)
@@ -104,8 +104,8 @@ visualise(GSE74821)
 
 ### Raw data from GEO
 
-Numerous NanoString nCounter data sets are available from GEO [@barrett_ncbi_2013].  
-In this example we use a mRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
+Numerous NanoString nCounter datasets are available from GEO [@barrett_ncbi_2013].  
+In this example, we use a mRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
 The data is extracted and prepared using the following code.
 
 ```{r geo_down, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
@@ -141,7 +141,7 @@ After we extracted the dataset to the `paste0(tempdir(), "/GSE70970/Data")` dire
 ## The `summarise()` function
  
 The first argument requires the path to the directory containing the RCC files, the second argument is the location of samplesheet followed by third argument with the column name containing the exact names of the files.  
-The `housekeeping_genes` and `normalisation_method`  arguments respectively indicate which housekeeping genes and normalisation method should be used.
+The `housekeeping_genes` and `normalisation_method` arguments respectively indicate which housekeeping genes and normalisation method should be used.
 
 ```{r ex3, eval = class(gse)!="try-error"}
 library(NACHO)
@@ -168,7 +168,7 @@ When the summarisation is done, the summarised (or normalised) data can be visua
 visualise(GSE70970_sum)
 ```
 
-On the left there are widgets that control the interactive plotting area. 
+On the left, there are widgets that control the interactive plotting area. 
 These widgets differ dependent on which main tab is chosen. 
 The second layer of tabs is also interactive and changes based on which main tab is chosen. 
 Each sample in the plots can be coloured based on either technical specifications which are included in the RCC files or based on specifications of your own choosing, though these specifications need to be included in the samplesheet.
@@ -177,8 +177,8 @@ Each sample in the plots can be coloured based on either technical specification
 
 *NACHO* is allows the discovery of housekeeping genes within your own dataset. 
 *NACHO* finds the five best suitable housekeeping genes, however, it is possible that one of these five genes might not be suitable, which is why a subset of these discovered housekeeping genes might work better in some cases. 
-For this example we use the **GSE70970** dataset from the previous example. 
-The discovered housekeeping genes are saved in a global variable named **predicted_housekeeping**. 
+For this example, we use the **GSE70970** dataset from the previous example. 
+The discovered housekeeping genes are saved in the result object as **predicted_housekeeping**. 
 
 ```{r ex5, eval = class(gse)!="try-error"}
 print(GSE70970_sum[["housekeeping_genes"]])
@@ -200,12 +200,13 @@ print(my_housekeeping)
 
 The next step is the actual normalisation. 
 The first argument requires the summary which is created with the `summarise()` function. 
-The second arugument requires a vector of gene names. 
-In this case it is a subset of the discovered housekeeping genes we just made. With the third argument the user has the choice to remove the outliers. 
-Lastly the normalisation method can be choosed.  
-Here the user has a choice between `"GLM"` or `"GEO"`. 
+The second argument requires a vector of gene names. 
+In this case, it is a subset of the discovered housekeeping genes we just made. 
+With the third argument the user has the choice to remove the outliers. 
+Lastly, the normalisation method can be choosed.  
+Here, the user has a choice between `"GLM"` or `"GEO"`. 
 The differences between normalisation methods are nuanced, however, a preference for either method are use case specific.  
-In this example `"GLM"` is used.
+In this example, `"GLM"` is used.
 
 ```{r ex7, eval = class(gse)!="try-error"}
 GSE70970_norm <- normalise(
@@ -297,7 +298,7 @@ render(
 )
 ```
 
-The underneath function `print()`can be used directly within any Rmakrdown chunk, setting the parameter `echo = TRUE`.
+The underneath function `print()`can be used directly within any Rmarkdown chunk, setting the parameter `echo = TRUE`.
 
 ```{r}
 print(
