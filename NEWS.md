@@ -2,7 +2,7 @@
 
 ## Citation
 
-* 
+* Add citation.
 
 ## New features
 
@@ -16,8 +16,13 @@
 
 * In `R/read_rcc.R`, `R/summarise.R`, fix issue (#1) when PlexSet RCC files could not be read.
 * In `R/summarise.R`, object returned is of S3 class "nacho" for ease of use of `autoplot()`.
-* In `R/normalise.R`, object returned is of S3 class "nacho" for ease of use of `autoplot()`.
+* In `R/normalise.R`, 
+    - object returned is of S3 class "nacho" for ease of use of `autoplot()`.
+    - fix missing `outliers_thresholds` component in returned object.
 * In `R/visualise.R`, minor code changes.
+* In `vignettes/NACHO.Rmd`, 
+    - fix several typos.
+    - add sections for `autoplot()`, `print()` and `render()`.
 
 
 # NACHO 0.5.6
