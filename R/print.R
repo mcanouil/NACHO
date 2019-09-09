@@ -163,7 +163,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   for (icodeclass in c("Positive", "Negative", "Housekeeping")) {
     cat(prefix_title(title_level, 1), icodeclass, "\n\n")
     print(autoplot.nacho(
-      x = imetric,
+      x = icodeclass,
       object = x,
       colour = colour,
       size = size,
