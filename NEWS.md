@@ -19,7 +19,9 @@
 * In `R/normalise.R`, 
     - object returned is of S3 class "nacho" for ease of use of `autoplot()`.
     - fix missing `outliers_thresholds` component in returned object.
-* In `R/visualise.R`, minor code changes.
+* In `R/visualise.R`, 
+    - minor code changes.
+    - return `app` object in non-interactive session.
 * In `vignettes/NACHO.Rmd`, 
     - fix several typos.
     - add sections for `autoplot()`, `print()` and `render()`.
