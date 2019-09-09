@@ -86,7 +86,7 @@ For more `vignette("NACHO")`.
 
 Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 “NACHO: a R package for quality-control of NanoString nCounter data.”
-<em>Bioinformatics</em>, <b>1–2</b>. ISSN 1367-4803, doi:
+<em>Bioinformatics</em>. ISSN 1367-4803, doi:
 <a href="https://doi.org/10.1093/bioinformatics/btz647">10.1093/bioinformatics/btz647</a>.
 
 </p>
@@ -98,7 +98,6 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
       address = {Oxford, England},
       year = {2019},
       month = {aug},
-      volume = {1–2},
       issn = {1367-4803},
       doi = {10.1093/bioinformatics/btz647},
     }
