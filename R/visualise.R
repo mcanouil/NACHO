@@ -84,9 +84,6 @@ visualise <- function(nacho_object) {
       '  "summarise()" and/or "normalise()" must be called before "visualise()".'
     )
   }
-  if (!interactive()) {
-    stop('[NACHO] Must be run in an interactive R session!')
-  }
 
   # nocov start
   id_colname <- nacho_object[["access"]]
@@ -1074,7 +1071,12 @@ visualise <- function(nacho_object) {
     }
   )
 
-  shiny::runApp(app)
+  if (!interactive()) {
+    message('[NACHO] Must be run in an interactive R session!')
+    return(app)
+  } else {
+    shiny::runApp(app)
+  }
   # nocov end
 }
 
