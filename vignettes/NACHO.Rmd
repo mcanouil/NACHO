@@ -175,7 +175,7 @@ Each sample in the plots can be coloured based on either technical specification
 
 ## The `normalise()` function
 
-*NACHO* is allows the discovery of housekeeping genes within your own dataset. 
+*NACHO* allows the discovery of housekeeping genes within your own dataset. 
 *NACHO* finds the five best suitable housekeeping genes, however, it is possible that one of these five genes might not be suitable, which is why a subset of these discovered housekeeping genes might work better in some cases. 
 For this example, we use the **GSE70970** dataset from the previous example. 
 The discovered housekeeping genes are saved in the result object as **predicted_housekeeping**. 
