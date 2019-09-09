@@ -12,6 +12,7 @@ test_that("missing directory", {
     targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE74821"), pattern = ".RCC.gz$")
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
+    closeAllConnections()
     expect_error(summarise(
       # data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
@@ -38,6 +39,7 @@ test_that("missing sample sheet", {
     targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE74821"), pattern = ".RCC.gz$")
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
+    closeAllConnections()
     expect_error(summarise(
       data_directory = paste0(tempdir(), "/GSE74821"),
       # ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
@@ -64,6 +66,7 @@ test_that("missing id_colname", {
     targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE74821"), pattern = ".RCC.gz$")
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
+    closeAllConnections()
     expect_error(summarise(
       data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
@@ -89,6 +92,7 @@ test_that("no housekeeping norm", {
     targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE74821"), pattern = ".RCC.gz$")
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
+    closeAllConnections()
     GSE74821 <- summarise(
       data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
@@ -115,6 +119,7 @@ test_that("no housekeeping norm and prediction", {
     targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE74821"), pattern = ".RCC.gz$")
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
+    closeAllConnections()
     GSE74821 <- summarise(
       data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
@@ -143,6 +148,7 @@ test_that("using GEO GSE74821", {
     targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE74821"), pattern = ".RCC.gz$")
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
+    closeAllConnections()
     GSE74821 <- summarise(
       data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
@@ -169,6 +175,7 @@ test_that("using GEO GSE74821 with prediction", {
     targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE74821"), pattern = ".RCC.gz$")
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
+    closeAllConnections()
     GSE74821 <- summarise(
       data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
@@ -196,6 +203,7 @@ test_that("using GEO GSE70970", {
     targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE70970"), pattern = ".RCC.gz$")
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE70970/Samplesheet.csv"))
+    closeAllConnections()
     GSE70970 <- summarise(
       data_directory = paste0(tempdir(), "/GSE70970"),
       ssheet_csv = paste0(tempdir(), "/GSE70970/Samplesheet.csv"),
@@ -222,6 +230,7 @@ test_that("using GEO GSE70970 with prediction", {
     targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE70970"), pattern = ".RCC.gz$")
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE70970/Samplesheet.csv"))
+    closeAllConnections()
     GSE70970 <- summarise(
       data_directory = paste0(tempdir(), "/GSE70970"),
       ssheet_csv = paste0(tempdir(), "/GSE70970/Samplesheet.csv"),
