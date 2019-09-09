@@ -298,7 +298,7 @@ render(
 )
 ```
 
-The underneath function `print()`can be used directly within any Rmarkdown chunk, setting the parameter `echo = TRUE`.
+The underneath function `print()` can be used directly within any Rmarkdown chunk, setting the parameter `echo = TRUE`.
 
 ```{r, results = "asis"}
 print(
