@@ -19,7 +19,7 @@ citEntry(
   issn = "1367-4803",
   doi = "10.1093/bioinformatics/btz647",
   textVersion = paste(
-    "Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).",
+    "Canouil, M., Bouland, G. A., Bonnefond, A., Froguel, P., ’t Hart, L. M., & Slieker, R. C. (2019).",
     '"NACHO: an R package for quality control of NanoString nCounter data".',
     "Bioinformatics (Oxford, England).",
     "doi: 10.1093/bioinformatics/btz647"
