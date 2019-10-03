@@ -1,0 +1,27 @@
+citHeader("To cite NACHO in publications use:")
+
+citEntry(
+  entry = "Article",
+  title = "NACHO: an R package for quality control of NanoString nCounter data",
+  author = paste(
+    "Mickaël Canouil [aut, cre]",
+    "Gerard A. Bouland [aut]",
+    "Amélie Bonnefond [rev]",
+    "Philippe Froguel [rev]",
+    "Leen Hart [rev]",
+    "Roderick Slieker [aut]",
+    sep = ", "
+  ),
+  journal = "Bioinformatics",
+  address = "Oxford, England",
+  year = "2019",
+  month = "aug",
+  issn = "1367-4803",
+  doi = "10.1093/bioinformatics/btz647",
+  textVersion = paste(
+    "Canouil, M., Bouland, G. A., Bonnefond, A., Froguel, P., ’t Hart, L. M., & Slieker, R. C. (2019).",
+    '"NACHO: an R package for quality control of NanoString nCounter data".',
+    "Bioinformatics (Oxford, England).",
+    "doi: 10.1093/bioinformatics/btz647"
+  )
+)
