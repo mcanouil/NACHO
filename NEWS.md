@@ -26,6 +26,7 @@
     - fix several typos.
     - add sections for `autoplot()`, `print()` and `render()`.
     - fix chunk output (*i.e.*, remove default `results = "asis"`).
+    - fix `normalise()` call with custom housekeeping genes (*i.e.*, set `housekeeping_predict = FALSE`).
 
 
 # NACHO 0.5.6

@@ -212,6 +212,7 @@ In this example, `"GLM"` is used.
 GSE70970_norm <- normalise(
   nacho_object = GSE70970_sum,
   housekeeping_genes = my_housekeeping,
+  housekeeping_predict = FALSE,
   housekeeping_norm = TRUE,
   normalisation_method = "GEO", 
   remove_outliers = TRUE
