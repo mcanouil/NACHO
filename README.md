@@ -20,7 +20,7 @@ Practices](https://bestpractices.coreinfrastructure.org/projects/2719/badge)](ht
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
 [![cran
 checks\_worst](https://cranchecks.info/badges/worst/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
-[![CRAN\_Download\_total](http://cranlogs.r-pkg.org/badges/grand-total/NACHO)](https://cran.r-project.org/package=NACHO)
+[![CRAN\_Download\_total](http://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
 <!--[![cran checks_summary](https://cranchecks.info/badges/summary/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)-->
 <!--[![CRAN_Download_month](http://cranlogs.r-pkg.org/badges/NACHO?color=brightgreen)](https://cran.r-project.org/package=NACHO)-->
 <!--[![Coverage Status (coveralls)](https://coveralls.io/repos/github/mcanouil/NACHO/badge.svg?branch=master)](https://coveralls.io/github/mcanouil/NACHO?branch=master)-->
@@ -85,14 +85,14 @@ For more `vignette("NACHO")`.
 <p>
 
 Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
-“NACHO: a R package for quality-control of NanoString nCounter data.”
+“NACHO: an R package for quality control of NanoString nCounter data.”
 <em>Bioinformatics</em>. ISSN 1367-4803, doi:
 <a href="https://doi.org/10.1093/bioinformatics/btz647">10.1093/bioinformatics/btz647</a>.
 
 </p>
 
     @Article{,
-      title = {NACHO: a R package for quality-control of NanoString nCounter data},
+      title = {NACHO: an R package for quality control of NanoString nCounter data},
       author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen Hart and Roderick Slieker},
       journal = {Bioinformatics},
       address = {Oxford, England},
