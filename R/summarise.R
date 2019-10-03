@@ -114,7 +114,7 @@ summarise <- function(
     )
   }
 
-  column_to_unnest <- c("rcc_content", "Code_Summary")
+  # column_to_unnest <- c("rcc_content", "Code_Summary")
 
   if (anyDuplicated(nacho_df[[id_colname]])!=0) {
     type_set <- "n8"
@@ -127,13 +127,13 @@ summarise <- function(
         read_rcc(file = ifile)
       }
     )
-    nacho_df_uniq <- tidyr::unnest(data = nacho_df_uniq, rcc_content = get(column_to_unnest[1]), .drop = FALSE)
+    nacho_df_uniq <- tidyr::unnest(data = nacho_df_uniq, cols = "rcc_content")
     nacho_df <- dplyr::left_join(
       x = nacho_df,
       y = nacho_df_uniq,
       by = c(id_colname, "file_path", "plexset_id")
     )
-    nacho_df <- tidyr::unnest(data = nacho_df, Code_Summary = get(column_to_unnest[2]), .drop = FALSE)
+    nacho_df <- tidyr::unnest(data = nacho_df, cols = "Code_Summary")
     nacho_df[["CodeClass"]] <- gsub("[0-8]+s$", "", nacho_df[["CodeClass"]])
     nacho_df <- tidyr::unite(data = nacho_df, col = !!id_colname, id_colname, "plexset_id")
   } else {
@@ -146,8 +146,8 @@ summarise <- function(
         read_rcc(file = ifile)
       }
     )
-    nacho_df <- tidyr::unnest(data = nacho_df, rcc_content = get(column_to_unnest[1]), .drop = FALSE)
-    nacho_df <- tidyr::unnest(data = nacho_df, Code_Summary = get(column_to_unnest[2]), .drop = FALSE)
+    nacho_df <- tidyr::unnest(data = nacho_df, cols = "rcc_content")
+    nacho_df <- tidyr::unnest(data = nacho_df, cols = "Code_Summary")
   }
   progress$pause(0.05)$tick()$print()
   cat("\n")
