@@ -1,0 +1,10 @@
+GSE74821                Presummarised data from GSE74821 (20 samples)
+autoplot.nacho          Plot quality-control metrics and thresholds
+normalise               (re)Normalise a dataset read from summarise
+print.nacho             Print method for nacho object
+render                  Render a HTML report from summarise or
+                        normalise
+summarise               Summarise data from RCC NanoString files (and
+                        normalise them)
+visualise               Visualise quality-control metrics using a shiny
+                        app
