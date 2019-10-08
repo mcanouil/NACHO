@@ -21,6 +21,8 @@
 #'   are removed from `output_dir`. Default is `TRUE`.
 #'
 #' @return NULL
+#' @importFrom knitr opts_chunk
+#' @importFrom sessioninfo session_info
 #' @export
 #'
 #' @examples
