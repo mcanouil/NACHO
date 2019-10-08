@@ -4,7 +4,7 @@ test_that("missing directory", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
-    expect_error(gse <- GEOquery::getGEO(GEO = "GSE74821"))
+    expect_s3_class(gse, "try-error")
   } else {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
     GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
@@ -30,7 +30,7 @@ test_that("missing sample sheet", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
-    expect_error(gse <- GEOquery::getGEO(GEO = "GSE74821"))
+    expect_s3_class(gse, "try-error")
   } else {
     gse <- GEOquery::getGEO(GEO = "GSE74821")
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
@@ -58,7 +58,7 @@ test_that("missing id_colname", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
-    expect_error(gse <- GEOquery::getGEO(GEO = "GSE74821"))
+    expect_s3_class(gse, "try-error")
   } else {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
     GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
@@ -84,7 +84,7 @@ test_that("no housekeeping norm", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
-    expect_error(gse <- GEOquery::getGEO(GEO = "GSE74821"))
+    expect_s3_class(gse, "try-error")
   } else {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
     GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
@@ -111,7 +111,7 @@ test_that("no housekeeping norm and prediction", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
-    expect_error(gse <- GEOquery::getGEO(GEO = "GSE74821"))
+    expect_s3_class(gse, "try-error")
   } else {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
     GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
@@ -140,7 +140,7 @@ test_that("using GEO GSE74821", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
-    expect_error(gse <- GEOquery::getGEO(GEO = "GSE74821"))
+    expect_s3_class(gse, "try-error")
   } else {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
     GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
@@ -167,7 +167,7 @@ test_that("using GEO GSE74821 with prediction", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
-    expect_error(gse <- GEOquery::getGEO(GEO = "GSE74821"))
+    expect_s3_class(gse, "try-error")
   } else {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
     GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
@@ -195,7 +195,7 @@ test_that("using GEO GSE70970", {
   gse <- try({GEOquery::getGEO(GEO = "GSE70970")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
-    expect_error(gse <- GEOquery::getGEO(GEO = "GSE70970"))
+    expect_s3_class(gse, "try-error")
   } else {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
     GEOquery::getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
@@ -222,7 +222,7 @@ test_that("using GEO GSE70970 with prediction", {
   gse <- try({GEOquery::getGEO(GEO = "GSE70970")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
     closeAllConnections()
-    expect_error(gse <- GEOquery::getGEO(GEO = "GSE70970"))
+    expect_s3_class(gse, "try-error")
   } else {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
     GEOquery::getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
