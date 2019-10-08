@@ -9,6 +9,5 @@
 ^cran-comments\.md$
 ^.*\.Rproj$
 ^README\.Rmd$
-^README\.md$
 ^revdep$
 ^CRAN-RELEASE$
