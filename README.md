@@ -17,12 +17,12 @@ Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/NACHO?branch
 (codecov)](https://codecov.io/gh/mcanouil/NACHO/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO)
 [![CII Best
 Practices](https://bestpractices.coreinfrastructure.org/projects/2719/badge)](https://bestpractices.coreinfrastructure.org/projects/2719)
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
+[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
 [![cran
 checks\_worst](https://cranchecks.info/badges/worst/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
-[![CRAN\_Download\_total](http://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
+[![CRAN\_Download\_total](https://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
 <!--[![cran checks_summary](https://cranchecks.info/badges/summary/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)-->
-<!--[![CRAN_Download_month](http://cranlogs.r-pkg.org/badges/NACHO?color=brightgreen)](https://cran.r-project.org/package=NACHO)-->
+<!--[![CRAN_Download_month](https://cranlogs.r-pkg.org/badges/NACHO?color=brightgreen)](https://cran.r-project.org/package=NACHO)-->
 <!--[![Coverage Status (coveralls)](https://coveralls.io/repos/github/mcanouil/NACHO/badge.svg?branch=master)](https://coveralls.io/github/mcanouil/NACHO?branch=master)-->
 <!-- badges: end -->
 
