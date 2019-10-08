@@ -7,6 +7,7 @@
   - explicit import for `opts_chunk::knitr` in roxygen documentation.
   - explicit import for `sessioninfo::session_info` in roxygen documentation.
 * In `tests/testthat/test-render.R`, now checks if pandoc is available.
+* In `tests/testthat/test-summarise.R`, fix failing tests when connection to GEO is alternatively up/down between two tests.
 
 
 # NACHO 0.6.0
