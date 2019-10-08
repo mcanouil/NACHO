@@ -24,7 +24,7 @@
 
 ### Local server
 
-* Linux Debian 4.9.110-3+deb9u2, R 3.6.0: OK
+* Linux Debian 4.9.110-3+deb9u2, R 3.6.1: OK
 
 ### Appveyor-ci
 
