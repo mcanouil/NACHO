@@ -2,6 +2,12 @@
 
 ## Minor improvements and fixes
 
+* In `DESCRIPTION`, add `"SystemRequirements: pandoc (>= 1.12.3) - http://pandoc.org"`.
+* In `R/render.R`, 
+  - explicit import for `opts_chunk::knitr` in roxygen documentation.
+  - explicit import for `sessioninfo::session_info` in roxygen documentation.
+* In `tests/testthat/test-render.R`, now checks if pandoc is available.
+
 
 # NACHO 0.6.0
 
