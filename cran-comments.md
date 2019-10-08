@@ -2,10 +2,10 @@
 
 * Now functions are imported explicitly in roxygen documentation
   * Version: 0.6.0  
-    Check: dependencies in R code  
-    Result: NOTE  
-        Namespaces in Imports field not imported from: ‘knitr’ ‘sessioninfo’  
-        All declared Imports should be used.  
+      Check: dependencies in R code  
+      Result: NOTE  
+          Namespaces in Imports field not imported from: ‘knitr’ ‘sessioninfo’  
+          All declared Imports should be used.  
     Flavors: **r-devel-linux-x86_64-fedora-clang**, **r-devel-linux-x86_64-fedora-gcc**, **r-patched-solaris-x86**
 
 * Add missing `SystemRequirements` field (and check for pandoc availability in tests)
