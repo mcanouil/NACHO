@@ -2,7 +2,7 @@
 
 ## Minor improvements and fixes
 
-* In `DESCRIPTION`, add `"SystemRequirements: pandoc (>= 1.12.3) - http://pandoc.org"`.
+* In `DESCRIPTION`, add `"SystemRequirements: pandoc (>= 1.12.3) - http://pandoc.org, pandoc-citeproc"`.
 * In `R/render.R`, 
   - explicit import for `opts_chunk::knitr` in roxygen documentation.
   - explicit import for `sessioninfo::session_info` in roxygen documentation.
