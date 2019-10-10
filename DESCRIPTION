@@ -44,7 +44,9 @@ Suggests:
     Biobase,
     GEOquery,
     testthat
-SystemRequirements: pandoc (>= 1.12.3) - http://pandoc.org
+SystemRequirements: 
+    pandoc (>= 1.12.3), 
+    pandoc-citeproc
 LazyData: true
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
