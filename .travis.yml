@@ -1,7 +1,6 @@
-language: R
+language: r
 cache: packages
-sudo: true
-
+os: linux
 
 env:
   global:
@@ -21,7 +20,7 @@ r_github_packages:
 bioc_packages:
   - GEOquery
 
-matrix:
+jobs:
   include:
   - r: devel
   - r: release
@@ -30,7 +29,7 @@ matrix:
     deploy:
       provider: script
       script: Rscript -e 'pkgdown::deploy_site_github()'
-      skip_cleanup: true
+      cleanup: false
   - r: 3.5
   - r: 3.6
 
