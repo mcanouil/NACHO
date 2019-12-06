@@ -36,31 +36,31 @@ BugReports: https://github.com/mcanouil/NACHO/issues
 Depends: 
     R (>= 3.5.0)
 Imports:
-    cli,
-    crayon,
-    dplyr,
-    ggbeeswarm,
-    ggplot2,
-    ggpubr,
-    ggrepel,
-    gtools,
-    knitr,
-    magrittr,
-    magrittr,
-    purrr,
-    rmarkdown,
-    rstudioapi,
-    scales,
-    sessioninfo,
-    shiny,
-    tibble,
-    tidyr,
+    cli (>= 1.1.0),
+    crayon (>= 1.3.4),
+    dplyr (>= 0.8.3),
+    ggbeeswarm (>= 0.6.0),
+    ggplot2 (>= 3.2.1),
+    ggpubr (>= 0.2.3),
+    ggrepel (>= 0.8.1),
+    gtools (>= 3.8.1),
+    knitr (>= 1.25),
+    magrittr (>= 1.5),
+    magrittr (>= 1.5),
+    purrr (>= 0.3.3),
+    rmarkdown (>= 1.16),
+    rstudioapi (>= 0.10),
+    scales (>= 1.0.0),
+    sessioninfo (>= 1.1.1),
+    shiny (>= 1.4.0),
+    tibble (>= 2.1.3),
+    tidyr (>= 1.0.0),
     utils
 Suggests:
-    Biobase,
-    covr,
-    GEOquery,
-    testthat
+    Biobase (>= 2.44.0),
+    covr (>= 3.3.2),
+    GEOquery (>= 2.52.0),
+    testthat (>= 2.2.1)
 VignetteBuilder: 
     knitr
 Encoding: UTF-8
