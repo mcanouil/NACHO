@@ -46,7 +46,6 @@ Imports:
     gtools (>= 3.8.1),
     knitr (>= 1.25),
     magrittr (>= 1.5),
-    magrittr (>= 1.5),
     purrr (>= 0.3.3),
     rmarkdown (>= 1.16),
     rstudioapi (>= 0.10),
