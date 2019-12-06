@@ -1,3 +1,5 @@
+# nocov start
+
 .onAttach <- function(...) {
   crayon::num_colors(TRUE)
   if (!"package:conflicted" %in% search()) {
@@ -137,3 +139,5 @@ style_grey <- function(level, ...) {
     crayon::make_style(grDevices::grey(level), grey = TRUE)
   )
 }
+
+# nocov end
