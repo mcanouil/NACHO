@@ -1,59 +1,70 @@
-Package: NACHO
 Type: Package
+Package: NACHO
 Title: NanoString Quality Control Dashboard
 Version: 0.6.1.9000
-Authors@R: c(
-    person(given = "Mickaël", family = "Canouil", role = c("aut", "cre"), email = "mickael.canouil@cnrs.fr", 
-      comment = c(ORCID = "0000-0002-3396-4549")
-    ),
-    person(given = "Roderick", family = "Slieker", role = "aut", email = "R.C.Slieker@lumc.nl",
-      comment = c(ORCID = "0000-0003-0961-9152")
-    ),
-    person(given = "Gerard", family = "Bouland", role = "aut", email = "G.A.Bouland@lumc.nl")
-  )
-Description: NanoString nCounter data are gene expression assays where there is no need for the use of enzymes 
-    or amplification protocols and work with fluorescent barcodes (Geiss et al. (2018) <doi:10.1038/nbt1385>). 
-    Each barcode is assigned a messenger-RNA/micro-RNA (mRNA/miRNA) which after bonding with its target can be counted. 
-    As a result each count of a specific barcode represents the presence of its target mRNA/miRNA.  
-    'NACHO' (NAnoString quality Control dasHbOard) is able to analyse the exported NanoString nCounter 
-    data and facilitates the user in performing a quality control.  
-    'NACHO' does this by visualising quality control metrics, expression of control genes, 
-    principal components and sample specific size factors in an interactive web application. 
+Authors@R: 
+    c(person(given = "Mickaël",
+             family = "Canouil",
+             role = c("aut", "cre"),
+             email = "mickael.canouil@cnrs.fr",
+             comment = c(ORCID = "0000-0002-3396-4549")),
+      person(given = "Roderick",
+             family = "Slieker",
+             role = "aut",
+             email = "R.C.Slieker@lumc.nl",
+             comment = c(ORCID = "0000-0003-0961-9152")),
+      person(given = "Gerard",
+             family = "Bouland",
+             role = "aut",
+             email = "G.A.Bouland@lumc.nl"))
+Description: NanoString nCounter data are gene expression assays
+    where there is no need for the use of enzymes or amplification
+    protocols and work with fluorescent barcodes (Geiss et al. (2018)
+    <doi:10.1038/nbt1385>).  Each barcode is assigned a
+    messenger-RNA/micro-RNA (mRNA/miRNA) which after bonding with its
+    target can be counted.  As a result each count of a specific barcode
+    represents the presence of its target mRNA/miRNA.  'NACHO' (NAnoString
+    quality Control dasHbOard) is able to analyse the exported NanoString
+    nCounter data and facilitates the user in performing a quality
+    control.  'NACHO' does this by visualising quality control metrics,
+    expression of control genes, principal components and sample specific
+    size factors in an interactive web application.
 License: GPL-3 | file LICENSE
-URL: https://github.com/mcanouil/NACHO, https://mcanouil.github.io/NACHO
+URL: https://github.com/mcanouil/NACHO,
+    https://mcanouil.github.io/NACHO
 BugReports: https://github.com/mcanouil/NACHO/issues
-Depends: R (>= 3.5.0)
+Depends: 
+    R (>= 3.5.0)
 Imports:
-    utils,
-    tibble,
-    dplyr,
-    tidyr,
-    shiny,
-    scales,
-    ggplot2,
-    ggbeeswarm,
-    ggrepel,
-    ggpubr,
-    gtools,
-    magrittr,
-    knitr,
-    rmarkdown,
-    sessioninfo,
     cli,
-    purrr,
-    magrittr,
     crayon,
-    rstudioapi
+    dplyr,
+    ggbeeswarm,
+    ggplot2,
+    ggpubr,
+    ggrepel,
+    gtools,
+    knitr,
+    magrittr,
+    magrittr,
+    purrr,
+    rmarkdown,
+    rstudioapi,
+    scales,
+    sessioninfo,
+    shiny,
+    tibble,
+    tidyr,
+    utils
 Suggests:
-    covr,
     Biobase,
+    covr,
     GEOquery,
     testthat
-SystemRequirements: 
-    pandoc (>= 1.12.3), 
-    pandoc-citeproc
-LazyData: true
-RoxygenNote: 6.1.1
-Roxygen: list(markdown = TRUE)
-VignetteBuilder: knitr
+VignetteBuilder: 
+    knitr
 Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.1.1
+SystemRequirements: pandoc (>= 1.12.3), pandoc-citeproc
