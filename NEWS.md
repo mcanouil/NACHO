@@ -1,5 +1,12 @@
 # NACHO (development version)
 
+## New features
+
+* In `R/conflicts.R`, conflicts are now printed when attaching `NACHO`.
+* In `DESCRIPTION`, 
+    - Order packages in alphabetical order.
+    - Add packages' version.
+
 # NACHO 0.6.1
 
 ## Minor improvements and fixes
