@@ -11,9 +11,9 @@ is_attached <- function(x) {
   paste0("package:", x) %in% search()
 }
 
-#' Conflicts between the nacho and other packages
+#' Conflicts between the NACHO and other packages
 #'
-#' This function lists all the conflicts between packages in the nacho
+#' This function lists all the conflicts between packages in the NACHO
 #' and other packages that you have loaded.
 #'
 #' There are four conflicts that are deliberately ignored: \code{intersect},
