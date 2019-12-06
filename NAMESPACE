@@ -2,8 +2,10 @@
 
 S3method(autoplot,nacho)
 S3method(print,nacho)
+S3method(print,nacho_conflicts)
 export("%>%")
 export(autoplot)
+export(nacho_conflicts)
 export(normalise)
 export(normalize)
 export(render)
