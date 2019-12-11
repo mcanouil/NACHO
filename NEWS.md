@@ -7,6 +7,11 @@
     - Order packages in alphabetical order.
     - Add packages' version.
 
+## Minor improvements and fixes
+
+* In `R/visualise.R`, replace datatable (render and output) with classical table.
+
+
 # NACHO 0.6.1
 
 ## Minor improvements and fixes
