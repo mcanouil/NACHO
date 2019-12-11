@@ -154,7 +154,7 @@ visualise <- function(nacho_object) {
             shiny::tabPanel(title = "About", value = "about")
           ),
           shiny::uiOutput("subtab"),
-          shiny::dataTableOutput("outlier_table"),
+          shiny::tableOutput("outlier_table"),
           shiny::plotOutput(outputId = "all", width = "100%", height = "600px")
         )
       )
@@ -547,7 +547,7 @@ visualise <- function(nacho_object) {
         )
       })
 
-      output$outlier_table <- shiny::renderDataTable({
+      output$outlier_table <- shiny::renderTable({
         shiny::req(input$maintabs == "ot")
         details_out <- details_outlier(
           nacho_df = nacho,
