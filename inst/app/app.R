@@ -6,8 +6,6 @@ library(ggplot2)
 library(dplyr)
 library(NACHO)
 
-addResourcePath("www", "./www")
-
 source("utils.R")
 
 ui <- tagList(
