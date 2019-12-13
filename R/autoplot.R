@@ -110,7 +110,7 @@ plot_metrics <- function(
   labels <- c(
     "BD" = "Binding Density",
     "FoV" = "Field of View",
-    "PC" = "Positive Control linearity",
+    "PC" = "Positive Control Linearity",
     "LoD" = "Limit of Detection"
   )
   units <- c(
@@ -135,7 +135,7 @@ plot_metrics <- function(
       colour = !!ggplot2::sym(colour)
     )
   ) +
-    ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggbeeswarm::geom_quasirandom(size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
     ggplot2::labs(
       x = attribute,
@@ -193,7 +193,7 @@ plot_cg <- function(
       colour = !!ggplot2::sym(colour)
     )
   ) +
-    ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggbeeswarm::geom_quasirandom(size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
     ggplot2::scale_y_log10(limits = c(1, NA)) +
     ggplot2::labs(
@@ -252,16 +252,31 @@ plot_pn <- function(
       group = !!ggplot2::sym("Name")
     )
   ) +
-    ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::geom_line() +
     ggplot2::facet_wrap(facets = "CodeClass", scales = "free_y", ncol = 2) +
     ggplot2::scale_y_log10(limits = c(1, NA)) +
     ggplot2::scale_x_discrete(labels = NULL) +
-    ggplot2::labs(x = "Sample Index", y = "Counts + 1", colour = "Control") +
+    ggplot2::labs(
+      x = "Sample Index",
+      y = "Counts + 1",
+      colour = "Control",
+      linetype = "Smooth"
+    ) +
     ggplot2::theme(
       axis.ticks.x = ggplot2::element_blank(),
       panel.grid.major.x = ggplot2::element_blank(),
       panel.grid.minor.x = ggplot2::element_blank()
+    ) +
+    ggplot2::geom_smooth(
+      mapping = ggplot2::aes(
+        x = as.numeric(as.factor(!!ggplot2::sym(nacho_object$access))),
+        linetype = "Loess",
+        group = "CodeClass"
+      ),
+      colour = "black",
+      se = TRUE,
+      method = "loess"
     ) +
     {if (!show_legend) ggplot2::guides(colour = "none")}
 }
@@ -297,7 +312,7 @@ plot_acbd <- function(
         colour = !!ggplot2::sym(colour)
       )
     ) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
       ggplot2::geom_point(size = size, na.rm = TRUE) +
       ggplot2::labs(
         x = "Average Counts",
@@ -337,7 +352,7 @@ plot_acmc <- function(
         colour = !!ggplot2::sym(colour)
       )
     ) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
       ggplot2::geom_point(size = size, na.rm = TRUE) +
       ggplot2::labs(
         x = "Average Counts",
@@ -378,8 +393,12 @@ plot_pca12 <- function(
       )
     ) +
       ggplot2::geom_point(size = size, na.rm = TRUE) +
-      ggplot2::stat_ellipse(na.rm = TRUE) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+      # ggplot2::stat_ellipse(na.rm = TRUE) +
+      ggforce::geom_mark_ellipse(na.rm = TRUE) +
+      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+      ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+      ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
+      ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(0.25)) +
       {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
@@ -427,12 +446,17 @@ plot_pca <- function(
       mapping = ggplot2::aes(
         x = !!ggplot2::sym("X"),
         y = !!ggplot2::sym("Y"),
-        colour = !!ggplot2::sym(colour)
+        colour = !!ggplot2::sym(colour),
+        fill = !!ggplot2::sym(colour)
       )
     ) +
       ggplot2::geom_point(size = size, na.rm = TRUE) +
-      ggplot2::stat_ellipse(na.rm = TRUE) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+      # ggplot2::stat_ellipse(na.rm = TRUE) +
+      ggforce::geom_mark_ellipse(na.rm = TRUE) +
+      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+      ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+      ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
+      ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(0.25)) +
       ggplot2::labs(x = NULL, y = NULL) +
       ggplot2::facet_grid(
         rows = ggplot2::vars(!!ggplot2::sym("Y.PC")),
@@ -462,7 +486,7 @@ plot_pcai <- function(
     ggplot2::ggplot(
       mapping = ggplot2::aes(x = !!ggplot2::sym("PC"), y = !!dplyr::sym("Proportion of Variance"))
     ) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
       ggplot2::geom_bar(stat = "identity") +
       ggplot2::geom_text(
         mapping = ggplot2::aes(label = !!ggplot2::sym("PoV")),
@@ -508,10 +532,27 @@ plot_pfnf <- function(
         colour = !!ggplot2::sym(colour)
       )
     ) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
       ggplot2::geom_point(size = size, na.rm = TRUE) +
       ggplot2::labs(x = "Negative Factor", y = "Positive Factor") +
       ggplot2::scale_y_log10() +
+      # ggplot2::geom_rect(
+      #   data = dplyr::tibble(
+      #     ymin = nacho_object$outliers_thresholds[["Positive_factor"]],
+      #     ymax = c(-Inf, Inf)[seq_along(!!dplyr::sym("ymin"))]
+      #   ),
+      #   mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = !!ggplot2::sym("ymin"), ymax = !!ggplot2::sym("ymax")),
+      #   fill = "firebrick2",
+      #   alpha = 0.2,
+      #   colour = "transparent",
+      #   inherit.aes = FALSE
+      # ) +
+      # ggplot2::geom_hline(
+      #   data = dplyr::tibble(value = nacho_object$outliers_thresholds[["Positive_factor"]]),
+      #   mapping = ggplot2::aes(yintercept = !!ggplot2::sym("value")),
+      #   colour = "firebrick2",
+      #   linetype = "longdash"
+      # ) +
       {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
@@ -546,11 +587,45 @@ plot_hf <- function(
         colour = !!ggplot2::sym(colour)
       )
     ) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
       ggplot2::geom_point(size = size, na.rm = TRUE) +
       ggplot2::labs(x = "Positive Factor", y = "Houskeeping Factor") +
       ggplot2::scale_x_log10() +
       ggplot2::scale_y_log10() +
+      # ggplot2::geom_rect(
+      #   data = dplyr::tibble(
+      #     ymin = nacho_object$outliers_thresholds[["House_factor"]],
+      #     ymax = c(-Inf, Inf)[seq_along(!!dplyr::sym("ymin"))]
+      #   ),
+      #   mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = !!ggplot2::sym("ymin"), ymax = !!ggplot2::sym("ymax")),
+      #   fill = "firebrick2",
+      #   alpha = 0.2,
+      #   colour = "transparent",
+      #   inherit.aes = FALSE
+      # ) +
+      # ggplot2::geom_hline(
+      #   data = dplyr::tibble(value = nacho_object$outliers_thresholds[["House_factor"]]),
+      #   mapping = ggplot2::aes(yintercept = !!ggplot2::sym("value")),
+      #   colour = "firebrick2",
+      #   linetype = "longdash"
+      # ) +
+      # ggplot2::geom_rect(
+      #   data = dplyr::tibble(
+      #     xmin = nacho_object$outliers_thresholds[["Positive_factor"]],
+      #     xmax = c(-Inf, Inf)[seq_along(!!dplyr::sym("xmin"))]
+      #   ),
+      #   mapping = ggplot2::aes(ymin = -Inf, ymax = Inf, xmin = !!ggplot2::sym("xmin"), xmax = !!ggplot2::sym("xmax")),
+      #   fill = "firebrick2",
+      #   alpha = 0.2,
+      #   colour = "transparent",
+      #   inherit.aes = FALSE
+      # ) +
+      # ggplot2::geom_vline(
+      #   data = dplyr::tibble(value = nacho_object$outliers_thresholds[["Positive_factor"]]),
+      #   mapping = ggplot2::aes(xintercept = !!ggplot2::sym("value")),
+      #   colour = "firebrick2",
+      #   linetype = "longdash"
+      # ) +
       {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
@@ -607,7 +682,7 @@ plot_norm <- function(
         na.rm = TRUE
       ) +
       ggplot2::facet_grid(cols = ggplot2::vars(!!ggplot2::sym("Status"))) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = -1, end = 0.9) +
+      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
       ggplot2::scale_x_discrete(label = NULL) +
       ggplot2::scale_y_log10(limits = c(1, NA)) +
       ggplot2::labs(
