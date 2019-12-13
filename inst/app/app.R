@@ -14,7 +14,7 @@ ui <- tagList(
   ))),
   navbarPage(
     theme = "united-bootstrap.min.css",
-    title = div(img(src = "www/nacho_hex.png", height = 18), "NACHO"),
+    title = span(img(src = "nacho_hex.png", height = 18), "NACHO"),
     windowTitle = "NACHO",
     collapsible = TRUE,
     # footer = div(
