@@ -10,7 +10,7 @@
 #'
 #'    * `"BD"` (Binding Density)
 #'    * `"FoV"` (Imaging)
-#'    * `"PC"` (Positive Control Linearity)
+#'    * `"PCL"` (Positive Control Linearity)
 #'    * `"LoD"` (Limit of Detection)
 #'    * `"Positive"` (Positive Controls)
 #'    * `"Negative"` (Negative Controls)
@@ -44,7 +44,7 @@ autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_l
     stop(
       paste(
         '[NACHO] "x" is missing. It must be one of the following possible values:',
-        '  * "BD", "FoV", "PC", "LoD"',
+        '  * "BD", "FoV", "PCL", "LoD"',
         '  * "Positive", "Negative", "Housekeeping", "PN"',
         '  * "ACBD", "ACMC"',
         '  * "PCA12", "PCAi", "PCA"',
@@ -55,14 +55,14 @@ autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_l
   }
   if (is.null(attribute)) attribute <- "CartridgeID"
 
-  if (attr(object, "RCC_type") == "n8" & x %in% c("PC", "LoD")) {
-    stop('[NACHO] "PC" and "LoD" are not available for the provided NanoString dataset.')
+  if (attr(object, "RCC_type") == "n8" & x %in% c("PCL", "LoD")) {
+    stop('[NACHO] "PCL" and "LoD" are not available for the provided NanoString dataset.')
   }
   switch(
     EXPR = x,
     "BD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
     "FoV" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
-    "PC" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
+    "PCL" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
     "LoD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
     "Positive" = plot_cg(nacho_object = object, x, colour, size, show_legend),
     "Negative" = plot_cg(nacho_object = object, x, colour, size, show_legend),
@@ -79,7 +79,7 @@ autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_l
     stop(
       paste(
         '[NACHO] "x" must be one of the following possible values:',
-        '  * "BD", "FoV", "PC", "LoD"',
+        '  * "BD", "FoV", "PCL", "LoD"',
         '  * "Positive", "Negative", "Housekeeping", "PN"',
         '  * "ACBD", "ACMC"',
         '  * "PCA12", "PCAi", "PCA"',
@@ -110,13 +110,13 @@ plot_metrics <- function(
   labels <- c(
     "BD" = "Binding Density",
     "FoV" = "Field of View",
-    "PC" = "Positive Control Linearity",
+    "PCL" = "Positive Control Linearity",
     "LoD" = "Limit of Detection"
   )
   units <- c(
     "BD" = '"(Optical features / ", mu, m^2, ")"',
     "FoV" = '"(% Counted)"',
-    "PC" = '(R^2)',
+    "PCL" = '(R^2)',
     "LoD" = '"(Z)"'
   )
   ggplot2::ggplot(
