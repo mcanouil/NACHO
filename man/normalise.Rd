@@ -70,8 +70,8 @@ Outliers definition (\code{remove_outliers}):
 \itemize{
 \item Binding Density (\code{BD}) < 0.1
 \item Binding Density (\code{BD}) > 2.25
-\item Imaging (\code{FoV}) < 75
-\item Positive Control Linearity (\code{PC}) < 0.95
+\item Field of View (\code{FoV}) < 75
+\item Positive Control Linearity (\code{PCL}) < 0.95
 \item Limit of Detection (\code{LoD}) < 2
 \item Positive normalisation factor (\code{Positive_factor}) < 0.25
 \item Positive normalisation factor (\code{Positive_factor}) > 4

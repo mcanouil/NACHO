@@ -16,15 +16,15 @@ qc_features <- function(data, id_colname) {
     counts <- .data[grep("Endogenous", .data[["CodeClass"]]), ][["Count"]]
 
     if (any(grepl("POS_E", positives[["Name"]]))) {
-      pc <- qc_positive_control(counts = positives)
+      pcl <- qc_positive_control(counts = positives)
       negatives <- .data[.data[["CodeClass"]] %in% "Negative", ][["Count"]]
-      ld <- qc_limit_detection(
+      lod <- qc_limit_detection(
         pos_e = positives[[grep("POS_E", positives[["Name"]]), "Count"]],
         negatives = negatives
       )
     } else {
-      pc <- 0
-      ld <- 0
+      pcl <- 0
+      lod <- 0
     }
     fov <- qc_imaging(
       fov_counted = as.numeric(unique(.data[["lane_FovCounted"]])),
@@ -42,8 +42,8 @@ qc_features <- function(data, id_colname) {
       "StagePosition" = unique(.data[["lane_StagePosition"]]),
       "CartridgeID" = unique(.data[["lane_CartridgeID"]]),
       "FoV" = fov,
-      "PC" = ifelse(is.na(pc), 0, pc),
-      "LoD" = ld,
+      "PCL" = ifelse(is.na(pcl), 0, pcl),
+      "LoD" = lod,
       "MC" = mean_count,
       "MedC" = median_count
     )
@@ -51,8 +51,8 @@ qc_features <- function(data, id_colname) {
 
   output <- as.data.frame(do.call("rbind", output), stringsAsFactors = FALSE)
   output[[id_colname]] <- nested_data_df[[id_colname]]
-  output[c("BD", "FoV", "PC", "LoD", "MC", "MedC")] <- lapply(
-    X = output[c("BD", "FoV", "PC", "LoD", "MC", "MedC")],
+  output[c("BD", "FoV", "PCL", "LoD", "MC", "MedC")] <- lapply(
+    X = output[c("BD", "FoV", "PCL", "LoD", "MC", "MedC")],
     FUN = as.numeric
   )
 

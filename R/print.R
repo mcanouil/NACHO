@@ -53,7 +53,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
       round(x$outliers_thresholds[["BD"]][1], 3), '\n',
     '    + ', 'Binding Density (BD) >',
       round(x$outliers_thresholds[["BD"]][2], 3), '\n',
-    '    + ', 'Imaging (FoV) <',
+    '    + ', 'Field of View (FoV) <',
       round(x$outliers_thresholds[["FoV"]], 3), '\n',
     '    + ', 'Positive Control Linearity (PC) <',
       round(x$outliers_thresholds[["PC"]], 3), '\n',
@@ -73,13 +73,13 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   labels <- c(
     "BD" = "Binding Density",
     "FoV" = "Field of View (Imaging)",
-    "PC" = "Positive Control linearity",
+    "PCL" = "Positive Control Linearity",
     "LoD" = "Limit of Detection"
   )
   units <- c(
     "BD" = '"(Optical features / ", mu, m^2, ")"',
     "FoV" = '"(% Counted)"',
-    "PC" = '(R^2)',
+    "PCL" = '(R^2)',
     "LoD" = '"(Z)"'
   )
   details <- c(
@@ -114,7 +114,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
       "Lanes will be flagged if this percentage is lower.",
       sep = "\n"
     ),
-    "PC" = paste(
+    "PCL" = paste(
       "Six synthetic DNA control targets are included with every nCounter Gene Expression assay.",
       "Their concentrations range linearly from `128 fM` to `0.125 fM`, and they are referred to as **POS_A** to **POS_F**, respectively.",
       "These **Positive Controls** are typically used to measure the efficiency of the hybridization reaction, and their step-wise concentrations also make them useful in checking the linearity performance of the assay.",
@@ -142,7 +142,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
 
   metrics <- switch(
     EXPR = attr(x, "RCC_type"),
-    "n1" = c("BD", "FoV", "PC", "LoD"),
+    "n1" = c("BD", "FoV", "PCL", "LoD"),
     "n8" = c("BD", "FoV")
   )
 
