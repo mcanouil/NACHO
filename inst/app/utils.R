@@ -178,7 +178,7 @@ plotInput <- function(id, nacho) {
       autoplot_values <- c(
         "bd" = "BD",
         "fov" = "FoV",
-        "pcl" = "PC",
+        "pcl" = "PCL",
         "lod" = "LoD",
         "pp" = "Positive",
         "np" = "Negative",

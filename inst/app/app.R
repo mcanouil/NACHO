@@ -100,7 +100,7 @@ server <- function(input, output, session) {
       BD = input$qc_bd_thresh %||% nacho_current$outliers_thresholds[["BD"]],
       FoV = input$qc_fov_thresh %||% nacho_current$outliers_thresholds[["FoV"]],
       LoD = input$qc_lod_thresh %||% nacho_current$outliers_thresholds[["LoD"]],
-      PC = input$qc_pcl_thresh %||% nacho_current$outliers_thresholds[["PC"]],
+      PCL = input$qc_pcl_thresh %||% nacho_current$outliers_thresholds[["PCL"]],
       Positive_factor = nacho_current$outliers_thresholds[["Positive_factor"]],
       House_factor = nacho_current$outliers_thresholds[["House_factor"]]
     )
@@ -165,12 +165,12 @@ server <- function(input, output, session) {
 
   output[["outliers-server"]] <- renderTable({
     ot <- nacho_custom()$outliers_thresholds
-    df <- distinct(nacho_custom()$nacho, sample_ID, CartridgeID, BD, FoV, PC, LoD, MC, MedC)
+    df <- distinct(nacho_custom()$nacho, sample_ID, CartridgeID, BD, FoV, PCL, LoD, MC, MedC)
     filter(df,
       BD < min(ot[["BD"]]) |
       BD > max(ot[["BD"]]) |
       FoV < ot[["FoV"]] |
-      PC < ot[["PC"]] |
+      PCL < ot[["PCL"]] |
       LoD < ot[["LoD"]]
     )
   })

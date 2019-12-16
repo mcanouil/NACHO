@@ -12,8 +12,8 @@
 #'
 #'  * Binding Density (`BD`) < 0.1
 #'  * Binding Density (`BD`) > 2.25
-#'  * Imaging (`FoV`) < 75
-#'  * Positive Control Linearity (`PC`) < 0.95
+#'  * Field of View (`FoV`) < 75
+#'  * Positive Control Linearity (`PCL`) < 0.95
 #'  * Limit of Detection (`LoD`) < 2
 #'  * Positive normalisation factor (`Positive_factor`) < 0.25
 #'  * Positive normalisation factor (`Positive_factor`) > 4

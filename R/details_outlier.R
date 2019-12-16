@@ -15,10 +15,10 @@ details_outlier <- function(nacho_df, id_colname, outliers_thresholds) {
   )
   binding_out <- nacho_df[[id_colname]][binding_thresh_logical]
   fov_out <- nacho_df[[id_colname]][which(nacho_df[["FoV"]] < outliers_thresholds[["FoV"]])]
-  if (!all(nacho_df[["PC"]]==0)) {
-    pc_out <- nacho_df[[id_colname]][which(nacho_df[["PC"]] < outliers_thresholds[["PC"]])]
+  if (!all(nacho_df[["PCL"]]==0)) {
+    pcl_out <- nacho_df[[id_colname]][which(nacho_df[["PCL"]] < outliers_thresholds[["PCL"]])]
   } else {
-    pc_out <- NULL
+    pcl_out <- NULL
   }
   if (!all(nacho_df[["LoD"]]==0)) {
     lod_out <- nacho_df[[id_colname]][which(nacho_df[["LoD"]] < outliers_thresholds[["LoD"]])]
@@ -39,7 +39,7 @@ details_outlier <- function(nacho_df, id_colname, outliers_thresholds) {
   list(
     "binding_out" = unique(binding_out),
     "fov_out" = unique(fov_out),
-    "pc_out" = unique(pc_out),
+    "pcl_out" = unique(pcl_out),
     "lod_out" = unique(lod_out),
     "house_out" = unique(house_out),
     "fac_out" = unique(fac_out)

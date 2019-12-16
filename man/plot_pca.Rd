@@ -12,7 +12,7 @@ The possible values are:
 \itemize{
 \item \code{"BD"} (Binding Density)
 \item \code{"FoV"} (Imaging)
-\item \code{"PC"} (Positive Control Linearity)
+\item \code{"PCL"} (Positive Control Linearity)
 \item \code{"LoD"} (Limit of Detection)
 \item \code{"Positive"} (Positive Controls)
 \item \code{"Negative"} (Negative Controls)
