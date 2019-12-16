@@ -55,8 +55,8 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
       round(x$outliers_thresholds[["BD"]][2], 3), '\n',
     '    + ', 'Field of View (FoV) <',
       round(x$outliers_thresholds[["FoV"]], 3), '\n',
-    '    + ', 'Positive Control Linearity (PC) <',
-      round(x$outliers_thresholds[["PC"]], 3), '\n',
+    '    + ', 'Positive Control Linearity (PCL) <',
+      round(x$outliers_thresholds[["PCL"]], 3), '\n',
     '    + ', 'Limit of Detection (LoD) <',
       round(x$outliers_thresholds[["LoD"]], 3), '\n',
     '    + ', 'Positive normalisation factor (Positive_factor) <',
@@ -238,7 +238,7 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   cat(prefix_title(title_level, 0), "Normalisation Factors\n\n")
 
   cat(prefix_title(title_level, 1), "Positive Factor vs. Background Threshold\n\n")
- print(autoplot.nacho(
+  print(autoplot.nacho(
     x = "PFNF",
     object = x,
     colour = colour,
