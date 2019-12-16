@@ -182,6 +182,8 @@ summarise <- function(
     n_comp = n_comp
   )
 
+  attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
+
   ot <- list(
     BD = c(0.1, 2.25),
     FoV = 75,
@@ -217,8 +219,6 @@ summarise <- function(
     count_column = "Count_Norm"
   )
   nacho_object[["normalised_counts"]] <- norm_counts
-
-  attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
 
   message(paste(
     "[NACHO] Returning a list.",
