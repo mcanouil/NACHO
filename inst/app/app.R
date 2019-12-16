@@ -184,12 +184,33 @@ server <- function(input, output, session) {
     )
   })
   output[["outliers"]] <- renderTable({ outliers_list() })
+  output[["outliers-thresholds"]] <- renderUI({
+    ot <- lapply(nacho_custom()$outliers_thresholds, round, digits = 3)
+    tags$div(
+      tags$ul(
+        tags$li(
+          'Binding Density (', code("BD"), ') <', strong(min(ot[["BD"]])),
+          'or Binding Density (', code("BD"), ') >', strong(max(ot[["BD"]]))
+        ),
+        tags$li('Field of View (', code("FoV"), ') <', strong(ot[["FoV"]])),
+        tags$li('Positive Control Linearity (', code("PCL"), ') <', strong(min(ot[["PCL"]]))),
+        tags$li('Limit of Detection (', code("LoD"), ') <', strong(min(ot[["LoD"]]))),
+        tags$li(
+          'Positive Normalisation Dactor (', code("Positive_factor"), ') <', strong(min(ot[["Positive_factor"]])),
+          'or Positive Normalisation Dactor (', code("Positive_factor"), ') >', strong(max(ot[["Positive_factor"]]))),
+        tags$li(
+          'Housekeeping Normalisation Factor (', code("house_factor"), ') <', strong(min(ot[["House_factor"]])),
+          'or Housekeeping Normalisation Dactor (', code("house_factor"), ') >', strong(max(ot[["House_factor"]]))
+        )
+      )
+    )
+  })
   observe({
     req(nrow(outliers_list()) != 0)
     insertTab("main-menu",
       tab = {
         tabPanel(title = "Outliers", value = "outliers-tab",
-          fluidRow(column(width = 12, align = "center", tableOutput("outliers")))
+          card(title = h4("Outliers List"), list(uiOutput("outliers-thresholds"), tableOutput("outliers")))
         )
       },
       target = "about-tab",
