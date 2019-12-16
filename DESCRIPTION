@@ -55,12 +55,14 @@ Imports:
     shiny (>= 1.4.0),
     tibble (>= 2.1.3),
     tidyr (>= 1.0.0),
-    utils
+    utils,
+    rlang (>= 0.1.2)
 Suggests:
     Biobase (>= 2.44.0),
     covr (>= 3.3.2),
     GEOquery (>= 2.52.0),
-    testthat (>= 2.2.1)
+    testthat (>= 2.2.1),
+    roxygen2
 VignetteBuilder: 
     knitr
 Encoding: UTF-8
