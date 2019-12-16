@@ -56,10 +56,10 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
   }
 }
 
-card <- function(label, plot, width = 12) {
+card <- function(title, body, width = 12) {
   div(class = paste0("card border-dark mb-", width),
-    div(class = "card-header", align = "center", label),
-    div(class = "card-body", align = "center", plot)
+    div(class = "card-header", align = "center", title),
+    div(class = "card-body", align = "center", body)
   )
 }
 
@@ -67,7 +67,7 @@ plotInputUI <- function(label = NULL, ...) {
   id <- tolower(gsub('\\b(\\pL)\\pL|.', '\\U\\1', label, perl = TRUE))
   ns <- NS(id)
   card(
-    label = {
+    title = {
       h4(label, align = "center",
         dropdownButton(
           uiOutput(ns("plot_ui")),
@@ -82,7 +82,7 @@ plotInputUI <- function(label = NULL, ...) {
         )
       )
     },
-    plot = {plotOutput(ns("server"), height = "350px")},
+    body = {plotOutput(ns("plot"), height = "350px")},
     width = 12
   )
 }
@@ -135,13 +135,13 @@ plotInput <- function(id, nacho) {
             column(6, align = "center",
               sliderInput(ns("point_size"), span("Point Size", helpText("(mm)")),
                 value = isolate(input$point_size) %||% 2,
-                min = 1, max = 4
+                min = 1, max = 4, step = 0.5
               )
             ),
             column(6, align = "center",
               sliderInput(ns("outliers_point_size"), span("Outliers Point Size", helpText("(Factor x Point Size)")),
                 value = isolate(input$outliers_point_size) %||% 1.2,
-                min = 1, max = 2
+                min = 1, max = 2, step = 0.1
               )
             )
           )
@@ -180,7 +180,7 @@ plotInput <- function(id, nacho) {
       )
     })
 
-    output$server <- renderPlot({
+    output$plot <- renderPlot({
       autoplot_values <- c(
         "bd" = "BD",
         "fov" = "FoV",
