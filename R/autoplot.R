@@ -25,8 +25,6 @@
 #'    * `"HF"` (Housekeeping Factor)
 #'    * `"NORM"` (Normalisation Factor)
 #'
-#' @param attribute [[character]] A character string to indicate which RCC attributes should be used
-#'
 #' @param ... Other arguments (Not used).
 #'
 #' @return NULL
@@ -39,7 +37,16 @@
 #' autoplot(GSE74821, x = "PCA12")
 #' autoplot(GSE74821, x = "NORM")
 #'
-autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_legend = TRUE, attribute = NULL, ...) {
+autoplot.nacho <- function(
+  object, x,
+  colour = "CartridgeID",
+  size = 0.5,
+  show_legend = TRUE,
+  show_outliers = TRUE,
+  outliers_factor = 1,
+  outliers_labels = FALSE,
+  ...
+) {
   if (missing(x) | is.null(x)) {
     stop(
       paste(
@@ -53,28 +60,30 @@ autoplot.nacho <- function(object, x, colour = "CartridgeID", size = 0.5, show_l
       )
     )
   }
-  if (is.null(attribute)) attribute <- "CartridgeID"
+  object <- check_outliers(object)
+
+  if (outliers_labels) show_outliers <- TRUE
 
   if (attr(object, "RCC_type") == "n8" & x %in% c("PCL", "LoD")) {
     stop('[NACHO] "PCL" and "LoD" are not available for the provided NanoString dataset.')
   }
   switch(
     EXPR = x,
-    "BD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
-    "FoV" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
-    "PCL" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
-    "LoD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, attribute),
-    "Positive" = plot_cg(nacho_object = object, x, colour, size, show_legend),
-    "Negative" = plot_cg(nacho_object = object, x, colour, size, show_legend),
-    "Housekeeping" = plot_cg(nacho_object = object, x, colour, size, show_legend),
-    "PN" = plot_pn(nacho_object = object, x, colour, size, show_legend),
-    "ACBD" = plot_acbd(nacho_object = object, x, colour, size, show_legend),
+    "BD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
+    "FoV" = plot_metrics(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
+    "PCL" = plot_metrics(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
+    "LoD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
+    "Positive" = plot_cg(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
+    "Negative" = plot_cg(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
+    "Housekeeping" = plot_cg(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
+    "PN" = plot_pn(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
+    "ACBD" = plot_acbd(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
     "ACMC" = plot_acmc(nacho_object = object, x, colour, size, show_legend),
     "PCA12" = plot_pca12(nacho_object = object, x, colour, size, show_legend),
     "PCAi" = plot_pcai(nacho_object = object, x, colour, size, show_legend),
     "PCA" = plot_pca(nacho_object = object, x, colour, size, show_legend),
-    "PFNF" = plot_pfnf(nacho_object = object, x, colour, size, show_legend),
-    "HF" = plot_hf(nacho_object = object, x, colour, size, show_legend),
+    "PFNF" = plot_pfnf(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
+    "HF" = plot_hf(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
     "NORM" = plot_norm(nacho_object = object, x, colour, size, show_legend),
     stop(
       paste(
@@ -103,10 +112,10 @@ plot_metrics <- function(
   colour,
   size,
   show_legend,
-  attribute
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
-  if (missing(attribute) | is.null(attribute)) attribute <- "CartridgeID"
-
   labels <- c(
     "BD" = "Binding Density",
     "FoV" = "Field of View",
@@ -126,25 +135,53 @@ plot_metrics <- function(
         !!colour,
         !!nacho_object$access,
         !!x,
-        !!attribute
+        is_outlier
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
-      x = .data[[attribute]],
+      x = .data[["CartridgeID"]],
       y = .data[[x]],
       colour = .data[[colour]]
     )
   ) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::geom_boxplot(
-      mapping = ggplot2::aes(group = .data[[attribute]]),
+      mapping = ggplot2::aes(group = .data[["CartridgeID"]]),
+      fill = NA,
       outlier.shape = NA,
       na.rm = TRUE,
       show.legend = FALSE
     ) +
-    ggbeeswarm::geom_quasirandom(size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
+    {
+      if (show_outliers) {
+        list(
+          ggbeeswarm::geom_quasirandom(
+            data = ~ dplyr::filter(.x, !is_outlier),
+            size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE
+          ),
+          ggbeeswarm::geom_quasirandom(
+            data = ~ dplyr::filter(.x, is_outlier),
+            size = size * outliers_factor,
+            colour = "red",
+            width = 0.25,
+            na.rm = TRUE,
+            groupOnX = TRUE
+          ),
+          if (outliers_labels) {
+            ggrepel::geom_label_repel(
+              data = ~ dplyr::filter(.x, is_outlier),
+              mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
+              colour = "red",
+              na.rm = TRUE
+            )
+          }
+        )
+      } else {
+        ggbeeswarm::geom_quasirandom(size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE)
+      }
+    } +
     ggplot2::labs(
-      x = attribute,
+      x = "CartridgeID",
       y = parse(text = paste0('paste("', labels[x], '", " ", ',  units[x], ")")),
       colour = colour
     ) +
@@ -181,7 +218,10 @@ plot_cg <- function(
   x,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
   p <- ggplot2::ggplot(
     data = nacho_object$nacho %>%
@@ -191,7 +231,8 @@ plot_cg <- function(
         !!colour,
         !!nacho_object$access,
         "Name",
-        "Count"
+        "Count",
+      is_outlier
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
@@ -203,11 +244,39 @@ plot_cg <- function(
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::geom_boxplot(
       mapping = ggplot2::aes(group = .data[["Name"]]),
+      fill = NA,
       outlier.shape = NA,
       na.rm = TRUE,
       show.legend = FALSE
     ) +
-    ggbeeswarm::geom_quasirandom(size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE) +
+    {
+      if (show_outliers) {
+        list(
+          ggbeeswarm::geom_quasirandom(
+            data = ~ dplyr::filter(.x, !is_outlier),
+            size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE
+          ),
+          ggbeeswarm::geom_quasirandom(
+            data = ~ dplyr::filter(.x, is_outlier),
+            size = size * outliers_factor,
+            colour = "red",
+            width = 0.25,
+            na.rm = TRUE,
+            groupOnX = TRUE
+          ),
+          if (outliers_labels) {
+            ggrepel::geom_label_repel(
+              data = ~ dplyr::filter(.x, is_outlier),
+              mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
+              colour = "red",
+              na.rm = TRUE
+            )
+          }
+        )
+      } else {
+        ggbeeswarm::geom_quasirandom(size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE)
+      }
+    } +
     ggplot2::scale_y_log10(
       limits = c(1, NA),
       labels = scales::comma_format(accuracy = 1, big.mark = ",")
@@ -248,7 +317,10 @@ plot_pn <- function(
   x,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
@@ -259,7 +331,8 @@ plot_pn <- function(
         !!nacho_object$access,
         "CodeClass",
         "Name",
-        "Count"
+        "Count",
+        is_outlier
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
@@ -313,7 +386,10 @@ plot_acbd <- function(
   x,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
   nacho_object$nacho %>%
     dplyr::select(
@@ -321,7 +397,8 @@ plot_acbd <- function(
       !!colour,
       !!nacho_object$access,
       "MC",
-      "BD"
+      "BD",
+      is_outlier
     ) %>%
     dplyr::distinct() %>%
     ggplot2::ggplot(
@@ -332,7 +409,32 @@ plot_acbd <- function(
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      ggplot2::geom_point(size = size, na.rm = TRUE) +
+      {
+        if (show_outliers) {
+          list(
+            ggplot2::geom_point(
+              data = ~ dplyr::filter(.x, !is_outlier),
+              size = size, na.rm = TRUE
+            ),
+            ggplot2::geom_point(
+              data = ~ dplyr::filter(.x, is_outlier),
+              size = size * outliers_factor,
+              colour = "red",
+              na.rm = TRUE
+            ),
+            if (outliers_labels) {
+              ggrepel::geom_label_repel(
+                data = ~ dplyr::filter(.x, is_outlier),
+                mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
+                colour = "red",
+                na.rm = TRUE
+              )
+            }
+          )
+        } else {
+          ggplot2::geom_point(size = size, na.rm = TRUE)
+        }
+      } +
       ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = 1, big.mark = ",")) +
       ggplot2::labs(
         x = "Average Counts",
@@ -434,7 +536,6 @@ plot_pca12 <- function(
       )
     ) +
       ggplot2::geom_point(size = size, na.rm = TRUE) +
-      # ggplot2::stat_ellipse(na.rm = TRUE) +
       ggforce::geom_mark_ellipse(na.rm = TRUE) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
       ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
@@ -492,7 +593,6 @@ plot_pca <- function(
       )
     ) +
       ggplot2::geom_point(size = size, na.rm = TRUE) +
-      # ggplot2::stat_ellipse(na.rm = TRUE) +
       ggforce::geom_mark_ellipse(na.rm = TRUE) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
       ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
@@ -555,7 +655,10 @@ plot_pfnf <- function(
   x,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
   nacho_object$nacho %>%
     dplyr::select(
@@ -563,7 +666,8 @@ plot_pfnf <- function(
       !!colour,
       !!nacho_object$access,
       "Negative_factor",
-      "Positive_factor"
+      "Positive_factor",
+      is_outlier
     ) %>%
     dplyr::distinct() %>%
     ggplot2::ggplot(
@@ -574,7 +678,32 @@ plot_pfnf <- function(
       )
     ) +
       ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      ggplot2::geom_point(size = size, na.rm = TRUE) +
+      {
+        if (show_outliers) {
+          list(
+            ggplot2::geom_point(
+              data = ~ dplyr::filter(.x, !is_outlier),
+              size = size, na.rm = TRUE
+            ),
+            ggplot2::geom_point(
+              data = ~ dplyr::filter(.x, is_outlier),
+              size = size * outliers_factor,
+              colour = "red",
+              na.rm = TRUE
+            ),
+            if (outliers_labels) {
+              ggrepel::geom_label_repel(
+                data = ~ dplyr::filter(.x, is_outlier),
+                mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
+                colour = "red",
+                na.rm = TRUE
+              )
+            }
+          )
+        } else {
+          ggplot2::geom_point(size = size, na.rm = TRUE)
+        }
+      } +
       ggplot2::labs(x = "Negative Factor", y = "Positive Factor", colour = colour) +
       ggplot2::scale_y_log10() +
       ggplot2::geom_rect(
@@ -610,55 +739,84 @@ plot_hf <- function(
   x,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
   ggplot2::ggplot(
-      data = nacho_object$nacho %>%
-        dplyr::select(
-          "CartridgeID",
-          !!colour,
-          !!nacho_object$access,
-          "House_factor",
-          "Positive_factor"
-        ) %>%
-        dplyr::distinct(),
-      mapping = ggplot2::aes(
-        x = .data[["Positive_factor"]],
-        y = .data[["House_factor"]],
-        colour = .data[[colour]]
-      )
+    data = nacho_object$nacho %>%
+      dplyr::select(
+        "CartridgeID",
+        !!colour,
+        !!nacho_object$access,
+        "House_factor",
+        "Positive_factor",
+        is_outlier
+      ) %>%
+      dplyr::distinct(),
+    mapping = ggplot2::aes(
+      x = .data[["Positive_factor"]],
+      y = .data[["House_factor"]],
+      colour = .data[[colour]]
+    )
+  ) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+    {
+      if (show_outliers) {
+        list(
+          ggplot2::geom_point(
+            data = ~ dplyr::filter(.x, !is_outlier),
+            size = size, na.rm = TRUE
+          ),
+          ggplot2::geom_point(
+            data = ~ dplyr::filter(.x, is_outlier),
+            size = size * outliers_factor,
+            colour = "red",
+            na.rm = TRUE
+          ),
+          if (outliers_labels) {
+            ggrepel::geom_label_repel(
+              data = ~ dplyr::filter(.x, is_outlier),
+              mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
+              colour = "red",
+              na.rm = TRUE
+            )
+          }
+        )
+      } else {
+        ggplot2::geom_point(size = size, na.rm = TRUE)
+      }
+    } +
+    ggplot2::labs(x = "Positive Factor", y = "Housekeeping Factor", colour = colour) +
+    ggplot2::scale_x_log10() +
+    ggplot2::scale_y_log10() +
+    ggplot2::geom_rect(
+      data = dplyr::tibble(
+        xmin = c(0, 0, nacho_object$outliers_thresholds[["Positive_factor"]]),
+        xmax = c(Inf, Inf, 0, Inf),
+        ymin = c(nacho_object$outliers_thresholds[["House_factor"]], 0, 0),
+        ymax = c(0, Inf, Inf, Inf)
+      ),
+      mapping = ggplot2::aes(xmin = .data[["xmin"]], xmax = .data[["xmax"]], ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
+      fill = "firebrick2",
+      alpha = 0.2,
+      colour = "transparent",
+      inherit.aes = FALSE
     ) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      ggplot2::geom_point(size = size, na.rm = TRUE) +
-      ggplot2::labs(x = "Positive Factor", y = "Housekeeping Factor", colour = colour) +
-      ggplot2::scale_x_log10() +
-      ggplot2::scale_y_log10() +
-      ggplot2::geom_rect(
-        data = dplyr::tibble(
-          xmin = c(0, 0, nacho_object$outliers_thresholds[["Positive_factor"]]),
-          xmax = c(Inf, Inf, 0, Inf),
-          ymin = c(nacho_object$outliers_thresholds[["House_factor"]], 0, 0),
-          ymax = c(0, Inf, Inf, Inf)
-        ),
-        mapping = ggplot2::aes(xmin = .data[["xmin"]], xmax = .data[["xmax"]], ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
-        fill = "firebrick2",
-        alpha = 0.2,
-        colour = "transparent",
-        inherit.aes = FALSE
-      ) +
-      ggplot2::geom_hline(
-        data = dplyr::tibble(value = nacho_object$outliers_thresholds[["House_factor"]]),
-        mapping = ggplot2::aes(yintercept = .data[["value"]]),
-        colour = "firebrick2",
-        linetype = "longdash"
-      ) +
-      ggplot2::geom_vline(
-        data = dplyr::tibble(value = nacho_object$outliers_thresholds[["Positive_factor"]]),
-        mapping = ggplot2::aes(xintercept = .data[["value"]]),
-        colour = "firebrick2",
-        linetype = "longdash"
-      ) +
-      {if (!show_legend) ggplot2::guides(colour = "none")}
+    ggplot2::geom_hline(
+      data = dplyr::tibble(value = nacho_object$outliers_thresholds[["House_factor"]]),
+      mapping = ggplot2::aes(yintercept = .data[["value"]]),
+      colour = "firebrick2",
+      linetype = "longdash"
+    ) +
+    ggplot2::geom_vline(
+      data = dplyr::tibble(value = nacho_object$outliers_thresholds[["Positive_factor"]]),
+      mapping = ggplot2::aes(xintercept = .data[["value"]]),
+      colour = "firebrick2",
+      linetype = "longdash"
+    ) +
+    {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
 
@@ -674,7 +832,10 @@ plot_norm <- function(
   x,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
   if (is.null(nacho_object$housekeeping_genes)) {
     probe_var <- dplyr::sym("CodeClass")
@@ -690,7 +851,8 @@ plot_norm <- function(
       !!nacho_object$access,
       "Count",
       "Count_Norm",
-      "Name"
+      "Name",
+      is_outlier
     ) %>%
     dplyr::distinct() %>%
     dplyr::filter(!!probe_var %in% !!probe_type) %>%

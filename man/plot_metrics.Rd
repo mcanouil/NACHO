@@ -4,7 +4,8 @@
 \alias{plot_metrics}
 \title{plot_metrics}
 \usage{
-plot_metrics(nacho_object, x, colour, size, show_legend, attribute)
+plot_metrics(nacho_object, x, colour, size, show_legend, show_outliers,
+  outliers_factor, outliers_labels)
 }
 \arguments{
 \item{x}{[\link{character}] Character string naming the quality-control metrics to plot from \code{nacho_object}.
@@ -37,7 +38,13 @@ or line size (\link{geom_line}).}
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 
-\item{attribute}{[\link{character}] A character string to indicate which RCC attributes should be used}
+\item{show_outliers}{[\link{logical}] Boolean to indicate whether the outliers should be highlighted
+in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
+
+\item{outliers_factor}{[\link{numeric}] Size factor for outliers compared to \code{size}. Default is \code{1}.}
+
+\item{outliers_labels}{[\link{logical}] Boolean to indicate whether the labels for outliers should be printed
+in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
 }
 \description{
 plot_metrics
