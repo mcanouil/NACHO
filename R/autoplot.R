@@ -131,7 +131,7 @@ plot_metrics <- function(
   if (attr(nacho_object, "RCC_type") == "n8" & x %in% c("PCL", "LoD")) {
     message('[NACHO] "PCL" and "LoD" are not available for RCC type "n8".')
     return(
-      ggplot() +
+      ggplot2::ggplot() +
         ggplot2::labs(
           x = "CartridgeID",
           y = parse(text = paste0('paste("', labels[x], '", " ", ',  units[x], ")")),
