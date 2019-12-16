@@ -188,7 +188,7 @@ plotInput <- function(id, nacho) {
         "acvmc" = "ACMC",
         "pca" = "PCA",
         "pcai" = "PCAi",
-        "pfvbt" = "PFNF",
+        "pfvnf" = "PFNF",
         "hgf" = "HF",
         "nr" = "NORM"
       )
@@ -200,7 +200,15 @@ plotInput <- function(id, nacho) {
         size = input[["point_size"]] %||% 2,
         show_legend = as.logical(input[["show_levels"]] %||% TRUE)
       ) +
-        theme_minimal(base_size = input[["font_size"]] %||% 16)
+        theme_minimal(base_size = input[["font_size"]] %||% 16) +
+        {
+          if (x_metrics %in% c("NORM", "PN")) {
+            ggplot2::theme(
+              panel.grid.major.x = ggplot2::element_blank(),
+              panel.grid.minor.x = ggplot2::element_blank()
+            )
+          }
+        }
     })
   })
 }
