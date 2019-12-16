@@ -1,7 +1,7 @@
 context("visualise() in non-interactive session")
 
-test_that("visualise should return an app object if R session is not interactive", {
-  expect_s3_class(visualise(GSE74821), class = "shiny.appobj")
+test_that("visualise should return an error object if R session is not interactive", {
+  expect_error(visualise(GSE74821))
 })
 
 context("visualise() field missing")
