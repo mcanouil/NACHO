@@ -63,7 +63,7 @@
 #' }
 #'
 visualise <- function(nacho_object) {
-  if (missing(nacho_object) {
+  if (missing(nacho_object)) {
     stop(
       '[NACHO] "nacho_object" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
     )

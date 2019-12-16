@@ -33,7 +33,7 @@ print.nacho <- function(
   title_level = 1,
   ...
 ) {
-  if (missing(x) {
+  if (missing(x)) {
     stop(
       '[NACHO] "x" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
     )
