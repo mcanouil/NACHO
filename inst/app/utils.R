@@ -204,7 +204,10 @@ plotInput <- function(id, nacho) {
         object = nacho,
         colour = input[["group_colour"]] %||% "CartridgeID",
         size = input[["point_size"]] %||% 2,
-        show_legend = as.logical(input[["show_levels"]] %||% TRUE)
+        show_legend = as.logical(input[["show_levels"]] %||% TRUE),
+        show_outliers = as.logical(input[["show_outliers"]] %||% TRUE),
+        outliers_factor = input[["outliers_point_size"]] %||% 2,
+        outliers_labels = as.logical(input[["show_outliers_labels"]] %||% FALSE)
       ) +
         theme_minimal(base_size = input[["font_size"]] %||% 16) +
         {
