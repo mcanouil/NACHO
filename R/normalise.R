@@ -108,7 +108,7 @@ normalise <- function(
   remove_outliers = nacho_object[["remove_outliers"]],
   outliers_thresholds = nacho_object[["outliers_thresholds"]]
 ) {
-  if (missing(nacho_object) {
+  if (missing(nacho_object)) {
     stop(
       '[NACHO] "nacho_object" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
     )
