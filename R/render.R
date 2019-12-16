@@ -17,6 +17,11 @@
 #'   or line size ([geom_line]).
 #' @param show_legend [[logical]] Boolean to indicate whether the plot legends should
 #'   be plotted (`TRUE`) or not (`FALSE`). Default is `TRUE`.
+#' @param show_outliers [[logical]] Boolean to indicate whether the outliers should be highlighted
+#'   in red (`TRUE`) or not (`FALSE`). Default is `TRUE`.
+#' @param outliers_factor [[numeric]] Size factor for outliers compared to `size`. Default is `1`.
+#' @param outliers_labels [[logical]] Boolean to indicate whether the labels for outliers should be printed
+#'   in red (`TRUE`) or not (`FALSE`). Default is `FALSE`.
 #' @param clean [[logical]] Boolean to indicate whether the Rmd and Rdata file used to produce the HTML report
 #'   are removed from `output_dir`. Default is `TRUE`.
 #'
@@ -37,8 +42,11 @@ render <- function(
   colour = "CartridgeID",
   output_file = "NACHO_QC.html",
   output_dir = ".",
-  size = 0.5,
+  size = 1,
   show_legend = TRUE,
+  show_outliers = TRUE,
+  outliers_factor = 1,
+  outliers_labels = FALSE,
   clean = TRUE
 ) {
   temp_dir <- file.path(normalizePath(output_dir), "tmp_nacho")
@@ -101,6 +109,9 @@ render <- function(
     paste0('  colour = "', colour, '",'),
     paste0('  size = ', size, ','),
     paste0('  show_legend = ', show_legend, ','),
+    paste0('  show_outliers = ', show_outliers, ','),
+    paste0('  outliers_factor = ', outliers_factor, ','),
+    paste0('  outliers_labels = ', outliers_labels, ','),
     '  echo = TRUE',
     ')',
     '```',
