@@ -21,8 +21,21 @@
 #' data(GSE74821)
 #' print(GSE74821)
 #'
-print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FALSE, echo = FALSE, title_level = 1, ...) {
+print.nacho <- function(
+  x,
+  colour = "CartridgeID",
+  size = 0.5,
+  show_legend = FALSE,
+  show_outliers = TRUE,
+  outliers_factor = 1,
+  outliers_labels = FALSE,
+  echo = FALSE,
+  title_level = 1,
+  ...
+) {
   if (!echo) return(utils::str(x, 1))
+
+  x <- check_outliers(x)
 
   if (is.numeric(x$nacho[[colour]])) {
     x$nacho[[colour]] <- as.character(x$nacho[[colour]])
@@ -115,7 +128,10 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
       object = x,
       colour = colour,
       size = size,
-      show_legend = show_legend
+      show_legend = show_legend,
+      show_outliers = show_outliers,
+      outliers_factor = outliers_factor,
+      outliers_labels = outliers_labels
     )))
     cat("\n")
   }
@@ -146,7 +162,10 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
         object = x,
         colour = colour,
         size = size,
-        show_legend = show_legend
+        show_legend = show_legend,
+        show_outliers = show_outliers,
+        outliers_factor = outliers_factor,
+        outliers_labels = outliers_labels
       )))
       cat("\n")
     }
