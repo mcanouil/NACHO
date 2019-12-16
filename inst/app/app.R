@@ -82,8 +82,8 @@ ui <- tagList(
           )
         )
       },
-      plotInputUI("Positive Factor vs. Background Threshold"),
-      plotInputUI("Houskeeeping Genes Factor", right = TRUE),
+      plotInputUI("Positive Factor vs. Negative Factor"),
+      plotInputUI("Housekeeeping Genes Factor", right = TRUE),
       plotInputUI("Normalisation Result", right = TRUE)
     ),
     panelInputUI("outliers", "Outliers",
@@ -114,7 +114,7 @@ server <- function(input, output, session) {
         "bd", "fov", "pcl", "lod",
         "pp", "np", "hgp", "cpe",
         "acvbd", "acvmc", "pca", "pcai",
-        "pfvbt", "hgf", "nr"
+        "pfvnf", "hgf", "nr"
       ),
       .f = ~plotInput(.x, nacho_custom())
     )
