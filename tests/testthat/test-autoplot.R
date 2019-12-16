@@ -7,7 +7,7 @@ test_that('Wrong "x"', {
 })
 
 metrics <- c(
-  "BD", "FoV", "PC", "LoD",
+  "BD", "FoV", "PCL", "LoD",
   "Positive", "Negative", "Housekeeping",
   "PN", "ACBD", "ACMC",
   "PCA12", "PCAi", "PCA",
