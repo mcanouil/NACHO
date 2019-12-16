@@ -8,7 +8,11 @@ library(NACHO)
 
 source("utils.R")
 
-ui <- navbarPage(
+ui <- tagList(
+  tags$head(tags$style(HTML(
+    ".navbar-nav { float: none !important; } .navbar-nav > li:nth-child(6) { float: right; }"
+  ))),
+  navbarPage(
   theme = "united-bootstrap.min.css",
   title = span(img(src = "nacho_hex.png", height = 18), "NACHO"),
   windowTitle = "NACHO",
@@ -83,10 +87,13 @@ ui <- navbarPage(
     plotInputUI("Housekeeeping Genes Factor", right = TRUE),
     plotInputUI("Normalisation Result", right = TRUE)
   ),
+  tabPanel(title = "Outliers", value = "outliers-tab",
+    card(title = h4("Outliers List"), list(uiOutput("outliers-thresholds"), tableOutput("outliers")))
+  ),
   tabPanel("About", icon = icon("info"), value = "about-tab",
     p(includeMarkdown("www/about-nacho.md"))
   )
-)
+))
 
 server <- function(input, output, session) {
   nacho_object <- reactive({ get(data(GSE74821, package = "NACHO")) })
@@ -125,14 +132,12 @@ server <- function(input, output, session) {
     updateSliderInput(session, "qc_fov_thresh",
       value = isolate(input$qc_fov_thresh)
     )
-    if (attr(nacho_object(), "RCC_type") == "n1") {
-      updateSliderInput(session, "qc_pcl_thresh",
-        value = isolate(input$qc_pcl_thresh)
-      )
-      updateSliderInput(session, "qc_lod_thresh",
-        value = isolate(input$qc_lod_thresh)
-      )
-    }
+    updateSliderInput(session, "qc_pcl_thresh",
+      value = isolate(input$qc_pcl_thresh)
+    )
+    updateSliderInput(session, "qc_lod_thresh",
+      value = isolate(input$qc_lod_thresh)
+    )
   })
 
   ## Help for QC metrics
@@ -171,8 +176,8 @@ server <- function(input, output, session) {
 
   # ---------------------------------------- Output
   outliers_list <- reactive({
-    distinct(
-      nacho_custom()$nacho,
+    dplyr::distinct(
+      dplyr::filter(nacho_custom()$nacho, .data[["is_outlier"]]),
       sample_ID, CartridgeID, BD, FoV, PCL, LoD, MC, MedC,
       Positive_factor, House_factor
     )
@@ -200,16 +205,11 @@ server <- function(input, output, session) {
     )
   })
   observe({
-    req(nrow(outliers_list()) != 0)
-    insertTab("main-menu",
-      tab = {
-        tabPanel(title = "Outliers", value = "outliers-tab",
-          card(title = h4("Outliers List"), list(uiOutput("outliers-thresholds"), tableOutput("outliers")))
-        )
-      },
-      target = "about-tab",
-      position = "before"
-    )
+    if (nrow(outliers_list()) == 0) {
+      hideTab("main-menu", target = "outliers-tab")
+    } else {
+      showTab("main-menu", target = "outliers-tab")
+    }
   })
 }
 
