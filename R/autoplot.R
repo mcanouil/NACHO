@@ -80,7 +80,7 @@ autoplot.nacho <- function(
     "ACBD" = plot_acbd(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
     "ACMC" = plot_acmc(nacho_object = object, x, colour, size, show_legend),
     "PCA12" = plot_pca12(nacho_object = object, x, colour, size, show_legend),
-    "PCAi" = plot_pcai(nacho_object = object, x, colour, size, show_legend),
+    "PCAi" = plot_pcai(nacho_object = object, x, colour, size),
     "PCA" = plot_pca(nacho_object = object, x, colour, size, show_legend),
     "PFNF" = plot_pfnf(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
     "HF" = plot_hf(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
@@ -128,6 +128,17 @@ plot_metrics <- function(
     "PCL" = '(R^2)',
     "LoD" = '"(Z)"'
   )
+  if (attr(nacho_object, "RCC_type") == "n8" & x %in% c("PCL", "LoD")) {
+    message('[NACHO] "PCL" and "LoD" are not available for RCC type "n8".')
+    return(
+      ggplot() +
+        ggplot2::labs(
+          x = "CartridgeID",
+          y = parse(text = paste0('paste("', labels[x], '", " ", ',  units[x], ")")),
+          colour = colour
+        )
+    )
+  }
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
       dplyr::select(
@@ -598,7 +609,7 @@ plot_pca <- function(
       ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
       ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
       ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(0.25)) +
-      ggplot2::labs(x = NULL, y = NULL, colour = colour) +
+      ggplot2::labs(x = NULL, y = NULL, colour = colour, fill = colour) +
       ggplot2::facet_grid(
         rows = ggplot2::vars(.data[["Y.PC"]]),
         cols = ggplot2::vars(.data[["X.PC"]]),
@@ -619,8 +630,7 @@ plot_pcai <- function(
   nacho_object,
   x,
   colour,
-  size,
-  show_legend
+  size
 ) {
   nacho_object$pc_sum %>%
     dplyr::mutate(PoV = scales::percent(!!dplyr::sym("Proportion of Variance"))) %>%
@@ -638,8 +648,7 @@ plot_pcai <- function(
         labels = scales::percent,
         expand = ggplot2::expand_scale(mult = c(0, 0.15))
       ) +
-      ggplot2::labs(x = "Number of Principal Component", y = "Proportion of Variance", colour = colour) +
-      {if (!show_legend) ggplot2::guides(colour = "none")}
+      ggplot2::labs(x = "Principal Components", y = "Proportion of Variance")
 }
 
 
