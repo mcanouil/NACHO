@@ -135,7 +135,7 @@ plot_metrics <- function(
         !!colour,
         !!nacho_object$access,
         !!x,
-        is_outlier
+        "is_outlier"
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
@@ -156,11 +156,11 @@ plot_metrics <- function(
       if (show_outliers) {
         list(
           ggbeeswarm::geom_quasirandom(
-            data = ~ dplyr::filter(.x, !is_outlier),
+            data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
             size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE
           ),
           ggbeeswarm::geom_quasirandom(
-            data = ~ dplyr::filter(.x, is_outlier),
+            data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
             size = size * outliers_factor,
             colour = "red",
             width = 0.25,
@@ -169,7 +169,7 @@ plot_metrics <- function(
           ),
           if (outliers_labels) {
             ggrepel::geom_label_repel(
-              data = ~ dplyr::filter(.x, is_outlier),
+              data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
               mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
               colour = "red",
               na.rm = TRUE
@@ -232,7 +232,7 @@ plot_cg <- function(
         !!nacho_object$access,
         "Name",
         "Count",
-      is_outlier
+        "is_outlier"
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
@@ -253,11 +253,11 @@ plot_cg <- function(
       if (show_outliers) {
         list(
           ggbeeswarm::geom_quasirandom(
-            data = ~ dplyr::filter(.x, !is_outlier),
+            data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
             size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE
           ),
           ggbeeswarm::geom_quasirandom(
-            data = ~ dplyr::filter(.x, is_outlier),
+            data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
             size = size * outliers_factor,
             colour = "red",
             width = 0.25,
@@ -266,7 +266,7 @@ plot_cg <- function(
           ),
           if (outliers_labels) {
             ggrepel::geom_label_repel(
-              data = ~ dplyr::filter(.x, is_outlier),
+              data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
               mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
               colour = "red",
               na.rm = TRUE
@@ -332,7 +332,7 @@ plot_pn <- function(
         "CodeClass",
         "Name",
         "Count",
-        is_outlier
+        "is_outlier"
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
@@ -398,7 +398,7 @@ plot_acbd <- function(
       !!nacho_object$access,
       "MC",
       "BD",
-      is_outlier
+      "is_outlier"
     ) %>%
     dplyr::distinct() %>%
     ggplot2::ggplot(
@@ -413,18 +413,18 @@ plot_acbd <- function(
         if (show_outliers) {
           list(
             ggplot2::geom_point(
-              data = ~ dplyr::filter(.x, !is_outlier),
+              data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
               size = size, na.rm = TRUE
             ),
             ggplot2::geom_point(
-              data = ~ dplyr::filter(.x, is_outlier),
+              data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
               size = size * outliers_factor,
               colour = "red",
               na.rm = TRUE
             ),
             if (outliers_labels) {
               ggrepel::geom_label_repel(
-                data = ~ dplyr::filter(.x, is_outlier),
+                data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
                 mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
                 colour = "red",
                 na.rm = TRUE
@@ -667,7 +667,7 @@ plot_pfnf <- function(
       !!nacho_object$access,
       "Negative_factor",
       "Positive_factor",
-      is_outlier
+      "is_outlier"
     ) %>%
     dplyr::distinct() %>%
     ggplot2::ggplot(
@@ -682,18 +682,18 @@ plot_pfnf <- function(
         if (show_outliers) {
           list(
             ggplot2::geom_point(
-              data = ~ dplyr::filter(.x, !is_outlier),
+              data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
               size = size, na.rm = TRUE
             ),
             ggplot2::geom_point(
-              data = ~ dplyr::filter(.x, is_outlier),
+              data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
               size = size * outliers_factor,
               colour = "red",
               na.rm = TRUE
             ),
             if (outliers_labels) {
               ggrepel::geom_label_repel(
-                data = ~ dplyr::filter(.x, is_outlier),
+                data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
                 mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
                 colour = "red",
                 na.rm = TRUE
@@ -752,7 +752,7 @@ plot_hf <- function(
         !!nacho_object$access,
         "House_factor",
         "Positive_factor",
-        is_outlier
+        "is_outlier"
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
@@ -766,18 +766,18 @@ plot_hf <- function(
       if (show_outliers) {
         list(
           ggplot2::geom_point(
-            data = ~ dplyr::filter(.x, !is_outlier),
+            data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
             size = size, na.rm = TRUE
           ),
           ggplot2::geom_point(
-            data = ~ dplyr::filter(.x, is_outlier),
+            data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
             size = size * outliers_factor,
             colour = "red",
             na.rm = TRUE
           ),
           if (outliers_labels) {
             ggrepel::geom_label_repel(
-              data = ~ dplyr::filter(.x, is_outlier),
+              data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
               mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
               colour = "red",
               na.rm = TRUE
@@ -852,7 +852,7 @@ plot_norm <- function(
       "Count",
       "Count_Norm",
       "Name",
-      is_outlier
+      "is_outlier"
     ) %>%
     dplyr::distinct() %>%
     dplyr::filter(!!probe_var %in% !!probe_type) %>%
