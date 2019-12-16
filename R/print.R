@@ -110,13 +110,13 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   for (imetric in metrics) {
     cat(prefix_title(title_level, 1), labels[imetric], "\n\n")
     cat(details[imetric], "\n")
-    print(autoplot.nacho(
+    suppressWarnings(print(autoplot.nacho(
       x = imetric,
       object = x,
       colour = colour,
       size = size,
       show_legend = show_legend
-    ))
+    )))
     cat("\n")
   }
 
@@ -141,13 +141,13 @@ print.nacho <- function(x, colour = "CartridgeID", size = 0.5, show_legend = FAL
   for (isection in seq(nrow(sections))) {
     cat(prefix_title(title_level, sections[isection, "level"]), sections[isection, "title"], "\n\n")
     if (!is.na(sections[isection, "plot"])) {
-      print(autoplot.nacho(
+      suppressWarnings(print(autoplot.nacho(
         x = sections[isection, "plot"],
         object = x,
         colour = colour,
         size = size,
         show_legend = show_legend
-      ))
+      )))
       cat("\n")
     }
   }
