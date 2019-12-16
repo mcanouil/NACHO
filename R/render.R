@@ -65,29 +65,6 @@ render <- function(
     '    mathjax: default',
     '    df_print: kable',
     '---',
-    sep = "\n",
-    file = temp_file,
-    append = FALSE
-  )
-
-  nacho_hex <- system.file("help", "figures", "nacho_hex.png", package = "NACHO")
-  if (!file.exists(nacho_hex)) {
-    nacho_hex <- grep("figures", list.files(
-      path = system.file(package = "NACHO"),
-      pattern = "nacho_hex.png",
-      recursive = TRUE,
-      full.names = TRUE
-    ), value = TRUE)
-  }
-
-  cat(
-    '\n<center>[![](', nacho_hex, '){width=150px}](https://mcanouil.github.io/NACHO)</center>',
-    file = temp_file,
-    append = TRUE,
-    sep = ""
-  )
-
-  cat(
     '\n',
     '```{r setup, include = FALSE}',
     'options(stringsAsFactors = FALSE)',
@@ -102,13 +79,21 @@ render <- function(
     '  autodep = TRUE,',
     '  fig.align = "center"',
     ')',
+    # 'library(NACHO)',
     '```',
-    sep = "\n",
-    file = temp_file,
-    append = TRUE
-  )
-
-  cat(
+    '\n',
+    '```{r logo, out.width = 150}',
+    'knitr::include_graphics(',
+    '  grep(',
+    '    pattern = file.path("figures", "nacho_hex.png"),',
+    '      x = list.files(',
+    '      path = system.file(package = "NACHO"),',
+    '      recursive = TRUE,',
+    '      full.names = TRUE',
+    '    ), value = TRUE',
+    '  )',
+    ')',
+    '```',
     '\n',
     '```{r nacho_qc}',
     'print.nacho(',
@@ -119,20 +104,15 @@ render <- function(
     '  echo = TRUE',
     ')',
     '```',
-    sep = "\n",
-    file = temp_file,
-    append = TRUE
-  )
-
-  cat(
-    "\n\n# R session information\n",
+    '\n\n',
+    '# R session information\n',
     '```{r session_info, results = "markup"}',
     'options("width" = 110)',
     'sessioninfo::session_info()',
     '```',
     sep = "\n",
     file = temp_file,
-    append = TRUE
+    append = FALSE
   )
 
   rmarkdown::render(

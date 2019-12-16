@@ -101,13 +101,13 @@ visualise <- function(nacho_object) {
     '  outliers_thresholds <- readRDS("', tempdir(), '/outliers_thresholds.rds")'
   )
 
-  shiny::addResourcePath("logo", system.file("help", "figures", package = "NACHO"))
+  # shiny::addResourcePath("logo", system.file("help", "figures", package = "NACHO"))
 
   app <- shiny::shinyApp(
     ui = shiny::fluidPage(
       shiny::sidebarLayout(
         shiny::sidebarPanel(width = 3,
-          shiny::div(shiny::img(src = "logo/nacho_hex.png", height = 150), align = "center"),
+          # shiny::div(shiny::img(src = "logo/nacho_hex.png", height = 150), align = "center"),
           shiny::br(),
           shiny::tabsetPanel(
             id = "settings",
