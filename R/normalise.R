@@ -162,15 +162,23 @@ normalise <- function(
   }
 
   if (remove_outliers & !nacho_object[["remove_outliers"]]) {
-    nacho_df <- exclude_outliers(nacho_object = nacho_object)
-    outliers <- setdiff(
-      unique(nacho_object[["nacho"]][[nacho_object[["access"]]]]),
-      unique(nacho_df[[nacho_object[["access"]]]])
-    )
-    if (length(outliers)!=0 | any(params_changed)) {
+    nacho_object[["outliers_thresholds"]] <- outliers_thresholds
+    ot <- outliers_thresholds
+    nacho_object[["nacho"]][, "is_outlier"] <- {
+      nacho_object[["nacho"]][, "BD"] < min(ot[["BD"]]) | nacho_object[["nacho"]][, "BD"] > max(ot[["BD"]]) |
+      nacho_object[["nacho"]][, "FoV"] < ot[["FoV"]] |
+      nacho_object[["nacho"]][, "PCL"] < ot[["PCL"]] |
+      nacho_object[["nacho"]][, "LoD"] < ot[["LoD"]] |
+      nacho_object[["nacho"]][, "Positive_factor"] < min(ot[["Positive_factor"]]) |
+        nacho_object[["nacho"]][, "Positive_factor"] > max(ot[["Positive_factor"]]) |
+      nacho_object[["nacho"]][, "House_factor"] < min(ot[["House_factor"]]) |
+        nacho_object[["nacho"]][, "House_factor"] > max(ot[["House_factor"]])
+    }
+
+    if (any(nacho_object[["nacho"]][, "is_outlier"]) | any(params_changed)) {
       nacho_object <- qc_rcc(
         data_directory = nacho_object[["data_directory"]],
-        nacho_df = nacho_df,
+        nacho_df = nacho_object[["nacho"]][which(!nacho_object[["nacho"]][, "is_outlier"]), ],
         id_colname = id_colname,
         housekeeping_genes = housekeeping_genes,
         housekeeping_predict = housekeeping_predict,
@@ -219,8 +227,6 @@ normalise <- function(
   if (!"RCC_type"%in%names(attributes(nacho_object))) {
     attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
   }
-
-  nacho_object[["outliers_thresholds"]] <- outliers_thresholds
 
   message(paste(
     "[NACHO] Returning a list.",
