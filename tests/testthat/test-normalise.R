@@ -31,7 +31,7 @@ test_that("No POS_E", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -52,7 +52,7 @@ test_that("genes not null", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -73,7 +73,7 @@ test_that("predict TRUE", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -94,7 +94,7 @@ test_that("norm TRUE", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -115,7 +115,7 @@ test_that("method GLM", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -136,7 +136,7 @@ test_that("n_comp 2", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -157,7 +157,7 @@ test_that("n_comp 10", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -178,7 +178,7 @@ test_that("outliers TRUE", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -195,7 +195,7 @@ test_that("Test outliers", {
       BD = c(0.15, 2.25),
       FoV = 95,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -218,7 +218,7 @@ test_that("All LoD to zero", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -240,7 +240,7 @@ test_that("All PC to zero", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -262,7 +262,7 @@ test_that("housekeeping_norm to FALSE and remove_outliers to TRUE", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
@@ -285,7 +285,7 @@ test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
       BD = c(0.1, 2.25),
       FoV = 75,
       LoD = 2,
-      PC = 0.95,
+      PCL = 0.95,
       Positive_factor = c(1/4, 4),
       House_factor = c(1/11, 11)
     )
