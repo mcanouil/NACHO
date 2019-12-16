@@ -10,7 +10,14 @@
 ## Minor improvements and fixes
 
 * In `R/visualise.R`, replace datatable (render and output) with classical table.
-
+* In `R/autoplot.R`, 
+    - add `show_outliers` to show outliers differently on plots (*i.e.*, in red).
+    - add `outliers_factor` to highligth outliers with different point size.
+    - add `outliers_labels` to print labels on top of outliers.
+    - now uses tidyeval via import.
+* In `R/visualise.R`, `R/render.R`, `print()`, `R/summarise.R` and `R/normalise.R`,
+    - replace function to check for outliers, now uses internal function `check_outliers`.
+* In `R/GSE74821.R`, dataset is up to date according to NACHO functions.
 
 # NACHO 0.6.1
 
