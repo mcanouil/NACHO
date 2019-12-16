@@ -28,4 +28,32 @@ for (imetric in metrics) {
       class = "ggplot"
     )
   })
+
+  test_that(paste(imetric, "show outliers and labels", sep = " - "), {
+    expect_s3_class(
+      object = autoplot(
+        object = GSE74821,
+        x = imetric,
+        show_legend = FALSE,
+        show_outliers = TRUE,
+        outliers_factor = 1,
+        outliers_labels = TRUE
+      ),
+      class = "ggplot"
+    )
+  })
+
+  test_that(paste(imetric, "hide outliers", sep = " - "), {
+    expect_s3_class(
+      object = autoplot(
+        object = GSE74821,
+        x = imetric,
+        show_legend = FALSE,
+        show_outliers = FALSE,
+        outliers_factor = 1.2,
+        outliers_labels = FALSE
+      ),
+      class = "ggplot"
+    )
+  })
 }
