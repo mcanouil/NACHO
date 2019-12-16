@@ -22,7 +22,7 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
           column(width = 6, align = "center", contents[[1]]),
           column(width = 6, align = "center", contents[[2]])
         ),
-        fluidRow(
+        fluidRow(style = "padding-top: 1em;",
           column(width = 12, align = "center", contents[[3]])
         )
       )
@@ -33,7 +33,7 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
           column(width = 6, align = "center", contents[[1]]),
           column(width = 6, align = "center", contents[[2]])
         ),
-        fluidRow(
+        fluidRow(style = "padding-top: 1em;",
           column(width = 6, align = "center", contents[[3]]),
           column(width = 6, align = "center", contents[[4]])
         )
@@ -56,12 +56,19 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
   }
 }
 
+card <- function(label, plot, width = 12) {
+  div(class = paste0("card border-dark mb-", width),
+    div(class = "card-header", align = "center", label),
+    div(class = "card-body", align = "center", plot)
+  )
+}
+
 plotInputUI <- function(label = NULL, ...) {
   id <- tolower(gsub('\\b(\\pL)\\pL|.', '\\U\\1', label, perl = TRUE))
   ns <- NS(id)
-  list(
-    fluidRow(
-        h4(label, align = "center",
+  card(
+    label = {
+      h4(label, align = "center",
         dropdownButton(
           uiOutput(ns("plot_ui")),
           circle = TRUE,
@@ -74,10 +81,9 @@ plotInputUI <- function(label = NULL, ...) {
           ...
         )
       )
-    ),
-    fluidRow(
-      column(width = 12, align = "center", plotOutput(ns("server"), height = "350px"))
-    )
+    },
+    plot = {plotOutput(ns("server"), height = "350px")},
+    width = 12
   )
 }
 
