@@ -47,6 +47,11 @@ autoplot.nacho <- function(
   outliers_labels = FALSE,
   ...
 ) {
+  if (missing(object) {
+    stop(
+      '[NACHO] "object" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
+    )
+  }
   if (missing(x) | is.null(x)) {
     stop(
       paste(

@@ -49,6 +49,14 @@ render <- function(
   outliers_labels = FALSE,
   clean = TRUE
 ) {
+  if (missing(nacho_object) {
+    stop(
+      '[NACHO] "nacho_object" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
+    )
+  }
+  if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
+    stop('[NACHO] RCC type must be either "n1" or "n8"!')
+  }
   temp_dir <- file.path(normalizePath(output_dir), "tmp_nacho")
   dir.create(temp_dir, showWarnings = FALSE)
   temp_file <- file.path(temp_dir, gsub("\\.[^.]+$", ".Rmd", output_file))
