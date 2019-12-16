@@ -6,6 +6,9 @@
 #'
 #' @return [[list]] A list containing parameters and data.#'
 check_outliers <- function(nacho_object) {
+  if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
+    stop('[NACHO] RCC type must be either "n1" or "n8"!')
+  }
   ot <- nacho_object[["outliers_thresholds"]]
   if (attr(nacho_object, "RCC_type") == "n1") {
     nacho_object[["nacho"]][, "is_outlier"] <- {
