@@ -38,7 +38,7 @@ print.nacho <- function(
       '[NACHO] "x" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
     )
   }
-  if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
+  if (!attr(x, "RCC_type") %in% c("n1", "n8")) {
     stop('[NACHO] RCC type must be either "n1" or "n8"!')
   }
   if (!echo) return(utils::str(x, 1))
