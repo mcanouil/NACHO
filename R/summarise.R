@@ -182,7 +182,7 @@ summarise <- function(
     n_comp = n_comp
   )
 
-  nacho_object[["outliers_thresholds"]] <- list(
+  ot <- list(
     BD = c(0.1, 2.25),
     FoV = 75,
     LoD = 2,
@@ -190,6 +190,17 @@ summarise <- function(
     Positive_factor = c(1/4, 4),
     House_factor = c(1/11, 11)
   )
+  nacho_object[["outliers_thresholds"]] <- ot
+  nacho_object[["nacho"]][, "is_outlier"] <- {
+    nacho_object[["nacho"]][, "BD"] < min(ot[["BD"]]) | nacho_object[["nacho"]][, "BD"] > max(ot[["BD"]]) |
+    nacho_object[["nacho"]][, "FoV"] < ot[["FoV"]] |
+    nacho_object[["nacho"]][, "PCL"] < ot[["PCL"]] |
+    nacho_object[["nacho"]][, "LoD"] < ot[["LoD"]] |
+    nacho_object[["nacho"]][, "Positive_factor"] < min(ot[["Positive_factor"]]) |
+      nacho_object[["nacho"]][, "Positive_factor"] > max(ot[["Positive_factor"]]) |
+    nacho_object[["nacho"]][, "House_factor"] < min(ot[["House_factor"]]) |
+      nacho_object[["nacho"]][, "House_factor"] > max(ot[["House_factor"]])
+  }
 
   message(
     paste0(
