@@ -1,6 +1,6 @@
 test_that("Default parameters", {
   if (rmarkdown::pandoc_available()) {
-    out <- render(nacho_object = GSE74821)
+    out <- render(nacho_object = GSE74821, clean = FALSE)
     expect_null(out)
   } else {
     expect_error(render(nacho_object = GSE74821))
