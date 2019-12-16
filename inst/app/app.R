@@ -163,24 +163,15 @@ server <- function(input, output, session) {
       nacho_object$outliers_thresholds[["Positive_factor"]]
     nacho_object$outliers_thresholds[["House_factor"]] <- input$qc_hgf_thresh %||%
       nacho_object$outliers_thresholds[["House_factor"]]
-    nacho_object
+    check_outliers(nacho_object)
   })
 
   # ---------------------------------------- Output
   outliers_list <- reactive({
-    ot <- nacho_custom()$outliers_thresholds
-    df <- distinct(
-      nacho_custom()$nacho,
+    distinct(
+      nacho_custom(),
       sample_ID, CartridgeID, BD, FoV, PCL, LoD, MC, MedC,
       Positive_factor, House_factor
-    )
-    filter(df,
-      BD < min(ot[["BD"]]) | BD > max(ot[["BD"]]) |
-      FoV < ot[["FoV"]] |
-      PCL < ot[["PCL"]] |
-      LoD < ot[["LoD"]] |
-      Positive_factor < min(ot[["Positive_factor"]]) | Positive_factor > max(ot[["Positive_factor"]]) |
-      House_factor < min(ot[["House_factor"]]) | House_factor > max(ot[["House_factor"]])
     )
   })
   output[["outliers"]] <- renderTable({ outliers_list() })
