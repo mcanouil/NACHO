@@ -89,6 +89,7 @@ ui <- navbarPage(
 )
 
 server <- function(input, output, session) {
+  nacho_object <- reactive({ get(data(GSE74821, package = "NACHO")) })
   # ---------------------------------------- UI / SERVER
   # Global UI input
   observe({
@@ -124,12 +125,14 @@ server <- function(input, output, session) {
     updateSliderInput(session, "qc_fov_thresh",
       value = isolate(input$qc_fov_thresh)
     )
-    updateSliderInput(session, "qc_pcl_thresh",
-      value = isolate(input$qc_pcl_thresh)
-    )
-    updateSliderInput(session, "qc_lod_thresh",
-      value = isolate(input$qc_lod_thresh)
-    )
+    if (attr(nacho_object(), "RCC_type") == "n1") {
+      updateSliderInput(session, "qc_pcl_thresh",
+        value = isolate(input$qc_pcl_thresh)
+      )
+      updateSliderInput(session, "qc_lod_thresh",
+        value = isolate(input$qc_lod_thresh)
+      )
+    }
   })
 
   ## Help for QC metrics
@@ -150,7 +153,7 @@ server <- function(input, output, session) {
   # ---------------------------------------- Input
   # Get nacho object and update thresholds
   nacho_custom <- reactive({
-    nacho_object <- get(data(GSE74821, package = "NACHO"))
+    nacho_object <- nacho_object()
     nacho_object$outliers_thresholds[["BD"]] <- input$qc_bd_thresh %||%
       nacho_object$outliers_thresholds[["BD"]]
     nacho_object$outliers_thresholds[["FoV"]] <- input$qc_fov_thresh %||%
@@ -169,7 +172,7 @@ server <- function(input, output, session) {
   # ---------------------------------------- Output
   outliers_list <- reactive({
     distinct(
-      nacho_custom(),
+      nacho_custom()$nacho,
       sample_ID, CartridgeID, BD, FoV, PCL, LoD, MC, MedC,
       Positive_factor, House_factor
     )
