@@ -63,13 +63,15 @@
 #' }
 #'
 visualise <- function(nacho_object) {
+  if (!inherits(nacho_object, "nacho")) {
+    stop(
+      '[NACHO] "nacho_object" must be of class "nacho" from "summarise()" and/or "normalise()" !'
+    )
+  }
   if (missing(nacho_object)) {
     stop(
       '[NACHO] "nacho_object" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
     )
-  }
-  if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
-    stop('[NACHO] RCC type must be either "n1" or "n8"!')
   }
   mandatory_fields <- c(
     "access",
@@ -94,31 +96,14 @@ visualise <- function(nacho_object) {
   }
 
   nacho_object <- check_outliers(nacho_object)
-
-  # nocov start
-  id_colname <- nacho_object[["access"]]
-  housekeeping_genes <- nacho_object[["housekeeping_genes"]]
-  housekeeping_norm <- nacho_object[["housekeeping_norm"]]
-  pc_sum <- nacho_object[["pc_sum"]]
-  nacho <- nacho_object[["nacho"]]
-  save_path_default <- nacho_object[["data_directory"]]
-  type_set <- attr(nacho_object, "RCC_type")
-  outliers_env <- new.env()
-  assign(x = "outliers_thresholds", value = nacho_object[["outliers_thresholds"]], envir = outliers_env)
-
-  message(
-    '[NACHO] Custom "outliers_thresholds" can be loaded for later use with:\n',
-    '  outliers_thresholds <- readRDS("', tempdir(), '/outliers_thresholds.rds")'
-  )
-
-  # shiny::addResourcePath("logo", system.file("help", "figures", package = "NACHO"))
+  shiny::shinyOptions(nacho_object = nacho_object)
+  on.exit(shiny::shinyOptions(nacho_object = NULL))
 
   if (!interactive()) {
     stop('[NACHO] Must be run in an interactive R session!')
-  } else {
-    shiny::runApp(system.file("app", package = "NACHO"))
   }
-  # nocov end
+
+  shiny::runApp(system.file("app", package = "NACHO"))
 }
 
 
