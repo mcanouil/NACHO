@@ -1,6 +1,6 @@
 template:
   params:
-    bootswatch: simplex
+    bootswatch: united
 
 development:
   mode: auto
