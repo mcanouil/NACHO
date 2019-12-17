@@ -16,7 +16,7 @@
     - add `outliers_labels` to print labels on top of outliers.
     - now uses tidyeval via import.
 * In `R/visualise.R`, `R/render.R`, `print()`, `R/summarise.R` and `R/normalise.R`,
-    - replace function to check for outliers, now uses internal function `check_outliers`.
+    - replace function to check for outliers, now uses `check_outliers()`.
 * In `R/GSE74821.R`, dataset is up to date according to NACHO functions.
 
 # NACHO 0.6.1
