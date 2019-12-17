@@ -6,6 +6,13 @@ test_that("visualise should return an error object if R session is not interacti
 
 context("visualise() field missing")
 
+test_that("not nacho", {
+  expect_error(visualise(iris))
+})
+test_that("nacho missing", {
+  expect_error(visualise())
+})
+
 test_that("access field missing", {
   GSE74821$access <- NULL
   expect_error(visualise(GSE74821))
