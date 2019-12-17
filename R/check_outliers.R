@@ -1,10 +1,20 @@
-#' check_outliers
+#' Annotate a "nacho" object for outliers
+#'
+#' Add or update `"is_outlier"` column in the `"nacho"` field of an object from
+#' a call to `summarise()` or `normalise()`, using the current quality-control thresholds.
 #'
 #' @inheritParams normalise
 #'
-#' @keywords internal
+#' @export
 #'
-#' @return [[list]] A list containing parameters and data.#'
+#' @return [[list]] A list containing parameters and data.
+#'
+#' @examples
+#'
+#' data(GSE74821)
+#' nacho_object <- check_outliers(GSE74821)
+#' head(nacho_object$nacho)
+#'
 check_outliers <- function(nacho_object) {
   if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
     stop('[NACHO] RCC type must be either "n1" or "n8"!')
