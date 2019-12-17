@@ -4,7 +4,7 @@
 #' within the shiny app using [visualise] or in the HTML report from [render].
 #'
 #' @inheritParams render
-#' @param object [[list]] List obtained from [summarise] or [normalise].
+#' @param object [[list]] List obtained from [load_rcc] or [normalise].
 #' @param x [[character]] Character string naming the quality-control metrics to plot from `nacho_object`.
 #'  The possible values are:
 #'
@@ -49,7 +49,7 @@ autoplot.nacho <- function(
 ) {
   if (missing(object)) {
     stop(
-      '[NACHO] "object" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
+      '[NACHO] "object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
     )
   }
   if (missing(x) | is.null(x)) {

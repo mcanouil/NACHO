@@ -1,8 +1,8 @@
 #' Visualise quality-control metrics using a shiny app
 #'
-#' This function allows to visualise several quality-control metrics
-#' in an interactive [shiny] application, in which thresholds can be customised
-#' and exported to the global environment.
+#' This function allows to visualise results from [load_rcc] or [normalise]
+#' several quality-control metrics in an interactive [shiny] application,
+#' in which thresholds can be customised and exported.
 #'
 #' @inheritParams normalise
 #'
@@ -39,7 +39,7 @@
 #'   )
 #'
 #'   # Read RCC files and format
-#'   nacho <- summarise(
+#'   nacho <- load_rcc(
 #'     data_directory = paste0(tempdir(), "/GSE74821"),
 #'     ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
 #'     id_colname = "IDFILE"
@@ -65,12 +65,12 @@
 visualise <- function(nacho_object) {
   if (!inherits(nacho_object, "nacho")) {
     stop(
-      '[NACHO] "nacho_object" must be of class "nacho" from "summarise()" and/or "normalise()" !'
+      '[NACHO] "nacho_object" must be of class "nacho" from "load_rcc()" and/or "normalise()" !'
     )
   }
   if (missing(nacho_object)) {
     stop(
-      '[NACHO] "nacho_object" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
+      '[NACHO] "nacho_object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
     )
   }
   mandatory_fields <- c(
@@ -91,7 +91,7 @@ visualise <- function(nacho_object) {
   if (!all(mandatory_fields%in%names(nacho_object))) {
     stop(
       '[NACHO] Mandatory fields are missing in "', substitute(nacho_object), '"!\n',
-      '  "summarise()" and/or "normalise()" must be called before "visualise()".'
+      '  "load_rcc()" and/or "normalise()" must be called before "visualise()".'
     )
   }
 

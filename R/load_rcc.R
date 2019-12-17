@@ -70,14 +70,14 @@
 #'   )
 #'
 #'   # Read RCC files and format
-#'   nacho <- summarise(
+#'   nacho <- load_rcc(
 #'     data_directory = paste0(tempdir(), "/GSE74821"),
 #'     ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
 #'     id_colname = "IDFILE"
 #'   )
 #' }
 #'
-summarise <- function(
+load_rcc <- function(
   data_directory,
   ssheet_csv,
   id_colname,
@@ -245,6 +245,9 @@ summarise <- function(
 
 
 #' @export
-#' @rdname summarise
+#' @rdname load_rcc
 #' @usage NULL
-summarize <- summarise
+summarize <- summarise <- function(...) {
+  warning("[NACHO] Please use `load_rcc()`!\n  This function is deprecated, due do conflict with `dplyr::summarise()`.")
+  load_rcc(...)
+}

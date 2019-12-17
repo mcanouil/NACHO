@@ -17,7 +17,7 @@
 # targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
 # utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
 #
-# GSE74821 <- summarise(
+# GSE74821 <- load_rcc(
 #   data_directory = paste0(tempdir(), "/GSE74821"),
 #   ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
 #   id_colname = "IDFILE",

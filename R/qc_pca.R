@@ -1,7 +1,7 @@
 #' qc_pca
 #'
 #' @param counts [[data.frame]] A `data.frame` with the count data.
-#' @inheritParams summarise
+#' @inheritParams load_rcc
 #'
 #' @keywords internal
 #' @usage NULL
