@@ -1,11 +1,9 @@
-library(shiny, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
-library(shinyWidgets, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
-
-library(ggplot2, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
-library(purrr, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
-library(dplyr, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
-
-library(NACHO, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
+requireNamespace("shiny", quietly = TRUE)
+requireNamespace("shinyWidgets", quietly = TRUE)
+requireNamespace("ggplot2", quietly = TRUE)
+requireNamespace("purrr", quietly = TRUE)
+requireNamespace("dplyr", quietly = TRUE)
+requireNamespace("NACHO", quietly = TRUE)
 
 source("utils.R")
 
@@ -30,9 +28,9 @@ ui <- shiny::tagList(
               label = shiny::tags$span(
                 "Normalisation Method",
                 shiny::helpText("(See", shiny::tags$a(
-                  href = "https://mcanouil.github.io/NACHO/reference/summarise.html",
+                  href = "https://mcanouil.github.io/NACHO/reference/load_rcc.html",
                   target = "_blank",
-                  shiny::tags$code("summarise()")
+                  shiny::tags$code("load_rcc()")
                 ), "for details and more options)")
               ),
               choices = c("GEO", "GLM"), selected = "GEO",
@@ -165,7 +163,7 @@ server <- function(input, output, session) {
       file = file.path(unique(dirname(targets$datapath)), "Samplesheet.csv")
     )
     suppressMessages(
-      NACHO::summarise(
+      NACHO::load_rcc(
         data_directory = unique(dirname(targets$datapath)),
         ssheet_csv = file.path(unique(dirname(targets$datapath)), "Samplesheet.csv"),
         id_colname = "IDFILE",
