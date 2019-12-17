@@ -7,7 +7,7 @@
 render(nacho_object, colour = "CartridgeID",
   output_file = "NACHO_QC.html", output_dir = ".", size = 1,
   show_legend = TRUE, show_outliers = TRUE, outliers_factor = 1,
-  outliers_labels = FALSE, clean = TRUE)
+  outliers_labels = NULL, clean = TRUE)
 }
 \arguments{
 \item{nacho_object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
@@ -34,8 +34,8 @@ in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 
 \item{outliers_factor}{[\link{numeric}] Size factor for outliers compared to \code{size}. Default is \code{1}.}
 
-\item{outliers_labels}{[\link{logical}] Boolean to indicate whether the labels for outliers should be printed
-in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
+\item{outliers_labels}{[\link{character}] Character to indicate which column in \code{nacho_object$nacho}
+should be used to be printed as the labels for outliers or not. Default is \code{NULL}.}
 
 \item{clean}{[\link{logical}] Boolean to indicate whether the Rmd and Rdata file used to produce the HTML report
 are removed from \code{output_dir}. Default is \code{TRUE}.}

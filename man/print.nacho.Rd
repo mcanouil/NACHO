@@ -6,7 +6,7 @@
 \usage{
 \method{print}{nacho}(x, colour = "CartridgeID", size = 0.5,
   show_legend = FALSE, show_outliers = TRUE, outliers_factor = 1,
-  outliers_labels = FALSE, echo = FALSE, title_level = 1, ...)
+  outliers_labels = NULL, echo = FALSE, title_level = 1, ...)
 }
 \arguments{
 \item{x}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
@@ -25,8 +25,8 @@ in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 
 \item{outliers_factor}{[\link{numeric}] Size factor for outliers compared to \code{size}. Default is \code{1}.}
 
-\item{outliers_labels}{[\link{logical}] Boolean to indicate whether the labels for outliers should be printed
-in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
+\item{outliers_labels}{[\link{character}] Character to indicate which column in \code{nacho_object$nacho}
+should be used to be printed as the labels for outliers or not. Default is \code{NULL}.}
 
 \item{echo}{[\link{logical}] A boolean to indicate whether text and plots should be printed.
 Mainly for use within a Rmarkdown chunk.}

@@ -43,8 +43,8 @@ in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 
 \item{outliers_factor}{[\link{numeric}] Size factor for outliers compared to \code{size}. Default is \code{1}.}
 
-\item{outliers_labels}{[\link{logical}] Boolean to indicate whether the labels for outliers should be printed
-in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
+\item{outliers_labels}{[\link{character}] Character to indicate which column in \code{nacho_object$nacho}
+should be used to be printed as the labels for outliers or not. Default is \code{NULL}.}
 }
 \description{
 plot_metrics
