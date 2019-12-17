@@ -9,7 +9,7 @@
   outliers_labels = NULL, echo = FALSE, title_level = 1, ...)
 }
 \arguments{
-\item{x}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
+\item{x}{[\link{list}] List obtained from \link{load_rcc} or \link{normalise}.}
 
 \item{colour}{[\link{character}] Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
@@ -37,8 +37,8 @@ Mainly for use within a Rmarkdown chunk.}
 \item{...}{Other arguments (Not used).}
 }
 \description{
-This function allows to print text and figures from the results of a call to \code{summarise()}
-or \code{normalise()}.
+This function allows to print text and figures from the results of a call to \link{load_rcc}
+or \link{normalise}.
 It is intended to be used in a \code{Rmarkdown} chunk.
 }
 \examples{

@@ -1,7 +1,7 @@
 #' format_counts
 #'
 #' @param data [[data.frame]] A `data.frame` with the count data.
-#' @inheritParams summarise
+#' @inheritParams load_rcc
 #' @param count_column [[character]] A `character` string naming the column where the counts are.
 #'
 #' @keywords internal

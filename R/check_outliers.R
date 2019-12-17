@@ -1,7 +1,7 @@
 #' Annotate a "nacho" object for outliers
 #'
 #' Add or update `"is_outlier"` column in the `"nacho"` field of an object from
-#' a call to `summarise()` or `normalise()`, using the current quality-control thresholds.
+#' a call to [load_rcc] or [normalise], using the current quality-control thresholds.
 #'
 #' @inheritParams normalise
 #'

@@ -1,10 +1,10 @@
-#' (re)Normalise a dataset read from [summarise]
+#' (re)Normalise a dataset read from [load_rcc]
 #'
 #' This function creates a list in which your settings, the raw counts and normalised counts are stored,
-#' using the result from a call to [summarise].
+#' using the result from a call to [load_rcc].
 #'
-#' @param nacho_object [[list]] List obtained from [summarise] or [normalise].
-#' @inheritParams summarise
+#' @param nacho_object [[list]] List obtained from [load_rcc] or [normalise].
+#' @inheritParams load_rcc
 #' @param remove_outliers [[logical]] A boolean to indicate if outliers should be excluded.
 #' @param outliers_thresholds [[list]] List of thresholds to exclude outliers.
 #'
@@ -22,14 +22,14 @@
 #'
 #' @return [[list]] A list containing parameters and data.
 #' \describe{
-#'   \item{`access`}{[[character]] Value passed to [summarise] in `id_colname`.}
-#'   \item{`housekeeping_genes`}{[[character]] Value passed to [summarise] or [normalise].}
-#'   \item{`housekeeping_predict`}{[[logical]] Value passed to [summarise].}
-#'   \item{`housekeeping_norm`}{[[logical]] Value passed to [summarise] or [normalise].}
-#'   \item{`normalisation_method`}{[[character]] Value passed to [summarise] or [normalise].}
+#'   \item{`access`}{[[character]] Value passed to [load_rcc] in `id_colname`.}
+#'   \item{`housekeeping_genes`}{[[character]] Value passed to [load_rcc] or [normalise].}
+#'   \item{`housekeeping_predict`}{[[logical]] Value passed to [load_rcc].}
+#'   \item{`housekeeping_norm`}{[[logical]] Value passed to [load_rcc] or [normalise].}
+#'   \item{`normalisation_method`}{[[character]] Value passed to [load_rcc] or [normalise].}
 #'   \item{`remove_outliers`}{[[logical]] Value passed to [normalise].}
-#'   \item{`n_comp`}{[[numeric]] Value passed to [summarise].}
-#'   \item{`data_directory`}{[[character]] Value passed to [summarise].}
+#'   \item{`n_comp`}{[[numeric]] Value passed to [load_rcc].}
+#'   \item{`data_directory`}{[[character]] Value passed to [load_rcc].}
 #'   \item{`pc_sum`}{[[data.frame]] A `data.frame` with `n_comp` rows and four columns:
 #'     "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
 #'   \item{`nacho`}{[[data.frame]] A `data.frame` with all columns from the sample sheet `ssheet_csv`
@@ -78,7 +78,7 @@
 #'   )
 #'
 #'   # Read RCC files and format
-#'   nacho <- summarise(
+#'   nacho <- load_rcc(
 #'     data_directory = paste0(tempdir(), "/GSE74821"),
 #'     ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
 #'     id_colname = "IDFILE"
@@ -110,7 +110,7 @@ normalise <- function(
 ) {
   if (missing(nacho_object)) {
     stop(
-      '[NACHO] "nacho_object" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
+      '[NACHO] "nacho_object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
     )
   }
   if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
@@ -134,7 +134,7 @@ normalise <- function(
   if (!all(mandatory_fields%in%names(nacho_object))) {
     stop(
       '[NACHO] Mandatory fields are missing in "', substitute(nacho_object), '"!\n',
-      '  "summarise()" must be called before "normalise()".'
+      '  "load_rcc()" must be called before "normalise()".'
     )
   }
 

@@ -1,4 +1,4 @@
-#' Render a HTML report from [summarise] or [normalise]
+#' Render a HTML report from [load_rcc] or [normalise]
 #'
 #' This function create a `Rmarkdown` script and render it as a HTML document.
 #' The HTML document is a quality-control report using all the metrics from [visualise]
@@ -51,7 +51,7 @@ render <- function(
 ) {
   if (missing(nacho_object)) {
     stop(
-      '[NACHO] "nacho_object" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
+      '[NACHO] "nacho_object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
     )
   }
   if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
