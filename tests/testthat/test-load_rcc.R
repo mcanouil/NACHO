@@ -1,4 +1,4 @@
-context("summarise()")
+context("load_rcc()")
 
 test_that("missing directory", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
@@ -13,7 +13,7 @@ test_that("missing directory", {
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
     closeAllConnections()
-    expect_error(summarise(
+    expect_error(load_rcc(
       # data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
       id_colname = "IDFILE",
@@ -40,7 +40,7 @@ test_that("missing sample sheet", {
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
     closeAllConnections()
-    expect_error(summarise(
+    expect_error(load_rcc(
       data_directory = paste0(tempdir(), "/GSE74821"),
       # ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
       id_colname = "IDFILE",
@@ -67,7 +67,7 @@ test_that("missing id_colname", {
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
     closeAllConnections()
-    expect_error(summarise(
+    expect_error(load_rcc(
       data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
       # id_colname = "IDFILE",
@@ -93,7 +93,7 @@ test_that("no housekeeping norm", {
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
     closeAllConnections()
-    GSE74821 <- summarise(
+    GSE74821 <- load_rcc(
       data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
       id_colname = "IDFILE",
@@ -120,7 +120,7 @@ test_that("no housekeeping norm and prediction", {
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
     closeAllConnections()
-    GSE74821 <- summarise(
+    GSE74821 <- load_rcc(
       data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
       id_colname = "IDFILE",
@@ -149,7 +149,7 @@ test_that("using GEO GSE74821", {
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
     closeAllConnections()
-    GSE74821 <- summarise(
+    GSE74821 <- load_rcc(
       data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
       id_colname = "IDFILE",
@@ -176,7 +176,7 @@ test_that("using GEO GSE74821 with prediction", {
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE74821/Samplesheet.csv"))
     closeAllConnections()
-    GSE74821 <- summarise(
+    GSE74821 <- load_rcc(
       data_directory = paste0(tempdir(), "/GSE74821"),
       ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
       id_colname = "IDFILE",
@@ -204,7 +204,7 @@ test_that("using GEO GSE70970", {
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE70970/Samplesheet.csv"))
     closeAllConnections()
-    GSE70970 <- summarise(
+    GSE70970 <- load_rcc(
       data_directory = paste0(tempdir(), "/GSE70970"),
       ssheet_csv = paste0(tempdir(), "/GSE70970/Samplesheet.csv"),
       id_colname = "IDFILE",
@@ -231,7 +231,7 @@ test_that("using GEO GSE70970 with prediction", {
     targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
     utils::write.csv(x = head(targets, 20), file = paste0(tempdir(), "/GSE70970/Samplesheet.csv"))
     closeAllConnections()
-    GSE70970 <- summarise(
+    GSE70970 <- load_rcc(
       data_directory = paste0(tempdir(), "/GSE70970"),
       ssheet_csv = paste0(tempdir(), "/GSE70970/Samplesheet.csv"),
       id_colname = "IDFILE",

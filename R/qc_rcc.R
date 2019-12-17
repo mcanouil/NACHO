@@ -1,6 +1,6 @@
 #' qc_rcc
 #'
-#' @inheritParams summarise
+#' @inheritParams load_rcc
 #' @param nacho_df [[data.frame]] A `data.frame` with all columns from the sample sheet `ssheet_csv`
 #'   and all computed columns, *i.e.*, quality-control metrics and counts, with one sample per row.
 #'

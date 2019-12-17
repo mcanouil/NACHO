@@ -1,7 +1,7 @@
 #' factor_calculation
 #'
 #' @inheritParams qc_rcc
-#' @inheritParams summarise
+#' @inheritParams load_rcc
 #' @inheritParams normalise
 #' @param exclude_probes [[character]] A vector of probes to exclude.
 #'

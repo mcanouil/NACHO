@@ -2,7 +2,7 @@
 % Please edit documentation in R/render.R
 \name{render}
 \alias{render}
-\title{Render a HTML report from \link{summarise} or \link{normalise}}
+\title{Render a HTML report from \link{load_rcc} or \link{normalise}}
 \usage{
 render(nacho_object, colour = "CartridgeID",
   output_file = "NACHO_QC.html", output_dir = ".", size = 1,
@@ -10,7 +10,7 @@ render(nacho_object, colour = "CartridgeID",
   outliers_labels = NULL, clean = TRUE)
 }
 \arguments{
-\item{nacho_object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
+\item{nacho_object}{[\link{list}] List obtained from \link{load_rcc} or \link{normalise}.}
 
 \item{colour}{[\link{character}] Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}

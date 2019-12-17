@@ -7,14 +7,14 @@
 check_outliers(nacho_object)
 }
 \arguments{
-\item{nacho_object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
+\item{nacho_object}{[\link{list}] List obtained from \link{load_rcc} or \link{normalise}.}
 }
 \value{
 [\link{list}] A list containing parameters and data.
 }
 \description{
 Add or update \code{"is_outlier"} column in the \code{"nacho"} field of an object from
-a call to \code{summarise()} or \code{normalise()}, using the current quality-control thresholds.
+a call to \link{load_rcc} or \link{normalise}, using the current quality-control thresholds.
 }
 \examples{
 

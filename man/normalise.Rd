@@ -3,7 +3,7 @@
 \name{normalise}
 \alias{normalise}
 \alias{normalize}
-\title{(re)Normalise a dataset read from \link{summarise}}
+\title{(re)Normalise a dataset read from \link{load_rcc}}
 \usage{
 normalise(nacho_object,
   housekeeping_genes = nacho_object[["housekeeping_genes"]],
@@ -15,7 +15,7 @@ normalise(nacho_object,
   outliers_thresholds = nacho_object[["outliers_thresholds"]])
 }
 \arguments{
-\item{nacho_object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
+\item{nacho_object}{[\link{list}] List obtained from \link{load_rcc} or \link{normalise}.}
 
 \item{housekeeping_genes}{[\link{character}] A vector of names of the miRNAs/mRNAs
 that should be used as housekeeping genes. Default is \code{NULL}.}
@@ -40,14 +40,14 @@ Cannot be more than n-1 samples. Default is \code{10}.}
 \value{
 [\link{list}] A list containing parameters and data.
 \describe{
-\item{\code{access}}{[\link{character}] Value passed to \link{summarise} in \code{id_colname}.}
-\item{\code{housekeeping_genes}}{[\link{character}] Value passed to \link{summarise} or \link{normalise}.}
-\item{\code{housekeeping_predict}}{[\link{logical}] Value passed to \link{summarise}.}
-\item{\code{housekeeping_norm}}{[\link{logical}] Value passed to \link{summarise} or \link{normalise}.}
-\item{\code{normalisation_method}}{[\link{character}] Value passed to \link{summarise} or \link{normalise}.}
+\item{\code{access}}{[\link{character}] Value passed to \link{load_rcc} in \code{id_colname}.}
+\item{\code{housekeeping_genes}}{[\link{character}] Value passed to \link{load_rcc} or \link{normalise}.}
+\item{\code{housekeeping_predict}}{[\link{logical}] Value passed to \link{load_rcc}.}
+\item{\code{housekeeping_norm}}{[\link{logical}] Value passed to \link{load_rcc} or \link{normalise}.}
+\item{\code{normalisation_method}}{[\link{character}] Value passed to \link{load_rcc} or \link{normalise}.}
 \item{\code{remove_outliers}}{[\link{logical}] Value passed to \link{normalise}.}
-\item{\code{n_comp}}{[\link{numeric}] Value passed to \link{summarise}.}
-\item{\code{data_directory}}{[\link{character}] Value passed to \link{summarise}.}
+\item{\code{n_comp}}{[\link{numeric}] Value passed to \link{load_rcc}.}
+\item{\code{data_directory}}{[\link{character}] Value passed to \link{load_rcc}.}
 \item{\code{pc_sum}}{[\link{data.frame}] A \code{data.frame} with \code{n_comp} rows and four columns:
 "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
 \item{\code{nacho}}{[\link{data.frame}] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
@@ -63,7 +63,7 @@ With \code{"CodeClass"} (first column)), the type of the probes and
 }
 \description{
 This function creates a list in which your settings, the raw counts and normalised counts are stored,
-using the result from a call to \link{summarise}.
+using the result from a call to \link{load_rcc}.
 }
 \details{
 Outliers definition (\code{remove_outliers}):
@@ -112,7 +112,7 @@ if (interactive()) {
   )
 
   # Read RCC files and format
-  nacho <- summarise(
+  nacho <- load_rcc(
     data_directory = paste0(tempdir(), "/GSE74821"),
     ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
     id_colname = "IDFILE"

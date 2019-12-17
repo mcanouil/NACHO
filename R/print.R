@@ -1,10 +1,10 @@
 #' Print method for nacho object
 #'
-#' This function allows to print text and figures from the results of a call to `summarise()`
-#' or `normalise()`.
+#' This function allows to print text and figures from the results of a call to [load_rcc]
+#' or [normalise].
 #' It is intended to be used in a `Rmarkdown` chunk.
 #'
-#' @param x [[list]] List obtained from [summarise] or [normalise].
+#' @param x [[list]] List obtained from [load_rcc] or [normalise].
 #' @inheritParams render
 #' @inheritParams autoplot.nacho
 #' @param echo [[logical]] A boolean to indicate whether text and plots should be printed.
@@ -35,7 +35,7 @@ print.nacho <- function(
 ) {
   if (missing(x)) {
     stop(
-      '[NACHO] "x" is missing, results from "summarise()" and/or "normalise()" is mandatory!'
+      '[NACHO] "x" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
     )
   }
   if (!attr(x, "RCC_type") %in% c("n1", "n8")) {
@@ -145,7 +145,7 @@ print.nacho <- function(
   }
 
 
-  sections <- data.frame(
+  sections <- data.frame(stringsAsFactors = FALSE,
     title = c(
       "Control Genes", "Positive", "Negative", "Housekeeping", "Control Probe Expression",
       "QC Visuals", "Average Count vs. Binding Density", "Average Count vs. Median Count",

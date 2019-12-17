@@ -49,12 +49,13 @@ knitr::include_graphics(path = "nacho_hex.png")
 install.packages("NACHO")
 
 # Or the the development version from GitHub:
-# install.packages("devtools")
-devtools::install_github("mcanouil/NACHO")
+# install.packages("remotes")
+remotes::install_github("mcanouil/NACHO")
 ```
 
 
-# Overview
+# Overview 
+
 *NACHO* (**NA**nostring quality **C**ontrol das**H**b**O**ard) is developed for NanoString nCounter data.  
 NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA) expression assay and works with fluorescent barcodes.  
 Each barcode is assigned a mRNA/miRNA, which can be counted after bonding with its target.  
@@ -63,9 +64,9 @@ As a result each count of a specific barcode represents the presence of its targ
 *NACHO* is able to load, visualise and normalise the exported NanoString nCounter data and facilitates the user in performing a quality control.  
 *NACHO* does this by visualising quality control metrics, expression of control genes, principal components and sample specific size factors in an interactive web application.
 
-With the use of two functions, RCC files are summarised and visualised, namely: `summarise()` and `visualise()`.
+With the use of two functions, RCC files are summarised and visualised, namely: `load_rcc()` and `visualise()`.
 
-* The `summarise()` function is used to preprocess the data.
+* The `load_rcc()` function is used to preprocess the data.
 * The `visualise()` function initiates a [Shiny-based dashboard](https://shiny.rstudio.com/) that visualises all relevant QC plots.
 
 *NACHO* also includes a function `normalise()`, which (re)calculates sample specific size factors and normalises the data.
@@ -74,9 +75,18 @@ With the use of two functions, RCC files are summarised and visualised, namely: 
 
 In addition (since v0.6.0) *NACHO* includes two (three) additional functions:
 
-* The `render()` function renders a full quality-control report (HTML) based on the results of a call to `summarise()` or `normalise()` (using `print()` in a Rmarkdown chunk).
+* The `render()` function renders a full quality-control report (HTML) based on the results of a call to `load_rcc()` or `normalise()` (using `print()` in a Rmarkdown chunk).
 * The `autoplot()` function draws any quality-control metrics from `visualise()` and `render()`.
 
+For more `vignette("NACHO")`.
+
+```{r, echo = FALSE, results = "asis"}
+print(citation("NACHO"), "html")
+```
+
+```{r, echo = FALSE, comment = ""}
+print(citation("NACHO"), "bibtex")
+```
 
 # An example
 
@@ -138,14 +148,14 @@ targets$IDFILE <- list.files(paste0(tempdir(), "/GSE70970/Data"))
 
 After we extracted the dataset to the `paste0(tempdir(), "/GSE70970/Data")` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or use as is.  
 
-## The `summarise()` function
+## The `load_rcc()` function
  
 The first argument requires the path to the directory containing the RCC files, the second argument is the location of samplesheet followed by third argument with the column name containing the exact names of the files.  
 The `housekeeping_genes` and `normalisation_method` arguments respectively indicate which housekeeping genes and normalisation method should be used.
 
 ```{r ex3, eval = class(gse)!="try-error"}
 library(NACHO)
-GSE70970_sum <- summarise(
+GSE70970_sum <- load_rcc(
   data_directory = paste0(tempdir(), "/GSE70970/Data"), # Where the data is
   ssheet_csv = targets, # The samplesheet
   id_colname = "IDFILE", # Name of the column that contains the identfiers
@@ -199,7 +209,7 @@ print(my_housekeeping)
 ```
 
 The next step is the actual normalisation. 
-The first argument requires the summary which is created with the `summarise()` function. 
+The first argument requires the summary which is created with the `load_rcc()` function. 
 The second argument requires a vector of gene names. 
 In this case, it is a subset of the discovered housekeeping genes we just made. 
 With the third argument the user has the choice to remove the outliers. 
@@ -219,7 +229,7 @@ GSE70970_norm <- normalise(
 )
 ```
 
-`normalise()` returns a `list` object (same as `summarise()`) with `raw_counts` and `normalised_counts` slots filled with the raw and normalised counts. 
+`normalise()` returns a `list` object (same as `load_rcc()`) with `raw_counts` and `normalised_counts` slots filled with the raw and normalised counts. 
 Both counts are also in the *NACHO* data.frame.
 
 ## The `autoplot()` function
@@ -240,7 +250,7 @@ The possible metrics (`x`) are:
 
 * `"BD"` (Binding Density)
 * `"FoV"` (Imaging)
-* `"PC"` (Positive Control Linearity)
+* `"PCL"` (Positive Control Linearity)
 * `"LoD"` (Limit of Detection)
 * `"Positive"` (Positive Controls)
 * `"Negative"` (Negative Controls)
@@ -259,7 +269,7 @@ The possible metrics (`x`) are:
 metrics <- c(
   "BD" = "Binding Density",
   "FoV" = "Imaging",
-  "PC" = "Positive Control Linearity",
+  "PCL" = "Positive Control Linearity",
   "LoD" = "Limit of Detection",
   "Positive" = "Positive Controls",
   "Negative" = "Negative Controls",

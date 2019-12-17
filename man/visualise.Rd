@@ -8,12 +8,12 @@
 visualise(nacho_object)
 }
 \arguments{
-\item{nacho_object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
+\item{nacho_object}{[\link{list}] List obtained from \link{load_rcc} or \link{normalise}.}
 }
 \description{
-This function allows to visualise several quality-control metrics
-in an interactive \link{shiny} application, in which thresholds can be customised
-and exported to the global environment.
+This function allows to visualise results from \link{load_rcc} or \link{normalise}
+several quality-control metrics in an interactive \link{shiny} application,
+in which thresholds can be customised and exported.
 }
 \examples{
 
@@ -46,7 +46,7 @@ if (interactive()) {
   )
 
   # Read RCC files and format
-  nacho <- summarise(
+  nacho <- load_rcc(
     data_directory = paste0(tempdir(), "/GSE74821"),
     ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
     id_colname = "IDFILE"
