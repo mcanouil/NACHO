@@ -3,7 +3,7 @@
 ## New features
 
 * In `R/conflicts.R`, conflicts are now printed when attaching `NACHO`.
-* New Shiny app in `inst/app/`,
+* New Shiny app in `inst/app/`, (#4, #5 & #14)
     - as a regular app, to load directly RCC files.
     - within `visualise()`, to load `"nacho"` object from `load_rcc()` (previous `summarise()`)
         or from `normalise()`.
@@ -13,14 +13,14 @@
     
 ## Breaking changes
 
-* `summarise()` and `summarize()` have been deprecated (issues #13 & #15) and replaced with `load_rcc()`.
+* `summarise()` and `summarize()` have been deprecated and replaced with `load_rcc()`. (#12 & #15)
 * In `R/visualise.R`, now uses a completely new shiny app in `inst/app/`.
 
 ## Minor improvements and fixes
 
 * In `R/visualise.R`, `R/render.R`, `print()`, `R/load_rcc.R` and `R/normalise.R`,
     - replace function to check for outliers, now uses `check_outliers()`.
-* In `R/visualise.R`, replace datatable (render and output) with classical table.
+* In `R/visualise.R`, replace datatable (render and output) with classical table. (#13)
 * In `R/autoplot.R`, 
     - add `show_outliers` to show outliers differently on plots (*i.e.*, in red).
     - add `outliers_factor` to highligth outliers with different point size.
