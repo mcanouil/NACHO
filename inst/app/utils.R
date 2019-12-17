@@ -2,6 +2,7 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
   ns <- NS(id)
 
   contents <- list(...)
+
   contents_grid <- switch(as.character(length(contents)),
     "1" = {
       list(
@@ -47,19 +48,17 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
   } else {
     tabPanel(label, value = ns("tab"),
       sidebarLayout(
-        sidebarPanel(width = 3,
-          div(align = "center", sidebar)
-        ),
+        sidebarPanel(width = 3, tags$div(align = "center", sidebar)),
         mainPanel(width = 9, contents_grid)
       )
     )
   }
 }
 
-card <- function(title, body, width = 12) {
-  div(class = paste0("card border-dark mb-", width),
-    div(class = "card-header", align = "center", title),
-    div(class = "card-body", align = "center", body)
+card <- function(title, body) {
+  tags$div(class = paste0("card border-dark"),
+    tags$div(class = "card-header", align = "center", title),
+    tags$div(class = "card-body", align = "center", body)
   )
 }
 
@@ -68,7 +67,7 @@ plotInputUI <- function(label = NULL, ...) {
   ns <- NS(id)
   card(
     title = {
-      h4(label, align = "center",
+      tags$h4(label, align = "center",
         dropdownButton(
           uiOutput(ns("plot_ui")),
           circle = TRUE,
@@ -82,8 +81,7 @@ plotInputUI <- function(label = NULL, ...) {
         )
       )
     },
-    body = {plotOutput(ns("plot"), height = "350px")},
-    width = 12
+    body = { plotOutput(ns("plot"), height = "350px") }
   )
 }
 
@@ -96,7 +94,7 @@ plotInput <- function(id, nacho) {
         column(width = 6,
           fluidRow(style = paste0("font-size: ", font_size, "%;"),
              column(12, align = "center",
-              selectInput(ns("group_colour"), span("Grouping Variable", helpText("(Colour)")),
+              selectInput(ns("group_colour"), tags$span("Grouping Variable", helpText("(Colour)")),
                 selected  = isolate(input$group_colour) %||% "CartridgeID",
                 choices = c(
                   "CartridgeID",
@@ -110,21 +108,21 @@ plotInput <- function(id, nacho) {
           ),
           fluidRow(style = paste0("font-size: ", font_size, "%;"),
             column(4, align = "center",
-              radioButtons(ns("show_levels"), span("Show Levels", helpText("(Legend)")),
+              radioButtons(ns("show_levels"), tags$span("Show Levels", helpText("(Legend)")),
                 choices = c("No" = FALSE, "Yes" = TRUE),
                 selected = isolate(input$show_levels) %||% TRUE,
                 inline = TRUE
               )
             ),
             column(4, align = "center",
-              radioButtons(ns("show_outliers"), span("Show Outliers", helpText("(Point)")),
+              radioButtons(ns("show_outliers"), tags$span("Show Outliers", helpText("(Point)")),
                 choices = c("No" = FALSE, "Yes" = TRUE),
                 selected = isolate(input$show_outliers) %||% TRUE,
                 inline = TRUE
               )
             ),
             column(4, align = "center",
-              radioButtons(ns("show_outliers_labels"), span("Outliers' Label", helpText("(Text)")),
+              radioButtons(ns("show_outliers_labels"), tags$span("Outliers' Label", helpText("(Text)")),
                 choices = c("No" = FALSE, "Yes" = TRUE),
                 selected = isolate(input$show_outliers_labels) %||% FALSE,
                 inline = TRUE
@@ -133,13 +131,13 @@ plotInput <- function(id, nacho) {
           ),
           fluidRow(style = paste0("font-size: ", font_size, "%;"),
             column(6, align = "center",
-              sliderInput(ns("point_size"), span("Point Size", helpText("(mm)")),
+              sliderInput(ns("point_size"), tags$span("Point Size", helpText("(mm)")),
                 value = isolate(input$point_size) %||% 2,
                 min = 1, max = 4, step = 0.5
               )
             ),
             column(6, align = "center",
-              sliderInput(ns("outliers_point_size"), span("Outliers Point Size", helpText("(Factor x Point Size)")),
+              sliderInput(ns("outliers_point_size"), tags$span("Outliers Point Size", helpText("(Factor x Point Size)")),
                 value = isolate(input$outliers_point_size) %||% 1.2,
                 min = 1, max = 2, step = 0.1
               )
@@ -149,24 +147,24 @@ plotInput <- function(id, nacho) {
         column(width = 6,
           fluidRow(style = paste0("font-size: ", font_size, "%;"),
             column(12, align = "center",
-              numericInput(ns("font_size"), span("Font Size", helpText("(pt)")),
+              numericInput(ns("font_size"), tags$span("Font Size", helpText("(pt)")),
                 value = isolate(input$font_size) %||% 16
               )
             )
           ),
           fluidRow(style = paste0("font-size: ", font_size, "%;"),
             column(4, align = "center",
-              numericInput(ns("plot_width"), span("Width", helpText("(cm)")),
+              numericInput(ns("plot_width"), tags$span("Width", helpText("(cm)")),
                 value = isolate(input$plot_width) %||% 16
               )
             ),
             column(4, align = "center",
-              numericInput(ns("plot_height"), span("Height", helpText("(cm)")),
+              numericInput(ns("plot_height"), tags$span("Height", helpText("(cm)")),
                 value = isolate(input$plot_height) %||% 12
               )
             ),
             column(4, align = "center",
-              numericInput(ns("plot_dpi"), span("DPI", helpText("(Default: 120)")),
+              numericInput(ns("plot_dpi"), tags$span("DPI", helpText("(Default: 120)")),
                 value = isolate(input$plot_dpi) %||% 120
               )
             )
@@ -180,7 +178,7 @@ plotInput <- function(id, nacho) {
       )
     })
 
-    output$plot <- renderPlot({
+    plot <- reactive({
       autoplot_values <- c(
         "bd" = "BD",
         "fov" = "FoV",
@@ -219,5 +217,39 @@ plotInput <- function(id, nacho) {
           }
         }
     })
+
+    output$plot <- renderPlot({ plot() })
+
+    output$plot_download <- downloadHandler(
+      filename = function() {
+        autoplot_values <- c(
+          "bd" = "BD",
+          "fov" = "FoV",
+          "pcl" = "PCL",
+          "lod" = "LoD",
+          "pp" = "Positive",
+          "np" = "Negative",
+          "hgp" = "Housekeeping",
+          "cpe" = "PN",
+          "acvbd" = "ACBD",
+          "acvmc" = "ACMC",
+          "pca" = "PCA",
+          "pcai" = "PCAi",
+          "pfvnf" = "PFNF",
+          "hgf" = "HF",
+          "nr" = "NORM"
+        )
+        x_metrics <- unname(autoplot_values[id])
+        paste0(unname(autoplot_values[id]), ".png")
+      },
+      content = function(file) {
+        ggplot2::ggsave(
+          filename = file, plot = plot(),
+          width = input[["plot_width"]], height = input[["plot_height"]],
+          units = "cm",
+          dpi = input[["plot_dpi"]]
+        )
+      }
+    )
   })
 }
