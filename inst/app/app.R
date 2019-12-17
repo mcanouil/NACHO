@@ -1,15 +1,15 @@
-# library(shiny)
-# library(shinyWidgets)
-# library(rlang)
-# library(purrr)
-# library(ggplot2)
-# library(dplyr)
-# library(tidyr)
-# library(NACHO)
+library(shiny, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
+library(shinyWidgets, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
+
+library(ggplot2, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
+library(purrr, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
+library(dplyr, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
+
+library(NACHO, quietly = TRUE, verbose = FALSE, warn.conflicts = FALSE)
 
 source("utils.R")
 
-nacho_object <- get(data(GSE74821, package = "NACHO"))
+nacho_object <- shiny::getShinyOption("nacho_object", NULL)
 
 ui <- shiny::tagList(
   shiny::tags$head(shiny::tags$style(shiny::HTML(
@@ -123,7 +123,7 @@ ui <- shiny::tagList(
 server <- function(input, output, session) {
   # ---------------------------------------- Upload
   shiny::observe({
-    if (exists("nacho_object")) {
+    if (inherits(nacho_object, "nacho")) {
       shiny::hideTab("main-menu", target = "upload-tab")
     } else {
       shiny::showTab("main-menu", target = "upload-tab", select = TRUE)
@@ -149,7 +149,7 @@ server <- function(input, output, session) {
 
 
   nacho_react <- shiny::reactive({
-    if (exists("nacho_object")) return(nacho_object)
+    if (inherits(nacho_object, "nacho")) return(nacho_object)
 
     targets <- shiny::req(input$rcc_files)
     targets$IDFILE <- basename(targets$datapath)
@@ -157,7 +157,7 @@ server <- function(input, output, session) {
     check_multiplex <- all(purrr::map_lgl(targets$datapath, ~ any(grepl("Endogenous8s", readLines(.x)))))
     if (check_multiplex) {
       targets$plexset_id <- rep(list(paste0("S", 1:8)), nrow(targets))
-      targets <- tidyr::unnest(targets, plexset_id)
+      targets <- as.data.frame(lapply(targets, unlist))
     }
 
     utils::write.csv(
@@ -282,11 +282,21 @@ server <- function(input, output, session) {
 
     NACHO::check_outliers(nacho)
   })
+  observe({
+    if (inherits(nacho_object, "nacho")) {
+      nacho_object$outliers_thresholds <- nacho_custom()$outliers_thresholds
+      message(
+        '[NACHO] Updated "nacho_object" can be loaded with:\n',
+        '  nacho_object <- readRDS("', tempdir(), '/nacho_object.rds")'
+      )
+      saveRDS(object = nacho_object, file = file.path(tempdir(), "nacho_object.rds"))
+    }
+  })
 
   # ---------------------------------------- Output
   outliers_list <- shiny::reactive({
     dplyr::distinct(
-      dplyr::filter(nacho_custom()$nacho, .data[["is_outlier"]]),
+      nacho_custom()$nacho[which(nacho_custom()$nacho[["is_outlier"]]), ],
       sample_ID, CartridgeID, BD, FoV, PCL, LoD, MC, MedC,
       Positive_factor, House_factor
     )
