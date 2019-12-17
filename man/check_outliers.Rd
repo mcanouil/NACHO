@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_outliers.R
 \name{check_outliers}
 \alias{check_outliers}
-\title{check_outliers}
+\title{Annotate a "nacho" object for outliers}
 \usage{
 check_outliers(nacho_object)
 }
@@ -10,9 +10,16 @@ check_outliers(nacho_object)
 \item{nacho_object}{[\link{list}] List obtained from \link{summarise} or \link{normalise}.}
 }
 \value{
-[\link{list}] A list containing parameters and data.#'
+[\link{list}] A list containing parameters and data.
 }
 \description{
-check_outliers
+Add or update \code{"is_outlier"} column in the \code{"nacho"} field of an object from
+a call to \code{summarise()} or \code{normalise()}, using the current quality-control thresholds.
 }
-\keyword{internal}
+\examples{
+
+data(GSE74821)
+nacho_object <- check_outliers(GSE74821)
+head(nacho_object$nacho)
+
+}
