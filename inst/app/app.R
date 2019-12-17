@@ -1,9 +1,9 @@
-requireNamespace("shiny", quietly = TRUE)
-requireNamespace("shinyWidgets", quietly = TRUE)
-requireNamespace("ggplot2", quietly = TRUE)
-requireNamespace("purrr", quietly = TRUE)
-requireNamespace("dplyr", quietly = TRUE)
-requireNamespace("NACHO", quietly = TRUE)
+invisible(suppressPackageStartupMessages({
+  sapply(
+    c("shiny", "shinyWidgets", "ggplot2", "purrr", "dplyr", "rlang", "NACHO"),
+    library, character.only = TRUE
+  )
+}))
 
 source("utils.R")
 
@@ -150,26 +150,26 @@ server <- function(input, output, session) {
     if (inherits(nacho_object, "nacho")) return(nacho_object)
 
     targets <- shiny::req(input$rcc_files)
-    targets$IDFILE <- basename(targets$datapath)
+    if (nrow(targets) > 0) {
+      targets$IDFILE <- basename(targets$datapath)
 
-    check_multiplex <- all(purrr::map_lgl(targets$datapath, ~ any(grepl("Endogenous8s", readLines(.x)))))
-    if (check_multiplex) {
-      targets$plexset_id <- rep(list(paste0("S", 1:8)), nrow(targets))
-      targets <- as.data.frame(lapply(targets, unlist))
-    }
+      check_multiplex <- all(purrr::map_lgl(targets$datapath, ~ any(grepl("Endogenous8s", readLines(.x)))))
+      if (check_multiplex) {
+        targets$plexset_id <- rep(list(paste0("S", 1:8)), nrow(targets))
+        targets <- as.data.frame(lapply(targets, unlist), stringsAsFactors = FALSE)
+      }
 
-    utils::write.csv(
-      x = targets,
-      file = file.path(unique(dirname(targets$datapath)), "Samplesheet.csv")
-    )
-    suppressMessages(
-      NACHO::load_rcc(
-        data_directory = unique(dirname(targets$datapath)),
-        ssheet_csv = file.path(unique(dirname(targets$datapath)), "Samplesheet.csv"),
-        id_colname = "IDFILE",
-        normalisation_method =  input[["norm_method"]]
+      utils::write.csv(x = targets, file = file.path(tempdir(), "Samplesheet.csv"))
+
+      suppressMessages(
+        NACHO::load_rcc(
+          data_directory = dirname(unique(targets$datapath)),
+          ssheet_csv = file.path(tempdir(), "Samplesheet.csv"),
+          id_colname = "IDFILE",
+          normalisation_method =  input[["norm_method"]]
+        )
       )
-    )
+    }
   })
 
   output$rcc_contents <- shiny::renderTable({ shiny::req(input$rcc_files) })
