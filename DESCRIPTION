@@ -62,7 +62,8 @@ Suggests:
     covr (>= 3.3.2),
     GEOquery (>= 2.52.0),
     testthat (>= 2.2.1),
-    roxygen2
+    roxygen2 (>= 6.1.1),
+    shinyWidgets (>= 0.4.9)
 VignetteBuilder: 
     knitr
 Encoding: UTF-8
