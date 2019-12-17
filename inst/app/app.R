@@ -40,7 +40,7 @@ ui <- shiny::tagList(
         ),
         shiny::column(width = 6,
           card(title = "Upload RCC Files", body = {
-            shiny::fileInput("rcc_files", "Choose one or several RCC File",
+            shiny::fileInput("rcc_files", "Choose One or Several RCC File",
               multiple = TRUE,
               accept = ".RCC"
             )
