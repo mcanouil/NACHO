@@ -1,70 +1,78 @@
-library(shiny)
-library(shinyWidgets)
-library(rlang)
-library(purrr)
-library(ggplot2)
-library(dplyr)
-library(NACHO)
+# library(shiny)
+# library(shinyWidgets)
+# library(rlang)
+# library(purrr)
+# library(ggplot2)
+# library(dplyr)
+# library(tidyr)
+# library(NACHO)
 
 source("utils.R")
 
 nacho_object <- get(data(GSE74821, package = "NACHO"))
 
-ui <- tagList(
-  tags$head(tags$style(HTML(
+ui <- shiny::tagList(
+  shiny::tags$head(shiny::tags$style(shiny::HTML(
     ".navbar-nav { float: none !important; } .navbar-nav > li:nth-child(7) { float: right; }"
   ))),
-  navbarPage(
+  shiny::navbarPage(
     theme = "united-bootstrap.min.css",
-    title = tags$span(tags$img(src = "nacho_hex.png", height = 18), "NACHO"),
+    title = shiny::tags$span(shiny::tags$img(src = "nacho_hex.png", height = 18), "NACHO"),
     windowTitle = "NACHO",
     collapsible = TRUE,
     id = "main-menu",
-    # footer = tags$div(
-    #   tags$p(
-    #     tags$img(src = "www/nacho_hex.png", height = 18),
-    #     "Full documentation on", icon("github"), "at",
-    #     tags$a(url = "https://mcanouil.github.io/NACHO", "mcanouil.github.io/NACHO")
-    #   ),
-    #   align = "center",
-    #   style = "margin: 5px;"
-    # ),
     selected = "qc_metrics",
-    tabPanel("Upload RCC Files", icon = icon("file-upload"), value = "upload-tab",
-      fluidRow(
-        column(width = 12,
+    shiny::tabPanel("Upload RCC Files", icon = shiny::icon("file-upload"), value = "upload-tab",
+      shiny::fluidRow(
+        shiny::column(width = 6,
+          card(title = "Normalisation Settings", body = {
+            shiny::radioButtons("norm_method",
+              label = shiny::tags$span(
+                "Normalisation Method",
+                shiny::helpText("(See", shiny::tags$a(
+                  href = "https://mcanouil.github.io/NACHO/reference/summarise.html",
+                  target = "_blank",
+                  shiny::tags$code("summarise()")
+                ), "for details and more options)")
+              ),
+              choices = c("GEO", "GLM"), selected = "GEO",
+              inline = TRUE
+            )
+          })
+        ),
+        shiny::column(width = 6,
           card(title = "Upload RCC Files", body = {
-            fileInput("rcc_files", "Choose one or several RCC File",
+            shiny::fileInput("rcc_files", "Choose one or several RCC File",
               multiple = TRUE,
               accept = ".RCC"
             )
           })
         )
       ),
-      uiOutput("upload_ui")
+      shiny::uiOutput("upload_ui")
     ),
     panelInputUI("qc_metrics", "QC Metrics",
       sidebar = {
         list(
-          h3("QC Thresholds"),
-          radioButtons("qc_bd_metrics", span("Binding Density", actionLink("about_bd", NULL, icon = icon("info-circle"))),
+          shiny::tags$h3("QC Thresholds"),
+          shiny::radioButtons("qc_bd_metrics", shiny::tags$span("Binding Density", shiny::actionLink("about_bd", NULL, icon = shiny::icon("info-circle"))),
             choiceNames = list(
-              span("MAX/FLEX", helpText("(Default: 0.1 - 2.25)")),
-              span("SPRINT", helpText("(Default: 0.1 - 1.8)"))
+              shiny::tags$span("MAX/FLEX", shiny::helpText("(Default: 0.1 - 2.25)")),
+              shiny::tags$span("SPRINT", shiny::helpText("(Default: 0.1 - 1.8)"))
             ),
             choiceValues = list("MAX/FLEX", "SPRINT"),
             inline = TRUE
           ),
-          sliderInput("qc_bd_thresh", NULL,
-            min = 0.1, max = 2.25, value = c(0.1, 2.25)
+          shiny::sliderInput("qc_bd_thresh", NULL,
+            min = 0, max = 2.5, value = c(0.1, 2.25), step = 0.05
           ),
-          sliderInput("qc_fov_thresh", span("Field of View", actionLink("about_fov", NULL, icon = icon("info-circle")), helpText("(Default: 75)")),
+          shiny::sliderInput("qc_fov_thresh", shiny::tags$span("Field of View", shiny::actionLink("about_fov", NULL, icon = shiny::icon("info-circle")), shiny::helpText("(Default: 75)")),
             min = 50, max = 100, value = 75
           ),
-          sliderInput("qc_pcl_thresh", span("Positive Control Linearity", actionLink("about_pcl", NULL, icon = icon("info-circle")), helpText("(Default: 0.95)")),
+          shiny::sliderInput("qc_pcl_thresh", shiny::tags$span("Positive Control Linearity", shiny::actionLink("about_pcl", NULL, icon = shiny::icon("info-circle")), shiny::helpText("(Default: 0.95)")),
             min = 0.5, max = 1, value = 0.95
           ),
-          sliderInput("qc_lod_thresh", span("Limit of Detection", actionLink("about_lod", NULL, icon = icon("info-circle")), helpText("(Default: 2)")),
+          shiny::sliderInput("qc_lod_thresh", shiny::tags$span("Limit of Detection", shiny::actionLink("about_lod", NULL, icon = shiny::icon("info-circle")), shiny::helpText("(Default: 2)")),
             min = 0, max = 30, value = 2
           )
         )
@@ -91,11 +99,11 @@ ui <- tagList(
     panelInputUI("norm", "Normalisation",
       sidebar = {
         list(
-          sliderInput("qc_pf_thresh", span("Positive Factor", helpText("(Default: 0.25 - 4)")),
-            min = 0.25, max = 4, value = c(0.25, 4)
+          shiny::sliderInput("qc_pf_thresh", shiny::tags$span("Positive Factor", shiny::helpText("(Default: 0.25 - 4)")),
+            min = 0, max = 5, value = c(0.25, 4), step = 0.25
           ),
-          sliderInput("qc_hgf_thresh", span("Housekeeping Genes Factor", helpText("(Default: 0.09 - 11)")),
-            min = 0.09, max = 11, value = c(0.09, 11)
+          shiny::sliderInput("qc_hgf_thresh", shiny::tags$span("Housekeeping Genes Factor", shiny::helpText("(Default: 0.09 - 11)")),
+            min = 0, max = 15, value = c(0.09, 11), step = 0.01
           )
         )
       },
@@ -103,59 +111,95 @@ ui <- tagList(
       plotInputUI("Housekeeeping Genes Factor", right = TRUE),
       plotInputUI("Normalisation Result", right = TRUE)
     ),
-    tabPanel(title = "Outliers", value = "outliers-tab",
-      card(title = h4("Outliers List"), list(uiOutput("outliers-thresholds"), tableOutput("outliers")))
+    shiny::tabPanel(title = "Outliers", value = "outliers-tab",
+      card(title = shiny::tags$h4("Outliers List"), list(shiny::uiOutput("outliers-thresholds"), shiny::tableOutput("outliers")))
     ),
-    tabPanel("About", icon = icon("info"), value = "about-tab",
-      p(includeMarkdown("www/about-nacho.md"))
+    shiny::tabPanel("About", icon = shiny::icon("info"), value = "about-tab",
+      shiny::tags$p(shiny::includeMarkdown("www/about-nacho.md"))
     )
   )
 )
 
 server <- function(input, output, session) {
   # ---------------------------------------- Upload
-  observe({
+  shiny::observe({
     if (exists("nacho_object")) {
-      hideTab("main-menu", target = "upload-tab")
+      shiny::hideTab("main-menu", target = "upload-tab")
     } else {
-      showTab("main-menu", target = "upload-tab", select = TRUE)
-      map(
+      shiny::showTab("main-menu", target = "upload-tab", select = TRUE)
+      purrr::map(
         .x = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
-        .f = ~ hideTab("main-menu", target = .x)
+        .f = ~ shiny::hideTab("main-menu", target = .x)
       )
+      if (inherits(shiny::req(nacho_react()), "nacho")) {
+        purrr::map(
+          .x = paste0(c("upload", "qc_metrics", "qc_control", "qc_count", "norm"), "-tab"),
+          .f = ~ shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
+        )
+      } else {
+        shiny::showTab("main-menu", target = "upload-tab", select = TRUE)
+      }
+    }
+    if (nrow(outliers_list()) == 0) {
+      shiny::hideTab("main-menu", target = "outliers-tab")
+    } else {
+      shiny::showTab("main-menu", target = "outliers-tab")
     }
   })
-  nacho_react <- reactive({
-    req(exists("nacho_object"))
-    nacho_object
-  })
 
-  output$rcc_contents <- renderTable({ req(input$rcc_files) })
-  output$rcc_contents_summary <- renderUI({
-    rcc_size <- sum(input$rcc_files[, "size"])
-    class(rcc_size) <- "object_size"
-    tags$p(
-      "A total of", tags$strong(length(input$rcc_files[, "name"])), "RCC files were succesfully uploaded,",
-      "for a total amount of", tags$strong(format(rcc_size, units = "Mb")), "."
+
+  nacho_react <- shiny::reactive({
+    if (exists("nacho_object")) return(nacho_object)
+
+    targets <- shiny::req(input$rcc_files)
+    targets$IDFILE <- basename(targets$datapath)
+
+    check_multiplex <- all(purrr::map_lgl(targets$datapath, ~ any(grepl("Endogenous8s", readLines(.x)))))
+    if (check_multiplex) {
+      targets$plexset_id <- rep(list(paste0("S", 1:8)), nrow(targets))
+      targets <- tidyr::unnest(targets, plexset_id)
+    }
+
+    utils::write.csv(
+      x = targets,
+      file = file.path(unique(dirname(targets$datapath)), "Samplesheet.csv")
+    )
+    suppressMessages(
+      NACHO::summarise(
+        data_directory = unique(dirname(targets$datapath)),
+        ssheet_csv = file.path(unique(dirname(targets$datapath)), "Samplesheet.csv"),
+        id_colname = "IDFILE",
+        normalisation_method =  input[["norm_method"]]
+      )
     )
   })
-  output$upload_ui <- renderUI({
+
+  output$rcc_contents <- shiny::renderTable({ shiny::req(input$rcc_files) })
+  output$rcc_contents_summary <- shiny::renderUI({
+    rcc_size <- sum(input$rcc_files[, "size"])
+    class(rcc_size) <- "object_size"
+    shiny::tags$p(
+      "A total of", shiny::tags$strong(length(input$rcc_files[, "name"])), "RCC files were succesfully uploaded,",
+      "for a total amount of", shiny::tags$strong(format(rcc_size, units = "Mb")), "."
+    )
+  })
+  output$upload_ui <- shiny::renderUI({
     if (is.null(input$rcc_files)) {
-      fluidRow(style = "padding-top: 1em;",
-        column(width = 12,
-          card(title = "Summary", body = tags$p("No RCC files uploaded."))
+      shiny::fluidRow(style = "padding-top: 1em;",
+        shiny::column(width = 12,
+          card(title = "Summary", body = shiny::tags$p("No RCC files uploaded."))
         )
       )
     } else {
       list(
-        fluidRow(style = "padding-top: 1em;",
-          column(width = 12,
-            card(title = "Summary", body = uiOutput("rcc_contents_summary"))
+        shiny::fluidRow(style = "padding-top: 1em;",
+          shiny::column(width = 12,
+            card(title = "Summary", body = shiny::uiOutput("rcc_contents_summary"))
           )
         ),
-        fluidRow(style = "padding-top: 1em;",
-          column(width = 12,
-            card(title = "RCC Files Uploaded", body = tableOutput("rcc_contents"))
+        shiny::fluidRow(style = "padding-top: 1em;",
+          shiny::column(width = 12,
+            card(title = "RCC Files Uploaded", body = shiny::tableOutput("rcc_contents"))
           )
         )
       )
@@ -164,9 +208,9 @@ server <- function(input, output, session) {
 
   # ---------------------------------------- UI / SERVER
   # Global UI input
-  observe({
+  shiny::observe({
     nacho_tmp <- nacho_custom()
-    map(
+    purrr::map(
       .x = c(
         "bd", "fov", "pcl", "lod",
         "pp", "np", "hgp", "cpe",
@@ -179,39 +223,39 @@ server <- function(input, output, session) {
 
   # QC metrics UI input
   ## Update UI with thresholds
-  observe({
-    switch(req(input$qc_bd_metrics),
+  shiny::observe({
+    switch(shiny::req(input$qc_bd_metrics),
       "MAX/FLEX" = {
-        updateSliderInput(session, "qc_bd_thresh",
-          max = 2.25, value = isolate(input$qc_bd_thresh)
+        shiny::updateSliderInput(session, "qc_bd_thresh",
+          value = min(shiny::isolate(input$qc_bd_thresh), 2.25)
         )
       },
       "SPRINT" = {
-        updateSliderInput(session, "qc_bd_thresh",
-          max = 1.8, value = isolate(input$qc_bd_thresh)
+        shiny::updateSliderInput(session, "qc_bd_thresh",
+          value = min(shiny::isolate(input$qc_bd_thresh), 1.8)
         )
       }
     )
-    updateSliderInput(session, "qc_fov_thresh",
-      value = isolate(input$qc_fov_thresh)
+    shiny::updateSliderInput(session, "qc_fov_thresh",
+      value = shiny::isolate(input$qc_fov_thresh)
     )
-    updateSliderInput(session, "qc_pcl_thresh",
-      value = isolate(input$qc_pcl_thresh)
+    shiny::updateSliderInput(session, "qc_pcl_thresh",
+      value = shiny::isolate(input$qc_pcl_thresh)
     )
-    updateSliderInput(session, "qc_lod_thresh",
-      value = isolate(input$qc_lod_thresh)
+    shiny::updateSliderInput(session, "qc_lod_thresh",
+      value = shiny::isolate(input$qc_lod_thresh)
     )
   })
 
   ## Help for QC metrics
-  map(
+  purrr::map(
     .x = c("Binding Density", "Field of View", "Positive Control Linearity", "Limit of Detection"),
     .f = function(.x) {
       short_x <- tolower(gsub('\\b(\\pL)\\pL|.', '\\U\\1', .x, perl = TRUE))
-      observeEvent(input[[paste0("about_", short_x)]], {
-        showModal(modalDialog(
+      shiny::observeEvent(input[[paste0("about_", short_x)]], {
+        shiny::showModal(shiny::modalDialog(
           title = .x,
-          p(includeMarkdown(paste0("www/about-", short_x,".md"))),
+          shiny::tags$p(shiny::includeMarkdown(paste0("www/about-", short_x,".md"))),
           easyClose = TRUE
         ))
       })
@@ -220,8 +264,8 @@ server <- function(input, output, session) {
 
   # ---------------------------------------- Input
   # Get nacho object and update thresholds
-  nacho_custom <- reactive({
-    nacho <- req(nacho_react())
+  nacho_custom <- shiny::reactive({
+    nacho <- shiny::req(nacho_react())
 
     nacho$outliers_thresholds[["BD"]] <- input$qc_bd_thresh %||%
       nacho$outliers_thresholds[["BD"]]
@@ -236,46 +280,39 @@ server <- function(input, output, session) {
     nacho$outliers_thresholds[["House_factor"]] <- input$qc_hgf_thresh %||%
       nacho$outliers_thresholds[["House_factor"]]
 
-    check_outliers(nacho)
+    NACHO::check_outliers(nacho)
   })
 
   # ---------------------------------------- Output
-  outliers_list <- reactive({
+  outliers_list <- shiny::reactive({
     dplyr::distinct(
       dplyr::filter(nacho_custom()$nacho, .data[["is_outlier"]]),
       sample_ID, CartridgeID, BD, FoV, PCL, LoD, MC, MedC,
       Positive_factor, House_factor
     )
   })
-  output[["outliers"]] <- renderTable({ outliers_list() })
-  output[["outliers-thresholds"]] <- renderUI({
+  output[["outliers"]] <- shiny::renderTable({ outliers_list() })
+  output[["outliers-thresholds"]] <- shiny::renderUI({
     ot <- lapply(nacho_custom()$outliers_thresholds, round, digits = 3)
-    tags$div(
-      tags$ul(
-        tags$li(
-          'Binding Density (', code("BD"), ') <', strong(min(ot[["BD"]])),
-          'or Binding Density (', code("BD"), ') >', strong(max(ot[["BD"]]))
+    shiny::tags$div(
+      shiny::tags$ul(
+        shiny::tags$li(
+          'Binding Density (', shiny::tags$code("BD"), ') <', shiny::tags$strong(min(ot[["BD"]])),
+          'or Binding Density (', shiny::tags$code("BD"), ') >', shiny::tags$strong(max(ot[["BD"]]))
         ),
-        tags$li('Field of View (', code("FoV"), ') <', strong(ot[["FoV"]])),
-        tags$li('Positive Control Linearity (', code("PCL"), ') <', strong(min(ot[["PCL"]]))),
-        tags$li('Limit of Detection (', code("LoD"), ') <', strong(min(ot[["LoD"]]))),
-        tags$li(
-          'Positive Normalisation Dactor (', code("Positive_factor"), ') <', strong(min(ot[["Positive_factor"]])),
-          'or Positive Normalisation Dactor (', code("Positive_factor"), ') >', strong(max(ot[["Positive_factor"]]))),
-        tags$li(
-          'Housekeeping Normalisation Factor (', code("house_factor"), ') <', strong(min(ot[["House_factor"]])),
-          'or Housekeeping Normalisation Dactor (', code("house_factor"), ') >', strong(max(ot[["House_factor"]]))
+        shiny::tags$li('Field of View (', shiny::tags$code("FoV"), ') <', shiny::tags$strong(ot[["FoV"]])),
+        shiny::tags$li('Positive Control Linearity (', shiny::tags$code("PCL"), ') <', shiny::tags$strong(min(ot[["PCL"]]))),
+        shiny::tags$li('Limit of Detection (', shiny::tags$code("LoD"), ') <', shiny::tags$strong(min(ot[["LoD"]]))),
+        shiny::tags$li(
+          'Positive Normalisation Dactor (', shiny::tags$code("Positive_factor"), ') <', shiny::tags$strong(min(ot[["Positive_factor"]])),
+          'or Positive Normalisation Dactor (', shiny::tags$code("Positive_factor"), ') >', shiny::tags$strong(max(ot[["Positive_factor"]]))),
+        shiny::tags$li(
+          'Housekeeping Normalisation Factor (', shiny::tags$code("house_factor"), ') <', shiny::tags$strong(min(ot[["House_factor"]])),
+          'or Housekeeping Normalisation Dactor (', shiny::tags$code("house_factor"), ') >', shiny::tags$strong(max(ot[["House_factor"]]))
         )
       )
     )
   })
-  observe({
-    if (nrow(outliers_list()) == 0) {
-      hideTab("main-menu", target = "outliers-tab")
-    } else {
-      showTab("main-menu", target = "outliers-tab")
-    }
-  })
 }
 
-shinyApp(ui = ui, server = server)
+shiny::shinyApp(ui = ui, server = server)
