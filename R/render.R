@@ -20,8 +20,8 @@
 #' @param show_outliers [[logical]] Boolean to indicate whether the outliers should be highlighted
 #'   in red (`TRUE`) or not (`FALSE`). Default is `TRUE`.
 #' @param outliers_factor [[numeric]] Size factor for outliers compared to `size`. Default is `1`.
-#' @param outliers_labels [[logical]] Boolean to indicate whether the labels for outliers should be printed
-#'   in red (`TRUE`) or not (`FALSE`). Default is `FALSE`.
+#' @param outliers_labels [[character]] Character to indicate which column in `nacho_object$nacho`
+#'   should be used to be printed as the labels for outliers or not. Default is `NULL`.
 #' @param clean [[logical]] Boolean to indicate whether the Rmd and Rdata file used to produce the HTML report
 #'   are removed from `output_dir`. Default is `TRUE`.
 #'
@@ -46,7 +46,7 @@ render <- function(
   show_legend = TRUE,
   show_outliers = TRUE,
   outliers_factor = 1,
-  outliers_labels = FALSE,
+  outliers_labels = NULL,
   clean = TRUE
 ) {
   if (missing(nacho_object)) {
