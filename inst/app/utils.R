@@ -107,48 +107,51 @@ plotInput <- function(id, nacho) {
             )
           ),
           fluidRow(style = paste0("font-size: ", font_size, "%;"),
-            column(4, align = "center",
+            column(6, align = "center",
               radioButtons(ns("show_levels"), tags$span("Show Levels", helpText("(Legend)")),
                 choices = c("No" = FALSE, "Yes" = TRUE),
                 selected = isolate(input$show_levels) %||% TRUE,
                 inline = TRUE
               )
             ),
-            column(4, align = "center",
+            column(6, align = "center",
               radioButtons(ns("show_outliers"), tags$span("Show Outliers", helpText("(Point)")),
                 choices = c("No" = FALSE, "Yes" = TRUE),
                 selected = isolate(input$show_outliers) %||% TRUE,
-                inline = TRUE
-              )
-            ),
-            column(4, align = "center",
-              radioButtons(ns("show_outliers_labels"), tags$span("Outliers' Label", helpText("(Text)")),
-                choices = c("No" = FALSE, "Yes" = TRUE),
-                selected = isolate(input$show_outliers_labels) %||% FALSE,
                 inline = TRUE
               )
             )
           ),
           fluidRow(style = paste0("font-size: ", font_size, "%;"),
             column(6, align = "center",
-              sliderInput(ns("point_size"), tags$span("Point Size", helpText("(mm)")),
-                value = isolate(input$point_size) %||% 2,
-                min = 1, max = 4, step = 0.5
+              radioButtons(ns("show_outliers_labels"), tags$span("Outliers' Label", helpText("(Text)")),
+                choices = c("No" = FALSE, "Yes" = TRUE),
+                selected = isolate(input$show_outliers_labels) %||% FALSE,
+                inline = TRUE
               )
             ),
             column(6, align = "center",
-              sliderInput(ns("outliers_point_size"), tags$span("Outliers Point Size", helpText("(Factor x Point Size)")),
-                value = isolate(input$outliers_point_size) %||% 1.2,
-                min = 1, max = 2, step = 0.1
+              numericInput(ns("outliers_point_size"), tags$span("Outliers Point Size", helpText("(Factor x Point Size)")),
+                value = isolate(input$outliers_point_size) %||% 1.5,
+                min = 1, max = 3, step = 0.1
               )
             )
+          ),
+          fluidRow(
+            column(12, align = "center", uiOutput(ns("outliers_labels")))
           )
         ),
         column(width = 6,
           fluidRow(style = paste0("font-size: ", font_size, "%;"),
-            column(12, align = "center",
+            column(6, align = "center",
               numericInput(ns("font_size"), tags$span("Font Size", helpText("(pt)")),
                 value = isolate(input$font_size) %||% 16
+              )
+            ),
+            column(6, align = "center",
+              numericInput(ns("point_size"), tags$span("Point Size", helpText("(mm)")),
+                value = isolate(input$point_size) %||% 2,
+                min = 1, max = 4, step = 0.5
               )
             )
           ),
@@ -178,6 +181,12 @@ plotInput <- function(id, nacho) {
       )
     })
 
+    output$outliers_labels <- renderUI({
+      if (req(input[["show_outliers_labels"]])) {
+        selectInput(ns("outliers_labels"), NULL, choices = colnames(nacho$nacho), selected = nacho$access)
+      }
+    })
+
     plot <- reactive({
       autoplot_values <- c(
         "bd" = "BD",
@@ -205,7 +214,7 @@ plotInput <- function(id, nacho) {
         show_legend = as.logical(input[["show_levels"]] %||% TRUE),
         show_outliers = as.logical(input[["show_outliers"]] %||% TRUE),
         outliers_factor = input[["outliers_point_size"]] %||% 2,
-        outliers_labels = as.logical(input[["show_outliers_labels"]] %||% FALSE)
+        outliers_labels = if (as.logical(input[["show_outliers_labels"]] %||% FALSE)) input[["outliers_labels"]] else NULL
       ) +
         theme_minimal(base_size = input[["font_size"]] %||% 16) +
         {

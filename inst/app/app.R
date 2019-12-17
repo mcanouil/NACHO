@@ -8,6 +8,8 @@ library(NACHO)
 
 source("utils.R")
 
+nacho_object <- get(data(GSE74821, package = "NACHO"))
+
 ui <- tagList(
   tags$head(tags$style(HTML(
     ".navbar-nav { float: none !important; } .navbar-nav > li:nth-child(7) { float: right; }"
@@ -109,8 +111,6 @@ ui <- tagList(
     )
   )
 )
-
-nacho_object <- get(data(GSE74821, package = "NACHO"))
 
 server <- function(input, output, session) {
   # ---------------------------------------- Upload

@@ -28,7 +28,7 @@ print.nacho <- function(
   show_legend = FALSE,
   show_outliers = TRUE,
   outliers_factor = 1,
-  outliers_labels = FALSE,
+  outliers_labels = NULL,
   echo = FALSE,
   title_level = 1,
   ...
