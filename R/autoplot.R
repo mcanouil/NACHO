@@ -44,7 +44,7 @@ autoplot.nacho <- function(
   show_legend = TRUE,
   show_outliers = TRUE,
   outliers_factor = 1,
-  outliers_labels = FALSE,
+  outliers_labels = NULL,
   ...
 ) {
   if (missing(object)) {
@@ -67,7 +67,7 @@ autoplot.nacho <- function(
   }
   object <- check_outliers(object)
 
-  if (outliers_labels) show_outliers <- TRUE
+  if (!is.null(outliers_labels)) show_outliers <- TRUE
 
   if (attr(object, "RCC_type") == "n8" & x %in% c("PCL", "LoD")) {
     stop('[NACHO] "PCL" and "LoD" are not available for the provided NanoString dataset.')
@@ -81,7 +81,7 @@ autoplot.nacho <- function(
     "Positive" = plot_cg(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
     "Negative" = plot_cg(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
     "Housekeeping" = plot_cg(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "PN" = plot_pn(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
+    "PN" = plot_pn(nacho_object = object, x, colour, size, show_legend),
     "ACBD" = plot_acbd(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
     "ACMC" = plot_acmc(nacho_object = object, x, colour, size, show_legend),
     "PCA12" = plot_pca12(nacho_object = object, x, colour, size, show_legend),
@@ -133,6 +133,7 @@ plot_metrics <- function(
     "PCL" = '(R^2)',
     "LoD" = '"(Z)"'
   )
+
   if (attr(nacho_object, "RCC_type") == "n8" & x %in% c("PCL", "LoD")) {
     message('[NACHO] "PCL" and "LoD" are not available for RCC type "n8".')
     return(
@@ -144,6 +145,11 @@ plot_metrics <- function(
         )
     )
   }
+
+  if (!is.null(outliers_labels) && !outliers_labels %in% colnames(nacho_object$nacho)) {
+    outliers_labels <- nacho_object$access
+  }
+
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
       dplyr::select(
@@ -151,7 +157,8 @@ plot_metrics <- function(
         !!colour,
         !!nacho_object$access,
         !!x,
-        "is_outlier"
+        "is_outlier",
+        !!outliers_labels
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
@@ -183,10 +190,10 @@ plot_metrics <- function(
             na.rm = TRUE,
             groupOnX = TRUE
           ),
-          if (outliers_labels) {
+          if (!is.null(outliers_labels)) {
             ggrepel::geom_label_repel(
               data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
-              mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
+              mapping = ggplot2::aes(label = .data[[outliers_labels]]),
               colour = "red",
               na.rm = TRUE
             )
@@ -239,6 +246,9 @@ plot_cg <- function(
   outliers_factor,
   outliers_labels
 ) {
+  if (!is.null(outliers_labels) && !outliers_labels %in% colnames(nacho_object$nacho)) {
+    outliers_labels <- nacho_object$access
+  }
   p <- ggplot2::ggplot(
     data = nacho_object$nacho %>%
       dplyr::filter(!!dplyr::sym("CodeClass") %in% x) %>%
@@ -248,7 +258,8 @@ plot_cg <- function(
         !!nacho_object$access,
         "Name",
         "Count",
-        "is_outlier"
+        "is_outlier",
+        !!outliers_labels
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
@@ -280,10 +291,10 @@ plot_cg <- function(
             na.rm = TRUE,
             groupOnX = TRUE
           ),
-          if (outliers_labels) {
+          if (!is.null(outliers_labels)) {
             ggrepel::geom_label_repel(
               data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
-              mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
+              mapping = ggplot2::aes(label = .data[[outliers_labels]]),
               colour = "red",
               na.rm = TRUE
             )
@@ -333,10 +344,7 @@ plot_pn <- function(
   x,
   colour,
   size,
-  show_legend,
-  show_outliers,
-  outliers_factor,
-  outliers_labels
+  show_legend
 ) {
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
@@ -407,6 +415,9 @@ plot_acbd <- function(
   outliers_factor,
   outliers_labels
 ) {
+  if (!is.null(outliers_labels) && !outliers_labels %in% colnames(nacho_object$nacho)) {
+    outliers_labels <- nacho_object$access
+  }
   nacho_object$nacho %>%
     dplyr::select(
       "CartridgeID",
@@ -414,7 +425,8 @@ plot_acbd <- function(
       !!nacho_object$access,
       "MC",
       "BD",
-      "is_outlier"
+      "is_outlier",
+      !!outliers_labels
     ) %>%
     dplyr::distinct() %>%
     ggplot2::ggplot(
@@ -438,10 +450,10 @@ plot_acbd <- function(
               colour = "red",
               na.rm = TRUE
             ),
-            if (outliers_labels) {
+            if (!is.null(outliers_labels)) {
               ggrepel::geom_label_repel(
                 data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
-                mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
+                mapping = ggplot2::aes(label = .data[[outliers_labels]]),
                 colour = "red",
                 na.rm = TRUE
               )
@@ -674,6 +686,9 @@ plot_pfnf <- function(
   outliers_factor,
   outliers_labels
 ) {
+  if (!is.null(outliers_labels) && !outliers_labels %in% colnames(nacho_object$nacho)) {
+    outliers_labels <- nacho_object$access
+  }
   nacho_object$nacho %>%
     dplyr::select(
       "CartridgeID",
@@ -681,7 +696,8 @@ plot_pfnf <- function(
       !!nacho_object$access,
       "Negative_factor",
       "Positive_factor",
-      "is_outlier"
+      "is_outlier",
+      !!outliers_labels
     ) %>%
     dplyr::distinct() %>%
     ggplot2::ggplot(
@@ -705,10 +721,10 @@ plot_pfnf <- function(
               colour = "red",
               na.rm = TRUE
             ),
-            if (outliers_labels) {
+            if (!is.null(outliers_labels)) {
               ggrepel::geom_label_repel(
                 data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
-                mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
+                mapping = ggplot2::aes(label = .data[[outliers_labels]]),
                 colour = "red",
                 na.rm = TRUE
               )
@@ -758,6 +774,9 @@ plot_hf <- function(
   outliers_factor,
   outliers_labels
 ) {
+  if (!is.null(outliers_labels) && !outliers_labels %in% colnames(nacho_object$nacho)) {
+    outliers_labels <- nacho_object$access
+  }
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
       dplyr::select(
@@ -766,7 +785,8 @@ plot_hf <- function(
         !!nacho_object$access,
         "House_factor",
         "Positive_factor",
-        "is_outlier"
+        "is_outlier",
+        !!outliers_labels
       ) %>%
       dplyr::distinct(),
     mapping = ggplot2::aes(
@@ -789,10 +809,10 @@ plot_hf <- function(
             colour = "red",
             na.rm = TRUE
           ),
-          if (outliers_labels) {
+          if (!is.null(outliers_labels)) {
             ggrepel::geom_label_repel(
               data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
-              mapping = ggplot2::aes(label = .data[[nacho_object$access]]),
+              mapping = ggplot2::aes(label = .data[[outliers_labels]]),
               colour = "red",
               na.rm = TRUE
             )
@@ -846,10 +866,7 @@ plot_norm <- function(
   x,
   colour,
   size,
-  show_legend,
-  show_outliers,
-  outliers_factor,
-  outliers_labels
+  show_legend
 ) {
   if (is.null(nacho_object$housekeeping_genes)) {
     probe_var <- dplyr::sym("CodeClass")
