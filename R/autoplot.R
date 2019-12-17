@@ -69,9 +69,9 @@ autoplot.nacho <- function(
 
   if (!is.null(outliers_labels)) show_outliers <- TRUE
 
-  if (attr(object, "RCC_type") == "n8" & x %in% c("PCL", "LoD")) {
-    stop('[NACHO] "PCL" and "LoD" are not available for the provided NanoString dataset.')
-  }
+  # if (attr(object, "RCC_type") == "n8" & x %in% c("PCL", "LoD")) {
+  #   stop('[NACHO] "PCL" and "LoD" are not available for the provided NanoString dataset.')
+  # }
   switch(
     EXPR = x,
     "BD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
@@ -142,6 +142,10 @@ plot_metrics <- function(
           x = "CartridgeID",
           y = parse(text = paste0('paste("', labels[x], '", " ", ',  units[x], ")")),
           colour = colour
+        ) +
+        ggplot2::annotate(
+          "text", x = 0.5, y = 0.5, label = "Not available!",
+          angle = 30, size = 24, colour = "red", alpha = 0.25
         )
     )
   }
