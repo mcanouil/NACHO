@@ -1,4 +1,4 @@
-#' Summarise data from RCC NanoString files (and normalise them)
+#' Summarise data from RCC NanoString files (and normalise them).
 #'
 #' This function is used to preprocess the data from NanoString nCounter.
 #'
@@ -22,14 +22,14 @@
 #'
 #' @return [[list]] A list containing parameters and data:
 #' \describe{
-#'   \item{`access`}{[[character]] Value passed to [summarise] in `id_colname`.}
-#'   \item{`housekeeping_genes`}{[[character]] Value passed to [summarise].}
-#'   \item{`housekeeping_predict`}{[[logical]] Value passed to [summarise].}
-#'   \item{`housekeeping_norm`}{[[logical]] Value passed to [summarise].}
-#'   \item{`normalisation_method`}{[[character]] Value passed to [summarise].}
+#'   \item{`access`}{[[character]] Value passed to [load_rcc] in `id_colname`.}
+#'   \item{`housekeeping_genes`}{[[character]] Value passed to [load_rcc].}
+#'   \item{`housekeeping_predict`}{[[logical]] Value passed to [load_rcc].}
+#'   \item{`housekeeping_norm`}{[[logical]] Value passed to [load_rcc].}
+#'   \item{`normalisation_method`}{[[character]] Value passed to [load_rcc].}
 #'   \item{`remove_outliers`}{[[logical]] `FALSE`.}
-#'   \item{`n_comp`}{[[numeric]] Value passed to [summarise].}
-#'   \item{`data_directory`}{[[character]] Value passed to [summarise].}
+#'   \item{`n_comp`}{[[numeric]] Value passed to [load_rcc].}
+#'   \item{`data_directory`}{[[character]] Value passed to [load_rcc].}
 #'   \item{`pc_sum`}{[[data.frame]] A `data.frame` with `n_comp` rows and four columns:
 #'     "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
 #'   \item{`nacho`}{[[data.frame]] A `data.frame` with all columns from the sample sheet `ssheet_csv`
@@ -73,6 +73,26 @@
 #'   nacho <- load_rcc(
 #'     data_directory = paste0(tempdir(), "/GSE74821"),
 #'     ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
+#'     id_colname = "IDFILE"
+#'   )
+#' }
+#'
+#' # Multiplex data (e.g., "plexset")
+#' if (interactive()) {
+#'   rcc_files_directory <- system.file("extdata", package = "NACHO")
+#'
+#'   targets <- data.frame(stringsAsFactors = FALSE,
+#'     name = list.files(rcc_files_directory),
+#'     datapath = list.files(rcc_files_directory, full.names = TRUE)
+#'   )
+#'
+#'   targets$IDFILE <- basename(targets$datapath)
+#'   targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+#'   targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+#'
+#'   salmon <- load_rcc(
+#'     data_directory = rcc_files_directory,
+#'     ssheet_csv = targets_tidy,
 #'     id_colname = "IDFILE"
 #'   )
 #' }
