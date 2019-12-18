@@ -7,6 +7,7 @@
     - as a regular app, to load directly RCC files.
     - within `visualise()`, to load `"nacho"` object from `load_rcc()` (previous `summarise()`)
         or from `normalise()`.
+* New `deploy()` function to easily deploy (copy) the shiny app.
 * In `DESCRIPTION`, 
     - Order packages in alphabetical order.
     - Add packages' version.
