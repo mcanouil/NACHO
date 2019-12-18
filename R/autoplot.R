@@ -782,6 +782,20 @@ plot_hf <- function(
   if (!is.null(outliers_labels) && !outliers_labels %in% colnames(nacho_object$nacho)) {
     outliers_labels <- nacho_object$access
   }
+
+  is_house_factor <- "House_factor" %in% colnames(nacho_object[["nacho"]])
+  if (!is_house_factor) {
+    message('[NACHO] "House_factor" was not computed.')
+    return(
+      ggplot2::ggplot() +
+        ggplot2::labs(x = "Positive Factor", y = "Housekeeping Factor", colour = colour) +
+        ggplot2::annotate(
+          "text", x = 0.5, y = 0.5, label = "Not available!",
+          angle = 30, size = 24, colour = "red", alpha = 0.25
+        )
+    )
+  }
+
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
       dplyr::select(
