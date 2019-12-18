@@ -179,5 +179,16 @@ print.nacho <- function(
     }
   }
 
+  if (any(x$nacho[["is_outlier"]])) {
+    cat(prefix_title(title_level, 1), "Outliers", "\n\n")
+    columns_qc <- c(
+      x$access, "CartridgeID",
+      "BD", "FoV", "PCL", "LoD", "MC", "MedC",
+      "Positive_factor", "House_factor"
+    )
+    outliers_list <- unique(x$nacho[which(x$nacho[["is_outlier"]]), columns_qc])
+    print(knitr::kable(outliers_list, row.names = FALSE))
+  }
+
   invisible()
 }
