@@ -1,4 +1,4 @@
-#' Render a HTML report from [load_rcc] or [normalise]
+#' Render a HTML report from [load_rcc] or [normalise].
 #'
 #' This function create a `Rmarkdown` script and render it as a HTML document.
 #' The HTML document is a quality-control report using all the metrics from [visualise]
