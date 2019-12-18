@@ -1,5 +1,3 @@
-context("load_rcc()")
-
 test_that("missing directory", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
@@ -53,7 +51,6 @@ test_that("missing sample sheet", {
   }
 })
 
-
 test_that("missing id_colname", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
   if (class(gse)=="try-error") { # when GEOQUERY is down
@@ -103,7 +100,7 @@ test_that("no housekeeping norm", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_type(GSE74821, "list")
+    expect_s3_class(GSE74821, "nacho")
   }
 })
 
@@ -130,11 +127,9 @@ test_that("no housekeeping norm and prediction", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_type(GSE74821, "list")
+    expect_s3_class(GSE74821, "nacho")
   }
 })
-
-
 
 test_that("using GEO GSE74821", {
   gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
@@ -159,7 +154,7 @@ test_that("using GEO GSE74821", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_type(GSE74821, "list")
+    expect_s3_class(GSE74821, "nacho")
   }
 })
 
@@ -186,7 +181,7 @@ test_that("using GEO GSE74821 with prediction", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_type(GSE74821, "list")
+    expect_s3_class(GSE74821, "nacho")
   }
 })
 
@@ -214,7 +209,7 @@ test_that("using GEO GSE70970", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_type(GSE70970, "list")
+    expect_s3_class(GSE70970, "nacho")
   }
 })
 
@@ -241,6 +236,134 @@ test_that("using GEO GSE70970 with prediction", {
       normalisation_method = "GLM",
       n_comp = 10
     )
-    expect_type(GSE70970, "list")
+    expect_s3_class(GSE70970, "nacho")
   }
+})
+
+test_that("using RAW RCC multiplexed", {
+  rcc_files_directory <- system.file("extdata", package = "NACHO")
+
+  targets <- data.frame(stringsAsFactors = FALSE,
+    name = list.files(rcc_files_directory),
+    datapath = list.files(rcc_files_directory, full.names = TRUE)
+  )
+
+  targets$IDFILE <- basename(targets$datapath)
+  targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+  targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+
+  salmon <- load_rcc(
+    data_directory = rcc_files_directory,
+    ssheet_csv = targets_tidy,
+    id_colname = "IDFILE"
+  )
+  expect_s3_class(salmon, "nacho")
+})
+
+test_that("using RAW RCC multiplexed without plexset_id", {
+  rcc_files_directory <- system.file("extdata", package = "NACHO")
+
+  targets <- data.frame(stringsAsFactors = FALSE,
+    name = list.files(rcc_files_directory),
+    datapath = list.files(rcc_files_directory, full.names = TRUE)
+  )
+
+  targets$IDFILE <- basename(targets$datapath)
+  # targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+  # targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+  targets_tidy <- targets[rep(1:nrow(targets), 8), ] # create all samples without plexset_id
+
+  expect_error({
+    load_rcc(
+      data_directory = rcc_files_directory,
+      ssheet_csv = targets_tidy,
+      id_colname = "IDFILE"
+    )
+  })
+})
+
+test_that("using RAW RCC multiplexed without plexset_id", {
+  rcc_files_directory <- system.file("extdata", package = "NACHO")
+
+  targets <- data.frame(stringsAsFactors = FALSE,
+    name = list.files(rcc_files_directory),
+    datapath = list.files(rcc_files_directory, full.names = TRUE)
+  )
+
+  targets$IDFILE <- basename(targets$datapath)
+  targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+  targets$IDFILE[1] <- "something_wrong.RCC" # wrong path
+  targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+
+  expect_error({
+    load_rcc(
+      data_directory = rcc_files_directory,
+      ssheet_csv = targets_tidy,
+      id_colname = "IDFILE"
+    )
+  })
+})
+
+test_that("deprecated summarise", {
+  rcc_files_directory <- system.file("extdata", package = "NACHO")
+
+  targets <- data.frame(stringsAsFactors = FALSE,
+    name = list.files(rcc_files_directory),
+    datapath = list.files(rcc_files_directory, full.names = TRUE)
+  )
+
+  targets$IDFILE <- basename(targets$datapath)
+  targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+  targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+
+  expect_warning({
+    summarise(
+      data_directory = rcc_files_directory,
+      ssheet_csv = targets_tidy,
+      id_colname = "IDFILE"
+    )
+  })
+})
+
+test_that("deprecated summarize", {
+  rcc_files_directory <- system.file("extdata", package = "NACHO")
+
+  targets <- data.frame(stringsAsFactors = FALSE,
+    name = list.files(rcc_files_directory),
+    datapath = list.files(rcc_files_directory, full.names = TRUE)
+  )
+
+  targets$IDFILE <- basename(targets$datapath)
+  targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+  targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+
+  expect_warning({
+    summarize(
+      data_directory = rcc_files_directory,
+      ssheet_csv = targets_tidy,
+      id_colname = "IDFILE"
+    )
+  })
+})
+
+test_that("Too high number of components", {
+  rcc_files_directory <- system.file("extdata", package = "NACHO")
+
+  targets <- data.frame(stringsAsFactors = FALSE,
+    name = list.files(rcc_files_directory),
+    datapath = list.files(rcc_files_directory, full.names = TRUE)
+  )
+
+  targets$IDFILE <- basename(targets$datapath)
+  targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+  targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+
+  expect_message({
+    load_rcc(
+      data_directory = rcc_files_directory,
+      ssheet_csv = targets_tidy,
+      id_colname = "IDFILE",
+      n_comp = 1000
+    )
+  }, "nacho", "has been set to")
 })
