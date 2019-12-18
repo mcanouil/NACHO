@@ -6,7 +6,7 @@
     - conflicts are now printed when attaching `NACHO`.
     - `nacho_conflicts()` can be used to print conflicts.
 * New Shiny app in `inst/app/`, (#4, #5 & #14)
-    - as a regular app, to load directly RCC files.
+    - as a regular app, to load directly RCC files individually or within zip archive.
     - within `visualise()`, to load `"nacho"` object from `load_rcc()` (previous `summarise()`)
         or from `normalise()`.
 * New `deploy()` (`R/deploy.R`) function to easily deploy (copy) the shiny app.
@@ -18,7 +18,7 @@
 ## Breaking changes
 
 * `summarise()` and `summarize()` have been deprecated and replaced with `load_rcc()`. (#12 & #15)
-* In `R/visualise.R`, now uses a completely new shiny app in `inst/app/`.
+* `visualise()`, now uses a new shiny app (`inst/app/`).
 
 ## Minor improvements and fixes
 
