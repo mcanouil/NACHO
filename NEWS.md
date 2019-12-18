@@ -2,12 +2,15 @@
 
 ## New features
 
-* In `R/conflicts.R`, conflicts are now printed when attaching `NACHO`.
+* In `R/conflicts.R`, 
+    - conflicts are now printed when attaching `NACHO`.
+    - `nacho_conflicts()` can be used to print conflicts.
 * New Shiny app in `inst/app/`, (#4, #5 & #14)
     - as a regular app, to load directly RCC files.
     - within `visualise()`, to load `"nacho"` object from `load_rcc()` (previous `summarise()`)
         or from `normalise()`.
-* New `deploy()` function to easily deploy (copy) the shiny app.
+* New `deploy()` (`R/deploy.R`) function to easily deploy (copy) the shiny app.
+* New raw RCC files (multiplexed) available in `inst/extdata/`.
 * In `DESCRIPTION`, 
     - Order packages in alphabetical order.
     - Add packages' version.
