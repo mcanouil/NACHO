@@ -1,0 +1,1 @@
+**Housekeeping Genes Factor** (**HGF**) is a normalisation factor computed based on housekeeping genes probes provided or predicted by **NACHO**.
