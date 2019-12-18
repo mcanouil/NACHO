@@ -74,14 +74,13 @@ confirm_conflict <- function(packages, name) {
     purrr::map(~ get(name, pos = .)) %>%
     purrr::keep(is.function)
 
-  if (length(objs) <= 1)
-    return()
+  if (length(objs) <= 1) return()
 
   # Remove identical functions
   objs <- objs[!duplicated(objs)]
   packages <- packages[!duplicated(packages)]
-  if (length(objs) == 1)
-    return()
+
+  if (length(objs) == 1) return()
 
   packages
 }
@@ -106,13 +105,9 @@ msg <- function(..., startup = FALSE) {
 
 text_col <- function(x) {
   # If RStudio not available, messages already printed in black
-  if (!rstudioapi::isAvailable()) {
-    return(x)
-  }
+  if (!rstudioapi::isAvailable()) return(x)
 
-  if (!rstudioapi::hasFun("getThemeInfo")) {
-    return(x)
-  }
+  if (!rstudioapi::hasFun("getThemeInfo")) return(x)
 
   theme <- rstudioapi::getThemeInfo()
 
