@@ -33,6 +33,7 @@
 * In `R/print.R`, now print a table with outliers if any (with `echo = TRUE`).
 * In `R/GSE74821.R`, dataset is up to date according to NACHO functions.
 
+
 # NACHO 0.6.1
 
 ## Minor improvements and fixes
