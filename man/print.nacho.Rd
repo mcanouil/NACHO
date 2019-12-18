@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.R
 \name{print.nacho}
 \alias{print.nacho}
-\title{Print method for nacho object}
+\title{Print method for nacho object.}
 \usage{
 \method{print}{nacho}(x, colour = "CartridgeID", size = 0.5,
   show_legend = FALSE, show_outliers = TRUE, outliers_factor = 1,

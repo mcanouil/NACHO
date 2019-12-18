@@ -2,7 +2,7 @@
 % Please edit documentation in R/conflicts.R
 \name{nacho_conflicts}
 \alias{nacho_conflicts}
-\title{Conflicts between the NACHO and other packages}
+\title{Conflicts between the NACHO and other packages.}
 \usage{
 nacho_conflicts()
 }
