@@ -1,6 +1,6 @@
 invisible(suppressPackageStartupMessages({
   sapply(
-    c("shiny", "shinyWidgets", "ggplot2", "purrr", "dplyr", "rlang", "NACHO"),
+    c("shiny", "shinyWidgets", "rlang", "ggplot2", "purrr", "dplyr", "tidyr", "NACHO"),
     library, character.only = TRUE
   )
 }))
@@ -120,51 +120,24 @@ ui <- shiny::tagList(
 
 server <- function(input, output, session) {
   # ---------------------------------------- Upload
-  shiny::observe({
-    if (inherits(nacho_object, "nacho")) {
-      shiny::hideTab("main-menu", target = "upload-tab")
-    } else {
-      shiny::showTab("main-menu", target = "upload-tab", select = TRUE)
-      purrr::map(
-        .x = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
-        .f = ~ shiny::hideTab("main-menu", target = .x)
-      )
-      if (inherits(shiny::req(nacho_react()), "nacho")) {
-        purrr::map(
-          .x = paste0(c("upload", "qc_metrics", "qc_control", "qc_count", "norm"), "-tab"),
-          .f = ~ shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
-        )
-      } else {
-        shiny::showTab("main-menu", target = "upload-tab", select = TRUE)
-      }
-    }
-    if (nrow(outliers_list()) == 0) {
-      shiny::hideTab("main-menu", target = "outliers-tab")
-    } else {
-      shiny::showTab("main-menu", target = "outliers-tab")
-    }
-  })
-
-
   nacho_react <- shiny::reactive({
     if (inherits(nacho_object, "nacho")) return(nacho_object)
 
     targets <- shiny::req(input$rcc_files)
     if (nrow(targets) > 0) {
       targets$IDFILE <- basename(targets$datapath)
+      temp_dir <- unique(dirname(targets$datapath))
 
       check_multiplex <- all(purrr::map_lgl(targets$datapath, ~ any(grepl("Endogenous8s", readLines(.x)))))
       if (check_multiplex) {
-        targets$plexset_id <- rep(list(paste0("S", 1:8)), nrow(targets))
-        targets <- as.data.frame(lapply(targets, unlist), stringsAsFactors = FALSE)
+        targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+        targets <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
       }
-
-      utils::write.csv(x = targets, file = file.path(tempdir(), "Samplesheet.csv"))
 
       suppressMessages(
         NACHO::load_rcc(
-          data_directory = dirname(unique(targets$datapath)),
-          ssheet_csv = file.path(tempdir(), "Samplesheet.csv"),
+          data_directory = temp_dir,
+          ssheet_csv = targets,
           id_colname = "IDFILE",
           normalisation_method =  input[["norm_method"]]
         )
@@ -320,6 +293,38 @@ server <- function(input, output, session) {
         )
       )
     )
+  })
+
+  # ---------------------------------------- Show / Hide tabs
+  shiny::observe({
+    if (!inherits(nacho_object, "nacho") & is.null(input$rcc_files)) {
+      shiny::showTab("main-menu", target = "upload-tab", select = TRUE)
+      purrr::map(
+        .x = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
+        .f = ~ shiny::hideTab("main-menu", target = .x)
+      )
+    }
+
+    if (inherits(nacho_object, "nacho") & is.null(input$rcc_files)) {
+      purrr::map(
+        .x = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
+        .f = ~ shiny::showTab("main-menu", target = .x)
+      )
+      shiny::hideTab("main-menu", target = "upload-tab")
+    }
+
+    if (!is.null(input$rcc_files)) {
+      purrr::map(
+        .x = paste0(c("upload", "qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
+        .f = ~ shiny::showTab("main-menu", target = .x)
+      )
+    }
+
+    if (nrow(outliers_list()) == 0) {
+      shiny::hideTab("main-menu", target = "outliers-tab")
+    } else {
+      shiny::showTab("main-menu", target = "outliers-tab")
+    }
   })
 }
 
