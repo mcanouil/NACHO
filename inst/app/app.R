@@ -1,6 +1,6 @@
 invisible(suppressPackageStartupMessages({
   sapply(
-    c("shiny", "shinyWidgets", "rlang", "ggplot2", "purrr", "dplyr", "tidyr", "NACHO"),
+    c("shiny", "shinyWidgets", "utils", "rlang", "ggplot2", "purrr", "dplyr", "tidyr", "NACHO"),
     library, character.only = TRUE
   )
 }))
@@ -40,9 +40,9 @@ ui <- shiny::tagList(
         ),
         shiny::column(width = 6,
           card(title = "Upload RCC Files", body = {
-            shiny::fileInput("rcc_files", "Choose One or Several RCC File",
+            shiny::fileInput("rcc_files", "Choose One or Several RCC Files",
               multiple = TRUE,
-              accept = ".RCC"
+              accept = c(".RCC", "application/zip")
             )
           })
         )
@@ -125,8 +125,30 @@ server <- function(input, output, session) {
 
     targets <- shiny::req(input$rcc_files)
     if (nrow(targets) > 0) {
-      targets$IDFILE <- basename(targets$datapath)
-      temp_dir <- unique(dirname(targets$datapath))
+      targets <- purrr::pmap_df(
+        .l = targets[, c("name", "datapath", "type")],
+        .f = function(name, datapath, type) {
+          if (type == "application/x-zip-compressed") {
+            ex_dir <- file.path(dirname(datapath), gsub(".zip$", "", name))
+            utils::unzip(datapath, exdir = ex_dir)
+            data.frame(
+              name = file.path(gsub(".zip$", "", name), list.files(ex_dir)),
+              datapath = list.files(ex_dir, full.names = TRUE),
+              type = type,
+              IDFILE = file.path(gsub(".zip$", "", name), list.files(ex_dir)),
+              stringsAsFactors = FALSE
+            )
+          } else {
+            data.frame(
+              name = name,
+              datapath = datapath,
+              type = type,
+              IDFILE = basename(datapath),
+              stringsAsFactors = FALSE
+            )
+          }
+        }
+      )
 
       check_multiplex <- all(purrr::map_lgl(targets$datapath, ~ any(grepl("Endogenous8s", readLines(.x)))))
       if (check_multiplex) {
@@ -136,7 +158,7 @@ server <- function(input, output, session) {
 
       suppressMessages(
         NACHO::load_rcc(
-          data_directory = temp_dir,
+          data_directory = unique(purrr::map2_chr(targets$IDFILE, targets$datapath, ~ gsub(.x, "", .y))),
           ssheet_csv = targets,
           id_colname = "IDFILE",
           normalisation_method =  input[["norm_method"]]
