@@ -121,7 +121,7 @@ load_rcc <- function(
   )
 
   nacho_df <- tibble::as_tibble(nacho_df)
-  nacho_df[["file_path"]] <- paste(data_directory, nacho_df[[id_colname]], sep = "/")
+  nacho_df[["file_path"]] <- file.path(data_directory, nacho_df[[id_colname]])
 
   if (!all(sapply(X = nacho_df[["file_path"]], FUN = file.exists))) {
     stop('[NACHO] Not all values from "id_colname" are mapped to a RCC file.')
