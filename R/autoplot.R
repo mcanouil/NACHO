@@ -556,14 +556,14 @@ plot_pca12 <- function(
       "CartridgeID",
       !!colour,
       !!nacho_object$access,
-      "PC1",
-      "PC2"
+      "PC01",
+      "PC02"
     ) %>%
     dplyr::distinct() %>%
     ggplot2::ggplot(
       mapping = ggplot2::aes(
-        x = .data[["PC1"]],
-        y = .data[["PC2"]],
+        x = .data[["PC01"]],
+        y = .data[["PC02"]],
         colour = .data[[colour]]
       )
     ) +
@@ -573,6 +573,7 @@ plot_pca12 <- function(
       ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
       ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
       ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(0.25)) +
+      ggplot2::labs(x = "PC01", y = "PC02", colour = colour) +
       {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
@@ -597,19 +598,19 @@ plot_pca <- function(
         "CartridgeID",
         !!colour,
         !!nacho_object$access,
-        paste0("PC", 1:min(nacho_object$n_comp, 5))
+        sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))
       ) %>%
       dplyr::distinct() %>%
-      tidyr::gather(key = "X.PC", value = "X", paste0("PC", 1:min(nacho_object$n_comp, 5))),
+      tidyr::gather(key = "X.PC", value = "X", sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))),
     y = nacho_object$nacho %>%
       dplyr::select(
         "CartridgeID",
         !!colour,
         !!nacho_object$access,
-        paste0("PC", 1:min(nacho_object$n_comp, 5))
+        sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))
       ) %>%
       dplyr::distinct() %>%
-      tidyr::gather(key = "Y.PC", value = "Y", paste0("PC", 1:min(nacho_object$n_comp, 5))),
+      tidyr::gather(key = "Y.PC", value = "Y", sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))),
     by = unique(c("CartridgeID", nacho_object$access, colour))
   ) %>%
     dplyr::filter(
