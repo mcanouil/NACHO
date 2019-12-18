@@ -175,20 +175,12 @@ load_rcc <- function(
   message("[NACHO] Performing QC and formatting data.")
   has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
   if (!has_hkg & is.null(housekeeping_genes) & !housekeeping_predict & housekeeping_norm) {
-    message(
-      paste(
-        '[NACHO] "housekeeping_norm" has been set to FALSE.',
-        "  Note:",
-        if (has_hkg) {
-          ""
-        } else {
-          "  - No default housekeeping genes available in your data;"
-        },
-        '  - "housekeeping_genes" is NULL;',
-        '  - "housekeeping_predict" is FALSE.',
-        sep = "\n"
-      )
-    )
+    message(paste(
+      '[NACHO] "housekeeping_norm" has been set to FALSE.',"  Note:",
+      if (has_hkg) "" else "  - No default housekeeping genes available in your data;",
+      '  - "housekeeping_genes" is NULL;', '  - "housekeeping_predict" is FALSE.',
+      sep = "\n"
+    ))
     housekeeping_norm <- FALSE
   }
   nacho_object <- qc_rcc(
