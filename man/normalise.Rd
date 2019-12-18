@@ -3,7 +3,7 @@
 \name{normalise}
 \alias{normalise}
 \alias{normalize}
-\title{(re)Normalise a dataset read from \link{load_rcc}}
+\title{(re)Normalise a dataset read from \link{load_rcc}.}
 \usage{
 normalise(nacho_object,
   housekeeping_genes = nacho_object[["housekeeping_genes"]],
