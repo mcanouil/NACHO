@@ -16,5 +16,6 @@ test_that("wrong attribute", {
 })
 
 test_that("numeric column for colour", {
+  GSE74821$outliers_thresholds$FoV <- 95
   expect_null(print.nacho(GSE74821, colour = "channel_count", echo = TRUE))
 })

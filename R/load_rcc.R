@@ -77,26 +77,6 @@
 #'   )
 #' }
 #'
-#' # Multiplex data (e.g., "plexset")
-#' if (interactive()) {
-#'   rcc_files_directory <- system.file("extdata", package = "NACHO")
-#'
-#'   targets <- data.frame(stringsAsFactors = FALSE,
-#'     name = list.files(rcc_files_directory),
-#'     datapath = list.files(rcc_files_directory, full.names = TRUE)
-#'   )
-#'
-#'   targets$IDFILE <- basename(targets$datapath)
-#'   targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
-#'   targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
-#'
-#'   salmon <- load_rcc(
-#'     data_directory = rcc_files_directory,
-#'     ssheet_csv = targets_tidy,
-#'     id_colname = "IDFILE"
-#'   )
-#' }
-#'
 load_rcc <- function(
   data_directory,
   ssheet_csv,
@@ -133,8 +113,6 @@ load_rcc <- function(
       '  For PlexSet RCC files, "plexset_id" column is required to identify samples.'
     )
   }
-
-  # column_to_unnest <- c("rcc_content", "Code_Summary")
 
   if (anyDuplicated(nacho_df[[id_colname]])!=0) {
     type_set <- "n8"
