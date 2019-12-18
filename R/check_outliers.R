@@ -24,7 +24,13 @@ check_outliers <- function(nacho_object) {
   if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
     stop('[NACHO] RCC type must be either "n1" or "n8"!')
   }
+
   ot <- nacho_object[["outliers_thresholds"]]
+
+  if (!"House_factor" %in% colnames(nacho_object[["nacho"]])) {
+    nacho_object[["nacho"]][, "House_factor"] <- median(ot[["House_factor"]])
+  }
+
   if (attr(nacho_object, "RCC_type") == "n1") {
     nacho_object[["nacho"]][, "is_outlier"] <- {
       nacho_object[["nacho"]][, "BD"] < min(ot[["BD"]]) | nacho_object[["nacho"]][, "BD"] > max(ot[["BD"]]) |
@@ -46,5 +52,10 @@ check_outliers <- function(nacho_object) {
         nacho_object[["nacho"]][, "House_factor"] > max(ot[["House_factor"]])
     }
   }
+
+  if (!"House_factor" %in% colnames(nacho_object[["nacho"]])) {
+    nacho_object[["nacho"]][, "House_factor"] <- NULL
+  }
+
   nacho_object
 }
