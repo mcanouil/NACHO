@@ -30,6 +30,7 @@
     - add `outliers_factor` to highligth outliers with different point size.
     - add `outliers_labels` to print labels on top of outliers.
     - now uses tidyeval via import.
+* In `R/print.R`, now print a table with outliers if any (with `echo = TRUE`).
 * In `R/GSE74821.R`, dataset is up to date according to NACHO functions.
 
 # NACHO 0.6.1
