@@ -6,4 +6,4 @@ In most assays, you will observe that even the **POS_F** probe (equivalent to 0.
 To determine whether **POS_E** is detectable, it can be compared to the counts for the negative control probes.  
 Every nCounter Gene Expression assay is manufactured with eight negative control probes that should not hybridize to any targets within the sample.  
 Counts from these will approximate general non-specific binding of probes within the samples being run.  
-The counts of **POS_E** should be higher than two times the standard deviation above the mean of the negative control.
+<!--The counts of **POS_E** should be higher than two times the standard deviation above the mean of the negative control.-->
