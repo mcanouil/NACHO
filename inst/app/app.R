@@ -288,10 +288,12 @@ server <- function(input, output, session) {
 
   # ---------------------------------------- Output
   outliers_list <- shiny::reactive({
-    dplyr::distinct(
-      nacho_custom()$nacho[which(nacho_custom()$nacho[["is_outlier"]]), ],
-      sample_ID, CartridgeID, BD, FoV, PCL, LoD, MC, MedC,
-      Positive_factor, House_factor
+    columns_qc <- c(
+      "IDFILE", "CartridgeID", "BD", "FoV", "PCL", "LoD", "MC", "MedC",
+      "Positive_factor", "House_factor"
+    )
+    unique(
+      nacho_custom()$nacho[which(nacho_custom()$nacho[["is_outlier"]]), columns_qc]
     )
   })
   output[["outliers"]] <- shiny::renderTable({ outliers_list() })
