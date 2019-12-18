@@ -2,7 +2,7 @@
 % Please edit documentation in R/render.R
 \name{render}
 \alias{render}
-\title{Render a HTML report from \link{load_rcc} or \link{normalise}}
+\title{Render a HTML report from \link{load_rcc} or \link{normalise}.}
 \usage{
 render(nacho_object, colour = "CartridgeID",
   output_file = "NACHO_QC.html", output_dir = ".", size = 1,

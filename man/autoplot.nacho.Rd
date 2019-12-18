@@ -2,7 +2,7 @@
 % Please edit documentation in R/autoplot.R
 \name{autoplot.nacho}
 \alias{autoplot.nacho}
-\title{Plot quality-control metrics and thresholds}
+\title{Plot quality-control metrics and thresholds.}
 \usage{
 \method{autoplot}{nacho}(object, x, colour = "CartridgeID", size = 0.5,
   show_legend = TRUE, show_outliers = TRUE, outliers_factor = 1,

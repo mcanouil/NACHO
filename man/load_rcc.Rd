@@ -3,7 +3,7 @@
 \name{load_rcc}
 \alias{load_rcc}
 \alias{summarize}
-\title{Summarise data from RCC NanoString files (and normalise them)}
+\title{Summarise data from RCC NanoString files (and normalise them).}
 \usage{
 load_rcc(data_directory, ssheet_csv, id_colname,
   housekeeping_genes = NULL, housekeeping_predict = FALSE,
@@ -39,14 +39,14 @@ Cannot be more than n-1 samples. Default is \code{10}.}
 \value{
 [\link{list}] A list containing parameters and data:
 \describe{
-\item{\code{access}}{[\link{character}] Value passed to \link{summarise} in \code{id_colname}.}
-\item{\code{housekeeping_genes}}{[\link{character}] Value passed to \link{summarise}.}
-\item{\code{housekeeping_predict}}{[\link{logical}] Value passed to \link{summarise}.}
-\item{\code{housekeeping_norm}}{[\link{logical}] Value passed to \link{summarise}.}
-\item{\code{normalisation_method}}{[\link{character}] Value passed to \link{summarise}.}
+\item{\code{access}}{[\link{character}] Value passed to \link{load_rcc} in \code{id_colname}.}
+\item{\code{housekeeping_genes}}{[\link{character}] Value passed to \link{load_rcc}.}
+\item{\code{housekeeping_predict}}{[\link{logical}] Value passed to \link{load_rcc}.}
+\item{\code{housekeeping_norm}}{[\link{logical}] Value passed to \link{load_rcc}.}
+\item{\code{normalisation_method}}{[\link{character}] Value passed to \link{load_rcc}.}
 \item{\code{remove_outliers}}{[\link{logical}] \code{FALSE}.}
-\item{\code{n_comp}}{[\link{numeric}] Value passed to \link{summarise}.}
-\item{\code{data_directory}}{[\link{character}] Value passed to \link{summarise}.}
+\item{\code{n_comp}}{[\link{numeric}] Value passed to \link{load_rcc}.}
+\item{\code{data_directory}}{[\link{character}] Value passed to \link{load_rcc}.}
 \item{\code{pc_sum}}{[\link{data.frame}] A \code{data.frame} with \code{n_comp} rows and four columns:
 "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
 \item{\code{nacho}}{[\link{data.frame}] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
@@ -91,6 +91,26 @@ if (interactive()) {
   nacho <- load_rcc(
     data_directory = paste0(tempdir(), "/GSE74821"),
     ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
+    id_colname = "IDFILE"
+  )
+}
+
+# Multiplex data (e.g., "plexset")
+if (interactive()) {
+  rcc_files_directory <- system.file("extdata", package = "NACHO")
+
+  targets <- data.frame(stringsAsFactors = FALSE,
+    name = list.files(rcc_files_directory),
+    datapath = list.files(rcc_files_directory, full.names = TRUE)
+  )
+
+  targets$IDFILE <- basename(targets$datapath)
+  targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+  targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+
+  salmon <- load_rcc(
+    data_directory = rcc_files_directory,
+    ssheet_csv = targets_tidy,
     id_colname = "IDFILE"
   )
 }
