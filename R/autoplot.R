@@ -1,4 +1,4 @@
-#' Plot quality-control metrics and thresholds
+#' Plot quality-control metrics and thresholds.
 #'
 #' This function allows to plot any qualit-control figures available
 #' within the shiny app using [visualise] or in the HTML report from [render].
@@ -874,10 +874,10 @@ plot_norm <- function(
   show_legend
 ) {
   if (is.null(nacho_object$housekeeping_genes)) {
-    probe_var <- dplyr::sym("CodeClass")
+    probe_var <- "CodeClass"
     probe_type <- "Positive"
   } else {
-    probe_var <- dplyr::sym("Name")
+    probe_var <- "Name"
     probe_type <- nacho_object$housekeeping_genes
   }
 
@@ -888,10 +888,11 @@ plot_norm <- function(
       "Count",
       "Count_Norm",
       "Name",
+      "CodeClass",
       "is_outlier"
     ) %>%
     dplyr::distinct() %>%
-    dplyr::filter(!!probe_var %in% !!probe_type) %>%
+    dplyr::filter(.data[[probe_var]] %in% !!probe_type) %>%
     tidyr::gather(key = "Status", value = "Count", c("Count", "Count_Norm")) %>%
     dplyr::mutate(
       Status = factor(
