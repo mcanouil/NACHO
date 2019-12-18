@@ -27,7 +27,9 @@ check_outliers <- function(nacho_object) {
 
   ot <- nacho_object[["outliers_thresholds"]]
 
-  if (!"House_factor" %in% colnames(nacho_object[["nacho"]])) {
+  is_house_factor <- "House_factor" %in% colnames(nacho_object[["nacho"]])
+
+  if (!is_house_factor) {
     nacho_object[["nacho"]][, "House_factor"] <- sum(ot[["House_factor"]]) / 2
   }
 
@@ -53,7 +55,7 @@ check_outliers <- function(nacho_object) {
     }
   }
 
-  if (!"House_factor" %in% colnames(nacho_object[["nacho"]])) {
+  if (!is_house_factor) {
     nacho_object[["nacho"]][, "House_factor"] <- NULL
   }
 
