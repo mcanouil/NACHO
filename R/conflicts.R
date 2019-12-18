@@ -1,5 +1,3 @@
-# nocov start
-
 .onAttach <- function(...) {
   crayon::num_colors(TRUE)
   if (!"package:conflicted" %in% search()) {
@@ -9,11 +7,7 @@
 
 }
 
-is_attached <- function(x) {
-  paste0("package:", x) %in% search()
-}
-
-#' Conflicts between the NACHO and other packages
+#' Conflicts between the NACHO and other packages.
 #'
 #' This function lists all the conflicts between packages in the NACHO
 #' and other packages that you have loaded.
@@ -131,13 +125,3 @@ invert <- function(x) {
   stacked <- utils::stack(x)
   tapply(as.character(stacked$ind), stacked$values, list)
 }
-
-
-style_grey <- function(level, ...) {
-  crayon::style(
-    paste0(...),
-    crayon::make_style(grDevices::grey(level), grey = TRUE)
-  )
-}
-
-# nocov end
