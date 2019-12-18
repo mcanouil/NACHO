@@ -1,4 +1,4 @@
-#' Presummarised data from GSE74821 (20 samples)
+#' Presummarised data from GSE74821 (20 samples).
 #'
 #' NanoString nCounter RUO-PAM50 Gene Expression Custom CodeSet
 #'

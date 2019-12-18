@@ -1,4 +1,4 @@
-#' Visualise quality-control metrics using a shiny app
+#' Visualise quality-control metrics using a shiny app.
 #'
 #' This function allows to visualise results from [load_rcc] or [normalise]
 #' several quality-control metrics in an interactive [shiny] application,
@@ -63,14 +63,14 @@
 #' }
 #'
 visualise <- function(nacho_object) {
-  if (!inherits(nacho_object, "nacho")) {
-    stop(
-      '[NACHO] "nacho_object" must be of class "nacho" from "load_rcc()" and/or "normalise()" !'
-    )
-  }
   if (missing(nacho_object)) {
     stop(
       '[NACHO] "nacho_object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
+    )
+  }
+  if (!inherits(nacho_object, "nacho")) {
+    stop(
+      '[NACHO] "nacho_object" must be of class "nacho" from "load_rcc()" and/or "normalise()" !'
     )
   }
   mandatory_fields <- c(
