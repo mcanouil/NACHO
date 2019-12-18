@@ -28,7 +28,7 @@ check_outliers <- function(nacho_object) {
   ot <- nacho_object[["outliers_thresholds"]]
 
   if (!"House_factor" %in% colnames(nacho_object[["nacho"]])) {
-    nacho_object[["nacho"]][, "House_factor"] <- median(ot[["House_factor"]])
+    nacho_object[["nacho"]][, "House_factor"] <- sum(ot[["House_factor"]]) / 2
   }
 
   if (attr(nacho_object, "RCC_type") == "n1") {
