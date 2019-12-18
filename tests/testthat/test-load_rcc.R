@@ -241,7 +241,7 @@ test_that("using GEO GSE70970 with prediction", {
 })
 
 test_that("using RAW RCC multiplexed", {
-  rcc_files_directory <- system.file("extdata", package = "NACHO")
+  rcc_files_directory <- "salmon_data"
 
   targets <- data.frame(stringsAsFactors = FALSE,
     name = list.files(rcc_files_directory),
@@ -261,7 +261,7 @@ test_that("using RAW RCC multiplexed", {
 })
 
 test_that("using RAW RCC multiplexed without plexset_id", {
-  rcc_files_directory <- system.file("extdata", package = "NACHO")
+  rcc_files_directory <- "salmon_data"
 
   targets <- data.frame(stringsAsFactors = FALSE,
     name = list.files(rcc_files_directory),
@@ -283,7 +283,7 @@ test_that("using RAW RCC multiplexed without plexset_id", {
 })
 
 test_that("using RAW RCC multiplexed without plexset_id", {
-  rcc_files_directory <- system.file("extdata", package = "NACHO")
+  rcc_files_directory <- "salmon_data"
 
   targets <- data.frame(stringsAsFactors = FALSE,
     name = list.files(rcc_files_directory),
@@ -305,7 +305,7 @@ test_that("using RAW RCC multiplexed without plexset_id", {
 })
 
 test_that("deprecated summarise", {
-  rcc_files_directory <- system.file("extdata", package = "NACHO")
+  rcc_files_directory <- "salmon_data"
 
   targets <- data.frame(stringsAsFactors = FALSE,
     name = list.files(rcc_files_directory),
@@ -326,7 +326,7 @@ test_that("deprecated summarise", {
 })
 
 test_that("deprecated summarize", {
-  rcc_files_directory <- system.file("extdata", package = "NACHO")
+  rcc_files_directory <- "salmon_data"
 
   targets <- data.frame(stringsAsFactors = FALSE,
     name = list.files(rcc_files_directory),
@@ -347,7 +347,7 @@ test_that("deprecated summarize", {
 })
 
 test_that("Too high number of components", {
-  rcc_files_directory <- system.file("extdata", package = "NACHO")
+  rcc_files_directory <- "salmon_data"
 
   targets <- data.frame(stringsAsFactors = FALSE,
     name = list.files(rcc_files_directory),
@@ -366,4 +366,29 @@ test_that("Too high number of components", {
       n_comp = 1000
     )
   }, "nacho", "has been set to")
+})
+
+
+test_that("plexset", {
+  rcc_files_directory <- "plexset_data"
+  targets <- data.frame(stringsAsFactors = FALSE,
+    name = list.files(rcc_files_directory),
+    datapath = list.files(rcc_files_directory, full.names = TRUE)
+  )
+  targets$IDFILE <- basename(targets$datapath)
+  targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+  targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+
+  expect_s3_class(
+    object = {
+      load_rcc(
+          data_directory = rcc_files_directory,
+          ssheet_csv = targets_tidy,
+          id_colname = "IDFILE",
+          housekeeping_predict = TRUE,
+          housekeeping_norm = TRUE
+        )
+    },
+    class = "nacho"
+  )
 })

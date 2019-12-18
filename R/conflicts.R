@@ -67,6 +67,8 @@ print.nacho_conflicts <- function(x, ..., startup = FALSE) {
   cli::cat_line(nacho_conflict_message(x))
 }
 
+# nocov start
+
 #' @importFrom magrittr %>%
 confirm_conflict <- function(packages, name) {
   # Only look at functions
@@ -120,3 +122,5 @@ invert <- function(x) {
   stacked <- utils::stack(x)
   tapply(as.character(stacked$ind), stacked$values, list)
 }
+
+# nocov end
