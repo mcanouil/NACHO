@@ -194,19 +194,6 @@ load_rcc <- function(
     n_comp = n_comp
   )
 
-  if (
-    is.null(nacho_object$housekeeping_genes) &
-      nacho_object$housekeeping_norm &
-      nacho_object$housekeeping_predict
-  ) {
-    message(paste(
-      '[NACHO] "housekeeping_norm" has been set to FALSE.',
-      "  Note: No suitable housekeeping genes available in your data.",
-      sep = "\n"
-    ))
-    housekeeping_norm <- FALSE
-  }
-
   attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
 
   ot <- list(
