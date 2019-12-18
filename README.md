@@ -56,9 +56,9 @@ control genes, principal components and sample specific size factors in
 an interactive web application.
 
 With the use of two functions, RCC files are summarised and visualised,
-namely: `summarise()` and `visualise()`.
+namely: `load_rcc()` and `visualise()`.
 
-  - The `summarise()` function is used to preprocess the data.
+  - The `load_rcc()` function is used to preprocess the data.
   - The `visualise()` function initiates a [Shiny-based
     dashboard](https://shiny.rstudio.com/) that visualises all relevant
     QC plots.
@@ -73,7 +73,7 @@ In addition (since v0.6.0) *NACHO* includes two (three) additional
 functions:
 
   - The `render()` function renders a full quality-control report (HTML)
-    based on the results of a call to `summarise()` or `normalise()`
+    based on the results of a call to `load_rcc()` or `normalise()`
     (using `print()` in a Rmarkdown chunk).
   - The `autoplot()` function draws any quality-control metrics from
     `visualise()` and `render()`.
