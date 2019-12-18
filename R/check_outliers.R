@@ -16,6 +16,11 @@
 #' head(nacho_object$nacho)
 #'
 check_outliers <- function(nacho_object) {
+  if (missing(nacho_object)) {
+    stop(
+      '[NACHO] "nacho_object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
+    )
+  }
   if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
     stop('[NACHO] RCC type must be either "n1" or "n8"!')
   }
