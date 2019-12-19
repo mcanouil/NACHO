@@ -44,7 +44,7 @@ remotes::install_github("mcanouil/NACHO")
 ## Overview 
 
 ```{r, echo = FALSE, results = "asis"}
-cat(readLines(system.file("app", "www", "about-nacho.md", package = "NACHO"))[-c(1, 2)], sep = "\n")
+cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep = "\n")
 ```
 
 ### Shiny Application
