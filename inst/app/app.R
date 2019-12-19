@@ -355,7 +355,7 @@ server <- function(input, output, session) {
     if (inherits(nacho_object, "nacho") & is.null(input$rcc_files)) {
       purrr::map(
         .x = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
-        .f = ~ shiny::showTab("main-menu", target = .x)
+        .f = ~ shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
       )
       shiny::hideTab("main-menu", target = "upload-tab")
     }
@@ -363,7 +363,7 @@ server <- function(input, output, session) {
     if (!is.null(input$rcc_files)) {
       purrr::map(
         .x = paste0(c("upload", "qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
-        .f = ~ shiny::showTab("main-menu", target = .x)
+        .f = ~ shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
       )
     }
 
