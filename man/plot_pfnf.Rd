@@ -4,8 +4,16 @@
 \alias{plot_pfnf}
 \title{plot_pfnf}
 \usage{
-plot_pfnf(nacho_object, x, colour, size, show_legend, show_outliers,
-  outliers_factor, outliers_labels)
+plot_pfnf(
+  nacho_object,
+  x,
+  colour,
+  size,
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
+)
 }
 \arguments{
 \item{x}{[\link{character}] Character string naming the quality-control metrics to plot from \code{nacho_object}.

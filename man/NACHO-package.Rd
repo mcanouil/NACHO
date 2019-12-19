@@ -29,11 +29,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Mickaël Canouil \email{***REMOVED***} (0000-0002-3396-4549)
+\strong{Maintainer}: Mickaël Canouil \email{***REMOVED***} (\href{https://orcid.org/0000-0002-3396-4549}{ORCID})
 
 Authors:
 \itemize{
-  \item Roderick Slieker \email{R.C.Slieker@lumc.nl} (0000-0003-0961-9152)
+  \item Roderick Slieker \email{R.C.Slieker@lumc.nl} (\href{https://orcid.org/0000-0003-0961-9152}{ORCID})
   \item Gerard Bouland \email{G.A.Bouland@lumc.nl}
 }
 
