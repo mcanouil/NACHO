@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Nanostring Quality Control Dashboard <img src="man/figures/nacho_hex.png" align="right" width="120" />
+# Nanostring Quality Control Dashboard <img src="vignettes/figures/nacho_hex.png" align="right" width="120" />
 
 <!-- badges: start -->
 
@@ -86,13 +86,13 @@ For more `vignette("NACHO")`.
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
 
-![](man/figures/README-app.png)
+![](vignettes/figures/README-app.png)
 
 ``` r
 visualise(GSE74821)
 ```
 
-![](man/figures/README-visualise.png)
+![](vignettes/figures/README-visualise.png)
 
 ## Citing NACHO
 
@@ -106,7 +106,7 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 </p>
 
     @Article{,
-      title = {NACHO: an R package for quality control of NanoString nCounter data},
+      title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
       author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen Hart and Roderick Slieker},
       journal = {Bioinformatics},
       address = {Oxford, England},
