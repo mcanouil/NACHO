@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Nanostring Quality Control Dashboard <img src="vignettes/figures/nacho_hex.png" align="right" width="120" />
+# Nanostring Quality Control Dashboard <img src="man/figures/nacho_hex.png" align="right" width="120" />
 
 <!-- badges: start -->
 
@@ -86,13 +86,13 @@ For more `vignette("NACHO")`.
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
 
-![](vignettes/figures/README-app.png)
+![](man/figures/README-app.png)
 
 ``` r
 visualise(GSE74821)
 ```
 
-![](vignettes/figures/README-visualise.png)
+![](man/figures/README-visualise.png)
 
 ## Citing NACHO
 
