@@ -14,7 +14,7 @@
 #'   shiny::runApp("NACHO")
 #' }
 #'
-deploy <- function(directory, app_name = "NACHO") {
+deploy <- function(directory = "/srv/shiny-server", app_name = "NACHO") {
   dir.create(file.path(directory, app_name), showWarnings = FALSE, recursive = TRUE)
   all(file.copy(
     from = list.files(system.file("app", package = "NACHO"), full.names = TRUE),
