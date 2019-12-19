@@ -47,8 +47,19 @@ remotes::install_github("mcanouil/NACHO")
 cat(readLines(system.file("app", "www", "about-nacho.md", package = "NACHO"))[-c(1, 2)], sep = "\n")
 ```
 
-<img src="man/figures/README-app.png" align="right" width="120" />
-<img src="man/figures/README-visualise.png" align="right" width="120" />
+### Shiny Application
+
+```{r, eval = FALSE}
+shiny::runApp(system.file("app", package = "NACHO"))
+```
+
+![](man/figures/README-app.png)
+
+```{r, eval = FALSE}
+visualise(GSE74821)
+```
+
+![](man/figures/README-visualise.png)
 
 ## Citing NACHO
 

@@ -53,6 +53,11 @@ install.packages("NACHO")
 remotes::install_github("mcanouil/NACHO")
 ```
 
+```{r, message = FALSE}
+# Load NACHO
+library(NACHO)
+```
+
 
 # Overview 
 
@@ -68,6 +73,7 @@ print(citation("NACHO"), "html")
 print(citation("NACHO"), "bibtex")
 ```
 
+
 # An example
 
 To display the usage and utility of *NACHO*, we show three examples in which the above mentioned functions are used and the results are briefly examined.
@@ -79,7 +85,9 @@ In the third example, we use the summarised dataset from the second example to c
 Besides creating interactive visualisations, *NACHO* also identifies poorly performing samples which can be seen under the Outlier Table tab in the interactive web application.  
 While calling `normalise()`, the user has the possibility to remove these outliers before size factor calculation.
 
+
 ## Get NanoString nCounter data
+
 
 ### Presummarised data from *NACHO*
 
@@ -92,9 +100,10 @@ data(GSE74821)
 visualise(GSE74821)
 ```
 
-```{r ex1-fig}
+```{r ex1-fig, echo = FALSE, out.width = "650px"}
 knitr::include_graphics(path = system.file("help", "figures", "README-visualise.png", package = "NACHO"))
 ```
+
 
 ### Raw data from GEO
 
@@ -102,7 +111,7 @@ Numerous NanoString nCounter datasets are available from GEO [@barrett_ncbi_2013
 In this example, we use a mRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
 The data is extracted and prepared using the following code.
 
-```{r geo_down, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
+```{r geo-down, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
 gse <- try({GEOquery::getGEO("GSE70970")}, silent = TRUE)
 if (class(gse)=="try-error") { # when GEOquery is down
   cons <- showConnections(all = TRUE)
@@ -130,7 +139,12 @@ untar(
 targets$IDFILE <- list.files(paste0(tempdir(), "/GSE70970/Data"))
 ```
 
-After we extracted the dataset to the `paste0(tempdir(), "/GSE70970/Data")` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or use as is.  
+```{r, echo = FALSE, message = FALSE, warning = FALSE, eval = class(gse)!="try-error"}
+tibble::as_tibble(dplyr::select(targets, "IDFILE", dplyr::everything()))
+```
+
+After we extracted the dataset to the `` `r paste0(tempdir(), "/GSE70970/Data")` `` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or use as is.  
+
 
 ## The `load_rcc()` function
  
@@ -138,21 +152,21 @@ The first argument requires the path to the directory containing the RCC files, 
 The `housekeeping_genes` and `normalisation_method` arguments respectively indicate which housekeeping genes and normalisation method should be used.
 
 ```{r ex3, eval = class(gse)!="try-error"}
-library(NACHO)
 GSE70970_sum <- load_rcc(
   data_directory = paste0(tempdir(), "/GSE70970/Data"), # Where the data is
   ssheet_csv = targets, # The samplesheet
-  id_colname = "IDFILE", # Name of the column that contains the identfiers
+  id_colname = "IDFILE", # Name of the column that contains the unique identfiers
   housekeeping_genes = NULL, # Custom list of housekeeping genes
-  housekeeping_predict = TRUE, # Predict the housekeeping genes based on the data?
+  housekeeping_predict = TRUE, # Whether or not to predict the housekeeping genes
   normalisation_method = "GEO", # Geometric mean or GLM
-  n_comp = 5 # Number indicating the number of principal components to compute. 
+  n_comp = 5 # Number indicating how many principal components should be computed. 
 )
 ```
 
 ```{r, echo = FALSE, results = "hide", eval = class(gse)!="try-error"}
 unlink(paste0(tempdir(), "/GSE70970"), recursive = TRUE)
 ```
+
 
 ## The `visualise()` function
 
@@ -162,10 +176,10 @@ When the summarisation is done, the summarised (or normalised) data can be visua
 visualise(GSE70970_sum)
 ```
 
-On the left, there are widgets that control the interactive plotting area. 
-These widgets differ dependent on which main tab is chosen. 
-The second layer of tabs is also interactive and changes based on which main tab is chosen. 
+The sidebar includes widgets to control quality-control thresholds. 
+These widgets differ according to the selected tab. 
 Each sample in the plots can be coloured based on either technical specifications which are included in the RCC files or based on specifications of your own choosing, though these specifications need to be included in the samplesheet.
+
 
 ## The `normalise()` function
 
@@ -178,7 +192,7 @@ The discovered housekeeping genes are saved in the result object as **predicted_
 print(GSE70970_sum[["housekeeping_genes"]])
 ```
 
-```{r in_text, eval = class(gse)!="try-error", echo = FALSE, results = "asis"}
+```{r intext, eval = class(gse)!="try-error", echo = FALSE, results = "asis"}
 cat(
   "Let's say _", GSE70970_sum[["housekeeping_genes"]][1], 
   "_ and _", GSE70970_sum[["housekeeping_genes"]][2], 
@@ -215,6 +229,7 @@ GSE70970_norm <- normalise(
 
 `normalise()` returns a `list` object (same as `load_rcc()`) with `raw_counts` and `normalised_counts` slots filled with the raw and normalised counts. 
 Both counts are also in the *NACHO* data.frame.
+
 
 ## The `autoplot()` function
 
@@ -276,6 +291,27 @@ for (imetric in seq_along(metrics)) {
 }
 ```
 
+
+## NACHO as a standalone app
+
+*NACHO* is also available as a standalone app to be used in a shiny server configuration.
+A convenience function `deploy()` is available to directly copy the *NACHO* app to the default directory of a shiny server.
+
+```{r deploy, eval = FALSE}
+deploy(directory = "/srv/shiny-server", app_name = "NACHO")
+```
+
+The app can also be run directly, without manually summarising and normalising RCC files:
+
+```{r app, eval = FALSE}
+shiny::runApp(system.file("app", package = "NACHO"))
+```
+
+```{r app-fig, echo = FALSE, out.width = "650px"}
+knitr::include_graphics(path = system.file("help", "figures", "README-app.png", package = "NACHO"))
+```
+
+
 ## The `render()` function
 
 The `render()` function renders (using `print(..., echo = TRUE)` a comprehensive HTML report 
@@ -295,7 +331,7 @@ render(
 
 The underneath function `print()` can be used directly within any Rmarkdown chunk, setting the parameter `echo = TRUE`.
 
-```{r, results = "asis"}
+```{r print, results = "asis"}
 print(
   x = GSE74821, 
   colour = "CartridgeID", 
@@ -305,6 +341,7 @@ print(
   title_level = 3
 )
 ```
+
 
 
 # References

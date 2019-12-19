@@ -80,6 +80,20 @@ functions:
 
 For more `vignette("NACHO")`.
 
+### Shiny Application
+
+``` r
+shiny::runApp(system.file("app", package = "NACHO"))
+```
+
+![](man/figures/README-app.png)
+
+``` r
+visualise(GSE74821)
+```
+
+![](man/figures/README-visualise.png)
+
 ## Citing NACHO
 
 <p>
