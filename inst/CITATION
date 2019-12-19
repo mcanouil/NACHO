@@ -2,7 +2,7 @@ citHeader("To cite NACHO in publications use:")
 
 citEntry(
   entry = "Article",
-  title = "NACHO: an R package for quality control of NanoString nCounter data",
+  title = "{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data",
   author = paste(
     "Mickaël Canouil [aut, cre]",
     "Gerard A. Bouland [aut]",

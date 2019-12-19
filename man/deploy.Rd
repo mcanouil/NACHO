@@ -4,7 +4,7 @@
 \alias{deploy}
 \title{Deploy (copy) the shiny application to the specified directory.}
 \usage{
-deploy(directory, app_name = "NACHO")
+deploy(directory = "/srv/shiny-server", app_name = "NACHO")
 }
 \arguments{
 \item{directory}{[\link{character}] A character vector of one path to the new location.}
