@@ -4,9 +4,17 @@
 \alias{autoplot.nacho}
 \title{Plot quality-control metrics and thresholds of a \code{"nacho"} object}
 \usage{
-\method{autoplot}{nacho}(object, x, colour = "CartridgeID", size = 0.5,
-  show_legend = TRUE, show_outliers = TRUE, outliers_factor = 1,
-  outliers_labels = NULL, ...)
+\method{autoplot}{nacho}(
+  object,
+  x,
+  colour = "CartridgeID",
+  size = 0.5,
+  show_legend = TRUE,
+  show_outliers = TRUE,
+  outliers_factor = 1,
+  outliers_labels = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{[\link{list}] List obtained from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}

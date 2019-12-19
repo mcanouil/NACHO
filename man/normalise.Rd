@@ -5,14 +5,16 @@
 \alias{normalize}
 \title{(re)Normalise a \code{"nacho"} object}
 \usage{
-normalise(nacho_object,
+normalise(
+  nacho_object,
   housekeeping_genes = nacho_object[["housekeeping_genes"]],
   housekeeping_predict = nacho_object[["housekeeping_predict"]],
   housekeeping_norm = nacho_object[["housekeeping_norm"]],
   normalisation_method = nacho_object[["normalisation_method"]],
   n_comp = nacho_object[["n_comp"]],
   remove_outliers = nacho_object[["remove_outliers"]],
-  outliers_thresholds = nacho_object[["outliers_thresholds"]])
+  outliers_thresholds = nacho_object[["outliers_thresholds"]]
+)
 }
 \arguments{
 \item{nacho_object}{[\link{list}] A list object of class \code{"nacho"} obtained
