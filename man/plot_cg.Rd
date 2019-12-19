@@ -4,8 +4,16 @@
 \alias{plot_cg}
 \title{plot_cg}
 \usage{
-plot_cg(nacho_object, x, colour, size, show_legend, show_outliers,
-  outliers_factor, outliers_labels)
+plot_cg(
+  nacho_object,
+  x,
+  colour,
+  size,
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
+)
 }
 \arguments{
 \item{x}{[\link{character}] Character string naming the quality-control metrics to plot from \code{nacho_object}.

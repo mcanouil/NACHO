@@ -4,10 +4,18 @@
 \alias{render}
 \title{Render a HTML report of a \code{"nacho"} object}
 \usage{
-render(nacho_object, colour = "CartridgeID",
-  output_file = "NACHO_QC.html", output_dir = ".", size = 1,
-  show_legend = TRUE, show_outliers = TRUE, outliers_factor = 1,
-  outliers_labels = NULL, clean = TRUE)
+render(
+  nacho_object,
+  colour = "CartridgeID",
+  output_file = "NACHO_QC.html",
+  output_dir = ".",
+  size = 1,
+  show_legend = TRUE,
+  show_outliers = TRUE,
+  outliers_factor = 1,
+  outliers_labels = NULL,
+  clean = TRUE
+)
 }
 \arguments{
 \item{nacho_object}{[\link{list}] A list object of class \code{"nacho"} obtained

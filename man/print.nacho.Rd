@@ -4,9 +4,18 @@
 \alias{print.nacho}
 \title{Print method for \code{"nacho"} object}
 \usage{
-\method{print}{nacho}(x, colour = "CartridgeID", size = 0.5,
-  show_legend = FALSE, show_outliers = TRUE, outliers_factor = 1,
-  outliers_labels = NULL, echo = FALSE, title_level = 1, ...)
+\method{print}{nacho}(
+  x,
+  colour = "CartridgeID",
+  size = 0.5,
+  show_legend = FALSE,
+  show_outliers = TRUE,
+  outliers_factor = 1,
+  outliers_labels = NULL,
+  echo = FALSE,
+  title_level = 1,
+  ...
+)
 }
 \arguments{
 \item{x}{[\link{list}] A list object of class \code{"nacho"} obtained from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}

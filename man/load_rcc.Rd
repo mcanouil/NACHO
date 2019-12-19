@@ -5,10 +5,16 @@
 \alias{summarize}
 \title{Produce a \code{"nacho"} object from RCC NanoString files}
 \usage{
-load_rcc(data_directory, ssheet_csv, id_colname,
-  housekeeping_genes = NULL, housekeeping_predict = FALSE,
-  housekeeping_norm = TRUE, normalisation_method = "GEO",
-  n_comp = 10)
+load_rcc(
+  data_directory,
+  ssheet_csv,
+  id_colname,
+  housekeeping_genes = NULL,
+  housekeeping_predict = FALSE,
+  housekeeping_norm = TRUE,
+  normalisation_method = "GEO",
+  n_comp = 10
+)
 }
 \arguments{
 \item{data_directory}{[\link{character}] A character string of the directory where the data are stored.}
