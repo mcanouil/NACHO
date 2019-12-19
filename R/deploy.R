@@ -1,4 +1,4 @@
-#' Deploy (copy) the shiny application to the specified directory.
+#' Deploy (copy) the shiny application to the specified directory
 #'
 #' @param directory [[character]] A character vector of one path to the new location.
 #' @param app_name [[character]] A character vector defining the shiny application name in the new location.

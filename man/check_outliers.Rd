@@ -2,19 +2,21 @@
 % Please edit documentation in R/check_outliers.R
 \name{check_outliers}
 \alias{check_outliers}
-\title{Annotate a "nacho" object for outliers.}
+\title{Annotate a \code{"nacho"} object for outliers}
 \usage{
 check_outliers(nacho_object)
 }
 \arguments{
-\item{nacho_object}{[\link{list}] List obtained from \link{load_rcc} or \link{normalise}.}
+\item{nacho_object}{[\link{list}] A list object of class \code{"nacho"} obtained
+from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 }
 \value{
-[\link{list}] A list containing parameters and data.
+A [\link{list}] object of class \code{"nacho"}.
 }
 \description{
 Add or update \code{"is_outlier"} column in the \code{"nacho"} field of an object from
-a call to \link{load_rcc} or \link{normalise}, using the current quality-control thresholds.
+a call to \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}} (\code{nacho_object$nacho}),
+using the current quality-control thresholds.
 }
 \examples{
 
