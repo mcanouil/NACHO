@@ -6,8 +6,8 @@
 \arguments{
 \item{data}{[\link{data.frame}] A \code{data.frame} with the count data.}
 
-\item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation should be performed.
-Default is \code{TRUE}.}
+\item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation
+should be performed. Default is \code{TRUE}.}
 }
 \value{
 [\link{numeric}]

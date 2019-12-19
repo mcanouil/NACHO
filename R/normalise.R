@@ -1,14 +1,15 @@
-#' (re)Normalise a dataset read from [load_rcc].
+#' (re)Normalise a `"nacho"` object
 #'
 #' This function creates a list in which your settings, the raw counts and normalised counts are stored,
-#' using the result from a call to [load_rcc].
+#' using the result from a call to [`load_rcc()`].
 #'
-#' @param nacho_object [[list]] List obtained from [load_rcc] or [normalise].
+#' @param nacho_object [[list]] A list object of class `"nacho"` obtained
+#'   from [`load_rcc()`] or [`normalise()`].
 #' @inheritParams load_rcc
 #' @param remove_outliers [[logical]] A boolean to indicate if outliers should be excluded.
 #' @param outliers_thresholds [[list]] List of thresholds to exclude outliers.
 #'
-#' @details Outliers definition (`remove_outliers`):
+#' @details Outliers definition (`remove_outliers = TRUE`):
 #'
 #'  * Binding Density (`BD`) < 0.1
 #'  * Binding Density (`BD`) > 2.25
@@ -22,14 +23,14 @@
 #'
 #' @return [[list]] A list containing parameters and data.
 #' \describe{
-#'   \item{`access`}{[[character]] Value passed to [load_rcc] in `id_colname`.}
-#'   \item{`housekeeping_genes`}{[[character]] Value passed to [load_rcc] or [normalise].}
-#'   \item{`housekeeping_predict`}{[[logical]] Value passed to [load_rcc].}
-#'   \item{`housekeeping_norm`}{[[logical]] Value passed to [load_rcc] or [normalise].}
-#'   \item{`normalisation_method`}{[[character]] Value passed to [load_rcc] or [normalise].}
-#'   \item{`remove_outliers`}{[[logical]] Value passed to [normalise].}
-#'   \item{`n_comp`}{[[numeric]] Value passed to [load_rcc].}
-#'   \item{`data_directory`}{[[character]] Value passed to [load_rcc].}
+#'   \item{`access`}{[[character]] Value passed to [`load_rcc()`] in `id_colname`.}
+#'   \item{`housekeeping_genes`}{[[character]] Value passed to [`load_rcc()`] or [`normalise()`].}
+#'   \item{`housekeeping_predict`}{[[logical]] Value passed to [`load_rcc()`].}
+#'   \item{`housekeeping_norm`}{[[logical]] Value passed to [`load_rcc()`] or [`normalise()`].}
+#'   \item{`normalisation_method`}{[[character]] Value passed to [`load_rcc()`] or [`normalise()`].}
+#'   \item{`remove_outliers`}{[[logical]] Value passed to [`normalise()`].}
+#'   \item{`n_comp`}{[[numeric]] Value passed to [`load_rcc()`].}
+#'   \item{`data_directory`}{[[character]] Value passed to [`load_rcc()`].}
 #'   \item{`pc_sum`}{[[data.frame]] A `data.frame` with `n_comp` rows and four columns:
 #'     "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
 #'   \item{`nacho`}{[[data.frame]] A `data.frame` with all columns from the sample sheet `ssheet_csv`

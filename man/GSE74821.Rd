@@ -3,8 +3,8 @@
 \docType{data}
 \name{GSE74821}
 \alias{GSE74821}
-\title{Presummarised data from GSE74821 (20 samples).}
-\format{A [\link{list}] object}
+\title{A \code{"nacho"} object containing 20 samples of GSE74821 dataset}
+\format{A [\link{list}] object of class \code{"nacho"}.}
 \source{
 \href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821}{GSE74821}
 }

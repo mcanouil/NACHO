@@ -1,7 +1,7 @@
-#' Render a HTML report from [load_rcc] or [normalise].
+#' Render a HTML report of a `"nacho"` object
 #'
-#' This function create a `Rmarkdown` script and render it as a HTML document.
-#' The HTML document is a quality-control report using all the metrics from [visualise]
+#' This function create a Rmarkdown script and render it as a HTML document.
+#' The HTML document is a quality-control report using all the metrics from [`visualise()`]
 #' based on recommendations from NanoString.
 #'
 #' @inheritParams normalise
@@ -13,8 +13,9 @@
 #'   (the default output directory is the working directory, *i.e.*, `.`).
 #'   If a path is provided with a filename in `output_file` the directory specified here will take precedence.
 #'   Please note that any directory path provided will create any necessary directories if they do not exist.
-#' @param size [[numeric]] A `numeric` controlling point size ([geom_point] or [geom_beeswarm])
-#'   or line size ([geom_line]).
+#' @param size [[numeric]] A numeric controlling point size
+#'   ([`ggplot2::geom_point()`] or #' [`ggbeeswarm::geom_beeswarm()`])
+#'   or line size ([`ggplot2::geom_line()`]).
 #' @param show_legend [[logical]] Boolean to indicate whether the plot legends should
 #'   be plotted (`TRUE`) or not (`FALSE`). Default is `TRUE`.
 #' @param show_outliers [[logical]] Boolean to indicate whether the outliers should be highlighted
@@ -26,6 +27,7 @@
 #'   are removed from `output_dir`. Default is `TRUE`.
 #'
 #' @return NULL
+#'
 #' @importFrom knitr opts_chunk
 #' @importFrom sessioninfo session_info
 #' @export

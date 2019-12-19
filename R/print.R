@@ -1,19 +1,21 @@
-#' Print method for nacho object.
+#' Print method for `"nacho"` object
 #'
-#' This function allows to print text and figures from the results of a call to [load_rcc]
-#' or [normalise].
-#' It is intended to be used in a `Rmarkdown` chunk.
+#' This function allows to print text and figures from the results of a call to [`load_rcc()`]
+#' or [`normalise()`].
+#' It is intended to be used in a Rmarkdown chunk.
 #'
-#' @param x [[list]] List obtained from [load_rcc] or [normalise].
+#' @param x [[list]] A list object of class `"nacho"` obtained from [`load_rcc()`] or [`normalise()`].
 #' @inheritParams render
 #' @inheritParams autoplot.nacho
 #' @param echo [[logical]] A boolean to indicate whether text and plots should be printed.
 #'   Mainly for use within a Rmarkdown chunk.
 #' @param title_level [[numeric]] A numeric to indicate the title level to start with, using markdown style,
-#'   *i.e.*, the number of "#".
-#' @param ... Other arguments (Not used).
+#'   *i.e.*, the number of `"#"`.
+#' @param ... Other arguments (*Not used*).
 #'
 #' @return NULL
+#'
+#' @importFrom knitr kable
 #' @export
 #'
 #' @examples

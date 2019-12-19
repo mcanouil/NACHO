@@ -3,7 +3,7 @@
 \name{load_rcc}
 \alias{load_rcc}
 \alias{summarize}
-\title{Summarise data from RCC NanoString files (and normalise them).}
+\title{Produce a \code{"nacho"} object from RCC NanoString files}
 \usage{
 load_rcc(data_directory, ssheet_csv, id_colname,
   housekeeping_genes = NULL, housekeeping_predict = FALSE,
@@ -13,8 +13,8 @@ load_rcc(data_directory, ssheet_csv, id_colname,
 \arguments{
 \item{data_directory}{[\link{character}] A character string of the directory where the data are stored.}
 
-\item{ssheet_csv}{[\link{character}] or [\link{data.frame}] Either a string with the name of the CSV of the samplesheet
-or the samplesheet as a \code{data.frame}.
+\item{ssheet_csv}{[\link{character}] or [\link{data.frame}] Either a string with the name of the CSV
+of the samplesheet or the samplesheet as a \code{data.frame}.
 Should contain a column that matches the file names in the folder.}
 
 \item{id_colname}{[\link{character}] Character string of the column in \code{ssheet_csv} that matches
@@ -26,8 +26,8 @@ that should be used as housekeeping genes. Default is \code{NULL}.}
 \item{housekeeping_predict}{[\link{logical}] Boolean to indicate whether the housekeeping genes
 should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
 
-\item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation should be performed.
-Default is \code{TRUE}.}
+\item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation
+should be performed. Default is \code{TRUE}.}
 
 \item{normalisation_method}{[\link{character}] Either \code{"GEO"} or \code{"GLM"}.
 Character string to indicate normalisation using the geometric mean (\code{"GEO"})
@@ -37,16 +37,16 @@ or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 Cannot be more than n-1 samples. Default is \code{10}.}
 }
 \value{
-[\link{list}] A list containing parameters and data:
+[\link{list}] A list object of class \code{"nacho"}:
 \describe{
-\item{\code{access}}{[\link{character}] Value passed to \link{load_rcc} in \code{id_colname}.}
-\item{\code{housekeeping_genes}}{[\link{character}] Value passed to \link{load_rcc}.}
-\item{\code{housekeeping_predict}}{[\link{logical}] Value passed to \link{load_rcc}.}
-\item{\code{housekeeping_norm}}{[\link{logical}] Value passed to \link{load_rcc}.}
-\item{\code{normalisation_method}}{[\link{character}] Value passed to \link{load_rcc}.}
+\item{\code{access}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}} in \code{id_colname}.}
+\item{\code{housekeeping_genes}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
+\item{\code{housekeeping_predict}}{[\link{logical}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
+\item{\code{housekeeping_norm}}{[\link{logical}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
+\item{\code{normalisation_method}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
 \item{\code{remove_outliers}}{[\link{logical}] \code{FALSE}.}
-\item{\code{n_comp}}{[\link{numeric}] Value passed to \link{load_rcc}.}
-\item{\code{data_directory}}{[\link{character}] Value passed to \link{load_rcc}.}
+\item{\code{n_comp}}{[\link{numeric}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
+\item{\code{data_directory}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
 \item{\code{pc_sum}}{[\link{data.frame}] A \code{data.frame} with \code{n_comp} rows and four columns:
 "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
 \item{\code{nacho}}{[\link{data.frame}] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
