@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Nanostring Quality Control Dashboard <img src="vignettes/figures/nacho_hex.png" align="right" width="120" />
+# Nanostring Quality Control Dashboard <img src="man/figures/nacho_hex.png" align="right" width="120" />
 
 <!-- badges: start -->
 [![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
@@ -53,13 +53,13 @@ cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep 
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
 
-![](vignettes/figures/README-app.png)
+![](man/figures/README-app.png)
 
 ```{r, eval = FALSE}
 visualise(GSE74821)
 ```
 
-![](vignettes/figures/README-visualise.png)
+![](man/figures/README-visualise.png)
 
 ## Citing NACHO
 
