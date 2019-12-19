@@ -18,8 +18,8 @@ that should be used as housekeeping genes. Default is \code{NULL}.}
 \item{housekeeping_predict}{[\link{logical}] Boolean to indicate whether the housekeeping genes
 should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
 
-\item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation should be performed.
-Default is \code{TRUE}.}
+\item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation
+should be performed. Default is \code{TRUE}.}
 
 \item{normalisation_method}{[\link{character}] Either \code{"GEO"} or \code{"GLM"}.
 Character string to indicate normalisation using the geometric mean (\code{"GEO"})

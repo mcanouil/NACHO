@@ -2,7 +2,7 @@
 % Please edit documentation in R/render.R
 \name{render}
 \alias{render}
-\title{Render a HTML report from \link{load_rcc} or \link{normalise}.}
+\title{Render a HTML report of a \code{"nacho"} object}
 \usage{
 render(nacho_object, colour = "CartridgeID",
   output_file = "NACHO_QC.html", output_dir = ".", size = 1,
@@ -10,7 +10,8 @@ render(nacho_object, colour = "CartridgeID",
   outliers_labels = NULL, clean = TRUE)
 }
 \arguments{
-\item{nacho_object}{[\link{list}] List obtained from \link{load_rcc} or \link{normalise}.}
+\item{nacho_object}{[\link{list}] A list object of class \code{"nacho"} obtained
+from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
 \item{colour}{[\link{character}] Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
@@ -23,8 +24,9 @@ This allows for a choice of an alternate directory to which the output file shou
 If a path is provided with a filename in \code{output_file} the directory specified here will take precedence.
 Please note that any directory path provided will create any necessary directories if they do not exist.}
 
-\item{size}{[\link{numeric}] A \code{numeric} controlling point size (\link{geom_point} or \link{geom_beeswarm})
-or line size (\link{geom_line}).}
+\item{size}{[\link{numeric}] A numeric controlling point size
+(\code{\link[ggplot2:geom_point]{ggplot2::geom_point()}} or #' \code{\link[ggbeeswarm:geom_beeswarm]{ggbeeswarm::geom_beeswarm()}})
+or line size (\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}).}
 
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
@@ -41,8 +43,8 @@ should be used to be printed as the labels for outliers or not. Default is \code
 are removed from \code{output_dir}. Default is \code{TRUE}.}
 }
 \description{
-This function create a \code{Rmarkdown} script and render it as a HTML document.
-The HTML document is a quality-control report using all the metrics from \link{visualise}
+This function create a Rmarkdown script and render it as a HTML document.
+The HTML document is a quality-control report using all the metrics from \code{\link[=visualise]{visualise()}}
 based on recommendations from NanoString.
 }
 \examples{

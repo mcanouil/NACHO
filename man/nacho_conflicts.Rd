@@ -2,7 +2,7 @@
 % Please edit documentation in R/conflicts.R
 \name{nacho_conflicts}
 \alias{nacho_conflicts}
-\title{Conflicts between the NACHO and other packages.}
+\title{Conflicts between the NACHO and other packages}
 \usage{
 nacho_conflicts()
 }
@@ -11,11 +11,13 @@ This function lists all the conflicts between packages in the NACHO
 and other packages that you have loaded.
 }
 \details{
-There are four conflicts that are deliberately ignored: \code{intersect},
-\code{union}, \code{setequal}, and \code{setdiff} from dplyr. These functions
+There are four conflicts that are deliberately ignored: \code{\link[=intersect]{intersect()}},
+\code{\link[=union]{union()}}, \code{\link[=setequal]{setequal()}}, and \code{\link[=setdiff]{setdiff()}} from dplyr. These functions
 make the base equivalents generic, so shouldn't negatively affect any
 existing code.
 }
 \examples{
+
 nacho_conflicts()
+
 }

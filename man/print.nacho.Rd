@@ -2,20 +2,21 @@
 % Please edit documentation in R/print.R
 \name{print.nacho}
 \alias{print.nacho}
-\title{Print method for nacho object.}
+\title{Print method for \code{"nacho"} object}
 \usage{
 \method{print}{nacho}(x, colour = "CartridgeID", size = 0.5,
   show_legend = FALSE, show_outliers = TRUE, outliers_factor = 1,
   outliers_labels = NULL, echo = FALSE, title_level = 1, ...)
 }
 \arguments{
-\item{x}{[\link{list}] List obtained from \link{load_rcc} or \link{normalise}.}
+\item{x}{[\link{list}] A list object of class \code{"nacho"} obtained from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
 \item{colour}{[\link{character}] Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 
-\item{size}{[\link{numeric}] A \code{numeric} controlling point size (\link{geom_point} or \link{geom_beeswarm})
-or line size (\link{geom_line}).}
+\item{size}{[\link{numeric}] A numeric controlling point size
+(\code{\link[ggplot2:geom_point]{ggplot2::geom_point()}} or #' \code{\link[ggbeeswarm:geom_beeswarm]{ggbeeswarm::geom_beeswarm()}})
+or line size (\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}).}
 
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
@@ -32,14 +33,14 @@ should be used to be printed as the labels for outliers or not. Default is \code
 Mainly for use within a Rmarkdown chunk.}
 
 \item{title_level}{[\link{numeric}] A numeric to indicate the title level to start with, using markdown style,
-\emph{i.e.}, the number of "#".}
+\emph{i.e.}, the number of \code{"#"}.}
 
-\item{...}{Other arguments (Not used).}
+\item{...}{Other arguments (\emph{Not used}).}
 }
 \description{
-This function allows to print text and figures from the results of a call to \link{load_rcc}
-or \link{normalise}.
-It is intended to be used in a \code{Rmarkdown} chunk.
+This function allows to print text and figures from the results of a call to \code{\link[=load_rcc]{load_rcc()}}
+or \code{\link[=normalise]{normalise()}}.
+It is intended to be used in a Rmarkdown chunk.
 }
 \examples{
 
