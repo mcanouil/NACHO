@@ -39,7 +39,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r logo, echo = FALSE, out.width = "150px"}
-knitr::include_graphics(path = file.path("figures", "nacho_hex.png"))
+knitr::include_graphics(path = "nacho_hex.png")
 ```
 
 # Installation
@@ -101,7 +101,7 @@ visualise(GSE74821)
 ```
 
 ```{r ex1-fig, echo = FALSE, out.width = "650px"}
-knitr::include_graphics(path = file.path("figures", "README-visualise.png"))
+knitr::include_graphics(path = "README-visualise.png")
 ```
 
 
@@ -308,7 +308,7 @@ shiny::runApp(system.file("app", package = "NACHO"))
 ```
 
 ```{r app-fig, echo = FALSE, out.width = "650px"}
-knitr::include_graphics(path = file.path("figures", "README-app.png"))
+knitr::include_graphics(path = "README-app.png")
 ```
 
 
