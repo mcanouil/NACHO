@@ -47,6 +47,8 @@ remotes::install_github("mcanouil/NACHO")
 cat(readLines(system.file("app", "www", "about-nacho.md", package = "NACHO"))[-c(1, 2)], sep = "\n")
 ```
 
+<img src="man/figures/README-app.png" align="right" width="120" />
+<img src="man/figures/README-visualise.png" align="right" width="120" />
 
 ## Citing NACHO
 

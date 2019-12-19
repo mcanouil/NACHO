@@ -39,7 +39,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r logo, echo = FALSE, out.width = "150px"}
-knitr::include_graphics(path = "nacho_hex.png")
+knitr::include_graphics(path = system.file("help", "figures", "nacho_hex.png", package = "NACHO"))
 ```
 
 # Installation
@@ -90,6 +90,10 @@ The raw data used is from a study of @liu_pam50_2016 and was acquired from the N
 library(NACHO)
 data(GSE74821)
 visualise(GSE74821)
+```
+
+```{r ex1-fig}
+knitr::include_graphics(path = system.file("help", "figures", "README-visualise.png", package = "NACHO"))
 ```
 
 ### Raw data from GEO
