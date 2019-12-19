@@ -130,7 +130,7 @@ print.nacho <- function(
 
   for (imetric in metrics) {
     cat(prefix_title(title_level, 1), labels[imetric], "\n\n")
-    cat(details[imetric], "\n")
+    cat(details[imetric], "\n\n")
     suppressWarnings(print(autoplot.nacho(
       x = imetric,
       object = x,
