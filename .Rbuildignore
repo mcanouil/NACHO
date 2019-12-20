@@ -12,3 +12,4 @@
 ^revdep$
 ^CRAN-RELEASE$
 ^.checks.R$
+^.checks.log$
