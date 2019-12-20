@@ -209,7 +209,7 @@ plotInput <- function(id, nacho) {
         "nr" = "NORM"
       )
       x_metrics <- unname(autoplot_values[id])
-      NACHO::autoplot(
+      p <- NACHO::autoplot(
         x = x_metrics,
         object = nacho,
         colour = input[["group_colour"]] %||% "CartridgeID",
@@ -218,16 +218,14 @@ plotInput <- function(id, nacho) {
         show_outliers = as.logical(input[["show_outliers"]] %||% TRUE),
         outliers_factor = input[["outliers_point_size"]] %||% 2,
         outliers_labels = if (as.logical(input[["show_outliers_labels"]] %||% FALSE)) input[["outliers_labels"]] else NULL
-      ) +
+      )
+      p +
         ggplot2::theme_minimal(base_size = input[["font_size"]] %||% 16) +
-        {
-          if (x_metrics %in% c("NORM", "PN")) {
-            ggplot2::theme(
-              panel.grid.major.x = ggplot2::element_blank(),
-              panel.grid.minor.x = ggplot2::element_blank()
-            )
-          }
-        }
+        ggplot2::theme(
+          panel.grid.major.x = p$theme$panel.grid.major.x,
+          panel.grid.minor.x = p$theme$panel.grid.major.x,
+          axis.text = p$theme$axis.text
+        )
     })
 
     output$plot <- shiny::renderPlot({ plot() })
