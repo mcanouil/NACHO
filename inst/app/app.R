@@ -311,10 +311,10 @@ server <- function(input, output, session) {
 
   # ---------------------------------------- Output
   outliers_list <- shiny::reactive({
-    columns_qc <- c(
+    columns_qc <- intersect(c(
       "IDFILE", "CartridgeID", "BD", "FoV", "PCL", "LoD", "MC", "MedC",
       "Positive_factor", "House_factor"
-    )
+    ), colnames(nacho_custom()$nacho))
     unique(
       nacho_custom()$nacho[which(nacho_custom()$nacho[["is_outlier"]]), columns_qc]
     )
