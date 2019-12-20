@@ -14,5 +14,4 @@ The acceptable range for **Binding Density** is:
 
 Within these ranges, relatively few reporters on the slide surface will overlap, enabling the instrument to accurately tabulate counts for each reporter species.  
 A **Binding Density** significantly greater than the upper limit in either range is indicative of overlapping reporters on the slide surface.  
-The counts observed in lanes with a **Binding Density** at this level may have had significant numbers of codes ignored, which could potentially affect quantification and linearity of the assay.  
-Some of the factors that may contribute to increased **Binding Density** are listed in the Factors affecting **Binding Density** box.
+The counts observed in lanes with a **Binding Density** at this level may have had significant numbers of codes ignored, which could potentially affect quantification and linearity of the assay.
