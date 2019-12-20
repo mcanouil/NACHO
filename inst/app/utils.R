@@ -109,14 +109,16 @@ plotInput <- function(id, nacho) {
           shiny::fluidRow(style = paste0("font-size: ", font_size, "%;"),
             shiny::column(6, align = "center",
               shiny::radioButtons(ns("show_levels"), shiny::tags$span("Show Levels", shiny::helpText("(Legend)")),
-                choices = c("No" = FALSE, "Yes" = TRUE),
+                choiceNames = list("No", "Yes"),
+                choiceValues = list(FALSE, TRUE),
                 selected = shiny::isolate(input$show_levels) %||% TRUE,
                 inline = TRUE
               )
             ),
             shiny::column(6, align = "center",
               shiny::radioButtons(ns("show_outliers"), shiny::tags$span("Show Outliers", shiny::helpText("(Point)")),
-                choices = c("No" = FALSE, "Yes" = TRUE),
+                choiceNames = list("No", "Yes"),
+                choiceValues = list(FALSE, TRUE),
                 selected = shiny::isolate(input$show_outliers) %||% TRUE,
                 inline = TRUE
               )
@@ -125,7 +127,8 @@ plotInput <- function(id, nacho) {
           shiny::fluidRow(style = paste0("font-size: ", font_size, "%;"),
             shiny::column(6, align = "center",
               shiny::radioButtons(ns("show_outliers_labels"), shiny::tags$span("Outliers' Label", shiny::helpText("(Text)")),
-                choices = c("No" = FALSE, "Yes" = TRUE),
+                choiceNames = list("No", "Yes"),
+                choiceValues = list(FALSE, TRUE),
                 selected = shiny::isolate(input$show_outliers_labels) %||% FALSE,
                 inline = TRUE
               )
