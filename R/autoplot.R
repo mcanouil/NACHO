@@ -146,7 +146,8 @@ plot_metrics <- function(
         ggplot2::annotate(
           "text", x = 0.5, y = 0.5, label = "Not available!",
           angle = 30, size = 24, colour = "red", alpha = 0.25
-        )
+        ) +
+        ggplot2::theme(axis.text = ggplot2::element_blank())
     )
   }
 
@@ -253,6 +254,23 @@ plot_cg <- function(
   if (!is.null(outliers_labels) && !outliers_labels %in% colnames(nacho_object$nacho)) {
     outliers_labels <- nacho_object$access
   }
+  if (is.null(nacho_object$housekeeping_genes) & x %in% "Housekeeping") {
+    message('[NACHO] No housekeeping genes found.')
+    return(
+      ggplot2::ggplot() +
+        ggplot2::labs(
+          x = "Gene Name",
+          y = "Counts + 1",
+          colour = colour
+        ) +
+        ggplot2::annotate(
+          "text", x = 0.5, y = 0.5, label = "Not available!",
+          angle = 30, size = 24, colour = "red", alpha = 0.25
+        ) +
+        ggplot2::theme(axis.text = ggplot2::element_blank())
+    )
+  }
+
   p <- ggplot2::ggplot(
     data = nacho_object$nacho %>%
       dplyr::filter(!!dplyr::sym("CodeClass") %in% x) %>%
@@ -792,7 +810,8 @@ plot_hf <- function(
         ggplot2::annotate(
           "text", x = 0.5, y = 0.5, label = "Not available!",
           angle = 30, size = 24, colour = "red", alpha = 0.25
-        )
+        ) +
+        ggplot2::theme(axis.text = ggplot2::element_blank())
     )
   }
 
