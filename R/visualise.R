@@ -6,6 +6,7 @@
 #'
 #' @inheritParams normalise
 #'
+#' @importFrom shinyWidgets dropdownButton tooltipOptions
 #' @export
 #'
 #' @examples

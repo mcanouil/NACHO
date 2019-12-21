@@ -1,7 +1,11 @@
 setwd("/disks/PROJECT/_Mickael/PACKAGES/NACHO")
+
 rhub::validate_email(email = "***REMOVED***", token = "1c1d492385b44415b673cf8acc567178")
+
 devtools::check(pkg = "/disks/PROJECT/_Mickael/PACKAGES/NACHO")
+
 devtools::check_win_devel(pkg = "/disks/PROJECT/_Mickael/PACKAGES/NACHO")
+
 rhub::check_for_cran(
   path = "/disks/PROJECT/_Mickael/PACKAGES/NACHO",
   email = "***REMOVED***",
@@ -23,6 +27,7 @@ rhub::check_on_windows(
   email = "***REMOVED***",
   show_status = FALSE
 )
+
 # rhub::check(
 #   path = "/disks/PROJECT/_Mickael/PACKAGES/NACHO",
 #   platform = c(
@@ -41,8 +46,11 @@ rhub::check_on_windows(
 #   env_vars = c(`_R_CHECK_FORCE_SUGGESTS_` = "false",  `_R_CHECK_CRAN_INCOMING_USE_ASPELL_` = "false"),
 #   show_status = FALSE
 # )
+
 # rhub::list_package_checks()
 
 # rm CRAN-RELEASE
+
 # git tag v0.6.1
+
 # usethis::use_dev_version()
