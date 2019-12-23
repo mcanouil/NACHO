@@ -24,41 +24,24 @@
 
 ### R-hub builder (`rhub::check()`)
 
-#### OK (or NOTE for "Days since last update")
+#### OK
 
-* Oracle Solaris 10, x86, 32 bit, R-patched: OK
+* Debian Linux, R-devel, GCC: 
+    
+* Debian Linux, R-patched, GCC: 
 
-* Windows Server 2008 R2 SP1, R-release, 32/64 bit: OK
+* Debian Linux, R-release, GCC: 
+
+* Fedora Linux, R-devel, clang, gfortran: OK
+
+* Fedora Linux, R-devel, GCC: 
 
 * macOS 10.11 El Capitan, R-release: OK
 
-#### NOTE (Bioconductor dependencies)
+* Oracle Solaris 10, x86, 32 bit, R-patched: OK
 
-* Debian Linux, R-devel, GCC: NOTE
-    * Package suggested but not available for checking: 'GEOquery'
-    
-* Debian Linux, R-patched, GCC: NOTE
-    * Package suggested but not available for checking: 'GEOquery'
+* Ubuntu Linux 16.04 LTS, R-release, GCC: OK
 
-* Debian Linux, R-release, GCC: NOTE
-    * Package suggested but not available for checking: 'GEOquery'
+* Windows Server 2008 R2 SP1, R-release, 32/64 bit: OK
 
-* Fedora Linux, R-devel, clang, gfortran: NOTE
-    * Package suggested but not available for checking: 'GEOquery'
-
-* Fedora Linux, R-devel, GCC: NOTE
-    * Package suggested but not available for checking: 'GEOquery'
-
-* Ubuntu Linux 16.04 LTS, R-release, GCC: NOTE
-    * Package suggested but not available for checking: 'GEOquery'
-    
-#### ERROR
-
-**NOTE:** R development version have some recent issue which was fixed in the virtual machine / Docker containers in Travis and Appveyor, but not yet in R-hub platforms.
-    
-* Windows Server 2008 R2 SP1, R-devel, 32/64 bit: ERROR
-    * Packages required but not available:  
-      'tibble', 'dplyr', 'tidyr', 'shiny', 'scales', 'ggplot2',  
-      'ggbeeswarm', 'ggrepel', 'ggpubr', 'gtools', 'knitr', 'rmarkdown'  
-
-
+* Windows Server 2008 R2 SP1, R-devel, 32/64 bit: OK
