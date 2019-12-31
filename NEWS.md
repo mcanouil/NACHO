@@ -19,7 +19,7 @@
 ## Breaking changes
 
 * `summarise()` and `summarize()` have been deprecated and replaced with `load_rcc()`. (#12 & #15)
-* Counts matrices (`raw_counts` and `normalised_counts`) are not longer directly available, 
+* Counts matrices (`raw_counts` and `normalised_counts`) are no longer (directly) available, 
     *i.e.*, counts are available in a long format within the `nacho` slot of a nacho object.
 * `visualise()`, now uses a new shiny app (`inst/app/`).
 
