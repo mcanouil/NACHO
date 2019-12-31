@@ -33,9 +33,8 @@
 #' @examples
 #'
 #' data(GSE74821)
+#'
 #' autoplot(GSE74821, x = "BD")
-#' autoplot(GSE74821, x = "PCA12")
-#' autoplot(GSE74821, x = "NORM")
 #'
 autoplot.nacho <- function(
   object, x,
