@@ -196,20 +196,6 @@ load_rcc <- function(
     housekeeping_norm = housekeeping_norm
   )
 
-  raw_counts <- format_counts(
-    data = nacho_object[["nacho"]],
-    id_colname = id_colname,
-    count_column = "Count"
-  )
-  nacho_object[["raw_counts"]] <- raw_counts
-
-  norm_counts <- format_counts(
-    data = nacho_object[["nacho"]],
-    id_colname = id_colname,
-    count_column = "Count_Norm"
-  )
-  nacho_object[["normalised_counts"]] <- norm_counts
-
   message(paste(
     "[NACHO] Returning a list.",
     "  $ access              : character",
@@ -223,8 +209,6 @@ load_rcc <- function(
     "  $ pc_sum              : data.frame",
     "  $ nacho               : data.frame",
     "  $ outliers_thresholds : list",
-    "  $ raw_counts          : data.frame",
-    "  $ normalised_counts   : data.frame",
     sep = "\n"
   ))
 
