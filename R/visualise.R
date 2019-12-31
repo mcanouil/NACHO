@@ -85,9 +85,7 @@ visualise <- function(nacho_object) {
     "data_directory",
     "pc_sum",
     "nacho",
-    "outliers_thresholds",
-    "raw_counts",
-    "normalised_counts"
+    "outliers_thresholds"
   )
   if (!all(mandatory_fields%in%names(nacho_object))) {
     stop(
