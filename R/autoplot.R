@@ -157,6 +157,9 @@ plot_metrics <- function(
 
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
+      dplyr::mutate(
+        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+      ) %>%
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -273,6 +276,9 @@ plot_cg <- function(
 
   p <- ggplot2::ggplot(
     data = nacho_object$nacho %>%
+      dplyr::mutate(
+        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+      ) %>%
       dplyr::filter(!!dplyr::sym("CodeClass") %in% x) %>%
       dplyr::select(
         "CartridgeID",
@@ -370,6 +376,9 @@ plot_pn <- function(
 ) {
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
+      dplyr::mutate(
+        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+      ) %>%
       dplyr::filter(!!dplyr::sym("CodeClass") %in% c("Positive", "Negative")) %>%
       dplyr::select(
         "CartridgeID",
@@ -440,75 +449,78 @@ plot_acbd <- function(
   if (!is.null(outliers_labels) && !outliers_labels %in% colnames(nacho_object$nacho)) {
     outliers_labels <- nacho_object$access
   }
-  nacho_object$nacho %>%
-    dplyr::select(
-      "CartridgeID",
-      !!colour,
-      !!nacho_object$access,
-      "MC",
-      "BD",
-      "is_outlier",
-      !!outliers_labels
-    ) %>%
-    dplyr::distinct() %>%
-    ggplot2::ggplot(
-      mapping = ggplot2::aes(
-        x = .data[["MC"]],
-        y = .data[["BD"]],
-        colour = .data[[colour]]
-      )
-    ) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      {
-        if (show_outliers) {
-          list(
-            ggplot2::geom_point(
-              data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
-              size = size, na.rm = TRUE
-            ),
-            ggplot2::geom_point(
+  ggplot2::ggplot(
+    data = nacho_object$nacho %>%
+      dplyr::mutate(
+        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+      ) %>%
+      dplyr::select(
+        "CartridgeID",
+        !!colour,
+        !!nacho_object$access,
+        "MC",
+        "BD",
+        "is_outlier",
+        !!outliers_labels
+      ) %>%
+      dplyr::distinct(),
+    mapping = ggplot2::aes(
+      x = .data[["MC"]],
+      y = .data[["BD"]],
+      colour = .data[[colour]]
+    )
+  ) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+    {
+      if (show_outliers) {
+        list(
+          ggplot2::geom_point(
+            data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
+            size = size, na.rm = TRUE
+          ),
+          ggplot2::geom_point(
+            data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
+            size = size * outliers_factor,
+            colour = "red",
+            na.rm = TRUE
+          ),
+          if (!is.null(outliers_labels)) {
+            ggrepel::geom_label_repel(
               data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
-              size = size * outliers_factor,
+              mapping = ggplot2::aes(label = .data[[outliers_labels]]),
               colour = "red",
               na.rm = TRUE
-            ),
-            if (!is.null(outliers_labels)) {
-              ggrepel::geom_label_repel(
-                data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
-                mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-                colour = "red",
-                na.rm = TRUE
-              )
-            }
-          )
-        } else {
-          ggplot2::geom_point(size = size, na.rm = TRUE)
-        }
-      } +
-      ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = 1, big.mark = ",")) +
-      ggplot2::labs(
-        x = "Average Counts",
-        y = parse(text = 'paste("Binding Density", " ", "(Optical features / ", mu, m^2, ")")'),
-        colour = colour
-      )+
-      ggplot2::geom_rect(
-        data = dplyr::tibble(
-          ymin = nacho_object$outliers_thresholds[["BD"]],
-          ymax = c(-Inf, Inf)[seq_along(!!dplyr::sym("ymin"))]
-        ),
-        mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
-        fill = "firebrick2",
-        alpha = 0.2,
-        colour = "transparent",
-        inherit.aes = FALSE
-      ) +
-      ggplot2::geom_hline(
-        data = dplyr::tibble(value = nacho_object$outliers_thresholds[["BD"]]),
-        mapping = ggplot2::aes(yintercept = .data[["value"]]),
-        colour = "firebrick2",
-        linetype = "longdash"
-      )  +
-      {if (!show_legend) ggplot2::guides(colour = "none")}
+            )
+          }
+        )
+      } else {
+        ggplot2::geom_point(size = size, na.rm = TRUE)
+      }
+    } +
+    ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = 1, big.mark = ",")) +
+    ggplot2::labs(
+      x = "Average Counts",
+      y = parse(text = 'paste("Binding Density", " ", "(Optical features / ", mu, m^2, ")")'),
+      colour = colour
+    )+
+    ggplot2::geom_rect(
+      data = dplyr::tibble(
+        ymin = nacho_object$outliers_thresholds[["BD"]],
+        ymax = c(-Inf, Inf)[seq_along(!!dplyr::sym("ymin"))]
+      ),
+      mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
+      fill = "firebrick2",
+      alpha = 0.2,
+      colour = "transparent",
+      inherit.aes = FALSE
+    ) +
+    ggplot2::geom_hline(
+      data = dplyr::tibble(value = nacho_object$outliers_thresholds[["BD"]]),
+      mapping = ggplot2::aes(yintercept = .data[["value"]]),
+      colour = "firebrick2",
+      linetype = "longdash"
+    )  +
+    {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
 
@@ -526,32 +538,35 @@ plot_acmc <- function(
   size,
   show_legend
 ) {
-  nacho_object$nacho %>%
-    dplyr::select(
-      "CartridgeID",
-      !!colour,
-      !!nacho_object$access,
-      "MC",
-      "MedC"
-    ) %>%
-    dplyr::distinct() %>%
-    ggplot2::ggplot(
-      mapping = ggplot2::aes(
-        x = .data[["MC"]],
-        y = .data[["MedC"]],
-        colour = .data[[colour]]
-      )
+  ggplot2::ggplot(
+    data = nacho_object$nacho %>%
+      dplyr::mutate(
+        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+      ) %>%
+      dplyr::select(
+        "CartridgeID",
+        !!colour,
+        !!nacho_object$access,
+        "MC",
+        "MedC"
+      ) %>%
+      dplyr::distinct(),
+    mapping = ggplot2::aes(
+      x = .data[["MC"]],
+      y = .data[["MedC"]],
+      colour = .data[[colour]]
+    )
+  ) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+    ggplot2::geom_point(size = size, na.rm = TRUE) +
+    ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = 1, big.mark = ",")) +
+    ggplot2::scale_y_continuous(labels = scales::comma_format(accuracy = 1, big.mark = ",")) +
+    ggplot2::labs(
+      x = "Average Counts",
+      y = "Median Counts",
+      colour = colour
     ) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      ggplot2::geom_point(size = size, na.rm = TRUE) +
-      ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = 1, big.mark = ",")) +
-      ggplot2::scale_y_continuous(labels = scales::comma_format(accuracy = 1, big.mark = ",")) +
-      ggplot2::labs(
-        x = "Average Counts",
-        y = "Median Counts",
-        colour = colour
-      ) +
-      {if (!show_legend) ggplot2::guides(colour = "none")}
+    {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
 
@@ -569,30 +584,33 @@ plot_pca12 <- function(
   size,
   show_legend
 ) {
-  nacho_object$nacho %>%
-    dplyr::select(
-      "CartridgeID",
-      !!colour,
-      !!nacho_object$access,
-      "PC01",
-      "PC02"
-    ) %>%
-    dplyr::distinct() %>%
-    ggplot2::ggplot(
-      mapping = ggplot2::aes(
-        x = .data[["PC01"]],
-        y = .data[["PC02"]],
-        colour = .data[[colour]]
-      )
-    ) +
-      ggplot2::geom_point(size = size, na.rm = TRUE) +
-      ggforce::geom_mark_ellipse(na.rm = TRUE) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
-      ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(0.25)) +
-      ggplot2::labs(x = "PC01", y = "PC02", colour = colour) +
-      {if (!show_legend) ggplot2::guides(colour = "none")}
+  ggplot2::ggplot(
+    data = nacho_object$nacho %>%
+      dplyr::mutate(
+        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+      ) %>%
+      dplyr::select(
+        "CartridgeID",
+        !!colour,
+        !!nacho_object$access,
+        "PC01",
+        "PC02"
+      ) %>%
+      dplyr::distinct(),
+    mapping = ggplot2::aes(
+      x = .data[["PC01"]],
+      y = .data[["PC02"]],
+      colour = .data[[colour]]
+    )
+  ) +
+    ggplot2::geom_point(size = size, na.rm = TRUE) +
+    ggforce::geom_mark_ellipse(na.rm = TRUE) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+    ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+    ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
+    ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(0.25)) +
+    ggplot2::labs(x = "PC01", y = "PC02", colour = colour) +
+    {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
 
@@ -610,52 +628,55 @@ plot_pca <- function(
   size,
   show_legend
 ) {
-  dplyr::full_join(
-    x = nacho_object$nacho %>%
-      dplyr::select(
-        "CartridgeID",
-        !!colour,
-        !!nacho_object$access,
-        sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))
+  nacho_object$nacho <- dplyr::mutate(
+    .data = nacho_object$nacho,
+    !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+  )
+  ggplot2::ggplot(
+    data = dplyr::full_join(
+      x = nacho_object$nacho %>%
+          dplyr::select(
+            "CartridgeID",
+            !!colour,
+            !!nacho_object$access,
+            sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))
+          ) %>%
+          dplyr::distinct() %>%
+          tidyr::gather(key = "X.PC", value = "X", sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))),
+        y = nacho_object$nacho %>%
+          dplyr::select(
+            "CartridgeID",
+            !!colour,
+            !!nacho_object$access,
+            sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))
+          ) %>%
+          dplyr::distinct() %>%
+          tidyr::gather(key = "Y.PC", value = "Y", sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))),
+        by = unique(c("CartridgeID", nacho_object$access, colour))
       ) %>%
-      dplyr::distinct() %>%
-      tidyr::gather(key = "X.PC", value = "X", sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))),
-    y = nacho_object$nacho %>%
-      dplyr::select(
-        "CartridgeID",
-        !!colour,
-        !!nacho_object$access,
-        sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))
-      ) %>%
-      dplyr::distinct() %>%
-      tidyr::gather(key = "Y.PC", value = "Y", sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))),
-    by = unique(c("CartridgeID", nacho_object$access, colour))
-  ) %>%
-    dplyr::filter(
-      as.numeric(gsub("PC", "", !!dplyr::sym("X.PC"))) <
-        as.numeric(gsub("PC", "", !!dplyr::sym("Y.PC")))
-    ) %>%
-    ggplot2::ggplot(
-      mapping = ggplot2::aes(
-        x = .data[["X"]],
-        y = .data[["Y"]],
-        colour = .data[[colour]],
-        fill = .data[[colour]]
-      )
+        dplyr::filter(
+          as.numeric(gsub("PC", "", .data[["X.PC"]])) < as.numeric(gsub("PC", "", .data[["Y.PC"]]))
+        ),
+    mapping = ggplot2::aes(
+      x = .data[["X"]],
+      y = .data[["Y"]],
+      colour = .data[[colour]],
+      fill = .data[[colour]]
+    )
+  ) +
+    ggplot2::geom_point(size = size, na.rm = TRUE) +
+    ggforce::geom_mark_ellipse(na.rm = TRUE) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+    ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+    ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
+    ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(0.25)) +
+    ggplot2::labs(x = NULL, y = NULL, colour = colour, fill = colour) +
+    ggplot2::facet_grid(
+      rows = ggplot2::vars(.data[["Y.PC"]]),
+      cols = ggplot2::vars(.data[["X.PC"]]),
+      scales = "free"
     ) +
-      ggplot2::geom_point(size = size, na.rm = TRUE) +
-      ggforce::geom_mark_ellipse(na.rm = TRUE) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
-      ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(0.25)) +
-      ggplot2::labs(x = NULL, y = NULL, colour = colour, fill = colour) +
-      ggplot2::facet_grid(
-        rows = ggplot2::vars(.data[["Y.PC"]]),
-        cols = ggplot2::vars(.data[["X.PC"]]),
-        scales = "free"
-      ) +
-      {if (!show_legend) ggplot2::guides(colour = "none")}
+    {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
 
@@ -672,23 +693,26 @@ plot_pcai <- function(
   colour,
   size
 ) {
-  nacho_object$pc_sum %>%
-    dplyr::mutate(PoV = scales::percent(!!dplyr::sym("Proportion of Variance"))) %>%
-    ggplot2::ggplot(
-      mapping = ggplot2::aes(x = .data[["PC"]], y = !!dplyr::sym("Proportion of Variance"))
+  ggplot2::ggplot(
+    data = dplyr::mutate(
+      .data = nacho_object$pc_sum,
+      PoV = scales::percent(!!dplyr::sym("Proportion of Variance")),
+      !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+    ),
+    mapping = ggplot2::aes(x = .data[["PC"]], y = !!dplyr::sym("Proportion of Variance"))
+  ) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+    ggplot2::geom_bar(stat = "identity") +
+    ggplot2::geom_text(
+      mapping = ggplot2::aes(label = .data[["PoV"]]),
+      vjust = -1,
+      show.legend = FALSE
     ) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      ggplot2::geom_bar(stat = "identity") +
-      ggplot2::geom_text(
-        mapping = ggplot2::aes(label = .data[["PoV"]]),
-        vjust = -1,
-        show.legend = FALSE
-      ) +
-      ggplot2::scale_y_continuous(
-        labels = scales::percent,
-        expand = ggplot2::expand_scale(mult = c(0, 0.15))
-      ) +
-      ggplot2::labs(x = "Principal Components", y = "Proportion of Variance")
+    ggplot2::scale_y_continuous(
+      labels = scales::percent,
+      expand = ggplot2::expand_scale(mult = c(0, 0.15))
+    ) +
+    ggplot2::labs(x = "Principal Components", y = "Proportion of Variance")
 }
 
 
@@ -712,71 +736,74 @@ plot_pfnf <- function(
   if (!is.null(outliers_labels) && !outliers_labels %in% colnames(nacho_object$nacho)) {
     outliers_labels <- nacho_object$access
   }
-  nacho_object$nacho %>%
-    dplyr::select(
-      "CartridgeID",
-      !!colour,
-      !!nacho_object$access,
-      "Negative_factor",
-      "Positive_factor",
-      "is_outlier",
-      !!outliers_labels
-    ) %>%
-    dplyr::distinct() %>%
-    ggplot2::ggplot(
-      mapping = ggplot2::aes(
-        x = .data[["Negative_factor"]],
-        y = .data[["Positive_factor"]],
-        colour = .data[[colour]]
-      )
-    ) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      {
-        if (show_outliers) {
-          list(
-            ggplot2::geom_point(
-              data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
-              size = size, na.rm = TRUE
-            ),
-            ggplot2::geom_point(
+  ggplot2::ggplot(
+    data = nacho_object$nacho %>%
+      dplyr::mutate(
+        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+      ) %>%
+      dplyr::select(
+        "CartridgeID",
+        !!colour,
+        !!nacho_object$access,
+        "Negative_factor",
+        "Positive_factor",
+        "is_outlier",
+        !!outliers_labels
+      ) %>%
+      dplyr::distinct(),
+    mapping = ggplot2::aes(
+      x = .data[["Negative_factor"]],
+      y = .data[["Positive_factor"]],
+      colour = .data[[colour]]
+    )
+  ) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+    {
+      if (show_outliers) {
+        list(
+          ggplot2::geom_point(
+            data = ~ dplyr::filter(.x, !.data[["is_outlier"]]),
+            size = size, na.rm = TRUE
+          ),
+          ggplot2::geom_point(
+            data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
+            size = size * outliers_factor,
+            colour = "red",
+            na.rm = TRUE
+          ),
+          if (!is.null(outliers_labels)) {
+            ggrepel::geom_label_repel(
               data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
-              size = size * outliers_factor,
+              mapping = ggplot2::aes(label = .data[[outliers_labels]]),
               colour = "red",
               na.rm = TRUE
-            ),
-            if (!is.null(outliers_labels)) {
-              ggrepel::geom_label_repel(
-                data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
-                mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-                colour = "red",
-                na.rm = TRUE
-              )
-            }
-          )
-        } else {
-          ggplot2::geom_point(size = size, na.rm = TRUE)
-        }
-      } +
-      ggplot2::labs(x = "Negative Factor", y = "Positive Factor", colour = colour) +
-      ggplot2::scale_y_log10() +
-      ggplot2::geom_rect(
-        data = dplyr::tibble(
-          ymin = nacho_object$outliers_thresholds[["Positive_factor"]],
-          ymax = c(0, Inf)
-        ),
-        mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
-        fill = "firebrick2",
-        alpha = 0.2,
-        colour = "transparent",
-        inherit.aes = FALSE
-      ) +
-      ggplot2::geom_hline(
-        data = dplyr::tibble(value = nacho_object$outliers_thresholds[["Positive_factor"]]),
-        mapping = ggplot2::aes(yintercept = .data[["value"]]),
-        colour = "firebrick2",
-        linetype = "longdash"
-      ) +
-      {if (!show_legend) ggplot2::guides(colour = "none")}
+            )
+          }
+        )
+      } else {
+        ggplot2::geom_point(size = size, na.rm = TRUE)
+      }
+    } +
+    ggplot2::labs(x = "Negative Factor", y = "Positive Factor", colour = colour) +
+    ggplot2::scale_y_log10() +
+    ggplot2::geom_rect(
+      data = dplyr::tibble(
+        ymin = nacho_object$outliers_thresholds[["Positive_factor"]],
+        ymax = c(0, Inf)
+      ),
+      mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
+      fill = "firebrick2",
+      alpha = 0.2,
+      colour = "transparent",
+      inherit.aes = FALSE
+    ) +
+    ggplot2::geom_hline(
+      data = dplyr::tibble(value = nacho_object$outliers_thresholds[["Positive_factor"]]),
+      mapping = ggplot2::aes(yintercept = .data[["value"]]),
+      colour = "firebrick2",
+      linetype = "longdash"
+    ) +
+    {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
 
@@ -817,6 +844,9 @@ plot_hf <- function(
 
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
+      dplyr::mutate(
+        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+      ) %>%
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -914,62 +944,65 @@ plot_norm <- function(
     probe_type <- nacho_object$housekeeping_genes
   }
 
-  nacho_object$nacho %>%
-    dplyr::select(
-      "CartridgeID",
-      !!nacho_object$access,
-      "Count",
-      "Count_Norm",
-      "Name",
-      "CodeClass",
-      "is_outlier"
-    ) %>%
-    dplyr::distinct() %>%
-    dplyr::filter(.data[[probe_var]] %in% !!probe_type) %>%
-    tidyr::gather(key = "Status", value = "Count", c("Count", "Count_Norm")) %>%
-    dplyr::mutate(
-      Status = factor(
-        x = c("Count" = "Raw", "Count_Norm" = "Normalised")[!!dplyr::sym("Status")],
-        levels = c("Count" = "Raw", "Count_Norm" = "Normalised")
-      ),
-      Count = !!dplyr::sym("Count") + 1
-    ) %>%
-    ggplot2::ggplot(
-      mapping = ggplot2::aes(
-        x = .data[[nacho_object$access]],
-        y = .data[["Count"]]
-      )
-    ) +
-      ggplot2::geom_line(
-        mapping = ggplot2::aes(colour = .data[["Name"]], group = .data[["Name"]]),
-        size = size,
-        na.rm = TRUE
-      ) +
-      ggplot2::facet_grid(cols = ggplot2::vars(.data[["Status"]])) +
-      ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-      ggplot2::scale_x_discrete(label = NULL) +
-      ggplot2::scale_y_log10(
-        limits = c(1, NA),
-        labels = scales::comma_format(accuracy = 1, big.mark = ",")
-      ) +
-      ggplot2::labs(
-        x = "Sample Index",
-        y = "Counts + 1",
-        colour = if (is.null(nacho_object$housekeeping_genes)) "Positive Control" else "Housekeeping Genes",
-        linetype = "Smooth"
-      ) +
-      ggplot2::theme(
-        panel.grid.major.x = ggplot2::element_blank(),
-        panel.grid.minor.x = ggplot2::element_blank()
-      ) +
-      ggplot2::geom_smooth(
-        mapping = ggplot2::aes(
-          x = as.numeric(as.factor(.data[[nacho_object$access]])),
-          linetype = "Loess"
+  ggplot2::ggplot(
+    data = nacho_object$nacho %>%
+      dplyr::mutate(
+        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+      ) %>%
+      dplyr::select(
+        "CartridgeID",
+        !!nacho_object$access,
+        "Count",
+        "Count_Norm",
+        "Name",
+        "CodeClass",
+        "is_outlier"
+      ) %>%
+      dplyr::distinct() %>%
+      dplyr::filter(.data[[probe_var]] %in% !!probe_type) %>%
+      tidyr::gather(key = "Status", value = "Count", c("Count", "Count_Norm")) %>%
+      dplyr::mutate(
+        Status = factor(
+          x = c("Count" = "Raw", "Count_Norm" = "Normalised")[!!dplyr::sym("Status")],
+          levels = c("Count" = "Raw", "Count_Norm" = "Normalised")
         ),
-        colour = "black",
-        se = TRUE,
-        method = "loess"
-      ) +
-      {if (!(show_legend & length(nacho_object$housekeeping_genes)<=10)) ggplot2::guides(colour = "none")}
+        Count = !!dplyr::sym("Count") + 1
+      ),
+    mapping = ggplot2::aes(
+      x = .data[[nacho_object$access]],
+      y = .data[["Count"]]
+    )
+  ) +
+    ggplot2::geom_line(
+      mapping = ggplot2::aes(colour = .data[["Name"]], group = .data[["Name"]]),
+      size = size,
+      na.rm = TRUE
+    ) +
+    ggplot2::facet_grid(cols = ggplot2::vars(.data[["Status"]])) +
+    ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
+    ggplot2::scale_x_discrete(label = NULL) +
+    ggplot2::scale_y_log10(
+      limits = c(1, NA),
+      labels = scales::comma_format(accuracy = 1, big.mark = ",")
+    ) +
+    ggplot2::labs(
+      x = "Sample Index",
+      y = "Counts + 1",
+      colour = if (is.null(nacho_object$housekeeping_genes)) "Positive Control" else "Housekeeping Genes",
+      linetype = "Smooth"
+    ) +
+    ggplot2::theme(
+      panel.grid.major.x = ggplot2::element_blank(),
+      panel.grid.minor.x = ggplot2::element_blank()
+    ) +
+    ggplot2::geom_smooth(
+      mapping = ggplot2::aes(
+        x = as.numeric(as.factor(.data[[nacho_object$access]])),
+        linetype = "Loess"
+      ),
+      colour = "black",
+      se = TRUE,
+      method = "loess"
+    ) +
+    {if (!(show_legend & length(nacho_object$housekeeping_genes)<=10)) ggplot2::guides(colour = "none")}
 }
