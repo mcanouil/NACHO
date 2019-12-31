@@ -140,7 +140,7 @@ plot_metrics <- function(
       ggplot2::ggplot() +
         ggplot2::labs(
           x = "CartridgeID",
-          y = parse(text = paste0('paste("', labels[x], '", " ", ',  units[x], ")")),
+          y = parse(text = paste0('atop("', labels[x], '", paste(',  units[x], '))')),
           colour = colour
         ) +
         ggplot2::annotate(
@@ -213,7 +213,7 @@ plot_metrics <- function(
     } +
     ggplot2::labs(
       x = "CartridgeID",
-      y = parse(text = paste0('paste("', labels[x], '", " ", ',  units[x], ")")),
+      y = parse(text = paste0('atop("', labels[x], '", paste(',  units[x], '))')),
       colour = colour
     ) +
     ggplot2::geom_rect(
@@ -482,7 +482,7 @@ plot_acbd <- function(
     ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = NULL, big.mark = ",")) +
     ggplot2::labs(
       x = "Average Counts",
-      y = parse(text = 'paste("Binding Density", " ", "(Optical features / ", mu, m^2, ")")'),
+      y = parse(text = 'atop("Binding Density", paste("(Optical features / ", mu, m^2, ")"))'),
       colour = colour
     )+
     ggplot2::geom_rect(
