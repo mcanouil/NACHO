@@ -22,4 +22,4 @@ In addition (since v0.6.0) *NACHO* includes two (three) additional functions:
 * The `render()` function renders a full quality-control report (HTML) based on the results of a call to `load_rcc()` or `normalise()` (using `print()` in a Rmarkdown chunk).
 * The `autoplot()` function draws any quality-control metrics from `visualise()` and `render()`.
 
-For more `vignette("NACHO")`.
+For more `vignette("NACHO")` and `vignette("NACHO-analysis")`.
