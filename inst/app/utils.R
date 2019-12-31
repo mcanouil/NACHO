@@ -224,7 +224,7 @@ plotInput <- function(id, nacho) {
         ggplot2::theme(
           panel.grid.major.x = p$theme$panel.grid.major.x,
           panel.grid.minor.x = p$theme$panel.grid.major.x,
-          axis.text = p$theme$axis.text
+          axis.text.x = p$theme$axis.text.x
         )
     })
 
