@@ -128,9 +128,7 @@ normalise <- function(
     "data_directory",
     "pc_sum",
     "nacho",
-    "outliers_thresholds",
-    "raw_counts",
-    "normalised_counts"
+    "outliers_thresholds"
   )
   if (!all(mandatory_fields%in%names(nacho_object))) {
     stop(
@@ -206,20 +204,6 @@ normalise <- function(
     housekeeping_norm = housekeeping_norm
   )
 
-  raw_counts <- format_counts(
-    data = nacho_object[["nacho"]],
-    id_colname = id_colname,
-    count_column = "Count"
-  )
-  nacho_object[["raw_counts"]] <- raw_counts
-
-  norm_counts <- format_counts(
-    data = nacho_object[["nacho"]],
-    id_colname = id_colname,
-    count_column = "Count_Norm"
-  )
-  nacho_object[["normalised_counts"]] <- norm_counts
-
   if (!"RCC_type"%in%names(attributes(nacho_object))) {
     attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
   }
@@ -237,8 +221,6 @@ normalise <- function(
     "  $ pc_sum              : data.frame",
     "  $ nacho               : data.frame",
     "  $ outliers_thresholds : list",
-    "  $ raw_counts          : data.frame",
-    "  $ normalised_counts   : data.frame",
     sep = "\n"
   ))
 
