@@ -376,9 +376,6 @@ plot_pn <- function(
 ) {
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
-      dplyr::mutate(
-        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
-      ) %>%
       dplyr::filter(!!dplyr::sym("CodeClass") %in% c("Positive", "Negative")) %>%
       dplyr::select(
         "CartridgeID",
@@ -401,7 +398,7 @@ plot_pn <- function(
     ggplot2::geom_line() +
     ggplot2::facet_wrap(facets = "CodeClass", scales = "free_y", ncol = 2) +
     ggplot2::scale_y_log10(
-      limits = c(1, NA),
+      # limits = c(1, NA),
       labels = scales::comma_format(accuracy = 1, big.mark = ",")
     ) +
     ggplot2::scale_x_discrete(labels = NULL) +
@@ -425,6 +422,7 @@ plot_pn <- function(
       se = TRUE,
       method = "loess"
     ) +
+    ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2)) +
     {if (!show_legend) ggplot2::guides(colour = "none")}
 }
 
@@ -451,9 +449,6 @@ plot_acbd <- function(
   }
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
-      dplyr::mutate(
-        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
-      ) %>%
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -540,9 +535,6 @@ plot_acmc <- function(
 ) {
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
-      dplyr::mutate(
-        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
-      ) %>%
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -586,9 +578,6 @@ plot_pca12 <- function(
 ) {
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
-      dplyr::mutate(
-        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
-      ) %>%
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -628,10 +617,6 @@ plot_pca <- function(
   size,
   show_legend
 ) {
-  nacho_object$nacho <- dplyr::mutate(
-    .data = nacho_object$nacho,
-    !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
-  )
   ggplot2::ggplot(
     data = dplyr::full_join(
       x = nacho_object$nacho %>%
@@ -696,8 +681,7 @@ plot_pcai <- function(
   ggplot2::ggplot(
     data = dplyr::mutate(
       .data = nacho_object$pc_sum,
-      PoV = scales::percent(!!dplyr::sym("Proportion of Variance")),
-      !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+      PoV = scales::percent(!!dplyr::sym("Proportion of Variance"))
     ),
     mapping = ggplot2::aes(x = .data[["PC"]], y = !!dplyr::sym("Proportion of Variance"))
   ) +
@@ -738,9 +722,6 @@ plot_pfnf <- function(
   }
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
-      dplyr::mutate(
-        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
-      ) %>%
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -844,9 +825,6 @@ plot_hf <- function(
 
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
-      dplyr::mutate(
-        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
-      ) %>%
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -946,9 +924,6 @@ plot_norm <- function(
 
   ggplot2::ggplot(
     data = nacho_object$nacho %>%
-      dplyr::mutate(
-        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
-      ) %>%
       dplyr::select(
         "CartridgeID",
         !!nacho_object$access,
@@ -982,7 +957,7 @@ plot_norm <- function(
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::scale_x_discrete(label = NULL) +
     ggplot2::scale_y_log10(
-      limits = c(1, NA),
+      # limits = c(1, NA),
       labels = scales::comma_format(accuracy = 1, big.mark = ",")
     ) +
     ggplot2::labs(
