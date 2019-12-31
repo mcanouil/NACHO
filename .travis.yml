@@ -24,7 +24,7 @@ jobs:
   include:
   - r: devel
   - r: release
-    after_success: Rscript -e 'covr::coveralls(); covr::codecov()'
+    after_success: Rscript -e 'covr::codecov() # covr::coveralls()'
     before_deploy: Rscript -e 'remotes::install_cran("pkgdown")'
     deploy:
       provider: script
@@ -32,9 +32,6 @@ jobs:
       skip_cleanup: true
   - r: 3.5
   - r: 3.6
-
-after_success:
-  - Rscript -e 'covr::coveralls(); covr::codecov()'
 
 notifications:
   email:
