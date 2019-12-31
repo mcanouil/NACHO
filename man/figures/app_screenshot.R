@@ -46,7 +46,7 @@ appshot_nacho(
   app = system.file("app", package = "NACHO"),
   file = "man/figures/README-visualise.png",
   nacho_object = GSE74821,
-  delay = 3,
+  delay = 5,
   cliprect = "viewport",
   vwidth = 1280 * 1.5,
   vheight = 640 * 1.5,
