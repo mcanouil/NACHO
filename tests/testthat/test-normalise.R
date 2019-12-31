@@ -349,3 +349,50 @@ test_that("plexset", {
     class = "nacho"
   )
 })
+
+
+test_that("plexset GLM", {
+  rcc_files_directory <- "plexset_data"
+  targets <- data.frame(stringsAsFactors = FALSE,
+    name = list.files(rcc_files_directory),
+    datapath = list.files(rcc_files_directory, full.names = TRUE)
+  )
+  targets$IDFILE <- basename(targets$datapath)
+  targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+  targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+
+  plexset <- load_rcc(
+    data_directory = rcc_files_directory,
+    ssheet_csv = targets_tidy,
+    id_colname = "IDFILE"
+  )
+  expect_s3_class(
+    object = {
+      normalise(plexset, housekeeping_predict = TRUE, housekeeping_norm = TRUE, normalisation_method = "GLM")
+    },
+    class = "nacho"
+  )
+})
+
+test_that("salmon GLM", {
+  rcc_files_directory <- "plexset_data"
+  targets <- data.frame(stringsAsFactors = FALSE,
+    name = list.files(rcc_files_directory),
+    datapath = list.files(rcc_files_directory, full.names = TRUE)
+  )
+  targets$IDFILE <- basename(targets$datapath)
+  targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+  targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+
+  plexset <- load_rcc(
+    data_directory = rcc_files_directory,
+    ssheet_csv = targets_tidy,
+    id_colname = "IDFILE"
+  )
+  expect_s3_class(
+    object = {
+      normalise(plexset, housekeeping_predict = TRUE, housekeeping_norm = TRUE, normalisation_method = "GLM")
+    },
+    class = "nacho"
+  )
+})
