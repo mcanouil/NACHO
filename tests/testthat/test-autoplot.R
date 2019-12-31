@@ -22,21 +22,6 @@ metrics <- c(
   "PFNF", "HF", "NORM"
 )
 
-rcc_files_directory <- "salmon_data"
-targets <- data.frame(stringsAsFactors = FALSE,
-  name = list.files(rcc_files_directory),
-  datapath = list.files(rcc_files_directory, full.names = TRUE)
-)
-targets$IDFILE <- basename(targets$datapath)
-targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
-targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
-salmon <- load_rcc(
-  data_directory = rcc_files_directory,
-  ssheet_csv = targets_tidy,
-  id_colname = "IDFILE"
-)
-rm(list = c("targets_tidy", "targets", "rcc_files_directory"))
-
 for (imetric in metrics) {
   test_that(paste(imetric, "Default parameters", sep = " - "), {
     expect_s3_class(
@@ -82,14 +67,14 @@ for (imetric in metrics) {
 
   test_that(paste(imetric, "[salmon] Default parameters", sep = " - "), {
     expect_s3_class(
-      object = autoplot(object = salmon, x = imetric),
+      object = autoplot(object = salmon_nacho, x = imetric),
       class = "ggplot"
     )
   })
 
   test_that(paste(imetric, "[salmon] show_legend to FALSE parameters", sep = " - "), {
     expect_s3_class(
-      object = autoplot(object = salmon, x = imetric, show_legend = FALSE),
+      object = autoplot(object = salmon_nacho, x = imetric, show_legend = FALSE),
       class = "ggplot"
     )
   })
@@ -97,7 +82,7 @@ for (imetric in metrics) {
   test_that(paste(imetric, "[salmon] show outliers and labels", sep = " - "), {
     expect_s3_class(
       object = autoplot(
-        object = salmon,
+        object = salmon_nacho,
         x = imetric,
         show_legend = FALSE,
         show_outliers = TRUE,
@@ -111,7 +96,7 @@ for (imetric in metrics) {
   test_that(paste(imetric, "[salmon] hide outliers", sep = " - "), {
     expect_s3_class(
       object = autoplot(
-        object = salmon,
+        object = salmon_nacho,
         x = imetric,
         show_legend = FALSE,
         show_outliers = FALSE,
@@ -124,7 +109,7 @@ for (imetric in metrics) {
 
   if (imetric == "NORM") {
     test_that(paste(imetric, "[salmon] NORM without housekeeping genes ", sep = " - "), {
-      salmon2 <- salmon
+      salmon2 <- salmon_nacho
       salmon2$housekeeping_genes <- NULL
       expect_s3_class(
         object = autoplot(salmon2, x = imetric),
@@ -134,31 +119,17 @@ for (imetric in metrics) {
   }
 }
 
-rcc_files_directory <- "plexset_data"
-targets <- data.frame(stringsAsFactors = FALSE,
-  name = list.files(rcc_files_directory),
-  datapath = list.files(rcc_files_directory, full.names = TRUE)
-)
-targets$IDFILE <- basename(targets$datapath)
-targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
-targets_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
-plexset <- load_rcc(
-  data_directory = rcc_files_directory,
-  ssheet_csv = targets_tidy,
-  id_colname = "IDFILE"
-)
-rm(list = c("targets_tidy", "targets", "rcc_files_directory"))
 test_that(paste("HF", "Default parameters", sep = " - "), {
   expect_s3_class(
-    object = autoplot(object = plexset, x = "HF"),
+    object = autoplot(object = plexset_nacho, x = "HF"),
     class = "ggplot"
   )
 })
 
 test_that(paste("Housekeeping", "no genes", sep = " - "), {
-  plexset$housekeeping_genes <- NULL
+  plexset_nacho$housekeeping_genes <- NULL
   expect_s3_class(
-    object = autoplot(object = plexset, x = "Housekeeping"),
+    object = autoplot(object = plexset_nacho, x = "Housekeeping"),
     class = "ggplot"
   )
 })
