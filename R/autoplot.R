@@ -233,7 +233,8 @@ plot_metrics <- function(
       colour = "firebrick2",
       linetype = "longdash"
     ) +
-    {if (!show_legend) ggplot2::guides(colour = "none")}
+    {if (!show_legend) ggplot2::guides(colour = "none")} +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 30, hjust = 1, vjust = 1))
 }
 
 
@@ -274,7 +275,7 @@ plot_cg <- function(
     )
   }
 
-  p <- ggplot2::ggplot(
+  ggplot2::ggplot(
     data = nacho_object$nacho %>%
       dplyr::mutate(
         !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
@@ -333,8 +334,8 @@ plot_cg <- function(
       }
     } +
     ggplot2::scale_y_log10(
-      limits = c(1, NA),
-      labels = scales::comma_format(accuracy = 1, big.mark = ",")
+      # limits = c(1, NA),
+      labels = scales::comma_format(accuracy = NULL, big.mark = ",")
     ) +
     ggplot2::labs(
       x = if (x %in% c("Negative", "Positive")) "Control Name" else "Gene Name",
@@ -342,21 +343,7 @@ plot_cg <- function(
       colour = colour
     ) +
     {if (!show_legend) ggplot2::guides(colour = "none")} +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(face = "italic"))
-
-  number_ticks_x <- nacho_object$nacho %>%
-    dplyr::filter(!!dplyr::sym("CodeClass") %in% x) %>%
-    dplyr::select("Name") %>%
-    unlist() %>%
-    unique() %>%
-    length()
-
-  if (number_ticks_x > 10 | show_legend) {
-    p <- p +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5))
-  }
-
-  p
+    ggplot2::theme(axis.text.x = ggplot2::element_text(face = "italic", angle = 30, hjust = 1, vjust = 1))
 }
 
 
@@ -399,7 +386,7 @@ plot_pn <- function(
     ggplot2::facet_wrap(facets = "CodeClass", scales = "free_y", ncol = 2) +
     ggplot2::scale_y_log10(
       # limits = c(1, NA),
-      labels = scales::comma_format(accuracy = 1, big.mark = ",")
+      labels = scales::comma_format(accuracy = NULL, big.mark = ",")
     ) +
     ggplot2::scale_x_discrete(labels = NULL) +
     ggplot2::labs(
@@ -492,7 +479,7 @@ plot_acbd <- function(
         ggplot2::geom_point(size = size, na.rm = TRUE)
       }
     } +
-    ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = 1, big.mark = ",")) +
+    ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = NULL, big.mark = ",")) +
     ggplot2::labs(
       x = "Average Counts",
       y = parse(text = 'paste("Binding Density", " ", "(Optical features / ", mu, m^2, ")")'),
@@ -551,8 +538,8 @@ plot_acmc <- function(
   ) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::geom_point(size = size, na.rm = TRUE) +
-    ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = 1, big.mark = ",")) +
-    ggplot2::scale_y_continuous(labels = scales::comma_format(accuracy = 1, big.mark = ",")) +
+    ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = NULL, big.mark = ",")) +
+    ggplot2::scale_y_continuous(labels = scales::comma_format(accuracy = NULL, big.mark = ",")) +
     ggplot2::labs(
       x = "Average Counts",
       y = "Median Counts",
@@ -958,7 +945,7 @@ plot_norm <- function(
     ggplot2::scale_x_discrete(label = NULL) +
     ggplot2::scale_y_log10(
       # limits = c(1, NA),
-      labels = scales::comma_format(accuracy = 1, big.mark = ",")
+      labels = scales::comma_format(accuracy = NULL, big.mark = ",")
     ) +
     ggplot2::labs(
       x = "Sample Index",
