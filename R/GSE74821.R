@@ -14,12 +14,20 @@
 # targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
 # GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
 # utils::untar(file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"), exdir = file.path(tempdir(), "GSE74821"))
-# targets$IDFILE <- list.files(path = paste0(tempdir(), "/GSE74821"), pattern = ".RCC.gz$")
+# targets$IDFILE <- list.files(path = file.path(tempdir(), "GSE74821"), pattern = ".RCC.gz$")
 # targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
+# select_cartridge <- unlist(lapply(
+#   X = c(
+#     "20111102_20111102-9741-1", "20111102_20111102-9741-2",
+#     "20111230_20111228-9741-2-0044", "20111230_20111228-9741-4-0044"
+#     ),
+#   FUN = grep,
+#   x = targets$IDFILE
+# ))
 #
 # GSE74821 <- load_rcc(
 #   data_directory = file.path(tempdir(), "GSE74821"),
-#   ssheet_csv = targets,
+#   ssheet_csv = targets[select_cartridge, ],
 #   id_colname = "IDFILE",
 #   housekeeping_genes = NULL,
 #   housekeeping_predict = FALSE,
