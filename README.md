@@ -78,7 +78,7 @@ functions:
   - The `autoplot()` function draws any quality-control metrics from
     `visualise()` and `render()`.
 
-For more `vignette("NACHO")`.
+For more `vignette("NACHO")` and `vignette("NACHO-analysis")`.
 
 ### Shiny Application
 
@@ -106,7 +106,7 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 </p>
 
     @Article{,
-      title = {NACHO: an R package for quality control of NanoString nCounter data},
+      title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
       author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen Hart and Roderick Slieker},
       journal = {Bioinformatics},
       address = {Oxford, England},
