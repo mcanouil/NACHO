@@ -154,3 +154,11 @@ test_that(paste("HF", "Default parameters", sep = " - "), {
     class = "ggplot"
   )
 })
+
+test_that(paste("Housekeeping", "no genes", sep = " - "), {
+  plexset$housekeeping_genes <- NULL
+  expect_s3_class(
+    object = autoplot(object = plexset, x = "Housekeeping"),
+    class = "ggplot"
+  )
+})
