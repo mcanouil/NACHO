@@ -196,7 +196,3 @@ res <- GSE70970[["nacho"]] %>%
 
 unnest(res, lm)
 ```
-
-
-# References
-
