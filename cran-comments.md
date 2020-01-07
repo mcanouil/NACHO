@@ -26,19 +26,21 @@
 
 #### OK
 
-* Debian Linux, R-devel, GCC: 
+* Debian Linux, R-devel, GCC: PREPERROR
     
-* Debian Linux, R-patched, GCC: 
+* Debian Linux, R-patched, GCC: PREPERROR
 
-* Debian Linux, R-release, GCC: 
+* Debian Linux, R-release, GCC: PREPERROR
+
+* Debian Linux, R-devel, clang: PREPERROR
 
 * Fedora Linux, R-devel, clang, gfortran: OK
 
-* Fedora Linux, R-devel, GCC: 
+* Fedora Linux, R-devel, GCC: PREPERROR
 
 * macOS 10.11 El Capitan, R-release: OK
 
-* Oracle Solaris 10, x86, 32 bit, R-patched: OK
+* Oracle Solaris 10, x86, 32 bit, R-patched: WARNING
 
 * Ubuntu Linux 16.04 LTS, R-release, GCC: OK
 
