@@ -177,7 +177,6 @@ eBayes(lmFit(expr_counts, design))
 
 ```{r}
 library(purrr)
-library(broom)
 res <- GSE70970[["nacho"]] %>% 
   # filter( QC PARAMETER) %>% # possible additional QC filters
   filter(grepl("Endogenous", CodeClass)) %>% 
@@ -190,7 +189,7 @@ res <- GSE70970[["nacho"]] %>%
   slice(1:10) %>% # the ten first genes
   mutate(
     lm = map(.x = data, .f = function(idata) {# lm or whatever model you want
-      tidy(lm(formula = Count_Norm ~ `disease.event:ch1`, idata))
+      as.data.frame(summary(lm(formula = Count_Norm ~ `disease.event:ch1`, idata))$coef)
     })
   ) %>% 
   select(-data)
