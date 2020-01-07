@@ -41,7 +41,7 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@master
 
       - name: Query dependencies
-        run: Rscript -e "install.packages('remotes')" -e "saveRDS(remotes::dev_package_deps(dependencies = TRUE), 'depends.Rds')"
+        run: Rscript -e "install.packages('remotes')" -e "install.packages('BiocManager')" -e "saveRDS(remotes::dev_package_deps(dependencies = TRUE), 'depends.Rds')"
 
       - name: Cache R packages
         if: runner.os != 'Windows'
@@ -61,7 +61,7 @@ jobs:
           sudo -s eval "$sysreqs"
 
       - name: Install dependencies
-        run: Rscript -e "library(remotes)" -e "update(readRDS('depends.Rds'))" -e "remotes::install_cran('rcmdcheck')"
+        run: Rscript -e "library(remotes)" -e "library(BiocManager)" -e "update(readRDS('depends.Rds'))" -e "BiocManager::install(x[is.na(x$available), 'package'])" -e "remotes::install_cran('rcmdcheck')"
 
       - name: Check
         run: Rscript -e "rcmdcheck::rcmdcheck(args = '--no-manual', error_on = 'warning', check_dir = 'check')"
