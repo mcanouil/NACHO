@@ -13,3 +13,4 @@
 ^CRAN-RELEASE$
 ^.checks.R$
 ^.checks.log$
+^\.github/workflows/R-CMD-check\.yaml$
