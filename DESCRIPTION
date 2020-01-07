@@ -58,7 +58,6 @@ Imports:
     utils
 Suggests:
     Biobase (>= 2.44.0),
-    broom (>= 0.5.3),
     covr (>= 3.3.2),
     GEOquery (>= 2.52.0),
     limma (>= 3.42.0),
