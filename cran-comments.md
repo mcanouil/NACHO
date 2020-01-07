@@ -40,7 +40,7 @@
 
 * macOS 10.11 El Capitan, R-release: OK
 
-* Oracle Solaris 10, x86, 32 bit, R-patched: WARNING
+* Oracle Solaris 10, x86, 32 bit, R-patched: OK
 
 * Ubuntu Linux 16.04 LTS, R-release, GCC: OK
 
