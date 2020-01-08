@@ -11,12 +11,12 @@ cran_prep <- rhub::check(
   platform = c(
     "debian-clang-devel",
     "debian-gcc-devel",
+    "debian-gcc-patched",
+    "debian-gcc-release",
     "fedora-clang-devel",
     "fedora-gcc-devel",
     "windows-x86_64-devel",
-    "debian-gcc-patched",
     # "solaris-x86-patched",
-    "debian-gcc-release",
     "windows-x86_64-release",
     "macos-elcapitan-release"
   ),
