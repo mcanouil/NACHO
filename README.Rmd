@@ -11,6 +11,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+
 # NAnostring quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" />
 
 <!-- badges: start -->
@@ -45,6 +46,7 @@ remotes::install_github("mcanouil/NACHO")
 cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep = "\n")
 ```
 
+
 ### Shiny Application
 
 ```{r, eval = FALSE}
@@ -58,6 +60,7 @@ visualise(GSE74821)
 ```
 
 ![](man/figures/README-visualise.png)
+
 
 ## Citing NACHO
 
