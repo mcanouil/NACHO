@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Nanostring Quality Control Dashboard <img src="man/figures/nacho_hex.png" align="right" width="120" />
+# NAnostring quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" />
 
 <!-- badges: start -->
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
