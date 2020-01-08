@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Nanostring Quality Control Dashboard <img src="man/figures/nacho_hex.png" align="right" width="120" />
+# NAnostring quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" />
 
 <!-- badges: start -->
 
@@ -23,9 +23,6 @@ checks\_worst](https://cranchecks.info/badges/worst/NACHO)](https://cran.r-proje
 [![CRAN\_Download\_total](https://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
 [![R build
 status](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO)
-<!--[![cran checks_summary](https://cranchecks.info/badges/summary/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)-->
-<!--[![CRAN_Download_month](https://cranlogs.r-pkg.org/badges/NACHO?color=brightgreen)](https://cran.r-project.org/package=NACHO)-->
-<!--[![Coverage Status (coveralls)](https://coveralls.io/repos/github/mcanouil/NACHO/badge.svg?branch=master)](https://coveralls.io/github/mcanouil/NACHO?branch=master)-->
 <!-- badges: end -->
 
 ## Installation
