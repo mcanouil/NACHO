@@ -2,7 +2,6 @@ on:
   push:
     paths:
       - README.Rmd
-      - *yaml
 
 name: Render README
 
