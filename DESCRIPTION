@@ -57,10 +57,10 @@ Imports:
     tidyr (>= 1.0.0),
     utils
 Suggests:
-    Biobase (>= 2.44.0),
+    Biobase,
     covr (>= 3.3.2),
-    GEOquery (>= 2.52.0),
-    limma (>= 3.42.0),
+    GEOquery,
+    limma,
     roxygen2 (>= 7.0.2),
     testthat (>= 2.2.1)
 VignetteBuilder: 
