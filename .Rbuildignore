@@ -14,3 +14,4 @@
 ^.checks.R$
 ^.checks.log$
 ^\.github/workflows/R-CMD-check\.yaml$
+^\.github/workflows/render-readme\.yaml$
