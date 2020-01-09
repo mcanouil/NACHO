@@ -11,7 +11,6 @@
 ^README\.Rmd$
 ^revdep$
 ^CRAN-RELEASE$
-^.checks.R$
-^.checks.log$
+^.cran-checks.R$
 ^\.github/workflows/R-CMD-check\.yaml$
 ^\.github/workflows/render-readme\.yaml$
