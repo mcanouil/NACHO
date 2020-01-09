@@ -4,6 +4,22 @@
 
 * Linux Debian 4.9.110-3+deb9u2, R-3.6.2: OK
 
+### win-builder (`devtools::check_win_devel()`)
+
+* R-devel: OK
+
+### R-hub builder (`rhub::check_for_cran()`)
+
+* Fedora Linux, R-devel, clang, gfortran: OK
+
+* Ubuntu Linux 16.04 LTS, R-release, GCC: OK
+
+* Windows Server 2008 R2 SP1, R-devel, 32/64 bit: OK
+
+### R-hub builder (`rhub::check_on_macos()`)
+
+* macOS 10.11 El Capitan, R-release: OK
+
 ### Appveyor-ci
 
 * Windows Server 2012 R2 x64 (build 9600), R-3.6.2: OK
@@ -17,33 +33,3 @@
 * Ubuntu 16.04.6 LTS, R-3.5: OK
 
 * Ubuntu 16.04.6 LTS, R-3.6: OK
-
-### win-builder (`devtools::check_win_devel()`)
-
-* R-devel: OK
-
-### R-hub builder (`rhub::check()`)
-
-#### OK
-
-* Debian Linux, R-devel, GCC: PREPERROR
-    
-* Debian Linux, R-patched, GCC: PREPERROR
-
-* Debian Linux, R-release, GCC: PREPERROR
-
-* Debian Linux, R-devel, clang: PREPERROR
-
-* Fedora Linux, R-devel, clang, gfortran: OK
-
-* Fedora Linux, R-devel, GCC: PREPERROR
-
-* macOS 10.11 El Capitan, R-release: OK
-
-* Oracle Solaris 10, x86, 32 bit, R-patched: OK
-
-* Ubuntu Linux 16.04 LTS, R-release, GCC: OK
-
-* Windows Server 2008 R2 SP1, R-release, 32/64 bit: OK
-
-* Windows Server 2008 R2 SP1, R-devel, 32/64 bit: OK
