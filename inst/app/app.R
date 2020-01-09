@@ -55,7 +55,7 @@ ui <- shiny::tagList(
           shiny::tags$h3("QC Thresholds"),
           shiny::radioButtons("qc_bd_metrics",
             shiny::tags$span("Binding Density",
-              shiny::actionLink("about_bd", NULL, icon = shiny::icon("info-circle"))
+              shiny::actionLink("about_bd", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;")
             ),
             choiceNames = list(
               shiny::tags$span("MAX/FLEX", shiny::helpText("(Default: 0.1 - 2.25)")),
@@ -69,21 +69,21 @@ ui <- shiny::tagList(
           ),
           shiny::sliderInput("qc_fov_thresh",
             shiny::tags$span("Field of View",
-              shiny::actionLink("about_fov", NULL, icon = shiny::icon("info-circle")),
+              shiny::actionLink("about_fov", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;"),
               shiny::helpText("(Default: 75)")
             ),
             min = 50, max = 100, value = 75
           ),
           shiny::sliderInput("qc_pcl_thresh",
             shiny::tags$span("Positive Control Linearity",
-              shiny::actionLink("about_pcl", NULL, icon = shiny::icon("info-circle")),
+              shiny::actionLink("about_pcl", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;"),
               shiny::helpText("(Default: 0.95)")
             ),
             min = 0.5, max = 1, value = 0.95
           ),
           shiny::sliderInput("qc_lod_thresh",
             shiny::tags$span("Limit of Detection",
-              shiny::actionLink("about_lod", NULL, icon = shiny::icon("info-circle")),
+              shiny::actionLink("about_lod", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;"),
               shiny::helpText("(Default: 2)")
             ),
             min = 0, max = 30, value = 2
@@ -114,14 +114,14 @@ ui <- shiny::tagList(
         list(
           shiny::sliderInput("qc_pf_thresh",
             shiny::tags$span("Positive Factor",
-              shiny::actionLink("about_pf", NULL, icon = shiny::icon("info-circle")),
+              shiny::actionLink("about_pf", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;"),
               shiny::helpText("(Default: 0.25 - 4)")
             ),
             min = 0, max = 5, value = c(0.25, 4), step = 0.25
           ),
           shiny::sliderInput("qc_hgf_thresh",
             shiny::tags$span("Housekeeping Genes Factor",
-              shiny::actionLink("about_hgf", NULL, icon = shiny::icon("info-circle")),
+              shiny::actionLink("about_hgf", NULL, icon = shiny::icon("info-circle"), style = "text-decoration:none;"),
               shiny::helpText("(Default: 0.09 - 11)")
             ),
             min = 0, max = 15, value = c(0.09, 11), step = 0.01
