@@ -9,3 +9,4 @@ revdep/library.noindex
 revdep/data.sqlite
 docs
 .checks.log
+**.mp4

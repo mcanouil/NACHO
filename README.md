@@ -85,7 +85,7 @@ For more `vignette("NACHO")` and `vignette("NACHO-analysis")`.
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
 
-![](man/figures/README-app.png)
+<img src="man/figures/README-nacho_app.gif" width="100%" />
 
 ``` r
 visualise(GSE74821)
