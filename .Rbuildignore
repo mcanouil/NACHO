@@ -14,3 +14,4 @@
 ^.cran-checks.R$
 ^\.github/workflows/R-CMD-check\.yaml$
 ^\.github/workflows/render-readme\.yaml$
+^\man/figures/README-nacho_app\.gif$

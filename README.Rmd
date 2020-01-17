@@ -7,8 +7,38 @@ output: github_document
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
 )
+
+if (file.exists("man/figures/nacho_app.mp4")) {
+  system("ffmpeg -i man/figures/nacho_app.mp4 -vf fps=1 man/figures/nacho_app%04d.png")
+  gif_app <- gifski::gifski(
+    png_files = list.files(
+      path = dirname(knitr::opts_chunk$get("fig.path")), 
+      pattern = "nacho_app.*.png", 
+      full.names = TRUE
+    ), 
+    gif_file = paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"),
+    width = 1920 * 2/3,
+    height = 1080 * 2/3,
+    delay = 0.50,
+    loop = TRUE,
+    progress = FALSE
+  )
+  unlink(list.files(
+    path = dirname(knitr::opts_chunk$get("fig.path")), 
+    pattern = "nacho_app.*.png", 
+    full.names = TRUE
+  ))
+}
+
+if (file.exists(paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"))) {
+  gif_app <- paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif")
+} else {
+  gif_app <- paste0(knitr::opts_chunk$get("fig.path"), "app.png")
+}
 ```
 
 
@@ -52,8 +82,10 @@ cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep 
 ```{r, eval = FALSE}
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
+```{r, echo = FALSE}
+knitr::include_graphics(gsub(".*/man", "man", gif_app))
+```
 
-![](man/figures/README-app.png)
 
 ```{r, eval = FALSE}
 visualise(GSE74821)
