@@ -35,12 +35,6 @@
 #'   \item{`nacho`}{[[data.frame]] A `data.frame` with all columns from the sample sheet `ssheet_csv`
 #'     and all computed columns, *i.e.*, quality-control metrics and counts, with one sample per row.}
 #'   \item{`outliers_thresholds`}{[[list]] A `list` of the (default) quality-control thresholds used.}
-#'   \item{`raw_counts`}{[[data.frame]] Raw counts with probes as rows and samples as columns.
-#'     With `"CodeClass"` (first column), the type of the probes and
-#'     `"Name"` (second column), the Name of the probes.}
-#'   \item{`normalised_counts`}{[[data.frame]] Normalised counts with probes as rows and samples as columns.
-#'     With `"CodeClass"` (first column)), the type of the probes and
-#'     `"Name"` (second column), the name of the probes.}
 #' }
 #'
 #' @export
