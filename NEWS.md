@@ -1,5 +1,9 @@
 # NACHO (development version)
 
+## Minor improvements and fixes
+
+* Fix deprecated documention for `R/load_rcc.R` and `R/normalise.R`.
+
 # NACHO 1.0.0
 
 ## New features
