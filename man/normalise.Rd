@@ -3,7 +3,7 @@
 \name{normalise}
 \alias{normalise}
 \alias{normalize}
-\title{(re)Normalise a \code{"nacho"} object}
+\title{(re)Normalise a "nacho" object}
 \usage{
 normalise(
   nacho_object,

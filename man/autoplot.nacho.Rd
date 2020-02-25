@@ -2,7 +2,7 @@
 % Please edit documentation in R/autoplot.R
 \name{autoplot.nacho}
 \alias{autoplot.nacho}
-\title{Plot quality-control metrics and thresholds of a \code{"nacho"} object}
+\title{Plot quality-control metrics and thresholds of a "nacho" object}
 \usage{
 \method{autoplot}{nacho}(
   object,

@@ -3,7 +3,7 @@
 \name{visualise}
 \alias{visualise}
 \alias{visualize}
-\title{Visualise quality-control metrics of a \code{"nacho"} object}
+\title{Visualise quality-control metrics of a "nacho" object}
 \usage{
 visualise(nacho_object)
 }

@@ -3,7 +3,7 @@
 \name{load_rcc}
 \alias{load_rcc}
 \alias{summarize}
-\title{Produce a \code{"nacho"} object from RCC NanoString files}
+\title{Produce a "nacho" object from RCC NanoString files}
 \usage{
 load_rcc(
   data_directory,
@@ -58,12 +58,6 @@ Cannot be more than n-1 samples. Default is \code{10}.}
 \item{\code{nacho}}{[\link{data.frame}] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
 and all computed columns, \emph{i.e.}, quality-control metrics and counts, with one sample per row.}
 \item{\code{outliers_thresholds}}{[\link{list}] A \code{list} of the (default) quality-control thresholds used.}
-\item{\code{raw_counts}}{[\link{data.frame}] Raw counts with probes as rows and samples as columns.
-With \code{"CodeClass"} (first column), the type of the probes and
-\code{"Name"} (second column), the Name of the probes.}
-\item{\code{normalised_counts}}{[\link{data.frame}] Normalised counts with probes as rows and samples as columns.
-With \code{"CodeClass"} (first column)), the type of the probes and
-\code{"Name"} (second column), the name of the probes.}
 }
 }
 \description{

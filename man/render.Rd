@@ -2,7 +2,7 @@
 % Please edit documentation in R/render.R
 \name{render}
 \alias{render}
-\title{Render a HTML report of a \code{"nacho"} object}
+\title{Render a HTML report of a "nacho" object}
 \usage{
 render(
   nacho_object,

@@ -1,4 +1,4 @@
-#' Render a HTML report of a `"nacho"` object
+#' Render a HTML report of a "nacho" object
 #'
 #' This function create a Rmarkdown script and render it as a HTML document.
 #' The HTML document is a quality-control report using all the metrics from [`visualise()`]

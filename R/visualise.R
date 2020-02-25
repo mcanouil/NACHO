@@ -1,4 +1,4 @@
-#' Visualise quality-control metrics of a `"nacho"` object
+#' Visualise quality-control metrics of a "nacho" object
 #'
 #' This function allows to visualise results from [`load_rcc()`] or [`normalise()`]
 #' several quality-control metrics in an interactive shiny application,

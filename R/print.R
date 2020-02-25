@@ -1,4 +1,4 @@
-#' Print method for `"nacho"` object
+#' Print method for "nacho" object
 #'
 #' This function allows to print text and figures from the results of a call to [`load_rcc()`]
 #' or [`normalise()`].

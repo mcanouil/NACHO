@@ -1,4 +1,4 @@
-#' Annotate a `"nacho"` object for outliers
+#' Annotate a "nacho" object for outliers
 #'
 #' Add or update `"is_outlier"` column in the `"nacho"` field of an object from
 #' a call to [`load_rcc()`] or [`normalise()`] (`nacho_object$nacho`),
