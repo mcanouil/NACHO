@@ -1,4 +1,4 @@
-#' Produce a `"nacho"` object from RCC NanoString files
+#' Produce a "nacho" object from RCC NanoString files
 #'
 #' This function is used to preprocess the data from NanoString nCounter.
 #'

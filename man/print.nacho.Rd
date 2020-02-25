@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.R
 \name{print.nacho}
 \alias{print.nacho}
-\title{Print method for \code{"nacho"} object}
+\title{Print method for "nacho" object}
 \usage{
 \method{print}{nacho}(
   x,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_outliers.R
 \name{check_outliers}
 \alias{check_outliers}
-\title{Annotate a \code{"nacho"} object for outliers}
+\title{Annotate a "nacho" object for outliers}
 \usage{
 check_outliers(nacho_object)
 }

@@ -1,4 +1,4 @@
-#' Plot quality-control metrics and thresholds of a `"nacho"` object
+#' Plot quality-control metrics and thresholds of a "nacho" object
 #'
 #' This function allows to plot any qualit-control figures available
 #' within the shiny app using [`visualise()`] or in the HTML report from [`render()`].
