@@ -1,4 +1,4 @@
-#' A `"nacho"` object containing 20 samples of GSE74821 dataset
+#' A "nacho" object containing 20 samples of GSE74821 dataset
 #'
 #' NanoString nCounter RUO-PAM50 Gene Expression Custom CodeSet
 #'
