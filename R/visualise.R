@@ -26,23 +26,23 @@
 #'   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
 #'   GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
 #'   utils::untar(
-#'     tarfile = paste0(tempdir(), "/GSE74821/GSE74821_RAW.tar"),
-#'     exdir = paste0(tempdir(), "/GSE74821")
+#'     tarfile = file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),
+#'     exdir = file.path(tempdir(), "GSE74821")
 #'   )
 #'   targets$IDFILE <- list.files(
-#'     path = paste0(tempdir(), "/GSE74821"),
+#'     path = file.path(tempdir(), "GSE74821"),
 #'     pattern = ".RCC.gz$"
 #'   )
 #'   targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
 #'   utils::write.csv(
 #'     x = targets,
-#'     file = paste0(tempdir(), "/GSE74821/Samplesheet.csv")
+#'     file = file.path(tempdir(), "GSE74821", "Samplesheet.csv")
 #'   )
 #'
 #'   # Read RCC files and format
 #'   nacho <- load_rcc(
-#'     data_directory = paste0(tempdir(), "/GSE74821"),
-#'     ssheet_csv = paste0(tempdir(), "/GSE74821/Samplesheet.csv"),
+#'     data_directory = file.path(tempdir(), "GSE74821"),
+#'     ssheet_csv = file.path(tempdir(), "GSE74821", "Samplesheet.csv"),
 #'     id_colname = "IDFILE"
 #'   )
 #'   visualise(nacho)
