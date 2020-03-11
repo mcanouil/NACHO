@@ -132,18 +132,18 @@ targets <- pData(phenoData(gse[[1]]))
 getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
 # Unzip data
 untar(
-  tarfile = paste0(tempdir(), "/GSE70970/GSE70970_RAW.tar"), 
-  exdir = paste0(tempdir(), "/GSE70970/Data")
+  tarfile = file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"), 
+  exdir = file.path(tempdir(), "GSE70970", "Data")
 )
 # Add IDs
-targets$IDFILE <- list.files(paste0(tempdir(), "/GSE70970/Data"))
+targets$IDFILE <- list.files(file.path(tempdir(), "GSE70970", "Data"))
 ```
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE, eval = class(gse)!="try-error"}
 tibble::as_tibble(dplyr::select(targets, "IDFILE", dplyr::everything()))
 ```
 
-After we extracted the dataset to the `` `r paste0(tempdir(), "/GSE70970/Data")` `` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or use as is.  
+After we extracted the dataset to the `` `r file.path(tempdir(), "GSE70970", "Data")` `` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or use as is.  
 
 
 ## The `load_rcc()` function
@@ -153,7 +153,7 @@ The `housekeeping_genes` and `normalisation_method` arguments respectively indic
 
 ```{r ex3, eval = class(gse)!="try-error"}
 GSE70970_sum <- load_rcc(
-  data_directory = paste0(tempdir(), "/GSE70970/Data"), # Where the data is
+  data_directory = file.path(tempdir(), "GSE70970", "Data"), # Where the data is
   ssheet_csv = targets, # The samplesheet
   id_colname = "IDFILE", # Name of the column that contains the unique identfiers
   housekeeping_genes = NULL, # Custom list of housekeeping genes
@@ -164,7 +164,7 @@ GSE70970_sum <- load_rcc(
 ```
 
 ```{r, echo = FALSE, results = "hide", eval = class(gse)!="try-error"}
-unlink(paste0(tempdir(), "/GSE70970"), recursive = TRUE)
+unlink(file.path(tempdir(), "GSE70970"), recursive = TRUE)
 ```
 
 

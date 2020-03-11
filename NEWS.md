@@ -3,7 +3,7 @@
 ## Minor improvements and fixes
 
 * Fix deprecated documention for `R/load_rcc.R` and `R/normalise.R`.
-* Use `file.path()` in examples
+* Use `file.path()` in examples and vignette.
 
 # NACHO 1.0.0
 
