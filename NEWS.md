@@ -4,7 +4,9 @@
 
 * Fix deprecated documention for `R/load_rcc.R` and `R/normalise.R`.
 * Use `file.path()` in examples and vignette.
+* In `R/autoplot.R`, reduce alpha for ellipses.
 * Code optimisation.
+
 
 # NACHO 1.0.0
 
