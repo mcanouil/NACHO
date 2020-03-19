@@ -19,7 +19,7 @@ norm_glm <- function(data) {
       if (all(check_name)) {
         x <- as.numeric(gsub("^[^(]*\\((.*)\\)$", "\\1", .data[["Name"]]))
       } else {
-        x <- c(NEG = 0, POS = 32)[gsub("([NP][EO][GS]).*", "\\1", .data[["Name"]])]
+        x <- c(NEG = 0, POS = 32)[gsub("(NEG).*|(POS).*", "\\1\\2", .data[["Name"]])]
       }
       stats::glm(y ~ x, family = stats::poisson(link = "identity"))$coeff[c(1, 2)]
     }
