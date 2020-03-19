@@ -77,7 +77,7 @@ cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep 
 ```
 
 
-### Shiny Application
+### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
 
 ```{r, eval = FALSE}
 shiny::runApp(system.file("app", package = "NACHO"))
