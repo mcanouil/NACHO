@@ -578,8 +578,8 @@ plot_pca12 <- function(
       colour = .data[[colour]]
     )
   ) +
-    ggplot2::geom_point(size = size, na.rm = TRUE) +
     ggforce::geom_mark_ellipse(na.rm = TRUE, alpha = 0.1) +
+    ggplot2::geom_point(size = size, na.rm = TRUE) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
@@ -635,8 +635,8 @@ plot_pca <- function(
       fill = .data[[colour]]
     )
   ) +
-    ggplot2::geom_point(size = size, na.rm = TRUE) +
     ggforce::geom_mark_ellipse(na.rm = TRUE, alpha = 0.1) +
+    ggplot2::geom_point(size = size, na.rm = TRUE) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
