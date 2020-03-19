@@ -135,7 +135,7 @@ plotInput <- function(id, nacho) {
             ),
             shiny::column(6, align = "center",
               shiny::numericInput(ns("outliers_point_size"), shiny::tags$span("Outliers Point Size", shiny::helpText("(Factor x Point Size)")),
-                value = shiny::isolate(input$outliers_point_size) %||% 1.5,
+                value = shiny::isolate(input$outliers_point_size) %||% 1,
                 min = 1, max = 3, step = 0.1
               )
             )
@@ -153,7 +153,7 @@ plotInput <- function(id, nacho) {
             ),
             shiny::column(6, align = "center",
               shiny::numericInput(ns("point_size"), shiny::tags$span("Point Size", shiny::helpText("(mm)")),
-                value = shiny::isolate(input$point_size) %||% 2,
+                value = shiny::isolate(input$point_size) %||% 1,
                 min = 0, max = 4, step = 0.5
               )
             )
@@ -213,10 +213,10 @@ plotInput <- function(id, nacho) {
         x = x_metrics,
         object = nacho,
         colour = input[["group_colour"]] %||% "CartridgeID",
-        size = input[["point_size"]] %||% 2,
+        size = input[["point_size"]] %||% 1,
         show_legend = as.logical(input[["show_levels"]] %||% TRUE),
         show_outliers = as.logical(input[["show_outliers"]] %||% TRUE),
-        outliers_factor = input[["outliers_point_size"]] %||% 2,
+        outliers_factor = input[["outliers_point_size"]] %||% 1,
         outliers_labels = if (as.logical(input[["show_outliers_labels"]] %||% FALSE)) input[["outliers_labels"]] else NULL
       )
       p +
