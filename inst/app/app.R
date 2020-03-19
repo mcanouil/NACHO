@@ -1,9 +1,9 @@
-invisible(suppressPackageStartupMessages({
+suppressPackageStartupMessages({invisible(
   sapply(
-    c("shiny", "shinyWidgets", "utils", "rlang", "ggplot2", "purrr", "dplyr", "tidyr", "NACHO"),
-    library, character.only = TRUE
+    X = c("shiny", "shinyWidgets", "utils", "rlang", "ggplot2", "purrr", "dplyr", "tidyr", "NACHO"),
+    FUN = library, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE
   )
-}))
+)})
 
 source("utils.R")
 
