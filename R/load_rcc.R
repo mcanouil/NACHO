@@ -88,9 +88,9 @@ load_rcc <- function(
 
   message("[NACHO] Importing RCC files.")
   nacho_df <- switch(
-    EXPR = class(ssheet_csv),
-    "data.frame" = ssheet_csv,
-    "character" = utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE),
+    EXPR = paste(inherits(ssheet_csv, c("data.frame", "character"), TRUE), collapse = ""),
+    "10" = ssheet_csv,
+    "01" = utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE),
     stop('[NACHO] "ssheet_csv" must be a "data.frame" or path to csv.')
   )
 
