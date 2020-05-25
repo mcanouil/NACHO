@@ -2,7 +2,7 @@
 
 ## Minor improvements and fixes
 
-* Fix deprecated documention for `R/load_rcc.R` and `R/normalise.R`.
+* Fix deprecated documentation for `R/load_rcc.R` and `R/normalise.R`.
 * Use `file.path()` in examples and vignette.
 * In `R/autoplot.R`, reduce alpha for ellipses.
 * In `inst/app/utils.R`, set default point size (also for outliers) to `1`.
