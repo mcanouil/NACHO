@@ -4,7 +4,9 @@
 \name{GSE74821}
 \alias{GSE74821}
 \title{A "nacho" object containing 20 samples of GSE74821 dataset}
-\format{A [\link{list}] object of class \code{"nacho"}.}
+\format{
+A [\link{list}] object of class \code{"nacho"}.
+}
 \source{
 \href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821}{GSE74821}
 }
