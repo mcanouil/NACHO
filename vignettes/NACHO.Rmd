@@ -113,7 +113,7 @@ The data is extracted and prepared using the following code.
 
 ```{r geo-down, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
 gse <- try({GEOquery::getGEO("GSE70970")}, silent = TRUE)
-if (class(gse)=="try-error") { # when GEOquery is down
+if (inherits(gse, "try-error")) { # when GEOquery is down
   cons <- showConnections(all = TRUE)
   icons <- which(grepl("GSE70970", cons[, "description"])) - 1
   for (icon in icons) close(getConnection(icon))
@@ -123,7 +123,7 @@ if (class(gse)=="try-error") { # when GEOquery is down
 }
 ```
 
-```{r ex2, results = "hide", message = FALSE, warning = FALSE, eval = class(gse)!="try-error"}
+```{r ex2, results = "hide", message = FALSE, warning = FALSE, eval = !inherits(gse, "try-error")}
 library(GEOquery)
 # Download data
 gse <- getGEO("GSE70970")
@@ -139,7 +139,7 @@ untar(
 targets$IDFILE <- list.files(file.path(tempdir(), "GSE70970", "Data"))
 ```
 
-```{r, echo = FALSE, message = FALSE, warning = FALSE, eval = class(gse)!="try-error"}
+```{r, echo = FALSE, message = FALSE, warning = FALSE, eval = !inherits(gse, "try-error")}
 tibble::as_tibble(dplyr::select(targets, "IDFILE", dplyr::everything()))
 ```
 
@@ -151,7 +151,7 @@ After we extracted the dataset to the `` `r file.path(tempdir(), "GSE70970", "Da
 The first argument requires the path to the directory containing the RCC files, the second argument is the location of samplesheet followed by third argument with the column name containing the exact names of the files.  
 The `housekeeping_genes` and `normalisation_method` arguments respectively indicate which housekeeping genes and normalisation method should be used.
 
-```{r ex3, eval = class(gse)!="try-error"}
+```{r ex3, eval = !inherits(gse, "try-error")}
 GSE70970_sum <- load_rcc(
   data_directory = file.path(tempdir(), "GSE70970", "Data"), # Where the data is
   ssheet_csv = targets, # The samplesheet
@@ -163,7 +163,7 @@ GSE70970_sum <- load_rcc(
 )
 ```
 
-```{r, echo = FALSE, results = "hide", eval = class(gse)!="try-error"}
+```{r, echo = FALSE, results = "hide", eval = !inherits(gse, "try-error")}
 unlink(file.path(tempdir(), "GSE70970"), recursive = TRUE)
 ```
 
@@ -188,11 +188,11 @@ Each sample in the plots can be coloured based on either technical specification
 For this example, we use the **GSE70970** dataset from the previous example. 
 The discovered housekeeping genes are saved in the result object as **predicted_housekeeping**. 
 
-```{r ex5, eval = class(gse)!="try-error"}
+```{r ex5, eval = !inherits(gse, "try-error")}
 print(GSE70970_sum[["housekeeping_genes"]])
 ```
 
-```{r intext, eval = class(gse)!="try-error", echo = FALSE, results = "asis"}
+```{r intext, eval = !inherits(gse, "try-error"), echo = FALSE, results = "asis"}
 cat(
   "Let's say _", GSE70970_sum[["housekeeping_genes"]][1], 
   "_ and _", GSE70970_sum[["housekeeping_genes"]][2], 
@@ -201,7 +201,7 @@ cat(
 )
 ```
 
-```{r ex6, eval = class(gse)!="try-error"}
+```{r ex6, eval = !inherits(gse, "try-error")}
 my_housekeeping <- GSE70970_sum[["housekeeping_genes"]][-c(1, 2)]
 print(my_housekeeping)
 ```
@@ -216,7 +216,7 @@ Here, the user has a choice between `"GLM"` or `"GEO"`.
 The differences between normalisation methods are nuanced, however, a preference for either method are use case specific.  
 In this example, `"GLM"` is used.
 
-```{r ex7, eval = class(gse)!="try-error"}
+```{r ex7, eval = !inherits(gse, "try-error")}
 GSE70970_norm <- normalise(
   nacho_object = GSE70970_sum,
   housekeeping_genes = my_housekeeping,
