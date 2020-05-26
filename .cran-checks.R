@@ -1,6 +1,6 @@
 devtools::check()
 devtools::check_win_devel()
-cran <- rhub::check_for_cran()
+cran <- rhub::check_for_cran(env_vars = c(`_R_CHECK_FORCE_SUGGESTS_` = "false"))
 mac <- rhub::check_on_macos()
 sol <- rhub::check_on_solaris()
 
