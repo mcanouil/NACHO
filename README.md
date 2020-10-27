@@ -9,10 +9,8 @@
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![GitHub
 tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest%20tag&include_prereleases)](https://github.com/mcanouil/NACHO)
-[![Travis-CI Build
-Status](https://travis-ci.org/mcanouil/NACHO.svg?branch=master)](https://travis-ci.org/mcanouil/NACHO)
-[![AppVeyor Build
-Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/NACHO?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/NACHO)
+[![R build
+status](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO/actions)
 [![Coverage Status
 (codecov)](https://codecov.io/gh/mcanouil/NACHO/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO)
 [![CII Best
@@ -21,8 +19,6 @@ Practices](https://bestpractices.coreinfrastructure.org/projects/2719/badge)](ht
 [![cran
 checks\_worst](https://cranchecks.info/badges/worst/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
 [![CRAN\_Download\_total](https://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
-[![R build
-status](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO)
 <!-- badges: end -->
 
 ## Installation
@@ -77,8 +73,7 @@ functions:
   - The `autoplot()` function draws any quality-control metrics from
     `visualise()` and `render()`.
 
-For more `vignette("NACHO")` and
-`vignette("NACHO-analysis")`.
+For more `vignette("NACHO")` and `vignette("NACHO-analysis")`.
 
 ### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
 
