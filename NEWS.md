@@ -9,6 +9,7 @@
 * In `R/*`,
     - No longer generates `Rd` files for internal functions.
 
+
 # NACHO 1.0.1
 
 ## Minor improvements and fixes
