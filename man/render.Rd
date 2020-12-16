@@ -34,7 +34,7 @@ Please note that any directory path provided will create any necessary directori
 
 \item{size}{[\link{numeric}] A numeric controlling point size
 (\code{\link[ggplot2:geom_point]{ggplot2::geom_point()}} or #' \code{\link[ggbeeswarm:geom_beeswarm]{ggbeeswarm::geom_beeswarm()}})
-or line size (\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}).}
+or line size (\code{\link[ggplot2:geom_path]{ggplot2::geom_line()}}).}
 
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
