@@ -1,5 +1,10 @@
 # NACHO (development version)
 
+## Minor improvements and fixes
+
+* In `R/normalise.R`, 
+    - Fix missing "outliers_thresholds" field after `normalise()` without removing outliers (#26).
+
 # NACHO 1.0.1
 
 ## Minor improvements and fixes

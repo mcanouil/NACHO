@@ -130,7 +130,7 @@ normalise <- function(
     "nacho",
     "outliers_thresholds"
   )
-  if (!all(mandatory_fields%in%names(nacho_object))) {
+  if (!all(mandatory_fields %in% names(nacho_object))) {
     stop(
       '[NACHO] Mandatory fields are missing in "', substitute(nacho_object), '"!\n',
       '  "load_rcc()" must be called before "normalise()".'
@@ -142,11 +142,11 @@ normalise <- function(
 
   params_changed <- c(
     "housekeeping_genes" = !isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes))),
-    "housekeeping_predict" = nacho_object[["housekeeping_predict"]]!=housekeeping_predict,
-    "housekeeping_norm" = nacho_object[["housekeeping_norm"]]!=housekeeping_norm,
-    "normalisation_method" = nacho_object[["normalisation_method"]]!=normalisation_method,
-    "n_comp" = nacho_object[["n_comp"]]!=n_comp,
-    "remove_outliers" = nacho_object[["remove_outliers"]]!=remove_outliers,
+    "housekeeping_predict" = nacho_object[["housekeeping_predict"]] != housekeeping_predict,
+    "housekeeping_norm" = nacho_object[["housekeeping_norm"]] != housekeeping_norm,
+    "normalisation_method" = nacho_object[["normalisation_method"]] != normalisation_method,
+    "n_comp" = nacho_object[["n_comp"]] != n_comp,
+    "remove_outliers" = nacho_object[["remove_outliers"]] != remove_outliers,
     "outliers_thresholds" = !isTRUE(all.equal(nacho_object[["outliers_thresholds"]], outliers_thresholds))
   )
 
@@ -199,12 +199,14 @@ normalise <- function(
     }
   }
 
+  nacho_object[["outliers_thresholds"]] <- outliers_thresholds
+
   nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(
     data = nacho_object[["nacho"]],
     housekeeping_norm = housekeeping_norm
   )
 
-  if (!"RCC_type"%in%names(attributes(nacho_object))) {
+  if (!"RCC_type" %in% names(attributes(nacho_object))) {
     attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
   }
 
