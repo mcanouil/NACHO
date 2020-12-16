@@ -16,3 +16,4 @@
 ^\.github/workflows/render-readme\.yaml$
 ^man/figures/README-nacho_app\.gif$
 ^LICENSE\.md$
+^data-raw$
