@@ -4,6 +4,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[tibble]]
 read_rcc <- function(file) {
@@ -24,10 +25,10 @@ read_rcc <- function(file) {
       .data[["Count"]] <- as.integer(.data[["Count"]])
     }
     if (all(paste0("Endogenous", 1:8, "s") %in% unique(.data[["CodeClass"]]))) {
-      control_probes <- .data[.data[["CodeClass"]]%in%c("Negative", "Positive"), ]
+      control_probes <- .data[.data[["CodeClass"]] %in% c("Negative", "Positive"), ]
       sample_list <- split(
-        x = .data[!.data[["CodeClass"]]%in%c("Negative", "Positive"), ],
-        f = gsub("Endogenous|Housekeeping", "", .data[["CodeClass"]][!.data[["CodeClass"]]%in%c("Negative", "Positive")])
+        x = .data[!.data[["CodeClass"]] %in% c("Negative", "Positive"), ],
+        f = gsub("Endogenous|Housekeeping", "", .data[["CodeClass"]][!.data[["CodeClass"]] %in% c("Negative", "Positive")])
       )
       .data <- lapply(X = sample_list, FUN = rbind, control_probes)
     }
@@ -36,7 +37,7 @@ read_rcc <- function(file) {
 
   rcc_tbl <- tibble::as_tibble(rcc_list)
 
-  if (length(rcc_tbl[["Code_Summary"]][[1]])==8) {
+  if (length(rcc_tbl[["Code_Summary"]][[1]]) == 8) {
     # column_to_unnest <- "Code_Summary"
     rcc_tbl <- tidyr::unnest(data = rcc_tbl, cols = "Code_Summary")
     rcc_tbl[["plexset_id"]] <- paste0("S", 1:8)

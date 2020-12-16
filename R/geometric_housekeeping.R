@@ -7,6 +7,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[numeric]]
 geometric_housekeeping <- function(data, positive_factor, intercept, housekeeping_genes) {

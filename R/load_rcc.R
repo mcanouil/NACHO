@@ -101,14 +101,14 @@ load_rcc <- function(
     stop('[NACHO] Not all values from "id_colname" are mapped to a RCC file.')
   }
 
-  if (anyDuplicated(nacho_df[[id_colname]])!=0 & !"plexset_id"%in%colnames(nacho_df)) {
+  if (anyDuplicated(nacho_df[[id_colname]]) != 0 & !"plexset_id" %in% colnames(nacho_df)) {
     stop(
       '[NACHO] "id_colname" contains duplicates and "plexset_id" was not provided.\n',
       '  For PlexSet RCC files, "plexset_id" column is required to identify samples.'
     )
   }
 
-  if (anyDuplicated(nacho_df[[id_colname]])!=0) {
+  if (anyDuplicated(nacho_df[[id_colname]]) != 0) {
     type_set <- "n8"
     nacho_df_uniq <- unique(nacho_df[, c(id_colname, "file_path")])
     progress <- dplyr::progress_estimated(length(nacho_df_uniq[["file_path"]]) + 1)

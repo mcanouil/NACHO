@@ -6,6 +6,8 @@
     - Fix missing "outliers_thresholds" field after `normalise()` without removing outliers (#26).
 * In `R/GSE74821.R`,
     - Now uses `data-raw` root directory.
+* In `R/*`,
+    - No longer generates `Rd` files for internal functions.
 
 # NACHO 1.0.1
 

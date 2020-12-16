@@ -6,6 +6,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[character]]
 find_housekeeping <- function(data, id_colname, count_column) {
