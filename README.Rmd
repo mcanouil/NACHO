@@ -62,7 +62,7 @@ if (file.exists(paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"))) {
 # Install NACHO from CRAN:
 install.packages("NACHO")
 
-# Or the the development version from GitHub:
+# Or the development version from GitHub:
 # install.packages("remotes")
 remotes::install_github("mcanouil/NACHO")
 ```
