@@ -5,6 +5,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[numeric]]
 qc_imaging <- function(fov_counted, fov_count) {

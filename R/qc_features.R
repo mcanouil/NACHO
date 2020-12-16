@@ -5,6 +5,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[data.frame]]
 qc_features <- function(data, id_colname) {

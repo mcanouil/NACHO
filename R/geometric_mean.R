@@ -4,6 +4,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [^[numeric]]
 geometric_mean <- function(x) {

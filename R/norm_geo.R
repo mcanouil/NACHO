@@ -4,6 +4,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[list]]
 norm_geo <- function(data) {

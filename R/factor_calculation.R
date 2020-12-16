@@ -7,6 +7,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[data.frame]]
 factor_calculation <- function(

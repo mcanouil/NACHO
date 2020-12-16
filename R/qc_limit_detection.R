@@ -5,6 +5,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[numeric]]
 qc_limit_detection <- function(pos_e, negatives) {

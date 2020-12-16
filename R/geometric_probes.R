@@ -6,6 +6,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[numeric]]
 geometric_probes <- function(data, probes_type) {

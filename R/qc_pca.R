@@ -5,6 +5,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[list]]
 qc_pca <- function(counts, n_comp = 10) {

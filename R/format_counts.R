@@ -6,6 +6,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[data.frame]]
 format_counts <- function(data, id_colname, count_column = "Count") {

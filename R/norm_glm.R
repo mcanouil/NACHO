@@ -4,10 +4,11 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[list]]
 norm_glm <- function(data) {
-  progress <- dplyr::progress_estimated(length(data)+1)
+  progress <- dplyr::progress_estimated(length(data) + 1)
   glms <- sapply(
     X = data,
     FUN = function(.data) {

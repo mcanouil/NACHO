@@ -4,6 +4,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[numeric]]
 qc_positive_control <- function(counts) {
