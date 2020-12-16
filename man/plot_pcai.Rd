@@ -33,7 +33,7 @@ or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 
 \item{size}{[\link{numeric}] A numeric controlling point size
 (\code{\link[ggplot2:geom_point]{ggplot2::geom_point()}} or #' \code{\link[ggbeeswarm:geom_beeswarm]{ggbeeswarm::geom_beeswarm()}})
-or line size (\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}).}
+or line size (\code{\link[ggplot2:geom_path]{ggplot2::geom_line()}}).}
 }
 \description{
 plot_pcai
