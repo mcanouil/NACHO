@@ -5,6 +5,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[numeric]]
 normalise_counts <- function(data, housekeeping_norm) {
@@ -12,6 +13,6 @@ normalise_counts <- function(data, housekeeping_norm) {
   if (housekeeping_norm & "House_factor" %in% colnames(data)) {
     out <- out * data[["House_factor"]]
   }
-  out[out<=0] <- 0.1
+  out[out <= 0] <- 0.1
   round(out)
 }

@@ -108,6 +108,7 @@ autoplot.nacho <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_metrics <- function(
@@ -242,6 +243,7 @@ plot_metrics <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_cg <- function(
@@ -351,6 +353,7 @@ plot_cg <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_pn <- function(
@@ -418,6 +421,7 @@ plot_pn <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_acbd <- function(
@@ -510,6 +514,7 @@ plot_acbd <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_acmc <- function(
@@ -553,6 +558,7 @@ plot_acmc <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_pca12 <- function(
@@ -594,6 +600,7 @@ plot_pca12 <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_pca <- function(
@@ -656,6 +663,7 @@ plot_pca <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_pcai <- function(
@@ -691,6 +699,7 @@ plot_pcai <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_pfnf <- function(
@@ -779,6 +788,7 @@ plot_pfnf <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_hf <- function(
@@ -891,6 +901,7 @@ plot_hf <- function(
 #' @inheritParams autoplot.nacho
 #'
 #' @keywords internal
+#' @noRd
 #'
 #' @return NULL
 plot_norm <- function(

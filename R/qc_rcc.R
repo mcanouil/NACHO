@@ -6,6 +6,7 @@
 #'
 #' @keywords internal
 #' @usage NULL
+#' @noRd
 #'
 #' @return [[list]]
 qc_rcc <- function(
@@ -24,7 +25,7 @@ qc_rcc <- function(
     housekeeping_genes <- unique(housekeeping_genes)
   }
 
-  control_genes_df <- nacho_df[nacho_df[["Name"]]%in%housekeeping_genes | !grepl("Endogenous", nacho_df[["CodeClass"]]), ]
+  control_genes_df <- nacho_df[nacho_df[["Name"]] %in% housekeeping_genes | !grepl("Endogenous", nacho_df[["CodeClass"]]), ]
 
   control_genes_df <- format_counts(
     data = control_genes_df,
@@ -64,7 +65,7 @@ qc_rcc <- function(
       count_column = "count_norm"
     )
 
-    if (is.null(predicted_housekeeping) | length(predicted_housekeeping)==0) {
+    if (is.null(predicted_housekeeping) | length(predicted_housekeeping) == 0) {
       message('[NACHO] Could not find suitable houskeeping genes, default will be used.')
     } else {
       message(
@@ -72,7 +73,7 @@ qc_rcc <- function(
           paste0("  - ", predicted_housekeeping, collapse = "\n")
       )
       housekeeping_genes <- predicted_housekeeping
-      control_genes_df <- nacho_df[nacho_df[["Name"]]%in%predicted_housekeeping, ]
+      control_genes_df <- nacho_df[nacho_df[["Name"]] %in% predicted_housekeeping, ]
       control_genes_df <- format_counts(
         data = control_genes_df,
         id_colname = id_colname,
@@ -100,9 +101,9 @@ qc_rcc <- function(
   )
   counts_df <- counts_df[, sapply(X = counts_df, FUN = is.numeric)]
 
-  if (n_comp > (ncol(counts_df)-1)) {
-    message(paste('"n_comp" has been set to "n-1:"', (ncol(counts_df)-1)))
-    n_comp <- (ncol(counts_df)-1)
+  if (n_comp > (ncol(counts_df) - 1)) {
+    message(paste('"n_comp" has been set to "n-1:"', (ncol(counts_df) - 1)))
+    n_comp <- (ncol(counts_df) - 1)
   }
 
   if (anyNA(counts_df)) {
