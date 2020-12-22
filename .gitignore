@@ -10,3 +10,6 @@ revdep/data.sqlite
 docs
 .checks.log
 **.mp4
+renv
+renv.lock
+.Rprofile
