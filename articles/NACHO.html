@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">NACHO</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.2</span>
       </span>
     </div>
 
@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -68,7 +68,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/mcanouil/NACHO/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -82,15 +82,14 @@
 
       
 
-      </header><script src="NACHO_files/accessible-code-block-0.0.1/empty-anchor.js"></script><link href="NACHO_files/anchor-sections-1.0/anchor-sections.css" rel="stylesheet">
-<script src="NACHO_files/anchor-sections-1.0/anchor-sections.js"></script><div class="row">
+      </header><script src="NACHO_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>NACHO</h1>
             <h3 class="subtitle">A NAnostring quality Control dasHbOard</h3>
                         <h4 class="author">Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D.</h4>
             
-            <h4 class="date">October 27, 2020</h4>
+            <h4 class="date">December 22, 2020</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mcanouil/NACHO/blob/master/vignettes/NACHO.Rmd"><code>vignettes/NACHO.Rmd</code></a></small>
       <div class="hidden name"><code>NACHO.Rmd</code></div>
@@ -103,16 +102,16 @@
 <div id="installation" class="section level1">
 <h1 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h1>
-<div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="co"># Install NACHO from CRAN:</span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Install NACHO from CRAN:</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"NACHO"</span><span class="op">)</span>
 
 <span class="co"># Or the the development version from GitHub:</span>
 <span class="co"># install.packages("remotes")</span>
-<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"mcanouil/NACHO"</span><span class="op">)</span></pre></div>
-<div class="sourceCode" id="cb2"><pre class="downlit">
-<span class="co"># Load NACHO</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mcanouil/NACHO">NACHO</a></span><span class="op">)</span></pre></div>
+<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"mcanouil/NACHO"</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Load NACHO</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mcanouil/NACHO">NACHO</a></span><span class="op">)</span></code></pre></div>
 </div>
 <div id="overview" class="section level1">
 <h1 class="hasAnchor">
@@ -169,10 +168,10 @@ While calling <code><a href="../reference/normalise.html">normalise()</a></code>
 </h3>
 <p>This example shows how to use summarised data to call the interactive web application.<br>
 The raw data used is from a study of <span class="citation">Liu et al. (<a href="#ref-liu_pam50_2016" role="doc-biblioref">2016</a>)</span> and was acquired from the NCBI GEO public database <span class="citation">(Barrett et al. <a href="#ref-barrett_ncbi_2013" role="doc-biblioref">2013</a>)</span>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mcanouil/NACHO">NACHO</a></span><span class="op">)</span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mcanouil/NACHO">NACHO</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">GSE74821</span><span class="op">)</span>
-<span class="fu"><a href="../reference/visualise.html">visualise</a></span><span class="op">(</span><span class="va">GSE74821</span><span class="op">)</span></pre></div>
+<span class="fu"><a href="../reference/visualise.html">visualise</a></span><span class="op">(</span><span class="va">GSE74821</span><span class="op">)</span></code></pre></div>
 <p><img src="README-visualise.png" width="650px" style="display: block; margin: auto;"></p>
 </div>
 <div id="raw-data-from-geo" class="section level3">
@@ -180,8 +179,8 @@ The raw data used is from a study of <span class="citation">Liu et al. (<a href=
 <a href="#raw-data-from-geo" class="anchor"></a>Raw data from GEO</h3>
 <p>Numerous NanoString nCounter datasets are available from GEO <span class="citation">(Barrett et al. <a href="#ref-barrett_ncbi_2013" role="doc-biblioref">2013</a>)</span>.<br>
 In this example, we use a mRNA dataset from the study of <span class="citation">Bruce et al. (<a href="#ref-bruce_identification_2015" role="doc-biblioref">2015</a>)</span> with the GEO accession number: <strong>GSE70970</strong>. The data is extracted and prepared using the following code.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/seandavi/GEOquery">GEOquery</a></span><span class="op">)</span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/seandavi/GEOquery">GEOquery</a></span><span class="op">)</span>
 <span class="co"># Download data</span>
 <span class="va">gse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GEOquery/man/getGEO.html">getGEO</a></span><span class="op">(</span><span class="st">"GSE70970"</span><span class="op">)</span>
 <span class="co"># Get phenotypes</span>
@@ -193,7 +192,7 @@ In this example, we use a mRNA dataset from the study of <span class="citation">
   exdir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"Data"</span><span class="op">)</span>
 <span class="op">)</span>
 <span class="co"># Add IDs</span>
-<span class="va">targets</span><span class="op">$</span><span class="va">IDFILE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"Data"</span><span class="op">)</span><span class="op">)</span></pre></div>
+<span class="va">targets</span><span class="op">$</span><span class="va">IDFILE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"Data"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 263 x 71
 ##    IDFILE title geo_accession status submission_date last_update_date type 
 ##    &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;         &lt;chr&gt;  &lt;chr&gt;           &lt;chr&gt;            &lt;chr&gt;
@@ -234,7 +233,7 @@ In this example, we use a mRNA dataset from the study of <span class="citation">
 ## #   `local.regional.time:ch1` &lt;chr&gt;, `local.time:ch1` &lt;chr&gt;, `n:ch1` &lt;chr&gt;,
 ## #   `nodal.event:ch1` &lt;chr&gt;, `nodal.time:ch1` &lt;chr&gt;,
 ## #   `survival.event:ch1` &lt;chr&gt;, `survival.time:ch1` &lt;chr&gt;, `t:ch1` &lt;chr&gt;</code></pre>
-<p>After we extracted the dataset to the <code>/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpLvF8PT/GSE70970/Data</code> directory, a <code>Samplesheet.csv</code> containing a column with the exact names of the files for each sample can be written or use as is.</p>
+<p>After we extracted the dataset to the <code>/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpJiKuPj/GSE70970/Data</code> directory, a <code>Samplesheet.csv</code> containing a column with the exact names of the files for each sample can be written or use as is.</p>
 </div>
 </div>
 <div id="the-load_rcc-function" class="section level2">
@@ -242,8 +241,8 @@ In this example, we use a mRNA dataset from the study of <span class="citation">
 <a href="#the-load_rcc-function" class="anchor"></a>The <code>load_rcc()</code> function</h2>
 <p>The first argument requires the path to the directory containing the RCC files, the second argument is the location of samplesheet followed by third argument with the column name containing the exact names of the files.<br>
 The <code>housekeeping_genes</code> and <code>normalisation_method</code> arguments respectively indicate which housekeeping genes and normalisation method should be used.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit">
-<span class="va">GSE70970_sum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_rcc.html">load_rcc</a></span><span class="op">(</span>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">GSE70970_sum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_rcc.html">load_rcc</a></span><span class="op">(</span>
   data_directory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"Data"</span><span class="op">)</span>, <span class="co"># Where the data is</span>
   ssheet_csv <span class="op">=</span> <span class="va">targets</span>, <span class="co"># The samplesheet</span>
   id_colname <span class="op">=</span> <span class="st">"IDFILE"</span>, <span class="co"># Name of the column that contains the unique identfiers</span>
@@ -276,36 +275,36 @@ The <code>housekeeping_genes</code> and <code>normalisation_method</code> argume
 <span class="co">##   $ data_directory      : character</span>
 <span class="co">##   $ pc_sum              : data.frame</span>
 <span class="co">##   $ nacho               : data.frame</span>
-<span class="co">##   $ outliers_thresholds : list</span></pre></div>
+<span class="co">##   $ outliers_thresholds : list</span></code></pre></div>
 </div>
 <div id="the-visualise-function" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-visualise-function" class="anchor"></a>The <code>visualise()</code> function</h2>
 <p>When the summarisation is done, the summarised (or normalised) data can be visualised using the <code><a href="../reference/visualise.html">visualise()</a></code> function as can be seen in the following chunk of code.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit">
-<span class="fu"><a href="../reference/visualise.html">visualise</a></span><span class="op">(</span><span class="va">GSE70970_sum</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/visualise.html">visualise</a></span><span class="op">(</span><span class="va">GSE70970_sum</span><span class="op">)</span></code></pre></div>
 <p>The sidebar includes widgets to control quality-control thresholds. These widgets differ according to the selected tab. Each sample in the plots can be coloured based on either technical specifications which are included in the RCC files or based on specifications of your own choosing, though these specifications need to be included in the samplesheet.</p>
 </div>
 <div id="the-normalise-function" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-normalise-function" class="anchor"></a>The <code>normalise()</code> function</h2>
 <p><em>NACHO</em> allows the discovery of housekeeping genes within your own dataset. <em>NACHO</em> finds the five best suitable housekeeping genes, however, it is possible that one of these five genes might not be suitable, which is why a subset of these discovered housekeeping genes might work better in some cases. For this example, we use the <strong>GSE70970</strong> dataset from the previous example. The discovered housekeeping genes are saved in the result object as <strong>predicted_housekeeping</strong>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">GSE70970_sum</span><span class="op">[[</span><span class="st">"housekeeping_genes"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">GSE70970_sum</span><span class="op">[[</span><span class="st">"housekeeping_genes"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>
 <span class="co">## [1] "hsa-miR-103"                "hsa-let-7e"                </span>
 <span class="co">## [3] "hsa-miR-1260"               "hsa-miR-500+hsa-miR-501-5p"</span>
-<span class="co">## [5] "hsa-miR-1274b"</span></pre></div>
+<span class="co">## [5] "hsa-miR-1274b"</span></code></pre></div>
 <p>Let’s say <em>hsa-miR-103</em> and <em>hsa-let-7e</em> are not suitable, therefore, you want to exclude these genes from the normalisation process.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit">
-<span class="va">my_housekeeping</span> <span class="op">&lt;-</span> <span class="va">GSE70970_sum</span><span class="op">[[</span><span class="st">"housekeeping_genes"</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">]</span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">my_housekeeping</span> <span class="op">&lt;-</span> <span class="va">GSE70970_sum</span><span class="op">[[</span><span class="st">"housekeeping_genes"</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">]</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">my_housekeeping</span><span class="op">)</span>
 <span class="co">## [1] "hsa-miR-1260"               "hsa-miR-500+hsa-miR-501-5p"</span>
-<span class="co">## [3] "hsa-miR-1274b"</span></pre></div>
+<span class="co">## [3] "hsa-miR-1274b"</span></code></pre></div>
 <p>The next step is the actual normalisation. The first argument requires the summary which is created with the <code><a href="../reference/load_rcc.html">load_rcc()</a></code> function. The second argument requires a vector of gene names. In this case, it is a subset of the discovered housekeeping genes we just made. With the third argument the user has the choice to remove the outliers. Lastly, the normalisation method can be choosed.<br>
 Here, the user has a choice between <code>"GLM"</code> or <code>"GEO"</code>. The differences between normalisation methods are nuanced, however, a preference for either method are use case specific.<br>
 In this example, <code>"GLM"</code> is used.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit">
-<span class="va">GSE70970_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalise.html">normalise</a></span><span class="op">(</span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">GSE70970_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalise.html">normalise</a></span><span class="op">(</span>
   nacho_object <span class="op">=</span> <span class="va">GSE70970_sum</span>,
   housekeeping_genes <span class="op">=</span> <span class="va">my_housekeeping</span>,
   housekeeping_predict <span class="op">=</span> <span class="cn">FALSE</span>,
@@ -330,21 +329,21 @@ In this example, <code>"GLM"</code> is used.</p>
 <span class="co">##   $ data_directory      : character</span>
 <span class="co">##   $ pc_sum              : data.frame</span>
 <span class="co">##   $ nacho               : data.frame</span>
-<span class="co">##   $ outliers_thresholds : list</span></pre></div>
+<span class="co">##   $ outliers_thresholds : list</span></code></pre></div>
 <p><code><a href="../reference/normalise.html">normalise()</a></code> returns a <code>list</code> object (same as <code><a href="../reference/load_rcc.html">load_rcc()</a></code>) with <code>raw_counts</code> and <code>normalised_counts</code> slots filled with the raw and normalised counts. Both counts are also in the <em>NACHO</em> data.frame.</p>
 </div>
 <div id="the-autoplot-function" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-autoplot-function" class="anchor"></a>The <code>autoplot()</code> function</h2>
 <p>The <code><a href="../reference/autoplot.html">autoplot()</a></code> function provides an easy way to plot any quality-control from the <code><a href="../reference/visualise.html">visualise()</a></code> function.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit">
-<span class="fu"><a href="../reference/autoplot.html">autoplot</a></span><span class="op">(</span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/autoplot.html">autoplot</a></span><span class="op">(</span>
   object <span class="op">=</span> <span class="va">GSE74821</span>, 
   x <span class="op">=</span> <span class="st">"BD"</span>,
   colour <span class="op">=</span> <span class="st">"CartridgeID"</span>, 
   size <span class="op">=</span> <span class="fl">0.5</span>, 
   show_legend <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></pre></div>
+<span class="op">)</span></code></pre></div>
 <p>The possible metrics (<code>x</code>) are:</p>
 <ul>
 <li>
@@ -479,19 +478,19 @@ In this example, <code>"GLM"</code> is used.</p>
 <h2 class="hasAnchor">
 <a href="#nacho-as-a-standalone-app" class="anchor"></a>NACHO as a standalone app</h2>
 <p><em>NACHO</em> is also available as a standalone app to be used in a shiny server configuration. A convenience function <code><a href="../reference/deploy.html">deploy()</a></code> is available to directly copy the <em>NACHO</em> app to the default directory of a shiny server.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit">
-<span class="fu"><a href="../reference/deploy.html">deploy</a></span><span class="op">(</span>directory <span class="op">=</span> <span class="st">"/srv/shiny-server"</span>, app_name <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/deploy.html">deploy</a></span><span class="op">(</span>directory <span class="op">=</span> <span class="st">"/srv/shiny-server"</span>, app_name <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span></code></pre></div>
 <p>The app can also be run directly, without manually summarising and normalising RCC files:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit">
-<span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/runApp.html">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"app"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/runApp.html">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"app"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="README-app.png" width="650px" style="display: block; margin: auto;"></p>
 </div>
 <div id="the-render-function" class="section level2">
 <h2 class="hasAnchor">
 <a href="#the-render-function" class="anchor"></a>The <code>render()</code> function</h2>
 <p>The <code><a href="../reference/render.html">render()</a></code> function renders (using <code><a href="https://rdrr.io/r/base/print.html">print(..., echo = TRUE)</a></code> a comprehensive HTML report which includes all quality-control metrics and description of those metrics.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit">
-<span class="fu"><a href="../reference/render.html">render</a></span><span class="op">(</span>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="../reference/render.html">render</a></span><span class="op">(</span>
   nacho_object <span class="op">=</span> <span class="va">GSE74821</span>,
   colour <span class="op">=</span> <span class="st">"CartridgeID"</span>,
   output_file <span class="op">=</span> <span class="st">"NACHO_QC.html"</span>,
@@ -499,17 +498,17 @@ In this example, <code>"GLM"</code> is used.</p>
   size <span class="op">=</span> <span class="fl">0.5</span>,
   show_legend <span class="op">=</span> <span class="cn">TRUE</span>,
   clean <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></pre></div>
+<span class="op">)</span></code></pre></div>
 <p>The underneath function <code><a href="https://rdrr.io/r/base/print.html">print()</a></code> can be used directly within any Rmarkdown chunk, setting the parameter <code>echo = TRUE</code>.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span>
   x <span class="op">=</span> <span class="va">GSE74821</span>, 
   colour <span class="op">=</span> <span class="st">"CartridgeID"</span>, 
   size <span class="op">=</span> <span class="fl">0.5</span>, 
   show_legend <span class="op">=</span> <span class="cn">TRUE</span>, 
   echo <span class="op">=</span> <span class="cn">TRUE</span>, 
   title_level <span class="op">=</span> <span class="fl">3</span>
-<span class="op">)</span></pre></div>
+<span class="op">)</span></code></pre></div>
 <div id="rcc-summary" class="section level3">
 <h3 class="hasAnchor">
 <a href="#rcc-summary" class="anchor"></a>RCC Summary</h3>

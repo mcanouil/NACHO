@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">NACHO</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.2</span>
       </span>
     </div>
 
@@ -39,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fas fa fas fa-home fa-lg"></span>
+    <span class="fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -68,7 +68,7 @@
 <ul class="nav navbar-nav navbar-right">
 <li>
   <a href="https://github.com/mcanouil/NACHO/">
-    <span class="fab fa fab fa-github fa-lg"></span>
+    <span class="fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -82,15 +82,14 @@
 
       
 
-      </header><script src="NACHO-analysis_files/accessible-code-block-0.0.1/empty-anchor.js"></script><link href="NACHO-analysis_files/anchor-sections-1.0/anchor-sections.css" rel="stylesheet">
-<script src="NACHO-analysis_files/anchor-sections-1.0/anchor-sections.js"></script><div class="row">
+      </header><script src="NACHO-analysis_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>NACHO Analysis</h1>
             <h3 class="subtitle">A NAnostring quality Control dasHbOard</h3>
                         <h4 class="author">Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D.</h4>
             
-            <h4 class="date">October 27, 2020</h4>
+            <h4 class="date">December 22, 2020</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mcanouil/NACHO/blob/master/vignettes/NACHO-analysis.Rmd"><code>vignettes/NACHO-analysis.Rmd</code></a></small>
       <div class="hidden name"><code>NACHO-analysis.Rmd</code></div>
@@ -103,13 +102,13 @@
 <div id="installation" class="section level1">
 <h1 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h1>
-<div class="sourceCode" id="cb1"><pre class="downlit">
-<span class="co"># Install NACHO from CRAN:</span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># Install NACHO from CRAN:</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"NACHO"</span><span class="op">)</span>
 
 <span class="co"># Or the the development version from GitHub:</span>
 <span class="co"># install.packages("remotes")</span>
-<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"mcanouil/NACHO"</span><span class="op">)</span></pre></div>
+<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"mcanouil/NACHO"</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="overview" class="section level1">
 <h1 class="hasAnchor">
@@ -154,8 +153,8 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019). “NACH
 <div id="load-packages" class="section level2">
 <h2 class="hasAnchor">
 <a href="#load-packages" class="anchor"></a>Load packages</h2>
-<div class="sourceCode" id="cb3"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="co">## </span>
 <span class="co">## Attaching package: 'dplyr'</span>
 <span class="co">## The following objects are masked from 'package:stats':</span>
@@ -201,20 +200,20 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019). “NACH
 <span class="co">##     grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,</span>
 <span class="co">##     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,</span>
 <span class="co">##     rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,</span>
-<span class="co">##     union, unique, unsplit, which, which.max, which.min</span>
+<span class="co">##     union, unique, unsplit, which.max, which.min</span>
 <span class="co">## Welcome to Bioconductor</span>
 <span class="co">## </span>
 <span class="co">##     Vignettes contain introductory material; view with</span>
 <span class="co">##     'browseVignettes()'. To cite Bioconductor, see</span>
 <span class="co">##     'citation("Biobase")', and for packages 'citation("pkgname")'.</span>
 <span class="co">## Setting options('download.file.method.GEOquery'='auto')</span>
-<span class="co">## Setting options('GEOquery.inmemory.gpl'=FALSE)</span></pre></div>
+<span class="co">## Setting options('GEOquery.inmemory.gpl'=FALSE)</span></code></pre></div>
 </div>
 <div id="download-gse70970-from-geo-or-use-your-own-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#download-gse70970-from-geo-or-use-your-own-data" class="anchor"></a>Download <code>GSE70970</code> from GEO (or use your own data)</h2>
-<div class="sourceCode" id="cb4"><pre class="downlit">
-<span class="va">data_directory</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"Data"</span><span class="op">)</span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">data_directory</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"Data"</span><span class="op">)</span>
 
 <span class="co"># Download data</span>
 <span class="va">gse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GEOquery/man/getGEO.html">getGEO</a></span><span class="op">(</span><span class="st">"GSE70970"</span><span class="op">)</span>
@@ -228,53 +227,53 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019). “NACH
 <span class="co">## )</span>
 <span class="co">## ℹ Use `spec()` for the full column specifications.</span>
 <span class="co">## File stored at:</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GPL20699.soft</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GPL20699.soft</span>
 <span class="co"># Get phenotypes</span>
 <span class="va">targets</span> <span class="op">&lt;-</span> <span class="fu">pData</span><span class="op">(</span><span class="fu">phenoData</span><span class="op">(</span><span class="va">gse</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/GEOquery/man/getGEOSuppFiles.html">getGEOSuppFiles</a></span><span class="op">(</span>GEO <span class="op">=</span> <span class="st">"GSE70970"</span>, baseDir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 <span class="co">##                                                                                                                 size</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_RAW.tar                       1986560</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_characteristics_readme.txt.gz     672</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_RAW.tar                       1986560</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_characteristics_readme.txt.gz     672</span>
 <span class="co">##                                                                                                              isdir</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_RAW.tar                       FALSE</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_characteristics_readme.txt.gz FALSE</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_RAW.tar                       FALSE</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_characteristics_readme.txt.gz FALSE</span>
 <span class="co">##                                                                                                              mode</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_RAW.tar                        666</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_characteristics_readme.txt.gz  666</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_RAW.tar                        666</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_characteristics_readme.txt.gz  666</span>
 <span class="co">##                                                                                                                            mtime</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_RAW.tar                       2020-10-27 13:53:18</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_characteristics_readme.txt.gz 2020-10-27 13:53:18</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_RAW.tar                       2020-12-22 17:27:54</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_characteristics_readme.txt.gz 2020-12-22 17:27:54</span>
 <span class="co">##                                                                                                                            ctime</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_RAW.tar                       2020-10-27 13:53:18</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_characteristics_readme.txt.gz 2020-10-27 13:53:18</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_RAW.tar                       2020-12-22 17:27:54</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_characteristics_readme.txt.gz 2020-12-22 17:27:54</span>
 <span class="co">##                                                                                                                            atime</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_RAW.tar                       2020-10-27 13:53:17</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_characteristics_readme.txt.gz 2020-10-27 13:53:18</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_RAW.tar                       2020-12-22 17:27:53</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_characteristics_readme.txt.gz 2020-12-22 17:27:54</span>
 <span class="co">##                                                                                                              uid</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_RAW.tar                       501</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_characteristics_readme.txt.gz 501</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_RAW.tar                       501</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_characteristics_readme.txt.gz 501</span>
 <span class="co">##                                                                                                              gid</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_RAW.tar                        20</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_characteristics_readme.txt.gz  20</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_RAW.tar                        20</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_characteristics_readme.txt.gz  20</span>
 <span class="co">##                                                                                                               uname</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_RAW.tar                       runner</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_characteristics_readme.txt.gz runner</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_RAW.tar                       runner</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_characteristics_readme.txt.gz runner</span>
 <span class="co">##                                                                                                              grname</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_RAW.tar                        staff</span>
-<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpcRn3Ly/GSE70970/GSE70970_characteristics_readme.txt.gz  staff</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_RAW.tar                        staff</span>
+<span class="co">## /var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpNImhwp/GSE70970/GSE70970_characteristics_readme.txt.gz  staff</span>
 <span class="co"># Unzip data</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/untar.html">untar</a></span><span class="op">(</span>
   tarfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"GSE70970_RAW.tar"</span><span class="op">)</span>, 
   exdir <span class="op">=</span> <span class="va">data_directory</span>
 <span class="op">)</span>
 <span class="co"># Add IDs</span>
-<span class="va">targets</span><span class="op">$</span><span class="va">IDFILE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span><span class="va">data_directory</span><span class="op">)</span></pre></div>
+<span class="va">targets</span><span class="op">$</span><span class="va">IDFILE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span><span class="va">data_directory</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="import-rcc-files" class="section level2">
 <h2 class="hasAnchor">
 <a href="#import-rcc-files" class="anchor"></a>Import RCC files</h2>
-<div class="sourceCode" id="cb5"><pre class="downlit">
-<span class="va">GSE70970</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_rcc.html">load_rcc</a></span><span class="op">(</span><span class="va">data_directory</span>, <span class="va">targets</span>, id_colname <span class="op">=</span> <span class="st">"IDFILE"</span><span class="op">)</span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">GSE70970</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_rcc.html">load_rcc</a></span><span class="op">(</span><span class="va">data_directory</span>, <span class="va">targets</span>, id_colname <span class="op">=</span> <span class="st">"IDFILE"</span><span class="op">)</span>
 <span class="co">## [NACHO] Importing RCC files.</span>
 <span class="co">## [NACHO] Performing QC and formatting data.</span>
 <span class="co">## [NACHO] Computing normalisation factors using "GEO" method.</span>
@@ -291,28 +290,28 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019). “NACH
 <span class="co">##   $ data_directory      : character</span>
 <span class="co">##   $ pc_sum              : data.frame</span>
 <span class="co">##   $ nacho               : data.frame</span>
-<span class="co">##   $ outliers_thresholds : list</span></pre></div>
+<span class="co">##   $ outliers_thresholds : list</span></code></pre></div>
 </div>
 <div id="perform-the-analyses-using-limma" class="section level2">
 <h2 class="hasAnchor">
 <a href="#perform-the-analyses-using-limma" class="anchor"></a>Perform the analyses using <code>limma</code>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioinf.wehi.edu.au/limma">limma</a></span><span class="op">)</span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://bioinf.wehi.edu.au/limma">limma</a></span><span class="op">)</span>
 <span class="co">## </span>
 <span class="co">## Attaching package: 'limma'</span>
 <span class="co">## The following object is masked from 'package:BiocGenerics':</span>
 <span class="co">## </span>
-<span class="co">##     plotMA</span></pre></div>
+<span class="co">##     plotMA</span></code></pre></div>
 <div id="get-the-phenotypes" class="section level3">
 <h3 class="hasAnchor">
 <a href="#get-the-phenotypes" class="anchor"></a>Get the phenotypes</h3>
-<div class="sourceCode" id="cb7"><pre class="downlit">
-<span class="va">selected_pheno</span> <span class="op">&lt;-</span> <span class="va">GSE70970</span><span class="op">[[</span><span class="st">"nacho"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span> 
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">selected_pheno</span> <span class="op">&lt;-</span> <span class="va">GSE70970</span><span class="op">[[</span><span class="st">"nacho"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">IDFILE</span>, <span class="va">`age:ch1`</span>, <span class="va">`gender:ch1`</span>, <span class="va">`chemo:ch1`</span>, <span class="va">`disease.event:ch1`</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html">distinct</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate_all.html">mutate_all</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/na_if.html">na_if</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"NA"</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html">drop_na</a></span><span class="op">(</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html">drop_na</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##                        IDFILE     age:ch1 gender:ch1 chemo:ch1
 ## 1   GSM1824143_NPC-T-1.RCC.gz 45.97260274       Male         0
 ## 2  GSM1824144_NPC-T-10.RCC.gz        46.4       Male         1
@@ -331,13 +330,13 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019). “NACH
 <div id="get-the-normalised-counts" class="section level3">
 <h3 class="hasAnchor">
 <a href="#get-the-normalised-counts" class="anchor"></a>Get the normalised counts</h3>
-<div class="sourceCode" id="cb9"><pre class="downlit">
-<span class="va">expr_counts</span> <span class="op">&lt;-</span> <span class="va">GSE70970</span><span class="op">[[</span><span class="st">"nacho"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span> 
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">expr_counts</span> <span class="op">&lt;-</span> <span class="va">GSE70970</span><span class="op">[[</span><span class="st">"nacho"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"Endogenous"</span>, <span class="va">CodeClass</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">IDFILE</span>, <span class="va">Name</span>, <span class="va">Count_Norm</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="st">"Name"</span>, values_from <span class="op">=</span> <span class="st">"Count_Norm"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html">column_to_rownames</a></span><span class="op">(</span><span class="st">"IDFILE"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code>##              GSM1824143_NPC-T-1.RCC.gz GSM1824144_NPC-T-10.RCC.gz
 ## hsa-miR-758                          5                          3
 ## hsa-miR-1296                         0                          0
@@ -357,13 +356,13 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019). “NACH
 ## hsa-miR-874                           98
 ## hsa-miR-106b                        5815</code></pre>
 <p>Alternatively, <code>"Accession"</code> number is also available.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit">
-<span class="va">GSE70970</span><span class="op">[[</span><span class="st">"nacho"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span> 
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">GSE70970</span><span class="op">[[</span><span class="st">"nacho"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"Endogenous"</span>, <span class="va">CodeClass</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">IDFILE</span>, <span class="va">Accession</span>, <span class="va">Count_Norm</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="st">"Accession"</span>, values_from <span class="op">=</span> <span class="st">"Count_Norm"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html">column_to_rownames</a></span><span class="op">(</span><span class="st">"IDFILE"</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="op">)</span></pre></div>
+  <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 </div>
 <div id="select-phenotypes-and-counts" class="section level3">
 <h3 class="hasAnchor">
@@ -371,20 +370,20 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019). “NACH
 <ol style="list-style-type: decimal">
 <li>Make sure count matrix and phenotypes have the same samples</li>
 </ol>
-<div class="sourceCode" id="cb12"><pre class="downlit">
-<span class="va">samples_kept</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/generics/man/setops.html">intersect</a></span><span class="op">(</span><span class="va">selected_pheno</span><span class="op">[[</span><span class="st">"IDFILE"</span><span class="op">]</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">expr_counts</span><span class="op">)</span><span class="op">)</span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">samples_kept</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html">intersect</a></span><span class="op">(</span><span class="va">selected_pheno</span><span class="op">[[</span><span class="st">"IDFILE"</span><span class="op">]</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">expr_counts</span><span class="op">)</span><span class="op">)</span>
 <span class="va">expr_counts</span> <span class="op">&lt;-</span> <span class="va">expr_counts</span><span class="op">[</span>, <span class="va">samples_kept</span><span class="op">]</span>
-<span class="va">selected_pheno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">selected_pheno</span>, <span class="va">IDFILE</span> <span class="op">%in%</span> <span class="op">!</span><span class="op">!</span><span class="va">samples_kept</span><span class="op">)</span></pre></div>
+<span class="va">selected_pheno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">selected_pheno</span>, <span class="va">IDFILE</span> <span class="op">%in%</span> <span class="op">!</span><span class="op">!</span><span class="va">samples_kept</span><span class="op">)</span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>Build the numeric design matrix</li>
 </ol>
-<div class="sourceCode" id="cb13"><pre class="downlit">
-<span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">`disease.event:ch1`</span>, <span class="va">selected_pheno</span><span class="op">)</span></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">`disease.event:ch1`</span>, <span class="va">selected_pheno</span><span class="op">)</span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
 <li><code>limma</code></li>
 </ol>
-<div class="sourceCode" id="cb14"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/pkg/limma/man/ebayes.html">eBayes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/lmFit.html">lmFit</a></span><span class="op">(</span><span class="va">expr_counts</span>, <span class="va">design</span><span class="op">)</span><span class="op">)</span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/limma/man/ebayes.html">eBayes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/lmFit.html">lmFit</a></span><span class="op">(</span><span class="va">expr_counts</span>, <span class="va">design</span><span class="op">)</span><span class="op">)</span>
 <span class="co">## An object of class "MArrayLM"</span>
 <span class="co">## $coefficients</span>
 <span class="co">##              (Intercept) `disease.event:ch1`1</span>
@@ -493,14 +492,14 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019). “NACH
 <span class="co">## </span>
 <span class="co">## $F.p.value</span>
 <span class="co">## [1] 4.525315e-15 4.304949e-07 2.771664e-11 5.784522e-17 7.949203e-23</span>
-<span class="co">## 767 more elements ...</span></pre></div>
+<span class="co">## 767 more elements ...</span></code></pre></div>
 </div>
 </div>
 <div id="perform-the-analyses-using-lm-or-any-other-model-in-a-tidy-way" class="section level2">
 <h2 class="hasAnchor">
 <a href="#perform-the-analyses-using-lm-or-any-other-model-in-a-tidy-way" class="anchor"></a>Perform the analyses using <code>lm</code> (or any other model) in a tidy-way</h2>
-<div class="sourceCode" id="cb15"><pre class="downlit">
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://purrr.tidyverse.org">purrr</a></span><span class="op">)</span>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://purrr.tidyverse.org">purrr</a></span><span class="op">)</span>
 <span class="va">res</span> <span class="op">&lt;-</span> <span class="va">GSE70970</span><span class="op">[[</span><span class="st">"nacho"</span><span class="op">]</span><span class="op">]</span> <span class="op">%&gt;%</span> 
   <span class="co"># filter( QC PARAMETER) %&gt;% # possible additional QC filters</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"Endogenous"</span>, <span class="va">CodeClass</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
@@ -541,7 +540,7 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019). “NACH
 <span class="co">## 17 hsa-miR-222  MIMAT0000279 1650.         184.        8.98    3.96e-15</span>
 <span class="co">## 18 hsa-miR-222  MIMAT0000279 -159.         329.       -0.483   6.30e- 1</span>
 <span class="co">## 19 hsa-miR-1973 MIMAT0009448  132.          22.2       5.93    2.88e- 8</span>
-<span class="co">## 20 hsa-miR-1973 MIMAT0009448  103.          39.8       2.58    1.11e- 2</span></pre></div>
+<span class="co">## 20 hsa-miR-1973 MIMAT0009448  103.          39.8       2.58    1.11e- 2</span></code></pre></div>
 </div>
 </div>
   </div>
