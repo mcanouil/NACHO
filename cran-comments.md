@@ -2,43 +2,55 @@
 
 ### Local server (`devtools::check(remote = TRUE, manual = TRUE)`)
 
-* Linux Debian 10 (buster), R-4.0.0: OK
+* Linux Debian 10 (buster), R-4.0.3: OK
 
 ### win-builder (`devtools::check_win_devel()`)
 
-* R-devel: 1 NOTE  
-Found the following (possibly) invalid URLs:
-  URL: https://codecov.io/gh/mcanouil/NACHO
-    From: README.md
-    Status: Error
-    Message: libcurl error code 35:
-      	schannel: next InitializeSecurityContext failed: SEC_E_ILLEGAL_MESSAGE (0x80090326) - This error usually occurs when a fatal SSL/TLS alert is received (e.g. handshake failed).
-  URL: https://mcanouil.shinyapps.io/NACHO_data/
-    From: README.md
-    Status: Error
-    Message: libcurl error code 35:
-      	schannel: next InitializeSecurityContext failed: SEC_E_ILLEGAL_MESSAGE (0x80090326) - This error usually occurs when a fatal SSL/TLS alert is received (e.g. handshake failed).
+* R-devel: 1 NOTE
+  Found the following (possibly) invalid URLs:
+    URL: https://codecov.io/gh/mcanouil/NACHO
+      From: README.md
+      Status: Error
+      Message: libcurl error code 35:
+        	schannel: next InitializeSecurityContext failed: SEC_E_ILLEGAL_MESSAGE (0x80090326) - This error usually occurs when a fatal SSL/TLS alert is received (e.g. handshake failed).
+    URL: https://mcanouil.shinyapps.io/NACHO_data/
+      From: README.md
+      Status: Error
+      Message: libcurl error code 35:
+        	schannel: next InitializeSecurityContext failed: SEC_E_ILLEGAL_MESSAGE (0x80090326) - This error usually occurs when a fatal SSL/TLS alert is received (e.g. handshake failed).
 
 ### R-hub builder (`rhub::check_for_cran()`)
 
-* Fedora Linux, R-devel, clang, gfortran: OK
+* Fedora Linux, R-devel, clang, gfortran: NOTE
+  Found the following (possibly) invalid URLs:
+    URL: https://mcanouil.github.io/NACHO (moved to https://m.canouil.fr/NACHO/)
+      From: DESCRIPTION
+            man/NACHO-package.Rd
+      Status: 200
+      Message: OK
 
 * Ubuntu Linux 16.04 LTS, R-release, GCC: OK
 
-* Windows Server 2008 R2 SP1, R-devel, 32/64 bit: OK
+* Windows Server 2008 R2 SP1, R-devel, 32/64 bit: NOTE
+  Found the following (possibly) invalid URLs:
+    URL: https://mcanouil.github.io/NACHO (moved to https://m.canouil.fr/NACHO/)
+      From: DESCRIPTION
+            man/NACHO-package.Rd
+      Status: 200
+      Message: OK
+  checking for future file timestamps ... NOTE
+    unable to verify current time
 
-### Appveyor-ci
+### Github Action
 
-* Windows Server 2012 R2 x64 (build 9600), R-4.0.0: OK
+* macOS-latest (release): OK
 
-### travis-ci
+* windows-latest (release): OK
 
-* Ubuntu 16.04.6 LTS, R-devel: OK
+* windows-latest (3.6): OK
 
-* Ubuntu 16.04.6 LTS, R-release: OK
+* ubuntu-16.04 (devel): OK
 
-* Ubuntu 16.04.6 LTS, R-3.5: OK
+* ubuntu-16.04 (release): OK
 
-* Ubuntu 16.04.6 LTS, R-3.6: OK
-
-* Ubuntu 16.04.6 LTS, R-4.0: OK
+* ubuntu-16.04 (oldrel): OK
