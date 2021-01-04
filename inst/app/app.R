@@ -28,7 +28,7 @@ ui <- shiny::tagList(
               label = shiny::tags$span(
                 "Normalisation Method",
                 shiny::helpText("(See", shiny::tags$a(
-                  href = "https://mcanouil.github.io/NACHO/reference/load_rcc.html",
+                  href = "https://m.canouil.fr/NACHO/reference/load_rcc.html",
                   target = "_blank",
                   shiny::tags$code("load_rcc()")
                 ), "for details and more options)")

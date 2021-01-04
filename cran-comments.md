@@ -21,25 +21,11 @@
 
 ### R-hub builder (`rhub::check_for_cran()`)
 
-* Fedora Linux, R-devel, clang, gfortran: NOTE
-  Found the following (possibly) invalid URLs:
-    URL: https://mcanouil.github.io/NACHO (moved to https://m.canouil.fr/NACHO/)
-      From: DESCRIPTION
-            man/NACHO-package.Rd
-      Status: 200
-      Message: OK
+* Fedora Linux, R-devel, clang, gfortran: OK
 
 * Ubuntu Linux 16.04 LTS, R-release, GCC: OK
 
-* Windows Server 2008 R2 SP1, R-devel, 32/64 bit: NOTE
-  Found the following (possibly) invalid URLs:
-    URL: https://mcanouil.github.io/NACHO (moved to https://m.canouil.fr/NACHO/)
-      From: DESCRIPTION
-            man/NACHO-package.Rd
-      Status: 200
-      Message: OK
-  checking for future file timestamps ... NOTE
-    unable to verify current time
+* Windows Server 2008 R2 SP1, R-devel, 32/64 bit: OK
 
 ### Github Action
 
