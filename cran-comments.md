@@ -8,11 +8,6 @@
 
 * R-devel: 1 NOTE
   Found the following (possibly) invalid URLs:
-    URL: https://codecov.io/gh/mcanouil/NACHO
-      From: README.md
-      Status: Error
-      Message: libcurl error code 35:
-        	schannel: next InitializeSecurityContext failed: SEC_E_ILLEGAL_MESSAGE (0x80090326) - This error usually occurs when a fatal SSL/TLS alert is received (e.g. handshake failed).
     URL: https://mcanouil.shinyapps.io/NACHO_data/
       From: README.md
       Status: Error
