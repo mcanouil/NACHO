@@ -2,10 +2,15 @@
 
 ## Minor improvements and fixes
 
-* In `R/autoplot.R`,
-    - Replace `ggplot2::expand_scale()` with `ggplot2::expansion()`.
 * In `DESCRIPTION`, 
     - Update `ggplot2` version.
+    - Update `dplyr` version.
+* In `R/autoplot.R`,
+    - Replace `ggplot2::expand_scale()` with `ggplot2::expansion()`.
+* In `R/load_rcc.R`,
+    - Remove deprecated `dplyr::progress_estimated()`.
+* In `R/norm_glm.R`,
+    - Remove deprecated `dplyr::progress_estimated()`.
 * In `tests`, 
     - Small tweaks.
     - Add condition when trying to download files from a GEO dataset (Fix CRAN checks).
