@@ -318,7 +318,7 @@ test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
 
 
 test_that("Missing values in counts", {
-  index <- sample(which(GSE74821$nacho$CodeClass=="Endogenous"), size = 25)
+  index <- sample(which(GSE74821$nacho$CodeClass == "Endogenous"), size = 25)
   GSE74821$nacho[index, "Count"] <- NA
   GSE74821$nacho[index, "Count_Norm"] <- NA
   expect_message(

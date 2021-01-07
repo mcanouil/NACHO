@@ -69,86 +69,88 @@ test_that("no housekeeping norm and prediction", {
 
 
 gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
-if (class(gse)!="try-error") {
+if (!inherits(gse, "try-error")) {
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
-  GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
-  utils::untar(file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"), exdir = file.path(tempdir(), "GSE74821"))
-  targets$IDFILE <- list.files(path = file.path(tempdir(), "GSE74821"), pattern = ".RCC.gz$")
-  targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
-  closeAllConnections()
+  geo_files <- try(GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir()), silent = TRUE)
+  if (!inherits(geo_files, "try-error")) {
+    utils::untar(file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"), exdir = file.path(tempdir(), "GSE74821"))
+    targets$IDFILE <- list.files(path = file.path(tempdir(), "GSE74821"), pattern = ".RCC.gz$")
+    targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
 
-  test_that("using GEO GSE74821", {
-    expect_s3_class({
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE74821"),
-        ssheet_csv = head(targets, 20),
-        id_colname = "IDFILE",
-        housekeeping_genes = NULL,
-        housekeeping_predict = FALSE,
-        housekeeping_norm = TRUE,
-        normalisation_method = "GLM",
-        n_comp = 10
-      )
-    }, "nacho")
-  })
+    test_that("using GEO GSE74821", {
+      expect_s3_class({
+        load_rcc(
+          data_directory = file.path(tempdir(), "GSE74821"),
+          ssheet_csv = head(targets, 20),
+          id_colname = "IDFILE",
+          housekeeping_genes = NULL,
+          housekeeping_predict = FALSE,
+          housekeeping_norm = TRUE,
+          normalisation_method = "GLM",
+          n_comp = 10
+        )
+      }, "nacho")
+    })
 
-  test_that("using GEO GSE74821 with prediction", {
-    expect_s3_class({
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE74821"),
-        ssheet_csv = head(targets, 20),
-        id_colname = "IDFILE",
-        housekeeping_genes = NULL,
-        housekeeping_predict = TRUE,
-        housekeeping_norm = TRUE,
-        normalisation_method = "GLM",
-        n_comp = 10
-      )
-    }, "nacho")
-  })
-
+    test_that("using GEO GSE74821 with prediction", {
+      expect_s3_class({
+        load_rcc(
+          data_directory = file.path(tempdir(), "GSE74821"),
+          ssheet_csv = head(targets, 20),
+          id_colname = "IDFILE",
+          housekeeping_genes = NULL,
+          housekeeping_predict = TRUE,
+          housekeeping_norm = TRUE,
+          normalisation_method = "GLM",
+          n_comp = 10
+        )
+      }, "nacho")
+    })
+  }
 }
+closeAllConnections()
 
 gse <- try({GEOquery::getGEO(GEO = "GSE70970")}, silent = TRUE)
-if (class(gse)!="try-error") {
+if (!inherits(gse, "try-error")) {
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
-  GEOquery::getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
-  utils::untar(file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"), exdir = file.path(tempdir(), "GSE70970"))
-  targets$IDFILE <- list.files(path = file.path(tempdir(), "GSE70970"), pattern = ".RCC.gz$")
-  targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
-  closeAllConnections()
+  geo_files <- try(GEOquery::getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir()), silent = TRUE)
+  if (!inherits(geo_files, "try-error")) {
+    utils::untar(file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"), exdir = file.path(tempdir(), "GSE70970"))
+    targets$IDFILE <- list.files(path = file.path(tempdir(), "GSE70970"), pattern = ".RCC.gz$")
+    targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
 
-  test_that("using GEO GSE70970", {
-    expect_s3_class({
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE70970"),
-        ssheet_csv = head(targets, 20),
-        id_colname = "IDFILE",
-        housekeeping_genes = NULL,
-        housekeeping_predict = FALSE,
-        housekeeping_norm = TRUE,
-        normalisation_method = "GLM",
-        n_comp = 10
-      )
-    }, "nacho")
-  })
+    test_that("using GEO GSE70970", {
+      expect_s3_class({
+        load_rcc(
+          data_directory = file.path(tempdir(), "GSE70970"),
+          ssheet_csv = head(targets, 20),
+          id_colname = "IDFILE",
+          housekeeping_genes = NULL,
+          housekeeping_predict = FALSE,
+          housekeeping_norm = TRUE,
+          normalisation_method = "GLM",
+          n_comp = 10
+        )
+      }, "nacho")
+    })
 
-  test_that("using GEO GSE70970 with prediction", {
-    expect_s3_class({
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE70970"),
-        ssheet_csv = head(targets, 20),
-        id_colname = "IDFILE",
-        housekeeping_genes = NULL,
-        housekeeping_predict = TRUE,
-        housekeeping_norm = TRUE,
-        normalisation_method = "GLM",
-        n_comp = 10
-      )
-    }, "nacho")
-  })
-
+    test_that("using GEO GSE70970 with prediction", {
+      expect_s3_class({
+        load_rcc(
+          data_directory = file.path(tempdir(), "GSE70970"),
+          ssheet_csv = head(targets, 20),
+          id_colname = "IDFILE",
+          housekeeping_genes = NULL,
+          housekeeping_predict = TRUE,
+          housekeeping_norm = TRUE,
+          normalisation_method = "GLM",
+          n_comp = 10
+        )
+      }, "nacho")
+    })
+  }
 }
+closeAllConnections()
 
 test_that("using RAW RCC multiplexed", {
   expect_s3_class({
