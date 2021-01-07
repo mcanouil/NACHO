@@ -41,7 +41,7 @@ Imports:
     dplyr (>= 0.8.3),
     ggbeeswarm (>= 0.6.0),
     ggforce (>= 0.3.1),
-    ggplot2 (>= 3.2.1),
+    ggplot2 (>= 3.3.0),
     ggrepel (>= 0.8.1),
     knitr (>= 1.25),
     magrittr (>= 1.5),

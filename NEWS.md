@@ -1,5 +1,15 @@
 # NACHO (development version)
 
+## Minor improvements and fixes
+
+* In `R/autoplot.R`,
+    - Replace `ggplot2::expand_scale()` with `ggplot2::expansion()`.
+* In `DESCRIPTION`, 
+    - Update `ggplot2` version.
+* In `tests`, 
+    - Small tweaks.
+    - Add condition when trying to download files from a GEO dataset.
+
 # NACHO 1.0.2
 
 ## Minor improvements and fixes
