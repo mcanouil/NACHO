@@ -1,3 +1,10 @@
+## Fix CRAN Package Check Results for Package NACHO v1.0.2
+
++ Fix function deprecation warnings (from ggplot2).
+
++ Refine checks for files download in tests to ensure tests continue 
+    when server is initially down or become unavailable while downloading files.
+
 ## R CMD check results
 
 ### Local server (`devtools::check(remote = TRUE, manual = TRUE)`)
