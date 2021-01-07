@@ -8,7 +8,8 @@
     - Update `ggplot2` version.
 * In `tests`, 
     - Small tweaks.
-    - Add condition when trying to download files from a GEO dataset.
+    - Add condition when trying to download files from a GEO dataset (Fix CRAN checks).
+
 
 # NACHO 1.0.2
 
