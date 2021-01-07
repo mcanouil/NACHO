@@ -137,14 +137,25 @@
 <h2 class="hasAnchor">
 <a href="#minor-improvements-and-fixes" class="anchor"></a>Minor improvements and fixes</h2>
 <ul>
+<li>In <code>DESCRIPTION</code>,
+<ul>
+<li>Update <code>ggplot2</code> version.</li>
+<li>Update <code>dplyr</code> version.</li>
+</ul>
+</li>
 <li>In <code>R/autoplot.R</code>,
 <ul>
 <li>Replace <code><a href="https://ggplot2.tidyverse.org/reference/expansion.html">ggplot2::expand_scale()</a></code> with <code><a href="https://ggplot2.tidyverse.org/reference/expansion.html">ggplot2::expansion()</a></code>.</li>
 </ul>
 </li>
-<li>In <code>DESCRIPTION</code>,
+<li>In <code>R/load_rcc.R</code>,
 <ul>
-<li>Update <code>ggplot2</code> version.</li>
+<li>Remove deprecated <code><a href="https://dplyr.tidyverse.org/reference/progress_estimated.html">dplyr::progress_estimated()</a></code>.</li>
+</ul>
+</li>
+<li>In <code>R/norm_glm.R</code>,
+<ul>
+<li>Remove deprecated <code><a href="https://dplyr.tidyverse.org/reference/progress_estimated.html">dplyr::progress_estimated()</a></code>.</li>
 </ul>
 </li>
 <li>In <code>tests</code>,
