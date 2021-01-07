@@ -111,14 +111,7 @@ load_rcc <- function(
   if (anyDuplicated(nacho_df[[id_colname]]) != 0) {
     type_set <- "n8"
     nacho_df_uniq <- unique(nacho_df[, c(id_colname, "file_path")])
-    progress <- dplyr::progress_estimated(length(nacho_df_uniq[["file_path"]]) + 1)
-    nacho_df_uniq[["rcc_content"]] <-  lapply(
-      X = nacho_df_uniq[["file_path"]],
-      FUN = function(ifile) {
-        progress$tick()$print()
-        read_rcc(file = ifile)
-      }
-    )
+    nacho_df_uniq[["rcc_content"]] <-  lapply(X = nacho_df_uniq[["file_path"]], FUN = read_rcc)
     nacho_df_uniq <- tidyr::unnest(data = nacho_df_uniq, cols = "rcc_content")
     nacho_df <- dplyr::left_join(
       x = nacho_df,
@@ -130,18 +123,10 @@ load_rcc <- function(
     nacho_df <- tidyr::unite(data = nacho_df, col = !!id_colname, id_colname, "plexset_id")
   } else {
     type_set <- "n1"
-    progress <- dplyr::progress_estimated(length(nacho_df[["file_path"]]) + 1)
-    nacho_df[["rcc_content"]] <- lapply(
-      X = nacho_df[["file_path"]],
-      FUN = function(ifile) {
-        progress$tick()$print()
-        read_rcc(file = ifile)
-      }
-    )
+    nacho_df[["rcc_content"]] <- lapply(X = nacho_df[["file_path"]], FUN = read_rcc)
     nacho_df <- tidyr::unnest(data = nacho_df, cols = "rcc_content")
     nacho_df <- tidyr::unnest(data = nacho_df, cols = "Code_Summary")
   }
-  progress$pause(0.05)$tick()$print()
   cat("\n")
 
   message("[NACHO] Performing QC and formatting data.")
