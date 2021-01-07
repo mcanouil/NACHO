@@ -588,8 +588,8 @@ plot_pca12 <- function(
     ggplot2::geom_point(size = size, na.rm = TRUE) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-    ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
-    ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(0.25)) +
+    ggplot2::scale_x_continuous(expand = ggplot2::expansion(0.25)) +
+    ggplot2::scale_y_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::labs(x = "PC01", y = "PC02", colour = colour) +
     {if (!show_legend) ggplot2::guides(colour = "none")}
 }
@@ -646,8 +646,8 @@ plot_pca <- function(
     ggplot2::geom_point(size = size, na.rm = TRUE) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::scale_fill_viridis_d(option = "plasma", direction = 1, end = 0.85) +
-    ggplot2::scale_x_continuous(expand = ggplot2::expand_scale(0.25)) +
-    ggplot2::scale_y_continuous(expand = ggplot2::expand_scale(0.25)) +
+    ggplot2::scale_x_continuous(expand = ggplot2::expansion(0.25)) +
+    ggplot2::scale_y_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::labs(x = NULL, y = NULL, colour = colour, fill = colour) +
     ggplot2::facet_grid(
       rows = ggplot2::vars(.data[["Y.PC"]]),
@@ -688,7 +688,7 @@ plot_pcai <- function(
     ) +
     ggplot2::scale_y_continuous(
       labels = scales::percent,
-      expand = ggplot2::expand_scale(mult = c(0, 0.15))
+      expand = ggplot2::expansion(mult = c(0, 0.15))
     ) +
     ggplot2::labs(x = "Principal Components", y = "Proportion of Variance")
 }
