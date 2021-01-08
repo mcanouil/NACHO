@@ -90,7 +90,7 @@
             <h3 class="subtitle">A NAnostring quality Control dasHbOard</h3>
                         <h4 class="author">Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D.</h4>
             
-            <h4 class="date">January 06, 2021</h4>
+            <h4 class="date">January 08, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mcanouil/NACHO/blob/master/vignettes/NACHO.Rmd"><code>vignettes/NACHO.Rmd</code></a></small>
       <div class="hidden name"><code>NACHO.Rmd</code></div>
@@ -234,7 +234,7 @@ In this example, we use a mRNA dataset from the study of <span class="citation">
 ## #   `local.regional.time:ch1` &lt;chr&gt;, `local.time:ch1` &lt;chr&gt;, `n:ch1` &lt;chr&gt;,
 ## #   `nodal.event:ch1` &lt;chr&gt;, `nodal.time:ch1` &lt;chr&gt;,
 ## #   `survival.event:ch1` &lt;chr&gt;, `survival.time:ch1` &lt;chr&gt;, `t:ch1` &lt;chr&gt;</code></pre>
-<p>After we extracted the dataset to the <code>/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//Rtmp3UwLGq/GSE70970/Data</code> directory, a <code>Samplesheet.csv</code> containing a column with the exact names of the files for each sample can be written or use as is.</p>
+<p>After we extracted the dataset to the <code>/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpFJHZIR/GSE70970/Data</code> directory, a <code>Samplesheet.csv</code> containing a column with the exact names of the files for each sample can be written or use as is.</p>
 </div>
 </div>
 <div id="the-load_rcc-function" class="section level2">
@@ -429,28 +429,22 @@ In this example, <code>"GLM"</code> is used.</p>
 <div id="average-counts-vs--median-counts" class="section level3">
 <h3 class="hasAnchor">
 <a href="#average-counts-vs--median-counts" class="anchor"></a>Average Counts vs. Median Counts</h3>
+<p><img src="NACHO_files/figure-html/unnamed-chunk-10-10.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div id="principal-component-1-vs--2" class="section level3">
 <h3 class="hasAnchor">
 <a href="#principal-component-1-vs--2" class="anchor"></a>Principal Component 1 vs. 2</h3>
-<pre><code>## Warning: `expand_scale()` is deprecated; use `expansion()` instead.
-
-## Warning: `expand_scale()` is deprecated; use `expansion()` instead.</code></pre>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-10-10.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="NACHO_files/figure-html/unnamed-chunk-10-11.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div id="principal-component-scree-plot" class="section level3">
 <h3 class="hasAnchor">
 <a href="#principal-component-scree-plot" class="anchor"></a>Principal Component scree plot</h3>
-<pre><code>## Warning: `expand_scale()` is deprecated; use `expansion()` instead.</code></pre>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-10-11.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="NACHO_files/figure-html/unnamed-chunk-10-12.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div id="principal-components-planes" class="section level3">
 <h3 class="hasAnchor">
 <a href="#principal-components-planes" class="anchor"></a>Principal Components planes</h3>
-<pre><code>## Warning: `expand_scale()` is deprecated; use `expansion()` instead.
-
-## Warning: `expand_scale()` is deprecated; use `expansion()` instead.</code></pre>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-10-12.png" width="700" style="display: block; margin: auto;"><img src="NACHO_files/figure-html/unnamed-chunk-10-13.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="NACHO_files/figure-html/unnamed-chunk-10-13.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div id="positive-factor-vs--negative-factor" class="section level3">
 <h3 class="hasAnchor">
@@ -479,10 +473,10 @@ In this example, <code>"GLM"</code> is used.</p>
 <h2 class="hasAnchor">
 <a href="#nacho-as-a-standalone-app" class="anchor"></a>NACHO as a standalone app</h2>
 <p><em>NACHO</em> is also available as a standalone app to be used in a shiny server configuration. A convenience function <code><a href="../reference/deploy.html">deploy()</a></code> is available to directly copy the <em>NACHO</em> app to the default directory of a shiny server.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/deploy.html">deploy</a></span><span class="op">(</span>directory <span class="op">=</span> <span class="st">"/srv/shiny-server"</span>, app_name <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span></code></pre></div>
 <p>The app can also be run directly, without manually summarising and normalising RCC files:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/runApp.html">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"app"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="README-app.png" width="650px" style="display: block; margin: auto;"></p>
 </div>
@@ -490,7 +484,7 @@ In this example, <code>"GLM"</code> is used.</p>
 <h2 class="hasAnchor">
 <a href="#the-render-function" class="anchor"></a>The <code>render()</code> function</h2>
 <p>The <code><a href="../reference/render.html">render()</a></code> function renders (using <code><a href="https://rdrr.io/r/base/print.html">print(..., echo = TRUE)</a></code> a comprehensive HTML report which includes all quality-control metrics and description of those metrics.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/render.html">render</a></span><span class="op">(</span>
   nacho_object <span class="op">=</span> <span class="va">GSE74821</span>,
   colour <span class="op">=</span> <span class="st">"CartridgeID"</span>,
@@ -501,7 +495,7 @@ In this example, <code>"GLM"</code> is used.</p>
   clean <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span></code></pre></div>
 <p>The underneath function <code><a href="https://rdrr.io/r/base/print.html">print()</a></code> can be used directly within any Rmarkdown chunk, setting the parameter <code>echo = TRUE</code>.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span>
   x <span class="op">=</span> <span class="va">GSE74821</span>, 
   colour <span class="op">=</span> <span class="st">"CartridgeID"</span>, 
