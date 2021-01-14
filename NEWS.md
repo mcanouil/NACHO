@@ -1,12 +1,15 @@
-# NACHO (development version)
+# NACHO 1.1.0
+
+## Breaking changes
+
+* In `DESCRIPTION`, 
+    - Update `ggplot2` version (>= 3.3.0).
+    - Update `dplyr` version (>= 1.0.2).
+* In `R/autoplot.R`,
+    - Replace `ggplot2::expand_scale()` with `ggplot2::expansion()`.
 
 ## Minor improvements and fixes
 
-* In `DESCRIPTION`, 
-    - Update `ggplot2` version.
-    - Update `dplyr` version.
-* In `R/autoplot.R`,
-    - Replace `ggplot2::expand_scale()` with `ggplot2::expansion()`.
 * In `R/load_rcc.R`,
     - Remove deprecated `dplyr::progress_estimated()`.
 * In `R/norm_glm.R`,
