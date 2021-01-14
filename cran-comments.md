@@ -3,7 +3,7 @@
 + Fix functions deprecation warnings (from ggplot2/dplyr).
 
 + Refine checks for files download in tests to ensure tests continue 
-    when server is initially down or become unavailable while downloading files.
+    when distant server is initially down or become unavailable while downloading files.
 
 ## R CMD check results
 
