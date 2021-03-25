@@ -90,7 +90,7 @@
             <h3 class="subtitle">A NAnostring quality Control dasHbOard</h3>
                         <h4 class="author">Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D.</h4>
             
-            <h4 class="date">January 14, 2021</h4>
+            <h4 class="date">March 25, 2021</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mcanouil/NACHO/blob/master/vignettes/NACHO.Rmd"><code>vignettes/NACHO.Rmd</code></a></small>
       <div class="hidden name"><code>NACHO.Rmd</code></div>
@@ -195,18 +195,18 @@ In this example, we use a mRNA dataset from the study of <span class="citation">
 <span class="co"># Add IDs</span>
 <span class="va">targets</span><span class="op">$</span><span class="va">IDFILE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"Data"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>## # A tibble: 263 x 71
-##    IDFILE title geo_accession status submission_date last_update_date type 
-##    &lt;chr&gt;  &lt;chr&gt; &lt;chr&gt;         &lt;chr&gt;  &lt;chr&gt;           &lt;chr&gt;            &lt;chr&gt;
-##  1 GSM18… NPC-… GSM1824143    Publi… Jul 15 2015     Jul 20 2015      RNA  
-##  2 GSM18… NPC-… GSM1824144    Publi… Jul 15 2015     Jul 20 2015      RNA  
-##  3 GSM18… NPC-… GSM1824145    Publi… Jul 15 2015     Jul 20 2015      RNA  
-##  4 GSM18… NPC-… GSM1824146    Publi… Jul 15 2015     Jul 20 2015      RNA  
-##  5 GSM18… NPC-… GSM1824147    Publi… Jul 15 2015     Jul 20 2015      RNA  
-##  6 GSM18… NPC-… GSM1824148    Publi… Jul 15 2015     Jul 20 2015      RNA  
-##  7 GSM18… NPC-… GSM1824149    Publi… Jul 15 2015     Jul 20 2015      RNA  
-##  8 GSM18… NPC-… GSM1824150    Publi… Jul 15 2015     Jul 20 2015      RNA  
-##  9 GSM18… NPC-… GSM1824151    Publi… Jul 15 2015     Jul 20 2015      RNA  
-## 10 GSM18… NPC-… GSM1824152    Publi… Jul 15 2015     Jul 20 2015      RNA  
+##    IDFILE    title  geo_accession status  submission_date last_update_date type 
+##    &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;         &lt;chr&gt;   &lt;chr&gt;           &lt;chr&gt;            &lt;chr&gt;
+##  1 GSM18241… NPC-T… GSM1824143    Public… Jul 15 2015     Jul 20 2015      RNA  
+##  2 GSM18241… NPC-T… GSM1824144    Public… Jul 15 2015     Jul 20 2015      RNA  
+##  3 GSM18241… NPC-T… GSM1824145    Public… Jul 15 2015     Jul 20 2015      RNA  
+##  4 GSM18241… NPC-T… GSM1824146    Public… Jul 15 2015     Jul 20 2015      RNA  
+##  5 GSM18241… NPC-T… GSM1824147    Public… Jul 15 2015     Jul 20 2015      RNA  
+##  6 GSM18241… NPC-T… GSM1824148    Public… Jul 15 2015     Jul 20 2015      RNA  
+##  7 GSM18241… NPC-T… GSM1824149    Public… Jul 15 2015     Jul 20 2015      RNA  
+##  8 GSM18241… NPC-T… GSM1824150    Public… Jul 15 2015     Jul 20 2015      RNA  
+##  9 GSM18241… NPC-T… GSM1824151    Public… Jul 15 2015     Jul 20 2015      RNA  
+## 10 GSM18241… NPC-T… GSM1824152    Public… Jul 15 2015     Jul 20 2015      RNA  
 ## # … with 253 more rows, and 64 more variables: channel_count &lt;chr&gt;,
 ## #   source_name_ch1 &lt;chr&gt;, organism_ch1 &lt;chr&gt;, characteristics_ch1 &lt;chr&gt;,
 ## #   characteristics_ch1.1 &lt;chr&gt;, characteristics_ch1.2 &lt;chr&gt;,
@@ -224,17 +224,16 @@ In this example, we use a mRNA dataset from the study of <span class="citation">
 ## #   hyb_protocol &lt;chr&gt;, scan_protocol &lt;chr&gt;, data_processing &lt;chr&gt;,
 ## #   platform_id &lt;chr&gt;, contact_name &lt;chr&gt;, contact_email &lt;chr&gt;,
 ## #   contact_institute &lt;chr&gt;, contact_address &lt;chr&gt;, contact_city &lt;chr&gt;,
-## #   contact_state &lt;chr&gt;, `contact_zip/postal_code` &lt;chr&gt;,
-## #   contact_country &lt;chr&gt;, supplementary_file &lt;chr&gt;, data_row_count &lt;chr&gt;,
-## #   `age:ch1` &lt;chr&gt;, `bin.t:ch1` &lt;chr&gt;, `chemo:ch1` &lt;chr&gt;,
-## #   `disease.event:ch1` &lt;chr&gt;, `disease.spec.event:ch1` &lt;chr&gt;,
-## #   `disease.spec.time:ch1` &lt;chr&gt;, `disease.time:ch1` &lt;chr&gt;,
-## #   `distant.event:ch1` &lt;chr&gt;, `distant.time:ch1` &lt;chr&gt;, `gender:ch1` &lt;chr&gt;,
-## #   `local.event:ch1` &lt;chr&gt;, `local.regional.event:ch1` &lt;chr&gt;,
-## #   `local.regional.time:ch1` &lt;chr&gt;, `local.time:ch1` &lt;chr&gt;, `n:ch1` &lt;chr&gt;,
-## #   `nodal.event:ch1` &lt;chr&gt;, `nodal.time:ch1` &lt;chr&gt;,
-## #   `survival.event:ch1` &lt;chr&gt;, `survival.time:ch1` &lt;chr&gt;, `t:ch1` &lt;chr&gt;</code></pre>
-<p>After we extracted the dataset to the <code>/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpUcfDP2/GSE70970/Data</code> directory, a <code>Samplesheet.csv</code> containing a column with the exact names of the files for each sample can be written or use as is.</p>
+## #   contact_state &lt;chr&gt;, contact_zip/postal_code &lt;chr&gt;, contact_country &lt;chr&gt;,
+## #   supplementary_file &lt;chr&gt;, data_row_count &lt;chr&gt;, age:ch1 &lt;chr&gt;,
+## #   bin.t:ch1 &lt;chr&gt;, chemo:ch1 &lt;chr&gt;, disease.event:ch1 &lt;chr&gt;,
+## #   disease.spec.event:ch1 &lt;chr&gt;, disease.spec.time:ch1 &lt;chr&gt;,
+## #   disease.time:ch1 &lt;chr&gt;, distant.event:ch1 &lt;chr&gt;, distant.time:ch1 &lt;chr&gt;,
+## #   gender:ch1 &lt;chr&gt;, local.event:ch1 &lt;chr&gt;, local.regional.event:ch1 &lt;chr&gt;,
+## #   local.regional.time:ch1 &lt;chr&gt;, local.time:ch1 &lt;chr&gt;, n:ch1 &lt;chr&gt;,
+## #   nodal.event:ch1 &lt;chr&gt;, nodal.time:ch1 &lt;chr&gt;, survival.event:ch1 &lt;chr&gt;,
+## #   survival.time:ch1 &lt;chr&gt;, t:ch1 &lt;chr&gt;</code></pre>
+<p>After we extracted the dataset to the <code>/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T//RtmpKjzYlQ/GSE70970/Data</code> directory, a <code>Samplesheet.csv</code> containing a column with the exact names of the files for each sample can be written or use as is.</p>
 </div>
 </div>
 <div id="the-load_rcc-function" class="section level2">
@@ -477,7 +476,7 @@ In this example, <code>"GLM"</code> is used.</p>
 <code class="sourceCode R"><span class="fu"><a href="../reference/deploy.html">deploy</a></span><span class="op">(</span>directory <span class="op">=</span> <span class="st">"/srv/shiny-server"</span>, app_name <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span></code></pre></div>
 <p>The app can also be run directly, without manually summarising and normalising RCC files:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/runApp.html">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"app"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"app"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="README-app.png" width="650px" style="display: block; margin: auto;"></p>
 </div>
 <div id="the-render-function" class="section level2">
