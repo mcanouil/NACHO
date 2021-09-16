@@ -47,8 +47,9 @@ if (file.exists(paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"))) {
 <!-- badges: start -->
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![GitHub tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest tag&include_prereleases)](https://github.com/mcanouil/NACHO)
-[![R build status](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO/actions)
-[![Coverage Status (codecov)](https://codecov.io/gh/mcanouil/NACHO/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO)
+[![Codecov test
+coverage](https://codecov.io/gh/mcanouil/NACHO/branch/main/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO?branch=main)
+[![R-CMD-check](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO/actions)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2719/badge)](https://bestpractices.coreinfrastructure.org/projects/2719)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
 [![cran checks_worst](https://cranchecks.info/badges/worst/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
