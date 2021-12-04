@@ -1,10 +1,10 @@
 template:
-  params:
-    bootswatch: united
+  bootstrap: 5
+  bootswatch: united
 
 development:
   mode: auto
 
 authors:
   Mickaël Canouil:
-    href: http://mickael.canouil.fr
+    href: https://mickael.canouil.fr
