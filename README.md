@@ -9,16 +9,15 @@
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://www.tidyverse.org/lifecycle/#stable)
 [![GitHub
 tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest%20tag&include_prereleases)](https://github.com/mcanouil/NACHO)
-[![R build
-status](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO/actions)
-[![Coverage Status
-(codecov)](https://codecov.io/gh/mcanouil/NACHO/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO)
+[![Codecov test
+coverage](https://codecov.io/gh/mcanouil/NACHO/branch/main/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO?branch=main)
+[![R-CMD-check](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO/actions)
 [![CII Best
 Practices](https://bestpractices.coreinfrastructure.org/projects/2719/badge)](https://bestpractices.coreinfrastructure.org/projects/2719)
-[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
 [![cran
-checks\_worst](https://cranchecks.info/badges/worst/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
-[![CRAN\_Download\_total](https://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
+checks_worst](https://cranchecks.info/badges/worst/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
+[![CRAN_Download_total](https://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
 <!-- badges: end -->
 
 ## Installation
@@ -53,24 +52,24 @@ an interactive web application.
 With the use of two functions, RCC files are summarised and visualised,
 namely: `load_rcc()` and `visualise()`.
 
-  - The `load_rcc()` function is used to preprocess the data.
-  - The `visualise()` function initiates a [Shiny-based
+-   The `load_rcc()` function is used to preprocess the data.
+-   The `visualise()` function initiates a [Shiny-based
     dashboard](https://shiny.rstudio.com/) that visualises all relevant
     QC plots.
 
 *NACHO* also includes a function `normalise()`, which (re)calculates
 sample specific size factors and normalises the data.
 
-  - The `normalise()` function creates a list in which your settings,
+-   The `normalise()` function creates a list in which your settings,
     the raw counts and normalised counts are stored.
 
 In addition (since v0.6.0) *NACHO* includes two (three) additional
 functions:
 
-  - The `render()` function renders a full quality-control report (HTML)
+-   The `render()` function renders a full quality-control report (HTML)
     based on the results of a call to `load_rcc()` or `normalise()`
     (using `print()` in a Rmarkdown chunk).
-  - The `autoplot()` function draws any quality-control metrics from
+-   The `autoplot()` function draws any quality-control metrics from
     `visualise()` and `render()`.
 
 For more `vignette("NACHO")` and `vignette("NACHO-analysis")`.
@@ -92,12 +91,10 @@ visualise(GSE74821)
 ## Citing NACHO
 
 <p>
-
 Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 “NACHO: an R package for quality control of NanoString nCounter data.”
 <em>Bioinformatics</em>. ISSN 1367-4803, doi:
 <a href="https://doi.org/10.1093/bioinformatics/btz647">10.1093/bioinformatics/btz647</a>.
-
 </p>
 
     @Article{,
@@ -118,8 +115,8 @@ on [github](https://github.com/mcanouil/NACHO/issues).
 For questions and other discussion, please contact the package
 maintainer.
 
------
+------------------------------------------------------------------------
 
 Please note that this project is released with a [Contributor Code of
-Conduct](https://github.com/mcanouil/NACHO/blob/master/.github/CODE_OF_CONDUCT.md).  
+Conduct](https://github.com/mcanouil/NACHO/blob/main/.github/CODE_OF_CONDUCT.md).  
 By participating in this project you agree to abide by its terms.
