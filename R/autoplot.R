@@ -130,7 +130,7 @@ plot_metrics <- function(
   units <- c(
     "BD" = '"(Optical features / ", mu, m^2, ")"',
     "FoV" = '"(% Counted)"',
-    "PCL" = '(R^2)',
+    "PCL" = '"(R^2)"',
     "LoD" = '"(Z)"'
   )
 
@@ -487,7 +487,7 @@ plot_acbd <- function(
       x = "Average Counts",
       y = parse(text = 'atop("Binding Density", paste("(Optical features / ", mu, m^2, ")"))'),
       colour = colour
-    )+
+    ) +
     ggplot2::geom_rect(
       data = dplyr::tibble(
         ymin = nacho_object$outliers_thresholds[["BD"]],
@@ -976,5 +976,5 @@ plot_norm <- function(
       se = TRUE,
       method = "loess"
     ) +
-    {if (!(show_legend & length(nacho_object$housekeeping_genes)<=10)) ggplot2::guides(colour = "none")}
+    {if (!(show_legend & length(nacho_object$housekeeping_genes) <= 10)) ggplot2::guides(colour = "none")}
 }
