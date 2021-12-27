@@ -55,11 +55,11 @@ print.nacho <- function(
 
   if (xaringan) {
     prefix_title <- function(title_level, x) {
-      paste(c("\n\n", rep("#", title_level + x)), collapse = "")
+      paste(c("\n\n---\n\n", rep("#", title_level + x)), collapse = "")
     }
   } else {
     prefix_title <- function(title_level, x) {
-      paste(c("\n\n---\n\n", rep("#", title_level + x)), collapse = "")
+      paste(c("\n\n", rep("#", title_level + x)), collapse = "")
     }
   }
 
