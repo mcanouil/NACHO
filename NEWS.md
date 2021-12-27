@@ -1,5 +1,10 @@
 # NACHO (development version)
 
+## Minor improvements and fixes
+
+* In `R/print.R`,
+    - New argument "xaringan" to format the output according to xaringan conventions.
+
 # NACHO 1.1.0
 
 ## Breaking changes
