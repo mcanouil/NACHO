@@ -3,7 +3,7 @@
 ## Minor improvements and fixes
 
 * In `DESCRIPTION`,
-    - Remove `R/conflicts.R` related dependencies.
+    - Remove dependencies.
 * In `R/print.R`,
     - New argument "xaringan" to format the output according to xaringan conventions.
 * In `R/load_rcc.R`,
