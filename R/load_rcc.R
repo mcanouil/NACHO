@@ -111,7 +111,7 @@ load_rcc <- function(
   if (anyDuplicated(nacho_df[[id_colname]]) != 0) {
     type_set <- "n8"
     nacho_df_uniq <- unique(nacho_df[, c(id_colname, "file_path")])
-    nacho_df_uniq[["rcc_content"]] <-  lapply(X = nacho_df_uniq[["file_path"]], FUN = read_rcc)
+    nacho_df_uniq[["rcc_content"]] <- lapply(X = nacho_df_uniq[["file_path"]], FUN = read_rcc)
     nacho_df_uniq <- tidyr::unnest(data = nacho_df_uniq, cols = "rcc_content")
     nacho_df <- dplyr::left_join(
       x = nacho_df,
@@ -133,7 +133,7 @@ load_rcc <- function(
   has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
   if (!has_hkg & is.null(housekeeping_genes) & !housekeeping_predict & housekeeping_norm) {
     message(paste(
-      '[NACHO] "housekeeping_norm" has been set to FALSE.',"  Note:",
+      '[NACHO] "housekeeping_norm" has been set to FALSE.', "  Note:",
       if (has_hkg) "" else "  - No default housekeeping genes available in your data;",
       '  - "housekeeping_genes" is NULL;', '  - "housekeeping_predict" is FALSE.',
       sep = "\n"
@@ -158,8 +158,8 @@ load_rcc <- function(
     FoV = 75,
     LoD = 2,
     PCL = 0.95,
-    Positive_factor = c(1/4, 4),
-    House_factor = c(1/11, 11)
+    Positive_factor = c(1 / 4, 4),
+    House_factor = c(1 / 11, 11)
   )
   nacho_object[["outliers_thresholds"]] <- ot
   nacho_object <- check_outliers(nacho_object)
@@ -194,13 +194,4 @@ load_rcc <- function(
   class(nacho_object) <- "nacho"
 
   nacho_object
-}
-
-
-#' @export
-#' @rdname load_rcc
-#' @usage NULL
-summarize <- summarise <- function(...) {
-  warning("[NACHO] Please use `load_rcc()`!\n  This function is deprecated, due do conflict with `dplyr::summarise()`.")
-  load_rcc(...)
 }
