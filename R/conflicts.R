@@ -7,6 +7,8 @@
 
 }
 
+# nocov start
+
 #' Conflicts between the NACHO and other packages
 #'
 #' This function lists all the conflicts between packages in the NACHO
@@ -69,8 +71,6 @@ nacho_conflict_message <- function(x) {
 print.nacho_conflicts <- function(x, ..., startup = FALSE) {
   cli::cat_line(nacho_conflict_message(x))
 }
-
-# nocov start
 
 #' @importFrom magrittr %>%
 confirm_conflict <- function(packages, name) {
