@@ -126,11 +126,6 @@ render <- function(
     ')',
     '```',
     '\n\n',
-    '# R session information\n',
-    '```{r session-info, results = "markup"}',
-    'options("width" = 110)',
-    'sessioninfo::session_info()',
-    '```',
     sep = "\n",
     file = temp_file,
     append = FALSE
