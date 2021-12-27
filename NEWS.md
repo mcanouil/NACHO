@@ -2,16 +2,22 @@
 
 ## Minor improvements and fixes
 
+* In `DESCRIPTION`,
+    - Remove `R/conflicts.R` related dependencies.
 * In `R/print.R`,
     - New argument "xaringan" to format the output according to xaringan conventions.
-
 * In `R/load_rcc.R`,
     - Remove `summari[sz]e` functions.
+* In `R/render.R`,
+    - Remove `sessioninfo` dependency.
+* In `R/autoplot.R`,
+    - Remove `scales` dependency.
+
 # NACHO 1.1.0
 
 ## Breaking changes
 
-* In `DESCRIPTION`, 
+* In `DESCRIPTION`,
     - Update `ggplot2` version (>= 3.3.0).
     - Update `dplyr` version (>= 1.0.2).
 * In `R/autoplot.R`,
