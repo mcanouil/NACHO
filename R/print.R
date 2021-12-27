@@ -145,11 +145,11 @@ print.nacho <- function(
   }
   for (imetric in metrics) {
     if (xaringan) {
-      cat(prefix_title(title_level, 0), "QC Metrics:", labels[imetric], "\n\n")
+      cat(prefix_title(title_level, 0), labels[imetric], "\n\n")
     } else {
       cat(prefix_title(title_level, 1), labels[imetric], "\n\n")
     }
-    if (xaringan) cat("\n\n.pull-left[\n\n")
+    if (xaringan) cat("\n\n.pull-left.font70[\n\n")
     cat(details[imetric], "\n\n")
     if (xaringan) cat("\n\n]\n\n.pull-right[\n\n")
     suppressWarnings(print(autoplot.nacho(
@@ -169,18 +169,18 @@ print.nacho <- function(
   if (xaringan) {
     sections <- data.frame(stringsAsFactors = FALSE,
       title = c(
-        "Control Genes: Positive",
-        "Control Genes: Negative",
-        "Control Genes: Housekeeping",
-        "Control Genes: Control Probe Expression",
-        "Quality-Control Visuals: Average Count vs. Binding Density",
-        "Quality-Control Visuals: Average Count vs. Median Count",
-        "Quality-Control Visuals: PC1 vs. PC2",
-        "Quality-Control Visuals: Factorial planes",
-        "Quality-Control Visuals: Inertia",
-        "Normalisation: Positive Factor vs. Background Threshold",
-        "Normalisation: Housekeeping Factor",
-        "Normalisation: Result"
+        "Positive Control Genes",
+        "Negative Control Genes",
+        "Housekeeping Genes",
+        "Control Probe Expression",
+        "Average Count vs. Binding Density",
+        "Average Count vs. Median Count",
+        "PC1 vs. PC2",
+        "Factorial planes",
+        "Proportion of Variance Explained",
+        "Positive Normalisation Factor vs. Background",
+        "Housekeeping Normalisation Factor",
+        "Normalisation Result"
       ),
       plot = c(
         "Positive", "Negative", "Housekeeping", "PN",
@@ -195,7 +195,7 @@ print.nacho <- function(
       title = c(
         "Control Genes", "Positive", "Negative", "Housekeeping", "Control Probe Expression",
         "Quality-Control Visuals", "Average Count vs. Binding Density", "Average Count vs. Median Count",
-        "Principal Component", "PC1 vs. PC2", "Factorial planes", "Inertia",
+        "Principal Component", "PC1 vs. PC2", "Factorial planes", "Proportion of Variance Explained",
         "Normalisation", "Positive Factor vs. Background Threshold", "Housekeeping Factor",
         "Normalisation Result"
       ),
