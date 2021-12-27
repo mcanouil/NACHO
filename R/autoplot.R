@@ -336,7 +336,7 @@ plot_cg <- function(
     } +
     ggplot2::scale_y_log10(
       # limits = c(1, NA),
-      labels = scales::comma_format(accuracy = NULL, big.mark = ",")
+      labels = function(x) format(x, big.mark = ",")
     ) +
     ggplot2::labs(
       x = if (x %in% c("Negative", "Positive")) "Control Name" else "Gene Name",
@@ -388,7 +388,7 @@ plot_pn <- function(
     ggplot2::facet_wrap(facets = "CodeClass", scales = "free_y", ncol = 2) +
     ggplot2::scale_y_log10(
       # limits = c(1, NA),
-      labels = scales::comma_format(accuracy = NULL, big.mark = ",")
+      labels = function(x) format(x, big.mark = ",")
     ) +
     ggplot2::scale_x_discrete(labels = NULL) +
     ggplot2::labs(
@@ -482,7 +482,7 @@ plot_acbd <- function(
         ggplot2::geom_point(size = size, na.rm = TRUE)
       }
     } +
-    ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = NULL, big.mark = ",")) +
+    ggplot2::scale_x_continuous(labels = function(x) format(x, big.mark = ",")) +
     ggplot2::labs(
       x = "Average Counts",
       y = parse(text = 'atop("Binding Density", paste("(Optical features / ", mu, m^2, ")"))'),
@@ -542,8 +542,8 @@ plot_acmc <- function(
   ) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::geom_point(size = size, na.rm = TRUE) +
-    ggplot2::scale_x_continuous(labels = scales::comma_format(accuracy = NULL, big.mark = ",")) +
-    ggplot2::scale_y_continuous(labels = scales::comma_format(accuracy = NULL, big.mark = ",")) +
+    ggplot2::scale_x_continuous(labels = function(x) format(x, big.mark = ",")) +
+    ggplot2::scale_y_continuous(labels = function(x) format(x, big.mark = ",")) +
     ggplot2::labs(
       x = "Average Counts",
       y = "Median Counts",
@@ -675,7 +675,7 @@ plot_pcai <- function(
   ggplot2::ggplot(
     data = dplyr::mutate(
       .data = nacho_object$pc_sum,
-      PoV = scales::percent(!!dplyr::sym("Proportion of Variance"))
+      PoV = sprintf("%0.2f%%", !!dplyr::sym("Proportion of Variance") * 100)
     ),
     mapping = ggplot2::aes(x = .data[["PC"]], y = !!dplyr::sym("Proportion of Variance"))
   ) +
@@ -687,7 +687,7 @@ plot_pcai <- function(
       show.legend = FALSE
     ) +
     ggplot2::scale_y_continuous(
-      labels = scales::percent,
+      labels = function(x) sprintf("%0.2f%%", x * 100),
       expand = ggplot2::expansion(mult = c(0, 0.15))
     ) +
     ggplot2::labs(x = "Principal Components", y = "Proportion of Variance")
@@ -955,7 +955,7 @@ plot_norm <- function(
     ggplot2::scale_x_discrete(label = NULL) +
     ggplot2::scale_y_log10(
       # limits = c(1, NA),
-      labels = scales::comma_format(accuracy = NULL, big.mark = ",")
+      labels = function(x) format(x, big.mark = ",")
     ) +
     ggplot2::labs(
       x = "Sample Index",
