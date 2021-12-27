@@ -14,6 +14,7 @@
   outliers_labels = NULL,
   echo = FALSE,
   title_level = 1,
+  xaringan = FALSE,
   ...
 )
 }
@@ -43,6 +44,8 @@ Mainly for use within a Rmarkdown chunk.}
 
 \item{title_level}{[\link{numeric}] A numeric to indicate the title level to start with, using markdown style,
 \emph{i.e.}, the number of \code{"#"}.}
+
+\item{xaringan}{[\link{logical}] A boolean to format output for Xaringan slides.}
 
 \item{...}{Other arguments (\emph{Not used}).}
 }
