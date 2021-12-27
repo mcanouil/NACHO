@@ -2,7 +2,6 @@
 % Please edit documentation in R/load_rcc.R
 \name{load_rcc}
 \alias{load_rcc}
-\alias{summarize}
 \title{Produce a "nacho" object from RCC NanoString files}
 \usage{
 load_rcc(

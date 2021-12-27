@@ -187,26 +187,6 @@ test_that("using RAW RCC multiplexed with wrong path", {
   })
 })
 
-test_that("deprecated summarise", {
-  expect_warning({
-    summarise(
-      data_directory = "salmon_data",
-      ssheet_csv = salmon_tidy,
-      id_colname = "IDFILE"
-    )
-  })
-})
-
-test_that("deprecated summarize", {
-  expect_warning({
-    summarize(
-      data_directory = "salmon_data",
-      ssheet_csv = salmon_tidy,
-      id_colname = "IDFILE"
-    )
-  })
-})
-
 test_that("Too high number of components", {
 
   expect_message({

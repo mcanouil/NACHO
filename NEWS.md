@@ -5,6 +5,8 @@
 * In `R/print.R`,
     - New argument "xaringan" to format the output according to xaringan conventions.
 
+* In `R/load_rcc.R`,
+    - Remove `summari[sz]e` functions.
 # NACHO 1.1.0
 
 ## Breaking changes
