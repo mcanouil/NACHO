@@ -46,15 +46,13 @@ Imports:
     purrr (>= 0.3.3),
     rlang (>= 0.1.2),
     rmarkdown (>= 1.16),
-    scales (>= 1.0.0),
-    sessioninfo (>= 1.1.1),
     shiny (>= 1.4.0),
     shinyWidgets (>= 0.4.9),
     tibble (>= 2.1.3),
     tidyr (>= 1.0.0),
     utils
 Suggests:
-    roxygen2 (>= 7.0.2),
+    roxygen2 (>= 7.1.2),
     testthat (>= 2.2.1),
     covr (>= 3.3.2),
     Biobase,
