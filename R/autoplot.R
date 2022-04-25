@@ -73,22 +73,146 @@ autoplot.nacho <- function(
   # }
   switch(
     EXPR = x,
-    "BD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "FoV" = plot_metrics(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "PCL" = plot_metrics(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "LoD" = plot_metrics(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "Positive" = plot_cg(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "Negative" = plot_cg(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "Housekeeping" = plot_cg(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "PN" = plot_pn(nacho_object = object, x, colour, size, show_legend),
-    "ACBD" = plot_acbd(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "ACMC" = plot_acmc(nacho_object = object, x, colour, size, show_legend),
-    "PCA12" = plot_pca12(nacho_object = object, x, colour, size, show_legend),
-    "PCAi" = plot_pcai(nacho_object = object, x, colour, size),
-    "PCA" = plot_pca(nacho_object = object, x, colour, size, show_legend),
-    "PFNF" = plot_pfnf(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "HF" = plot_hf(nacho_object = object, x, colour, size, show_legend, show_outliers, outliers_factor, outliers_labels),
-    "NORM" = plot_norm(nacho_object = object, x, colour, size, show_legend),
+    "BD" = plot_metrics(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend,
+      show_outliers,
+      outliers_factor,
+      outliers_labels
+    ),
+    "FoV" = plot_metrics(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend,
+      show_outliers,
+      outliers_factor,
+      outliers_labels
+    ),
+    "PCL" = plot_metrics(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend,
+      show_outliers,
+      outliers_factor,
+      outliers_labels
+    ),
+    "LoD" = plot_metrics(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend,
+      show_outliers,
+      outliers_factor,
+      outliers_labels
+    ),
+    "Positive" = plot_cg(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend,
+      show_outliers,
+      outliers_factor,
+      outliers_labels
+    ),
+    "Negative" = plot_cg(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend,
+      show_outliers,
+      outliers_factor,
+      outliers_labels
+    ),
+    "Housekeeping" = plot_cg(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend,
+      show_outliers,
+      outliers_factor,
+      outliers_labels
+    ),
+    "PN" = plot_pn(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend
+    ),
+    "ACBD" = plot_acbd(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend,
+      show_outliers,
+      outliers_factor,
+      outliers_labels
+    ),
+    "ACMC" = plot_acmc(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend
+    ),
+    "PCA12" = plot_pca12(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend
+    ),
+    "PCAi" = plot_pcai(
+      nacho_object = object,
+      x,
+      colour,
+      size),
+    "PCA" = plot_pca(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend
+    ),
+    "PFNF" = plot_pfnf(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend,
+      show_outliers,
+      outliers_factor,
+      outliers_labels
+    ),
+    "HF" = plot_hf(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend,
+      show_outliers,
+      outliers_factor,
+      outliers_labels
+    ),
+    "NORM" = plot_norm(
+      nacho_object = object,
+      x,
+      colour,
+      size,
+      show_legend
+    ),
     stop(
       paste(
         '[NACHO] "x" must be one of the following possible values:',
@@ -140,7 +264,7 @@ plot_metrics <- function(
       ggplot2::ggplot() +
         ggplot2::labs(
           x = "CartridgeID",
-          y = parse(text = paste0('atop("', labels[x], '", paste(',  units[x], '))')),
+          y = parse(text = paste0("atop(\"", labels[x], "\", paste(",  units[x], "))")),
           colour = colour
         ) +
         ggplot2::annotate(
@@ -213,7 +337,7 @@ plot_metrics <- function(
     } +
     ggplot2::labs(
       x = "CartridgeID",
-      y = parse(text = paste0('atop("', labels[x], '", paste(',  units[x], '))')),
+      y = parse(text = paste0("atop(\"", labels[x], "\", paste(",  units[x], "))")),
       colour = colour
     ) +
     ggplot2::geom_rect(
@@ -260,7 +384,7 @@ plot_cg <- function(
     outliers_labels <- nacho_object$access
   }
   if (is.null(nacho_object$housekeeping_genes) & x %in% "Housekeeping") {
-    message('[NACHO] No housekeeping genes found.')
+    message("[NACHO] No housekeeping genes found.")
     return(
       ggplot2::ggplot() +
         ggplot2::labs(
