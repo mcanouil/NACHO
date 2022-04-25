@@ -29,16 +29,13 @@ factor_calculation <- function(
   nested_control_data <- tidyr::nest(dplyr::group_by(.data = control_data, get(id_colname)))
   colnames(nested_control_data)[1] <- id_colname
 
-  factors_norm <- switch(
+  factors_norm_fun <- switch(
     EXPR = normalisation_method,
-    "GLM" = {
-      norm_glm(data = nested_control_data[["data"]])
-    },
-    "GEO" = {
-      norm_geo(data = nested_control_data[["data"]])
-    },
+    "GLM" = norm_glm,
+    "GEO" = norm_geo,
     stop('[NACHO] "normalisation_method" should be either "GLM" or "GEO"!')
   )
+  factors_norm <- factors_norm_fun(data = nested_control_data[["data"]])
   positive_factor <- factors_norm[["positive_factor"]]
   geometric_mean_neg <- factors_norm[["geometric_mean_neg"]]
 
