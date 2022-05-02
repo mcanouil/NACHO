@@ -280,10 +280,10 @@ plot_metrics <- function(
   }
 
   ggplot2::ggplot(
-    data = nacho_object$nacho %>%
+    data = nacho_object$nacho |>
       dplyr::mutate(
         !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
-      ) %>%
+      ) |>
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -291,7 +291,7 @@ plot_metrics <- function(
         !!x,
         "is_outlier",
         !!outliers_labels
-      ) %>%
+      ) |>
       dplyr::distinct(),
     mapping = ggplot2::aes(
       x = .data[["CartridgeID"]],
@@ -401,11 +401,11 @@ plot_cg <- function(
   }
 
   ggplot2::ggplot(
-    data = nacho_object$nacho %>%
+    data = nacho_object$nacho |>
       dplyr::mutate(
         !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
-      ) %>%
-      dplyr::filter(!!dplyr::sym("CodeClass") %in% x) %>%
+      ) |>
+      dplyr::filter(!!dplyr::sym("CodeClass") %in% x) |>
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -414,7 +414,7 @@ plot_cg <- function(
         "Count",
         "is_outlier",
         !!outliers_labels
-      ) %>%
+      ) |>
       dplyr::distinct(),
     mapping = ggplot2::aes(
       x = .data[["Name"]],
@@ -488,8 +488,8 @@ plot_pn <- function(
   show_legend
 ) {
   ggplot2::ggplot(
-    data = nacho_object$nacho %>%
-      dplyr::filter(!!dplyr::sym("CodeClass") %in% c("Positive", "Negative")) %>%
+    data = nacho_object$nacho |>
+      dplyr::filter(!!dplyr::sym("CodeClass") %in% c("Positive", "Negative")) |>
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -498,7 +498,7 @@ plot_pn <- function(
         "Name",
         "Count",
         "is_outlier"
-      ) %>%
+      ) |>
       dplyr::distinct(),
     mapping = ggplot2::aes(
       x = .data[[nacho_object$access]],
@@ -562,7 +562,7 @@ plot_acbd <- function(
     outliers_labels <- nacho_object$access
   }
   ggplot2::ggplot(
-    data = nacho_object$nacho %>%
+    data = nacho_object$nacho |>
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -571,7 +571,7 @@ plot_acbd <- function(
         "BD",
         "is_outlier",
         !!outliers_labels
-      ) %>%
+      ) |>
       dplyr::distinct(),
     mapping = ggplot2::aes(
       x = .data[["MC"]],
@@ -649,14 +649,14 @@ plot_acmc <- function(
   show_legend
 ) {
   ggplot2::ggplot(
-    data = nacho_object$nacho %>%
+    data = nacho_object$nacho |>
       dplyr::select(
         "CartridgeID",
         !!colour,
         !!nacho_object$access,
         "MC",
         "MedC"
-      ) %>%
+      ) |>
       dplyr::distinct(),
     mapping = ggplot2::aes(
       x = .data[["MC"]],
@@ -693,14 +693,14 @@ plot_pca12 <- function(
   show_legend
 ) {
   ggplot2::ggplot(
-    data = nacho_object$nacho %>%
+    data = nacho_object$nacho |>
       dplyr::select(
         "CartridgeID",
         !!colour,
         !!nacho_object$access,
         "PC01",
         "PC02"
-      ) %>%
+      ) |>
       dplyr::distinct(),
     mapping = ggplot2::aes(
       x = .data[["PC01"]],
@@ -736,26 +736,26 @@ plot_pca <- function(
 ) {
   ggplot2::ggplot(
     data = dplyr::full_join(
-      x = nacho_object$nacho %>%
+      x = nacho_object$nacho |>
           dplyr::select(
             "CartridgeID",
             !!colour,
             !!nacho_object$access,
             sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))
-          ) %>%
-          dplyr::distinct() %>%
+          ) |>
+          dplyr::distinct() |>
           tidyr::gather(key = "X.PC", value = "X", sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))),
-        y = nacho_object$nacho %>%
+        y = nacho_object$nacho |>
           dplyr::select(
             "CartridgeID",
             !!colour,
             !!nacho_object$access,
             sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))
-          ) %>%
-          dplyr::distinct() %>%
+          ) |>
+          dplyr::distinct() |>
           tidyr::gather(key = "Y.PC", value = "Y", sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))),
         by = unique(c("CartridgeID", nacho_object$access, colour))
-      ) %>%
+      ) |>
         dplyr::filter(
           as.numeric(gsub("PC", "", .data[["X.PC"]])) < as.numeric(gsub("PC", "", .data[["Y.PC"]]))
         ),
@@ -840,7 +840,7 @@ plot_pfnf <- function(
     outliers_labels <- nacho_object$access
   }
   ggplot2::ggplot(
-    data = nacho_object$nacho %>%
+    data = nacho_object$nacho |>
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -849,7 +849,7 @@ plot_pfnf <- function(
         "Positive_factor",
         "is_outlier",
         !!outliers_labels
-      ) %>%
+      ) |>
       dplyr::distinct(),
     mapping = ggplot2::aes(
       x = .data[["Negative_factor"]],
@@ -944,7 +944,7 @@ plot_hf <- function(
   }
 
   ggplot2::ggplot(
-    data = nacho_object$nacho %>%
+    data = nacho_object$nacho |>
       dplyr::select(
         "CartridgeID",
         !!colour,
@@ -953,7 +953,7 @@ plot_hf <- function(
         "Positive_factor",
         "is_outlier",
         !!outliers_labels
-      ) %>%
+      ) |>
       dplyr::distinct(),
     mapping = ggplot2::aes(
       x = .data[["Positive_factor"]],
@@ -1044,7 +1044,7 @@ plot_norm <- function(
   }
 
   ggplot2::ggplot(
-    data = nacho_object$nacho %>%
+    data = nacho_object$nacho |>
       dplyr::select(
         "CartridgeID",
         !!nacho_object$access,
@@ -1053,10 +1053,10 @@ plot_norm <- function(
         "Name",
         "CodeClass",
         "is_outlier"
-      ) %>%
-      dplyr::distinct() %>%
-      dplyr::filter(.data[[probe_var]] %in% !!probe_type) %>%
-      tidyr::gather(key = "Status", value = "Count", c("Count", "Count_Norm")) %>%
+      ) |>
+      dplyr::distinct() |>
+      dplyr::filter(.data[[probe_var]] %in% !!probe_type) |>
+      tidyr::gather(key = "Status", value = "Count", c("Count", "Count_Norm")) |>
       dplyr::mutate(
         Status = factor(
           x = c("Count" = "Raw", "Count_Norm" = "Normalised")[!!dplyr::sym("Status")],

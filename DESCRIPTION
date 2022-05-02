@@ -43,7 +43,6 @@ Imports:
     ggplot2 (>= 3.3.0),
     ggrepel (>= 0.8.1),
     knitr (>= 1.25),
-    magrittr (>= 1.5),
     purrr (>= 0.3.3),
     rlang (>= 0.1.2),
     rmarkdown (>= 1.16),
