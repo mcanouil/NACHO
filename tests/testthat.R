@@ -7,7 +7,7 @@ targets <- data.frame(stringsAsFactors = FALSE,
   datapath = list.files(rcc_files_directory, full.names = TRUE)
 )
 targets$IDFILE <- basename(targets$datapath)
-targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+targets$plexset_id <- rep(list(paste0("S", seq_len(8))), each = nrow(targets))
 plexset_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
 
 plexset_nacho <- load_rcc(
@@ -22,7 +22,7 @@ targets <- data.frame(stringsAsFactors = FALSE,
   datapath = list.files(rcc_files_directory, full.names = TRUE)
 )
 targets$IDFILE <- basename(targets$datapath)
-targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+targets$plexset_id <- rep(list(paste0("S", seq_len(8))), each = nrow(targets))
 salmon_tidy <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
 salmon_nacho <- load_rcc(
   data_directory = rcc_files_directory,
