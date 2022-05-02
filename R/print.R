@@ -209,7 +209,7 @@ print.nacho <- function(
     )
   }
 
-  for (isection in seq(nrow(sections))) {
+  for (isection in seq_len(nrow(sections))) {
     cat(prefix_title(title_level, sections[isection, "level"]), sections[isection, "title"], "\n\n")
     if (!is.na(sections[isection, "plot"])) {
       suppressWarnings(print(autoplot.nacho(
