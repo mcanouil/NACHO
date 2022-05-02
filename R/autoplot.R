@@ -741,19 +741,19 @@ plot_pca <- function(
             "CartridgeID",
             !!colour,
             !!nacho_object$access,
-            sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))
+            sprintf("PC%02d", seq_len(min(nacho_object$n_comp, 5)))
           ) |>
           dplyr::distinct() |>
-          tidyr::gather(key = "X.PC", value = "X", sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))),
+          tidyr::gather(key = "X.PC", value = "X", sprintf("PC%02d", seq_len(min(nacho_object$n_comp, 5)))),
         y = nacho_object$nacho |>
           dplyr::select(
             "CartridgeID",
             !!colour,
             !!nacho_object$access,
-            sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))
+            sprintf("PC%02d", seq_len(min(nacho_object$n_comp, 5)))
           ) |>
           dplyr::distinct() |>
-          tidyr::gather(key = "Y.PC", value = "Y", sprintf("PC%02d", 1:min(nacho_object$n_comp, 5))),
+          tidyr::gather(key = "Y.PC", value = "Y", sprintf("PC%02d", seq_len(min(nacho_object$n_comp, 5)))),
         by = unique(c("CartridgeID", nacho_object$access, colour))
       ) |>
         dplyr::filter(

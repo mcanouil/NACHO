@@ -175,7 +175,7 @@ server <- function(input, output, session) {
 
       check_multiplex <- all(purrr::map_lgl(targets$datapath, ~ any(grepl("Endogenous8s", readLines(.x)))))
       if (check_multiplex) {
-        targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
+        targets$plexset_id <- rep(list(paste0("S", seq_len(8))), each = nrow(targets))
         targets <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
       }
 
