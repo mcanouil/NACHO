@@ -20,7 +20,11 @@ norm_glm <- function(data) {
       } else {
         x <- c(NEG = 0, POS = 32)[gsub("(NEG).*|(POS).*", "\\1\\2", .data[["Name"]])]
       }
-      stats::glm(y ~ x, family = stats::poisson(link = "identity"))$coeff[c(1, 2)]
+      stats::glm(
+        formula = y ~ x,
+        family = stats::poisson(link = "identity"),
+        data = data.fram(x, y)
+      )$coeff[c(1, 2)]
     }
   )
   cat("\n")
@@ -30,4 +34,3 @@ norm_glm <- function(data) {
     positive_factor = mean(glms[2, ]) / glms[2, ]
   )
 }
-
