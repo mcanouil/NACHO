@@ -11,7 +11,7 @@
 #' @return [[data.frame]]
 format_counts <- function(data, id_colname, count_column = "Count") {
   data.table::dcast(
-    data = data,
+    data = data.table::setDT(data),
     formula = sprintf("CodeClass + Name ~ %s", id_colname),
     value.var = count_column
   )
