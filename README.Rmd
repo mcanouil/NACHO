@@ -78,7 +78,7 @@ cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep 
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
 ```{r, echo = FALSE}
-knitr::include_graphics(gsub(".*/man", "man", gif_app))
+knitr::include_graphics(sub(".*/man", "man", gif_app))
 ```
 
 

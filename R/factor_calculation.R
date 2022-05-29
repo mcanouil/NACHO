@@ -18,10 +18,8 @@ factor_calculation <- function(
   normalisation_method,
   exclude_probes
 ) {
+  CodeClass <- Name <- NULL # no visible binding for global variable
   exclude_probes <- c("POS_F(0.125)", exclude_probes)
-  if (!inherits(nacho_df, "data.table")) {
-    nacho_df <- data.table::as.data.table(nacho_df)
-  }
   control_data <- nacho_df[
     j = .SD,
     .SDcols = c("Name", "CodeClass", "Count", id_colname)

@@ -81,6 +81,7 @@ load_rcc <- function(
   normalisation_method = "GEO",
   n_comp = 10
 ) {
+  file_path <- Code_Summary <- CodeClass <- NULL # no visible binding for global variable
   if (missing(data_directory) | missing(ssheet_csv)) {
     stop('[NACHO] "data_directory" and "ssheet_csv" must be provided.')
   }
@@ -132,7 +133,7 @@ load_rcc <- function(
 
   if (anyDuplicated(nacho_df[[id_colname]]) != 0) {
     type_set <- "n8"
-    nacho_df <- data.table::merge.data.table(
+    nacho_df <- merge(
       x = nacho_df,
       y = nacho_df[
         j = unique(.SD),
@@ -151,7 +152,7 @@ load_rcc <- function(
       j = unlist(Code_Summary, recursive = FALSE),
       by = setdiff(names(nacho_df), "Code_Summary")
     ][
-      j = `:=`(CodeClass = gsub("[0-8]+s$", "", CodeClass))
+      j = `:=`(CodeClass = sub("[0-8]+s$", "", CodeClass))
     ]
   } else {
     type_set <- "n1"

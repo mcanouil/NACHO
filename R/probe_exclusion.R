@@ -8,6 +8,7 @@
 #'
 #' @return [[character]]
 probe_exclusion <- function(control_genes_df) {
+  CodeClass <- NULL # no visible binding for global variable
   local_neg <- as.matrix(
     control_genes_df[
       CodeClass %in% "Negative",

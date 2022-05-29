@@ -7,7 +7,7 @@
 load_rcc(
   data_directory,
   ssheet_csv,
-  id_colname,
+  id_colname = NULL,
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
   housekeeping_norm = TRUE,

@@ -8,11 +8,13 @@
 #'
 #' @return [[data.table]]
 read_rcc <- function(file) {
+  Header <- Sample_Attributes <- Lane_Attributes <- NULL # no visible binding for global variable
+  Code_Summary <- Messages <- plexset_id <- NULL # no visible binding for global variable
   tags <- c(
     "Header", "Sample_Attributes", "Lane_Attributes", "Code_Summary", "Messages"
   )
   raw <- readLines(file)
-  raw <- gsub("[|]+[[:digit:]]+\\.*[[:digit:]]*", "", raw)
+  raw <- sub("[|]+[[:digit:]]+\\.*[[:digit:]]*", "", raw)
 
   rcc_list <- lapply(X = tags, FUN = read_tags, raw_rcc = raw)
   names(rcc_list) <- tags
@@ -28,7 +30,7 @@ read_rcc <- function(file) {
       control_probes <- .data[.data[["CodeClass"]] %in% c("Negative", "Positive"), ]
       sample_list <- split(
         x = .data[!.data[["CodeClass"]] %in% c("Negative", "Positive"), ],
-        f = gsub(
+        f = sub(
           "Endogenous|Housekeeping",
           "",
           .data[["CodeClass"]][!.data[["CodeClass"]] %in% c("Negative", "Positive")]
