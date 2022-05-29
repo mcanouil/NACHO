@@ -18,16 +18,19 @@ factor_calculation <- function(
   normalisation_method,
   exclude_probes
 ) {
-
   exclude_probes <- c("POS_F(0.125)", exclude_probes)
-
-  control_data <- nacho_df[, c("Name", "CodeClass", "Count", id_colname)]
-  control_data <- control_data[control_data[["CodeClass"]] %in% c("Positive", "Negative"), ]
-  control_data <- control_data[order(control_data[["Name"]]), ]
-  control_data <- control_data[!control_data[, "Name"] %in% exclude_probes, ]
-
-  nested_control_data <- tidyr::nest(dplyr::group_by(.data = control_data, get(id_colname)))
-  colnames(nested_control_data)[1] <- id_colname
+  if (!inherits(nacho_df, "data.table")) {
+    nacho_df <- data.table::as.data.table(nacho_df)
+  }
+  control_data <- nacho_df[
+    j = .SD,
+    .SDcols = c("Name", "CodeClass", "Count", id_colname)
+  ][
+    CodeClass %in% c("Positive", "Negative") &
+      ! Name %in% exclude_probes
+  ][
+    order(Name)
+  ]
 
   factors_norm_fun <- switch(
     EXPR = normalisation_method,
@@ -35,36 +38,29 @@ factor_calculation <- function(
     "GEO" = norm_geo,
     stop('[NACHO] "normalisation_method" should be either "GLM" or "GEO"!')
   )
-  factors_norm <- factors_norm_fun(data = nested_control_data[["data"]])
+  factors_norm <- factors_norm_fun(data = split(control_data, control_data[[id_colname]]))
   positive_factor <- factors_norm[["positive_factor"]]
   geometric_mean_neg <- factors_norm[["geometric_mean_neg"]]
 
-  nested_nacho_df <- tidyr::nest(dplyr::group_by(.data = nacho_df, get(id_colname)))
-  colnames(nested_nacho_df)[1] <- id_colname
-
   if (housekeeping_predict | is.null(housekeeping_genes)) {
-    norm_factor <- data.frame(
+    norm_factor <- data.table::data.table(
       "Positive_factor" = positive_factor,
       "Negative_factor" = geometric_mean_neg
     )
   } else {
     geometric_mean_house <- mapply(
       FUN = geometric_housekeeping,
-      data = nested_nacho_df[["data"]],
+      data = split(nacho_df, nacho_df[[id_colname]]),
       positive_factor = positive_factor,
       intercept = geometric_mean_neg,
       housekeeping_genes = list(housekeeping_genes)
     )
-    house_factor <- mean(geometric_mean_house) / geometric_mean_house
-    house_factor <- unname(house_factor)
-
-    norm_factor <- data.frame(
+    norm_factor <- data.table::data.table(
       "Positive_factor" = positive_factor,
       "Negative_factor" = geometric_mean_neg,
-      "House_factor" = house_factor
+      "House_factor" = mean(geometric_mean_house) / geometric_mean_house
     )
   }
-  rownames(norm_factor) <- nested_nacho_df[[id_colname]]
-  norm_factor[[id_colname]] <- nested_nacho_df[[id_colname]]
+  norm_factor[[id_colname]] <- names(positive_factor)
   norm_factor
 }

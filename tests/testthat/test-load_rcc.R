@@ -196,7 +196,7 @@ test_that("Too high number of components", {
       id_colname = "IDFILE",
       n_comp = 1000
     )
-  }, "nacho", "has been set to")
+  }, "has been set to")
 })
 
 

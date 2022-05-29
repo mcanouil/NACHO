@@ -24,15 +24,16 @@ qc_rcc <- function(
     housekeeping_genes <- nacho_df[["Name"]][has_hkg]
     housekeeping_genes <- unique(housekeeping_genes)
   }
-
-  control_genes_df <- nacho_df[nacho_df[["Name"]] %in% housekeeping_genes | !grepl("Endogenous", nacho_df[["CodeClass"]]), ]
+  if (!inherits(nacho_df, "data.table")) {
+    nacho_df <- data.table::as.data.table(nacho_df)
+  }
+  control_genes_df <- nacho_df[Name %in% housekeeping_genes | !grepl("Endogenous", CodeClass)]
 
   control_genes_df <- format_counts(
     data = control_genes_df,
     id_colname = id_colname,
     count_column = "Count"
   )
-  rownames(control_genes_df) <- control_genes_df[["Name"]]
 
   probes_to_exclude <- probe_exclusion(control_genes_df = control_genes_df)
 
@@ -52,10 +53,14 @@ qc_rcc <- function(
       exclude_probes = probes_to_exclude
     )
 
-    tmp_counts <- dplyr::full_join(
-      x = nacho_df[, c(id_colname, setdiff(colnames(nacho_df), colnames(temp_facs)))],
+    tmp_counts <- merge(
+      x = nacho_df[
+        j = .SD,
+        .SDcols = c(id_colname, setdiff(colnames(nacho_df), colnames(temp_facs)))
+      ],
       y = temp_facs,
-      by = id_colname
+      by = id_colname,
+      all = TRUE
     )
     tmp_counts[["count_norm"]] <- normalise_counts(data = tmp_counts, housekeeping_norm = FALSE)
 
@@ -66,10 +71,10 @@ qc_rcc <- function(
     )
 
     if (is.null(predicted_housekeeping) | length(predicted_housekeeping) == 0) {
-      message('[NACHO] Could not find suitable houskeeping genes, default will be used.')
+      message("[NACHO] Could not find suitable houskeeping genes, default will be used.")
     } else {
       message(
-        '[NACHO] The following predicted housekeeping genes will be used for normalisation:\n',
+        "[NACHO] The following predicted housekeeping genes will be used for normalisation:\n",
           paste0("  - ", predicted_housekeeping, collapse = "\n")
       )
       housekeeping_genes <- predicted_housekeeping
@@ -99,7 +104,7 @@ qc_rcc <- function(
     id_colname = id_colname,
     count_column = "Count"
   )
-  counts_df <- counts_df[, sapply(X = counts_df, FUN = is.numeric)]
+  counts_df <- counts_df[j = .SD, .SDcols = is.numeric]
 
   if (n_comp > (ncol(counts_df) - 1)) {
     message(paste('"n_comp" has been set to "n-1:"', (ncol(counts_df) - 1)))
@@ -123,21 +128,26 @@ qc_rcc <- function(
   colnames(pcas_pc) <- sprintf("PC%02d", as.numeric(gsub("PC", "", colnames(pcas_pc))))
   pcas_pc[[id_colname]] <- rownames(pcas_pc)
 
-
-  facs_pc_qc <- dplyr::full_join(
-    x = dplyr::full_join(
+  facs_pc_qc <- merge(
+    x = merge(
       x = qc_values,
       y = pcas_pc,
-      by = id_colname
+      by = id_colname,
+      all = TRUE
     ),
     y = norm_factor,
-    by = id_colname
+    by = id_colname,
+    all = TRUE
   )
 
-  nacho_out <- dplyr::full_join(
-    x = nacho_df[, c(id_colname, setdiff(colnames(nacho_df), colnames(facs_pc_qc)))],
+  nacho_out <- merge(
+    x = nacho_df[
+      j = .SD,
+      .SDcols = c(id_colname, setdiff(colnames(nacho_df), colnames(facs_pc_qc)))
+    ],
     y = facs_pc_qc,
-    by = id_colname
+    by = id_colname,
+    all = TRUE
   )
 
   list(

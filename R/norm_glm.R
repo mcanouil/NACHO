@@ -23,7 +23,7 @@ norm_glm <- function(data) {
       stats::glm(
         formula = y ~ x,
         family = stats::poisson(link = "identity"),
-        data = data.fram(x, y)
+        data = data.frame(x, y)
       )$coeff[c(1, 2)]
     }
   )

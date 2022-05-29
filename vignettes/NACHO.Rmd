@@ -140,7 +140,7 @@ targets$IDFILE <- list.files(file.path(tempdir(), "GSE70970", "Data"))
 ```
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE, eval = !inherits(gse, "try-error")}
-tibble::as_tibble(dplyr::select(targets, "IDFILE", dplyr::everything()))
+targets[1:5, unique(c("IDFILE", names(targets)))]
 ```
 
 After we extracted the dataset to the `` `r file.path(tempdir(), "GSE70970", "Data")` `` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or use as is.  
@@ -345,4 +345,3 @@ print(
 
 
 # References
-
