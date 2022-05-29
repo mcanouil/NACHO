@@ -269,7 +269,7 @@ plot_metrics <- function(
         ) +
         ggplot2::annotate(
           "text", x = 0.5, y = 0.5, label = "Not available!",
-          angle = 30, size = 24, colour = "red", alpha = 0.25
+          angle = 30, size = 24, colour = "#b22222", alpha = 0.25
         ) +
         ggplot2::theme(axis.text = ggplot2::element_blank())
     )
@@ -282,7 +282,7 @@ plot_metrics <- function(
   ggplot2::ggplot(
     data = nacho_object$nacho |>
       dplyr::mutate(
-        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+        !!nacho_object$access := sub("_S[0-9]*$", "", .data[[nacho_object$access]])
       ) |>
       dplyr::select(
         "CartridgeID",
@@ -317,7 +317,7 @@ plot_metrics <- function(
           ggbeeswarm::geom_quasirandom(
             data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
             size = size * outliers_factor,
-            colour = "red",
+            colour = "#b22222",
             width = 0.25,
             na.rm = TRUE,
             groupOnX = TRUE
@@ -326,7 +326,7 @@ plot_metrics <- function(
             ggrepel::geom_label_repel(
               data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
               mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-              colour = "red",
+              colour = "#b22222",
               na.rm = TRUE
             )
           }
@@ -346,7 +346,7 @@ plot_metrics <- function(
         ymax = c(-Inf, Inf)[seq_along(!!dplyr::sym("ymin"))]
       ),
       mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
-      fill = "firebrick2",
+      fill = "#b22222",
       alpha = 0.2,
       colour = "transparent",
       inherit.aes = FALSE
@@ -354,7 +354,7 @@ plot_metrics <- function(
     ggplot2::geom_hline(
       data = dplyr::tibble(value = nacho_object$outliers_thresholds[[x]]),
       mapping = ggplot2::aes(yintercept = .data[["value"]]),
-      colour = "firebrick2",
+      colour = "#b22222",
       linetype = "longdash"
     ) +
     {if (!show_legend) ggplot2::guides(colour = "none")} +
@@ -394,7 +394,7 @@ plot_cg <- function(
         ) +
         ggplot2::annotate(
           "text", x = 0.5, y = 0.5, label = "Not available!",
-          angle = 30, size = 24, colour = "red", alpha = 0.25
+          angle = 30, size = 24, colour = "#b22222", alpha = 0.25
         ) +
         ggplot2::theme(axis.text = ggplot2::element_blank())
     )
@@ -403,7 +403,7 @@ plot_cg <- function(
   ggplot2::ggplot(
     data = nacho_object$nacho |>
       dplyr::mutate(
-        !!nacho_object$access := gsub("_S[0-9]*$", "", .data[[nacho_object$access]])
+        !!nacho_object$access := sub("_S[0-9]*$", "", .data[[nacho_object$access]])
       ) |>
       dplyr::filter(!!dplyr::sym("CodeClass") %in% x) |>
       dplyr::select(
@@ -440,7 +440,7 @@ plot_cg <- function(
           ggbeeswarm::geom_quasirandom(
             data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
             size = size * outliers_factor,
-            colour = "red",
+            colour = "#b22222",
             width = 0.25,
             na.rm = TRUE,
             groupOnX = TRUE
@@ -449,7 +449,7 @@ plot_cg <- function(
             ggrepel::geom_label_repel(
               data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
               mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-              colour = "red",
+              colour = "#b22222",
               na.rm = TRUE
             )
           }
@@ -590,14 +590,14 @@ plot_acbd <- function(
           ggplot2::geom_point(
             data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
             size = size * outliers_factor,
-            colour = "red",
+            colour = "#b22222",
             na.rm = TRUE
           ),
           if (!is.null(outliers_labels)) {
             ggrepel::geom_label_repel(
               data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
               mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-              colour = "red",
+              colour = "#b22222",
               na.rm = TRUE
             )
           }
@@ -618,7 +618,7 @@ plot_acbd <- function(
         ymax = c(-Inf, Inf)[seq_along(!!dplyr::sym("ymin"))]
       ),
       mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
-      fill = "firebrick2",
+      fill = "#b22222",
       alpha = 0.2,
       colour = "transparent",
       inherit.aes = FALSE
@@ -626,7 +626,7 @@ plot_acbd <- function(
     ggplot2::geom_hline(
       data = dplyr::tibble(value = nacho_object$outliers_thresholds[["BD"]]),
       mapping = ggplot2::aes(yintercept = .data[["value"]]),
-      colour = "firebrick2",
+      colour = "#b22222",
       linetype = "longdash"
     )  +
     {if (!show_legend) ggplot2::guides(colour = "none")}
@@ -757,7 +757,7 @@ plot_pca <- function(
         by = unique(c("CartridgeID", nacho_object$access, colour))
       ) |>
         dplyr::filter(
-          as.numeric(gsub("PC", "", .data[["X.PC"]])) < as.numeric(gsub("PC", "", .data[["Y.PC"]]))
+          as.numeric(sub("PC", "", .data[["X.PC"]])) < as.numeric(sub("PC", "", .data[["Y.PC"]]))
         ),
     mapping = ggplot2::aes(
       x = .data[["X"]],
@@ -868,14 +868,14 @@ plot_pfnf <- function(
           ggplot2::geom_point(
             data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
             size = size * outliers_factor,
-            colour = "red",
+            colour = "#b22222",
             na.rm = TRUE
           ),
           if (!is.null(outliers_labels)) {
             ggrepel::geom_label_repel(
               data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
               mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-              colour = "red",
+              colour = "#b22222",
               na.rm = TRUE
             )
           }
@@ -892,7 +892,7 @@ plot_pfnf <- function(
         ymax = c(0, Inf)
       ),
       mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
-      fill = "firebrick2",
+      fill = "#b22222",
       alpha = 0.2,
       colour = "transparent",
       inherit.aes = FALSE
@@ -900,7 +900,7 @@ plot_pfnf <- function(
     ggplot2::geom_hline(
       data = dplyr::tibble(value = nacho_object$outliers_thresholds[["Positive_factor"]]),
       mapping = ggplot2::aes(yintercept = .data[["value"]]),
-      colour = "firebrick2",
+      colour = "#b22222",
       linetype = "longdash"
     ) +
     {if (!show_legend) ggplot2::guides(colour = "none")}
@@ -937,7 +937,7 @@ plot_hf <- function(
         ggplot2::labs(x = "Positive Factor", y = "Housekeeping Factor", colour = colour) +
         ggplot2::annotate(
           "text", x = 0.5, y = 0.5, label = "Not available!",
-          angle = 30, size = 24, colour = "red", alpha = 0.25
+          angle = 30, size = 24, colour = "#b22222", alpha = 0.25
         ) +
         ggplot2::theme(axis.text = ggplot2::element_blank())
     )
@@ -972,14 +972,14 @@ plot_hf <- function(
           ggplot2::geom_point(
             data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
             size = size * outliers_factor,
-            colour = "red",
+            colour = "#b22222",
             na.rm = TRUE
           ),
           if (!is.null(outliers_labels)) {
             ggrepel::geom_label_repel(
               data = ~ dplyr::filter(.x, .data[["is_outlier"]]),
               mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-              colour = "red",
+              colour = "#b22222",
               na.rm = TRUE
             )
           }
@@ -998,8 +998,13 @@ plot_hf <- function(
         ymin = c(nacho_object$outliers_thresholds[["House_factor"]], 0, 0),
         ymax = c(0, Inf, Inf, Inf)
       ),
-      mapping = ggplot2::aes(xmin = .data[["xmin"]], xmax = .data[["xmax"]], ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
-      fill = "firebrick2",
+      mapping = ggplot2::aes(
+        xmin = .data[["xmin"]],
+        xmax = .data[["xmax"]],
+        ymin = .data[["ymin"]],
+        ymax = .data[["ymax"]]
+      ),
+      fill = "#b22222",
       alpha = 0.2,
       colour = "transparent",
       inherit.aes = FALSE
@@ -1007,13 +1012,13 @@ plot_hf <- function(
     ggplot2::geom_hline(
       data = dplyr::tibble(value = nacho_object$outliers_thresholds[["House_factor"]]),
       mapping = ggplot2::aes(yintercept = .data[["value"]]),
-      colour = "firebrick2",
+      colour = "#b22222",
       linetype = "longdash"
     ) +
     ggplot2::geom_vline(
       data = dplyr::tibble(value = nacho_object$outliers_thresholds[["Positive_factor"]]),
       mapping = ggplot2::aes(xintercept = .data[["value"]]),
-      colour = "firebrick2",
+      colour = "#b22222",
       linetype = "longdash"
     ) +
     {if (!show_legend) ggplot2::guides(colour = "none")}

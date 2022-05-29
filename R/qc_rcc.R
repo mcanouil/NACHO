@@ -19,18 +19,15 @@ qc_rcc <- function(
   normalisation_method,
   n_comp
 ) {
+  Name <- CodeClass <- NULL # no visible binding for global variable
   has_hkg <- grepl("Housekeeping", nacho_df[["CodeClass"]])
   if (is.null(housekeeping_genes) & any(has_hkg)) {
     housekeeping_genes <- nacho_df[["Name"]][has_hkg]
     housekeeping_genes <- unique(housekeeping_genes)
   }
-  if (!inherits(nacho_df, "data.table")) {
-    nacho_df <- data.table::as.data.table(nacho_df)
-  }
-  control_genes_df <- nacho_df[Name %in% housekeeping_genes | !grepl("Endogenous", CodeClass)]
 
   control_genes_df <- format_counts(
-    data = control_genes_df,
+    data = nacho_df[Name %in% housekeeping_genes | !grepl("Endogenous", CodeClass)],
     id_colname = id_colname,
     count_column = "Count"
   )
@@ -65,7 +62,7 @@ qc_rcc <- function(
     tmp_counts[["count_norm"]] <- normalise_counts(data = tmp_counts, housekeeping_norm = FALSE)
 
     predicted_housekeeping <- find_housekeeping(
-      data = tmp_counts,
+      data = data.table::setDT(tmp_counts),
       id_colname = id_colname,
       count_column = "count_norm"
     )
@@ -78,9 +75,9 @@ qc_rcc <- function(
           paste0("  - ", predicted_housekeeping, collapse = "\n")
       )
       housekeeping_genes <- predicted_housekeeping
-      control_genes_df <- nacho_df[nacho_df[["Name"]] %in% predicted_housekeeping, ]
+
       control_genes_df <- format_counts(
-        data = control_genes_df,
+        data = nacho_df[Name %in% housekeeping_genes],
         id_colname = id_colname,
         count_column = "Count"
       )
@@ -122,10 +119,10 @@ qc_rcc <- function(
   pcas <- qc_pca(counts = counts_df_tmp, n_comp = n_comp)
 
   pcsum <- as.data.frame(t(pcas[["pcsum"]]), stringsAsFactors = FALSE)
-  rownames(pcsum) <- pcsum[["PC"]] <- sprintf("PC%02d", as.numeric(gsub("PC", "", rownames(pcsum))))
+  rownames(pcsum) <- pcsum[["PC"]] <- sprintf("PC%02d", as.numeric(sub("PC", "", rownames(pcsum))))
 
   pcas_pc <- as.data.frame(pcas[["pc"]], stringsAsFactors = FALSE)
-  colnames(pcas_pc) <- sprintf("PC%02d", as.numeric(gsub("PC", "", colnames(pcas_pc))))
+  colnames(pcas_pc) <- sprintf("PC%02d", as.numeric(sub("PC", "", colnames(pcas_pc))))
   pcas_pc[[id_colname]] <- rownames(pcas_pc)
 
   facs_pc_qc <- merge(
@@ -160,6 +157,6 @@ qc_rcc <- function(
     n_comp = n_comp,
     data_directory = data_directory,
     pc_sum = pcsum,
-    nacho = as.data.frame(nacho_out, stringsAsFactors = FALSE)
+    nacho = nacho_out
   )
 }

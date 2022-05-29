@@ -11,6 +11,7 @@
 #'
 #' @return [[numeric]]
 geometric_housekeeping <- function(data, positive_factor, intercept, housekeeping_genes) {
+  Name <- Count <- NULL # no visible binding for global variable
   if (!inherits(data, "data.table")) data.table::as.data.table(data)
   if (!is.null(housekeeping_genes)) {
     house_data <- data[

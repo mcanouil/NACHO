@@ -1,9 +1,9 @@
-suppressPackageStartupMessages({invisible(
+suppressPackageStartupMessages(invisible(
   sapply(
     X = c("shiny", "shinyWidgets", "utils", "rlang", "ggplot2", "purrr", "dplyr", "tidyr", "NACHO"),
     FUN = library, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE
   )
-)})
+))
 
 source("utils.R")
 
@@ -133,7 +133,10 @@ ui <- shiny::tagList(
       plotInputUI("Normalisation Result", right = TRUE)
     ),
     shiny::tabPanel(title = "Outliers", value = "outliers-tab",
-      card(title = shiny::tags$h4("Outliers List"), list(shiny::uiOutput("outliers-thresholds"), shiny::tableOutput("outliers")))
+      card(
+        title = shiny::tags$h4("Outliers List"),
+        body = list(shiny::uiOutput("outliers-thresholds"), shiny::tableOutput("outliers"))
+      )
     ),
     shiny::tabPanel("About", icon = shiny::icon("info"), value = "about-tab",
       shiny::tags$p(shiny::includeMarkdown("www/about-nacho.md"))
@@ -152,13 +155,13 @@ server <- function(input, output, session) {
         .l = targets[, c("name", "datapath", "type")],
         .f = function(name, datapath, type) {
           if (type == "application/x-zip-compressed") {
-            ex_dir <- file.path(dirname(datapath), gsub(".zip$", "", name))
+            ex_dir <- file.path(dirname(datapath), sub(".zip$", "", name))
             utils::unzip(datapath, exdir = ex_dir)
             data.frame(
-              name = file.path(gsub(".zip$", "", name), list.files(ex_dir)),
+              name = file.path(sub(".zip$", "", name), list.files(ex_dir)),
               datapath = list.files(ex_dir, full.names = TRUE),
               type = type,
-              IDFILE = file.path(gsub(".zip$", "", name), list.files(ex_dir)),
+              IDFILE = file.path(sub(".zip$", "", name), list.files(ex_dir)),
               stringsAsFactors = FALSE
             )
           } else {
@@ -181,7 +184,7 @@ server <- function(input, output, session) {
 
       suppressMessages(
         NACHO::load_rcc(
-          data_directory = unique(purrr::map2_chr(targets$IDFILE, targets$datapath, ~ gsub(.x, "", .y))),
+          data_directory = unique(purrr::map2_chr(targets$IDFILE, targets$datapath, ~ sub(.x, "", .y))),
           ssheet_csv = targets,
           id_colname = "IDFILE",
           normalisation_method =  input[["norm_method"]]
@@ -190,7 +193,7 @@ server <- function(input, output, session) {
     }
   })
 
-  output$rcc_contents <- shiny::renderTable({ shiny::req(input$rcc_files) })
+  output$rcc_contents <- shiny::renderTable(shiny::req(input$rcc_files))
   output$rcc_contents_summary <- shiny::renderUI({
     rcc_size <- sum(input$rcc_files[, "size"])
     class(rcc_size) <- "object_size"
@@ -265,13 +268,20 @@ server <- function(input, output, session) {
 
   ## Help for QC metrics
   purrr::map(
-    .x = c("Binding Density", "Field of View", "Positive Control Linearity", "Limit of Detection", "Positive Factor", "Housekeeping Genes Factor"),
+    .x = c(
+      "Binding Density",
+      "Field of View",
+      "Positive Control Linearity",
+      "Limit of Detection",
+      "Positive Factor",
+      "Housekeeping Genes Factor"
+    ),
     .f = function(.x) {
-      short_x <- tolower(gsub('\\b(\\pL)\\pL|.', '\\U\\1', .x, perl = TRUE))
+      short_x <- tolower(sub("\\b(\\pL)\\pL|.", "\\U\\1", .x, perl = TRUE))
       shiny::observeEvent(input[[paste0("about_", short_x)]], {
         shiny::showModal(shiny::modalDialog(
           title = .x,
-          shiny::tags$p(shiny::includeMarkdown(paste0("www/about-", short_x,".md"))),
+          shiny::tags$p(shiny::includeMarkdown(paste0("www/about-", short_x, ".md"))),
           easyClose = TRUE
         ))
       })
@@ -319,24 +329,39 @@ server <- function(input, output, session) {
       nacho_custom()$nacho[which(nacho_custom()$nacho[["is_outlier"]]), columns_qc]
     )
   })
-  output[["outliers"]] <- shiny::renderTable({ outliers_list() })
+  output[["outliers"]] <- shiny::renderTable(outliers_list())
   output[["outliers-thresholds"]] <- shiny::renderUI({
     ot <- lapply(nacho_custom()$outliers_thresholds, round, digits = 3)
     shiny::tags$div(
       shiny::tags$ul(
         shiny::tags$li(
-          'Binding Density (', shiny::tags$code("BD"), ') <', shiny::tags$strong(min(ot[["BD"]])),
-          'or Binding Density (', shiny::tags$code("BD"), ') >', shiny::tags$strong(max(ot[["BD"]]))
+          "Binding Density (", shiny::tags$code("BD"), ") <",
+          shiny::tags$strong(min(ot[["BD"]])),
+          "or Binding Density (", shiny::tags$code("BD"), ") >",
+          shiny::tags$strong(max(ot[["BD"]]))
         ),
-        shiny::tags$li('Field of View (', shiny::tags$code("FoV"), ') <', shiny::tags$strong(ot[["FoV"]])),
-        shiny::tags$li('Positive Control Linearity (', shiny::tags$code("PCL"), ') <', shiny::tags$strong(min(ot[["PCL"]]))),
-        shiny::tags$li('Limit of Detection (', shiny::tags$code("LoD"), ') <', shiny::tags$strong(min(ot[["LoD"]]))),
         shiny::tags$li(
-          'Positive Normalisation Dactor (', shiny::tags$code("Positive_factor"), ') <', shiny::tags$strong(min(ot[["Positive_factor"]])),
-          'or Positive Normalisation Dactor (', shiny::tags$code("Positive_factor"), ') >', shiny::tags$strong(max(ot[["Positive_factor"]]))),
+          "Field of View (", shiny::tags$code("FoV"), ") <",
+          shiny::tags$strong(ot[["FoV"]])
+        ),
         shiny::tags$li(
-          'Housekeeping Normalisation Factor (', shiny::tags$code("house_factor"), ') <', shiny::tags$strong(min(ot[["House_factor"]])),
-          'or Housekeeping Normalisation Dactor (', shiny::tags$code("house_factor"), ') >', shiny::tags$strong(max(ot[["House_factor"]]))
+          "Positive Control Linearity (", shiny::tags$code("PCL"), ") <",
+          shiny::tags$strong(min(ot[["PCL"]]))
+        ),
+        shiny::tags$li(
+          "Limit of Detection (", shiny::tags$code("LoD"), ") <",
+          shiny::tags$strong(min(ot[["LoD"]]))
+        ),
+        shiny::tags$li(
+          "Positive Normalisation Dactor (", shiny::tags$code("Positive_factor"),
+          ") <", shiny::tags$strong(min(ot[["Positive_factor"]])),
+          "or Positive Normalisation Dactor (", shiny::tags$code("Positive_factor"),
+          ") >", shiny::tags$strong(max(ot[["Positive_factor"]]))),
+        shiny::tags$li(
+          "Housekeeping Normalisation Factor (", shiny::tags$code("house_factor"),
+          ") <", shiny::tags$strong(min(ot[["House_factor"]])),
+          "or Housekeeping Normalisation Dactor (", shiny::tags$code("house_factor"),
+          ") >", shiny::tags$strong(max(ot[["House_factor"]]))
         )
       )
     )

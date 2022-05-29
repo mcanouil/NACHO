@@ -37,6 +37,7 @@ print.nacho <- function(
   xaringan = FALSE,
   ...
 ) {
+  is_outlier <- NULL # no visible binding for global variable
   if (missing(x)) {
     stop(
       '[NACHO] "x" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
@@ -233,8 +234,7 @@ print.nacho <- function(
       "BD", "FoV", "PCL", "LoD", "MC", "MedC",
       "Positive_factor", "House_factor"
     )
-    outliers_list <- unique(x$nacho[which(x$nacho[["is_outlier"]]), columns_qc])
-    print(knitr::kable(outliers_list, row.names = FALSE))
+    print(knitr::kable(x$nacho[(is_outlier), unique(.SD), .SDcols = c(columns_qc)], row.names = FALSE))
   }
 
   invisible()

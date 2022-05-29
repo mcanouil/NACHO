@@ -7,3 +7,4 @@
 ^man/figures/README-nacho_app\.gif$
 ^LICENSE\.md$
 ^data-raw$
+^NACHO/tests/testthat/_snaps$

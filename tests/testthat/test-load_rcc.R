@@ -68,7 +68,7 @@ test_that("no housekeeping norm and prediction", {
 })
 
 
-gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
+gse <- try(GEOquery::getGEO(GEO = "GSE74821"), silent = TRUE)
 if (!inherits(gse, "try-error")) {
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
   geo_files <- try(GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir()), silent = TRUE)
@@ -110,7 +110,7 @@ if (!inherits(gse, "try-error")) {
 }
 closeAllConnections()
 
-gse <- try({GEOquery::getGEO(GEO = "GSE70970")}, silent = TRUE)
+gse <- try(GEOquery::getGEO(GEO = "GSE70970"), silent = TRUE)
 if (!inherits(gse, "try-error")) {
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
   geo_files <- try(GEOquery::getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir()), silent = TRUE)
