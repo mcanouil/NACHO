@@ -148,6 +148,61 @@ if (!inherits(gse, "try-error")) {
         )
       }, "nacho")
     })
+
+    test_that("ssheet_csv as vector", {
+      expect_s3_class({
+          load_rcc(
+            data_directory = file.path(tempdir(), "GSE70970"),
+            ssheet_csv = head(targets[["IDFILE"]], 20),
+            id_colname = "IDFILE",
+            housekeeping_predict = TRUE,
+            housekeeping_norm = TRUE
+          )
+        },
+        class = "nacho"
+      )
+    })
+
+    test_that("ssheet_csv as vector without id_colname", {
+      expect_s3_class({
+          load_rcc(
+            data_directory = file.path(tempdir(), "GSE70970"),
+            ssheet_csv = head(targets[["IDFILE"]], 20),
+            housekeeping_predict = TRUE,
+            housekeeping_norm = TRUE
+          )
+        },
+        class = "nacho"
+      )
+    })
+
+    test_that("ssheet_csv as a named vector", {
+      expect_s3_class({
+          load_rcc(
+            data_directory = file.path(tempdir(), "GSE70970"),
+            ssheet_csv = `names<-`(
+              head(targets[["IDFILE"]], 20),
+              head(letters, 20)
+            ),
+            # id_colname = "IDFILE",
+            housekeeping_predict = TRUE,
+            housekeeping_norm = TRUE
+          )
+        },
+        class = "nacho"
+      )
+    })
+
+    test_that("id_colname not defined when using df", {
+      expect_error({
+        load_rcc(
+          data_directory = file.path(tempdir(), "GSE70970"),
+          ssheet_csv = head(targets, 20),
+          housekeeping_predict = TRUE,
+          housekeeping_norm = TRUE
+        )
+      })
+    })
   }
 }
 closeAllConnections()

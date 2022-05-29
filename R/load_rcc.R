@@ -74,17 +74,36 @@
 load_rcc <- function(
   data_directory,
   ssheet_csv,
-  id_colname,
+  id_colname = NULL,
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
   housekeeping_norm = TRUE,
   normalisation_method = "GEO",
   n_comp = 10
 ) {
-  if (missing(data_directory) | missing(ssheet_csv) | missing(id_colname)) {
-    stop('[NACHO] "data_directory", "ssheet_csv" and "id_colname" must be provided.')
+  if (missing(data_directory) | missing(ssheet_csv)) {
+    stop('[NACHO] "data_directory" and "ssheet_csv" must be provided.')
   }
   data_directory <- normalizePath(data_directory, mustWork = TRUE)
+  if (is.vector(ssheet_csv, "character") & length(ssheet_csv) > 1) {
+    if (is.null(names(ssheet_csv))) {
+      ssheet_csv <- data.frame(IDFILE = ssheet_csv)
+    } else {
+      ssheet_csv <- utils::stack(ssheet_csv)
+      names(ssheet_csv) <- c("IDFILE", "label")
+    }
+    id_colname <- "IDFILE"
+  }
+
+  if (
+    is.null(id_colname) & (
+      inherits(ssheet_csv, "data.frame") | (
+        is.vector(ssheet_csv, "character") & length(ssheet_csv) == 1
+      )
+    )
+  ) {
+    stop('[NACHO] "id_colname" must be provided as a column of "ssheet_csv".')
+  }
 
   message("[NACHO] Importing RCC files.")
   nacho_df <- switch(

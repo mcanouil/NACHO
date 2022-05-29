@@ -42,8 +42,7 @@ read_rcc <- function(file) {
   rcc_dt <- data.table::as.data.table(rcc_list)
 
   if (length(rcc_dt[["Code_Summary"]][[1]]) == 8) {
-    # column_to_unnest <- "Code_Summary"
-    rcc_dt <- rcc_dt[
+    rcc_dt[
       j = list(
         Header,
         Sample_Attributes,
@@ -52,18 +51,25 @@ read_rcc <- function(file) {
         Messages,
         plexset_id = paste0("S", seq_len(8))
       )
+    ][
+      j = list(
+        Header = data.table::rbindlist(Header),
+        Sample_Attributes = data.table::rbindlist(Sample_Attributes),
+        Lane_Attributes = data.table::rbindlist(Lane_Attributes),
+        Code_Summary,
+        Messages = gsub("messages_;", "", sapply(Messages, names)),
+        plexset_id
+      )
+    ]
+  } else {
+    rcc_dt[
+      j = list(
+        Header = data.table::rbindlist(Header),
+        Sample_Attributes = data.table::rbindlist(Sample_Attributes),
+        Lane_Attributes = data.table::rbindlist(Lane_Attributes),
+        Code_Summary,
+        Messages = gsub("messages_;", "", sapply(Messages, names))
+      )
     ]
   }
-
-  # column_to_unnest <- c("Header", "Sample_Attributes", "Lane_Attributes", "Messages")
-  rcc_dt[
-    j = list(
-      Header = data.table::rbindlist(Header),
-      Sample_Attributes = data.table::rbindlist(Sample_Attributes),
-      Lane_Attributes = data.table::rbindlist(Lane_Attributes),
-      Code_Summary,
-      Messages = gsub("messages_;", "", sapply(Messages, names)),
-      plexset_id
-    )
-  ]
 }
