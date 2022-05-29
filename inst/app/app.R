@@ -1,6 +1,6 @@
 suppressPackageStartupMessages(invisible(
   sapply(
-    X = c("shiny", "shinyWidgets", "utils", "rlang", "ggplot2", "purrr", "dplyr", "tidyr", "NACHO"),
+    X = c("shiny", "shinyWidgets", "utils", "ggplot2", "NACHO"),
     FUN = library, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE
   )
 ))
@@ -151,9 +151,9 @@ server <- function(input, output, session) {
 
     targets <- shiny::req(input$rcc_files)
     if (nrow(targets) > 0) {
-      targets <- purrr::pmap_df(
-        .l = targets[, c("name", "datapath", "type")],
-        .f = function(name, datapath, type) {
+      targets <- do.call("rbind.data.frame", lapply(
+        X = targets[, c("name", "datapath", "type")],
+        FUN = function(name, datapath, type) {
           if (type == "application/x-zip-compressed") {
             ex_dir <- file.path(dirname(datapath), sub(".zip$", "", name))
             utils::unzip(datapath, exdir = ex_dir)
@@ -174,17 +174,16 @@ server <- function(input, output, session) {
             )
           }
         }
-      )
+      ))
 
-      check_multiplex <- all(purrr::map_lgl(targets$datapath, ~ any(grepl("Endogenous8s", readLines(.x)))))
+      check_multiplex <- all(sapply(targets$datapath, function(.x) any(grepl("Endogenous8s", readLines(.x)))))
       if (check_multiplex) {
-        targets$plexset_id <- rep(list(paste0("S", seq_len(8))), each = nrow(targets))
-        targets <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+        targets$plexset_id <- rep(paste0("S", seq_len(8)), each = length(targets$datapath))
       }
 
       suppressMessages(
         NACHO::load_rcc(
-          data_directory = unique(purrr::map2_chr(targets$IDFILE, targets$datapath, ~ sub(.x, "", .y))),
+          data_directory = unique(mapply(FUN = function(.x, .y) sub(.x, "", .y), targets$IDFILE, targets$datapath)),
           ssheet_csv = targets,
           id_colname = "IDFILE",
           normalisation_method =  input[["norm_method"]]
@@ -229,14 +228,15 @@ server <- function(input, output, session) {
   # Global UI input
   shiny::observe({
     nacho_tmp <- nacho_custom()
-    purrr::map(
-      .x = c(
+    lapply(
+      X = c(
         "bd", "fov", "pcl", "lod",
         "pp", "np", "hgp", "cpe",
         "acvbd", "acvmc", "pca", "pcai",
         "pfvnf", "hgf", "nr"
       ),
-      .f = ~ plotInput(.x, nacho_tmp)
+      F = plotInput,
+      nacho = nacho_tmp
     )
   })
 
@@ -267,8 +267,8 @@ server <- function(input, output, session) {
   })
 
   ## Help for QC metrics
-  purrr::map(
-    .x = c(
+  lapply(
+    X = c(
       "Binding Density",
       "Field of View",
       "Positive Control Linearity",
@@ -276,7 +276,7 @@ server <- function(input, output, session) {
       "Positive Factor",
       "Housekeeping Genes Factor"
     ),
-    .f = function(.x) {
+    FUN = function(.x) {
       short_x <- tolower(sub("\\b(\\pL)\\pL|.", "\\U\\1", .x, perl = TRUE))
       shiny::observeEvent(input[[paste0("about_", short_x)]], {
         shiny::showModal(shiny::modalDialog(
@@ -371,24 +371,24 @@ server <- function(input, output, session) {
   shiny::observe({
     if (!inherits(nacho_object, "nacho") & is.null(input$rcc_files)) {
       shiny::showTab("main-menu", target = "upload-tab", select = TRUE)
-      purrr::map(
-        .x = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
-        .f = ~ shiny::hideTab("main-menu", target = .x)
+      lapply(
+        X = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
+        FUN = function(.x) shiny::hideTab("main-menu", target = .x)
       )
     }
 
     if (inherits(nacho_object, "nacho") & is.null(input$rcc_files)) {
-      purrr::map(
-        .x = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
-        .f = ~ shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
+      lapply(
+        X = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
+        FUN = function(.x) shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
       )
       shiny::hideTab("main-menu", target = "upload-tab")
     }
 
     if (!is.null(input$rcc_files)) {
-      purrr::map(
-        .x = paste0(c("upload", "qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
-        .f = ~ shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
+      lapply(
+        X = paste0(c("upload", "qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
+        FUN = function(.x) shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
       )
     }
 

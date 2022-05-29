@@ -1,3 +1,7 @@
+`%||%` <- function(x, y) {
+  if (is_null(x)) y else x
+}
+
 panelInputUI <- function(id, label, ..., sidebar = NULL) {
   ns <- shiny::NS(id)
 
