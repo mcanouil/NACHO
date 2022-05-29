@@ -84,7 +84,7 @@ load_rcc <- function(
   if (missing(data_directory) | missing(ssheet_csv) | missing(id_colname)) {
     stop('[NACHO] "data_directory", "ssheet_csv" and "id_colname" must be provided.')
   }
-  data_directory <- normalizePath(data_directory)
+  data_directory <- normalizePath(data_directory, mustWork = TRUE)
 
   message("[NACHO] Importing RCC files.")
   nacho_df <- switch(

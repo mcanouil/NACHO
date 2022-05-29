@@ -15,7 +15,7 @@ test_that("missing field", {
 })
 
 test_that("No POS_E", {
-  GSE74821$nacho <- GSE74821$nacho[GSE74821$nacho$Name!="POS_E(0.5)", ]
+  GSE74821$nacho <- GSE74821$nacho[GSE74821$nacho$Name != "POS_E(0.5)", ]
   res <- normalise(
     nacho_object = GSE74821,
     housekeeping_genes = NULL,

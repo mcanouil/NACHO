@@ -10,11 +10,10 @@
 #'
 #' @return [[character]]
 find_housekeeping <- function(data, id_colname, count_column) {
+  if (inherits(data, "data.table")) data <- as.data.frame(data)
   data <- data[unlist(lapply(c("Endogenous", "Housekeeping"), grep, x = data[["CodeClass"]])), ]
-  nested_data_df <- tidyr::nest(dplyr::group_by(.data = data, get(id_colname)))
-  colnames(nested_data_df)[1] <- id_colname
   ratios <- lapply(
-    X = nested_data_df[["data"]],
+    X = split(data, data[[id_colname]]),
     count_column = count_column,
     FUN = function(.data, count_column) {
       .data <- .data[, c("Name", count_column)]
