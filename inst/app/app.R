@@ -22,7 +22,7 @@ ui <- shiny::tagList(
     selected = "qc_metrics",
     shiny::tabPanel("Upload RCC Files", icon = shiny::icon("file-upload"), value = "upload-tab",
       shiny::fluidRow(
-        shiny::column(width = 6,
+        shiny::column(width = 4,
           card(title = "Normalisation Settings", body = {
             shiny::radioButtons("norm_method",
               label = shiny::tags$span(
@@ -38,11 +38,29 @@ ui <- shiny::tagList(
             )
           })
         ),
-        shiny::column(width = 6,
+        shiny::column(width = 4,
           card(title = "Upload RCC Files", body = {
             shiny::fileInput("rcc_files", "Choose One or Several RCC Files",
               multiple = TRUE,
               accept = c(".RCC", "application/zip")
+            )
+          })
+        ),
+        shiny::column(width = 4,
+          card(title = "Upload Sample Sheet (Optionnal)", body = {
+            shiny::fileInput("ssheet_file",
+              label = shiny::tags$span(
+                "Choose one csv file",
+                shiny::helpText(
+                  "(Must contains \"IDFILE\",",
+                  shiny::tags$i("i.e."),
+                  "\"BASENAME.RCC\", and optionnally \"plexset_id\",",
+                  shiny::tags$i("i.e."),
+                  ", \"S1\", \"S2\", ...)"
+                )
+              ),
+              multiple = FALSE,
+              accept = ".csv"
             )
           })
         )
@@ -179,6 +197,39 @@ server <- function(input, output, session) {
       check_multiplex <- all(sapply(targets$datapath, function(.x) any(grepl("Endogenous8s", readLines(.x)))))
       if (check_multiplex) {
         targets$plexset_id <- rep(paste0("S", seq_len(8)), each = length(targets$datapath))
+      }
+
+      targets_ssheet <- shiny::req(input$ssheet_file)
+      if (nrow(targets_ssheet) > 0) {
+        ssheet_dt <- data.table::fread(targets_ssheet[["datapath"]])
+      }
+
+      if (any(grepl("^IDFILE$", names(ssheet_dt)))) {
+        if (check_multiplex) {
+          if (any(grepl("^plexset_id$", names(ssheet_dt)))) {
+            targets <- merge(
+              x = targets,
+              y = ssheet_dt,
+              by = c("IDFILE", "plexset_id")
+            )
+          } else {
+            warning(
+              "[NACHO] Missing \"plexset_id\" column in sample sheet file!\n",
+              "  Sample sheet file is discarded."
+            )
+          }
+        } else {
+          targets <- merge(
+            x = targets,
+            y = ssheet_dt,
+            by = "IDFILE"
+          )
+        }
+      } else {
+        warning(
+          "[NACHO] Missing \"IDFILE\" column in sample sheet file!\n",
+          "  Sample sheet file is discarded."
+        )
       }
 
       suppressMessages(
