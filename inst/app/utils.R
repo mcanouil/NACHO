@@ -1,5 +1,5 @@
 `%||%` <- function(x, y) {
-  if (is_null(x)) y else x
+  if (is.null(x)) y else x
 }
 
 panelInputUI <- function(id, label, ..., sidebar = NULL) {
@@ -77,7 +77,7 @@ plotInputUI <- function(label = NULL, ...) {
           circle = TRUE,
           status = "danger",
           size = "sm",
-          icon = shiny::icon("gear"),
+          icon = shiny::icon("gear", verify_fa = FALSE),
           width = "800px",
           inline = TRUE,
           tooltip = shinyWidgets::tooltipOptions(title = "Click to see inputs!"),

@@ -326,7 +326,11 @@ server <- function(input, output, session) {
       "Positive_factor", "House_factor"
     ), colnames(nacho_custom()$nacho))
     unique(
-      nacho_custom()$nacho[which(nacho_custom()$nacho[["is_outlier"]]), columns_qc]
+      nacho_custom()$nacho[
+        (is_outlier),
+        .SD,
+        .SDcols = columns_qc
+      ]
     )
   })
   output[["outliers"]] <- shiny::renderTable(outliers_list())
