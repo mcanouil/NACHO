@@ -12,7 +12,6 @@ tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest%20tag&inc
 [![Codecov test
 coverage](https://codecov.io/gh/mcanouil/NACHO/branch/main/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO?branch=main)
 [![R-CMD-check](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO/actions)
-£
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
 [![cran
 checks_worst](https://cranchecks.info/badges/worst/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
