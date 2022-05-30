@@ -12,8 +12,7 @@ tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest%20tag&inc
 [![Codecov test
 coverage](https://codecov.io/gh/mcanouil/NACHO/branch/main/graph/badge.svg)](https://codecov.io/gh/mcanouil/NACHO?branch=main)
 [![R-CMD-check](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO/actions)
-[![CII Best
-Practices](https://bestpractices.coreinfrastructure.org/projects/2719/badge)](https://bestpractices.coreinfrastructure.org/projects/2719)
+£
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
 [![cran
 checks_worst](https://cranchecks.info/badges/worst/NACHO)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
@@ -119,7 +118,6 @@ maintainer.
 
 ## Code of Conduct
 
-Please note that the `eggla` project is released with a [Contributor
-Code of
+Please note that this project is released with a [Contributor Code of
 Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).  
 By contributing to this project, you agree to abide by its terms.
