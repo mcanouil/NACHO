@@ -1,12 +1,10 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Workflow derived from https://github.com/r-lib/actions/tree/master/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
-  push:
-    branches: [main, master]
-    paths: ['README.md']
-    tags: ['*']
-  pull_request:
-    branches: [main, master]
+  workflow_run:
+    workflows: "R-CMD-check"
+    branches: main
+    types: completed
   release:
     types: [published]
   workflow_dispatch:
@@ -16,10 +14,11 @@ name: pkgdown
 jobs:
   pkgdown:
     runs-on: ubuntu-latest
+    if: github.event_name == 'release' || github.event.workflow_run.conclusion == 'success'
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -32,13 +31,11 @@ jobs:
           extra-packages: any::pkgdown, local::.
           needs: website
 
-      - name: Build site
-        run: Rscript -e 'pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)'
-
-      - name: Deploy to GitHub pages 🚀
-        if: github.event_name != 'pull_request'
-        uses: JamesIves/github-pages-deploy-action@4.1.4
-        with:
-          clean: false
-          branch: gh-pages
-          folder: docs
+      - name: Deploy package
+        run: |
+          git config --local user.name "$GITHUB_ACTOR"
+          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          Rscript -e 'rmarkdown::render("README.Rmd")'
+          git commit README.md -m 'Re-build README.Rmd' || echo "No changes to commit"
+          git push origin || echo "No changes to commit"
+          Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'
