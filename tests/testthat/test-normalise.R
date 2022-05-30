@@ -15,7 +15,7 @@ test_that("missing field", {
 })
 
 test_that("No POS_E", {
-  GSE74821$nacho <- GSE74821$nacho[GSE74821$nacho$Name!="POS_E(0.5)", ]
+  GSE74821$nacho <- GSE74821$nacho[GSE74821$nacho$Name != "POS_E(0.5)", ]
   res <- normalise(
     nacho_object = GSE74821,
     housekeeping_genes = NULL,
@@ -29,8 +29,8 @@ test_that("No POS_E", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -50,8 +50,8 @@ test_that("genes not null", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -71,8 +71,8 @@ test_that("predict TRUE", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -92,8 +92,8 @@ test_that("norm TRUE", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -113,8 +113,8 @@ test_that("method GLM", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -134,8 +134,8 @@ test_that("n_comp 2", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -155,8 +155,8 @@ test_that("n_comp 10", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -176,8 +176,8 @@ test_that("outliers TRUE", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -193,8 +193,8 @@ test_that("Test outliers", {
       FoV = 95,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -216,8 +216,8 @@ test_that("All LoD to zero", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -238,8 +238,8 @@ test_that("All PC to zero", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -260,8 +260,8 @@ test_that("housekeeping_norm to FALSE and remove_outliers to TRUE", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -282,8 +282,8 @@ test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")
@@ -304,8 +304,8 @@ test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
       FoV = 75,
       LoD = 2,
       PCL = 0.95,
-      Positive_factor = c(1/4, 4),
-      House_factor = c(1/11, 11)
+      Positive_factor = c(1 / 4, 4),
+      House_factor = c(1 / 11, 11)
     )
   )
   expect_s3_class(res, "nacho")

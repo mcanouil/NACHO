@@ -11,15 +11,24 @@
 #'
 #' @return [[numeric]]
 geometric_housekeeping <- function(data, positive_factor, intercept, housekeeping_genes) {
-  house_data <- as.data.frame(data[, c("Name", "CodeClass", "Count")])
-  # if (is.null(housekeeping_genes)) {
-  #   house_data <- house_data[house_data[["CodeClass"]] %in% "Housekeeping", ]
-  # } else {
-  house_data <- house_data[house_data[["Name"]] %in% housekeeping_genes, ]
-  # }
+  Name <- Count <- NULL # no visible binding for global variable
+  if (!inherits(data, "data.table")) data.table::as.data.table(data)
+  if (!is.null(housekeeping_genes)) {
+    house_data <- data[
+      i = Name %in% housekeeping_genes
+    ]
+  } else {
+    house_data <- data
+  }
+  house_data <- house_data[
+    j = .SD,
+    .SDcols = c("Name", "CodeClass", "Count")
+  ][
+    j = Count := (Count - intercept) * positive_factor
+  ][
+    Count <= 0,
+    Count := 1
+  ]
 
-  house_data[["Count"]] <- house_data[["Count"]] - intercept
-  house_data[["Count"]] <- house_data[["Count"]] * positive_factor
-  house_data[["Count"]][house_data[["Count"]] <= 0] <- 1
   geometric_mean(house_data[["Count"]])
 }

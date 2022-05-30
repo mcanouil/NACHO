@@ -74,30 +74,53 @@
 load_rcc <- function(
   data_directory,
   ssheet_csv,
-  id_colname,
+  id_colname = NULL,
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
   housekeeping_norm = TRUE,
   normalisation_method = "GEO",
   n_comp = 10
 ) {
-  if (missing(data_directory) | missing(ssheet_csv) | missing(id_colname)) {
-    stop('[NACHO] "data_directory", "ssheet_csv" and "id_colname" must be provided.')
+  file_path <- Code_Summary <- CodeClass <- NULL # no visible binding for global variable
+  if (missing(data_directory) | missing(ssheet_csv)) {
+    stop('[NACHO] "data_directory" and "ssheet_csv" must be provided.')
   }
-  data_directory <- normalizePath(data_directory)
+  data_directory <- normalizePath(data_directory, mustWork = TRUE)
+  if (is.vector(ssheet_csv, "character") & length(ssheet_csv) > 1) {
+    if (is.null(names(ssheet_csv))) {
+      ssheet_csv <- data.frame(IDFILE = ssheet_csv)
+    } else {
+      ssheet_csv <- utils::stack(ssheet_csv)
+      names(ssheet_csv) <- c("IDFILE", "label")
+    }
+    id_colname <- "IDFILE"
+  }
+
+  if (
+    is.null(id_colname) & (
+      inherits(ssheet_csv, "data.frame") | (
+        is.vector(ssheet_csv, "character") & length(ssheet_csv) == 1
+      )
+    )
+  ) {
+    stop('[NACHO] "id_colname" must be provided as a column of "ssheet_csv".')
+  }
 
   message("[NACHO] Importing RCC files.")
   nacho_df <- switch(
-    EXPR = paste(inherits(ssheet_csv, c("data.frame", "character"), TRUE), collapse = ""),
+    EXPR = paste(as.integer(inherits(ssheet_csv, c("data.frame", "character"), TRUE) > 0), collapse = ""),
     "10" = ssheet_csv,
-    "01" = utils::read.csv(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE),
+    "01" = data.table::fread(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE),
     stop('[NACHO] "ssheet_csv" must be a "data.frame" or path to csv.')
   )
 
-  nacho_df <- tibble::as_tibble(nacho_df)
-  nacho_df[["file_path"]] <- file.path(data_directory, nacho_df[[id_colname]])
+  nacho_df <- data.table::setDT(nacho_df)[
+    j = `:=`(
+      "file_path" = file.path(data_directory, nacho_df[[id_colname]])
+    )
+  ]
 
-  if (!all(sapply(X = nacho_df[["file_path"]], FUN = file.exists))) {
+  if (nacho_df[j = !all(sapply(X = file_path, FUN = file.exists))]) {
     stop('[NACHO] Not all values from "id_colname" are mapped to a RCC file.')
   }
 
@@ -110,24 +133,64 @@ load_rcc <- function(
 
   if (anyDuplicated(nacho_df[[id_colname]]) != 0) {
     type_set <- "n8"
-    nacho_df_uniq <- unique(nacho_df[, c(id_colname, "file_path")])
-    nacho_df_uniq[["rcc_content"]] <- lapply(X = nacho_df_uniq[["file_path"]], FUN = read_rcc)
-    nacho_df_uniq <- tidyr::unnest(data = nacho_df_uniq, cols = "rcc_content")
-    nacho_df <- dplyr::left_join(
+    nacho_df <- merge(
       x = nacho_df,
-      y = nacho_df_uniq,
-      by = c(id_colname, "file_path", "plexset_id")
-    )
-    nacho_df <- tidyr::unnest(data = nacho_df, cols = "Code_Summary")
-    nacho_df[["CodeClass"]] <- gsub("[0-8]+s$", "", nacho_df[["CodeClass"]])
-    nacho_df <- tidyr::unite(data = nacho_df, col = !!id_colname, id_colname, "plexset_id")
+      y = nacho_df[
+        j = unique(.SD),
+        .SDcols = c(id_colname, "file_path")
+      ][
+        j = data.table::rbindlist(lapply(X = file_path, FUN = read_rcc)),
+        by = c(id_colname, "file_path")
+      ],
+      by = c(id_colname, "file_path", "plexset_id"),
+      all.x = TRUE
+    )[
+      j = (id_colname) := apply(.SD, 1, paste, collapse = "_"),
+      .SDcols = c(id_colname, "plexset_id")
+    ]
+    nacho_df <- nacho_df[
+      j = unlist(Code_Summary, recursive = FALSE),
+      by = setdiff(names(nacho_df), "Code_Summary")
+    ][
+      j = `:=`(CodeClass = sub("[0-8]+s$", "", CodeClass))
+    ]
   } else {
     type_set <- "n1"
-    nacho_df[["rcc_content"]] <- lapply(X = nacho_df[["file_path"]], FUN = read_rcc)
-    nacho_df <- tidyr::unnest(data = nacho_df, cols = "rcc_content")
-    nacho_df <- tidyr::unnest(data = nacho_df, cols = "Code_Summary")
+    nacho_df <- nacho_df[
+      j = data.table::rbindlist(lapply(X = file_path, FUN = read_rcc)),
+      by = c(unique(c(id_colname, "file_path", names(nacho_df))))
+    ]
+    nacho_df <- nacho_df[
+      j = unlist(Code_Summary, recursive = FALSE),
+      by = setdiff(names(nacho_df), "Code_Summary")
+    ]
   }
   cat("\n")
+
+  nanostring_versions <- nacho_df[
+    j = unique(.SD),
+    .SDcols = c("Header.header_FileVersion", "Header.header_SoftwareVersion")
+  ]
+  if (nrow(nanostring_versions) > 1) {
+    stop(
+      "[NACHO] Multiple Nanostring file/software versions detected.\n",
+      "  Please provide a set of files with the same version.\n",
+      paste(
+        sapply(
+          X = c("Header.header_FileVersion", "Header.header_SoftwareVersion"),
+          FUN = function(x) {
+            sprintf(
+              "  - %s: '%s'",
+              sub("Header.header_", "", x),
+              paste(nanostring_versions[[x]], collapse = "', '")
+            )
+          },
+          USE.NAMES = FALSE
+        ),
+        collapse = "\n"
+      )
+    )
+  }
 
   message("[NACHO] Performing QC and formatting data.")
   has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
@@ -178,7 +241,7 @@ load_rcc <- function(
   message(paste(
     "[NACHO] Returning a list.",
     "  $ access              : character",
-    "  $ housekeeping_genes  : character" ,
+    "  $ housekeeping_genes  : character",
     "  $ housekeeping_predict: logical",
     "  $ housekeeping_norm   : logical",
     "  $ normalisation_method: character",

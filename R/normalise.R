@@ -213,7 +213,7 @@ normalise <- function(
   message(paste(
     "[NACHO] Returning a list.",
     "  $ access              : character",
-    "  $ housekeeping_genes  : character" ,
+    "  $ housekeeping_genes  : character",
     "  $ housekeeping_predict: logical",
     "  $ housekeeping_norm   : logical",
     "  $ normalisation_method: character",
