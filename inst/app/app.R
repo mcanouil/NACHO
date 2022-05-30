@@ -22,7 +22,7 @@ ui <- shiny::tagList(
     selected = "qc_metrics",
     shiny::tabPanel("Upload RCC Files", icon = shiny::icon("file-upload"), value = "upload-tab",
       shiny::fluidRow(
-        shiny::column(width = 4,
+        shiny::column(width = 6,
           card(title = "Normalisation Settings", body = {
             shiny::radioButtons("norm_method",
               label = shiny::tags$span(
@@ -38,29 +38,21 @@ ui <- shiny::tagList(
             )
           })
         ),
-        shiny::column(width = 4,
+        shiny::column(width = 6,
           card(title = "Upload RCC Files", body = {
-            shiny::fileInput("rcc_files", "Choose One or Several RCC Files",
-              multiple = TRUE,
-              accept = c(".RCC", "application/zip")
-            )
-          })
-        ),
-        shiny::column(width = 4,
-          card(title = "Upload Sample Sheet (Optionnal)", body = {
-            shiny::fileInput("ssheet_file",
+            shiny::fileInput("rcc_files",
               label = shiny::tags$span(
-                "Choose one csv file",
+                "Choose One or Several RCC Files and Optionally a CSV File",
                 shiny::helpText(
-                  "(Must contains \"IDFILE\",",
+                  "(The CSV file must contains \"IDFILE\",",
                   shiny::tags$i("i.e."),
                   "\"BASENAME.RCC\", and optionnally \"plexset_id\",",
                   shiny::tags$i("i.e."),
                   ", \"S1\", \"S2\", ...)"
                 )
               ),
-              multiple = FALSE,
-              accept = ".csv"
+              multiple = TRUE,
+              accept = c(".RCC", "application/zip", ".csv")
             )
           })
         )
@@ -169,9 +161,13 @@ server <- function(input, output, session) {
 
     targets <- shiny::req(input$rcc_files)
     if (nrow(targets) > 0) {
-      targets <- do.call("rbind.data.frame", lapply(
+      targets <- do.call("rbind.data.frame", apply(
         X = targets[, c("name", "datapath", "type")],
-        FUN = function(name, datapath, type) {
+        MARGIN = 1,
+        FUN = function(.row) {
+          name <- .row[1]
+          datapath <- .row[2]
+          type <- .row[3]
           if (type == "application/x-zip-compressed") {
             ex_dir <- file.path(dirname(datapath), sub(".zip$", "", name))
             utils::unzip(datapath, exdir = ex_dir)
@@ -183,25 +179,42 @@ server <- function(input, output, session) {
               stringsAsFactors = FALSE
             )
           } else {
+            file.rename(
+              from = datapath,
+              to = file.path(dirname(datapath), name)
+            )
             data.frame(
               name = name,
-              datapath = datapath,
+              datapath = file.path(dirname(datapath), name),
               type = type,
-              IDFILE = basename(datapath),
+              IDFILE = name,
               stringsAsFactors = FALSE
             )
           }
         }
       ))
 
-      check_multiplex <- all(sapply(targets$datapath, function(.x) any(grepl("Endogenous8s", readLines(.x)))))
-      if (check_multiplex) {
-        targets$plexset_id <- rep(paste0("S", seq_len(8)), each = length(targets$datapath))
+      targets_ssheet <- targets[grep("\\.csv", targets[["name"]]), ]
+      if (nrow(targets_ssheet) > 0) {
+        targets <- targets[grep("\\.RCC", targets[["name"]]), ]
+        ssheet_dt <- data.table::fread(targets_ssheet[["datapath"]])
       }
 
-      targets_ssheet <- shiny::req(input$ssheet_file)
-      if (nrow(targets_ssheet) > 0) {
-        ssheet_dt <- data.table::fread(targets_ssheet[["datapath"]])
+      check_multiplex <- all(sapply(
+        X = targets$datapath,
+        FUN = function(.x) any(grepl("Endogenous8s", readLines(.x)))
+      ))
+      save(list = ls(), file = "all.rdata")
+      if (check_multiplex) {
+        targets <- merge(
+          x = targets,
+          y = expand.grid(
+            IDFILE = targets[["IDFILE"]],
+            plexset_id = paste0("S", seq_len(8)),
+            stringsAsFactors = FALSE
+          ),
+          by = "IDFILE"
+        )
       }
 
       if (any(grepl("^IDFILE$", names(ssheet_dt)))) {
@@ -231,13 +244,12 @@ server <- function(input, output, session) {
           "  Sample sheet file is discarded."
         )
       }
-
       suppressMessages(
-        NACHO::load_rcc(
+        x = NACHO::load_rcc(
           data_directory = unique(mapply(FUN = function(.x, .y) sub(.x, "", .y), targets$IDFILE, targets$datapath)),
           ssheet_csv = targets,
           id_colname = "IDFILE",
-          normalisation_method =  input[["norm_method"]]
+          normalisation_method = input[["norm_method"]]
         )
       )
     }
@@ -377,7 +389,7 @@ server <- function(input, output, session) {
       "Positive_factor", "House_factor"
     ), colnames(nacho_custom()$nacho))
     unique(
-      nacho_custom()$nacho[
+      data.table::as.data.table(nacho_custom()$nacho)[
         (is_outlier),
         .SD,
         .SDcols = columns_qc
