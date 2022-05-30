@@ -13,7 +13,7 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
         shiny::fluidRow(shiny::column(width = 12, align = "center", contents[[1]]))
       )
     },
-    "2"  = {
+    "2" = {
       list(
         shiny::fluidRow(
           shiny::column(width = 6, align = "center", contents[[1]]),
@@ -99,14 +99,15 @@ plotInput <- function(id, nacho) {
           shiny::fluidRow(style = paste0("font-size: ", font_size, "%;"),
              shiny::column(12, align = "center",
               shiny::selectInput(ns("group_colour"), shiny::tags$span("Grouping Variable", shiny::helpText("(Colour)")),
-                selected  = shiny::isolate(input$group_colour) %||% "CartridgeID",
-                choices = c(
+                selected = shiny::isolate(input$group_colour) %||% "CartridgeID",
+                choices = unique(c(
                   "CartridgeID",
                   "Date",
                   "ID",
                   "ScannerID",
-                  "StagePosition"
-                )
+                  "StagePosition",
+                  names(nacho[["nacho"]])
+                ))
               )
             )
           ),
