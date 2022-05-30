@@ -8,14 +8,9 @@
 
 - Ensure RCC files are homogeneous in terms of versions. [#20](https://github.com/mcanouil/NACHO/issues/20)
 - Allow to use vector of file paths, named or not. [#33](https://github.com/mcanouil/NACHO/issues/33)
-- Allow to upload a CSV file associated with the RCC files within the `shiny` application.
+- Allow to upload a CSV file associated with the RCC files within the `shiny` application. [#36](https://github.com/mcanouil/NACHO/issues/36)
 
-## Minor improvements and fixes
-
-- In `DESCRIPTION`,
-  - Remove dependencies.
-
-Full Changelog: https://github.com/mcanouil/NACHO/compare/v1.1.0...v2.0.0
+Full Changelog: <https://github.com/mcanouil/NACHO/compare/v1.1.0...v2.0.0>
 
 # NACHO 1.1.0
 
