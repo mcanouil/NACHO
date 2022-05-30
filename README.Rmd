@@ -16,20 +16,20 @@ if (file.exists("man/figures/nacho_app.mp4")) {
   system("ffmpeg -i man/figures/nacho_app.mp4 -vf fps=1 man/figures/nacho_app%04d.png")
   gif_app <- gifski::gifski(
     png_files = list.files(
-      path = dirname(knitr::opts_chunk$get("fig.path")), 
-      pattern = "nacho_app.*.png", 
+      path = dirname(knitr::opts_chunk$get("fig.path")),
+      pattern = "nacho_app.*.png",
       full.names = TRUE
-    ), 
+    ),
     gif_file = paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"),
-    width = 1920 * 2/3,
-    height = 1080 * 2/3,
+    width = 1920 * 2 / 3,
+    height = 1080 * 2 / 3,
     delay = 0.50,
     loop = TRUE,
     progress = FALSE
   )
   unlink(list.files(
-    path = dirname(knitr::opts_chunk$get("fig.path")), 
-    pattern = "nacho_app.*.png", 
+    path = dirname(knitr::opts_chunk$get("fig.path")),
+    pattern = "nacho_app.*.png",
     full.names = TRUE
   ))
 }
@@ -40,7 +40,6 @@ if (file.exists(paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"))) {
   gif_app <- paste0(knitr::opts_chunk$get("fig.path"), "app.png")
 }
 ```
-
 
 # NAnostring quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" />
 
@@ -56,7 +55,6 @@ coverage](https://codecov.io/gh/mcanouil/NACHO/branch/main/graph/badge.svg)](htt
 [![CRAN_Download_total](https://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
 <!-- badges: end -->
 
-
 ## Installation
 
 ```{r, eval = FALSE}
@@ -68,13 +66,11 @@ install.packages("NACHO")
 remotes::install_github("mcanouil/NACHO")
 ```
 
-
 ## Overview 
 
 ```{r, echo = FALSE, results = "asis"}
 cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep = "\n")
 ```
-
 
 ### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
 
@@ -82,7 +78,7 @@ cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep 
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
 ```{r, echo = FALSE}
-knitr::include_graphics(gsub(".*/man", "man", gif_app))
+knitr::include_graphics(sub(".*/man", "man", gif_app))
 ```
 
 
@@ -91,7 +87,6 @@ visualise(GSE74821)
 ```
 
 ![](man/figures/README-visualise.png)
-
 
 ## Citing NACHO
 
@@ -103,13 +98,14 @@ print(citation("NACHO"), "html")
 print(citation("NACHO"), "bibtex")
 ```
 
+---
 
 ## Getting help
 
 If you encounter a clear bug, please file a minimal reproducible example on [github](https://github.com/mcanouil/NACHO/issues).  
 For questions and other discussion, please contact the package maintainer.
 
----
+## Code of Conduct
 
-Please note that this project is released with a [Contributor Code of Conduct](https://github.com/mcanouil/NACHO/blob/main/.github/CODE_OF_CONDUCT.md).  
-By participating in this project you agree to abide by its terms.
+Please note that the `eggla` project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).  
+By contributing to this project, you agree to abide by its terms.

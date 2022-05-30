@@ -68,7 +68,7 @@ test_that("no housekeeping norm and prediction", {
 })
 
 
-gse <- try({GEOquery::getGEO(GEO = "GSE74821")}, silent = TRUE)
+gse <- try(GEOquery::getGEO(GEO = "GSE74821"), silent = TRUE)
 if (!inherits(gse, "try-error")) {
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
   geo_files <- try(GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir()), silent = TRUE)
@@ -110,7 +110,7 @@ if (!inherits(gse, "try-error")) {
 }
 closeAllConnections()
 
-gse <- try({GEOquery::getGEO(GEO = "GSE70970")}, silent = TRUE)
+gse <- try(GEOquery::getGEO(GEO = "GSE70970"), silent = TRUE)
 if (!inherits(gse, "try-error")) {
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
   geo_files <- try(GEOquery::getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir()), silent = TRUE)
@@ -147,6 +147,61 @@ if (!inherits(gse, "try-error")) {
           n_comp = 10
         )
       }, "nacho")
+    })
+
+    test_that("ssheet_csv as vector", {
+      expect_s3_class({
+          load_rcc(
+            data_directory = file.path(tempdir(), "GSE70970"),
+            ssheet_csv = head(targets[["IDFILE"]], 20),
+            id_colname = "IDFILE",
+            housekeeping_predict = TRUE,
+            housekeeping_norm = TRUE
+          )
+        },
+        class = "nacho"
+      )
+    })
+
+    test_that("ssheet_csv as vector without id_colname", {
+      expect_s3_class({
+          load_rcc(
+            data_directory = file.path(tempdir(), "GSE70970"),
+            ssheet_csv = head(targets[["IDFILE"]], 20),
+            housekeeping_predict = TRUE,
+            housekeeping_norm = TRUE
+          )
+        },
+        class = "nacho"
+      )
+    })
+
+    test_that("ssheet_csv as a named vector", {
+      expect_s3_class({
+          load_rcc(
+            data_directory = file.path(tempdir(), "GSE70970"),
+            ssheet_csv = `names<-`(
+              head(targets[["IDFILE"]], 20),
+              head(letters, 20)
+            ),
+            # id_colname = "IDFILE",
+            housekeeping_predict = TRUE,
+            housekeeping_norm = TRUE
+          )
+        },
+        class = "nacho"
+      )
+    })
+
+    test_that("id_colname not defined when using df", {
+      expect_error({
+        load_rcc(
+          data_directory = file.path(tempdir(), "GSE70970"),
+          ssheet_csv = head(targets, 20),
+          housekeeping_predict = TRUE,
+          housekeeping_norm = TRUE
+        )
+      })
     })
   }
 }
@@ -196,7 +251,7 @@ test_that("Too high number of components", {
       id_colname = "IDFILE",
       n_comp = 1000
     )
-  }, "nacho", "has been set to")
+  }, "has been set to")
 })
 
 

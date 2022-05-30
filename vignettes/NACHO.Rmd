@@ -32,8 +32,8 @@ knitr::opts_chunk$set(
   # tidy = FALSE,
   # crop = TRUE,
   # autodep = TRUE,
-  fig.align = 'center',
-  fig.pos = '!h',
+  fig.align = "center",
+  fig.pos = "!h",
   cache = FALSE
 )
 ```
@@ -58,7 +58,6 @@ remotes::install_github("mcanouil/NACHO")
 library(NACHO)
 ```
 
-
 # Overview 
 
 ```{r, echo = FALSE, results = "asis"}
@@ -73,7 +72,6 @@ print(citation("NACHO"), "html")
 print(citation("NACHO"), "bibtex")
 ```
 
-
 # An example
 
 To display the usage and utility of *NACHO*, we show three examples in which the above mentioned functions are used and the results are briefly examined.
@@ -85,9 +83,7 @@ In the third example, we use the summarised dataset from the second example to c
 Besides creating interactive visualisations, *NACHO* also identifies poorly performing samples which can be seen under the Outlier Table tab in the interactive web application.  
 While calling `normalise()`, the user has the possibility to remove these outliers before size factor calculation.
 
-
 ## Get NanoString nCounter data
-
 
 ### Presummarised data from *NACHO*
 
@@ -104,7 +100,6 @@ visualise(GSE74821)
 knitr::include_graphics(path = "README-visualise.png")
 ```
 
-
 ### Raw data from GEO
 
 Numerous NanoString nCounter datasets are available from GEO [@barrett_ncbi_2013].  
@@ -112,7 +107,7 @@ In this example, we use a mRNA dataset from the study of @bruce_identification_2
 The data is extracted and prepared using the following code.
 
 ```{r geo-down, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
-gse <- try({GEOquery::getGEO("GSE70970")}, silent = TRUE)
+gse <- try(GEOquery::getGEO("GSE70970"), silent = TRUE)
 if (inherits(gse, "try-error")) { # when GEOquery is down
   cons <- showConnections(all = TRUE)
   icons <- which(grepl("GSE70970", cons[, "description"])) - 1
@@ -127,24 +122,22 @@ if (inherits(gse, "try-error")) { # when GEOquery is down
 library(GEOquery)
 # Download data
 gse <- getGEO("GSE70970")
-# Get phenotypes
-targets <- pData(phenoData(gse[[1]]))
 getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
 # Unzip data
 untar(
-  tarfile = file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"), 
+  tarfile = file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"),
   exdir = file.path(tempdir(), "GSE70970", "Data")
 )
-# Add IDs
+# Get phenotypes and add IDs
+targets <- pData(phenoData(gse[[1]]))
 targets$IDFILE <- list.files(file.path(tempdir(), "GSE70970", "Data"))
 ```
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE, eval = !inherits(gse, "try-error")}
-tibble::as_tibble(dplyr::select(targets, "IDFILE", dplyr::everything()))
+targets[1:5, unique(c("IDFILE", names(targets)))]
 ```
 
-After we extracted the dataset to the `` `r file.path(tempdir(), "GSE70970", "Data")` `` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or use as is.  
-
+After we extracted the dataset to the `` `r file.path(tempdir(), "GSE70970", "Data")` `` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or use as is.
 
 ## The `load_rcc()` function
  
@@ -159,7 +152,7 @@ GSE70970_sum <- load_rcc(
   housekeeping_genes = NULL, # Custom list of housekeeping genes
   housekeeping_predict = TRUE, # Whether or not to predict the housekeeping genes
   normalisation_method = "GEO", # Geometric mean or GLM
-  n_comp = 5 # Number indicating how many principal components should be computed. 
+  n_comp = 5 # Number indicating how many principal components should be computed.
 )
 ```
 
@@ -167,19 +160,18 @@ GSE70970_sum <- load_rcc(
 unlink(file.path(tempdir(), "GSE70970"), recursive = TRUE)
 ```
 
-
 ## The `visualise()` function
 
 When the summarisation is done, the summarised (or normalised) data can be visualised using the `visualise()` function as can be seen in the following chunk of code.
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 visualise(GSE70970_sum)
 ```
 
 The sidebar includes widgets to control quality-control thresholds. 
 These widgets differ according to the selected tab. 
 Each sample in the plots can be coloured based on either technical specifications which are included in the RCC files or based on specifications of your own choosing, though these specifications need to be included in the samplesheet.
-
 
 ## The `normalise()` function
 
@@ -194,14 +186,14 @@ print(GSE70970_sum[["housekeeping_genes"]])
 
 ```{r intext, eval = !inherits(gse, "try-error"), echo = FALSE, results = "asis"}
 cat(
-  "Let's say _", GSE70970_sum[["housekeeping_genes"]][1], 
-  "_ and _", GSE70970_sum[["housekeeping_genes"]][2], 
+  "Let's say _", GSE70970_sum[["housekeeping_genes"]][1],
+  "_ and _", GSE70970_sum[["housekeeping_genes"]][2],
   "_ are not suitable, therefore, you want to exclude these genes from the normalisation process.",
   sep = ""
 )
 ```
 
-```{r ex6, eval = !inherits(gse, "try-error")}
+```{r, eval = !inherits(gse, "try-error")}
 my_housekeeping <- GSE70970_sum[["housekeeping_genes"]][-c(1, 2)]
 print(my_housekeeping)
 ```
@@ -222,7 +214,7 @@ GSE70970_norm <- normalise(
   housekeeping_genes = my_housekeeping,
   housekeeping_predict = FALSE,
   housekeeping_norm = TRUE,
-  normalisation_method = "GEO", 
+  normalisation_method = "GEO",
   remove_outliers = TRUE
 )
 ```
@@ -230,17 +222,16 @@ GSE70970_norm <- normalise(
 `normalise()` returns a `list` object (same as `load_rcc()`) with `raw_counts` and `normalised_counts` slots filled with the raw and normalised counts. 
 Both counts are also in the *NACHO* data.frame.
 
-
 ## The `autoplot()` function
 
 The `autoplot()` function provides an easy way to plot any quality-control from the `visualise()` function.
 
 ```{r, eval = FALSE}
 autoplot(
-  object = GSE74821, 
+  object = GSE74821,
   x = "BD",
-  colour = "CartridgeID", 
-  size = 0.5, 
+  colour = "CartridgeID",
+  size = 0.5,
   show_legend = TRUE
 )
 ```
@@ -291,7 +282,6 @@ for (imetric in seq_along(metrics)) {
 }
 ```
 
-
 ## NACHO as a standalone app
 
 *NACHO* is also available as a standalone app to be used in a shiny server configuration.
@@ -311,10 +301,9 @@ shiny::runApp(system.file("app", package = "NACHO"))
 knitr::include_graphics(path = "README-app.png")
 ```
 
-
 ## The `render()` function
 
-The `render()` function renders (using `print(..., echo = TRUE)` a comprehensive HTML report 
+The `render()` function renders a comprehensive HTML report, using `print(..., echo = TRUE)`,
 which includes all quality-control metrics and description of those metrics.
 
 ```{r, eval = FALSE}
@@ -333,16 +322,13 @@ The underneath function `print()` can be used directly within any Rmarkdown chun
 
 ```{r print, results = "asis"}
 print(
-  x = GSE74821, 
-  colour = "CartridgeID", 
-  size = 0.5, 
-  show_legend = TRUE, 
-  echo = TRUE, 
+  x = GSE74821,
+  colour = "CartridgeID",
+  size = 0.5,
+  show_legend = TRUE,
+  echo = TRUE,
   title_level = 3
 )
 ```
 
-
-
 # References
-

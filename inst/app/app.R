@@ -1,9 +1,9 @@
-suppressPackageStartupMessages({invisible(
+suppressPackageStartupMessages(invisible(
   sapply(
-    X = c("shiny", "shinyWidgets", "utils", "rlang", "ggplot2", "purrr", "dplyr", "tidyr", "NACHO"),
+    X = c("shiny", "shinyWidgets", "utils", "ggplot2", "NACHO"),
     FUN = library, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE
   )
-)})
+))
 
 source("utils.R")
 
@@ -22,7 +22,7 @@ ui <- shiny::tagList(
     selected = "qc_metrics",
     shiny::tabPanel("Upload RCC Files", icon = shiny::icon("file-upload"), value = "upload-tab",
       shiny::fluidRow(
-        shiny::column(width = 6,
+        shiny::column(width = 4,
           card(title = "Normalisation Settings", body = {
             shiny::radioButtons("norm_method",
               label = shiny::tags$span(
@@ -38,11 +38,29 @@ ui <- shiny::tagList(
             )
           })
         ),
-        shiny::column(width = 6,
+        shiny::column(width = 4,
           card(title = "Upload RCC Files", body = {
             shiny::fileInput("rcc_files", "Choose One or Several RCC Files",
               multiple = TRUE,
               accept = c(".RCC", "application/zip")
+            )
+          })
+        ),
+        shiny::column(width = 4,
+          card(title = "Upload Sample Sheet (Optionnal)", body = {
+            shiny::fileInput("ssheet_file",
+              label = shiny::tags$span(
+                "Choose one csv file",
+                shiny::helpText(
+                  "(Must contains \"IDFILE\",",
+                  shiny::tags$i("i.e."),
+                  "\"BASENAME.RCC\", and optionnally \"plexset_id\",",
+                  shiny::tags$i("i.e."),
+                  ", \"S1\", \"S2\", ...)"
+                )
+              ),
+              multiple = FALSE,
+              accept = ".csv"
             )
           })
         )
@@ -133,7 +151,10 @@ ui <- shiny::tagList(
       plotInputUI("Normalisation Result", right = TRUE)
     ),
     shiny::tabPanel(title = "Outliers", value = "outliers-tab",
-      card(title = shiny::tags$h4("Outliers List"), list(shiny::uiOutput("outliers-thresholds"), shiny::tableOutput("outliers")))
+      card(
+        title = shiny::tags$h4("Outliers List"),
+        body = list(shiny::uiOutput("outliers-thresholds"), shiny::tableOutput("outliers"))
+      )
     ),
     shiny::tabPanel("About", icon = shiny::icon("info"), value = "about-tab",
       shiny::tags$p(shiny::includeMarkdown("www/about-nacho.md"))
@@ -148,17 +169,17 @@ server <- function(input, output, session) {
 
     targets <- shiny::req(input$rcc_files)
     if (nrow(targets) > 0) {
-      targets <- purrr::pmap_df(
-        .l = targets[, c("name", "datapath", "type")],
-        .f = function(name, datapath, type) {
+      targets <- do.call("rbind.data.frame", lapply(
+        X = targets[, c("name", "datapath", "type")],
+        FUN = function(name, datapath, type) {
           if (type == "application/x-zip-compressed") {
-            ex_dir <- file.path(dirname(datapath), gsub(".zip$", "", name))
+            ex_dir <- file.path(dirname(datapath), sub(".zip$", "", name))
             utils::unzip(datapath, exdir = ex_dir)
             data.frame(
-              name = file.path(gsub(".zip$", "", name), list.files(ex_dir)),
+              name = file.path(sub(".zip$", "", name), list.files(ex_dir)),
               datapath = list.files(ex_dir, full.names = TRUE),
               type = type,
-              IDFILE = file.path(gsub(".zip$", "", name), list.files(ex_dir)),
+              IDFILE = file.path(sub(".zip$", "", name), list.files(ex_dir)),
               stringsAsFactors = FALSE
             )
           } else {
@@ -171,17 +192,49 @@ server <- function(input, output, session) {
             )
           }
         }
-      )
+      ))
 
-      check_multiplex <- all(purrr::map_lgl(targets$datapath, ~ any(grepl("Endogenous8s", readLines(.x)))))
+      check_multiplex <- all(sapply(targets$datapath, function(.x) any(grepl("Endogenous8s", readLines(.x)))))
       if (check_multiplex) {
-        targets$plexset_id <- rep(list(paste0("S", 1:8)), each = nrow(targets))
-        targets <- as.data.frame(tidyr::unnest(targets, "plexset_id"))
+        targets$plexset_id <- rep(paste0("S", seq_len(8)), each = length(targets$datapath))
+      }
+
+      targets_ssheet <- shiny::req(input$ssheet_file)
+      if (nrow(targets_ssheet) > 0) {
+        ssheet_dt <- data.table::fread(targets_ssheet[["datapath"]])
+      }
+
+      if (any(grepl("^IDFILE$", names(ssheet_dt)))) {
+        if (check_multiplex) {
+          if (any(grepl("^plexset_id$", names(ssheet_dt)))) {
+            targets <- merge(
+              x = targets,
+              y = ssheet_dt,
+              by = c("IDFILE", "plexset_id")
+            )
+          } else {
+            warning(
+              "[NACHO] Missing \"plexset_id\" column in sample sheet file!\n",
+              "  Sample sheet file is discarded."
+            )
+          }
+        } else {
+          targets <- merge(
+            x = targets,
+            y = ssheet_dt,
+            by = "IDFILE"
+          )
+        }
+      } else {
+        warning(
+          "[NACHO] Missing \"IDFILE\" column in sample sheet file!\n",
+          "  Sample sheet file is discarded."
+        )
       }
 
       suppressMessages(
         NACHO::load_rcc(
-          data_directory = unique(purrr::map2_chr(targets$IDFILE, targets$datapath, ~ gsub(.x, "", .y))),
+          data_directory = unique(mapply(FUN = function(.x, .y) sub(.x, "", .y), targets$IDFILE, targets$datapath)),
           ssheet_csv = targets,
           id_colname = "IDFILE",
           normalisation_method =  input[["norm_method"]]
@@ -190,7 +243,7 @@ server <- function(input, output, session) {
     }
   })
 
-  output$rcc_contents <- shiny::renderTable({ shiny::req(input$rcc_files) })
+  output$rcc_contents <- shiny::renderTable(shiny::req(input$rcc_files))
   output$rcc_contents_summary <- shiny::renderUI({
     rcc_size <- sum(input$rcc_files[, "size"])
     class(rcc_size) <- "object_size"
@@ -226,14 +279,15 @@ server <- function(input, output, session) {
   # Global UI input
   shiny::observe({
     nacho_tmp <- nacho_custom()
-    purrr::map(
-      .x = c(
+    lapply(
+      X = c(
         "bd", "fov", "pcl", "lod",
         "pp", "np", "hgp", "cpe",
         "acvbd", "acvmc", "pca", "pcai",
         "pfvnf", "hgf", "nr"
       ),
-      .f = ~ plotInput(.x, nacho_tmp)
+      F = plotInput,
+      nacho = nacho_tmp
     )
   })
 
@@ -264,14 +318,21 @@ server <- function(input, output, session) {
   })
 
   ## Help for QC metrics
-  purrr::map(
-    .x = c("Binding Density", "Field of View", "Positive Control Linearity", "Limit of Detection", "Positive Factor", "Housekeeping Genes Factor"),
-    .f = function(.x) {
-      short_x <- tolower(gsub('\\b(\\pL)\\pL|.', '\\U\\1', .x, perl = TRUE))
+  lapply(
+    X = c(
+      "Binding Density",
+      "Field of View",
+      "Positive Control Linearity",
+      "Limit of Detection",
+      "Positive Factor",
+      "Housekeeping Genes Factor"
+    ),
+    FUN = function(.x) {
+      short_x <- tolower(sub("\\b(\\pL)\\pL|.", "\\U\\1", .x, perl = TRUE))
       shiny::observeEvent(input[[paste0("about_", short_x)]], {
         shiny::showModal(shiny::modalDialog(
           title = .x,
-          shiny::tags$p(shiny::includeMarkdown(paste0("www/about-", short_x,".md"))),
+          shiny::tags$p(shiny::includeMarkdown(paste0("www/about-", short_x, ".md"))),
           easyClose = TRUE
         ))
       })
@@ -316,27 +377,46 @@ server <- function(input, output, session) {
       "Positive_factor", "House_factor"
     ), colnames(nacho_custom()$nacho))
     unique(
-      nacho_custom()$nacho[which(nacho_custom()$nacho[["is_outlier"]]), columns_qc]
+      nacho_custom()$nacho[
+        (is_outlier),
+        .SD,
+        .SDcols = columns_qc
+      ]
     )
   })
-  output[["outliers"]] <- shiny::renderTable({ outliers_list() })
+  output[["outliers"]] <- shiny::renderTable(outliers_list())
   output[["outliers-thresholds"]] <- shiny::renderUI({
     ot <- lapply(nacho_custom()$outliers_thresholds, round, digits = 3)
     shiny::tags$div(
       shiny::tags$ul(
         shiny::tags$li(
-          'Binding Density (', shiny::tags$code("BD"), ') <', shiny::tags$strong(min(ot[["BD"]])),
-          'or Binding Density (', shiny::tags$code("BD"), ') >', shiny::tags$strong(max(ot[["BD"]]))
+          "Binding Density (", shiny::tags$code("BD"), ") <",
+          shiny::tags$strong(min(ot[["BD"]])),
+          "or Binding Density (", shiny::tags$code("BD"), ") >",
+          shiny::tags$strong(max(ot[["BD"]]))
         ),
-        shiny::tags$li('Field of View (', shiny::tags$code("FoV"), ') <', shiny::tags$strong(ot[["FoV"]])),
-        shiny::tags$li('Positive Control Linearity (', shiny::tags$code("PCL"), ') <', shiny::tags$strong(min(ot[["PCL"]]))),
-        shiny::tags$li('Limit of Detection (', shiny::tags$code("LoD"), ') <', shiny::tags$strong(min(ot[["LoD"]]))),
         shiny::tags$li(
-          'Positive Normalisation Dactor (', shiny::tags$code("Positive_factor"), ') <', shiny::tags$strong(min(ot[["Positive_factor"]])),
-          'or Positive Normalisation Dactor (', shiny::tags$code("Positive_factor"), ') >', shiny::tags$strong(max(ot[["Positive_factor"]]))),
+          "Field of View (", shiny::tags$code("FoV"), ") <",
+          shiny::tags$strong(ot[["FoV"]])
+        ),
         shiny::tags$li(
-          'Housekeeping Normalisation Factor (', shiny::tags$code("house_factor"), ') <', shiny::tags$strong(min(ot[["House_factor"]])),
-          'or Housekeeping Normalisation Dactor (', shiny::tags$code("house_factor"), ') >', shiny::tags$strong(max(ot[["House_factor"]]))
+          "Positive Control Linearity (", shiny::tags$code("PCL"), ") <",
+          shiny::tags$strong(min(ot[["PCL"]]))
+        ),
+        shiny::tags$li(
+          "Limit of Detection (", shiny::tags$code("LoD"), ") <",
+          shiny::tags$strong(min(ot[["LoD"]]))
+        ),
+        shiny::tags$li(
+          "Positive Normalisation Dactor (", shiny::tags$code("Positive_factor"),
+          ") <", shiny::tags$strong(min(ot[["Positive_factor"]])),
+          "or Positive Normalisation Dactor (", shiny::tags$code("Positive_factor"),
+          ") >", shiny::tags$strong(max(ot[["Positive_factor"]]))),
+        shiny::tags$li(
+          "Housekeeping Normalisation Factor (", shiny::tags$code("house_factor"),
+          ") <", shiny::tags$strong(min(ot[["House_factor"]])),
+          "or Housekeeping Normalisation Dactor (", shiny::tags$code("house_factor"),
+          ") >", shiny::tags$strong(max(ot[["House_factor"]]))
         )
       )
     )
@@ -346,24 +426,24 @@ server <- function(input, output, session) {
   shiny::observe({
     if (!inherits(nacho_object, "nacho") & is.null(input$rcc_files)) {
       shiny::showTab("main-menu", target = "upload-tab", select = TRUE)
-      purrr::map(
-        .x = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
-        .f = ~ shiny::hideTab("main-menu", target = .x)
+      lapply(
+        X = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
+        FUN = function(.x) shiny::hideTab("main-menu", target = .x)
       )
     }
 
     if (inherits(nacho_object, "nacho") & is.null(input$rcc_files)) {
-      purrr::map(
-        .x = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
-        .f = ~ shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
+      lapply(
+        X = paste0(c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
+        FUN = function(.x) shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
       )
       shiny::hideTab("main-menu", target = "upload-tab")
     }
 
     if (!is.null(input$rcc_files)) {
-      purrr::map(
-        .x = paste0(c("upload", "qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
-        .f = ~ shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
+      lapply(
+        X = paste0(c("upload", "qc_metrics", "qc_control", "qc_count", "norm", "outliers"), "-tab"),
+        FUN = function(.x) shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
       )
     }
 

@@ -93,8 +93,8 @@ visualise(GSE74821)
 <p>
 Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 “NACHO: an R package for quality control of NanoString nCounter data.”
-<em>Bioinformatics</em>. ISSN 1367-4803, doi:
-<a href="https://doi.org/10.1093/bioinformatics/btz647">10.1093/bioinformatics/btz647</a>.
+<em>Bioinformatics</em>. ISSN 1367-4803,
+<a href="https://doi.org/10.1093/bioinformatics/btz647">doi:10.1093/bioinformatics/btz647</a>.
 </p>
 
     @Article{,
@@ -108,6 +108,8 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
       doi = {10.1093/bioinformatics/btz647},
     }
 
+------------------------------------------------------------------------
+
 ## Getting help
 
 If you encounter a clear bug, please file a minimal reproducible example
@@ -115,8 +117,9 @@ on [github](https://github.com/mcanouil/NACHO/issues).
 For questions and other discussion, please contact the package
 maintainer.
 
-------------------------------------------------------------------------
+## Code of Conduct
 
-Please note that this project is released with a [Contributor Code of
-Conduct](https://github.com/mcanouil/NACHO/blob/main/.github/CODE_OF_CONDUCT.md).  
-By participating in this project you agree to abide by its terms.
+Please note that the `eggla` project is released with a [Contributor
+Code of
+Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).  
+By contributing to this project, you agree to abide by its terms.

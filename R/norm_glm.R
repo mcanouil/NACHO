@@ -16,11 +16,15 @@ norm_glm <- function(data) {
       y <- .data[["Count"]] + 1
       check_name <- grepl("^[^(]*\\((.*)\\)$", .data[["Name"]])
       if (all(check_name)) {
-        x <- as.numeric(gsub("^[^(]*\\((.*)\\)$", "\\1", .data[["Name"]]))
+        x <- as.numeric(sub("^[^(]*\\((.*)\\)$", "\\1", .data[["Name"]]))
       } else {
-        x <- c(NEG = 0, POS = 32)[gsub("(NEG).*|(POS).*", "\\1\\2", .data[["Name"]])]
+        x <- c(NEG = 0, POS = 32)[sub("(NEG).*|(POS).*", "\\1\\2", .data[["Name"]])]
       }
-      stats::glm(y ~ x, family = stats::poisson(link = "identity"))$coeff[c(1, 2)]
+      stats::glm(
+        formula = y ~ x,
+        family = stats::poisson(link = "identity"),
+        data = data.frame(x, y)
+      )$coeff[c(1, 2)]
     }
   )
   cat("\n")
@@ -30,4 +34,3 @@ norm_glm <- function(data) {
     positive_factor = mean(glms[2, ]) / glms[2, ]
   )
 }
-
