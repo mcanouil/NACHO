@@ -1,8 +1,8 @@
-# NACHO (development version)
+# NACHO 2.0.0
 
 ## Major (breaking) changes
 
-- Refactor to use `data.table` instead of `dplyr`/`tidyr`/`purr`.
+- Refactor to use `data.table` instead of `dplyr`/`tidyr`/`purrr`.
 
 ## Features
 
@@ -13,14 +13,8 @@
 
 - In `DESCRIPTION`,
   - Remove dependencies.
-- In `R/print.R`,
-  - New argument "xaringan" to format the output according to xaringan conventions.
-- In `R/load_rcc.R`,
-  - Remove `summari[sz]e` functions.
-- In `R/render.R`,
-  - Remove `sessioninfo` dependency.
-- In `R/autoplot.R`,
-  - Remove `scales` dependency.
+
+Full Changelog: https://github.com/mcanouil/NACHO/compare/v1.1.0...v2.0.0
 
 # NACHO 1.1.0
 
