@@ -158,7 +158,7 @@ load_rcc <- function(
     type_set <- "n1"
     nacho_df <- nacho_df[
       j = data.table::rbindlist(lapply(X = file_path, FUN = read_rcc)),
-      by = c(id_colname, "file_path")
+      by = c(unique(c(id_colname, "file_path", names(nacho_df))))
     ]
     nacho_df <- nacho_df[
       j = unlist(Code_Summary, recursive = FALSE),
