@@ -20,3 +20,7 @@ test_that("numeric column for colour", {
   GSE74821$nacho$channel_count <- as.numeric(GSE74821$nacho$channel_count)
   expect_null(print.nacho(GSE74821, colour = "channel_count", echo = TRUE))
 })
+
+test_that("xaringan", {
+  expect_null(print.nacho(GSE74821, xaringan = TRUE, echo = TRUE))
+})

@@ -268,3 +268,16 @@ test_that("plexset", {
     class = "nacho"
   )
 })
+
+test_that("heterogenous", {
+  expect_error({
+      load_rcc(
+        data_directory = ".",
+        ssheet_csv = plexset_salmon_tidy,
+        id_colname = "IDFILE",
+        housekeeping_predict = TRUE,
+        housekeeping_norm = TRUE
+      )
+    }
+  )
+})

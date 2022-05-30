@@ -29,4 +29,12 @@ salmon_nacho <- load_rcc(
   id_colname = "IDFILE"
 )
 
+rcc_files_directory <- "testthat"
+plexset_salmon_tidy <- data.frame(stringsAsFactors = FALSE,
+  name = list.files(rcc_files_directory, pattern = "\\.RCC", recursive = TRUE),
+  datapath = list.files(rcc_files_directory, full.names = TRUE, pattern = "\\.RCC", recursive = TRUE),
+  IDFILE = basename(list.files(rcc_files_directory, full.names = TRUE, pattern = "\\.RCC", recursive = TRUE)),
+  plexset_id = rep(paste0("S", seq_len(8)), each = length(list.files(rcc_files_directory, pattern = "\\.RCC", recursive = TRUE)))
+)
+
 test_check("NACHO")
