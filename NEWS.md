@@ -1,5 +1,14 @@
 # NACHO (development version)
 
+## Major (breaking) changes
+
+- Refactor to use `data.table` instead of `dplyr`/`tidyr`/`purr`.
+
+## Features
+
+- Ensure RCC files are homogeneous in terms of versions. [#20](https://github.com/mcanouil/NACHO/issues/20)
+- Allow to use vector of file paths, named or not. [#33](https://github.com/mcanouil/NACHO/issues/33)
+
 ## Minor improvements and fixes
 
 - In `DESCRIPTION`,
