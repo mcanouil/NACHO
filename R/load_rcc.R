@@ -167,6 +167,31 @@ load_rcc <- function(
   }
   cat("\n")
 
+  nanostring_versions <- nacho_df[
+    j = unique(.SD),
+    .SDcols = c("Header.header_FileVersion", "Header.header_SoftwareVersion")
+  ]
+  if (nrow(nanostring_versions) > 1) {
+    stop(
+      "[NACHO] Multiple Nanostring file/software versions detected.\n",
+      "  Please provide a set of files with the same version.\n",
+      paste(
+        sapply(
+          X = c("Header.header_FileVersion", "Header.header_SoftwareVersion"),
+          FUN = function(x) {
+            sprintf(
+              "  - %s: '%s'",
+              sub("Header.header_", "", x),
+              paste(nanostring_versions[[x]], collapse = "', '")
+            )
+          },
+          USE.NAMES = FALSE
+        ),
+        collapse = "\n"
+      )
+    )
+  }
+
   message("[NACHO] Performing QC and formatting data.")
   has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
   if (!has_hkg & is.null(housekeeping_genes) & !housekeeping_predict & housekeeping_norm) {
