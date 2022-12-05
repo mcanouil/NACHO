@@ -1,0 +1,1 @@
+**Positive Factor** (**PF**) is a normalisation factor computed based on positive probes **POS_X**.
