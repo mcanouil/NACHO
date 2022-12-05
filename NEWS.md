@@ -1,3 +1,13 @@
+# NACHO 2.0.2
+
+## Chores
+
+- In `DESCRIPTION`,
+  - chore: update email address.
+- chore: remove `ggbeeswarm`.
+
+**Full Changelog**: <https://github.com/mcanouil/NACHO/compare/v2.0.1...v2.0.2>
+
 # NACHO 2.0.1
 
 ## Chores
