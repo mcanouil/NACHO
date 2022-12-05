@@ -2,7 +2,7 @@
 title: 'NACHO'
 subtitle: "A NAnostring quality Control dasHbOard"
 author: "Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D."
-email: "***REMOVED***"
+email: "mickael.canouil@cnrs.fr"
 date: '`r format(Sys.time(), "%B %d, %Y")`'
 bibliography: nacho.bib
 link-citations: true

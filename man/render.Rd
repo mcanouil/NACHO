@@ -33,7 +33,7 @@ If a path is provided with a filename in \code{output_file} the directory specif
 Please note that any directory path provided will create any necessary directories if they do not exist.}
 
 \item{size}{[\link{numeric}] A numeric controlling point size
-(\code{\link[ggplot2:geom_point]{ggplot2::geom_point()}} or #' \code{\link[ggbeeswarm:geom_beeswarm]{ggbeeswarm::geom_beeswarm()}})
+(\code{\link[ggplot2:geom_point]{ggplot2::geom_point()}}
 or line size (\code{\link[ggplot2:geom_path]{ggplot2::geom_line()}}).}
 
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should

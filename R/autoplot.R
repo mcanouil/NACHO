@@ -314,17 +314,18 @@ plot_metrics <- function(
     {
       if (show_outliers) {
         list(
-          ggbeeswarm::geom_quasirandom(
+          ggplot2::geom_point(
             data = ~ .x[!(is_outlier)],
-            size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE
+            size = size, width = 0.25, na.rm = TRUE,
+            position = ggplot2::position_jitter(width = 0.25)
           ),
-          ggbeeswarm::geom_quasirandom(
+          ggplot2::geom_point(
             data = ~ .x[(is_outlier)],
             size = size * outliers_factor,
             colour = "#b22222",
             width = 0.25,
             na.rm = TRUE,
-            groupOnX = TRUE
+            position = ggplot2::position_jitter(width = 0.25)
           ),
           if (!is.null(outliers_labels)) {
             ggrepel::geom_label_repel(
@@ -336,7 +337,10 @@ plot_metrics <- function(
           }
         )
       } else {
-        ggbeeswarm::geom_quasirandom(size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE)
+        ggplot2::geom_point(
+          size = size, width = 0.25, na.rm = TRUE,
+          position = ggplot2::position_jitter(width = 0.25)
+        )
       }
     } +
     ggplot2::labs(
@@ -443,17 +447,18 @@ plot_cg <- function(
     {
       if (show_outliers) {
         list(
-          ggbeeswarm::geom_quasirandom(
+          ggplot2::geom_point(
             data = ~ .x[!(is_outlier)],
-            size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE
+            size = size, width = 0.25, na.rm = TRUE,
+            position = ggplot2::position_jitter(width = 0.25)
           ),
-          ggbeeswarm::geom_quasirandom(
+          ggplot2::geom_point(
             data = ~ .x[(is_outlier)],
             size = size * outliers_factor,
             colour = "#b22222",
             width = 0.25,
             na.rm = TRUE,
-            groupOnX = TRUE
+            position = ggplot2::position_jitter(width = 0.25)
           ),
           if (!is.null(outliers_labels)) {
             ggrepel::geom_label_repel(
@@ -465,7 +470,10 @@ plot_cg <- function(
           }
         )
       } else {
-        ggbeeswarm::geom_quasirandom(size = size, width = 0.25, na.rm = TRUE, groupOnX = TRUE)
+        ggplot2::geom_point(
+          size = size, width = 0.25, na.rm = TRUE,
+          position = ggplot2::position_jitter(width = 0.25)
+        )
       }
     } +
     ggplot2::scale_y_log10(
