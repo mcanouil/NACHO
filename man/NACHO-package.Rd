@@ -18,7 +18,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Mickaël Canouil \email{mickael.canouil@cnrs.fr} (\href{https://orcid.org/0000-0002-3396-4549}{ORCID})
+\strong{Maintainer}: Mickaël Canouil \email{pro@mickael.canouil.dev} (\href{https://orcid.org/0000-0002-3396-4549}{ORCID})
 
 Authors:
 \itemize{

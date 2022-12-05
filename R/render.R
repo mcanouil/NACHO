@@ -14,7 +14,7 @@
 #'   If a path is provided with a filename in `output_file` the directory specified here will take precedence.
 #'   Please note that any directory path provided will create any necessary directories if they do not exist.
 #' @param size [[numeric]] A numeric controlling point size
-#'   ([`ggplot2::geom_point()`] or #' [`ggbeeswarm::geom_beeswarm()`])
+#'   ([`ggplot2::geom_point()`]
 #'   or line size ([`ggplot2::geom_line()`]).
 #' @param show_legend [[logical]] Boolean to indicate whether the plot legends should
 #'   be plotted (`TRUE`) or not (`FALSE`). Default is `TRUE`.
