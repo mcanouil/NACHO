@@ -12,7 +12,7 @@ NanoString nCounter data are gene expression assays where there is no need for t
 Useful links:
 \itemize{
   \item \url{https://github.com/mcanouil/NACHO/}
-  \item \url{https://m.canouil.fr/NACHO/}
+  \item \url{https://m.canouil.dev/NACHO/}
   \item Report bugs at \url{https://github.com/mcanouil/NACHO/issues}
 }
 
