@@ -1,7 +1,6 @@
-citHeader("To cite NACHO in publications use:")
-
-citEntry(
-  entry = "Article",
+bibentry(
+  bibtype = "Article",
+  header = "To cite NACHO in publications use:",
   title = "{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data",
   author = paste(
     "Mickaël Canouil [aut, cre]",
@@ -19,7 +18,7 @@ citEntry(
   issn = "1367-4803",
   doi = "10.1093/bioinformatics/btz647",
   textVersion = paste(
-    "Canouil, M., Bouland, G. A., Bonnefond, A., Froguel, P., ’t Hart, L. M., & Slieker, R. C. (2019).",
+    "Canouil, M., Bouland, G. A., Bonnefond, A., Froguel, P., 't Hart, L. M., & Slieker, R. C. (2019).",
     '"NACHO: an R package for quality control of NanoString nCounter data".',
     "Bioinformatics (Oxford, England).",
     "doi: 10.1093/bioinformatics/btz647"
