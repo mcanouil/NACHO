@@ -1,5 +1,14 @@
 # NACHO 2.0.3
 
+## Fixes
+
+- In `inst/CITATION`,
+  - fix: convert `citEntry` to `bibentry` from CRAN note.
+
+**Full Changelog**: <https://github.com/mcanouil/NACHO/compare/v2.0.2...v2.0.3>
+
+# NACHO 2.0.3
+
 ## Chores
 
 - In `DESCRIPTION`,
