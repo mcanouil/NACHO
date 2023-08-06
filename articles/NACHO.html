@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">NACHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,7 +80,7 @@ Control dasHbOard</h3>
                         <h4 data-toc-skip class="author">Mickaël
 Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D.</h4>
             
-            <h4 data-toc-skip class="date">April 19, 2023</h4>
+            <h4 data-toc-skip class="date">August 06, 2023</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mcanouil/NACHO/blob/HEAD/vignettes/NACHO.Rmd" class="external-link"><code>vignettes/NACHO.Rmd</code></a></small>
       <div class="d-none name"><code>NACHO.Rmd</code></div>
@@ -392,7 +392,7 @@ following code.</p>
 <span><span class="co">## GSM1824146       3.835728953    T3</span></span>
 <span><span class="co">## GSM1824147       4.292950034    T3</span></span></code></pre>
 <p>After we extracted the dataset to the
-<code>/tmp/RtmpODTK9c/GSE70970/Data</code> directory, a
+<code>/tmp/RtmpZ9ZGGc/GSE70970/Data</code> directory, a
 <code>Samplesheet.csv</code> containing a column with the exact names of
 the files for each sample can be written or use as is.</p>
 </div>
@@ -451,13 +451,13 @@ discovered housekeeping genes are saved in the result object as
 <strong>predicted_housekeeping</strong>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">GSE70970_sum</span><span class="op">[[</span><span class="st">"housekeeping_genes"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">## Error in print(GSE70970_sum[["housekeeping_genes"]]): object 'GSE70970_sum' not found</span></span></code></pre></div>
-<pre><code><span><span class="co">## Error in cat("Let's say _", GSE70970_sum[["housekeeping_genes"]][1], "_ and _", : object 'GSE70970_sum' not found</span></span></code></pre>
+<span><span class="co">## Error in eval(expr, envir, enclos): object 'GSE70970_sum' not found</span></span></code></pre></div>
+<pre><code><span><span class="co">## Error in eval(expr, envir, enclos): object 'GSE70970_sum' not found</span></span></code></pre>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_housekeeping</span> <span class="op">&lt;-</span> <span class="va">GSE70970_sum</span><span class="op">[[</span><span class="st">"housekeeping_genes"</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">## Error in eval(expr, envir, enclos): object 'GSE70970_sum' not found</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">my_housekeeping</span><span class="op">)</span></span>
-<span><span class="co">## Error in print(my_housekeeping): object 'my_housekeeping' not found</span></span></code></pre></div>
+<span><span class="co">## Error in eval(expr, envir, enclos): object 'my_housekeeping' not found</span></span></code></pre></div>
 <p>The next step is the actual normalisation. The first argument
 requires the summary which is created with the <code><a href="../reference/load_rcc.html">load_rcc()</a></code>
 function. The second argument requires a vector of gene names. In this
@@ -478,7 +478,7 @@ In this example, <code>"GLM"</code> is used.</p>
 <span>  normalisation_method <span class="op">=</span> <span class="st">"GEO"</span>,</span>
 <span>  remove_outliers <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">## Error in attr(nacho_object, "RCC_type") %in% c("n1", "n8"): object 'GSE70970_sum' not found</span></span></code></pre></div>
+<span><span class="co">## Error in eval(expr, envir, enclos): object 'GSE70970_sum' not found</span></span></code></pre></div>
 <p><code><a href="../reference/normalise.html">normalise()</a></code> returns a <code>list</code> object (same as
 <code><a href="../reference/load_rcc.html">load_rcc()</a></code>) with <code>raw_counts</code> and
 <code>normalised_counts</code> slots filled with the raw and normalised
@@ -663,7 +663,7 @@ directory of a shiny server.</p>
 <p>The app can also be run directly, without manually summarising and
 normalising RCC files:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"app"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"app"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="README-app.png" width="650px" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
