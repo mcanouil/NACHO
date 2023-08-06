@@ -317,7 +317,7 @@ plot_metrics <- function(
           ggplot2::geom_point(
             data = ~ .x[!(is_outlier)],
             size = size, width = 0.25, na.rm = TRUE,
-            position = ggplot2::position_jitter(width = 0.25)
+            position = ggplot2::position_jitter(width = 0.25, height = 0)
           ),
           ggplot2::geom_point(
             data = ~ .x[(is_outlier)],
@@ -325,7 +325,7 @@ plot_metrics <- function(
             colour = "#b22222",
             width = 0.25,
             na.rm = TRUE,
-            position = ggplot2::position_jitter(width = 0.25)
+            position = ggplot2::position_jitter(width = 0.25, height = 0)
           ),
           if (!is.null(outliers_labels)) {
             ggrepel::geom_label_repel(
@@ -339,7 +339,7 @@ plot_metrics <- function(
       } else {
         ggplot2::geom_point(
           size = size, width = 0.25, na.rm = TRUE,
-          position = ggplot2::position_jitter(width = 0.25)
+          position = ggplot2::position_jitter(width = 0.25, height = 0)
         )
       }
     } +
@@ -450,7 +450,7 @@ plot_cg <- function(
           ggplot2::geom_point(
             data = ~ .x[!(is_outlier)],
             size = size, width = 0.25, na.rm = TRUE,
-            position = ggplot2::position_jitter(width = 0.25)
+            position = ggplot2::position_jitter(width = 0.25, height = 0)
           ),
           ggplot2::geom_point(
             data = ~ .x[(is_outlier)],
@@ -458,7 +458,7 @@ plot_cg <- function(
             colour = "#b22222",
             width = 0.25,
             na.rm = TRUE,
-            position = ggplot2::position_jitter(width = 0.25)
+            position = ggplot2::position_jitter(width = 0.25, height = 0)
           ),
           if (!is.null(outliers_labels)) {
             ggrepel::geom_label_repel(
@@ -472,7 +472,7 @@ plot_cg <- function(
       } else {
         ggplot2::geom_point(
           size = size, width = 0.25, na.rm = TRUE,
-          position = ggplot2::position_jitter(width = 0.25)
+          position = ggplot2::position_jitter(width = 0.25, height = 0)
         )
       }
     } +
