@@ -3,7 +3,7 @@
 ## Fixes
 
 - In `inst/app/www/about-nacho.md`,
-  - fix: <https://shiny.rstudio.com/> moved to <https://shiny.posit.co/>.
+  - fix: shiny[dot]rstudio[dot]com moved to <https://shiny.posit.co/>.
 
 # NACHO 2.0.5
 
