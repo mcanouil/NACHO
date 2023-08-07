@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">NACHO</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,20 +54,20 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="2.0.6" id="nacho-206">NACHO 2.0.6<a class="anchor" aria-label="anchor" href="#nacho-206"></a></h2>
-<div class="section level3">
-<h3 id="fixes-2-0-6">Fixes<a class="anchor" aria-label="anchor" href="#fixes-2-0-6"></a></h3>
-<ul><li>In <code>inst/app/www/about-nacho.md</code>,
-<ul><li>fix: shiny[dot]rstudio[dot]com moved to <a href="https://shiny.posit.co/" class="external-link uri">https://shiny.posit.co/</a>.</li>
-</ul></li>
-</ul></div>
-</div>
-    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.0.5" id="nacho-205">NACHO 2.0.5<a class="anchor" aria-label="anchor" href="#nacho-205"></a></h2>
 <div class="section level3">
 <h3 id="fixes-2-0-5">Fixes<a class="anchor" aria-label="anchor" href="#fixes-2-0-5"></a></h3>
 <ul><li>In <code>R/autoplot.R</code>,
 <ul><li>fix: set <code>height</code> in <code><a href="https://ggplot2.tidyverse.org/reference/position_jitter.html" class="external-link">ggplot2::position_jitter()</a></code> to <code>0</code> to avoid vertical dispersion points. (<a href="https://github.com/mcanouil/NACHO/issues/45" class="external-link">#45</a>)</li>
+</ul></li>
+<li>In <code>inst/app/www/about-nacho.md</code>,
+<ul><li>fix: shiny[dot]rstudio[dot]com moved to <a href="https://shiny.posit.co/" class="external-link uri">https://shiny.posit.co/</a>.</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="tests-2-0-5">Tests<a class="anchor" aria-label="anchor" href="#tests-2-0-5"></a></h3>
+<ul><li>In <code>tests/testthat/test-load_rcc.R</code>,
+<ul><li>fix: add <code><a href="https://testthat.r-lib.org/reference/skip.html" class="external-link">testthat::skip_on_cran()</a></code> to decrease CRAN checks computation time.</li>
 </ul></li>
 </ul><p><strong>Full Changelog</strong>: <a href="https://github.com/mcanouil/NACHO/compare/v2.0.4...v2.0.5" class="external-link uri">https://github.com/mcanouil/NACHO/compare/v2.0.4...v2.0.5</a></p>
 </div>
