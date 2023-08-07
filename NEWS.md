@@ -10,7 +10,7 @@
 ## Tests
 
 - In `tests/testthat/test-load_rcc.R`,
-  - fix: add `testthat::skip_on_cran()` to decrease CRAN checks computation time.
+  - fix: skip tests to decrease CRAN checks computation time.
 
 **Full Changelog**: <https://github.com/mcanouil/NACHO/compare/v2.0.4...v2.0.5>
 
