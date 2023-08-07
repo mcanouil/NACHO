@@ -68,6 +68,7 @@ test_that("no housekeeping norm and prediction", {
 })
 
 test_that("using GEO", {
+  skip_on_cran()
   gse <- try(GEOquery::getGEO(GEO = "GSE74821"), silent = TRUE)
   if (!inherits(gse, "try-error")) {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))

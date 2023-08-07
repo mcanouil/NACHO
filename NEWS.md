@@ -5,6 +5,11 @@
 - In `inst/app/www/about-nacho.md`,
   - fix: shiny[dot]rstudio[dot]com moved to <https://shiny.posit.co/>.
 
+## Tests
+
+- In `tests/testthat/test-load_rcc.R`,
+  - fix: add `testthat::skip_on_cran()` to decrease CRAN checks computation time.
+
 # NACHO 2.0.5
 
 ## Fixes
