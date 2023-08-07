@@ -1,7 +1,7 @@
 Type: Package
 Package: NACHO
 Title: NanoString Quality Control Dashboard
-Version: 2.0.6
+Version: 2.0.5
 Authors@R: 
     c(person(given = "Mickaël",
              family = "Canouil",
