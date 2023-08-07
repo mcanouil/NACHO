@@ -3,6 +3,8 @@ library(NACHO)
 
 # setwd("tests")
 
+if (!identical(Sys.getenv("NOT_CRAN"), "true")) return()
+
 rcc_files_directory <- "testthat/plexset_data"
 plexset_files <- list.files(rcc_files_directory, full.names = TRUE, pattern = "\\.RCC")
 plexset_tidy <- data.frame(stringsAsFactors = FALSE,
