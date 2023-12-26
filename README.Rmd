@@ -4,7 +4,8 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, echo = FALSE}
+```{r}
+#| echo: false
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -55,7 +56,8 @@ if (file.exists(paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"))) {
 
 ## Installation
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 # Install NACHO from CRAN:
 install.packages("NACHO")
 
@@ -66,21 +68,25 @@ remotes::install_github("mcanouil/NACHO")
 
 ## Overview 
 
-```{r, echo = FALSE, results = "asis"}
+```{r}
+#| echo: false
+#| results: asis
 cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep = "\n")
 ```
 
 ### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
-```{r, echo = FALSE}
+```{r}
+#| echo: false
 knitr::include_graphics(sub(".*/man", "man", gif_app))
 ```
 
-
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 visualise(GSE74821)
 ```
 
@@ -88,11 +94,15 @@ visualise(GSE74821)
 
 ## Citing NACHO
 
-```{r, echo = FALSE, results = "asis"}
+```{r}
+#| echo: false
+#| results: asis
 print(citation("NACHO"), "html")
 ```
 
-```{r, echo = FALSE, comment = ""}
+```{r}
+#| echo: false
+#| comment: ""
 print(citation("NACHO"), "bibtex")
 ```
 
