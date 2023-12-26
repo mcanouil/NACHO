@@ -316,14 +316,13 @@ plot_metrics <- function(
         list(
           ggplot2::geom_point(
             data = ~ .x[!(is_outlier)],
-            size = size, width = 0.25, na.rm = TRUE,
+            size = size, na.rm = TRUE,
             position = ggplot2::position_jitter(width = 0.25, height = 0)
           ),
           ggplot2::geom_point(
             data = ~ .x[(is_outlier)],
             size = size * outliers_factor,
             colour = "#b22222",
-            width = 0.25,
             na.rm = TRUE,
             position = ggplot2::position_jitter(width = 0.25, height = 0)
           ),
@@ -338,7 +337,7 @@ plot_metrics <- function(
         )
       } else {
         ggplot2::geom_point(
-          size = size, width = 0.25, na.rm = TRUE,
+          size = size, na.rm = TRUE,
           position = ggplot2::position_jitter(width = 0.25, height = 0)
         )
       }
@@ -449,14 +448,13 @@ plot_cg <- function(
         list(
           ggplot2::geom_point(
             data = ~ .x[!(is_outlier)],
-            size = size, width = 0.25, na.rm = TRUE,
+            size = size, na.rm = TRUE,
             position = ggplot2::position_jitter(width = 0.25, height = 0)
           ),
           ggplot2::geom_point(
             data = ~ .x[(is_outlier)],
             size = size * outliers_factor,
             colour = "#b22222",
-            width = 0.25,
             na.rm = TRUE,
             position = ggplot2::position_jitter(width = 0.25, height = 0)
           ),
@@ -471,7 +469,7 @@ plot_cg <- function(
         )
       } else {
         ggplot2::geom_point(
-          size = size, width = 0.25, na.rm = TRUE,
+          size = size, na.rm = TRUE,
           position = ggplot2::position_jitter(width = 0.25, height = 0)
         )
       }
@@ -1131,7 +1129,7 @@ plot_norm <- function(
     ) +
     ggplot2::geom_line(
       mapping = ggplot2::aes(colour = .data[["Name"]], group = .data[["Name"]]),
-      size = size,
+      linewidth = size,
       na.rm = TRUE
     ) +
     ggplot2::facet_grid(cols = ggplot2::vars(.data[["Status"]])) +

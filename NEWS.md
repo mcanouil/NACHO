@@ -1,3 +1,10 @@
+# NACHO 2.0.6
+
+## Fixes
+
+- In `R/qc_positive_control.R`,
+  - fix: use R-squared instead of Pearson correlation coefficient. ([#48](https://github.com/mcanouil/NACHO/issues/48))
+
 # NACHO 2.0.5
 
 ## Fixes
