@@ -1,8 +1,8 @@
-pandoc: 2.14.2
-pkgdown: 2.0.3
+pandoc: 2.19.2
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   NACHO-analysis: NACHO-analysis.html
   NACHO: NACHO.html
-last_built: 2022-05-31T09:25Z
+last_built: 2024-01-12T19:24Z
 

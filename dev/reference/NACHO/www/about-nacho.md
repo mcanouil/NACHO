@@ -11,7 +11,7 @@ As a result each count of a specific barcode represents the presence of its targ
 With the use of two functions, RCC files are summarised and visualised, namely: `load_rcc()` and `visualise()`.
 
 * The `load_rcc()` function is used to preprocess the data.
-* The `visualise()` function initiates a [Shiny-based dashboard](https://shiny.rstudio.com/) that visualises all relevant QC plots.
+* The `visualise()` function initiates a [Shiny-based dashboard](https://shiny.posit.co/) that visualises all relevant QC plots.
 
 *NACHO* also includes a function `normalise()`, which (re)calculates sample specific size factors and normalises the data.
 
