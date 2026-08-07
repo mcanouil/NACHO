@@ -4,13 +4,20 @@ on:
   push:
     branches: main
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 name: R-CMD-check
 
 jobs:
   r-cmd-check:
     runs-on: ${{ matrix.config.os }}
+    if: ${{ github.event.pull_request.draft != true }}
+    timeout-minutes: 45
 
     name: R CMD check ${{ matrix.config.os }} (${{ matrix.config.r }})
 
