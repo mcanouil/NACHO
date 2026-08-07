@@ -17,6 +17,8 @@ jobs:
     if: github.event_name == 'release' || github.event.workflow_run.conclusion == 'success'
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
 
