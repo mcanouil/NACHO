@@ -100,7 +100,7 @@ render <- function(
     "\n",
     "```{r logo, out.width = 150}",
     "knitr::include_graphics(",
-    '  path = system.file("help", "figures", "nacho_hex.png", package = "NACHO"),',
+    paste0('  path = "', logo_path(), '",'),
     "  rel_path = FALSE",
     ")",
     "```",

@@ -26,8 +26,29 @@ transform_log10_infinite <- function() {
       x[finite] <- log10(x[finite])
       x
     },
-    inverse = function(x) 10^x,
+    inverse = function(x) {
+      finite <- !is.infinite(x)
+      x[finite] <- 10^x[finite]
+      x
+    },
     breaks = scales::breaks_log(base = 10),
     domain = c(1e-100, Inf)
   )
+}
+
+#' Path to the NACHO logo
+#'
+#' Installed packages keep `man/figures` under `help/figures`, while a source
+#' tree loaded with `pkgload::load_all()` keeps it under `man/figures`.
+#'
+#' @keywords internal
+#' @noRd
+#'
+#' @return A `character` path to `nacho_hex.png`.
+logo_path <- function() {
+  path <- system.file("help", "figures", "nacho_hex.png", package = "NACHO")
+  if (nzchar(path)) {
+    return(path)
+  }
+  system.file("man", "figures", "nacho_hex.png", package = "NACHO")
 }
