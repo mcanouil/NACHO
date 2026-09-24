@@ -105,6 +105,7 @@ untar(
 targets <- pData(phenoData(gse[[1]]))
 rcc_files <- list.files(data_directory, pattern = "\\.RCC(\\.gz)?$", ignore.case = TRUE)
 targets$IDFILE <- rcc_files[match(targets$geo_accession, sub("_.*", "", rcc_files))]
+targets <- targets[!is.na(targets$IDFILE), ]
 # Keep the samples measured with the same CodeSet
 codeset <- vapply(
   X = file.path(data_directory, targets$IDFILE),
