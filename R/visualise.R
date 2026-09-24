@@ -7,6 +7,7 @@
 #' @inheritParams normalise
 #'
 #' @importFrom shinyWidgets dropdownButton tooltipOptions
+#' @importFrom markdown mark_html
 #' @export
 #'
 #' @examples
