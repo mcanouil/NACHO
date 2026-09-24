@@ -202,7 +202,6 @@ server <- function(input, output, session) {
         X = targets$datapath,
         FUN = function(.x) any(grepl("Endogenous8s", readLines(.x)))
       ))
-      save(list = ls(), file = "all.rdata")
       if (check_multiplex) {
         targets <- merge(
           x = targets,
