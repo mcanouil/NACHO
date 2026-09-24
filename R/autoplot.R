@@ -1,7 +1,7 @@
 #' Plot quality-control metrics and thresholds of a "nacho" object
 #'
-#' This function allows to plot any qualit-control figures available
-#' within the shiny app using [`visualise()`] or in the HTML report from [`render()`].
+#' This function plots any of the quality-control figures available
+#' within the Shiny app using [`visualise()`] or in the HTML report from [`render()`].
 #'
 #' @inheritParams render
 #' @param object [[list]] List obtained from [`load_rcc()`] or [`normalise()`].

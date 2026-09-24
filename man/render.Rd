@@ -2,7 +2,7 @@
 % Please edit documentation in R/render.R
 \name{render}
 \alias{render}
-\title{Render a HTML report of a "nacho" object}
+\title{Render an HTML report of a "nacho" object}
 \usage{
 render(
   nacho_object,
@@ -34,7 +34,7 @@ Please note that any directory path provided will create any necessary directori
 
 \item{size}{[\link{numeric}] A numeric controlling point size
 (\code{\link[ggplot2:geom_point]{ggplot2::geom_point()}}
-or line size (\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}).}
+or line width (\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}).}
 
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
@@ -47,11 +47,11 @@ in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 \item{outliers_labels}{[\link{character}] Character to indicate which column in \code{nacho_object$nacho}
 should be used to be printed as the labels for outliers or not. Default is \code{NULL}.}
 
-\item{clean}{[\link{logical}] Boolean to indicate whether the Rmd and Rdata file used to produce the HTML report
+\item{clean}{[\link{logical}] Boolean to indicate whether the Rmd and RData files used to produce the HTML report
 are removed from \code{output_dir}. Default is \code{TRUE}.}
 }
 \description{
-This function create a Rmarkdown script and render it as a HTML document.
+This function creates an R Markdown script and renders it as an HTML document.
 The HTML document is a quality-control report using all the metrics from \code{\link[=visualise]{visualise()}}
 based on recommendations from NanoString.
 }

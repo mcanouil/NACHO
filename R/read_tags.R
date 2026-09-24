@@ -1,7 +1,7 @@
 #' read_tags
 #'
 #' @param tag [[character]] A `character` string naming the TAG field in the RCC files.
-#' @param raw_rcc [[character]]  A `character` vector containing all lines from a RCC file.
+#' @param raw_rcc [[character]]  A `character` vector containing all lines from an RCC file.
 #'
 #' @keywords internal
 #' @usage NULL

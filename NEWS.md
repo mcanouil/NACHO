@@ -17,6 +17,17 @@
   - refactor: drop `stringsAsFactors = FALSE` from `data.frame()` and `as.data.frame()` calls, where it is the default since R 4.0.0.
   - refactor: hide boxplot outliers with `outliers = FALSE` instead of `outlier.shape = NA`.
 
+## Documentation
+
+- In `vignettes/`, `README.Rmd` and the `render()` report template,
+  - docs: write chunk options as `#|` YAML comments, which needs knitr 1.35 or newer.
+  - docs: add alternative text to the images.
+  - docs: install the development version with `pak::pak()` instead of `remotes::install_github()`.
+- docs: fix typos and grammar, and spell GitHub, NanoString, R Markdown and Shiny consistently.
+- In `vignettes/`,
+  - docs: keep only the GSE70970 samples measured with the `NS_H_miR_1.4` CodeSet, since its two CodeSets come from different nSolver versions and `load_rcc()` refuses files that mix versions.
+  - docs: attach data.table in the analysis vignette, which uses `dcast()` and `as.data.table()`.
+
 ## Fixes
 
 - In `inst/CITATION`,

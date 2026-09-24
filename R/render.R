@@ -1,6 +1,6 @@
-#' Render a HTML report of a "nacho" object
+#' Render an HTML report of a "nacho" object
 #'
-#' This function create a Rmarkdown script and render it as a HTML document.
+#' This function creates an R Markdown script and renders it as an HTML document.
 #' The HTML document is a quality-control report using all the metrics from [`visualise()`]
 #' based on recommendations from NanoString.
 #'
@@ -15,7 +15,7 @@
 #'   Please note that any directory path provided will create any necessary directories if they do not exist.
 #' @param size [[numeric]] A numeric controlling point size
 #'   ([`ggplot2::geom_point()`]
-#'   or line size ([`ggplot2::geom_line()`]).
+#'   or line width ([`ggplot2::geom_line()`]).
 #' @param show_legend [[logical]] Boolean to indicate whether the plot legends should
 #'   be plotted (`TRUE`) or not (`FALSE`). Default is `TRUE`.
 #' @param show_outliers [[logical]] Boolean to indicate whether the outliers should be highlighted
@@ -23,7 +23,7 @@
 #' @param outliers_factor [[numeric]] Size factor for outliers compared to `size`. Default is `1`.
 #' @param outliers_labels [[character]] Character to indicate which column in `nacho_object$nacho`
 #'   should be used to be printed as the labels for outliers or not. Default is `NULL`.
-#' @param clean [[logical]] Boolean to indicate whether the Rmd and Rdata file used to produce the HTML report
+#' @param clean [[logical]] Boolean to indicate whether the Rmd and RData files used to produce the HTML report
 #'   are removed from `output_dir`. Default is `TRUE`.
 #'
 #' @return NULL
@@ -65,7 +65,6 @@ render <- function(
   cat(
     "---",
     'title: "NanoString Quality-Control Report"',
-    # 'author: "[NACHO](https://mcanouil.github.io/NACHO)"',
     "params:",
     "  nacho_object: NULL",
     "output:",
@@ -83,7 +82,9 @@ render <- function(
     "    df_print: kable",
     "---",
     "\n",
-    "```{r setup, include = FALSE}",
+    "```{r}",
+    "#| label: setup",
+    "#| include: false",
     "knitr::opts_chunk$set(",
     '  results = "asis",',
     "  include = TRUE,",
@@ -95,17 +96,20 @@ render <- function(
     "  autodep = TRUE,",
     '  fig.align = "center"',
     ")",
-    # "library(NACHO)",
     "```",
     "\n",
-    "```{r logo, out.width = 150}",
+    "```{r}",
+    "#| label: logo",
+    "#| out-width: 150px",
+    '#| fig-alt: "NACHO hexagonal logo."',
     "knitr::include_graphics(",
     paste0("  path = ", encodeString(logo_path(), quote = '"'), ","),
     "  rel_path = FALSE",
     ")",
     "```",
     "\n",
-    "```{r nacho-qc}",
+    "```{r}",
+    "#| label: nacho-qc",
     "print.nacho(",
     '  x = params[["nacho_object"]],',
     paste0('  colour = "', colour, '",'),

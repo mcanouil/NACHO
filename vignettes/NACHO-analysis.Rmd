@@ -1,12 +1,12 @@
 ---
 title: 'NACHO Analysis'
-subtitle: "A NAnostring quality Control dasHbOard"
+subtitle: "A NAnoString quality Control dasHbOard"
 author: "Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D."
-email: "mickael.canouil@cnrs.fr"
+email: "pro@mickael.canouil.dev"
 date: '`r format(Sys.time(), "%B %d, %Y")`'
 bibliography: nacho.bib
 link-citations: true
-output: 
+output:
   rmarkdown::html_vignette:
     number_sections: true
     toc: true
@@ -14,55 +14,64 @@ output:
     fig_width: 6.3
     fig_height: 4.7
 vignette: >
-  %\VignetteIndexEntry{NACHO-analysis}
+  %\VignetteIndexEntry{NACHO Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
+```{r}
+#| label: setup
+#| include: false
 knitr::opts_chunk$set(
   eval = TRUE,
   collapse = TRUE,
-  # results = "asis",
   include = TRUE,
   echo = TRUE,
   warning = TRUE,
   message = TRUE,
   error = TRUE,
-  # tidy = FALSE,
-  # crop = TRUE,
-  # autodep = TRUE,
   fig.align = "center",
   cache = FALSE
 )
 ```
 
-```{r logo, echo = FALSE, out.width = "150px"}
+```{r}
+#| label: logo
+#| echo: false
+#| out-width: 150px
+#| fig-alt: "NACHO hexagonal logo."
 knitr::include_graphics(path = "nacho_hex.png")
 ```
 
 # Installation
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 # Install NACHO from CRAN:
 install.packages("NACHO")
 
-# Or the the development version from GitHub:
-# install.packages("remotes")
-remotes::install_github("mcanouil/NACHO")
+# Or the development version from GitHub:
+# install.packages("pak")
+pak::pak("mcanouil/NACHO")
 ```
 
-# Overview 
+# Overview
 
-```{r, echo = FALSE, results = "asis"}
+```{r}
+#| echo: false
+#| results: asis
 cat(readLines(system.file("app", "www", "about-nacho.md", package = "NACHO"))[-c(1, 2)], sep = "\n")
 ```
 
-```{r, echo = FALSE, results = "asis"}
+```{r}
+#| echo: false
+#| results: asis
 print(citation("NACHO"), "html")
 ```
 
-```{r, echo = FALSE, comment = ""}
+```{r}
+#| echo: false
+#| comment: ""
 print(citation("NACHO"), "bibtex")
 ```
 
@@ -72,10 +81,14 @@ print(citation("NACHO"), "bibtex")
 
 ```{r}
 library(NACHO)
+library(data.table)
 library(GEOquery, quietly = TRUE, warn.conflicts = FALSE)
 ```
 
 ## Download `GSE70970` from GEO (or use your own data)
+
+The samples in GSE70970 were measured with two versions of the miRNA CodeSet.
+Each CodeSet was exported by a different nSolver version, and `load_rcc()` refuses files that mix versions, so the code keeps the samples measured with `NS_H_miR_1.4`.
 
 ```{r}
 data_directory <- file.path(tempdir(), "GSE70970", "Data")
@@ -90,7 +103,19 @@ untar(
 )
 # Get phenotypes and add IDs
 targets <- pData(phenoData(gse[[1]]))
-targets$IDFILE <- list.files(data_directory)
+rcc_files <- list.files(data_directory, pattern = "\\.RCC(\\.gz)?$", ignore.case = TRUE)
+targets$IDFILE <- rcc_files[match(targets$geo_accession, sub("_.*", "", rcc_files))]
+targets <- targets[!is.na(targets$IDFILE), ]
+# Keep the samples measured with the same CodeSet
+codeset <- vapply(
+  X = file.path(data_directory, targets$IDFILE),
+  FUN = function(file) {
+    header <- grep("^GeneRLF,", readLines(file, n = 40), value = TRUE)
+    if (length(header) == 0) NA_character_ else header[1]
+  },
+  FUN.VALUE = character(1)
+)
+targets <- targets[codeset %in% "GeneRLF,NS_H_miR_1.4", ]
 ```
 
 ## Import RCC files
@@ -115,7 +140,8 @@ selected_pheno <- GSE70970[["nacho"]][
 selected_pheno <- na.exclude(selected_pheno)
 ```
 
-```{r, echo = FALSE}
+```{r}
+#| echo: false
 head(selected_pheno)
 ```
 
@@ -132,13 +158,15 @@ expr_counts <- GSE70970[["nacho"]][
 ]
 ```
 
-```{r, echo = FALSE}
+```{r}
+#| echo: false
 expr_counts[1:5, 1:5]
 ```
 
 Alternatively, `"Accession"` number is also available.
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 GSE70970[["nacho"]][
   i = grepl("Endogenous", CodeClass),
   j = as.matrix(

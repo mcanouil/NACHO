@@ -42,13 +42,13 @@ if (file.exists(paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"))) {
 }
 ```
 
-# NAnostring quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" />
+# NAnoString quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" alt="NACHO hexagonal logo" />
 
 <!-- badges: start -->
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![GitHub tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest tag&include_prereleases)](https://github.com/mcanouil/NACHO)
 [![codecov](https://codecov.io/gh/mcanouil/NACHO/branch/main/graph/badge.svg)](https://app.codecov.io/gh/mcanouil/NACHO?branch=main)
-[![R-CMD-check](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO/actions)
+[![R-CMD-check](https://github.com/mcanouil/NACHO/actions/workflows/check-pak.yaml/badge.svg)](https://github.com/mcanouil/NACHO/actions/workflows/check-pak.yaml)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
 [![cran checks_worst](https://badges.cranchecks.info/worst/NACHO.svg)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
 [![CRAN_Download_total](https://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
@@ -62,11 +62,11 @@ if (file.exists(paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"))) {
 install.packages("NACHO")
 
 # Or the development version from GitHub:
-# install.packages("remotes")
-remotes::install_github("mcanouil/NACHO")
+# install.packages("pak")
+pak::pak("mcanouil/NACHO")
 ```
 
-## Overview 
+## Overview
 
 ```{r}
 #| echo: false
@@ -80,8 +80,10 @@ cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep 
 #| eval: false
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
+
 ```{r}
 #| echo: false
+#| fig-alt: "NACHO Shiny application in use."
 knitr::include_graphics(sub(".*/man", "man", gif_app))
 ```
 
@@ -90,7 +92,11 @@ knitr::include_graphics(sub(".*/man", "man", gif_app))
 visualise(GSE74821)
 ```
 
-![](man/figures/README-visualise.png)
+```{r}
+#| echo: false
+#| fig-alt: "NACHO interactive dashboard showing quality-control plots for the GSE74821 dataset."
+knitr::include_graphics("man/figures/README-visualise.png")
+```
 
 ## Citing NACHO
 
@@ -110,7 +116,7 @@ print(citation("NACHO"), "bibtex")
 
 ## Getting help
 
-If you encounter a clear bug, please file a minimal reproducible example on [github](https://github.com/mcanouil/NACHO/issues).  
+If you encounter a clear bug, please file a minimal reproducible example on [GitHub](https://github.com/mcanouil/NACHO/issues).  
 For questions and other discussion, please contact the package maintainer.
 
 ## Code of Conduct

@@ -26,7 +26,7 @@ or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
 
 \item{size}{[\link{numeric}] A numeric controlling point size
 (\code{\link[ggplot2:geom_point]{ggplot2::geom_point()}}
-or line size (\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}).}
+or line width (\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}).}
 
 \item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
 be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
@@ -40,19 +40,19 @@ in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 should be used to be printed as the labels for outliers or not. Default is \code{NULL}.}
 
 \item{echo}{[\link{logical}] A boolean to indicate whether text and plots should be printed.
-Mainly for use within a Rmarkdown chunk.}
+Mainly for use within an R Markdown chunk.}
 
 \item{title_level}{[\link{numeric}] A numeric to indicate the title level to start with, using markdown style,
 \emph{i.e.}, the number of \code{"#"}.}
 
-\item{xaringan}{[\link{logical}] A boolean to format output for Xaringan slides.}
+\item{xaringan}{[\link{logical}] A boolean to format output for xaringan slides.}
 
 \item{...}{Other arguments (\emph{Not used}).}
 }
 \description{
-This function allows to print text and figures from the results of a call to \code{\link[=load_rcc]{load_rcc()}}
+This function prints text and figures from the results of a call to \code{\link[=load_rcc]{load_rcc()}}
 or \code{\link[=normalise]{normalise()}}.
-It is intended to be used in a Rmarkdown chunk.
+It is intended to be used in an R Markdown chunk.
 }
 \examples{
 

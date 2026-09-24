@@ -121,7 +121,7 @@ load_rcc <- function(
   ]
 
   if (nacho_df[j = !all(sapply(X = file_path, FUN = file.exists))]) {
-    stop('[NACHO] Not all values from "id_colname" are mapped to a RCC file.')
+    stop('[NACHO] Not all values from "id_colname" are mapped to an RCC file.')
   }
 
   if (anyDuplicated(nacho_df[[id_colname]]) != 0 & !"plexset_id" %in% colnames(nacho_df)) {
@@ -173,7 +173,7 @@ load_rcc <- function(
   ]
   if (nrow(nanostring_versions) > 1) {
     stop(
-      "[NACHO] Multiple Nanostring file/software versions detected.\n",
+      "[NACHO] Multiple NanoString file/software versions detected.\n",
       "  Please provide a set of files with the same version.\n",
       paste(
         sapply(

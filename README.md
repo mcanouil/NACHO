@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# NAnostring quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" />
+# NAnoString quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" alt="NACHO hexagonal logo" />
 
 <!-- badges: start -->
 
@@ -10,7 +10,7 @@ stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://
 [![GitHub
 tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest%20tag&include_prereleases)](https://github.com/mcanouil/NACHO)
 [![codecov](https://codecov.io/gh/mcanouil/NACHO/branch/main/graph/badge.svg)](https://app.codecov.io/gh/mcanouil/NACHO?branch=main)
-[![R-CMD-check](https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/NACHO/actions)
+[![R-CMD-check](https://github.com/mcanouil/NACHO/actions/workflows/check-pak.yaml/badge.svg)](https://github.com/mcanouil/NACHO/actions/workflows/check-pak.yaml)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
 [![cran
 checks_worst](https://badges.cranchecks.info/worst/NACHO.svg)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
@@ -24,17 +24,17 @@ checks_worst](https://badges.cranchecks.info/worst/NACHO.svg)](https://cran.r-pr
 install.packages("NACHO")
 
 # Or the development version from GitHub:
-# install.packages("remotes")
-remotes::install_github("mcanouil/NACHO")
+# install.packages("pak")
+pak::pak("mcanouil/NACHO")
 ```
 
 ## Overview
 
-*NACHO* (**NA**nostring quality **C**ontrol das**H**b**O**ard) is
+*NACHO* (**NA**noString quality **C**ontrol das**H**b**O**ard) is
 developed for NanoString nCounter data.  
 NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA)
 expression assay and works with fluorescent barcodes.  
-Each barcode is assigned a mRNA/miRNA, which can be counted after
+Each barcode is assigned an mRNA/miRNA, which can be counted after
 bonding with its target.  
 As a result each count of a specific barcode represents the presence of
 its target mRNA/miRNA.
@@ -65,7 +65,7 @@ functions:
 
 - The `render()` function renders a full quality-control report (HTML)
   based on the results of a call to `load_rcc()` or `normalise()` (using
-  `print()` in a Rmarkdown chunk).
+  `print()` in an R Markdown chunk).
 - The `autoplot()` function draws any quality-control metrics from
   `visualise()` and `render()`.
 
@@ -77,26 +77,27 @@ For more `vignette("NACHO")` and `vignette("NACHO-analysis")`.
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
 
-<img src="man/figures/README-nacho_app.gif" width="100%" />
+<img src="man/figures/README-nacho_app.gif" alt="NACHO Shiny application in use." width="100%" />
 
 ``` r
 visualise(GSE74821)
 ```
 
-![](man/figures/README-visualise.png)
+<img src="man/figures/README-visualise.png" alt="NACHO interactive dashboard showing quality-control plots for the GSE74821 dataset." width="100%" />
 
 ## Citing NACHO
 
 <p>
-Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
-“NACHO: an R package for quality control of NanoString nCounter data.”
-<em>Bioinformatics</em>. ISSN 1367-4803,
+
+Canouil M, Bouland GA, Bonnefond A, Froguel P, ’t Hart LM, Slieker RC
+(2019). “NACHO: an R package for quality control of NanoString nCounter
+data.” <em>Bioinformatics</em>. ISSN 1367-4803.
 <a href="https://doi.org/10.1093/bioinformatics/btz647">doi:10.1093/bioinformatics/btz647</a>.
 </p>
 
     @Article{,
       title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
-      author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen Hart and Roderick Slieker},
+      author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
       journal = {Bioinformatics},
       address = {Oxford, England},
       year = {2019},
@@ -110,7 +111,7 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 ## Getting help
 
 If you encounter a clear bug, please file a minimal reproducible example
-on [github](https://github.com/mcanouil/NACHO/issues).  
+on [GitHub](https://github.com/mcanouil/NACHO/issues).  
 For questions and other discussion, please contact the package
 maintainer.
 
