@@ -6,7 +6,7 @@ library(NACHO)
 if (identical(Sys.getenv("NOT_CRAN"), "true")) {
   rcc_files_directory <- "testthat/plexset_data"
   plexset_files <- list.files(rcc_files_directory, full.names = TRUE, pattern = "\\.RCC")
-  plexset_tidy <- data.frame(stringsAsFactors = FALSE,
+  plexset_tidy <- data.frame(
     name = basename(plexset_files),
     datapath = plexset_files,
     IDFILE = basename(plexset_files),
@@ -20,7 +20,7 @@ if (identical(Sys.getenv("NOT_CRAN"), "true")) {
 
   rcc_files_directory <- "testthat/salmon_data"
   salmon_files <- list.files(rcc_files_directory, full.names = TRUE, pattern = "\\.RCC")
-  salmon_tidy <- data.frame(stringsAsFactors = FALSE,
+  salmon_tidy <- data.frame(
     name = basename(salmon_files),
     datapath = salmon_files,
     IDFILE = basename(salmon_files),
@@ -33,7 +33,7 @@ if (identical(Sys.getenv("NOT_CRAN"), "true")) {
   )
 
   rcc_files_directory <- "testthat"
-  plexset_salmon_tidy <- data.frame(stringsAsFactors = FALSE,
+  plexset_salmon_tidy <- data.frame(
     name = list.files(rcc_files_directory, pattern = "\\.RCC", recursive = TRUE),
     datapath = list.files(rcc_files_directory, full.names = TRUE, pattern = "\\.RCC", recursive = TRUE),
     IDFILE = basename(list.files(rcc_files_directory, full.names = TRUE, pattern = "\\.RCC", recursive = TRUE)),

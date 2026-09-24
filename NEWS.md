@@ -1,5 +1,22 @@
 # NACHO (development version)
 
+## Breaking changes
+
+- In `DESCRIPTION`,
+  - build: require R 4.1.0 or newer, ggplot2 4.0.0 or newer, ggforce 0.5.0 or newer, ggrepel 0.9.6 or newer, and shiny 1.5.0 or newer.
+  - build: require pandoc 2.11 or newer, which has citeproc built in, so pandoc-citeproc is no longer needed.
+
+## Chores
+
+- In `inst/app/`,
+  - refactor: replace the superseded `shiny::callModule()` with `shiny::moduleServer()`.
+  - refactor: use the Font Awesome 6 icon names `file-arrow-up` and `circle-info`.
+- In `inst/CITATION`,
+  - refactor: list the authors as `person()` objects.
+- In `R/`,
+  - refactor: drop `stringsAsFactors = FALSE`, which is the default since R 4.0.0.
+  - refactor: hide boxplot outliers with `outliers = FALSE` instead of `outlier.shape = NA`.
+
 ## Fixes
 
 - In `R/geometric_housekeeping.R`,

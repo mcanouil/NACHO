@@ -77,7 +77,7 @@ plotInputUI <- function(label = NULL, ...) {
           circle = TRUE,
           status = "danger",
           size = "sm",
-          icon = shiny::icon("gear", verify_fa = FALSE),
+          icon = shiny::icon("gear"),
           width = "800px",
           inline = TRUE,
           tooltip = shinyWidgets::tooltipOptions(title = "Click to see inputs!"),
@@ -90,7 +90,7 @@ plotInputUI <- function(label = NULL, ...) {
 }
 
 plotInput <- function(id, nacho) {
-  shiny::callModule(id = id, function(input, output, session) {
+  shiny::moduleServer(id = id, module = function(input, output, session) {
     ns <- session$ns
     font_size <- 80
     output$plot_ui <- shiny::renderUI({

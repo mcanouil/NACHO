@@ -307,7 +307,7 @@ plot_metrics <- function(
     ggplot2::geom_boxplot(
       mapping = ggplot2::aes(group = .data[["CartridgeID"]]),
       fill = NA,
-      outlier.shape = NA,
+      outliers = FALSE,
       na.rm = TRUE,
       show.legend = FALSE
     ) +
@@ -439,7 +439,7 @@ plot_cg <- function(
     ggplot2::geom_boxplot(
       mapping = ggplot2::aes(group = .data[["Name"]]),
       fill = NA,
-      outlier.shape = NA,
+      outliers = FALSE,
       na.rm = TRUE,
       show.legend = FALSE
     ) +

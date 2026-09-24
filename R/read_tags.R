@@ -20,7 +20,7 @@ read_tags <- function(tag, raw_rcc) {
   if (tag != "Code_Summary") {
     tag_content <- format_tag_content(tag = tag, content = tag_content)
   } else {
-    tag_content <- as.data.frame(tag_content, stringsAsFactors = FALSE)
+    tag_content <- as.data.frame(tag_content)
   }
 
   list(tag_content)

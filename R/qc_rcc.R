@@ -118,10 +118,10 @@ qc_rcc <- function(
 
   pcas <- qc_pca(counts = counts_df_tmp, n_comp = n_comp)
 
-  pcsum <- as.data.frame(t(pcas[["pcsum"]]), stringsAsFactors = FALSE)
+  pcsum <- as.data.frame(t(pcas[["pcsum"]]))
   rownames(pcsum) <- pcsum[["PC"]] <- sprintf("PC%02d", as.numeric(sub("PC", "", rownames(pcsum))))
 
-  pcas_pc <- as.data.frame(pcas[["pc"]], stringsAsFactors = FALSE)
+  pcas_pc <- as.data.frame(pcas[["pc"]])
   colnames(pcas_pc) <- sprintf("PC%02d", as.numeric(sub("PC", "", colnames(pcas_pc))))
   pcas_pc[[id_colname]] <- rownames(pcas_pc)
 

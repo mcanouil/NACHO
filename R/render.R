@@ -84,7 +84,6 @@ render <- function(
     "---",
     "\n",
     "```{r setup, include = FALSE}",
-    "options(stringsAsFactors = FALSE)",
     "knitr::opts_chunk$set(",
     '  results = "asis",',
     "  include = TRUE,",
