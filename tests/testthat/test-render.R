@@ -38,3 +38,7 @@ test_that("wrong attribute", {
     expect_error(render(nacho_object = GSE74821, output_dir = tempdir()))
   }
 })
+
+test_that("report logo resolves in installed and source packages", {
+  expect_true(file.exists(NACHO:::logo_path()))
+})

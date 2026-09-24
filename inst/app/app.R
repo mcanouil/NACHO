@@ -192,6 +192,7 @@ server <- function(input, output, session) {
         }
       ))
 
+      ssheet_dt <- NULL
       targets_ssheet <- targets[grep("\\.csv", targets[["name"]]), ]
       if (nrow(targets_ssheet) > 0) {
         targets <- targets[grep("\\.RCC", targets[["name"]]), ]
@@ -202,7 +203,6 @@ server <- function(input, output, session) {
         X = targets$datapath,
         FUN = function(.x) any(grepl("Endogenous8s", readLines(.x)))
       ))
-      save(list = ls(), file = "all.rdata")
       if (check_multiplex) {
         targets <- merge(
           x = targets,
@@ -215,35 +215,24 @@ server <- function(input, output, session) {
         )
       }
 
-      if (any(grepl("^IDFILE$", names(ssheet_dt)))) {
-        if (check_multiplex) {
-          if (any(grepl("^plexset_id$", names(ssheet_dt)))) {
-            targets <- merge(
-              x = targets,
-              y = ssheet_dt,
-              by = c("IDFILE", "plexset_id")
-            )
-          } else {
-            warning(
-              "[NACHO] Missing \"plexset_id\" column in sample sheet file!\n",
-              "  Sample sheet file is discarded."
-            )
-          }
-        } else {
-          targets <- merge(
-            x = targets,
-            y = ssheet_dt,
-            by = "IDFILE"
+      if (!is.null(ssheet_dt)) {
+        merge_by <- if (check_multiplex) c("IDFILE", "plexset_id") else "IDFILE"
+        missing_columns <- setdiff(merge_by, names(ssheet_dt))
+        if (length(missing_columns) > 0) {
+          warning(
+            "[NACHO] Missing ",
+            paste0("\"", missing_columns, "\"", collapse = ", "),
+            if (length(missing_columns) > 1) " columns" else " column",
+            " in sample sheet file!\n",
+            "  Sample sheet file is discarded."
           )
+        } else {
+          targets <- merge(x = targets, y = ssheet_dt, by = merge_by)
         }
-      } else {
-        warning(
-          "[NACHO] Missing \"IDFILE\" column in sample sheet file!\n",
-          "  Sample sheet file is discarded."
-        )
       }
+
       suppressMessages(
-        x = NACHO::load_rcc(
+        expr = NACHO::load_rcc(
           data_directory = unique(mapply(FUN = function(.x, .y) sub(.x, "", .y), targets$IDFILE, targets$datapath)),
           ssheet_csv = targets,
           id_colname = "IDFILE",
