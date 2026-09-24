@@ -7,6 +7,8 @@ template:
     primary: "#B64326"
     link-color-dark: "#FCB448"
     body-bg-dark: "#111821"
+    headings-color: "#182430"
+    headings-color-dark: "#F0D83C"
     navbar-bg: "#182430"
     navbar-light-color: "#FFFFFF"
     navbar-light-hover-color: "#FCB448"
@@ -15,8 +17,6 @@ template:
     navbar-dark-hover-color: "#FCB448"
     navbar-dark-active-color: "#FCB448"
     base_font:
-      google: "Source Sans 3"
-    heading_font:
       google: "Source Sans 3"
     code_font:
       google: "JetBrains Mono"
@@ -28,15 +28,6 @@ development:
 authors:
   Mickaël Canouil:
     href: https://mickael.canouil.fr
-
-home:
-  sidebar:
-    structure: [links, license, community, citation, authors, dev]
-
-navbar:
-  structure:
-    left: [intro, reference, articles, news]
-    right: [search, github, lightswitch]
 
 reference:
   - title: Load and normalise
@@ -58,9 +49,3 @@ reference:
   - title: Data
     contents:
       - GSE74821
-
-articles:
-  - title: Articles
-    navbar: ~
-    contents:
-      - NACHO-analysis
