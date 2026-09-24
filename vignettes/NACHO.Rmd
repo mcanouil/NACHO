@@ -158,14 +158,18 @@ untar(
 )
 # Get phenotypes and add IDs
 targets <- pData(phenoData(gse[[1]]))
-targets$IDFILE <- list.files(data_directory, pattern = "\\.RCC(\\.gz)?$")
+rcc_files <- list.files(data_directory, pattern = "\\.RCC(\\.gz)?$", ignore.case = TRUE)
+targets$IDFILE <- rcc_files[match(targets$geo_accession, sub("_.*", "", rcc_files))]
 # Keep the samples measured with the same CodeSet
 codeset <- vapply(
   X = file.path(data_directory, targets$IDFILE),
-  FUN = function(file) grep("^GeneRLF,", readLines(file, n = 20), value = TRUE),
+  FUN = function(file) {
+    header <- grep("^GeneRLF,", readLines(file, n = 40), value = TRUE)
+    if (length(header) == 0) NA_character_ else header[1]
+  },
   FUN.VALUE = character(1)
 )
-targets <- targets[codeset == "GeneRLF,NS_H_miR_1.4", ]
+targets <- targets[codeset %in% "GeneRLF,NS_H_miR_1.4", ]
 ```
 
 ```{r}
