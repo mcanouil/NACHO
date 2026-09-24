@@ -1,0 +1,22 @@
+$nacho-navy: #182430;
+$nacho-yellow: #F0D83C;
+$nacho-amber: #FCB448;
+$nacho-orange: #E45430;
+$nacho-rose: #D85460;
+
+.navbar {
+  border-bottom: 4px solid transparent;
+  border-image: linear-gradient(90deg, $nacho-yellow, $nacho-amber, $nacho-orange, $nacho-rose) 1;
+}
+
+[data-bs-theme="light"] {
+  --bs-heading-color: #{$nacho-navy};
+}
+
+[data-bs-theme="dark"] {
+  --bs-heading-color: #{$nacho-yellow};
+}
+
+[data-bs-theme="dark"] img.r-plt:is([src$="nacho_hex.png"], [src$="README-app.png"], [src$="README-visualise.png"]) {
+  filter: none;
+}

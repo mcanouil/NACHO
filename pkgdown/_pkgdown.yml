@@ -4,8 +4,16 @@ template:
   bootstrap: 5
   light-switch: true
   bslib:
-    primary: "#BF4315"
-    navbar-bg: "#BF4315"
+    primary: "#B64326"
+    link-color-dark: "#FCB448"
+    body-bg-dark: "#111821"
+    navbar-bg: "#182430"
+    navbar-light-color: "#FFFFFF"
+    navbar-light-hover-color: "#FCB448"
+    navbar-light-active-color: "#FCB448"
+    navbar-dark-color: "#FFFFFF"
+    navbar-dark-hover-color: "#FCB448"
+    navbar-dark-active-color: "#FCB448"
     base_font:
       google: "Source Sans 3"
     heading_font:
@@ -15,6 +23,7 @@ template:
 
 development:
   mode: auto
+  version_label: white
 
 authors:
   Mickaël Canouil:
