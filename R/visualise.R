@@ -7,7 +7,6 @@
 #' @inheritParams normalise
 #'
 #' @importFrom shinyWidgets dropdownButton tooltipOptions
-#' @importFrom markdown mark_html
 #' @export
 #'
 #' @examples
@@ -101,6 +100,13 @@ visualise <- function(nacho_object) {
 
   if (!interactive()) {
     stop('[NACHO] Must be run in an interactive R session!')
+  }
+
+  if (!requireNamespace("markdown", quietly = TRUE)) {
+    stop(
+      "[NACHO] The \"markdown\" package is required to run the app.\n",
+      "  Install it with install.packages(\"markdown\")."
+    )
   }
 
   shiny::runApp(system.file("app", package = "NACHO"))

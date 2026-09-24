@@ -1,4 +1,5 @@
 upload_to_app <- function(data_directory) {
+  skip_if_not_installed("markdown")
   rcc_files <- list.files(
     data_directory,
     pattern = "\\.RCC$",
