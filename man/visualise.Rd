@@ -12,8 +12,8 @@ visualise(nacho_object)
 from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 }
 \description{
-This function allows to visualise results from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}
-several quality-control metrics in an interactive shiny application,
+This function visualises results from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}
+several quality-control metrics in an interactive Shiny application,
 in which thresholds can be customised and exported.
 }
 \examples{

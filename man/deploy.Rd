@@ -2,20 +2,20 @@
 % Please edit documentation in R/deploy.R
 \name{deploy}
 \alias{deploy}
-\title{Deploy (copy) the shiny application to the specified directory}
+\title{Deploy (copy) the Shiny application to the specified directory}
 \usage{
 deploy(directory = "/srv/shiny-server", app_name = "NACHO")
 }
 \arguments{
 \item{directory}{[\link{character}] A character vector of one path to the new location.}
 
-\item{app_name}{[\link{character}] A character vector defining the shiny application name in the new location.}
+\item{app_name}{[\link{character}] A character vector defining the Shiny application name in the new location.}
 }
 \value{
-[\link{logical}] A logical indicating whether the deployment is successfull (\code{TRUE}) or not (\code{FALSE}).
+[\link{logical}] A logical indicating whether the deployment is successful (\code{TRUE}) or not (\code{FALSE}).
 }
 \description{
-Deploy (copy) the shiny application to the specified directory
+Deploy (copy) the Shiny application to the specified directory
 }
 \details{
 The app needs the markdown package on the server to show its help pages.

@@ -247,7 +247,7 @@ server <- function(input, output, session) {
     rcc_size <- sum(input$rcc_files[, "size"])
     class(rcc_size) <- "object_size"
     shiny::tags$p(
-      "A total of", shiny::tags$strong(length(input$rcc_files[, "name"])), "RCC files were succesfully uploaded,",
+      "A total of", shiny::tags$strong(length(input$rcc_files[, "name"])), "RCC files were successfully uploaded,",
       "for a total amount of", shiny::tags$strong(format(rcc_size, units = "Mb")), "."
     )
   })
