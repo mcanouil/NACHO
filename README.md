@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# NAnoString quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" />
+# NAnoString quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" alt="NACHO hexagonal logo" />
 
 <!-- badges: start -->
 
