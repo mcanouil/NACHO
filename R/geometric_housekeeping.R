@@ -25,7 +25,7 @@ geometric_housekeeping <- function(data, positive_factor, intercept, housekeepin
   ][
     j = Count := (Count - intercept) * positive_factor
   ][
-    Count <= 0,
+    Count < 1,
     Count := 1
   ]
 

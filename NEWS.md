@@ -1,5 +1,10 @@
 # NACHO (development version)
 
+## Fixes
+
+- In `R/geometric_housekeeping.R`,
+  - fix: replace background-corrected housekeeping counts below 1 with 1, so values between 0 and 1 no longer inflate `House_factor`. ([#53](https://github.com/mcanouil/NACHO/issues/53))
+
 # NACHO 2.0.6
 
 ## Fixes
