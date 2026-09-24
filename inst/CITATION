@@ -2,14 +2,13 @@ bibentry(
   bibtype = "Article",
   header = "To cite NACHO in publications use:",
   title = "{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data",
-  author = paste(
-    "Mickaël Canouil [aut, cre]",
-    "Gerard A. Bouland [aut]",
-    "Amélie Bonnefond [rev]",
-    "Philippe Froguel [rev]",
-    "Leen Hart [rev]",
-    "Roderick Slieker [aut]",
-    sep = ", "
+  author = c(
+    person(given = "Mickaël", family = "Canouil", role = c("aut", "cre")),
+    person(given = c("Gerard", "A."), family = "Bouland", role = "aut"),
+    person(given = "Amélie", family = "Bonnefond", role = "rev"),
+    person(given = "Philippe", family = "Froguel", role = "rev"),
+    person(given = c("Leen", "M."), family = "'t Hart", role = "rev"),
+    person(given = c("Roderick", "C."), family = "Slieker", role = "aut")
   ),
   journal = "Bioinformatics",
   address = "Oxford, England",
