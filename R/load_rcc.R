@@ -205,11 +205,7 @@ load_rcc <- function(
     message(paste(
       '[NACHO] "housekeeping_norm" has been set to FALSE.',
       "  Note:",
-      if (has_hkg) {
-        ""
-      } else {
-        "  - No default housekeeping genes available in your data;"
-      },
+      "  - No default housekeeping genes available in your data;",
       '  - "housekeeping_genes" is NULL;',
       '  - "housekeeping_predict" is FALSE.',
       sep = "\n"

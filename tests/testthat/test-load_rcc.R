@@ -70,7 +70,7 @@ test_that("no housekeeping norm and prediction", {
   )
 })
 
-test_that("using GEO", {
+test_that("using GEO GSE74821", {
   gse <- try(GEOquery::getGEO(GEO = "GSE74821"), silent = TRUE)
   if (!inherits(gse, "try-error")) {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
@@ -130,7 +130,9 @@ test_that("using GEO", {
     }
   }
   closeAllConnections()
+})
 
+test_that("using GEO GSE70970", {
   gse <- try(GEOquery::getGEO(GEO = "GSE70970"), silent = TRUE)
   if (!inherits(gse, "try-error")) {
     targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
@@ -243,8 +245,9 @@ test_that("using GEO", {
     }
   }
   closeAllConnections()
+})
 
-  # using RAW RCC multiplexed
+test_that("using RAW RCC multiplexed", {
   expect_s3_class(
     {
       load_rcc(
@@ -255,8 +258,9 @@ test_that("using GEO", {
     },
     "nacho"
   )
+})
 
-  # using RAW RCC multiplexed without plexset_id
+test_that("using RAW RCC multiplexed without plexset_id", {
   targets_tidy <- salmon_tidy
   targets_tidy$plexset_id <- NULL
 
@@ -267,8 +271,9 @@ test_that("using GEO", {
       id_colname = "IDFILE"
     )
   })
+})
 
-  # using RAW RCC multiplexed with wrong path
+test_that("using RAW RCC multiplexed with wrong path", {
   targets_tidy <- salmon_tidy
   targets_tidy$IDFILE[1] <- "something_wrong.RCC" # wrong path
   expect_error({
@@ -278,8 +283,9 @@ test_that("using GEO", {
       id_colname = "IDFILE"
     )
   })
+})
 
-  # Too high number of components
+test_that("Too high number of components", {
   expect_message(
     {
       load_rcc(
@@ -291,8 +297,9 @@ test_that("using GEO", {
     },
     "has been set to"
   )
+})
 
-  # plexset
+test_that("plexset", {
   expect_s3_class(
     {
       load_rcc(
@@ -305,8 +312,9 @@ test_that("using GEO", {
     },
     class = "nacho"
   )
+})
 
-  # heterogenous
+test_that("heterogenous", {
   expect_error({
     load_rcc(
       data_directory = ".",
