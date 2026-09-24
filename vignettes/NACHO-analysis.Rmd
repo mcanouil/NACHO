@@ -1,12 +1,12 @@
 ---
 title: 'NACHO Analysis'
-subtitle: "A NAnostring quality Control dasHbOard"
+subtitle: "A NAnoString quality Control dasHbOard"
 author: "Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D."
-email: "mickael.canouil@cnrs.fr"
+email: "pro@mickael.canouil.dev"
 date: '`r format(Sys.time(), "%B %d, %Y")`'
 bibliography: nacho.bib
 link-citations: true
-output: 
+output:
   rmarkdown::html_vignette:
     number_sections: true
     toc: true
@@ -14,55 +14,64 @@ output:
     fig_width: 6.3
     fig_height: 4.7
 vignette: >
-  %\VignetteIndexEntry{NACHO-analysis}
+  %\VignetteIndexEntry{NACHO Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
+```{r}
+#| label: setup
+#| include: false
 knitr::opts_chunk$set(
   eval = TRUE,
   collapse = TRUE,
-  # results = "asis",
   include = TRUE,
   echo = TRUE,
   warning = TRUE,
   message = TRUE,
   error = TRUE,
-  # tidy = FALSE,
-  # crop = TRUE,
-  # autodep = TRUE,
   fig.align = "center",
   cache = FALSE
 )
 ```
 
-```{r logo, echo = FALSE, out.width = "150px"}
+```{r}
+#| label: logo
+#| echo: false
+#| out-width: 150px
+#| fig-alt: "NACHO hexagonal logo."
 knitr::include_graphics(path = "nacho_hex.png")
 ```
 
 # Installation
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 # Install NACHO from CRAN:
 install.packages("NACHO")
 
-# Or the the development version from GitHub:
-# install.packages("remotes")
-remotes::install_github("mcanouil/NACHO")
+# Or the development version from GitHub:
+# install.packages("pak")
+pak::pak("mcanouil/NACHO")
 ```
 
-# Overview 
+# Overview
 
-```{r, echo = FALSE, results = "asis"}
+```{r}
+#| echo: false
+#| results: asis
 cat(readLines(system.file("app", "www", "about-nacho.md", package = "NACHO"))[-c(1, 2)], sep = "\n")
 ```
 
-```{r, echo = FALSE, results = "asis"}
+```{r}
+#| echo: false
+#| results: asis
 print(citation("NACHO"), "html")
 ```
 
-```{r, echo = FALSE, comment = ""}
+```{r}
+#| echo: false
+#| comment: ""
 print(citation("NACHO"), "bibtex")
 ```
 
@@ -115,7 +124,8 @@ selected_pheno <- GSE70970[["nacho"]][
 selected_pheno <- na.exclude(selected_pheno)
 ```
 
-```{r, echo = FALSE}
+```{r}
+#| echo: false
 head(selected_pheno)
 ```
 
@@ -132,13 +142,15 @@ expr_counts <- GSE70970[["nacho"]][
 ]
 ```
 
-```{r, echo = FALSE}
+```{r}
+#| echo: false
 expr_counts[1:5, 1:5]
 ```
 
 Alternatively, `"Accession"` number is also available.
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 GSE70970[["nacho"]][
   i = grepl("Endogenous", CodeClass),
   j = as.matrix(

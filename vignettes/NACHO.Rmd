@@ -1,12 +1,12 @@
 ---
 title: 'NACHO'
-subtitle: "A NAnostring quality Control dasHbOard"
+subtitle: "A NAnoString quality Control dasHbOard"
 author: "Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D."
-email: "mickael.canouil@cnrs.fr"
+email: "pro@mickael.canouil.dev"
 date: '`r format(Sys.time(), "%B %d, %Y")`'
 bibliography: nacho.bib
 link-citations: true
-output: 
+output:
   rmarkdown::html_vignette:
     number_sections: true
     toc: true
@@ -19,56 +19,66 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
+```{r}
+#| label: setup
+#| include: false
 knitr::opts_chunk$set(
   eval = TRUE,
   collapse = TRUE,
-  # results = "asis",
   include = TRUE,
   echo = TRUE,
   warning = TRUE,
   message = TRUE,
   error = TRUE,
-  # tidy = FALSE,
-  # crop = TRUE,
-  # autodep = TRUE,
   fig.align = "center",
   fig.pos = "!h",
   cache = FALSE
 )
 ```
 
-```{r logo, echo = FALSE, out.width = "150px"}
+```{r}
+#| label: logo
+#| echo: false
+#| out-width: 150px
+#| fig-alt: "NACHO hexagonal logo."
 knitr::include_graphics(path = "nacho_hex.png")
 ```
 
 # Installation
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 # Install NACHO from CRAN:
 install.packages("NACHO")
 
-# Or the the development version from GitHub:
-# install.packages("remotes")
-remotes::install_github("mcanouil/NACHO")
+# Or the development version from GitHub:
+# install.packages("pak")
+pak::pak("mcanouil/NACHO")
 ```
 
-```{r, message = FALSE}
+```{r}
+#| message: false
 # Load NACHO
 library(NACHO)
 ```
 
-# Overview 
+# Overview
 
-```{r, echo = FALSE, results = "asis"}
+```{r}
+#| echo: false
+#| results: asis
 cat(readLines(system.file("app", "www", "about-nacho.md", package = "NACHO"))[-c(1, 2)], sep = "\n")
 ```
 
-```{r, echo = FALSE, results = "asis"}
+```{r}
+#| echo: false
+#| results: asis
 print(citation("NACHO"), "html")
 ```
 
-```{r, echo = FALSE, comment = ""}
+```{r}
+#| echo: false
+#| comment: ""
 print(citation("NACHO"), "bibtex")
 ```
 
@@ -90,23 +100,34 @@ While calling `normalise()`, the user has the possibility to remove these outlie
 This example shows how to use summarised data to call the interactive web application.  
 The raw data used is from a study of @liu_pam50_2016 and was acquired from the NCBI GEO public database [@barrett_ncbi_2013].
 
-```{r ex1, eval = FALSE}
+```{r}
+#| label: ex1
+#| eval: false
 library(NACHO)
 data(GSE74821)
 visualise(GSE74821)
 ```
 
-```{r ex1-fig, echo = FALSE, out.width = "650px"}
+```{r}
+#| label: ex1-fig
+#| echo: false
+#| out-width: 650px
+#| fig-alt: "NACHO dashboard on the QC Metrics tab, with threshold sliders on the left and boxplots of binding density, field of view, positive control linearity and limit of detection per cartridge."
 knitr::include_graphics(path = "README-visualise.png")
 ```
 
 ### Raw data from GEO
 
 Numerous NanoString nCounter datasets are available from GEO [@barrett_ncbi_2013].  
-In this example, we use a mRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
+In this example, we use an mRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
 The data is extracted and prepared using the following code.
 
-```{r geo-down, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
+```{r}
+#| label: geo-down
+#| echo: false
+#| warning: false
+#| message: false
+#| error: false
 gse <- try(GEOquery::getGEO("GSE70970"), silent = TRUE)
 if (inherits(gse, "try-error")) { # when GEOquery is down
   cons <- showConnections(all = TRUE)
@@ -118,7 +139,12 @@ if (inherits(gse, "try-error")) { # when GEOquery is down
 }
 ```
 
-```{r ex2, results = "hide", message = FALSE, warning = FALSE, eval = !inherits(gse, "try-error")}
+```{r}
+#| label: ex2
+#| results: hide
+#| message: false
+#| warning: false
+#| eval: !expr '!inherits(gse, "try-error")'
 library(GEOquery)
 # Download data
 gse <- getGEO("GSE70970")
@@ -133,22 +159,28 @@ targets <- pData(phenoData(gse[[1]]))
 targets$IDFILE <- list.files(file.path(tempdir(), "GSE70970", "Data"))
 ```
 
-```{r, echo = FALSE, message = FALSE, warning = FALSE, eval = !inherits(gse, "try-error")}
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+#| eval: !expr '!inherits(gse, "try-error")'
 targets[1:5, unique(c("IDFILE", names(targets)))]
 ```
 
-After we extracted the dataset to the `` `r file.path(tempdir(), "GSE70970", "Data")` `` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or use as is.
+After we extracted the dataset to the `` `r file.path(tempdir(), "GSE70970", "Data")` `` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or used as is.
 
 ## The `load_rcc()` function
- 
-The first argument requires the path to the directory containing the RCC files, the second argument is the location of samplesheet followed by third argument with the column name containing the exact names of the files.  
+
+The first argument requires the path to the directory containing the RCC files, the second argument is the location of the samplesheet, followed by the third argument with the column name containing the exact names of the files.  
 The `housekeeping_genes` and `normalisation_method` arguments respectively indicate which housekeeping genes and normalisation method should be used.
 
-```{r ex3, eval = !inherits(gse, "try-error")}
+```{r}
+#| label: ex3
+#| eval: !expr '!inherits(gse, "try-error")'
 GSE70970_sum <- load_rcc(
   data_directory = file.path(tempdir(), "GSE70970", "Data"), # Where the data is
   ssheet_csv = targets, # The samplesheet
-  id_colname = "IDFILE", # Name of the column that contains the unique identfiers
+  id_colname = "IDFILE", # Name of the column that contains the unique identifiers
   housekeeping_genes = NULL, # Custom list of housekeeping genes
   housekeeping_predict = TRUE, # Whether or not to predict the housekeeping genes
   normalisation_method = "GEO", # Geometric mean or GLM
@@ -156,7 +188,10 @@ GSE70970_sum <- load_rcc(
 )
 ```
 
-```{r, echo = FALSE, results = "hide", eval = !inherits(gse, "try-error")}
+```{r}
+#| echo: false
+#| results: hide
+#| eval: !expr '!inherits(gse, "try-error")'
 unlink(file.path(tempdir(), "GSE70970"), recursive = TRUE)
 ```
 
@@ -169,22 +204,28 @@ When the summarisation is done, the summarised (or normalised) data can be visua
 visualise(GSE70970_sum)
 ```
 
-The sidebar includes widgets to control quality-control thresholds. 
-These widgets differ according to the selected tab. 
+The sidebar includes widgets to control quality-control thresholds.
+These widgets differ according to the selected tab.
 Each sample in the plots can be coloured based on either technical specifications which are included in the RCC files or based on specifications of your own choosing, though these specifications need to be included in the samplesheet.
 
 ## The `normalise()` function
 
-*NACHO* allows the discovery of housekeeping genes within your own dataset. 
-*NACHO* finds the five best suitable housekeeping genes, however, it is possible that one of these five genes might not be suitable, which is why a subset of these discovered housekeeping genes might work better in some cases. 
-For this example, we use the **GSE70970** dataset from the previous example. 
-The discovered housekeeping genes are saved in the result object as **predicted_housekeeping**. 
+*NACHO* allows the discovery of housekeeping genes within your own dataset.
+*NACHO* finds the five best suitable housekeeping genes, however, it is possible that one of these five genes might not be suitable, which is why a subset of these discovered housekeeping genes might work better in some cases.
+For this example, we use the **GSE70970** dataset from the previous example.
+The discovered housekeeping genes are saved in the result object as **predicted_housekeeping**.
 
-```{r ex5, eval = !inherits(gse, "try-error")}
+```{r}
+#| label: ex5
+#| eval: !expr '!inherits(gse, "try-error")'
 print(GSE70970_sum[["housekeeping_genes"]])
 ```
 
-```{r intext, eval = !inherits(gse, "try-error"), echo = FALSE, results = "asis"}
+```{r}
+#| label: intext
+#| eval: !expr '!inherits(gse, "try-error")'
+#| echo: false
+#| results: asis
 cat(
   "Let's say _", GSE70970_sum[["housekeeping_genes"]][1],
   "_ and _", GSE70970_sum[["housekeeping_genes"]][2],
@@ -193,22 +234,25 @@ cat(
 )
 ```
 
-```{r, eval = !inherits(gse, "try-error")}
+```{r}
+#| eval: !expr '!inherits(gse, "try-error")'
 my_housekeeping <- GSE70970_sum[["housekeeping_genes"]][-c(1, 2)]
 print(my_housekeeping)
 ```
 
-The next step is the actual normalisation. 
-The first argument requires the summary which is created with the `load_rcc()` function. 
-The second argument requires a vector of gene names. 
-In this case, it is a subset of the discovered housekeeping genes we just made. 
-With the third argument the user has the choice to remove the outliers. 
-Lastly, the normalisation method can be choosed.  
-Here, the user has a choice between `"GLM"` or `"GEO"`. 
-The differences between normalisation methods are nuanced, however, a preference for either method are use case specific.  
+The next step is the actual normalisation.
+The first argument requires the summary which is created with the `load_rcc()` function.
+The second argument requires a vector of gene names.
+In this case, it is a subset of the discovered housekeeping genes we just made.
+With the third argument the user has the choice to remove the outliers.
+Lastly, the normalisation method can be chosen.  
+Here, the user has a choice between `"GLM"` or `"GEO"`.
+The differences between normalisation methods are nuanced, however, a preference for either method is use case specific.  
 In this example, `"GLM"` is used.
 
-```{r ex7, eval = !inherits(gse, "try-error")}
+```{r}
+#| label: ex7
+#| eval: !expr '!inherits(gse, "try-error")'
 GSE70970_norm <- normalise(
   nacho_object = GSE70970_sum,
   housekeeping_genes = my_housekeeping,
@@ -219,14 +263,15 @@ GSE70970_norm <- normalise(
 )
 ```
 
-`normalise()` returns a `list` object (same as `load_rcc()`) with `raw_counts` and `normalised_counts` slots filled with the raw and normalised counts. 
+`normalise()` returns a `list` object (same as `load_rcc()`) with `raw_counts` and `normalised_counts` slots filled with the raw and normalised counts.
 Both counts are also in the *NACHO* data.frame.
 
 ## The `autoplot()` function
 
 The `autoplot()` function provides an easy way to plot any quality-control from the `visualise()` function.
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 autoplot(
   object = GSE74821,
   x = "BD",
@@ -255,7 +300,9 @@ The possible metrics (`x`) are:
 * `"HF"` (Housekeeping Factor)
 * `"NORM"` (Normalisation Factor)
 
-```{r, echo = FALSE, results = "asis"}
+```{r}
+#| echo: false
+#| results: asis
 metrics <- c(
   "BD" = "Binding Density",
   "FoV" = "Imaging",
@@ -284,20 +331,28 @@ for (imetric in seq_along(metrics)) {
 
 ## NACHO as a standalone app
 
-*NACHO* is also available as a standalone app to be used in a shiny server configuration.
-A convenience function `deploy()` is available to directly copy the *NACHO* app to the default directory of a shiny server.
+*NACHO* is also available as a standalone app to be used in a Shiny Server configuration.
+A convenience function `deploy()` is available to directly copy the *NACHO* app to the default directory of a Shiny Server.
 
-```{r deploy, eval = FALSE}
+```{r}
+#| label: deploy
+#| eval: false
 deploy(directory = "/srv/shiny-server", app_name = "NACHO")
 ```
 
 The app can also be run directly, without manually summarising and normalising RCC files:
 
-```{r app, eval = FALSE}
+```{r}
+#| label: app
+#| eval: false
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
 
-```{r app-fig, echo = FALSE, out.width = "650px"}
+```{r}
+#| label: app-fig
+#| echo: false
+#| out-width: 650px
+#| fig-alt: "NACHO Shiny application on the Upload RCC Files tab, with a choice of normalisation method and a file picker for RCC files."
 knitr::include_graphics(path = "README-app.png")
 ```
 
@@ -306,7 +361,8 @@ knitr::include_graphics(path = "README-app.png")
 The `render()` function renders a comprehensive HTML report, using `print(..., echo = TRUE)`,
 which includes all quality-control metrics and description of those metrics.
 
-```{r, eval = FALSE}
+```{r}
+#| eval: false
 render(
   nacho_object = GSE74821,
   colour = "CartridgeID",
@@ -318,9 +374,11 @@ render(
 )
 ```
 
-The underneath function `print()` can be used directly within any Rmarkdown chunk, setting the parameter `echo = TRUE`.
+The underneath function `print()` can be used directly within any R Markdown chunk, setting the parameter `echo = TRUE`.
 
-```{r print, results = "asis"}
+```{r}
+#| label: print
+#| results: asis
 print(
   x = GSE74821,
   colour = "CartridgeID",
