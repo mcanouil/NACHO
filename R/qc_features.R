@@ -25,7 +25,9 @@ qc_features <- function(data, id_colname) {
       lod <- 0
     }
     fov <- qc_imaging(
-      fov_counted = as.numeric(unique(.data[["Lane_Attributes.lane_FovCounted"]])),
+      fov_counted = as.numeric(unique(.data[[
+        "Lane_Attributes.lane_FovCounted"
+      ]])),
       fov_count = as.numeric(unique(.data[["Lane_Attributes.lane_FovCount"]]))
     )
 
@@ -50,7 +52,10 @@ qc_features <- function(data, id_colname) {
     x = do.call("rbind", output),
     keep.rownames = id_colname
   )
-  metrics_in <- intersect(names(output), c("BD", "FoV", "PCL", "LoD", "MC", "MedC"))
+  metrics_in <- intersect(
+    names(output),
+    c("BD", "FoV", "PCL", "LoD", "MC", "MedC")
+  )
   output[
     j = c(metrics_in) := lapply(.SD, as.numeric),
     .SDcols = c(metrics_in)

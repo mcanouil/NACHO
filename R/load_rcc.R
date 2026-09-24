@@ -82,11 +82,11 @@ load_rcc <- function(
   n_comp = 10
 ) {
   file_path <- Code_Summary <- CodeClass <- NULL # no visible binding for global variable
-  if (missing(data_directory) | missing(ssheet_csv)) {
+  if (missing(data_directory) || missing(ssheet_csv)) {
     stop('[NACHO] "data_directory" and "ssheet_csv" must be provided.')
   }
   data_directory <- normalizePath(data_directory, mustWork = TRUE)
-  if (is.vector(ssheet_csv, "character") & length(ssheet_csv) > 1) {
+  if (is.vector(ssheet_csv, "character") && length(ssheet_csv) > 1) {
     if (is.null(names(ssheet_csv))) {
       ssheet_csv <- data.frame(IDFILE = ssheet_csv)
     } else {
@@ -96,19 +96,18 @@ load_rcc <- function(
     id_colname <- "IDFILE"
   }
 
-  if (
-    is.null(id_colname) & (
-      inherits(ssheet_csv, "data.frame") | (
-        is.vector(ssheet_csv, "character") & length(ssheet_csv) == 1
-      )
-    )
-  ) {
+  requires_id_colname <- inherits(ssheet_csv, "data.frame") ||
+    (is.vector(ssheet_csv, "character") && length(ssheet_csv) == 1)
+  if (is.null(id_colname) && requires_id_colname) {
     stop('[NACHO] "id_colname" must be provided as a column of "ssheet_csv".')
   }
 
   message("[NACHO] Importing RCC files.")
   nacho_df <- switch(
-    EXPR = paste(as.integer(inherits(ssheet_csv, c("data.frame", "character"), TRUE) > 0), collapse = ""),
+    EXPR = paste(
+      as.integer(inherits(ssheet_csv, c("data.frame", "character"), TRUE) > 0),
+      collapse = ""
+    ),
     "10" = ssheet_csv,
     "01" = data.table::fread(file = ssheet_csv, header = TRUE, sep = ","),
     stop('[NACHO] "ssheet_csv" must be a "data.frame" or path to csv.')
@@ -124,7 +123,10 @@ load_rcc <- function(
     stop('[NACHO] Not all values from "id_colname" are mapped to an RCC file.')
   }
 
-  if (anyDuplicated(nacho_df[[id_colname]]) != 0 & !"plexset_id" %in% colnames(nacho_df)) {
+  if (
+    anyDuplicated(nacho_df[[id_colname]]) != 0 &&
+      !"plexset_id" %in% colnames(nacho_df)
+  ) {
     stop(
       '[NACHO] "id_colname" contains duplicates and "plexset_id" was not provided.\n',
       '  For PlexSet RCC files, "plexset_id" column is required to identify samples.'
@@ -194,11 +196,18 @@ load_rcc <- function(
 
   message("[NACHO] Performing QC and formatting data.")
   has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
-  if (!has_hkg & is.null(housekeeping_genes) & !housekeeping_predict & housekeeping_norm) {
+  if (
+    !has_hkg &&
+      is.null(housekeeping_genes) &&
+      !housekeeping_predict &&
+      housekeeping_norm
+  ) {
     message(paste(
-      '[NACHO] "housekeeping_norm" has been set to FALSE.', "  Note:",
-      if (has_hkg) "" else "  - No default housekeeping genes available in your data;",
-      '  - "housekeeping_genes" is NULL;', '  - "housekeeping_predict" is FALSE.',
+      '[NACHO] "housekeeping_norm" has been set to FALSE.',
+      "  Note:",
+      "  - No default housekeeping genes available in your data;",
+      '  - "housekeeping_genes" is NULL;',
+      '  - "housekeeping_predict" is FALSE.',
       sep = "\n"
     ))
     housekeeping_norm <- FALSE
@@ -229,8 +238,11 @@ load_rcc <- function(
 
   message(
     paste0(
-      '[NACHO] Normalising data using "', normalisation_method, '" method ',
-      if (housekeeping_norm) "with" else "without", " housekeeping genes."
+      '[NACHO] Normalising data using "',
+      normalisation_method,
+      '" method ',
+      if (housekeeping_norm) "with" else "without",
+      " housekeeping genes."
     )
   )
   nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(

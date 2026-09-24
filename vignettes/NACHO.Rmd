@@ -112,7 +112,10 @@ visualise(GSE74821)
 #| label: ex1-fig
 #| echo: false
 #| out-width: 650px
-#| fig-alt: "NACHO dashboard on the QC Metrics tab, with threshold sliders on the left and boxplots of binding density, field of view, positive control linearity and limit of detection per cartridge."
+#| fig-alt: >-
+#|   NACHO dashboard on the QC Metrics tab, with threshold sliders on the left
+#|   and boxplots of binding density, field of view, positive control linearity
+#|   and limit of detection per cartridge.
 knitr::include_graphics(path = "README-visualise.png")
 ```
 
@@ -366,7 +369,9 @@ shiny::runApp(system.file("app", package = "NACHO"))
 #| label: app-fig
 #| echo: false
 #| out-width: 650px
-#| fig-alt: "NACHO Shiny application on the Upload RCC Files tab, with a choice of normalisation method and a file picker for RCC files."
+#| fig-alt: >-
+#|   NACHO Shiny application on the Upload RCC Files tab, with a choice of
+#|   normalisation method and a file picker for RCC files.
 knitr::include_graphics(path = "README-app.png")
 ```
 

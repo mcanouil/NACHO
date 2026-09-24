@@ -18,7 +18,11 @@ norm_glm <- function(data) {
       if (all(check_name)) {
         x <- as.numeric(sub("^[^(]*\\((.*)\\)$", "\\1", .data[["Name"]]))
       } else {
-        x <- c(NEG = 0, POS = 32)[sub("(NEG).*|(POS).*", "\\1\\2", .data[["Name"]])]
+        x <- c(NEG = 0, POS = 32)[sub(
+          "(NEG).*|(POS).*",
+          "\\1\\2",
+          .data[["Name"]]
+        )]
       }
       stats::glm(
         formula = y ~ x,

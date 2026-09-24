@@ -9,12 +9,16 @@
 #'
 #' @return [data.frame]
 format_tag_content <- function(tag, content) {
-  if (nrow(content) == 1 & is.na(content[1, 1])) {
+  if (nrow(content) == 1 && is.na(content[1, 1])) {
     output <- content
   } else {
     output <- as.data.frame(x = t(content[, -1, drop = FALSE]))
     rownames(output) <- NULL
-    colnames(output) <- paste(tolower(sub("_.*", "", tag)), content[, 1], sep = "_")
+    colnames(output) <- paste(
+      tolower(sub("_.*", "", tag)),
+      content[, 1],
+      sep = "_"
+    )
   }
   output
 }

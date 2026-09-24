@@ -24,8 +24,7 @@ factor_calculation <- function(
     j = .SD,
     .SDcols = c("Name", "CodeClass", "Count", id_colname)
   ][
-    CodeClass %in% c("Positive", "Negative") &
-      ! Name %in% exclude_probes
+    CodeClass %in% c("Positive", "Negative") & !Name %in% exclude_probes
   ][
     order(Name)
   ]
@@ -36,11 +35,13 @@ factor_calculation <- function(
     "GEO" = norm_geo,
     stop('[NACHO] "normalisation_method" should be either "GLM" or "GEO"!')
   )
-  factors_norm <- factors_norm_fun(data = split(control_data, control_data[[id_colname]]))
+  factors_norm <- factors_norm_fun(
+    data = split(control_data, control_data[[id_colname]])
+  )
   positive_factor <- factors_norm[["positive_factor"]]
   geometric_mean_neg <- factors_norm[["geometric_mean_neg"]]
 
-  if (housekeeping_predict | is.null(housekeeping_genes)) {
+  if (housekeeping_predict || is.null(housekeeping_genes)) {
     norm_factor <- data.table::data.table(
       "Positive_factor" = positive_factor,
       "Negative_factor" = geometric_mean_neg
