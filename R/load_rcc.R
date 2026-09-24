@@ -96,9 +96,9 @@ load_rcc <- function(
     id_colname <- "IDFILE"
   }
 
-  ssheet_is_table <- inherits(ssheet_csv, "data.frame") ||
+  requires_id_colname <- inherits(ssheet_csv, "data.frame") ||
     (is.vector(ssheet_csv, "character") && length(ssheet_csv) == 1)
-  if (is.null(id_colname) && ssheet_is_table) {
+  if (is.null(id_colname) && requires_id_colname) {
     stop('[NACHO] "id_colname" must be provided as a column of "ssheet_csv".')
   }
 
