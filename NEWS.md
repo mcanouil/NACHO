@@ -3,7 +3,7 @@
 ## Breaking changes
 
 - In `DESCRIPTION`,
-  - build: require R 4.1.0 or newer, ggplot2 4.0.0 or newer, ggforce 0.5.0 or newer, ggrepel 0.9.6 or newer, and shiny 1.7.4 or newer, which bundles Font Awesome 6.
+  - build: require R 4.1.0 or newer, ggplot2 4.0.0 or newer, ggforce 0.5.0 or newer, ggrepel 0.9.6 or newer, and shiny 1.7.4 or newer, which pulls in fontawesome 0.4.0 and its Font Awesome 6 icon names.
   - build: require pandoc 2.11 or newer, which has citeproc built in, so pandoc-citeproc is no longer needed.
 
 ## Chores
