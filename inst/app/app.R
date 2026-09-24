@@ -274,11 +274,13 @@ server <- function(input, output, session) {
             if (type == "application/x-zip-compressed") {
               ex_dir <- file.path(dirname(datapath), sub(".zip$", "", name))
               utils::unzip(datapath, exdir = ex_dir)
+              files <- list.files(ex_dir)
+              extracted <- file.path(basename(ex_dir), files)
               data.frame(
-                name = file.path(sub(".zip$", "", name), list.files(ex_dir)),
-                datapath = list.files(ex_dir, full.names = TRUE),
+                name = extracted,
+                datapath = file.path(ex_dir, files),
                 type = type,
-                IDFILE = file.path(sub(".zip$", "", name), list.files(ex_dir))
+                IDFILE = extracted
               )
             } else {
               file.rename(
