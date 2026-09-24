@@ -1,5 +1,9 @@
-test_that("app loads uploaded RCC files without a sample sheet", {
-  rcc_files <- list.files("salmon_data", pattern = "\\.RCC$", full.names = TRUE)
+upload_to_app <- function(data_directory) {
+  rcc_files <- list.files(
+    data_directory,
+    pattern = "\\.RCC$",
+    full.names = TRUE
+  )
   upload_directory <- tempfile("upload")
   dir.create(upload_directory)
   on.exit(unlink(upload_directory, recursive = TRUE))
@@ -12,11 +16,25 @@ test_that("app loads uploaded RCC files without a sample sheet", {
     datapath = upload_paths
   )
 
+  nacho <- NULL
+  # nolint start: object_usage_linter. testServer() provides session and the app reactives.
   shiny::testServer(
     shiny::shinyAppDir(system.file("app", package = "NACHO")),
     {
       session$setInputs(norm_method = "GEO", rcc_files = uploaded)
-      expect_s3_class(nacho_react(), "nacho")
+      nacho <<- nacho_react()
     }
   )
+  # nolint end
+  nacho
+}
+
+test_that("app loads uploaded RCC files without a sample sheet", {
+  expect_s3_class(upload_to_app("salmon_data"), "nacho")
+})
+
+test_that("app loads uploaded PlexSet RCC files", {
+  nacho <- upload_to_app("plexset_data")
+  expect_s3_class(nacho, "nacho")
+  expect_type(nacho[["nacho"]][["plexset_id"]], "character")
 })
