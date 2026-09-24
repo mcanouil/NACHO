@@ -5,68 +5,50 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="NACHO">
 <title>NACHO Analysis • NACHO</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="NACHO Analysis">
-<meta property="og:description" content="NACHO">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="NACHO Analysis">
 <meta name="robots" content="noindex">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">NACHO</a>
 
     <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.0.6.9000</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../articles/NACHO.html">Get started</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../articles/NACHO.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/NACHO-analysis.html">NACHO Analysis</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/NACHO-analysis.html">NACHO Analysis</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/mcanouil/NACHO/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/mcanouil/NACHO/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -75,21 +57,22 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>NACHO Analysis</h1>
+
+      <h1>NACHO Analysis</h1>
             <h3 data-toc-skip class="subtitle">A NAnostring quality
 Control dasHbOard</h3>
                         <h4 data-toc-skip class="author">Mickaël
 Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D.</h4>
             
-            <h4 data-toc-skip class="date">January 12, 2024</h4>
+            <h4 data-toc-skip class="date">September 24, 2026</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/mcanouil/NACHO/blob/HEAD/vignettes/NACHO-analysis.Rmd" class="external-link"><code>vignettes/NACHO-analysis.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mcanouil/NACHO/blob/main/vignettes/NACHO-analysis.Rmd" class="external-link"><code>vignettes/NACHO-analysis.Rmd</code></a></small>
       <div class="d-none name"><code>NACHO-analysis.Rmd</code></div>
     </div>
 
     
     
-<p><img src="nacho_hex.png" width="150px" style="display: block; margin: auto;"></p>
+<p><img src="nacho_hex.png" class="r-plt" alt="" width="150px" style="display: block; margin: auto;"></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -149,7 +132,7 @@ metrics from <code><a href="../reference/visualise.html">visualise()</a></code> 
 <p>
 Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 “NACHO: an R package for quality control of NanoString nCounter data.”
-<em>Bioinformatics</em>. ISSN 1367-4803,
+<em>Bioinformatics</em>. ISSN 1367-4803.
 <a href="https://doi.org/10.1093/bioinformatics/btz647" class="external-link">doi:10.1093/bioinformatics/btz647</a>.
 </p>
 <pre><code>@Article{,
@@ -173,6 +156,15 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mcanouil/NACHO/" class="external-link">NACHO</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/seandavi/GEOquery" class="external-link">GEOquery</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span>, warn.conflicts <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">## </span></span>
+<span><span class="co">## Attaching package: 'generics'</span></span>
+<span><span class="co">## The following object is masked from 'package:NACHO':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     visualize</span></span>
+<span><span class="co">## The following objects are masked from 'package:base':</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##     as.difftime, as.factor, as.ordered, intersect, is.element, setdiff,</span></span>
+<span><span class="co">##     setequal, union</span></span>
+<span><span class="co">## </span></span>
 <span><span class="co">## Attaching package: 'BiocGenerics'</span></span>
 <span><span class="co">## The following object is masked from 'package:NACHO':</span></span>
 <span><span class="co">## </span></span>
@@ -184,15 +176,17 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 <span><span class="co">## </span></span>
 <span><span class="co">##     anyDuplicated, aperm, append, as.data.frame, basename, cbind,</span></span>
 <span><span class="co">##     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,</span></span>
-<span><span class="co">##     get, grep, grepl, intersect, is.unsorted, lapply, Map, mapply,</span></span>
-<span><span class="co">##     match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,</span></span>
-<span><span class="co">##     Position, rank, rbind, Reduce, rownames, sapply, setdiff, sort,</span></span>
-<span><span class="co">##     table, tapply, union, unique, unsplit, which.max, which.min</span></span>
+<span><span class="co">##     get, grep, grepl, is.unsorted, lapply, Map, mapply, match, mget,</span></span>
+<span><span class="co">##     order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,</span></span>
+<span><span class="co">##     rbind, Reduce, rownames, sapply, saveRDS, table, tapply, unique,</span></span>
+<span><span class="co">##     unsplit, which.max, which.min</span></span>
 <span><span class="co">## Welcome to Bioconductor</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">##     Vignettes contain introductory material; view with</span></span>
 <span><span class="co">##     'browseVignettes()'. To cite Bioconductor, see</span></span>
 <span><span class="co">##     'citation("Biobase")', and for packages 'citation("pkgname")'.</span></span>
+<span><span class="co">## Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by</span></span>
+<span><span class="co">## 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'</span></span>
 <span><span class="co">## Setting options('download.file.method.GEOquery'='auto')</span></span>
 <span><span class="co">## Setting options('GEOquery.inmemory.gpl'=FALSE)</span></span></code></pre></div>
 </div>
@@ -208,26 +202,38 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 <span><span class="co">## GSE70970_series_matrix.txt.gz</span></span>
 <span><span class="fu"><a href="http://seandavi.github.io/GEOquery/reference/getGEOSuppFiles.html" class="external-link">getGEOSuppFiles</a></span><span class="op">(</span>GEO <span class="op">=</span> <span class="st">"GSE70970"</span>, baseDir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">##                                                                    size isdir</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_RAW.tar                       1986560 FALSE</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_characteristics_readme.txt.gz     672 FALSE</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                       1986560 FALSE</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz     672 FALSE</span></span>
 <span><span class="co">##                                                                 mode</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_RAW.tar                        644</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_characteristics_readme.txt.gz  644</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                        644</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz  644</span></span>
 <span><span class="co">##                                                                               mtime</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_RAW.tar                       2024-01-12 19:24:46</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_characteristics_readme.txt.gz 2024-01-12 19:24:46</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                       2026-09-24 19:44:11</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-24 19:44:11</span></span>
 <span><span class="co">##                                                                               ctime</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_RAW.tar                       2024-01-12 19:24:46</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_characteristics_readme.txt.gz 2024-01-12 19:24:46</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                       2026-09-24 19:44:11</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-24 19:44:11</span></span>
 <span><span class="co">##                                                                               atime</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_RAW.tar                       2024-01-12 19:24:45</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_characteristics_readme.txt.gz 2024-01-12 19:24:46</span></span>
-<span><span class="co">##                                                                  uid gid  uname</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_RAW.tar                       1001 127 runner</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_characteristics_readme.txt.gz 1001 127 runner</span></span>
-<span><span class="co">##                                                                 grname</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_RAW.tar                       docker</span></span>
-<span><span class="co">## /tmp/RtmpyI29id/GSE70970/GSE70970_characteristics_readme.txt.gz docker</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                       2026-09-24 19:44:10</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-24 19:44:11</span></span>
+<span><span class="co">##                                                                  uid  gid</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                       1001 1001</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz 1001 1001</span></span>
+<span><span class="co">##                                                                  uname grname</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                       runner runner</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz runner runner</span></span>
+<span><span class="co">##                                                                                                  fname</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                                             GSE70970_RAW.tar</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz GSE70970_characteristics_readme.txt.gz</span></span>
+<span><span class="co">##                                                                                  destdir</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                       /tmp/RtmphjNqrY/GSE70970</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz /tmp/RtmphjNqrY/GSE70970</span></span>
+<span><span class="co">##                                                                                                                        filepath</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                                             /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz</span></span>
+<span><span class="co">##                                                                      GEO</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_RAW.tar                       GSE70970</span></span>
+<span><span class="co">## /tmp/RtmphjNqrY/GSE70970/GSE70970_characteristics_readme.txt.gz GSE70970</span></span>
 <span><span class="co"># Unzip data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/untar.html" class="external-link">untar</a></span><span class="op">(</span></span>
 <span>  tarfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"GSE70970_RAW.tar"</span><span class="op">)</span>,</span>
@@ -243,7 +249,8 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">GSE70970</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_rcc.html">load_rcc</a></span><span class="op">(</span><span class="va">data_directory</span>, <span class="va">targets</span>, id_colname <span class="op">=</span> <span class="st">"IDFILE"</span><span class="op">)</span></span>
 <span><span class="co">## [NACHO] Importing RCC files.</span></span>
-<span><span class="co">## Error in load_rcc(data_directory, targets, id_colname = "IDFILE"): [NACHO] Multiple Nanostring file/software versions detected.</span></span>
+<span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `load_rcc()`:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> [NACHO] Multiple Nanostring file/software versions detected.</span></span>
 <span><span class="co">##   Please provide a set of files with the same version.</span></span>
 <span><span class="co">##   - FileVersion: '1.6', '1.6'</span></span>
 <span><span class="co">##   - SoftwareVersion: '2.1.2.3', '2.1.1.0005'</span></span></code></pre></div>
@@ -266,10 +273,13 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 <span>  j <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">.SD</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">x</span> <span class="op">==</span> <span class="st">"NA"</span>, <span class="cn">NA</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  .SDcols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"IDFILE"</span>, <span class="st">"age:ch1"</span>, <span class="st">"gender:ch1"</span>, <span class="st">"chemo:ch1"</span>, <span class="st">"disease.event:ch1"</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
-<span><span class="co">## Error in eval(expr, envir, enclos): object 'GSE70970' not found</span></span>
+<span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> object 'GSE70970' not found</span></span>
 <span><span class="va">selected_pheno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.exclude</a></span><span class="op">(</span><span class="va">selected_pheno</span><span class="op">)</span></span>
-<span><span class="co">## Error in eval(expr, envir, enclos): object 'selected_pheno' not found</span></span></code></pre></div>
-<pre><code><span><span class="co">## Error in eval(expr, envir, enclos): object 'selected_pheno' not found</span></span></code></pre>
+<span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> object 'selected_pheno' not found</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> object 'selected_pheno' not found</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="get-the-normalised-counts">Get the normalised counts<a class="anchor" aria-label="anchor" href="#get-the-normalised-counts"></a>
@@ -283,8 +293,10 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 <span>  <span class="op">)</span>,</span>
 <span>  .SDcols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"IDFILE"</span>, <span class="st">"Name"</span>, <span class="st">"Count_Norm"</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
-<span><span class="co">## Error in eval(expr, envir, enclos): object 'GSE70970' not found</span></span></code></pre></div>
-<pre><code><span><span class="co">## Error in eval(expr, envir, enclos): object 'expr_counts' not found</span></span></code></pre>
+<span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> object 'GSE70970' not found</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> object 'expr_counts' not found</span></span></code></pre>
 <p>Alternatively, <code>"Accession"</code> number is also available.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">GSE70970</span><span class="op">[[</span><span class="st">"nacho"</span><span class="op">]</span><span class="op">]</span><span class="op">[</span></span>
@@ -304,23 +316,28 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 </ol>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">samples_kept</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">selected_pheno</span><span class="op">[[</span><span class="st">"IDFILE"</span><span class="op">]</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">expr_counts</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">## Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'intersect': object 'selected_pheno' not found</span></span>
+<span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `h()`:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> error in evaluating the argument 'x' in selecting a method for function 'intersect': object 'selected_pheno' not found</span></span>
 <span><span class="va">expr_counts</span> <span class="op">&lt;-</span> <span class="va">expr_counts</span><span class="op">[</span>, <span class="va">samples_kept</span><span class="op">]</span></span>
-<span><span class="co">## Error in eval(expr, envir, enclos): object 'expr_counts' not found</span></span>
+<span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> object 'expr_counts' not found</span></span>
 <span><span class="va">selected_pheno</span> <span class="op">&lt;-</span> <span class="va">selected_pheno</span><span class="op">[</span><span class="va">IDFILE</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">samples_kept</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">## Error in eval(expr, envir, enclos): object 'selected_pheno' not found</span></span></code></pre></div>
+<span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> object 'selected_pheno' not found</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>Build the numeric design matrix</li>
 </ol>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">model.matrix</a></span><span class="op">(</span><span class="op">~</span> <span class="va">`disease.event:ch1`</span>, <span class="va">selected_pheno</span><span class="op">)</span></span>
-<span><span class="co">## Error in eval(expr, envir, enclos): object 'selected_pheno' not found</span></span></code></pre></div>
+<span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> object 'selected_pheno' not found</span></span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
 <li><code>limma</code></li>
 </ol>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/ebayes.html" class="external-link">eBayes</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/limma/man/lmFit.html" class="external-link">lmFit</a></span><span class="op">(</span><span class="va">expr_counts</span>, <span class="va">design</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">## Error in eval(expr, envir, enclos): object 'expr_counts' not found</span></span></code></pre></div>
+<span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> object 'expr_counts' not found</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -346,31 +363,30 @@ Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
 <span>  <span class="op">)</span>,</span>
 <span>  by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Name"</span>, <span class="st">"Accession"</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
-<span><span class="co">## Error in eval(expr, envir, enclos): object 'GSE70970' not found</span></span></code></pre></div>
+<span><span class="co">## <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">## <span style="color: #BBBB00;">!</span> object 'GSE70970' not found</span></span></code></pre></div>
 </div>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by <a href="https://mickael.canouil.fr" class="external-link">Mickaël Canouil</a>, Roderick Slieker, Gerard Bouland.</p>
+  <p>Developed by <a href="https://mickael.canouil.fr" class="external-link">Mickaël Canouil</a>, Roderick Slieker, Gerard Bouland.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>

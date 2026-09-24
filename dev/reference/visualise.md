@@ -1,0 +1,77 @@
+# Visualise quality-control metrics of a "nacho" object
+
+This function allows to visualise results from
+[`load_rcc()`](load_rcc.md) or [`normalise()`](normalise.md) several
+quality-control metrics in an interactive shiny application, in which
+thresholds can be customised and exported.
+
+## Usage
+
+``` r
+visualise(nacho_object)
+```
+
+## Arguments
+
+- nacho_object:
+
+  \[[list](https://rdrr.io/r/base/list.html)\] A list object of class
+  `"nacho"` obtained from [`load_rcc()`](load_rcc.md) or
+  [`normalise()`](normalise.md).
+
+## Examples
+
+``` r
+
+if (interactive()) {
+  data(GSE74821)
+  # Must be run in an interactive R session!
+  visualise(GSE74821)
+}
+
+if (interactive()) {
+  library(GEOquery)
+  library(NACHO)
+
+  # Import data from GEO
+  gse <- GEOquery::getGEO(GEO = "GSE74821")
+  targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
+  GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
+  utils::untar(
+    tarfile = file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),
+    exdir = file.path(tempdir(), "GSE74821")
+  )
+  targets$IDFILE <- list.files(
+    path = file.path(tempdir(), "GSE74821"),
+    pattern = ".RCC.gz$"
+  )
+  targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
+  utils::write.csv(
+    x = targets,
+    file = file.path(tempdir(), "GSE74821", "Samplesheet.csv")
+  )
+
+  # Read RCC files and format
+  nacho <- load_rcc(
+    data_directory = file.path(tempdir(), "GSE74821"),
+    ssheet_csv = file.path(tempdir(), "GSE74821", "Samplesheet.csv"),
+    id_colname = "IDFILE"
+  )
+  visualise(nacho)
+
+  # (re)Normalise data by removing outliers
+  nacho_norm <- normalise(
+    nacho_object = nacho,
+    remove_outliers = TRUE
+  )
+  visualise(nacho_norm)
+
+  # (re)Normalise data with "GLM" method and removing outliers
+  nacho_norm <- normalise(
+    nacho_object = nacho,
+    normalisation_method = "GLM",
+    remove_outliers = TRUE
+  )
+  visualise(nacho_norm)
+}
+```
