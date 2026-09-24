@@ -1,6 +1,17 @@
+url: https://m.canouil.dev/NACHO/
+
 template:
   bootstrap: 5
-  bootswatch: united
+  light-switch: true
+  bslib:
+    primary: "#BF4315"
+    navbar-bg: "#BF4315"
+    base_font:
+      google: "Source Sans 3"
+    heading_font:
+      google: "Source Sans 3"
+    code_font:
+      google: "JetBrains Mono"
 
 development:
   mode: auto
@@ -8,3 +19,39 @@ development:
 authors:
   Mickaël Canouil:
     href: https://mickael.canouil.fr
+
+home:
+  sidebar:
+    structure: [links, license, community, citation, authors, dev]
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github, lightswitch]
+
+reference:
+  - title: Load and normalise
+    desc: Read RCC files, compute quality-control metrics and normalise counts.
+    contents:
+      - load_rcc
+      - normalise
+      - check_outliers
+  - title: Visualise and report
+    desc: Explore quality control interactively, plot a single metric, or write a full report.
+    contents:
+      - visualise
+      - autoplot.nacho
+      - print.nacho
+      - render
+  - title: Shiny application
+    contents:
+      - deploy
+  - title: Data
+    contents:
+      - GSE74821
+
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+      - NACHO-analysis
