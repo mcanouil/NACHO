@@ -216,34 +216,20 @@ server <- function(input, output, session) {
       }
 
       if (!is.null(ssheet_dt)) {
-        if (any(grepl("^IDFILE$", names(ssheet_dt)))) {
-          if (check_multiplex) {
-            if (any(grepl("^plexset_id$", names(ssheet_dt)))) {
-              targets <- merge(
-                x = targets,
-                y = ssheet_dt,
-                by = c("IDFILE", "plexset_id")
-              )
-            } else {
-              warning(
-                "[NACHO] Missing \"plexset_id\" column in sample sheet file!\n",
-                "  Sample sheet file is discarded."
-              )
-            }
-          } else {
-            targets <- merge(
-              x = targets,
-              y = ssheet_dt,
-              by = "IDFILE"
-            )
-          }
-        } else {
+        merge_by <- if (check_multiplex) c("IDFILE", "plexset_id") else "IDFILE"
+        missing_columns <- setdiff(merge_by, names(ssheet_dt))
+        if (length(missing_columns) > 0) {
           warning(
-            "[NACHO] Missing \"IDFILE\" column in sample sheet file!\n",
+            "[NACHO] Missing ",
+            paste0("\"", missing_columns, "\"", collapse = ", "),
+            " column in sample sheet file!\n",
             "  Sample sheet file is discarded."
           )
+        } else {
+          targets <- merge(x = targets, y = ssheet_dt, by = merge_by)
         }
       }
+
       suppressMessages(
         expr = NACHO::load_rcc(
           data_directory = unique(mapply(FUN = function(.x, .y) sub(.x, "", .y), targets$IDFILE, targets$datapath)),
