@@ -1,9 +1,10 @@
-# Render a HTML report of a "nacho" object
+# Render an HTML report of a "nacho" object
 
-This function create a Rmarkdown script and render it as a HTML
+This function creates an R Markdown script and renders it as an HTML
 document. The HTML document is a quality-control report using all the
-metrics from [`visualise()`](visualise.md) based on recommendations from
-NanoString.
+metrics from
+[`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+based on recommendations from NanoString.
 
 ## Usage
 
@@ -27,8 +28,10 @@ render(
 - nacho_object:
 
   \[[list](https://rdrr.io/r/base/list.html)\] A list object of class
-  `"nacho"` obtained from [`load_rcc()`](load_rcc.md) or
-  [`normalise()`](normalise.md).
+  `"nacho"` obtained from
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  or
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
 
 - colour:
 
@@ -57,7 +60,7 @@ render(
   \[[numeric](https://rdrr.io/r/base/numeric.html)\] A numeric
   controlling point size
   ([`ggplot2::geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html)
-  or line size
+  or line width
   ([`ggplot2::geom_line()`](https://ggplot2.tidyverse.org/reference/geom_path.html)).
 
 - show_legend:
@@ -86,7 +89,7 @@ render(
 - clean:
 
   \[[logical](https://rdrr.io/r/base/logical.html)\] Boolean to indicate
-  whether the Rmd and Rdata file used to produce the HTML report are
+  whether the Rmd and RData files used to produce the HTML report are
   removed from `output_dir`. Default is `TRUE`.
 
 ## Examples

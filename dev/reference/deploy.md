@@ -1,6 +1,6 @@
-# Deploy (copy) the shiny application to the specified directory
+# Deploy (copy) the Shiny application to the specified directory
 
-Deploy (copy) the shiny application to the specified directory
+Deploy (copy) the Shiny application to the specified directory
 
 ## Usage
 
@@ -18,12 +18,16 @@ deploy(directory = "/srv/shiny-server", app_name = "NACHO")
 - app_name:
 
   \[[character](https://rdrr.io/r/base/character.html)\] A character
-  vector defining the shiny application name in the new location.
+  vector defining the Shiny application name in the new location.
 
 ## Value
 
 \[[logical](https://rdrr.io/r/base/logical.html)\] A logical indicating
-whether the deployment is successfull (`TRUE`) or not (`FALSE`).
+whether the deployment is successful (`TRUE`) or not (`FALSE`).
+
+## Details
+
+The app needs the markdown package on the server to show its help pages.
 
 ## Examples
 

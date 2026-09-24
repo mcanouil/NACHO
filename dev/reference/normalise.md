@@ -2,7 +2,7 @@
 
 This function creates a list in which your settings, the raw counts and
 normalised counts are stored, using the result from a call to
-[`load_rcc()`](load_rcc.md).
+[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md).
 
 ## Usage
 
@@ -24,7 +24,9 @@ normalise(
 - nacho_object:
 
   \[[list](https://rdrr.io/r/base/list.html)\] A list object of class
-  `"nacho"` obtained from [`load_rcc()`](load_rcc.md) or `normalise()`.
+  `"nacho"` obtained from
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  or `normalise()`.
 
 - housekeeping_genes:
 
@@ -75,27 +77,31 @@ parameters and data.
 - `access`:
 
   \[[character](https://rdrr.io/r/base/character.html)\] Value passed to
-  [`load_rcc()`](load_rcc.md) in `id_colname`.
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  in `id_colname`.
 
 - `housekeeping_genes`:
 
   \[[character](https://rdrr.io/r/base/character.html)\] Value passed to
-  [`load_rcc()`](load_rcc.md) or `normalise()`.
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  or `normalise()`.
 
 - `housekeeping_predict`:
 
   \[[logical](https://rdrr.io/r/base/logical.html)\] Value passed to
-  [`load_rcc()`](load_rcc.md).
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md).
 
 - `housekeeping_norm`:
 
   \[[logical](https://rdrr.io/r/base/logical.html)\] Value passed to
-  [`load_rcc()`](load_rcc.md) or `normalise()`.
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  or `normalise()`.
 
 - `normalisation_method`:
 
   \[[character](https://rdrr.io/r/base/character.html)\] Value passed to
-  [`load_rcc()`](load_rcc.md) or `normalise()`.
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  or `normalise()`.
 
 - `remove_outliers`:
 
@@ -105,12 +111,12 @@ parameters and data.
 - `n_comp`:
 
   \[[numeric](https://rdrr.io/r/base/numeric.html)\] Value passed to
-  [`load_rcc()`](load_rcc.md).
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md).
 
 - `data_directory`:
 
   \[[character](https://rdrr.io/r/base/character.html)\] Value passed to
-  [`load_rcc()`](load_rcc.md).
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md).
 
 - `pc_sum`:
 

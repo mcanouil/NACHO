@@ -46,8 +46,8 @@ with a minimal [reprex](https://www.tidyverse.org/help/#reprex).
 ### Code of Conduct
 
 Please note that the NACHO project is released with a [Contributor Code
-of Conduct](CODE_OF_CONDUCT.md). By contributing to this project you
-agree to abide by its terms.
+of Conduct](https://m.canouil.dev/NACHO/dev/CODE_OF_CONDUCT.md). By
+contributing to this project you agree to abide by its terms.
 
 ### See tidyverse [development contributing guide](https://rstd.io/tidy-contrib)
 

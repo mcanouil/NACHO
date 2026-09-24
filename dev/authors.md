@@ -22,7 +22,7 @@ NanoString nCounter data". Bioinformatics (Oxford, England). doi:
 
     @Article{,
       title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
-      author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen Hart and Roderick Slieker},
+      author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
       journal = {Bioinformatics},
       address = {Oxford, England},
       year = {2019},

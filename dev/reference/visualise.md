@@ -1,9 +1,10 @@
 # Visualise quality-control metrics of a "nacho" object
 
-This function allows to visualise results from
-[`load_rcc()`](load_rcc.md) or [`normalise()`](normalise.md) several
-quality-control metrics in an interactive shiny application, in which
-thresholds can be customised and exported.
+This function visualises results from
+[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md) or
+[`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+several quality-control metrics in an interactive Shiny application, in
+which thresholds can be customised and exported.
 
 ## Usage
 
@@ -16,8 +17,10 @@ visualise(nacho_object)
 - nacho_object:
 
   \[[list](https://rdrr.io/r/base/list.html)\] A list object of class
-  `"nacho"` obtained from [`load_rcc()`](load_rcc.md) or
-  [`normalise()`](normalise.md).
+  `"nacho"` obtained from
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  or
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
 
 ## Examples
 

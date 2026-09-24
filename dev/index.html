@@ -6,9 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>NanoString Quality Control Dashboard • NACHO</title>
-<script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script src="lightswitch.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/Source_Sans_3-0.4.10/font.css" rel="stylesheet">
+<link href="deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="NanoString Quality Control Dashboard">
 <meta name="description" content="NanoString nCounter data are gene expression assays where there is no need for the use of enzymes or amplification protocols and work with fluorescent barcodes (Geiss et al. (2018) &lt;doi:10.1038/nbt1385&gt;). Each barcode is assigned a messenger-RNA/micro-RNA (mRNA/miRNA) which after bonding with its target can be counted. As a result each count of a specific barcode represents the presence of its target mRNA/miRNA. NACHO (NAnoString quality Control dasHbOard) is able to analyse the exported NanoString nCounter data and facilitates the user in performing a quality control. NACHO does this by visualising quality control metrics, expression of control genes, principal components and sample specific size factors in an interactive web application.">
@@ -19,11 +21,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="index.html">NACHO</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.0.6.9000</small>
+    <small class="nav-text text-white me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.0.6.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +49,14 @@
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/mcanouil/NACHO/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
+  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
+<li><button class="dropdown-item" data-bs-theme-value="light"><span class="fa fa-sun"></span> Light</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="dark"><span class="fa fa-moon"></span> Dark</button></li>
+    <li><button class="dropdown-item" data-bs-theme-value="auto"><span class="fa fa-adjust"></span> Auto</button></li>
+  </ul>
+</li>
       </ul>
 </div>
 
@@ -55,7 +65,7 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="nanostring-quality-control-dashboard-">NAnostring quality Control dasHbOard <img src="reference/figures/nacho_hex.png" align="right" width="120"><a class="anchor" aria-label="anchor" href="#nanostring-quality-control-dashboard-"></a>
+<div class="page-header"><h1 id="nanostring-quality-control-dashboard-">NAnoString quality Control dasHbOard <img src="reference/figures/nacho_hex.png" align="right" width="120" alt="NACHO hexagonal logo"><a class="anchor" aria-label="anchor" href="#nanostring-quality-control-dashboard-"></a>
 </h1></div>
 <!-- badges: start -->
 
@@ -67,15 +77,15 @@
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"NACHO"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Or the development version from GitHub:</span></span>
-<span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"mcanouil/NACHO"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># install.packages("pak")</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"mcanouil/NACHO"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p><em>NACHO</em> (<strong>NA</strong>nostring quality <strong>C</strong>ontrol das<strong>H</strong>b<strong>O</strong>ard) is developed for NanoString nCounter data.<br>
+<p><em>NACHO</em> (<strong>NA</strong>noString quality <strong>C</strong>ontrol das<strong>H</strong>b<strong>O</strong>ard) is developed for NanoString nCounter data.<br>
 NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA) expression assay and works with fluorescent barcodes.<br>
-Each barcode is assigned a mRNA/miRNA, which can be counted after bonding with its target.<br>
+Each barcode is assigned an mRNA/miRNA, which can be counted after bonding with its target.<br>
 As a result each count of a specific barcode represents the presence of its target mRNA/miRNA.</p>
 <p><em>NACHO</em> is able to load, visualise and normalise the exported NanoString nCounter data and facilitates the user in performing a quality control.<br><em>NACHO</em> does this by visualising quality control metrics, expression of control genes, principal components and sample specific size factors in an interactive web application.</p>
 <p>With the use of two functions, RCC files are summarised and visualised, namely: <code><a href="reference/load_rcc.html">load_rcc()</a></code> and <code><a href="reference/visualise.html">visualise()</a></code>.</p>
@@ -89,7 +99,7 @@ As a result each count of a specific barcode represents the presence of its targ
 </ul>
 <p>In addition (since v0.6.0) <em>NACHO</em> includes two (three) additional functions:</p>
 <ul>
-<li>The <code><a href="reference/render.html">render()</a></code> function renders a full quality-control report (HTML) based on the results of a call to <code><a href="reference/load_rcc.html">load_rcc()</a></code> or <code><a href="reference/normalise.html">normalise()</a></code> (using <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> in a Rmarkdown chunk).</li>
+<li>The <code><a href="reference/render.html">render()</a></code> function renders a full quality-control report (HTML) based on the results of a call to <code><a href="reference/load_rcc.html">load_rcc()</a></code> or <code><a href="reference/normalise.html">normalise()</a></code> (using <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> in an R Markdown chunk).</li>
 <li>The <code><a href="reference/autoplot.html">autoplot()</a></code> function draws any quality-control metrics from <code><a href="reference/visualise.html">visualise()</a></code> and <code><a href="reference/render.html">render()</a></code>.</li>
 </ul>
 <p>For more <code><a href="articles/NACHO.html">vignette("NACHO")</a></code> and <code><a href="articles/NACHO-analysis.html">vignette("NACHO-analysis")</a></code>.</p>
@@ -98,34 +108,34 @@ As a result each count of a specific barcode represents the presence of its targ
 </h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"app"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-nacho_app.gif" alt="" width="100%"></p>
+<p><img src="reference/figures/README-nacho_app.gif" alt="NACHO Shiny application in use." width="100%"></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/visualise.html">visualise</a></span><span class="op">(</span><span class="va">GSE74821</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-visualise.png"></p>
+<p><img src="reference/figures/README-visualise.png" alt="NACHO interactive dashboard showing quality-control plots for the GSE74821 dataset." width="100%"></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="citing-nacho">Citing NACHO<a class="anchor" aria-label="anchor" href="#citing-nacho"></a>
 </h2>
 <p>
-Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019). “NACHO: an R package for quality control of NanoString nCounter data.” <em>Bioinformatics</em>. ISSN 1367-4803. <a href="https://doi.org/10.1093/bioinformatics/btz647" class="external-link">doi:10.1093/bioinformatics/btz647</a>.
+Canouil M, Bouland GA, Bonnefond A, Froguel P, ’t Hart LM, Slieker RC (2019). “NACHO: an R package for quality control of NanoString nCounter data.” <em>Bioinformatics</em>. ISSN 1367-4803. <a href="https://doi.org/10.1093/bioinformatics/btz647" class="external-link">doi:10.1093/bioinformatics/btz647</a>.
 </p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="sc">@</span>Article{,</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  title <span class="ot">=</span> {{NACHO}<span class="sc">:</span> an {R} package <span class="cf">for</span> quality control of {NanoString} {nCounter} data},</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  author <span class="ot">=</span> {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen Hart and Roderick Slieker},</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  journal <span class="ot">=</span> {Bioinformatics},</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  address <span class="ot">=</span> {Oxford, England},</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  year <span class="ot">=</span> {<span class="dv">2019</span>},</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  month <span class="ot">=</span> {aug},</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  issn <span class="ot">=</span> {<span class="dv">1367-4803</span>},</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  doi <span class="ot">=</span> {<span class="fl">10.1093</span><span class="sc">/</span>bioinformatics<span class="sc">/</span>btz647},</span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  author <span class="ot">=</span> {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {<span class="st">'t Hart} and Roderick C. Slieker},</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="st">  journal = {Bioinformatics},</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="st">  address = {Oxford, England},</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="st">  year = {2019},</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="st">  month = {aug},</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="st">  issn = {1367-4803},</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="st">  doi = {10.1093/bioinformatics/btz647},</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="st">}</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
 </h2>
-<p>If you encounter a clear bug, please file a minimal reproducible example on <a href="https://github.com/mcanouil/NACHO/issues" class="external-link">github</a>.<br>
+<p>If you encounter a clear bug, please file a minimal reproducible example on <a href="https://github.com/mcanouil/NACHO/issues" class="external-link">GitHub</a>.<br>
 For questions and other discussion, please contact the package maintainer.</p>
 </div>
 <div class="section level2">
@@ -184,7 +194,7 @@ By contributing to this project, you agree to abide by its terms.</p>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: stable"></a></li>
 <li><a href="https://github.com/mcanouil/NACHO" class="external-link"><img src="https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest%20tag&amp;include_prereleases" alt="GitHub tag"></a></li>
 <li><a href="https://app.codecov.io/gh/mcanouil/NACHO?branch=main" class="external-link"><img src="https://codecov.io/gh/mcanouil/NACHO/branch/main/graph/badge.svg" alt="codecov"></a></li>
-<li><a href="https://github.com/mcanouil/NACHO/actions" class="external-link"><img src="https://github.com/mcanouil/NACHO/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/mcanouil/NACHO/actions/workflows/check-pak.yaml" class="external-link"><img src="https://github.com/mcanouil/NACHO/actions/workflows/check-pak.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://cran.r-project.org/package=NACHO" class="external-link"><img src="https://www.r-pkg.org/badges/version-ago/NACHO" alt="CRAN_Status_Badge"></a></li>
 <li><a href="https://cran.r-project.org/web/checks/check_results_NACHO.html" class="external-link"><img src="https://badges.cranchecks.info/worst/NACHO.svg" alt="cran checks_worst"></a></li>
 <li><a href="https://cran.r-project.org/package=NACHO" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/NACHO" alt="CRAN_Download_total"></a></li>

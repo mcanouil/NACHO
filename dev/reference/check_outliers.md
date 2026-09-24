@@ -1,9 +1,10 @@
 # Annotate a "nacho" object for outliers
 
 Add or update `"is_outlier"` column in the `"nacho"` field of an object
-from a call to [`load_rcc()`](load_rcc.md) or
-[`normalise()`](normalise.md) (`nacho_object$nacho`), using the current
-quality-control thresholds.
+from a call to
+[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md) or
+[`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+(`nacho_object$nacho`), using the current quality-control thresholds.
 
 ## Usage
 
@@ -16,8 +17,10 @@ check_outliers(nacho_object)
 - nacho_object:
 
   \[[list](https://rdrr.io/r/base/list.html)\] A list object of class
-  `"nacho"` obtained from [`load_rcc()`](load_rcc.md) or
-  [`normalise()`](normalise.md).
+  `"nacho"` obtained from
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  or
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
 
 ## Value
 

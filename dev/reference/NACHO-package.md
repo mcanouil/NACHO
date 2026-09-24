@@ -30,6 +30,9 @@ Useful links:
 
 Authors:
 
+- Mickaël Canouil <pro@mickael.canouil.dev>
+  ([ORCID](https://orcid.org/0000-0002-3396-4549))
+
 - Roderick Slieker <R.C.Slieker@lumc.nl>
   ([ORCID](https://orcid.org/0000-0003-0961-9152))
 

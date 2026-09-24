@@ -1,20 +1,36 @@
 # Package index
 
-## All functions
+## Load and normalise
 
-- [`GSE74821`](GSE74821.md) : A "nacho" object containing 20 samples of
-  GSE74821 dataset
-- [`autoplot(`*`<nacho>`*`)`](autoplot.nacho.md) : Plot quality-control
-  metrics and thresholds of a "nacho" object
-- [`check_outliers()`](check_outliers.md) : Annotate a "nacho" object
-  for outliers
-- [`deploy()`](deploy.md) : Deploy (copy) the shiny application to the
-  specified directory
-- [`load_rcc()`](load_rcc.md) : Produce a "nacho" object from RCC
-  NanoString files
-- [`normalise()`](normalise.md) : (re)Normalise a "nacho" object
-- [`print(`*`<nacho>`*`)`](print.nacho.md) : Print method for "nacho"
-  object
-- [`render()`](render.md) : Render a HTML report of a "nacho" object
-- [`visualise()`](visualise.md) : Visualise quality-control metrics of a
-  "nacho" object
+Read RCC files, compute quality-control metrics and normalise counts.
+
+- [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  : Produce a "nacho" object from RCC NanoString files
+- [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+  : (re)Normalise a "nacho" object
+- [`check_outliers()`](https://m.canouil.dev/NACHO/dev/reference/check_outliers.md)
+  : Annotate a "nacho" object for outliers
+
+## Visualise and report
+
+Explore quality control interactively, plot a single metric, or write a
+full report.
+
+- [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+  : Visualise quality-control metrics of a "nacho" object
+- [`autoplot(`*`<nacho>`*`)`](https://m.canouil.dev/NACHO/dev/reference/autoplot.nacho.md)
+  : Plot quality-control metrics and thresholds of a "nacho" object
+- [`print(`*`<nacho>`*`)`](https://m.canouil.dev/NACHO/dev/reference/print.nacho.md)
+  : Print method for "nacho" object
+- [`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md) :
+  Render an HTML report of a "nacho" object
+
+## Shiny application
+
+- [`deploy()`](https://m.canouil.dev/NACHO/dev/reference/deploy.md) :
+  Deploy (copy) the Shiny application to the specified directory
+
+## Data
+
+- [`GSE74821`](https://m.canouil.dev/NACHO/dev/reference/GSE74821.md) :
+  A "nacho" object containing 20 samples of GSE74821 dataset

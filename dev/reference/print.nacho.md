@@ -1,8 +1,9 @@
 # Print method for "nacho" object
 
-This function allows to print text and figures from the results of a
-call to [`load_rcc()`](load_rcc.md) or [`normalise()`](normalise.md). It
-is intended to be used in a Rmarkdown chunk.
+This function prints text and figures from the results of a call to
+[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md) or
+[`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
+It is intended to be used in an R Markdown chunk.
 
 ## Usage
 
@@ -28,8 +29,10 @@ print(
 - x:
 
   \[[list](https://rdrr.io/r/base/list.html)\] A list object of class
-  `"nacho"` obtained from [`load_rcc()`](load_rcc.md) or
-  [`normalise()`](normalise.md).
+  `"nacho"` obtained from
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  or
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
 
 - colour:
 
@@ -42,7 +45,7 @@ print(
   \[[numeric](https://rdrr.io/r/base/numeric.html)\] A numeric
   controlling point size
   ([`ggplot2::geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html)
-  or line size
+  or line width
   ([`ggplot2::geom_line()`](https://ggplot2.tidyverse.org/reference/geom_path.html)).
 
 - show_legend:
@@ -72,7 +75,7 @@ print(
 
   \[[logical](https://rdrr.io/r/base/logical.html)\] A boolean to
   indicate whether text and plots should be printed. Mainly for use
-  within a Rmarkdown chunk.
+  within an R Markdown chunk.
 
 - title_level:
 
@@ -83,7 +86,7 @@ print(
 - xaringan:
 
   \[[logical](https://rdrr.io/r/base/logical.html)\] A boolean to format
-  output for Xaringan slides.
+  output for xaringan slides.
 
 - ...:
 

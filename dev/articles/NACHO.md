@@ -1,6 +1,6 @@
 # NACHO
 
-![](nacho_hex.png)
+![NACHO hexagonal logo.](nacho_hex.png)
 
 ## Installation
 
@@ -9,9 +9,9 @@
 # Install NACHO from CRAN:
 install.packages("NACHO")
 
-# Or the the development version from GitHub:
-# install.packages("remotes")
-remotes::install_github("mcanouil/NACHO")
+# Or the development version from GitHub:
+# install.packages("pak")
+pak::pak("mcanouil/NACHO")
 ```
 
 ``` r
@@ -22,11 +22,11 @@ library(NACHO)
 
 ## Overview
 
-*NACHO* (**NA**nostring quality **C**ontrol das**H**b**O**ard) is
+*NACHO* (**NA**noString quality **C**ontrol das**H**b**O**ard) is
 developed for NanoString nCounter data.  
 NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA)
 expression assay and works with fluorescent barcodes.  
-Each barcode is assigned a mRNA/miRNA, which can be counted after
+Each barcode is assigned an mRNA/miRNA, which can be counted after
 bonding with its target.  
 As a result each count of a specific barcode represents the presence of
 its target mRNA/miRNA.
@@ -39,47 +39,59 @@ control genes, principal components and sample specific size factors in
 an interactive web application.
 
 With the use of two functions, RCC files are summarised and visualised,
-namely: [`load_rcc()`](../reference/load_rcc.md) and
-[`visualise()`](../reference/visualise.md).
+namely:
+[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+and
+[`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md).
 
-- The [`load_rcc()`](../reference/load_rcc.md) function is used to
-  preprocess the data.
-- The [`visualise()`](../reference/visualise.md) function initiates a
-  [Shiny-based dashboard](https://shiny.posit.co/) that visualises all
-  relevant QC plots.
+- The
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  function is used to preprocess the data.
+- The
+  [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+  function initiates a [Shiny-based dashboard](https://shiny.posit.co/)
+  that visualises all relevant QC plots.
 
 *NACHO* also includes a function
-[`normalise()`](../reference/normalise.md), which (re)calculates sample
-specific size factors and normalises the data.
+[`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md),
+which (re)calculates sample specific size factors and normalises the
+data.
 
-- The [`normalise()`](../reference/normalise.md) function creates a list
-  in which your settings, the raw counts and normalised counts are
-  stored.
+- The
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+  function creates a list in which your settings, the raw counts and
+  normalised counts are stored.
 
 In addition (since v0.6.0) *NACHO* includes two (three) additional
 functions:
 
-- The [`render()`](../reference/render.md) function renders a full
-  quality-control report (HTML) based on the results of a call to
-  [`load_rcc()`](../reference/load_rcc.md) or
-  [`normalise()`](../reference/normalise.md) (using
-  [`print()`](https://rdrr.io/r/base/print.html) in a Rmarkdown chunk).
-- The [`autoplot()`](../reference/autoplot.md) function draws any
-  quality-control metrics from
-  [`visualise()`](../reference/visualise.md) and
-  [`render()`](../reference/render.md).
+- The [`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)
+  function renders a full quality-control report (HTML) based on the
+  results of a call to
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  or
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+  (using [`print()`](https://rdrr.io/r/base/print.html) in an R Markdown
+  chunk).
+- The
+  [`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md)
+  function draws any quality-control metrics from
+  [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+  and [`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md).
 
-For more [`vignette("NACHO")`](../articles/NACHO.md) and
-[`vignette("NACHO-analysis")`](../articles/NACHO-analysis.md).
+For more
+[`vignette("NACHO")`](https://m.canouil.dev/NACHO/dev/articles/NACHO.md)
+and
+[`vignette("NACHO-analysis")`](https://m.canouil.dev/NACHO/dev/articles/NACHO-analysis.md).
 
-Canouil M, Bouland GA, Bonnefond A, Froguel P, Hart L, Slieker R (2019).
-“NACHO: an R package for quality control of NanoString nCounter data.”
-*Bioinformatics*. ISSN 1367-4803.
+Canouil M, Bouland GA, Bonnefond A, Froguel P, ’t Hart LM, Slieker RC
+(2019). “NACHO: an R package for quality control of NanoString nCounter
+data.” *Bioinformatics*. ISSN 1367-4803.
 [doi:10.1093/bioinformatics/btz647](https://doi.org/10.1093/bioinformatics/btz647).
 
     @Article{,
       title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
-      author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen Hart and Roderick Slieker},
+      author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
       journal = {Bioinformatics},
       address = {Oxford, England},
       year = {2019},
@@ -96,20 +108,22 @@ examined.
 
 *NACHO* comes with presummarised data and in the first example we use
 this dataset to call the interactive web application using
-[`visualise()`](../reference/visualise.md).  
+[`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md).  
 In the second example, we show the process of going from raw RCC files
 to visualisations with a dataset queried from **GEO** using
 `GEOquery`.  
 In the third example, we use the summarised dataset from the second
 example to calculate the sample specific size factors using
-[`normalise()`](../reference/normalise.md) and its added functionality
-to predict housekeeping genes.
+[`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+and its added functionality to predict housekeeping genes.
 
 Besides creating interactive visualisations, *NACHO* also identifies
 poorly performing samples which can be seen under the Outlier Table tab
 in the interactive web application.  
-While calling [`normalise()`](../reference/normalise.md), the user has
-the possibility to remove these outliers before size factor calculation.
+While calling
+[`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md),
+the user has the possibility to remove these outliers before size factor
+calculation.
 
 ### Get NanoString nCounter data
 
@@ -128,31 +142,49 @@ data(GSE74821)
 visualise(GSE74821)
 ```
 
-![](README-visualise.png)
+![NACHO dashboard on the QC Metrics tab, with threshold sliders on the
+left and boxplots of binding density, field of view, positive control
+linearity and limit of detection per cartridge.](README-visualise.png)
 
 #### Raw data from GEO
 
 Numerous NanoString nCounter datasets are available from GEO ([Barrett
 et al. 2013](#ref-barrett_ncbi_2013)).  
-In this example, we use a mRNA dataset from the study of Bruce et al.
+In this example, we use a miRNA dataset from the study of Bruce et al.
 ([2015](#ref-bruce_identification_2015)) with the GEO accession number:
-**GSE70970**. The data is extracted and prepared using the following
-code.
+**GSE70970**. The samples were measured with two versions of the miRNA
+CodeSet, each exported by a different nSolver version, and
+[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+refuses files that mix versions. The following code extracts the data
+and keeps the samples measured with `NS_H_miR_1.4`.
 
 ``` r
 
 library(GEOquery)
+data_directory <- file.path(tempdir(), "GSE70970", "Data")
 # Download data
 gse <- getGEO("GSE70970")
 getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
 # Unzip data
 untar(
   tarfile = file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"),
-  exdir = file.path(tempdir(), "GSE70970", "Data")
+  exdir = data_directory
 )
 # Get phenotypes and add IDs
 targets <- pData(phenoData(gse[[1]]))
-targets$IDFILE <- list.files(file.path(tempdir(), "GSE70970", "Data"))
+rcc_files <- list.files(data_directory, pattern = "\\.RCC(\\.gz)?$", ignore.case = TRUE)
+targets$IDFILE <- rcc_files[match(targets$geo_accession, sub("_.*", "", rcc_files))]
+targets <- targets[!is.na(targets$IDFILE), ]
+# Keep the samples measured with the same CodeSet
+codeset <- vapply(
+  X = file.path(data_directory, targets$IDFILE),
+  FUN = function(file) {
+    header <- grep("^GeneRLF,", readLines(file, n = 40), value = TRUE)
+    if (length(header) == 0) NA_character_ else header[1]
+  },
+  FUN.VALUE = character(1)
+)
+targets <- targets[codeset %in% "GeneRLF,NS_H_miR_1.4", ]
 ```
 
     ##                                 IDFILE                title geo_accession
@@ -324,16 +356,16 @@ targets$IDFILE <- list.files(file.path(tempdir(), "GSE70970", "Data"))
     ## GSM1824146       3.835728953    T3
     ## GSM1824147       4.292950034    T3
 
-After we extracted the dataset to the `/tmp/RtmpFvuvG8/GSE70970/Data`
+After we extracted the dataset to the `/tmp/RtmpA9RmqK/GSE70970/Data`
 directory, a `Samplesheet.csv` containing a column with the exact names
-of the files for each sample can be written or use as is.
+of the files for each sample can be written or used as is.
 
 ### The `load_rcc()` function
 
 The first argument requires the path to the directory containing the RCC
-files, the second argument is the location of samplesheet followed by
-third argument with the column name containing the exact names of the
-files.  
+files, the second argument is the location of the samplesheet, followed
+by the third argument with the column name containing the exact names of
+the files.  
 The `housekeeping_genes` and `normalisation_method` arguments
 respectively indicate which housekeeping genes and normalisation method
 should be used.
@@ -341,26 +373,46 @@ should be used.
 ``` r
 
 GSE70970_sum <- load_rcc(
-  data_directory = file.path(tempdir(), "GSE70970", "Data"), # Where the data is
+  data_directory = data_directory, # Where the data is
   ssheet_csv = targets, # The samplesheet
-  id_colname = "IDFILE", # Name of the column that contains the unique identfiers
+  id_colname = "IDFILE", # Name of the column that contains the unique identifiers
   housekeeping_genes = NULL, # Custom list of housekeeping genes
   housekeeping_predict = TRUE, # Whether or not to predict the housekeeping genes
   normalisation_method = "GEO", # Geometric mean or GLM
   n_comp = 5 # Number indicating how many principal components should be computed.
 )
 ## [NACHO] Importing RCC files.
-## Error in `load_rcc()`:
-## ! [NACHO] Multiple Nanostring file/software versions detected.
-##   Please provide a set of files with the same version.
-##   - FileVersion: '1.6', '1.6'
-##   - SoftwareVersion: '2.1.2.3', '2.1.1.0005'
+## [NACHO] Performing QC and formatting data.
+## [NACHO] Searching for the best housekeeping genes.
+## [NACHO] Computing normalisation factors using "GEO" method for housekeeping genes prediction.
+## [NACHO] The following predicted housekeeping genes will be used for normalisation:
+##   - ebv-miR-BHRF1-3
+##   - ebv-miR-BHRF1-1
+##   - ebv-miR-BART9
+##   - hsa-miR-720
+##   - hsa-miR-103
+## [NACHO] Computing normalisation factors using "GEO" method.
+## [NACHO] Missing values have been replaced with zeros for PCA.
+## [NACHO] Normalising data using "GEO" method with housekeeping genes.
+## [NACHO] Returning a list.
+##   $ access              : character
+##   $ housekeeping_genes  : character
+##   $ housekeeping_predict: logical
+##   $ housekeeping_norm   : logical
+##   $ normalisation_method: character
+##   $ remove_outliers     : logical
+##   $ n_comp              : numeric
+##   $ data_directory      : character
+##   $ pc_sum              : data.frame
+##   $ nacho               : data.frame
+##   $ outliers_thresholds : list
 ```
 
 ### The `visualise()` function
 
 When the summarisation is done, the summarised (or normalised) data can
-be visualised using the [`visualise()`](../reference/visualise.md)
+be visualised using the
+[`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
 function as can be seen in the following chunk of code.
 
 ``` r
@@ -389,33 +441,31 @@ housekeeping genes are saved in the result object as
 ``` r
 
 print(GSE70970_sum[["housekeeping_genes"]])
-## Error:
-## ! object 'GSE70970_sum' not found
+## [1] "ebv-miR-BHRF1-3" "ebv-miR-BHRF1-1" "ebv-miR-BART9"   "hsa-miR-720"    
+## [5] "hsa-miR-103"
 ```
 
-    ## Error:
-    ## ! object 'GSE70970_sum' not found
+Let’s say *ebv-miR-BHRF1-3* and *ebv-miR-BHRF1-1* are not suitable,
+therefore, you want to exclude these genes from the normalisation
+process.
 
 ``` r
 
 my_housekeeping <- GSE70970_sum[["housekeeping_genes"]][-c(1, 2)]
-## Error:
-## ! object 'GSE70970_sum' not found
 print(my_housekeeping)
-## Error:
-## ! object 'my_housekeeping' not found
+## [1] "ebv-miR-BART9" "hsa-miR-720"   "hsa-miR-103"
 ```
 
 The next step is the actual normalisation. The first argument requires
 the summary which is created with the
-[`load_rcc()`](../reference/load_rcc.md) function. The second argument
-requires a vector of gene names. In this case, it is a subset of the
-discovered housekeeping genes we just made. With the third argument the
-user has the choice to remove the outliers. Lastly, the normalisation
-method can be choosed.  
+[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+function. The second argument requires a vector of gene names. In this
+case, it is a subset of the discovered housekeeping genes we just made.
+With the third argument the user has the choice to remove the outliers.
+Lastly, the normalisation method can be chosen.  
 Here, the user has a choice between `"GLM"` or `"GEO"`. The differences
 between normalisation methods are nuanced, however, a preference for
-either method are use case specific.  
+either method is use case specific.  
 In this example, `"GLM"` is used.
 
 ``` r
@@ -428,20 +478,39 @@ GSE70970_norm <- normalise(
   normalisation_method = "GEO",
   remove_outliers = TRUE
 )
-## Error:
-## ! object 'GSE70970_sum' not found
+## [NACHO] Normalising "GSE70970_sum" with new value for parameters:
+##   - housekeeping_genes = TRUE
+##   - housekeeping_predict = TRUE
+##   - remove_outliers = TRUE
+## [NACHO] Computing normalisation factors using "GEO" method.
+## [NACHO] Missing values have been replaced with zeros for PCA.
+## [NACHO] Returning a list.
+##   $ access              : character
+##   $ housekeeping_genes  : character
+##   $ housekeeping_predict: logical
+##   $ housekeeping_norm   : logical
+##   $ normalisation_method: character
+##   $ remove_outliers     : logical
+##   $ n_comp              : numeric
+##   $ data_directory      : character
+##   $ pc_sum              : data.frame
+##   $ nacho               : data.frame
+##   $ outliers_thresholds : list
 ```
 
-[`normalise()`](../reference/normalise.md) returns a `list` object (same
-as [`load_rcc()`](../reference/load_rcc.md)) with `raw_counts` and
-`normalised_counts` slots filled with the raw and normalised counts.
-Both counts are also in the *NACHO* data.frame.
+[`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+returns a `list` object (same as
+[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md))
+with `raw_counts` and `normalised_counts` slots filled with the raw and
+normalised counts. Both counts are also in the *NACHO* data.frame.
 
 ### The `autoplot()` function
 
-The [`autoplot()`](../reference/autoplot.md) function provides an easy
-way to plot any quality-control from the
-[`visualise()`](../reference/visualise.md) function.
+The
+[`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md)
+function provides an easy way to plot any quality-control from the
+[`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+function.
 
 ``` r
 
@@ -491,34 +560,13 @@ The possible metrics (`x`) are:
 
 #### Positive Controls
 
-    ## Warning: The following aesthetics were dropped during statistical transformation:
-    ## colour.
-    ## ℹ This can happen when ggplot fails to infer the correct grouping structure in
-    ##   the data.
-    ## ℹ Did you forget to specify a `group` aesthetic or to convert a numerical
-    ##   variable into a factor?
-
 ![](NACHO_files/figure-html/unnamed-chunk-11-5.png)
 
 #### Negative Controls
 
-    ## Warning: The following aesthetics were dropped during statistical transformation:
-    ## colour.
-    ## ℹ This can happen when ggplot fails to infer the correct grouping structure in
-    ##   the data.
-    ## ℹ Did you forget to specify a `group` aesthetic or to convert a numerical
-    ##   variable into a factor?
-
 ![](NACHO_files/figure-html/unnamed-chunk-11-6.png)
 
 #### Housekeeping Genes
-
-    ## Warning: The following aesthetics were dropped during statistical transformation:
-    ## colour.
-    ## ℹ This can happen when ggplot fails to infer the correct grouping structure in
-    ##   the data.
-    ## ℹ Did you forget to specify a `group` aesthetic or to convert a numerical
-    ##   variable into a factor?
 
 ![](NACHO_files/figure-html/unnamed-chunk-11-7.png)
 
@@ -550,19 +598,9 @@ The possible metrics (`x`) are:
 
 #### Positive Factor vs. Negative Factor
 
-    ## Warning in ggplot2::scale_y_log10(): log-10 transformation
-    ## introduced infinite values.
-
 ![](NACHO_files/figure-html/unnamed-chunk-11-14.png)
 
 #### Housekeeping Factor
-
-    ## Warning in ggplot2::scale_x_log10(): log-10 transformation
-    ## introduced infinite values.
-    ## Warning in ggplot2::scale_x_log10(): log-10 transformation
-    ## introduced infinite values.
-    ## Warning in ggplot2::scale_y_log10(): log-10 transformation introduced infinite values.
-    ## log-10 transformation introduced infinite values.
 
 ![](NACHO_files/figure-html/unnamed-chunk-11-15.png)
 
@@ -574,10 +612,11 @@ The possible metrics (`x`) are:
 
 ### NACHO as a standalone app
 
-*NACHO* is also available as a standalone app to be used in a shiny
-server configuration. A convenience function
-[`deploy()`](../reference/deploy.md) is available to directly copy the
-*NACHO* app to the default directory of a shiny server.
+*NACHO* is also available as a standalone app to be used in a Shiny
+Server configuration. A convenience function
+[`deploy()`](https://m.canouil.dev/NACHO/dev/reference/deploy.md) is
+available to directly copy the *NACHO* app to the default directory of a
+Shiny Server.
 
 ``` r
 
@@ -592,13 +631,15 @@ normalising RCC files:
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
 
-![](README-app.png)
+![NACHO Shiny application on the Upload RCC Files tab, with a choice of
+normalisation method and a file picker for RCC files.](README-app.png)
 
 ### The `render()` function
 
-The [`render()`](../reference/render.md) function renders a
-comprehensive HTML report, using `print(..., echo = TRUE)`, which
-includes all quality-control metrics and description of those metrics.
+The [`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)
+function renders a comprehensive HTML report, using
+`print(..., echo = TRUE)`, which includes all quality-control metrics
+and description of those metrics.
 
 ``` r
 
@@ -614,7 +655,7 @@ render(
 ```
 
 The underneath function [`print()`](https://rdrr.io/r/base/print.html)
-can be used directly within any Rmarkdown chunk, setting the parameter
+can be used directly within any R Markdown chunk, setting the parameter
 `echo = TRUE`.
 
 ``` r

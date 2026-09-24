@@ -2,8 +2,95 @@
 
 ## NACHO (development version)
 
+### Breaking changes
+
+- In `DESCRIPTION`,
+  - build: require R 4.1.0 or newer, ggplot2 4.0.0 or newer, ggforce
+    0.5.0 or newer, ggrepel 0.9.6 or newer, and shiny 1.7.4 or newer,
+    which pulls in fontawesome 0.4.0 and its Font Awesome 6 icon names.
+  - build: require pandoc 2.11 or newer, which has citeproc built in, so
+    pandoc-citeproc is no longer needed.
+  - build: require knitr 1.39 or newer, which the report needs for
+    `include_graphics(rel_path = FALSE)`.
+  - build: require scales 1.4.0 or newer, which ggplot2 4.0.0 already
+    needs, for the log-10 axes of the `"PFNF"` and `"HF"` plots.
+
+### Chores
+
+- In `inst/app/`,
+  - refactor: replace the superseded
+    [`shiny::callModule()`](https://rdrr.io/pkg/shiny/man/callModule.html)
+    with
+    [`shiny::moduleServer()`](https://rdrr.io/pkg/shiny/man/moduleServer.html).
+  - refactor: use the Font Awesome 6 icon names `file-arrow-up` and
+    `circle-info`.
+- In `R/`,
+  - refactor: drop `stringsAsFactors = FALSE` from
+    [`data.frame()`](https://rdrr.io/r/base/data.frame.html) and
+    [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
+    calls, where it is the default since R 4.0.0.
+  - refactor: hide boxplot outliers with `outliers = FALSE` instead of
+    `outlier.shape = NA`.
+
+### Documentation
+
+- In `vignettes/`, `README.Rmd` and the
+  [`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)
+  report template,
+  - docs: write chunk options as `#|` YAML comments, which needs knitr
+    1.35 or newer.
+  - docs: add alternative text to the images.
+  - docs: install the development version with
+    [`pak::pak()`](https://pak.r-lib.org/reference/pak.html) instead of
+    `remotes::install_github()`.
+- docs: fix typos and grammar, and spell GitHub, NanoString, R Markdown
+  and Shiny consistently.
+- In `vignettes/`,
+  - docs: keep only the GSE70970 samples measured with the
+    `NS_H_miR_1.4` CodeSet, since its two CodeSets come from different
+    nSolver versions and
+    [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+    refuses files that mix versions.
+  - docs: attach data.table in the analysis vignette, which uses
+    [`dcast()`](https://rdrr.io/pkg/data.table/man/dcast.data.table.html)
+    and
+    [`as.data.table()`](https://rdrr.io/pkg/data.table/man/as.data.table.html).
+- In `pkgdown/`,
+  - docs: restyle the website for pkgdown 2.2 with the NACHO logo
+    colours, a light and dark mode switch, and colour contrast that
+    meets WCAG AA.
+  - docs: group the reference index by task.
+
 ### Fixes
 
+- In `inst/CITATION`,
+  - fix: list the authors as
+    [`person()`](https://rdrr.io/r/utils/person.html) objects, so the
+    citation shows their full initials and spells Leen M. ’t Hart
+    correctly.
+- In `R/autoplot.R`,
+  - fix: stop boxplots inheriting the colour aesthetic, which made
+    ggplot2 warn that it dropped `colour` for the control probe plots.
+  - fix: draw the outlier bands of the `"PFNF"` and `"HF"` plots to the
+    panel edges without log-10 warnings about infinite values.
+- In `R/render.R`,
+  - fix: include the logo by its absolute path, so pandoc finds it when
+    the temporary directory sits behind a symbolic link.
+- In `inst/app/app.R`,
+  - fix: stop writing an `all.rdata` debug file to the working directory
+    when uploading RCC files.
+  - fix: load uploaded RCC files, which failed because
+    [`suppressMessages()`](https://rdrr.io/r/base/message.html) received
+    `x` instead of `expr`.
+  - fix: make the sample sheet optional again when uploading RCC files,
+    instead of failing on a missing `ssheet_dt`.
+- In `DESCRIPTION`,
+  - fix: suggest markdown, which the app needs to show its help pages,
+    and make
+    [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+    ask for it when it is not installed. The
+    [`deploy()`](https://m.canouil.dev/NACHO/dev/reference/deploy.md)
+    help page notes that the server needs it too.
 - In `R/geometric_housekeeping.R`,
   - fix: replace background-corrected housekeeping counts below 1 with
     1, so values between 0 and 1 no longer inflate `House_factor`.
@@ -148,7 +235,8 @@ CRAN release: 2021-01-05
   - Update URLs.
 - In `R/normalise.R`,
   - Fix missing “outliers_thresholds” field after
-    [`normalise()`](../reference/normalise.md) without removing outliers
+    [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+    without removing outliers
     ([\#26](https://github.com/mcanouil/NACHO/issues/26)).
 - In `R/GSE74821.R`,
   - Now uses `data-raw` root directory.
@@ -187,11 +275,14 @@ CRAN release: 2020-01-09
   [\#14](https://github.com/mcanouil/NACHO/issues/14))
   - as a regular app, to load directly RCC files individually or within
     zip archive.
-  - within [`visualise()`](../reference/visualise.md), to load `"nacho"`
-    object from [`load_rcc()`](../reference/load_rcc.md) (previous
-    `summarise()`) or from [`normalise()`](../reference/normalise.md).
-- New [`deploy()`](../reference/deploy.md) (`R/deploy.R`) function to
-  easily deploy (copy) the shiny app.
+  - within
+    [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md),
+    to load `"nacho"` object from
+    [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+    (previous `summarise()`) or from
+    [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
+- New [`deploy()`](https://m.canouil.dev/NACHO/dev/reference/deploy.md)
+  (`R/deploy.R`) function to easily deploy (copy) the shiny app.
 - New raw RCC files (multiplexed) available in `inst/extdata/`.
 - New vignette `NACHO-analysis`, which describe how to use `limma` or
   other model after using –NACHO–.
@@ -202,14 +293,14 @@ CRAN release: 2020-01-09
 ### Breaking changes
 
 - `summarise()` and `summarize()` have been deprecated and replaced with
-  [`load_rcc()`](../reference/load_rcc.md).
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md).
   ([\#12](https://github.com/mcanouil/NACHO/issues/12) &
   [\#15](https://github.com/mcanouil/NACHO/issues/15))
 - Counts matrices (`raw_counts` and `normalised_counts`) are no longer
   (directly) available, -i.e.-, counts are available in a long format
   within the `nacho` slot of a nacho object.
-- [`visualise()`](../reference/visualise.md), now uses a new shiny app
-  (`inst/app/`).
+- [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md),
+  now uses a new shiny app (`inst/app/`).
 
 ### Minor improvements and fixes
 
@@ -217,7 +308,7 @@ CRAN release: 2020-01-09
   [`print()`](https://rdrr.io/r/base/print.html), `R/load_rcc.R` and
   `R/normalise.R`,
   - replace function to check for outliers, now uses
-    [`check_outliers()`](../reference/check_outliers.md).
+    [`check_outliers()`](https://m.canouil.dev/NACHO/dev/reference/check_outliers.md).
 - In `R/visualise.R`, replace datatable (render and output) with
   classical table. ([\#13](https://github.com/mcanouil/NACHO/issues/13))
 - In `R/autoplot.R`,
@@ -259,15 +350,18 @@ CRAN release: 2019-10-07
 
 ### New features
 
-- [`autoplot()`](../reference/autoplot.md) allows to plot a chosen QC
-  plot available in the shiny app
-  ([`visualise()`](../reference/visualise.md)) and/or in the HTML report
-  ([`render()`](../reference/render.md)).
+- [`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md)
+  allows to plot a chosen QC plot available in the shiny app
+  ([`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md))
+  and/or in the HTML report
+  ([`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)).
 - [`print()`](https://rdrr.io/r/base/print.html) allows to print the
   structure or to print text and figures formatted using markdown
   (mainly to be used in a Rmakrdown chunk).
-- [`render()`](../reference/render.md) render figures from
-  [`visualise()`](../reference/visualise.md) in a HTML friendly output.
+- [`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)
+  render figures from
+  [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+  in a HTML friendly output.
 
 ### Minor improvements and fixes
 
@@ -278,25 +372,28 @@ CRAN release: 2019-10-07
     ([\#9](https://github.com/mcanouil/NACHO/issues/9)).
 - In `R/summarise.R`,
   - object returned is of S3 class “nacho” for ease of use of
-    [`autoplot()`](../reference/autoplot.md).
+    [`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md).
   - update code to use `tidyr` 1.0.0
     ([\#9](https://github.com/mcanouil/NACHO/issues/9)).
 - In `R/normalise.R`,
   - object returned is of S3 class “nacho” for ease of use of
-    [`autoplot()`](../reference/autoplot.md).
+    [`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md).
   - fix missing `outliers_thresholds` component in returned object.
 - In `R/visualise.R`,
   - minor code changes.
   - return `app` object in non-interactive session.
 - In `vignettes/NACHO.Rmd`,
   - fix several typos.
-  - add sections for [`autoplot()`](../reference/autoplot.md),
+  - add sections for
+    [`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md),
     [`print()`](https://rdrr.io/r/base/print.html) and
-    [`render()`](../reference/render.md)
+    [`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)
     ([\#7](https://github.com/mcanouil/NACHO/issues/7)).
   - fix chunk output (-i.e.-, remove default `results = "asis"`).
-  - fix [`normalise()`](../reference/normalise.md) call with custom
-    housekeeping genes (-i.e.-, set `housekeeping_predict = FALSE`)
+  - fix
+    [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+    call with custom housekeeping genes (-i.e.-, set
+    `housekeeping_predict = FALSE`)
     ([\#10](https://github.com/mcanouil/NACHO/issues/10)).
 
 ## NACHO 0.5.6
@@ -330,9 +427,9 @@ CRAN release: 2019-04-28
 ### Minor improvements and fixes
 
 - In `R/normalise.R`, add short running example for
-  [`normalise()`](../reference/normalise.md).
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
 - In `R/visualise.R`, add short running example for
-  [`visualise()`](../reference/visualise.md).
+  [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md).
 - In `DESCRIPTION`, description updated for CRAN, by removing some
   capital letters and put –NACHO– between single quotes.
 
@@ -362,10 +459,10 @@ CRAN release: 2019-04-28
 ### New features
 
 - `summarise()` imports and pre-process RCC files.
-- [`normalise()`](../reference/normalise.md) allows to change settings
-  used in `summarise()` and exclude outliers.
-- [`visualise()`](../reference/visualise.md) allows customisation of the
-  quality thresholds.
+- [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+  allows to change settings used in `summarise()` and exclude outliers.
+- [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+  allows customisation of the quality thresholds.
 - Minor changes
 
 ### Minor improvements and fixes
@@ -386,9 +483,11 @@ CRAN release: 2019-04-28
 
 ## NACHO 0.3.0
 
-- Code optimisation in [`normalise()`](../reference/normalise.md) (and
-  internal functions).
-- [`visualise()`](../reference/visualise.md) replaces the Shiny app.
+- Code optimisation in
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+  (and internal functions).
+- [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+  replaces the Shiny app.
 
 ## NACHO 0.2.2
 
@@ -401,8 +500,8 @@ CRAN release: 2019-04-28
 ## NACHO 0.2.0
 
 - Complete rewrite of `summarise()` and
-  [`normalise()`](../reference/normalise.md) (and all internal
-  functions).
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+  (and all internal functions).
 - Add S4 class object.
 
 ## NACHO 0.1.0

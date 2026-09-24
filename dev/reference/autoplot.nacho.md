@@ -1,8 +1,10 @@
 # Plot quality-control metrics and thresholds of a "nacho" object
 
-This function allows to plot any qualit-control figures available within
-the shiny app using [`visualise()`](visualise.md) or in the HTML report
-from [`render()`](render.md).
+This function plots any of the quality-control figures available within
+the Shiny app using
+[`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+or in the HTML report from
+[`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md).
 
 ## Usage
 
@@ -26,7 +28,9 @@ autoplot(
 - object:
 
   \[[list](https://rdrr.io/r/base/list.html)\] List obtained from
-  [`load_rcc()`](load_rcc.md) or [`normalise()`](normalise.md).
+  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+  or
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
 
 - x:
 
@@ -77,7 +81,7 @@ autoplot(
   \[[numeric](https://rdrr.io/r/base/numeric.html)\] A numeric
   controlling point size
   ([`ggplot2::geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html)
-  or line size
+  or line width
   ([`ggplot2::geom_line()`](https://ggplot2.tidyverse.org/reference/geom_path.html)).
 
 - show_legend:
