@@ -1,10 +1,53 @@
+url: https://m.canouil.dev/NACHO/
+
 template:
   bootstrap: 5
-  bootswatch: united
+  light-switch: true
+  bslib:
+    primary: "#B64326"
+    link-color-dark: "#FCB448"
+    body-bg-dark: "#111821"
+    headings-color: "#182430"
+    headings-color-dark: "#F0D83C"
+    navbar-bg: "#182430"
+    # pkgdown default of 56px plus the 4px strip in extra.scss.
+    pkgdown-nav-height: 60px
+    navbar-light-color: "#FFFFFF"
+    navbar-light-hover-color: "#FCB448"
+    navbar-light-active-color: "#FCB448"
+    navbar-dark-color: "#FFFFFF"
+    navbar-dark-hover-color: "#FCB448"
+    navbar-dark-active-color: "#FCB448"
+    base_font:
+      google: "Source Sans 3"
+    code_font:
+      google: "JetBrains Mono"
 
 development:
   mode: auto
+  version_label: white
 
 authors:
   Mickaël Canouil:
     href: https://mickael.canouil.fr
+
+reference:
+  - title: Load and normalise
+    desc: Read RCC files, compute quality-control metrics and normalise counts.
+    contents:
+      - load_rcc
+      - normalise
+      - check_outliers
+  - title: Visualise and report
+    desc: Explore quality control interactively, plot a single metric, or write a full report.
+    contents:
+      - visualise
+      - autoplot.nacho
+      - print.nacho
+      - render
+  - title: Shiny application
+    contents:
+      - deploy
+  - title: Data
+    contents:
+      - GSE74821
