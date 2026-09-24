@@ -305,7 +305,7 @@ plot_metrics <- function(
     ) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::geom_boxplot(
-      mapping = ggplot2::aes(group = .data[["CartridgeID"]]),
+      mapping = ggplot2::aes(group = .data[["CartridgeID"]], colour = NULL),
       fill = NA,
       outliers = FALSE,
       na.rm = TRUE,
@@ -437,7 +437,7 @@ plot_cg <- function(
     ) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::geom_boxplot(
-      mapping = ggplot2::aes(group = .data[["Name"]]),
+      mapping = ggplot2::aes(group = .data[["Name"]], colour = NULL),
       fill = NA,
       outliers = FALSE,
       na.rm = TRUE,
@@ -475,7 +475,6 @@ plot_cg <- function(
       }
     } +
     ggplot2::scale_y_log10(
-      # limits = c(1, NA),
       labels = function(x) format(x, big.mark = ",")
     ) +
     ggplot2::labs(
@@ -532,7 +531,6 @@ plot_pn <- function(
     ggplot2::geom_line() +
     ggplot2::facet_wrap(facets = "CodeClass", scales = "free_y", ncol = 2) +
     ggplot2::scale_y_log10(
-      # limits = c(1, NA),
       labels = function(x) format(x, big.mark = ",")
     ) +
     ggplot2::scale_x_discrete(labels = NULL) +
@@ -919,11 +917,11 @@ plot_pfnf <- function(
       }
     } +
     ggplot2::labs(x = "Negative Factor", y = "Positive Factor", colour = colour) +
-    ggplot2::scale_y_log10() +
+    ggplot2::scale_y_continuous(transform = transform_log10_infinite()) +
     ggplot2::geom_rect(
       data = data.table::data.table(
         ymin = nacho_object$outliers_thresholds[["Positive_factor"]],
-        ymax = c(0, Inf)
+        ymax = c(-Inf, Inf)
       ),
       mapping = ggplot2::aes(xmin = -Inf, xmax = Inf, ymin = .data[["ymin"]], ymax = .data[["ymax"]]),
       fill = "#b22222",
@@ -1024,14 +1022,14 @@ plot_hf <- function(
       }
     } +
     ggplot2::labs(x = "Positive Factor", y = "Housekeeping Factor", colour = colour) +
-    ggplot2::scale_x_log10() +
-    ggplot2::scale_y_log10() +
+    ggplot2::scale_x_continuous(transform = transform_log10_infinite()) +
+    ggplot2::scale_y_continuous(transform = transform_log10_infinite()) +
     ggplot2::geom_rect(
       data = data.table::data.table(
-        xmin = c(0, 0, nacho_object$outliers_thresholds[["Positive_factor"]]),
-        xmax = c(Inf, Inf, 0, Inf),
-        ymin = c(nacho_object$outliers_thresholds[["House_factor"]], 0, 0),
-        ymax = c(0, Inf, Inf, Inf)
+        xmin = c(-Inf, -Inf, nacho_object$outliers_thresholds[["Positive_factor"]]),
+        xmax = c(Inf, Inf, -Inf, Inf),
+        ymin = c(nacho_object$outliers_thresholds[["House_factor"]], -Inf, -Inf),
+        ymax = c(-Inf, Inf, Inf, Inf)
       ),
       mapping = ggplot2::aes(
         xmin = .data[["xmin"]],
@@ -1136,7 +1134,6 @@ plot_norm <- function(
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::scale_x_discrete(label = NULL) +
     ggplot2::scale_y_log10(
-      # limits = c(1, NA),
       labels = function(x) format(x, big.mark = ",")
     ) +
     ggplot2::labs(

@@ -43,6 +43,7 @@ Imports:
     ggrepel (>= 0.9.6),
     knitr (>= 1.25),
     rmarkdown (>= 1.16),
+    scales (>= 1.4.0),
     shiny (>= 1.7.4),
     shinyWidgets (>= 0.4.9)
 Suggests:

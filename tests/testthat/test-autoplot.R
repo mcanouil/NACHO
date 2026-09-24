@@ -133,3 +133,11 @@ test_that(paste("Housekeeping", "no genes", sep = " - "), {
     class = "ggplot"
   )
 })
+
+for (imetric in metrics) {
+  test_that(paste(imetric, "builds without warnings", sep = " - "), {
+    expect_no_warning(
+      ggplot2::ggplot_build(autoplot(object = GSE74821, x = imetric, colour = "Date"))
+    )
+  })
+}
