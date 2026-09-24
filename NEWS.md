@@ -11,14 +11,14 @@
 - In `inst/app/`,
   - refactor: replace the superseded `shiny::callModule()` with `shiny::moduleServer()`.
   - refactor: use the Font Awesome 6 icon names `file-arrow-up` and `circle-info`.
-- In `inst/CITATION`,
-  - refactor: list the authors as `person()` objects.
 - In `R/`,
-  - refactor: drop `stringsAsFactors = FALSE`, which is the default since R 4.0.0.
+  - refactor: drop `stringsAsFactors = FALSE` from `data.frame()` and `as.data.frame()` calls, where it is the default since R 4.0.0.
   - refactor: hide boxplot outliers with `outliers = FALSE` instead of `outlier.shape = NA`.
 
 ## Fixes
 
+- In `inst/CITATION`,
+  - fix: list the authors as `person()` objects, so the citation shows their full initials and spells Leen M. 't Hart correctly.
 - In `R/geometric_housekeeping.R`,
   - fix: replace background-corrected housekeeping counts below 1 with 1, so values between 0 and 1 no longer inflate `House_factor`. ([#53](https://github.com/mcanouil/NACHO/issues/53))
 
