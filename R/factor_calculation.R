@@ -41,7 +41,7 @@ factor_calculation <- function(
   positive_factor <- factors_norm[["positive_factor"]]
   geometric_mean_neg <- factors_norm[["geometric_mean_neg"]]
 
-  if (housekeeping_predict | is.null(housekeeping_genes)) {
+  if (housekeeping_predict || is.null(housekeeping_genes)) {
     norm_factor <- data.table::data.table(
       "Positive_factor" = positive_factor,
       "Negative_factor" = geometric_mean_neg

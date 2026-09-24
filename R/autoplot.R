@@ -54,7 +54,7 @@ autoplot.nacho <- function(
       '[NACHO] "object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
     )
   }
-  if (missing(x) | is.null(x)) {
+  if (missing(x) || is.null(x)) {
     stop(
       paste(
         '[NACHO] "x" is missing. It must be one of the following possible values:',
@@ -265,7 +265,7 @@ plot_metrics <- function(
     "LoD" = '"(Z)"'
   )
 
-  if (attr(nacho_object, "RCC_type") == "n8" & x %in% c("PCL", "LoD")) {
+  if (attr(nacho_object, "RCC_type") == "n8" && x %in% c("PCL", "LoD")) {
     message('[NACHO] "PCL" and "LoD" are not available for RCC type "n8".')
     return(
       ggplot2::ggplot() +
@@ -329,41 +329,39 @@ plot_metrics <- function(
       na.rm = TRUE,
       show.legend = FALSE
     ) +
-    {
-      if (show_outliers) {
-        list(
-          ggplot2::geom_point(
-            data = ~ .x[!(is_outlier)],
-            mapping = ggplot2::aes(colour = .data[[colour]]),
-            size = size,
-            na.rm = TRUE,
-            position = ggplot2::position_jitter(width = 0.25, height = 0)
-          ),
-          ggplot2::geom_point(
-            data = ~ .x[(is_outlier)],
-            size = size * outliers_factor,
-            colour = "#b22222",
-            na.rm = TRUE,
-            position = ggplot2::position_jitter(width = 0.25, height = 0)
-          ),
-          if (!is.null(outliers_labels)) {
-            ggrepel::geom_label_repel(
-              data = ~ .x[(is_outlier)],
-              mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-              colour = "#b22222",
-              na.rm = TRUE
-            )
-          }
-        )
-      } else {
+    (if (show_outliers) {
+      list(
         ggplot2::geom_point(
+          data = ~ .x[!(is_outlier)],
           mapping = ggplot2::aes(colour = .data[[colour]]),
           size = size,
           na.rm = TRUE,
           position = ggplot2::position_jitter(width = 0.25, height = 0)
-        )
-      }
-    } +
+        ),
+        ggplot2::geom_point(
+          data = ~ .x[(is_outlier)],
+          size = size * outliers_factor,
+          colour = "#b22222",
+          na.rm = TRUE,
+          position = ggplot2::position_jitter(width = 0.25, height = 0)
+        ),
+        if (!is.null(outliers_labels)) {
+          ggrepel::geom_label_repel(
+            data = ~ .x[(is_outlier)],
+            mapping = ggplot2::aes(label = .data[[outliers_labels]]),
+            colour = "#b22222",
+            na.rm = TRUE
+          )
+        }
+      )
+    } else {
+      ggplot2::geom_point(
+        mapping = ggplot2::aes(colour = .data[[colour]]),
+        size = size,
+        na.rm = TRUE,
+        position = ggplot2::position_jitter(width = 0.25, height = 0)
+      )
+    }) +
     ggplot2::labs(
       x = "CartridgeID",
       y = parse(
@@ -394,9 +392,7 @@ plot_metrics <- function(
       colour = "#b22222",
       linetype = "longdash"
     ) +
-    {
-      if (!show_legend) ggplot2::guides(colour = "none")
-    } +
+    (if (!show_legend) ggplot2::guides(colour = "none")) +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(angle = 30, hjust = 1, vjust = 1)
     )
@@ -428,7 +424,7 @@ plot_cg <- function(
   ) {
     outliers_labels <- nacho_object$access
   }
-  if (is.null(nacho_object$housekeeping_genes) & x %in% "Housekeeping") {
+  if (is.null(nacho_object$housekeeping_genes) && x %in% "Housekeeping") {
     message("[NACHO] No housekeeping genes found.")
     return(
       ggplot2::ggplot() +
@@ -485,41 +481,39 @@ plot_cg <- function(
       na.rm = TRUE,
       show.legend = FALSE
     ) +
-    {
-      if (show_outliers) {
-        list(
-          ggplot2::geom_point(
-            data = ~ .x[!(is_outlier)],
-            mapping = ggplot2::aes(colour = .data[[colour]]),
-            size = size,
-            na.rm = TRUE,
-            position = ggplot2::position_jitter(width = 0.25, height = 0)
-          ),
-          ggplot2::geom_point(
-            data = ~ .x[(is_outlier)],
-            size = size * outliers_factor,
-            colour = "#b22222",
-            na.rm = TRUE,
-            position = ggplot2::position_jitter(width = 0.25, height = 0)
-          ),
-          if (!is.null(outliers_labels)) {
-            ggrepel::geom_label_repel(
-              data = ~ .x[(is_outlier)],
-              mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-              colour = "#b22222",
-              na.rm = TRUE
-            )
-          }
-        )
-      } else {
+    (if (show_outliers) {
+      list(
         ggplot2::geom_point(
+          data = ~ .x[!(is_outlier)],
           mapping = ggplot2::aes(colour = .data[[colour]]),
           size = size,
           na.rm = TRUE,
           position = ggplot2::position_jitter(width = 0.25, height = 0)
-        )
-      }
-    } +
+        ),
+        ggplot2::geom_point(
+          data = ~ .x[(is_outlier)],
+          size = size * outliers_factor,
+          colour = "#b22222",
+          na.rm = TRUE,
+          position = ggplot2::position_jitter(width = 0.25, height = 0)
+        ),
+        if (!is.null(outliers_labels)) {
+          ggrepel::geom_label_repel(
+            data = ~ .x[(is_outlier)],
+            mapping = ggplot2::aes(label = .data[[outliers_labels]]),
+            colour = "#b22222",
+            na.rm = TRUE
+          )
+        }
+      )
+    } else {
+      ggplot2::geom_point(
+        mapping = ggplot2::aes(colour = .data[[colour]]),
+        size = size,
+        na.rm = TRUE,
+        position = ggplot2::position_jitter(width = 0.25, height = 0)
+      )
+    }) +
     ggplot2::scale_y_log10(
       labels = function(x) format(x, big.mark = ",")
     ) +
@@ -528,9 +522,7 @@ plot_cg <- function(
       y = "Counts + 1",
       colour = colour
     ) +
-    {
-      if (!show_legend) ggplot2::guides(colour = "none")
-    } +
+    (if (!show_legend) ggplot2::guides(colour = "none")) +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(
         face = "italic",
@@ -614,9 +606,7 @@ plot_pn <- function(
       method = "loess"
     ) +
     ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2)) +
-    {
-      if (!show_legend) ggplot2::guides(colour = "none")
-    }
+    (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
 
@@ -669,33 +659,31 @@ plot_acbd <- function(
       direction = 1,
       end = 0.85
     ) +
-    {
-      if (show_outliers) {
-        list(
-          ggplot2::geom_point(
-            data = ~ .x[!(is_outlier)],
-            size = size,
-            na.rm = TRUE
-          ),
-          ggplot2::geom_point(
+    (if (show_outliers) {
+      list(
+        ggplot2::geom_point(
+          data = ~ .x[!(is_outlier)],
+          size = size,
+          na.rm = TRUE
+        ),
+        ggplot2::geom_point(
+          data = ~ .x[(is_outlier)],
+          size = size * outliers_factor,
+          colour = "#b22222",
+          na.rm = TRUE
+        ),
+        if (!is.null(outliers_labels)) {
+          ggrepel::geom_label_repel(
             data = ~ .x[(is_outlier)],
-            size = size * outliers_factor,
+            mapping = ggplot2::aes(label = .data[[outliers_labels]]),
             colour = "#b22222",
             na.rm = TRUE
-          ),
-          if (!is.null(outliers_labels)) {
-            ggrepel::geom_label_repel(
-              data = ~ .x[(is_outlier)],
-              mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-              colour = "#b22222",
-              na.rm = TRUE
-            )
-          }
-        )
-      } else {
-        ggplot2::geom_point(size = size, na.rm = TRUE)
-      }
-    } +
+          )
+        }
+      )
+    } else {
+      ggplot2::geom_point(size = size, na.rm = TRUE)
+    }) +
     ggplot2::scale_x_continuous(labels = function(x) {
       format(x, big.mark = ",")
     }) +
@@ -731,9 +719,7 @@ plot_acbd <- function(
       colour = "#b22222",
       linetype = "longdash"
     ) +
-    {
-      if (!show_legend) ggplot2::guides(colour = "none")
-    }
+    (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
 
@@ -786,9 +772,7 @@ plot_acmc <- function(
       y = "Median Counts",
       colour = colour
     ) +
-    {
-      if (!show_legend) ggplot2::guides(colour = "none")
-    }
+    (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
 
@@ -839,9 +823,7 @@ plot_pca12 <- function(
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::labs(x = "PC01", y = "PC02", colour = colour) +
-    {
-      if (!show_legend) ggplot2::guides(colour = "none")
-    }
+    (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
 
@@ -923,9 +905,7 @@ plot_pca <- function(
       cols = ggplot2::vars(.data[["X.PC"]]),
       scales = "free"
     ) +
-    {
-      if (!show_legend) ggplot2::guides(colour = "none")
-    }
+    (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
 
@@ -1019,33 +999,31 @@ plot_pfnf <- function(
       direction = 1,
       end = 0.85
     ) +
-    {
-      if (show_outliers) {
-        list(
-          ggplot2::geom_point(
-            data = ~ .x[!(is_outlier)],
-            size = size,
-            na.rm = TRUE
-          ),
-          ggplot2::geom_point(
+    (if (show_outliers) {
+      list(
+        ggplot2::geom_point(
+          data = ~ .x[!(is_outlier)],
+          size = size,
+          na.rm = TRUE
+        ),
+        ggplot2::geom_point(
+          data = ~ .x[(is_outlier)],
+          size = size * outliers_factor,
+          colour = "#b22222",
+          na.rm = TRUE
+        ),
+        if (!is.null(outliers_labels)) {
+          ggrepel::geom_label_repel(
             data = ~ .x[(is_outlier)],
-            size = size * outliers_factor,
+            mapping = ggplot2::aes(label = .data[[outliers_labels]]),
             colour = "#b22222",
             na.rm = TRUE
-          ),
-          if (!is.null(outliers_labels)) {
-            ggrepel::geom_label_repel(
-              data = ~ .x[(is_outlier)],
-              mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-              colour = "#b22222",
-              na.rm = TRUE
-            )
-          }
-        )
-      } else {
-        ggplot2::geom_point(size = size, na.rm = TRUE)
-      }
-    } +
+          )
+        }
+      )
+    } else {
+      ggplot2::geom_point(size = size, na.rm = TRUE)
+    }) +
     ggplot2::labs(
       x = "Negative Factor",
       y = "Positive Factor",
@@ -1076,9 +1054,7 @@ plot_pfnf <- function(
       colour = "#b22222",
       linetype = "longdash"
     ) +
-    {
-      if (!show_legend) ggplot2::guides(colour = "none")
-    }
+    (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
 
@@ -1155,33 +1131,31 @@ plot_hf <- function(
       direction = 1,
       end = 0.85
     ) +
-    {
-      if (show_outliers) {
-        list(
-          ggplot2::geom_point(
-            data = ~ .x[!(is_outlier)],
-            size = size,
-            na.rm = TRUE
-          ),
-          ggplot2::geom_point(
+    (if (show_outliers) {
+      list(
+        ggplot2::geom_point(
+          data = ~ .x[!(is_outlier)],
+          size = size,
+          na.rm = TRUE
+        ),
+        ggplot2::geom_point(
+          data = ~ .x[(is_outlier)],
+          size = size * outliers_factor,
+          colour = "#b22222",
+          na.rm = TRUE
+        ),
+        if (!is.null(outliers_labels)) {
+          ggrepel::geom_label_repel(
             data = ~ .x[(is_outlier)],
-            size = size * outliers_factor,
+            mapping = ggplot2::aes(label = .data[[outliers_labels]]),
             colour = "#b22222",
             na.rm = TRUE
-          ),
-          if (!is.null(outliers_labels)) {
-            ggrepel::geom_label_repel(
-              data = ~ .x[(is_outlier)],
-              mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-              colour = "#b22222",
-              na.rm = TRUE
-            )
-          }
-        )
-      } else {
-        ggplot2::geom_point(size = size, na.rm = TRUE)
-      }
-    } +
+          )
+        }
+      )
+    } else {
+      ggplot2::geom_point(size = size, na.rm = TRUE)
+    }) +
     ggplot2::labs(
       x = "Positive Factor",
       y = "Housekeeping Factor",
@@ -1231,9 +1205,7 @@ plot_hf <- function(
       colour = "#b22222",
       linetype = "longdash"
     ) +
-    {
-      if (!show_legend) ggplot2::guides(colour = "none")
-    }
+    (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
 
@@ -1342,9 +1314,7 @@ plot_norm <- function(
       se = TRUE,
       method = "loess"
     ) +
-    {
-      if (!(show_legend & length(nacho_object$housekeeping_genes) <= 10)) {
-        ggplot2::guides(colour = "none")
-      }
-    }
+    (if (!(show_legend && length(nacho_object$housekeeping_genes) <= 10)) {
+      ggplot2::guides(colour = "none")
+    })
 }

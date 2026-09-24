@@ -611,7 +611,7 @@ server <- function(input, output, session) {
 
   # ---------------------------------------- Show / Hide tabs
   shiny::observe({
-    if (!inherits(nacho_object, "nacho") & is.null(input$rcc_files)) {
+    if (!inherits(nacho_object, "nacho") && is.null(input$rcc_files)) {
       shiny::showTab("main-menu", target = "upload-tab", select = TRUE)
       lapply(
         X = paste0(
@@ -622,7 +622,7 @@ server <- function(input, output, session) {
       )
     }
 
-    if (inherits(nacho_object, "nacho") & is.null(input$rcc_files)) {
+    if (inherits(nacho_object, "nacho") && is.null(input$rcc_files)) {
       lapply(
         X = paste0(
           c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"),

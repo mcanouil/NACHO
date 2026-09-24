@@ -82,11 +82,11 @@ load_rcc <- function(
   n_comp = 10
 ) {
   file_path <- Code_Summary <- CodeClass <- NULL # no visible binding for global variable
-  if (missing(data_directory) | missing(ssheet_csv)) {
+  if (missing(data_directory) || missing(ssheet_csv)) {
     stop('[NACHO] "data_directory" and "ssheet_csv" must be provided.')
   }
   data_directory <- normalizePath(data_directory, mustWork = TRUE)
-  if (is.vector(ssheet_csv, "character") & length(ssheet_csv) > 1) {
+  if (is.vector(ssheet_csv, "character") && length(ssheet_csv) > 1) {
     if (is.null(names(ssheet_csv))) {
       ssheet_csv <- data.frame(IDFILE = ssheet_csv)
     } else {
@@ -97,9 +97,9 @@ load_rcc <- function(
   }
 
   if (
-    is.null(id_colname) &
-      (inherits(ssheet_csv, "data.frame") |
-        (is.vector(ssheet_csv, "character") & length(ssheet_csv) == 1))
+    is.null(id_colname) &&
+      (inherits(ssheet_csv, "data.frame") ||
+        (is.vector(ssheet_csv, "character") && length(ssheet_csv) == 1))
   ) {
     stop('[NACHO] "id_colname" must be provided as a column of "ssheet_csv".')
   }
@@ -126,7 +126,7 @@ load_rcc <- function(
   }
 
   if (
-    anyDuplicated(nacho_df[[id_colname]]) != 0 &
+    anyDuplicated(nacho_df[[id_colname]]) != 0 &&
       !"plexset_id" %in% colnames(nacho_df)
   ) {
     stop(
@@ -199,9 +199,9 @@ load_rcc <- function(
   message("[NACHO] Performing QC and formatting data.")
   has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
   if (
-    !has_hkg &
-      is.null(housekeeping_genes) &
-      !housekeeping_predict &
+    !has_hkg &&
+      is.null(housekeeping_genes) &&
+      !housekeeping_predict &&
       housekeeping_norm
   ) {
     message(paste(

@@ -185,11 +185,11 @@ normalise <- function(
     )
   }
 
-  if (remove_outliers & !nacho_object[["remove_outliers"]]) {
+  if (remove_outliers && !nacho_object[["remove_outliers"]]) {
     nacho_object[["outliers_thresholds"]] <- outliers_thresholds
     nacho_object <- check_outliers(nacho_object)
 
-    if (any(nacho_object[["nacho"]][, "is_outlier"]) | any(params_changed)) {
+    if (any(nacho_object[["nacho"]][, "is_outlier"]) || any(params_changed)) {
       nacho_object <- qc_rcc(
         data_directory = nacho_object[["data_directory"]],
         nacho_df = nacho_object[["nacho"]][

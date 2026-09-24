@@ -21,7 +21,7 @@ qc_rcc <- function(
 ) {
   Name <- CodeClass <- NULL # no visible binding for global variable
   has_hkg <- grepl("Housekeeping", nacho_df[["CodeClass"]])
-  if (is.null(housekeeping_genes) & any(has_hkg)) {
+  if (is.null(housekeeping_genes) && any(has_hkg)) {
     housekeeping_genes <- nacho_df[["Name"]][has_hkg]
     housekeeping_genes <- unique(housekeeping_genes)
   }
@@ -75,7 +75,7 @@ qc_rcc <- function(
       count_column = "count_norm"
     )
 
-    if (is.null(predicted_housekeeping) | length(predicted_housekeeping) == 0) {
+    if (is.null(predicted_housekeeping) || length(predicted_housekeeping) == 0) {
       message(
         "[NACHO] Could not find suitable houskeeping genes, default will be used."
       )
