@@ -26,6 +26,8 @@
   - fix: include the logo by its absolute path, so pandoc finds it when the temporary directory sits behind a symbolic link.
 - In `inst/app/app.R`,
   - fix: stop writing an `all.rdata` debug file to the working directory when uploading RCC files.
+  - fix: load uploaded RCC files, which failed because `suppressMessages()` received `x` instead of `expr`.
+  - fix: make the sample sheet optional again when uploading RCC files, instead of failing on a missing `ssheet_dt`.
 - In `R/geometric_housekeeping.R`,
   - fix: replace background-corrected housekeeping counts below 1 with 1, so values between 0 and 1 no longer inflate `House_factor`. ([#53](https://github.com/mcanouil/NACHO/issues/53))
 
