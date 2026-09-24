@@ -19,6 +19,13 @@
 
 - In `inst/CITATION`,
   - fix: list the authors as `person()` objects, so the citation shows their full initials and spells Leen M. 't Hart correctly.
+- In `R/autoplot.R`,
+  - fix: stop boxplots inheriting the colour aesthetic, which made ggplot2 warn that it dropped `colour` for the control probe plots.
+  - fix: draw the outlier bands of the `"PFNF"` and `"HF"` plots to the panel edges without log-10 warnings about infinite values.
+- In `R/render.R`,
+  - fix: include the logo by its absolute path, so pandoc finds it when the temporary directory sits behind a symbolic link.
+- In `inst/app/app.R`,
+  - fix: stop writing an `all.rdata` debug file to the working directory when uploading RCC files.
 - In `R/geometric_housekeeping.R`,
   - fix: replace background-corrected housekeeping counts below 1 with 1, so values between 0 and 1 no longer inflate `House_factor`. ([#53](https://github.com/mcanouil/NACHO/issues/53))
 
