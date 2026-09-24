@@ -168,7 +168,7 @@ print.nacho <- function(
   }
 
   if (xaringan) {
-    sections <- data.frame(stringsAsFactors = FALSE,
+    sections <- data.frame(
       title = c(
         "Positive Control Genes",
         "Negative Control Genes",
@@ -192,7 +192,7 @@ print.nacho <- function(
       level = 0
     )
   } else {
-    sections <- data.frame(stringsAsFactors = FALSE,
+    sections <- data.frame(
       title = c(
         "Control Genes", "Positive", "Negative", "Housekeeping", "Control Probe Expression",
         "Quality-Control Visuals", "Average Count vs. Binding Density", "Average Count vs. Median Count",

@@ -110,7 +110,7 @@ load_rcc <- function(
   nacho_df <- switch(
     EXPR = paste(as.integer(inherits(ssheet_csv, c("data.frame", "character"), TRUE) > 0), collapse = ""),
     "10" = ssheet_csv,
-    "01" = data.table::fread(file = ssheet_csv, header = TRUE, sep = ",", stringsAsFactors = FALSE),
+    "01" = data.table::fread(file = ssheet_csv, header = TRUE, sep = ","),
     stop('[NACHO] "ssheet_csv" must be a "data.frame" or path to csv.')
   )
 
