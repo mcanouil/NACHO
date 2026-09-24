@@ -15,6 +15,13 @@ test_that("corrected counts between 0 and 1 are floored at 1", {
   expect_equal(housekeeping_mean(5 - 1e-12), housekeeping_mean(5))
 })
 
+test_that("only corrected counts below 1 are floored", {
+  expect_equal(
+    housekeeping_mean(4.5),
+    exp(mean(log(c(1, 64.5, 5.5, 103.5, 4841.5))))
+  )
+})
+
 test_that("geometric mean does not decrease as the intercept decreases", {
   means <- vapply(
     X = c(5.1, 5, 5 - 1e-12, 4.9, 4.5, 4),
