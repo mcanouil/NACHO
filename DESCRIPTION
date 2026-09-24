@@ -43,7 +43,7 @@ Imports:
     ggrepel (>= 0.9.6),
     knitr (>= 1.25),
     rmarkdown (>= 1.16),
-    shiny (>= 1.5.0),
+    shiny (>= 1.7.4),
     shinyWidgets (>= 0.4.9)
 Suggests:
     roxygen2 (>= 8.1.0),

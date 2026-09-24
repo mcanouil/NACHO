@@ -208,7 +208,8 @@ server <- function(input, output, session) {
           x = targets,
           y = expand.grid(
             IDFILE = targets[["IDFILE"]],
-            plexset_id = paste0("S", seq_len(8))
+            plexset_id = paste0("S", seq_len(8)),
+            stringsAsFactors = FALSE
           ),
           by = "IDFILE"
         )
