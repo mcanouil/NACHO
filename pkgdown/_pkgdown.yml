@@ -10,6 +10,7 @@ template:
     headings-color: "#182430"
     headings-color-dark: "#F0D83C"
     navbar-bg: "#182430"
+    pkgdown-nav-height: 60px
     navbar-light-color: "#FFFFFF"
     navbar-light-hover-color: "#FCB448"
     navbar-light-active-color: "#FCB448"
