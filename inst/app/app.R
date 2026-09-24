@@ -222,7 +222,8 @@ server <- function(input, output, session) {
           warning(
             "[NACHO] Missing ",
             paste0("\"", missing_columns, "\"", collapse = ", "),
-            " column in sample sheet file!\n",
+            if (length(missing_columns) > 1) " columns" else " column",
+            " in sample sheet file!\n",
             "  Sample sheet file is discarded."
           )
         } else {

@@ -31,6 +31,8 @@ transform_log10_infinite <- function() {
       x[finite] <- 10^x[finite]
       x
     },
+    d_transform = function(x) 1 / (x * log(10)),
+    d_inverse = function(x) 10^x * log(10),
     breaks = scales::breaks_log(base = 10),
     domain = c(1e-100, Inf)
   )

@@ -6,6 +6,7 @@
   - build: require R 4.1.0 or newer, ggplot2 4.0.0 or newer, ggforce 0.5.0 or newer, ggrepel 0.9.6 or newer, and shiny 1.7.4 or newer, which pulls in fontawesome 0.4.0 and its Font Awesome 6 icon names.
   - build: require pandoc 2.11 or newer, which has citeproc built in, so pandoc-citeproc is no longer needed.
   - build: require knitr 1.39 or newer, which the report needs for `include_graphics(rel_path = FALSE)`.
+  - build: require scales 1.4.0 or newer, which ggplot2 4.0.0 already needs, for the log-10 axes of the `"PFNF"` and `"HF"` plots.
 
 ## Chores
 
@@ -30,7 +31,7 @@
   - fix: load uploaded RCC files, which failed because `suppressMessages()` received `x` instead of `expr`.
   - fix: make the sample sheet optional again when uploading RCC files, instead of failing on a missing `ssheet_dt`.
 - In `DESCRIPTION`,
-  - fix: suggest markdown, which the app needs to show its help pages, and make `visualise()` ask for it when it is not installed.
+  - fix: suggest markdown, which the app needs to show its help pages, and make `visualise()` ask for it when it is not installed. The `deploy()` help page notes that the server needs it too.
 - In `R/geometric_housekeeping.R`,
   - fix: replace background-corrected housekeeping counts below 1 with 1, so values between 0 and 1 no longer inflate `House_factor`. ([#53](https://github.com/mcanouil/NACHO/issues/53))
 

@@ -99,3 +99,13 @@ test_that("app merges a sample sheet by IDFILE for single-sample RCC files", {
   expect_s3_class(discarded, "nacho")
   expect_false("group" %in% names(discarded[["nacho"]]))
 })
+
+test_that("app discards a PlexSet sample sheet without plexset_id", {
+  sample_sheet <- data.frame(
+    IDFILE = basename(list.files("salmon_data", pattern = "\\.RCC$")),
+    group = "case"
+  )
+  nacho <- suppressWarnings(upload_to_app("salmon_data", sample_sheet))
+  expect_s3_class(nacho, "nacho")
+  expect_false("group" %in% names(nacho[["nacho"]]))
+})
