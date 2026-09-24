@@ -17,6 +17,9 @@ deploy(directory = "/srv/shiny-server", app_name = "NACHO")
 \description{
 Deploy (copy) the shiny application to the specified directory
 }
+\details{
+The app needs the markdown package on the server to show its help pages.
+}
 \examples{
 
 deploy(directory = ".")

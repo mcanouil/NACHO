@@ -38,17 +38,17 @@ transform_log10_infinite <- function() {
 
 #' Path to the NACHO logo
 #'
-#' Installed packages keep `man/figures` under `help/figures`, while a source
-#' tree loaded with `pkgload::load_all()` keeps it under `man/figures`.
+#' The app ships the logo, and `system.file()` finds it both in an installed
+#' package and in a source tree loaded with `pkgload::load_all()`.
 #'
 #' @keywords internal
 #' @noRd
 #'
 #' @return A `character` path to `nacho_hex.png`.
 logo_path <- function() {
-  path <- system.file("help", "figures", "nacho_hex.png", package = "NACHO")
-  if (nzchar(path)) {
-    return(path)
+  path <- system.file("app", "www", "nacho_hex.png", package = "NACHO")
+  if (!nzchar(path)) {
+    stop("[NACHO] Could not find the NACHO logo in the package.")
   }
-  system.file("man", "figures", "nacho_hex.png", package = "NACHO")
+  path
 }

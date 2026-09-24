@@ -100,7 +100,7 @@ render <- function(
     "\n",
     "```{r logo, out.width = 150}",
     "knitr::include_graphics(",
-    paste0('  path = "', logo_path(), '",'),
+    paste0("  path = ", encodeString(logo_path(), quote = '"'), ","),
     "  rel_path = FALSE",
     ")",
     "```",
