@@ -73,9 +73,6 @@ autoplot.nacho <- function(
     show_outliers <- TRUE
   }
 
-  # if (attr(object, "RCC_type") == "n8" & x %in% c("PCL", "LoD")) {
-  #   stop('[NACHO] "PCL" and "LoD" are not available for the provided NanoString dataset.')
-  # }
   switch(
     EXPR = x,
     "BD" = plot_metrics(

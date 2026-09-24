@@ -101,7 +101,7 @@ visualise <- function(nacho_object) {
   on.exit(shiny::shinyOptions(nacho_object = NULL))
 
   if (!interactive()) {
-    stop('[NACHO] Must be run in an interactive R session!')
+    stop("[NACHO] Must be run in an interactive R session!")
   }
 
   if (!requireNamespace("markdown", quietly = TRUE)) {

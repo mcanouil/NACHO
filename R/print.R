@@ -131,12 +131,6 @@ print.nacho <- function(
     "PCL" = "Positive Control Linearity",
     "LoD" = "Limit of Detection"
   )
-  units <- c(
-    "BD" = '"(Optical features / ", mu, m^2, ")"',
-    "FoV" = '"(% Counted)"',
-    "PCL" = '"(R^2)"',
-    "LoD" = '"(Z)"'
-  )
   details <- c(
     "BD" = paste(
       readLines(system.file("app", "www", "about-bd.md", package = "NACHO")),

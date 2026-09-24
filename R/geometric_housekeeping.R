@@ -17,13 +17,9 @@ geometric_housekeeping <- function(
   housekeeping_genes
 ) {
   Name <- Count <- NULL # no visible binding for global variable
-  # if (!is.null(housekeeping_genes)) {
   house_data <- data[
     i = Name %in% housekeeping_genes
   ]
-  # } else {
-  #   house_data <- data
-  # }
   house_data <- house_data[
     j = .SD,
     .SDcols = c("Name", "CodeClass", "Count")

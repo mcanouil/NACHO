@@ -1,7 +1,6 @@
 library(testthat)
 library(NACHO)
 
-# setwd("tests")
 
 if (identical(Sys.getenv("NOT_CRAN"), "true")) {
   rcc_files_directory <- "testthat/plexset_data"

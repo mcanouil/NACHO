@@ -1,6 +1,6 @@
 #' GSE74821
 library(GEOquery)
-devtools::load_all(".") # library(NACHO)
+devtools::load_all(".")
 
 gse <- GEOquery::getGEO(GEO = "GSE74821")
 targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))

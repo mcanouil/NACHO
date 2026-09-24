@@ -254,7 +254,7 @@ ui <- shiny::tagList(
 )
 
 server <- function(input, output, session) {
-  # ---------------------------------------- Upload
+  # Upload ----
   nacho_react <- shiny::reactive({
     if (inherits(nacho_object, "nacho")) {
       return(nacho_object)
@@ -363,6 +363,7 @@ server <- function(input, output, session) {
       "."
     )
   })
+  # nolint start: object_usage_linter. card() is defined in utils.R, sourced at start-up.
   output$upload_ui <- shiny::renderUI({
     if (is.null(input$rcc_files)) {
       shiny::fluidRow(
@@ -400,8 +401,9 @@ server <- function(input, output, session) {
       )
     }
   })
+  # nolint end
 
-  # ---------------------------------------- UI / SERVER
+  # UI / SERVER ----
   # Global UI input
   shiny::observe({
     nacho_tmp <- nacho_custom()
@@ -423,7 +425,7 @@ server <- function(input, output, session) {
         "hgf",
         "nr"
       ),
-      FUN = plotInput,
+      FUN = plotInput, # nolint: object_usage_linter. plotInput() is defined in utils.R, sourced at start-up.
       nacho = nacho_tmp
     )
   })
@@ -491,7 +493,7 @@ server <- function(input, output, session) {
     }
   )
 
-  # ---------------------------------------- Input
+  # Input ----
   # Get nacho object and update thresholds
   nacho_custom <- shiny::reactive({
     nacho <- shiny::req(nacho_react())
@@ -511,7 +513,7 @@ server <- function(input, output, session) {
 
     NACHO::check_outliers(nacho)
   })
-  observe({
+  shiny::observe({
     if (inherits(nacho_object, "nacho")) {
       nacho_object$outliers_thresholds <- nacho_custom()$outliers_thresholds
       message(
@@ -527,8 +529,9 @@ server <- function(input, output, session) {
     }
   })
 
-  # ---------------------------------------- Output
+  # Output ----
   outliers_list <- shiny::reactive({
+    is_outlier <- NULL # no visible binding for global variable
     columns_qc <- intersect(
       c(
         "IDFILE",
@@ -609,7 +612,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # ---------------------------------------- Show / Hide tabs
+  # Show / Hide tabs ----
   shiny::observe({
     if (!inherits(nacho_object, "nacho") && is.null(input$rcc_files)) {
       shiny::showTab("main-menu", target = "upload-tab", select = TRUE)

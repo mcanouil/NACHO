@@ -1,6 +1,5 @@
 test_that("missing directory", {
   expect_error(load_rcc(
-    # data_directory = "salmon_data",
     ssheet_csv = salmon_tidy,
     id_colname = "IDFILE",
     housekeeping_genes = NULL,
@@ -14,7 +13,6 @@ test_that("missing directory", {
 test_that("missing sample sheet", {
   expect_error(load_rcc(
     data_directory = "salmon_data",
-    # ssheet_csv = salmon_tidy,
     id_colname = "IDFILE",
     housekeeping_genes = NULL,
     housekeeping_predict = FALSE,
@@ -28,7 +26,6 @@ test_that("missing id_colname", {
   expect_error(load_rcc(
     data_directory = "salmon_data",
     ssheet_csv = salmon_tidy,
-    # id_colname = "IDFILE",
     housekeeping_genes = NULL,
     housekeeping_predict = FALSE,
     housekeeping_norm = TRUE,
@@ -97,7 +94,7 @@ test_that("using GEO", {
         to = "ASCII"
       )
 
-      # test_that("using GEO GSE74821", {
+      # using GEO GSE74821
       expect_s3_class(
         {
           load_rcc(
@@ -113,9 +110,8 @@ test_that("using GEO", {
         },
         "nacho"
       )
-      # })
 
-      # test_that("using GEO GSE74821 with prediction", {
+      # using GEO GSE74821 with prediction
       expect_s3_class(
         {
           load_rcc(
@@ -131,7 +127,6 @@ test_that("using GEO", {
         },
         "nacho"
       )
-      # })
     }
   }
   closeAllConnections()
@@ -159,7 +154,7 @@ test_that("using GEO", {
         to = "ASCII"
       )
 
-      # test_that("using GEO GSE70970", {
+      # using GEO GSE70970
       expect_s3_class(
         {
           load_rcc(
@@ -175,9 +170,8 @@ test_that("using GEO", {
         },
         "nacho"
       )
-      # })
 
-      # test_that("using GEO GSE70970 with prediction", {
+      # using GEO GSE70970 with prediction
       expect_s3_class(
         {
           load_rcc(
@@ -193,9 +187,8 @@ test_that("using GEO", {
         },
         "nacho"
       )
-      # })
 
-      # test_that("ssheet_csv as vector", {
+      # ssheet_csv as vector
       expect_s3_class(
         {
           load_rcc(
@@ -208,9 +201,8 @@ test_that("using GEO", {
         },
         class = "nacho"
       )
-      # })
 
-      # test_that("ssheet_csv as vector without id_colname", {
+      # ssheet_csv as vector without id_colname
       expect_s3_class(
         {
           load_rcc(
@@ -222,9 +214,8 @@ test_that("using GEO", {
         },
         class = "nacho"
       )
-      # })
 
-      # test_that("ssheet_csv as a named vector", {
+      # ssheet_csv as a named vector
       expect_s3_class(
         {
           load_rcc(
@@ -233,16 +224,14 @@ test_that("using GEO", {
               head(targets[["IDFILE"]], 20),
               head(letters, 20)
             ),
-            # id_colname = "IDFILE",
             housekeeping_predict = TRUE,
             housekeeping_norm = TRUE
           )
         },
         class = "nacho"
       )
-      # })
 
-      # test_that("id_colname not defined when using df", {
+      # id_colname not defined when using df
       expect_error({
         load_rcc(
           data_directory = file.path(tempdir(), "GSE70970"),
@@ -251,12 +240,11 @@ test_that("using GEO", {
           housekeeping_norm = TRUE
         )
       })
-      # })
     }
   }
   closeAllConnections()
 
-  # test_that("using RAW RCC multiplexed", {
+  # using RAW RCC multiplexed
   expect_s3_class(
     {
       load_rcc(
@@ -267,9 +255,8 @@ test_that("using GEO", {
     },
     "nacho"
   )
-  # })
 
-  # test_that("using RAW RCC multiplexed without plexset_id", {
+  # using RAW RCC multiplexed without plexset_id
   targets_tidy <- salmon_tidy
   targets_tidy$plexset_id <- NULL
 
@@ -280,9 +267,8 @@ test_that("using GEO", {
       id_colname = "IDFILE"
     )
   })
-  # })
 
-  # test_that("using RAW RCC multiplexed with wrong path", {
+  # using RAW RCC multiplexed with wrong path
   targets_tidy <- salmon_tidy
   targets_tidy$IDFILE[1] <- "something_wrong.RCC" # wrong path
   expect_error({
@@ -292,9 +278,8 @@ test_that("using GEO", {
       id_colname = "IDFILE"
     )
   })
-  # })
 
-  # test_that("Too high number of components", {
+  # Too high number of components
   expect_message(
     {
       load_rcc(
@@ -306,9 +291,8 @@ test_that("using GEO", {
     },
     "has been set to"
   )
-  # })
 
-  # test_that("plexset", {
+  # plexset
   expect_s3_class(
     {
       load_rcc(
@@ -321,9 +305,8 @@ test_that("using GEO", {
     },
     class = "nacho"
   )
-  # })
 
-  # test_that("heterogenous", {
+  # heterogenous
   expect_error({
     load_rcc(
       data_directory = ".",
@@ -333,5 +316,4 @@ test_that("using GEO", {
       housekeeping_norm = TRUE
     )
   })
-  # })
 })
