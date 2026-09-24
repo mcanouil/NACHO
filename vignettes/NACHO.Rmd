@@ -120,7 +120,7 @@ knitr::include_graphics(path = "README-visualise.png")
 
 Numerous NanoString nCounter datasets are available from GEO [@barrett_ncbi_2013].  
 In this example, we use a miRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
-The samples were measured with two versions of the miRNA CodeSet, and `load_rcc()` only accepts files from a single CodeSet.
+The samples were measured with two versions of the miRNA CodeSet, each exported by a different nSolver version, and `load_rcc()` refuses files that mix versions.
 The following code extracts the data and keeps the samples measured with `NS_H_miR_1.4`.
 
 ```{r}
@@ -147,20 +147,21 @@ if (inherits(gse, "try-error")) { # when GEOquery is down
 #| warning: false
 #| eval: !expr '!inherits(gse, "try-error")'
 library(GEOquery)
+data_directory <- file.path(tempdir(), "GSE70970", "Data")
 # Download data
 gse <- getGEO("GSE70970")
 getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
 # Unzip data
 untar(
   tarfile = file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"),
-  exdir = file.path(tempdir(), "GSE70970", "Data")
+  exdir = data_directory
 )
 # Get phenotypes and add IDs
 targets <- pData(phenoData(gse[[1]]))
-targets$IDFILE <- list.files(file.path(tempdir(), "GSE70970", "Data"))
+targets$IDFILE <- list.files(data_directory)
 # Keep the samples measured with the same CodeSet
 codeset <- vapply(
-  X = file.path(tempdir(), "GSE70970", "Data", targets$IDFILE),
+  X = file.path(data_directory, targets$IDFILE),
   FUN = function(file) grep("^GeneRLF,", readLines(file, n = 20), value = TRUE),
   FUN.VALUE = character(1)
 )
@@ -186,7 +187,7 @@ The `housekeeping_genes` and `normalisation_method` arguments respectively indic
 #| label: ex3
 #| eval: !expr '!inherits(gse, "try-error")'
 GSE70970_sum <- load_rcc(
-  data_directory = file.path(tempdir(), "GSE70970", "Data"), # Where the data is
+  data_directory = data_directory, # Where the data is
   ssheet_csv = targets, # The samplesheet
   id_colname = "IDFILE", # Name of the column that contains the unique identifiers
   housekeeping_genes = NULL, # Custom list of housekeeping genes

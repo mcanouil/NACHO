@@ -88,7 +88,7 @@ library(GEOquery, quietly = TRUE, warn.conflicts = FALSE)
 ## Download `GSE70970` from GEO (or use your own data)
 
 The samples in GSE70970 were measured with two versions of the miRNA CodeSet.
-`load_rcc()` only accepts files from a single CodeSet, so the code keeps the samples measured with `NS_H_miR_1.4`.
+Each CodeSet was exported by a different nSolver version, and `load_rcc()` refuses files that mix versions, so the code keeps the samples measured with `NS_H_miR_1.4`.
 
 ```{r}
 data_directory <- file.path(tempdir(), "GSE70970", "Data")
