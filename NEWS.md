@@ -24,6 +24,9 @@
   - docs: add alternative text to the images.
   - docs: install the development version with `pak::pak()` instead of `remotes::install_github()`.
 - docs: fix typos and grammar, and spell GitHub, NanoString, R Markdown and Shiny consistently.
+- In `vignettes/`,
+  - docs: keep only the GSE70970 samples measured with the `NS_H_miR_1.4` CodeSet, since `load_rcc()` refuses files from mixed CodeSets.
+  - docs: attach data.table in the analysis vignette, which uses `dcast()` and `as.data.table()`.
 
 ## Fixes
 

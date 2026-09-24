@@ -119,8 +119,9 @@ knitr::include_graphics(path = "README-visualise.png")
 ### Raw data from GEO
 
 Numerous NanoString nCounter datasets are available from GEO [@barrett_ncbi_2013].  
-In this example, we use an mRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
-The data is extracted and prepared using the following code.
+In this example, we use a miRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
+The samples were measured with two versions of the miRNA CodeSet, and `load_rcc()` only accepts files from a single CodeSet.
+The following code extracts the data and keeps the samples measured with `NS_H_miR_1.4`.
 
 ```{r}
 #| label: geo-down
@@ -157,6 +158,13 @@ untar(
 # Get phenotypes and add IDs
 targets <- pData(phenoData(gse[[1]]))
 targets$IDFILE <- list.files(file.path(tempdir(), "GSE70970", "Data"))
+# Keep the samples measured with the same CodeSet
+codeset <- vapply(
+  X = file.path(tempdir(), "GSE70970", "Data", targets$IDFILE),
+  FUN = function(file) grep("^GeneRLF,", readLines(file, n = 20), value = TRUE),
+  FUN.VALUE = character(1)
+)
+targets <- targets[codeset == "GeneRLF,NS_H_miR_1.4", ]
 ```
 
 ```{r}

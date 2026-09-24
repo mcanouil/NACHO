@@ -81,10 +81,14 @@ print(citation("NACHO"), "bibtex")
 
 ```{r}
 library(NACHO)
+library(data.table)
 library(GEOquery, quietly = TRUE, warn.conflicts = FALSE)
 ```
 
 ## Download `GSE70970` from GEO (or use your own data)
+
+The samples in GSE70970 were measured with two versions of the miRNA CodeSet.
+`load_rcc()` only accepts files from a single CodeSet, so the code keeps the samples measured with `NS_H_miR_1.4`.
 
 ```{r}
 data_directory <- file.path(tempdir(), "GSE70970", "Data")
@@ -100,6 +104,13 @@ untar(
 # Get phenotypes and add IDs
 targets <- pData(phenoData(gse[[1]]))
 targets$IDFILE <- list.files(data_directory)
+# Keep the samples measured with the same CodeSet
+codeset <- vapply(
+  X = file.path(data_directory, targets$IDFILE),
+  FUN = function(file) grep("^GeneRLF,", readLines(file, n = 20), value = TRUE),
+  FUN.VALUE = character(1)
+)
+targets <- targets[codeset == "GeneRLF,NS_H_miR_1.4", ]
 ```
 
 ## Import RCC files
