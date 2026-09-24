@@ -4,6 +4,3 @@
 .Rprofile
 renv/
 renv.lock
-tests/testthat/NACHO_QC.html
-tests/testthat/Rplots.pdf
-tests/testthat/tmp_nacho/

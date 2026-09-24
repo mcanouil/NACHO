@@ -1,3 +1,5 @@
+grDevices::pdf(NULL)
+
 test_that("default", {
   expect_null(print(GSE74821))
 })
@@ -24,3 +26,5 @@ test_that("numeric column for colour", {
 test_that("xaringan", {
   expect_null(print.nacho(GSE74821, xaringan = TRUE, echo = TRUE))
 })
+
+grDevices::dev.off()
