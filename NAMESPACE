@@ -12,9 +12,15 @@ export(render)
 export(visualise)
 export(visualize)
 import(data.table)
-importFrom(ggplot2,.data)
-importFrom(ggplot2,autoplot)
-importFrom(knitr,kable)
-importFrom(knitr,opts_chunk)
-importFrom(shinyWidgets,dropdownButton)
-importFrom(shinyWidgets,tooltipOptions)
+importFrom(ggplot2,
+  .data,
+  autoplot
+)
+importFrom(knitr,
+  kable,
+  opts_chunk
+)
+importFrom(shinyWidgets,
+  dropdownButton,
+  tooltipOptions
+)

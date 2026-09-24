@@ -34,20 +34,20 @@ URL: https://github.com/mcanouil/NACHO/,
     https://m.canouil.dev/NACHO/
 BugReports: https://github.com/mcanouil/NACHO/issues
 Depends: 
-    R (>= 3.6.0)
+    R (>= 4.1.0)
 Imports:
     utils,
     data.table,
-    ggplot2 (>= 3.3.0),
-    ggforce (>= 0.3.1),
-    ggrepel (>= 0.8.1),
+    ggplot2 (>= 4.0.0),
+    ggforce (>= 0.5.0),
+    ggrepel (>= 0.9.6),
     knitr (>= 1.25),
     rmarkdown (>= 1.16),
-    shiny (>= 1.4.0),
+    shiny (>= 1.5.0),
     shinyWidgets (>= 0.4.9)
 Suggests:
-    roxygen2 (>= 7.2.0),
-    testthat (>= 2.2.1),
+    roxygen2 (>= 8.1.0),
+    testthat (>= 3.0.0),
     covr (>= 3.3.2),
     Biobase,
     GEOquery,
@@ -57,6 +57,6 @@ VignetteBuilder:
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.0
-SystemRequirements: pandoc (>= 1.14), pandoc-citeproc
+SystemRequirements: pandoc (>= 2.11)
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0

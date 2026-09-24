@@ -22,6 +22,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Mickaël Canouil \email{pro@mickael.canouil.dev} (\href{https://orcid.org/0000-0002-3396-4549}{ORCID})
   \item Roderick Slieker \email{R.C.Slieker@lumc.nl} (\href{https://orcid.org/0000-0003-0961-9152}{ORCID})
   \item Gerard Bouland \email{G.A.Bouland@lumc.nl}
 }
