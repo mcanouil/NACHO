@@ -7,10 +7,15 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
 
   contents <- list(...)
 
-  contents_grid <- switch(as.character(length(contents)),
+  contents_grid <- switch(
+    as.character(length(contents)),
     "1" = {
       list(
-        shiny::fluidRow(shiny::column(width = 12, align = "center", contents[[1]]))
+        shiny::fluidRow(shiny::column(
+          width = 12,
+          align = "center",
+          contents[[1]]
+        ))
       )
     },
     "2" = {
@@ -27,7 +32,8 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
           shiny::column(width = 6, align = "center", contents[[1]]),
           shiny::column(width = 6, align = "center", contents[[2]])
         ),
-        shiny::fluidRow(style = "padding-top: 1em;",
+        shiny::fluidRow(
+          style = "padding-top: 1em;",
           shiny::column(width = 12, align = "center", contents[[3]])
         )
       )
@@ -38,7 +44,8 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
           shiny::column(width = 6, align = "center", contents[[1]]),
           shiny::column(width = 6, align = "center", contents[[2]])
         ),
-        shiny::fluidRow(style = "padding-top: 1em;",
+        shiny::fluidRow(
+          style = "padding-top: 1em;",
           shiny::column(width = 6, align = "center", contents[[3]]),
           shiny::column(width = 6, align = "center", contents[[4]])
         )
@@ -50,9 +57,14 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
   if (is.null(sidebar)) {
     shiny::tabPanel(label, value = ns("tab"), contents_grid)
   } else {
-    shiny::tabPanel(label, value = ns("tab"),
+    shiny::tabPanel(
+      label,
+      value = ns("tab"),
       shiny::sidebarLayout(
-        shiny::sidebarPanel(width = 3, shiny::tags$div(align = "center", sidebar)),
+        shiny::sidebarPanel(
+          width = 3,
+          shiny::tags$div(align = "center", sidebar)
+        ),
         shiny::mainPanel(width = 9, contents_grid)
       )
     )
@@ -60,7 +72,8 @@ panelInputUI <- function(id, label, ..., sidebar = NULL) {
 }
 
 card <- function(title, body) {
-  shiny::tags$div(class = paste0("card border-dark"),
+  shiny::tags$div(
+    class = paste0("card border-dark"),
     shiny::tags$div(class = "card-header", align = "center", title),
     shiny::tags$div(class = "card-body", align = "center", body)
   )
@@ -71,7 +84,9 @@ plotInputUI <- function(label = NULL, ...) {
   ns <- shiny::NS(id)
   card(
     title = {
-      shiny::tags$h4(label, align = "center",
+      shiny::tags$h4(
+        label,
+        align = "center",
         shinyWidgets::dropdownButton(
           shiny::uiOutput(ns("plot_ui")),
           circle = TRUE,
@@ -80,7 +95,9 @@ plotInputUI <- function(label = NULL, ...) {
           icon = shiny::icon("gear"),
           width = "800px",
           inline = TRUE,
-          tooltip = shinyWidgets::tooltipOptions(title = "Click to see inputs!"),
+          tooltip = shinyWidgets::tooltipOptions(
+            title = "Click to see inputs!"
+          ),
           ...
         )
       )
@@ -95,11 +112,21 @@ plotInput <- function(id, nacho) {
     font_size <- 80
     output$plot_ui <- shiny::renderUI({
       shiny::fluidRow(
-        shiny::column(width = 6,
-          shiny::fluidRow(style = paste0("font-size: ", font_size, "%;"),
-             shiny::column(12, align = "center",
-              shiny::selectInput(ns("group_colour"), shiny::tags$span("Grouping Variable", shiny::helpText("(Colour)")),
-                selected = shiny::isolate(input$group_colour) %||% "CartridgeID",
+        shiny::column(
+          width = 6,
+          shiny::fluidRow(
+            style = paste0("font-size: ", font_size, "%;"),
+            shiny::column(
+              12,
+              align = "center",
+              shiny::selectInput(
+                ns("group_colour"),
+                shiny::tags$span(
+                  "Grouping Variable",
+                  shiny::helpText("(Colour)")
+                ),
+                selected = shiny::isolate(input$group_colour) %||%
+                  "CartridgeID",
                 choices = unique(c(
                   "CartridgeID",
                   "Date",
@@ -111,17 +138,26 @@ plotInput <- function(id, nacho) {
               )
             )
           ),
-          shiny::fluidRow(style = paste0("font-size: ", font_size, "%;"),
-            shiny::column(6, align = "center",
-              shiny::radioButtons(ns("show_levels"), shiny::tags$span("Show Levels", shiny::helpText("(Legend)")),
+          shiny::fluidRow(
+            style = paste0("font-size: ", font_size, "%;"),
+            shiny::column(
+              6,
+              align = "center",
+              shiny::radioButtons(
+                ns("show_levels"),
+                shiny::tags$span("Show Levels", shiny::helpText("(Legend)")),
                 choiceNames = list("No", "Yes"),
                 choiceValues = list(FALSE, TRUE),
                 selected = shiny::isolate(input$show_levels) %||% TRUE,
                 inline = TRUE
               )
             ),
-            shiny::column(6, align = "center",
-              shiny::radioButtons(ns("show_outliers"), shiny::tags$span("Show Outliers", shiny::helpText("(Point)")),
+            shiny::column(
+              6,
+              align = "center",
+              shiny::radioButtons(
+                ns("show_outliers"),
+                shiny::tags$span("Show Outliers", shiny::helpText("(Point)")),
                 choiceNames = list("No", "Yes"),
                 choiceValues = list(FALSE, TRUE),
                 selected = shiny::isolate(input$show_outliers) %||% TRUE,
@@ -129,63 +165,110 @@ plotInput <- function(id, nacho) {
               )
             )
           ),
-          shiny::fluidRow(style = paste0("font-size: ", font_size, "%;"),
-            shiny::column(6, align = "center",
+          shiny::fluidRow(
+            style = paste0("font-size: ", font_size, "%;"),
+            shiny::column(
+              6,
+              align = "center",
               shiny::radioButtons(
                 inputId = ns("show_outliers_labels"),
-                label = shiny::tags$span("Outliers' Label", shiny::helpText("(Text)")),
+                label = shiny::tags$span(
+                  "Outliers' Label",
+                  shiny::helpText("(Text)")
+                ),
                 choiceNames = list("No", "Yes"),
                 choiceValues = list(FALSE, TRUE),
-                selected = shiny::isolate(input$show_outliers_labels) %||% FALSE,
+                selected = shiny::isolate(input$show_outliers_labels) %||%
+                  FALSE,
                 inline = TRUE
               )
             ),
-            shiny::column(6, align = "center",
+            shiny::column(
+              6,
+              align = "center",
               shiny::numericInput(
                 inputId = ns("outliers_point_size"),
-                label = shiny::tags$span("Outliers Point Size", shiny::helpText("(Factor x Point Size)")),
+                label = shiny::tags$span(
+                  "Outliers Point Size",
+                  shiny::helpText("(Factor x Point Size)")
+                ),
                 value = shiny::isolate(input$outliers_point_size) %||% 1,
-                min = 1, max = 3, step = 0.1
+                min = 1,
+                max = 3,
+                step = 0.1
               )
             )
           ),
           shiny::fluidRow(
-            shiny::column(12, align = "center", shiny::uiOutput(ns("outliers_labels")))
+            shiny::column(
+              12,
+              align = "center",
+              shiny::uiOutput(ns("outliers_labels"))
+            )
           )
         ),
-        shiny::column(width = 6,
-          shiny::fluidRow(style = paste0("font-size: ", font_size, "%;"),
-            shiny::column(6, align = "center",
-              shiny::numericInput(ns("font_size"), shiny::tags$span("Font Size", shiny::helpText("(pt)")),
+        shiny::column(
+          width = 6,
+          shiny::fluidRow(
+            style = paste0("font-size: ", font_size, "%;"),
+            shiny::column(
+              6,
+              align = "center",
+              shiny::numericInput(
+                ns("font_size"),
+                shiny::tags$span("Font Size", shiny::helpText("(pt)")),
                 value = shiny::isolate(input$font_size) %||% 16
               )
             ),
-            shiny::column(6, align = "center",
-              shiny::numericInput(ns("point_size"), shiny::tags$span("Point Size", shiny::helpText("(mm)")),
+            shiny::column(
+              6,
+              align = "center",
+              shiny::numericInput(
+                ns("point_size"),
+                shiny::tags$span("Point Size", shiny::helpText("(mm)")),
                 value = shiny::isolate(input$point_size) %||% 1,
-                min = 0, max = 4, step = 0.5
+                min = 0,
+                max = 4,
+                step = 0.5
               )
             )
           ),
-          shiny::fluidRow(style = paste0("font-size: ", font_size, "%;"),
-            shiny::column(4, align = "center",
-              shiny::numericInput(ns("plot_width"), shiny::tags$span("Width", shiny::helpText("(cm)")),
+          shiny::fluidRow(
+            style = paste0("font-size: ", font_size, "%;"),
+            shiny::column(
+              4,
+              align = "center",
+              shiny::numericInput(
+                ns("plot_width"),
+                shiny::tags$span("Width", shiny::helpText("(cm)")),
                 value = shiny::isolate(input$plot_width) %||% 16
               )
             ),
-            shiny::column(4, align = "center",
-              shiny::numericInput(ns("plot_height"), shiny::tags$span("Height", shiny::helpText("(cm)")),
+            shiny::column(
+              4,
+              align = "center",
+              shiny::numericInput(
+                ns("plot_height"),
+                shiny::tags$span("Height", shiny::helpText("(cm)")),
                 value = shiny::isolate(input$plot_height) %||% 12
               )
             ),
-            shiny::column(4, align = "center",
-              shiny::numericInput(ns("plot_dpi"), shiny::tags$span("DPI", shiny::helpText("(Default: 120)")),
+            shiny::column(
+              4,
+              align = "center",
+              shiny::numericInput(
+                ns("plot_dpi"),
+                shiny::tags$span("DPI", shiny::helpText("(Default: 120)")),
                 value = shiny::isolate(input$plot_dpi) %||% 120
               )
             )
           ),
-          shiny::fluidRow(style = paste0("font-size: ", font_size, "%;"),
-            shiny::column(12, align = "center", style = "padding-top: 2em;",
+          shiny::fluidRow(
+            style = paste0("font-size: ", font_size, "%;"),
+            shiny::column(
+              12,
+              align = "center",
+              style = "padding-top: 2em;",
               shiny::downloadButton(ns("plot_download"), label = "Download")
             )
           )
@@ -195,7 +278,12 @@ plotInput <- function(id, nacho) {
 
     output$outliers_labels <- shiny::renderUI({
       if (shiny::req(input[["show_outliers_labels"]])) {
-        shiny::selectInput(ns("outliers_labels"), NULL, choices = colnames(nacho$nacho), selected = nacho$access)
+        shiny::selectInput(
+          ns("outliers_labels"),
+          NULL,
+          choices = colnames(nacho$nacho),
+          selected = nacho$access
+        )
       }
     })
 
@@ -226,7 +314,9 @@ plotInput <- function(id, nacho) {
         show_legend = as.logical(input[["show_levels"]] %||% TRUE),
         show_outliers = as.logical(input[["show_outliers"]] %||% TRUE),
         outliers_factor = input[["outliers_point_size"]] %||% 1,
-        outliers_labels = if (as.logical(input[["show_outliers_labels"]] %||% FALSE)) {
+        outliers_labels = if (
+          as.logical(input[["show_outliers_labels"]] %||% FALSE)
+        ) {
           input[["outliers_labels"]]
         } else {
           NULL
@@ -267,8 +357,10 @@ plotInput <- function(id, nacho) {
       },
       content = function(file) {
         ggplot2::ggsave(
-          filename = file, plot = plot(),
-          width = input[["plot_width"]], height = input[["plot_height"]],
+          filename = file,
+          plot = plot(),
+          width = input[["plot_width"]],
+          height = input[["plot_height"]],
           units = "cm",
           dpi = input[["plot_dpi"]]
         )

@@ -14,7 +14,11 @@ format_tag_content <- function(tag, content) {
   } else {
     output <- as.data.frame(x = t(content[, -1, drop = FALSE]))
     rownames(output) <- NULL
-    colnames(output) <- paste(tolower(sub("_.*", "", tag)), content[, 1], sep = "_")
+    colnames(output) <- paste(
+      tolower(sub("_.*", "", tag)),
+      content[, 1],
+      sep = "_"
+    )
   }
   output
 }

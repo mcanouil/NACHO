@@ -132,7 +132,9 @@ normalise <- function(
   )
   if (!all(mandatory_fields %in% names(nacho_object))) {
     stop(
-      '[NACHO] Mandatory fields are missing in "', substitute(nacho_object), '"!\n',
+      '[NACHO] Mandatory fields are missing in "',
+      substitute(nacho_object),
+      '"!\n',
       '  "load_rcc()" must be called before "normalise()".'
     )
   }
@@ -141,25 +143,43 @@ normalise <- function(
   type_set <- attr(nacho_object, "RCC_type")
 
   params_changed <- c(
-    "housekeeping_genes" = !isTRUE(all.equal(sort(nacho_object[["housekeeping_genes"]]), sort(housekeeping_genes))),
-    "housekeeping_predict" = nacho_object[["housekeeping_predict"]] != housekeeping_predict,
-    "housekeeping_norm" = nacho_object[["housekeeping_norm"]] != housekeeping_norm,
-    "normalisation_method" = nacho_object[["normalisation_method"]] != normalisation_method,
+    "housekeeping_genes" = !isTRUE(all.equal(
+      sort(nacho_object[["housekeeping_genes"]]),
+      sort(housekeeping_genes)
+    )),
+    "housekeeping_predict" = nacho_object[["housekeeping_predict"]] !=
+      housekeeping_predict,
+    "housekeeping_norm" = nacho_object[["housekeeping_norm"]] !=
+      housekeeping_norm,
+    "normalisation_method" = nacho_object[["normalisation_method"]] !=
+      normalisation_method,
     "n_comp" = nacho_object[["n_comp"]] != n_comp,
     "remove_outliers" = nacho_object[["remove_outliers"]] != remove_outliers,
-    "outliers_thresholds" = !isTRUE(all.equal(nacho_object[["outliers_thresholds"]], outliers_thresholds))
+    "outliers_thresholds" = !isTRUE(all.equal(
+      nacho_object[["outliers_thresholds"]],
+      outliers_thresholds
+    ))
   )
 
   if (all(!params_changed)) {
     message(
-      '[NACHO] Nothing was done. Parameters in "normalise()", were the same as in "', substitute(nacho_object), '".'
+      '[NACHO] Nothing was done. Parameters in "normalise()", were the same as in "',
+      substitute(nacho_object),
+      '".'
     )
     return(nacho_object)
   } else {
     message(
-      '[NACHO] Normalising "', substitute(nacho_object), '" with new value for parameters:\n',
+      '[NACHO] Normalising "',
+      substitute(nacho_object),
+      '" with new value for parameters:\n',
       paste(
-        paste0("  - ", names(params_changed[which(params_changed)]), " = ", params_changed[which(params_changed)]),
+        paste0(
+          "  - ",
+          names(params_changed[which(params_changed)]),
+          " = ",
+          params_changed[which(params_changed)]
+        ),
         collapse = "\n"
       )
     )
@@ -172,7 +192,9 @@ normalise <- function(
     if (any(nacho_object[["nacho"]][, "is_outlier"]) | any(params_changed)) {
       nacho_object <- qc_rcc(
         data_directory = nacho_object[["data_directory"]],
-        nacho_df = nacho_object[["nacho"]][which(!nacho_object[["nacho"]][, "is_outlier"]), ],
+        nacho_df = nacho_object[["nacho"]][
+          which(!nacho_object[["nacho"]][, "is_outlier"]),
+        ],
         id_colname = id_colname,
         housekeeping_genes = housekeeping_genes,
         housekeeping_predict = housekeeping_predict,

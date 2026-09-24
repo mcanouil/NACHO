@@ -15,11 +15,22 @@ test_that('Wrong "x"', {
 })
 
 metrics <- c(
-  "BD", "FoV", "PCL", "LoD",
-  "Positive", "Negative", "Housekeeping",
-  "PN", "ACBD", "ACMC",
-  "PCA12", "PCAi", "PCA",
-  "PFNF", "HF", "NORM"
+  "BD",
+  "FoV",
+  "PCL",
+  "LoD",
+  "Positive",
+  "Negative",
+  "Housekeeping",
+  "PN",
+  "ACBD",
+  "ACMC",
+  "PCA12",
+  "PCAi",
+  "PCA",
+  "PFNF",
+  "HF",
+  "NORM"
 )
 
 for (imetric in metrics) {
@@ -72,12 +83,19 @@ for (imetric in metrics) {
     )
   })
 
-  test_that(paste(imetric, "[salmon] show_legend to FALSE parameters", sep = " - "), {
-    expect_s3_class(
-      object = autoplot(object = salmon_nacho, x = imetric, show_legend = FALSE),
-      class = "ggplot"
-    )
-  })
+  test_that(
+    paste(imetric, "[salmon] show_legend to FALSE parameters", sep = " - "),
+    {
+      expect_s3_class(
+        object = autoplot(
+          object = salmon_nacho,
+          x = imetric,
+          show_legend = FALSE
+        ),
+        class = "ggplot"
+      )
+    }
+  )
 
   test_that(paste(imetric, "[salmon] show outliers and labels", sep = " - "), {
     expect_s3_class(
@@ -108,14 +126,17 @@ for (imetric in metrics) {
   })
 
   if (imetric == "NORM") {
-    test_that(paste(imetric, "[salmon] NORM without housekeeping genes ", sep = " - "), {
-      salmon2 <- salmon_nacho
-      salmon2$housekeeping_genes <- NULL
-      expect_s3_class(
-        object = autoplot(salmon2, x = imetric),
-        class = "ggplot"
-      )
-    })
+    test_that(
+      paste(imetric, "[salmon] NORM without housekeeping genes ", sep = " - "),
+      {
+        salmon2 <- salmon_nacho
+        salmon2$housekeeping_genes <- NULL
+        expect_s3_class(
+          object = autoplot(salmon2, x = imetric),
+          class = "ggplot"
+        )
+      }
+    )
   }
 }
 
@@ -137,7 +158,11 @@ test_that(paste("Housekeeping", "no genes", sep = " - "), {
 for (imetric in metrics) {
   test_that(paste(imetric, "builds without warnings", sep = " - "), {
     expect_no_warning(
-      ggplot2::ggplot_build(autoplot(object = GSE74821, x = imetric, colour = "Date"))
+      ggplot2::ggplot_build(autoplot(
+        object = GSE74821,
+        x = imetric,
+        colour = "Date"
+      ))
     )
   })
 }

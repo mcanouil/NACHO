@@ -330,7 +330,11 @@ test_that("Missing values in counts", {
 test_that("plexset", {
   expect_s3_class(
     object = {
-      normalise(plexset_nacho, housekeeping_predict = TRUE, housekeeping_norm = TRUE)
+      normalise(
+        plexset_nacho,
+        housekeeping_predict = TRUE,
+        housekeeping_norm = TRUE
+      )
     },
     class = "nacho"
   )
@@ -339,7 +343,12 @@ test_that("plexset", {
 test_that("plexset GLM", {
   expect_s3_class(
     object = {
-      normalise(plexset_nacho, housekeeping_predict = TRUE, housekeeping_norm = TRUE, normalisation_method = "GLM")
+      normalise(
+        plexset_nacho,
+        housekeeping_predict = TRUE,
+        housekeeping_norm = TRUE,
+        normalisation_method = "GLM"
+      )
     },
     class = "nacho"
   )

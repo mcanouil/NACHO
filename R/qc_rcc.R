@@ -27,7 +27,9 @@ qc_rcc <- function(
   }
 
   control_genes_df <- format_counts(
-    data = nacho_df[Name %in% housekeeping_genes | !grepl("Endogenous", CodeClass)],
+    data = nacho_df[
+      Name %in% housekeeping_genes | !grepl("Endogenous", CodeClass)
+    ],
     id_colname = id_colname,
     count_column = "Count"
   )
@@ -53,13 +55,19 @@ qc_rcc <- function(
     tmp_counts <- merge(
       x = nacho_df[
         j = .SD,
-        .SDcols = c(id_colname, setdiff(colnames(nacho_df), colnames(temp_facs)))
+        .SDcols = c(
+          id_colname,
+          setdiff(colnames(nacho_df), colnames(temp_facs))
+        )
       ],
       y = temp_facs,
       by = id_colname,
       all = TRUE
     )
-    tmp_counts[["count_norm"]] <- normalise_counts(data = tmp_counts, housekeeping_norm = FALSE)
+    tmp_counts[["count_norm"]] <- normalise_counts(
+      data = tmp_counts,
+      housekeeping_norm = FALSE
+    )
 
     predicted_housekeeping <- find_housekeeping(
       data = data.table::setDT(tmp_counts),
@@ -68,11 +76,13 @@ qc_rcc <- function(
     )
 
     if (is.null(predicted_housekeeping) | length(predicted_housekeeping) == 0) {
-      message("[NACHO] Could not find suitable houskeeping genes, default will be used.")
+      message(
+        "[NACHO] Could not find suitable houskeeping genes, default will be used."
+      )
     } else {
       message(
         "[NACHO] The following predicted housekeeping genes will be used for normalisation:\n",
-          paste0("  - ", predicted_housekeeping, collapse = "\n")
+        paste0("  - ", predicted_housekeeping, collapse = "\n")
       )
       housekeeping_genes <- predicted_housekeeping
 
@@ -85,7 +95,11 @@ qc_rcc <- function(
     }
   }
 
-  message('[NACHO] Computing normalisation factors using "', normalisation_method, '" method.')
+  message(
+    '[NACHO] Computing normalisation factors using "',
+    normalisation_method,
+    '" method.'
+  )
   qc_values <- qc_features(data = nacho_df, id_colname = id_colname)
   norm_factor <- factor_calculation(
     nacho_df = nacho_df,
@@ -119,10 +133,16 @@ qc_rcc <- function(
   pcas <- qc_pca(counts = counts_df_tmp, n_comp = n_comp)
 
   pcsum <- as.data.frame(t(pcas[["pcsum"]]))
-  rownames(pcsum) <- pcsum[["PC"]] <- sprintf("PC%02d", as.numeric(sub("PC", "", rownames(pcsum))))
+  rownames(pcsum) <- pcsum[["PC"]] <- sprintf(
+    "PC%02d",
+    as.numeric(sub("PC", "", rownames(pcsum)))
+  )
 
   pcas_pc <- as.data.frame(pcas[["pc"]])
-  colnames(pcas_pc) <- sprintf("PC%02d", as.numeric(sub("PC", "", colnames(pcas_pc))))
+  colnames(pcas_pc) <- sprintf(
+    "PC%02d",
+    as.numeric(sub("PC", "", colnames(pcas_pc)))
+  )
   pcas_pc[[id_colname]] <- rownames(pcas_pc)
 
   facs_pc_qc <- merge(

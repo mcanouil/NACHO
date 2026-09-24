@@ -10,7 +10,12 @@ test_that("missing object", {
 })
 
 test_that("show_legend to TRUE", {
-  expect_null(print.nacho(GSE74821, colour = "CartridgeID", size = 0.5, show_legend = TRUE))
+  expect_null(print.nacho(
+    GSE74821,
+    colour = "CartridgeID",
+    size = 0.5,
+    show_legend = TRUE
+  ))
 })
 
 test_that("wrong attribute", {
