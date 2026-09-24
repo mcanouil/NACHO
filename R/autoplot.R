@@ -300,12 +300,11 @@ plot_metrics <- function(
   ) +
     ggplot2::aes(
       x = .data[["CartridgeID"]],
-      y = .data[[x]],
-      colour = .data[[colour]]
+      y = .data[[x]]
     ) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::geom_boxplot(
-      mapping = ggplot2::aes(group = .data[["CartridgeID"]], colour = NULL),
+      mapping = ggplot2::aes(group = .data[["CartridgeID"]]),
       fill = NA,
       outliers = FALSE,
       na.rm = TRUE,
@@ -316,6 +315,7 @@ plot_metrics <- function(
         list(
           ggplot2::geom_point(
             data = ~ .x[!(is_outlier)],
+            mapping = ggplot2::aes(colour = .data[[colour]]),
             size = size, na.rm = TRUE,
             position = ggplot2::position_jitter(width = 0.25, height = 0)
           ),
@@ -337,6 +337,7 @@ plot_metrics <- function(
         )
       } else {
         ggplot2::geom_point(
+          mapping = ggplot2::aes(colour = .data[[colour]]),
           size = size, na.rm = TRUE,
           position = ggplot2::position_jitter(width = 0.25, height = 0)
         )
@@ -432,12 +433,11 @@ plot_cg <- function(
   ) +
     ggplot2::aes(
       x = .data[["Name"]],
-      y = .data[["Count"]] + 1,
-      colour = .data[[colour]]
+      y = .data[["Count"]] + 1
     ) +
     ggplot2::scale_colour_viridis_d(option = "plasma", direction = 1, end = 0.85) +
     ggplot2::geom_boxplot(
-      mapping = ggplot2::aes(group = .data[["Name"]], colour = NULL),
+      mapping = ggplot2::aes(group = .data[["Name"]]),
       fill = NA,
       outliers = FALSE,
       na.rm = TRUE,
@@ -448,6 +448,7 @@ plot_cg <- function(
         list(
           ggplot2::geom_point(
             data = ~ .x[!(is_outlier)],
+            mapping = ggplot2::aes(colour = .data[[colour]]),
             size = size, na.rm = TRUE,
             position = ggplot2::position_jitter(width = 0.25, height = 0)
           ),
@@ -469,6 +470,7 @@ plot_cg <- function(
         )
       } else {
         ggplot2::geom_point(
+          mapping = ggplot2::aes(colour = .data[[colour]]),
           size = size, na.rm = TRUE,
           position = ggplot2::position_jitter(width = 0.25, height = 0)
         )
