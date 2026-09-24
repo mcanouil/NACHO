@@ -158,7 +158,7 @@ untar(
 )
 # Get phenotypes and add IDs
 targets <- pData(phenoData(gse[[1]]))
-targets$IDFILE <- list.files(data_directory)
+targets$IDFILE <- list.files(data_directory, pattern = "\\.RCC(\\.gz)?$")
 # Keep the samples measured with the same CodeSet
 codeset <- vapply(
   X = file.path(data_directory, targets$IDFILE),
