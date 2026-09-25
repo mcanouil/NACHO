@@ -1,0 +1,59 @@
+cff-version: 1.2.0
+title: "NACHO: NanoString Quality Control Dashboard"
+message: "If you use NACHO, please cite the article in preferred-citation."
+type: software
+authors:
+  - family-names: "Canouil"
+    given-names: "Mickaël"
+    email: "pro@mickael.canouil.dev"
+    orcid: "https://orcid.org/0000-0002-3396-4549"
+  - family-names: "Slieker"
+    given-names: "Roderick"
+    orcid: "https://orcid.org/0000-0003-0961-9152"
+  - family-names: "Bouland"
+    given-names: "Gerard"
+repository-code: "https://github.com/mcanouil/NACHO"
+repository: "https://CRAN.R-project.org/package=NACHO"
+url: "https://m.canouil.dev/NACHO/"
+abstract: >-
+  NACHO (NAnoString quality Control dasHbOard) analyses exported NanoString
+  nCounter data and helps users run quality control, by showing quality control
+  metrics, control gene expression, principal components and sample-specific
+  size factors in an interactive web application.
+keywords:
+  - R
+  - NanoString
+  - nCounter
+  - quality control
+  - normalisation
+  - Shiny
+license: "GPL-3.0-only"
+version: "2.0.6"
+date-released: "2024-01-12"
+preferred-citation:
+  type: article
+  title: "NACHO: an R package for quality control of NanoString nCounter data"
+  authors:
+    - family-names: "Canouil"
+      given-names: "Mickaël"
+      orcid: "https://orcid.org/0000-0002-3396-4549"
+    - family-names: "Bouland"
+      given-names: "Gerard A."
+    - family-names: "Bonnefond"
+      given-names: "Amélie"
+    - family-names: "Froguel"
+      given-names: "Philippe"
+    - family-names: "'t Hart"
+      given-names: "Leen M."
+    - family-names: "Slieker"
+      given-names: "Roderick C."
+      orcid: "https://orcid.org/0000-0003-0961-9152"
+  journal: "Bioinformatics"
+  volume: 36
+  issue: "3"
+  start: 970
+  end: 971
+  year: 2020
+  month: 2
+  doi: "10.1093/bioinformatics/btz647"
+  issn: "1367-4803"
