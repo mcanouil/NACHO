@@ -42,8 +42,10 @@
 - In `R/autoplot.R`,
   - fix: stop boxplots inheriting the colour aesthetic, which made ggplot2 warn that it dropped `colour` for the control probe plots.
   - fix: draw the outlier bands of the `"PFNF"` and `"HF"` plots to the panel edges without log-10 warnings about infinite values.
+  - fix: keep each sample's identifier in the `"BD"`, `"FoV"`, `"PCL"`, `"LoD"`, `"PN"`, `"Positive"`, `"Negative"` and `"Housekeeping"` plots, which drew every point at one position and dropped some of them.
 - In `R/render.R`,
   - fix: include the logo by its absolute path, so pandoc finds it when the temporary directory sits behind a symbolic link.
+  - fix: pass the report options as R Markdown parameters, so `outliers_labels = "CartridgeID"` works and column names with quotes no longer break the report.
 - In `inst/app/app.R`,
   - fix: stop writing an `all.rdata` debug file to the working directory when uploading RCC files.
   - fix: load uploaded RCC files, which failed because `suppressMessages()` received `x` instead of `expr`.
@@ -55,9 +57,9 @@
 - In `R/qc_pca.R`,
   - fix: compute the PCA with samples as observations and store their scores. `PC01` to `PC10` and the variance explained change, and the PCA plots now show the main sources of variation between samples.
 - In `R/normalise_counts.R`,
-  - fix: apply the 0.1 floor after rounding, so normalised counts at or below background are 0.1 instead of 0.
-- In `R/autoplot.R`,
-  - fix: keep each sample's identifier in the `"BD"`, `"FoV"`, `"PCL"`, `"LoD"`, `"PN"`, `"Positive"`, `"Negative"` and `"Housekeeping"` plots, which drew every point at one position and dropped some of them.
+  - fix: apply the 0.1 floor after rounding, so normalised counts at or below background are 0.1 instead of 0. With `housekeeping_predict = TRUE`, the floor can change which housekeeping genes are picked, which in turn changes `House_factor`, the normalised counts and the outlier flags.
+- In `R/qc_pca.R` and `R/normalise_counts.R`,
+  - fix: objects created with an earlier version keep the old values, so run `load_rcc()` again to refresh them.
 - In `R/normalise.R`,
   - fix: use the `n_comp` passed to `normalise()`, which was ignored.
   - fix: recompute `is_outlier` when only the thresholds change.
@@ -70,8 +72,6 @@
   - fix: stop when a single-sample sample sheet lists the same RCC file twice.
 - In `R/print.R`,
   - fix: return the object invisibly from `print()`.
-- In `R/render.R`,
-  - fix: pass the report options as R Markdown parameters, so `outliers_labels = "CartridgeID"` works and column names with quotes no longer break the report.
 - In `data/`,
   - fix: rebuild `GSE74821` with the corrected PCA and normalised counts.
 - In `inst/app/`,

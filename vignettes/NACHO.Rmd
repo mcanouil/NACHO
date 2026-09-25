@@ -282,7 +282,6 @@ GSE70970_norm <- normalise(
 
 `normalise()` returns a `list` object, like `load_rcc()`.
 Its `nacho` slot holds the raw counts in `Count` and the normalised counts in `Count_Norm`.
-Both counts are also in the *NACHO* data.frame.
 
 ## The `autoplot()` function
 
