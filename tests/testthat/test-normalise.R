@@ -353,3 +353,37 @@ test_that("plexset GLM", {
     class = "nacho"
   )
 })
+
+test_that("normalise() uses the n_comp it receives", {
+  res <- suppressMessages(normalise(GSE74821, n_comp = 3))
+  expect_identical(res[["n_comp"]], 3)
+  expect_identical(nrow(res[["pc_sum"]]), 3L)
+  expect_identical(
+    grep("^PC[0-9]+$", names(res[["nacho"]]), value = TRUE),
+    sprintf("PC%02d", 1:3)
+  )
+})
+
+test_that("normalise() keeps the requested n_comp when it removes outliers", {
+  thresholds <- GSE74821[["outliers_thresholds"]]
+  thresholds[["FoV"]] <- 99.5
+  res <- suppressMessages(normalise(
+    GSE74821,
+    n_comp = 4,
+    remove_outliers = TRUE,
+    outliers_thresholds = thresholds
+  ))
+  expect_identical(res[["n_comp"]], 4)
+  expect_identical(nrow(res[["pc_sum"]]), 4L)
+})
+
+test_that("normalise() flags outliers against new thresholds", {
+  thresholds <- GSE74821[["outliers_thresholds"]]
+  thresholds[["BD"]] <- c(0.1, 0.2)
+  res <- suppressMessages(normalise(GSE74821, outliers_thresholds = thresholds))
+  expect_identical(
+    res[["nacho"]][["is_outlier"]],
+    check_outliers(res)[["nacho"]][["is_outlier"]]
+  )
+  expect_true(any(res[["nacho"]][["is_outlier"]]))
+})
