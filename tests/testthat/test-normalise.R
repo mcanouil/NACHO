@@ -387,3 +387,14 @@ test_that("normalise() flags outliers against new thresholds", {
   )
   expect_true(any(res[["nacho"]][["is_outlier"]]))
 })
+
+test_that("a panel without POS_E gives NA for PCL and LoD, not a failure", {
+  no_pos_e <- GSE74821
+  no_pos_e[["nacho"]] <- no_pos_e[["nacho"]][
+    no_pos_e[["nacho"]][["Name"]] != "POS_E(0.5)",
+  ]
+  res <- suppressMessages(normalise(no_pos_e, normalisation_method = "GEO"))
+  expect_true(all(is.na(res[["nacho"]][["PCL"]])))
+  expect_true(all(is.na(res[["nacho"]][["LoD"]])))
+  expect_false(anyNA(res[["nacho"]][["is_outlier"]]))
+})
