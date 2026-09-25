@@ -71,7 +71,10 @@ test_that("no housekeeping norm and prediction", {
 })
 
 test_that("using GEO GSE74821", {
-  on.exit(closeAllConnections(), add = TRUE)
+  skip_on_cran()
+  skip_if_offline()
+  skip_if_not_installed("GEOquery")
+  skip_if_not_installed("Biobase")
   gse <- try(GEOquery::getGEO(GEO = "GSE74821"), silent = TRUE)
   skip_if(inherits(gse, "try-error"), "GEO is unavailable.")
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
@@ -131,7 +134,10 @@ test_that("using GEO GSE74821", {
 })
 
 test_that("using GEO GSE70970", {
-  on.exit(closeAllConnections(), add = TRUE)
+  skip_on_cran()
+  skip_if_offline()
+  skip_if_not_installed("GEOquery")
+  skip_if_not_installed("Biobase")
   gse <- try(GEOquery::getGEO(GEO = "GSE70970"), silent = TRUE)
   skip_if(inherits(gse, "try-error"), "GEO is unavailable.")
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))

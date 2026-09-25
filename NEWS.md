@@ -199,7 +199,7 @@ Full Changelog: <https://github.com/mcanouil/NACHO/compare/v1.1.0...v2.0.0>
 - In `R/visualise.R`, replace datatable (render and output) with classical table. (#13)
 - In `R/autoplot.R`,
   - add `show_outliers` to show outliers differently on plots (-i.e.-, in red).
-  - add `outliers_factor` to highligth outliers with different point size.
+  - add `outliers_factor` to highlight outliers with different point size.
   - add `outliers_labels` to print labels on top of outliers.
   - now uses tidyeval via import.
   - remove plexset ID (`_S-`) to remove duplicated QC metrics.
@@ -228,7 +228,7 @@ Full Changelog: <https://github.com/mcanouil/NACHO/compare/v1.1.0...v2.0.0>
 - `autoplot()` allows to plot a chosen QC plot available in the shiny app (`visualise()`) and/or
   in the HTML report (`render()`).
 - `print()` allows to print the structure or to print text and figures formatted using markdown
-  (mainly to be used in a Rmakrdown chunk).
+  (mainly to be used in a R Markdown chunk).
 - `render()` render figures from `visualise()` in a HTML friendly output.
 
 ## Minor improvements and fixes
