@@ -49,6 +49,9 @@ Mainly for use within an R Markdown chunk.}
 
 \item{...}{Other arguments (\emph{Not used}).}
 }
+\value{
+\code{x}, invisibly.
+}
 \description{
 This function prints text and figures from the results of a call to \code{\link[=load_rcc]{load_rcc()}}
 or \code{\link[=normalise]{normalise()}}.

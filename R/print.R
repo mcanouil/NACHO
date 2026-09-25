@@ -14,7 +14,7 @@
 #' @param xaringan [[logical]] A boolean to format output for xaringan slides.
 #' @param ... Other arguments (*Not used*).
 #'
-#' @return NULL
+#' @return `x`, invisibly.
 #'
 #' @importFrom knitr kable
 #' @export
@@ -47,9 +47,11 @@ print.nacho <- function(
     stop('[NACHO] RCC type must be either "n1" or "n8"!')
   }
   if (!echo) {
-    return(utils::str(x, 1))
+    utils::str(x, 1)
+    return(invisible(x))
   }
 
+  nacho_object <- x
   x <- check_outliers(x)
 
   if (is.numeric(x$nacho[[colour]])) {
@@ -303,5 +305,5 @@ print.nacho <- function(
     ))
   }
 
-  invisible()
+  invisible(nacho_object)
 }
