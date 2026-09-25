@@ -1,6 +1,6 @@
 # NACHO (development version)
 
-## Breaking changes
+## Dependencies
 
 - In `DESCRIPTION`,
   - build: require R 4.1.0 or newer, ggplot2 4.0.0 or newer, ggforce 0.5.0 or newer, ggrepel 0.9.6 or newer, and shiny 1.7.4 or newer, which pulls in fontawesome 0.4.0 and its Font Awesome 6 icon names.
@@ -30,6 +30,10 @@
 - In `pkgdown/`,
   - docs: restyle the website for pkgdown 2.2 with the NACHO logo colours, a light and dark mode switch, and colour contrast that meets WCAG AA.
   - docs: group the reference index by task.
+- In `R/normalise.R`, `R/load_rcc.R` and `vignettes/NACHO.Rmd`,
+  - docs: remove the `raw_counts` and `normalised_counts` slots, which never existed, and say that `nacho` holds one row per sample and probe.
+- In `R/GSE74821.R`,
+  - docs: say that `GSE74821` holds 48 samples, not 20.
 
 ## Fixes
 
@@ -48,6 +52,34 @@
   - fix: suggest markdown, which the app needs to show its help pages, and make `visualise()` ask for it when it is not installed. The `deploy()` help page notes that the server needs it too.
 - In `R/geometric_housekeeping.R`,
   - fix: replace background-corrected housekeeping counts below 1 with 1, so values between 0 and 1 no longer inflate `House_factor`. ([#53](https://github.com/mcanouil/NACHO/issues/53))
+- In `R/qc_pca.R`,
+  - fix: compute the PCA with samples as observations and store their scores. `PC01` to `PC10` and the variance explained change, and the PCA plots now show the main sources of variation between samples.
+- In `R/normalise_counts.R`,
+  - fix: apply the 0.1 floor after rounding, so normalised counts at or below background are 0.1 instead of 0.
+- In `R/autoplot.R`,
+  - fix: keep each sample's identifier in the `"BD"`, `"FoV"`, `"PCL"`, `"LoD"`, `"PN"`, `"Positive"`, `"Negative"` and `"Housekeeping"` plots, which drew every point at one position and dropped some of them.
+- In `R/normalise.R`,
+  - fix: use the `n_comp` passed to `normalise()`, which was ignored.
+  - fix: recompute `is_outlier` when only the thresholds change.
+- In `R/qc_features.R`, `R/qc_limit_detection.R` and `R/check_outliers.R`,
+  - fix: report `PCL` and `LoD` as `NA` when a panel has no `POS_E` probe or when the negative controls do not vary, and do not flag a sample on a metric that could not be measured.
+- In `R/load_rcc.R`,
+  - fix: detect PlexSet files from their content, and add `plexset_id` `S1` to `S8` when the sample sheet lists each file once.
+  - fix: stop converting the caller's sample sheet to a `data.table`.
+  - fix: stop with a clear message when RCC files mix PlexSet and single-sample files.
+  - fix: stop when a single-sample sample sheet lists the same RCC file twice.
+- In `R/print.R`,
+  - fix: return the object invisibly from `print()`.
+- In `R/render.R`,
+  - fix: pass the report options as R Markdown parameters, so `outliers_labels = "CartridgeID"` works and column names with quotes no longer break the report.
+- In `data/`,
+  - fix: rebuild `GSE74821` with the corrected PCA and normalised counts.
+- In `inst/app/`,
+  - fix: set the full binding density range when switching between the MAX/FLEX and SPRINT presets.
+  - fix: accept zip archives sent as `application/zip`, and `.RCC`, `.rcc`, `.RCC.gz` and `.csv` files in any case.
+  - fix: stop warning about row names when unpacking a zip archive.
+  - fix: show a notification when the sample sheet is discarded, instead of a warning in the R console.
+  - fix: correct the typos in the card and outlier labels, and open the app on the QC metrics tab.
 
 # NACHO 2.0.6
 
