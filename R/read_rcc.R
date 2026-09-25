@@ -95,3 +95,18 @@ read_rcc <- function(file) {
     ]
   }
 }
+
+#' is_plexset_rcc
+#'
+#' @param file [[character]] The name of the RCC file to inspect.
+#'
+#' @keywords internal
+#' @usage NULL
+#' @noRd
+#'
+#' @return [[logical]] `TRUE` when the file holds all eight PlexSet code classes,
+#'   `Endogenous1s` to `Endogenous8s`, matched exactly.
+is_plexset_rcc <- function(file) {
+  code_classes <- sub(",.*$", "", readLines(file))
+  all(paste0("Endogenous", seq_len(8), "s") %in% code_classes)
+}

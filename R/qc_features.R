@@ -21,8 +21,8 @@ qc_features <- function(data, id_colname) {
         negatives = negatives
       )
     } else {
-      pcl <- 0
-      lod <- 0
+      pcl <- NA_real_
+      lod <- NA_real_
     }
     fov <- qc_imaging(
       fov_counted = as.numeric(unique(.data[[
@@ -42,7 +42,7 @@ qc_features <- function(data, id_colname) {
       "StagePosition" = unique(.data[["Lane_Attributes.lane_StagePosition"]]),
       "CartridgeID" = unique(.data[["Lane_Attributes.lane_CartridgeID"]]),
       "FoV" = fov,
-      "PCL" = ifelse(is.na(pcl), 0, pcl),
+      "PCL" = pcl,
       "LoD" = lod,
       "MC" = mean_count,
       "MedC" = median_count

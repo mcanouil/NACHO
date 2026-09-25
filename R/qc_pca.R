@@ -9,8 +9,10 @@
 #'
 #' @return [[list]]
 qc_pca <- function(counts, n_comp = 10) {
-  pc <- stats::prcomp(log(counts + 1))
+  pc <- stats::prcomp(t(log(counts + 1)))
   pc_sum <- summary(pc)
-  pc <- pc$rotation[, seq_len(n_comp)]
-  list("pc" = pc, "pcsum" = pc_sum$importance[, seq_len(n_comp)])
+  list(
+    "pc" = pc[["x"]][, seq_len(n_comp), drop = FALSE],
+    "pcsum" = pc_sum[["importance"]][, seq_len(n_comp), drop = FALSE]
+  )
 }

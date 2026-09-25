@@ -27,44 +27,29 @@ check_outliers <- function(nacho_object) {
   }
 
   ot <- nacho_object[["outliers_thresholds"]]
+  nacho_df <- nacho_object[["nacho"]]
 
-  is_house_factor <- "House_factor" %in% colnames(nacho_object[["nacho"]])
-
-  if (!is_house_factor) {
-    nacho_object[["nacho"]][, "House_factor"] <- sum(ot[["House_factor"]]) / 2
+  outside <- function(metric, limits) {
+    values <- nacho_df[[metric]]
+    !is.na(values) & (values < min(limits) | values > max(limits))
+  }
+  below <- function(metric, limit) {
+    values <- nacho_df[[metric]]
+    !is.na(values) & values < limit
   }
 
+  is_outlier <- outside("BD", ot[["BD"]]) |
+    below("FoV", ot[["FoV"]]) |
+    outside("Positive_factor", ot[["Positive_factor"]])
+  if ("House_factor" %in% colnames(nacho_df)) {
+    is_outlier <- is_outlier | outside("House_factor", ot[["House_factor"]])
+  }
   if (attr(nacho_object, "RCC_type") == "n1") {
-    nacho_object[["nacho"]][, "is_outlier"] <- {
-      nacho_object[["nacho"]][, "BD"] < min(ot[["BD"]]) |
-        nacho_object[["nacho"]][, "BD"] > max(ot[["BD"]]) |
-        nacho_object[["nacho"]][, "FoV"] < ot[["FoV"]] |
-        nacho_object[["nacho"]][, "PCL"] < ot[["PCL"]] |
-        nacho_object[["nacho"]][, "LoD"] < ot[["LoD"]] |
-        nacho_object[["nacho"]][, "Positive_factor"] <
-          min(ot[["Positive_factor"]]) |
-        nacho_object[["nacho"]][, "Positive_factor"] >
-          max(ot[["Positive_factor"]]) |
-        nacho_object[["nacho"]][, "House_factor"] < min(ot[["House_factor"]]) |
-        nacho_object[["nacho"]][, "House_factor"] > max(ot[["House_factor"]])
-    }
-  } else {
-    nacho_object[["nacho"]][, "is_outlier"] <- {
-      nacho_object[["nacho"]][, "BD"] < min(ot[["BD"]]) |
-        nacho_object[["nacho"]][, "BD"] > max(ot[["BD"]]) |
-        nacho_object[["nacho"]][, "FoV"] < ot[["FoV"]] |
-        nacho_object[["nacho"]][, "Positive_factor"] <
-          min(ot[["Positive_factor"]]) |
-        nacho_object[["nacho"]][, "Positive_factor"] >
-          max(ot[["Positive_factor"]]) |
-        nacho_object[["nacho"]][, "House_factor"] < min(ot[["House_factor"]]) |
-        nacho_object[["nacho"]][, "House_factor"] > max(ot[["House_factor"]])
-    }
+    is_outlier <- is_outlier |
+      below("PCL", ot[["PCL"]]) |
+      below("LoD", ot[["LoD"]])
   }
 
-  if (!is_house_factor) {
-    nacho_object[["nacho"]][, "House_factor"] <- NULL
-  }
-
+  nacho_object[["nacho"]][["is_outlier"]] <- is_outlier
   nacho_object
 }

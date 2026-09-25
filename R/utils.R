@@ -54,3 +54,18 @@ logo_path <- function() {
   }
   path
 }
+
+#' Drop the PlexSet suffix from sample identifiers
+#'
+#' PlexSet samples are named `<file>_S1` to `<file>_S8`. Lane-level plots
+#' group the eight samples of a lane back under their file name.
+#'
+#' @keywords internal
+#' @noRd
+#'
+#' @return A copy of `data` with the suffix removed from `id_colname`.
+strip_plexset_suffix <- function(data, id_colname) {
+  data <- data.table::copy(data)
+  data[[id_colname]] <- sub("_S[0-9]*$", "", data[[id_colname]])
+  data
+}

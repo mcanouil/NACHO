@@ -9,6 +9,10 @@
 #'
 #' @return [[numeric]]
 qc_limit_detection <- function(pos_e, negatives) {
-  z_score <- (pos_e - mean(negatives)) / stats::sd(negatives)
+  negatives_sd <- stats::sd(negatives)
+  if (is.na(negatives_sd) || negatives_sd == 0) {
+    return(NA_real_)
+  }
+  z_score <- (pos_e - mean(negatives)) / negatives_sd
   round(z_score, 2)
 }

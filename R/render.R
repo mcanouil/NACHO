@@ -67,6 +67,12 @@ render <- function(
     'title: "NanoString Quality-Control Report"',
     "params:",
     "  nacho_object: NULL",
+    "  colour: NULL",
+    "  size: NULL",
+    "  show_legend: NULL",
+    "  show_outliers: NULL",
+    "  outliers_factor: NULL",
+    "  outliers_labels: NULL",
     "output:",
     "  html_document:",
     "    theme: simplex",
@@ -112,12 +118,12 @@ render <- function(
     "#| label: nacho-qc",
     "print.nacho(",
     '  x = params[["nacho_object"]],',
-    paste0('  colour = "', colour, '",'),
-    paste0("  size = ", size, ","),
-    paste0("  show_legend = ", show_legend, ","),
-    paste0("  show_outliers = ", show_outliers, ","),
-    paste0("  outliers_factor = ", outliers_factor, ","),
-    paste0("  outliers_labels = ", outliers_labels, ","),
+    '  colour = params[["colour"]],',
+    '  size = params[["size"]],',
+    '  show_legend = params[["show_legend"]],',
+    '  show_outliers = params[["show_outliers"]],',
+    '  outliers_factor = params[["outliers_factor"]],',
+    '  outliers_labels = params[["outliers_labels"]],',
     "  echo = TRUE",
     ")",
     "```",
@@ -133,7 +139,15 @@ render <- function(
     output_dir = output_dir,
     encoding = "UTF-8",
     quiet = TRUE,
-    params = list(nacho_object = nacho_object)
+    params = list(
+      nacho_object = nacho_object,
+      colour = colour,
+      size = size,
+      show_legend = show_legend,
+      show_outliers = show_outliers,
+      outliers_factor = outliers_factor,
+      outliers_labels = outliers_labels
+    )
   )
 
   if (clean) {

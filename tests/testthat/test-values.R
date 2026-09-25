@@ -114,3 +114,43 @@ test_that("normalised counts above background are corrected, scaled and rounded"
     round(expected[above_background])
   )
 })
+
+test_that("normalised counts at or below background are floored at 0.1 after rounding", {
+  expected <- round(
+    (gse_df[["Count"]] - gse_df[["Negative_factor"]]) *
+      gse_df[["Positive_factor"]] *
+      gse_df[["House_factor"]]
+  )
+  expected[expected <= 0] <- 0.1
+  expect_equal(gse_df[["Count_Norm"]], expected)
+  expect_false(any(gse_df[["Count_Norm"]] == 0))
+})
+
+test_that("PCA stores sample scores on log counts", {
+  wide <- data.table::dcast(
+    gse_df,
+    stats::as.formula(paste("CodeClass + Name ~", gse_id)),
+    value.var = "Count"
+  )
+  counts <- as.matrix(wide[, -c(1, 2)])
+  expected <- stats::prcomp(t(log(counts + 1)))
+  pcs <- per_sample_ref(
+    gse_geo,
+    sprintf("PC%02d", seq_len(gse_geo[["n_comp"]]))
+  )
+  expect_equal(
+    abs(unname(as.matrix(pcs[, -1]))),
+    abs(unname(expected[["x"]][pcs[[gse_id]], seq_len(gse_geo[["n_comp"]])]))
+  )
+  expect_equal(
+    gse_geo[["pc_sum"]][["Proportion of Variance"]],
+    unname(summary(expected)[["importance"]][
+      "Proportion of Variance",
+      seq_len(gse_geo[["n_comp"]])
+    ])
+  )
+})
+
+test_that("limit of detection is NA when the negatives do not vary", {
+  expect_identical(NACHO:::qc_limit_detection(10, c(0, 0, 0, 0)), NA_real_)
+})

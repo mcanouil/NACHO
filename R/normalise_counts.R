@@ -14,6 +14,7 @@ normalise_counts <- function(data, housekeeping_norm) {
   if (housekeeping_norm && "House_factor" %in% colnames(data)) {
     out <- out * data[["House_factor"]]
   }
+  out <- round(out)
   out[out <= 0] <- 0.1
-  round(out)
+  out
 }

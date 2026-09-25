@@ -200,12 +200,14 @@ normalise <- function(
         housekeeping_predict = housekeeping_predict,
         housekeeping_norm = housekeeping_norm,
         normalisation_method = normalisation_method,
-        n_comp = nacho_object[["n_comp"]]
+        n_comp = n_comp
       )
     }
     nacho_object[["remove_outliers"]] <- remove_outliers
   } else {
-    message("[NACHO] Outliers have already been removed!")
+    if (remove_outliers) {
+      message("[NACHO] Outliers have already been removed!")
+    }
 
     if (any(params_changed)) {
       nacho_object <- qc_rcc(
@@ -216,7 +218,7 @@ normalise <- function(
         housekeeping_predict = housekeeping_predict,
         housekeeping_norm = housekeeping_norm,
         normalisation_method = normalisation_method,
-        n_comp = nacho_object[["n_comp"]]
+        n_comp = n_comp
       )
     }
   }
@@ -231,6 +233,8 @@ normalise <- function(
   if (!"RCC_type" %in% names(attributes(nacho_object))) {
     attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
   }
+
+  nacho_object <- check_outliers(nacho_object)
 
   message(paste(
     "[NACHO] Returning a list.",

@@ -159,10 +159,14 @@ qc_rcc <- function(
     all = TRUE
   )
 
+  previous_pcs <- grep("^PC[0-9]+$", colnames(nacho_df), value = TRUE)
   nacho_out <- merge(
     x = nacho_df[
       j = .SD,
-      .SDcols = c(id_colname, setdiff(colnames(nacho_df), colnames(facs_pc_qc)))
+      .SDcols = c(
+        id_colname,
+        setdiff(colnames(nacho_df), c(colnames(facs_pc_qc), previous_pcs))
+      )
     ],
     y = facs_pc_qc,
     by = id_colname,
