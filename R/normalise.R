@@ -234,7 +234,7 @@ normalise <- function(
     attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
   }
 
-  nacho_object <- NACHO::check_outliers(nacho_object)
+  nacho_object <- check_outliers(nacho_object)
 
   message(paste(
     "[NACHO] Returning a list.",
