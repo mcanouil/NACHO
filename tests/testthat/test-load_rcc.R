@@ -327,3 +327,38 @@ test_that("heterogenous", {
     )
   })
 })
+
+test_that("PlexSet files are detected from their content", {
+  unique_ids <- data.frame(IDFILE = basename(salmon_files))
+  res <- suppressMessages(load_rcc(
+    data_directory = test_path("salmon_data"),
+    ssheet_csv = unique_ids,
+    id_colname = "IDFILE"
+  ))
+  expect_identical(attr(res, "RCC_type"), "n8")
+  expect_setequal(
+    unique(res[["nacho"]][["IDFILE"]]),
+    unique(salmon_nacho[["nacho"]][["IDFILE"]])
+  )
+  expect_false(all(res[["nacho"]][["is_outlier"]]))
+})
+
+test_that("PlexSet detection needs the exact PlexSet code classes", {
+  single <- withr::local_tempfile(fileext = ".RCC")
+  writeLines(c("<Code_Summary>", "Endogenous1,miR-1,MIMAT0000416,12"), single)
+  plexset <- withr::local_tempfile(fileext = ".RCC")
+  writeLines(
+    c("<Code_Summary>", paste0("Endogenous", 1:8, "s,GENE,NM_1,12")),
+    plexset
+  )
+  expect_false(NACHO:::is_plexset_rcc(single))
+  expect_true(NACHO:::is_plexset_rcc(plexset))
+})
+
+test_that("PlexSet detection reads gzipped RCC files", {
+  gz_file <- withr::local_tempfile(fileext = ".RCC.gz")
+  connection <- gzfile(gz_file, "w")
+  writeLines(readLines(salmon_files[[1]]), connection)
+  close(connection)
+  expect_true(NACHO:::is_plexset_rcc(gz_file))
+})

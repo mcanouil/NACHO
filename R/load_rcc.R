@@ -123,17 +123,39 @@ load_rcc <- function(
     stop('[NACHO] Not all values from "id_colname" are mapped to an RCC file.')
   }
 
-  if (
-    anyDuplicated(nacho_df[[id_colname]]) != 0 &&
-      !"plexset_id" %in% colnames(nacho_df)
-  ) {
+  is_plexset <- vapply(
+    X = unique(nacho_df[["file_path"]]),
+    FUN = is_plexset_rcc,
+    FUN.VALUE = logical(1)
+  )
+  if (any(is_plexset) && !all(is_plexset)) {
     stop(
-      '[NACHO] "id_colname" contains duplicates and "plexset_id" was not provided.\n',
-      '  For PlexSet RCC files, "plexset_id" column is required to identify samples.'
+      "[NACHO] RCC files mix PlexSet and single-sample files.\n",
+      "  Load each kind of file separately."
+    )
+  }
+  has_duplicates <- anyDuplicated(nacho_df[[id_colname]]) != 0
+  if (all(is_plexset) && !"plexset_id" %in% colnames(nacho_df)) {
+    if (has_duplicates) {
+      stop(
+        '[NACHO] "id_colname" contains duplicates and "plexset_id" was not provided.\n',
+        '  For PlexSet RCC files, "plexset_id" column is required to identify samples.'
+      )
+    }
+    nacho_df <- nacho_df[rep(seq_len(nrow(nacho_df)), each = 8)]
+    nacho_df[["plexset_id"]] <- rep(
+      paste0("S", seq_len(8)),
+      times = nrow(nacho_df) / 8
+    )
+  }
+  if (!all(is_plexset) && has_duplicates) {
+    stop(
+      '[NACHO] "id_colname" contains duplicates, but the RCC files are not PlexSet files.\n',
+      '  Each single-sample RCC file must appear once in "ssheet_csv".'
     )
   }
 
-  if (anyDuplicated(nacho_df[[id_colname]]) != 0) {
+  if (all(is_plexset)) {
     type_set <- "n8"
     nacho_df <- merge(
       x = nacho_df,
