@@ -333,12 +333,14 @@ server <- function(input, output, session) {
         merge_by <- if (check_multiplex) c("IDFILE", "plexset_id") else "IDFILE"
         missing_columns <- setdiff(merge_by, names(ssheet_dt))
         if (length(missing_columns) > 0) {
-          warning(
-            "[NACHO] Missing ",
-            paste0("\"", missing_columns, "\"", collapse = ", "),
-            if (length(missing_columns) > 1) " columns" else " column",
-            " in sample sheet file!\n",
-            "  Sample sheet file is discarded."
+          shiny::showNotification(
+            ui = paste0(
+              "The sample sheet was discarded, because it has no ",
+              paste0("\"", missing_columns, "\"", collapse = " or "),
+              if (length(missing_columns) > 1) " columns." else " column."
+            ),
+            type = "warning",
+            duration = NULL
           )
         } else {
           targets <- merge(x = targets, y = ssheet_dt, by = merge_by)
