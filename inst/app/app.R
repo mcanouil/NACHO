@@ -271,8 +271,12 @@ server <- function(input, output, session) {
             name <- .row[1]
             datapath <- .row[2]
             type <- .row[3]
-            if (type == "application/x-zip-compressed") {
-              ex_dir <- file.path(dirname(datapath), sub(".zip$", "", name))
+            is_zip <- is_zip_upload(name, type) # nolint: object_usage_linter. Defined in utils.R.
+            if (is_zip) {
+              ex_dir <- file.path(
+                dirname(datapath),
+                sub("\\.zip$", "", name, ignore.case = TRUE)
+              )
               utils::unzip(datapath, exdir = ex_dir)
               files <- list.files(ex_dir)
               extracted <- file.path(basename(ex_dir), files)
@@ -299,9 +303,13 @@ server <- function(input, output, session) {
       )
 
       ssheet_dt <- NULL
-      targets_ssheet <- targets[grep("\\.csv", targets[["name"]]), ]
+      targets_ssheet <- targets[
+        grepl("\\.csv$", targets[["name"]], ignore.case = TRUE),
+      ]
       if (nrow(targets_ssheet) > 0) {
-        targets <- targets[grep("\\.RCC", targets[["name"]]), ]
+        targets <- targets[
+          grepl("\\.rcc(\\.gz)?$", targets[["name"]], ignore.case = TRUE),
+        ]
         ssheet_dt <- data.table::fread(targets_ssheet[["datapath"]])
       }
 

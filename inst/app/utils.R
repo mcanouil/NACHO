@@ -376,3 +376,9 @@ bd_range <- function(instrument) {
     "SPRINT" = c(0.1, 1.8)
   )
 }
+
+is_zip_upload <- function(name, type) {
+  type %in%
+    c("application/zip", "application/x-zip-compressed") ||
+    grepl("\\.zip$", name, ignore.case = TRUE)
+}
