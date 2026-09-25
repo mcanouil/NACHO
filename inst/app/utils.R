@@ -368,3 +368,11 @@ plotInput <- function(id, nacho) {
     )
   })
 }
+
+bd_range <- function(instrument) {
+  switch(
+    instrument,
+    "MAX/FLEX" = c(0.1, 2.25),
+    "SPRINT" = c(0.1, 1.8)
+  )
+}

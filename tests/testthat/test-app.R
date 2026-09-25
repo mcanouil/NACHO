@@ -109,3 +109,13 @@ test_that("app discards a PlexSet sample sheet without plexset_id", {
   expect_s3_class(nacho, "nacho")
   expect_false("group" %in% names(nacho[["nacho"]]))
 })
+
+test_that("instrument presets give a full binding density range", {
+  app_utils <- new.env()
+  sys.source(
+    system.file("app", "utils.R", package = "NACHO"),
+    envir = app_utils
+  )
+  expect_identical(app_utils[["bd_range"]]("MAX/FLEX"), c(0.1, 2.25))
+  expect_identical(app_utils[["bd_range"]]("SPRINT"), c(0.1, 1.8))
+})

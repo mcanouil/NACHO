@@ -435,22 +435,10 @@ server <- function(input, output, session) {
   # QC metrics UI input
   ## Update UI with thresholds
   shiny::observe({
-    switch(
-      shiny::req(input$qc_bd_metrics),
-      "MAX/FLEX" = {
-        shiny::updateSliderInput(
-          session,
-          "qc_bd_thresh",
-          value = min(shiny::isolate(input$qc_bd_thresh), 2.25)
-        )
-      },
-      "SPRINT" = {
-        shiny::updateSliderInput(
-          session,
-          "qc_bd_thresh",
-          value = min(shiny::isolate(input$qc_bd_thresh), 1.8)
-        )
-      }
+    shiny::updateSliderInput(
+      session,
+      "qc_bd_thresh",
+      value = bd_range(shiny::req(input$qc_bd_metrics)) # nolint: object_usage_linter. Defined in utils.R.
     )
     shiny::updateSliderInput(
       session,
