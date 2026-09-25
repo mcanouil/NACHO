@@ -113,7 +113,7 @@ load_rcc <- function(
     stop('[NACHO] "ssheet_csv" must be a "data.frame" or path to csv.')
   )
 
-  nacho_df <- data.table::setDT(nacho_df)[
+  nacho_df <- data.table::as.data.table(nacho_df)[
     j = `:=`(
       "file_path" = file.path(data_directory, nacho_df[[id_colname]])
     )

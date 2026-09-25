@@ -362,3 +362,14 @@ test_that("PlexSet detection reads gzipped RCC files", {
   close(connection)
   expect_true(NACHO:::is_plexset_rcc(gz_file))
 })
+
+test_that("load_rcc() leaves the caller's sample sheet unchanged", {
+  sample_sheet <- salmon_tidy
+  suppressMessages(load_rcc(
+    data_directory = test_path("salmon_data"),
+    ssheet_csv = sample_sheet,
+    id_colname = "IDFILE"
+  ))
+  expect_identical(sample_sheet, salmon_tidy)
+  expect_identical(class(sample_sheet), "data.frame")
+})
