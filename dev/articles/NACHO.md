@@ -356,7 +356,7 @@ targets <- targets[codeset %in% "GeneRLF,NS_H_miR_1.4", ]
     ## GSM1824146       3.835728953    T3
     ## GSM1824147       4.292950034    T3
 
-After we extracted the dataset to the `/tmp/RtmpA9RmqK/GSE70970/Data`
+After we extracted the dataset to the `/tmp/RtmpKm29pt/GSE70970/Data`
 directory, a `Samplesheet.csv` containing a column with the exact names
 of the files for each sample can be written or used as is.
 
@@ -499,10 +499,10 @@ GSE70970_norm <- normalise(
 ```
 
 [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
-returns a `list` object (same as
-[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md))
-with `raw_counts` and `normalised_counts` slots filled with the raw and
-normalised counts. Both counts are also in the *NACHO* data.frame.
+returns a `list` object, like
+[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md).
+Its `nacho` slot holds the raw counts in `Count` and the normalised
+counts in `Count_Norm`.
 
 ### The `autoplot()` function
 

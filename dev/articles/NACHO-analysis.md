@@ -162,38 +162,38 @@ gse <- getGEO("GSE70970")
 ## GSE70970_series_matrix.txt.gz
 getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
 ##                                                                    size isdir
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                       1986560 FALSE
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz     672 FALSE
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                       1986560 FALSE
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz     672 FALSE
 ##                                                                 mode
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                        644
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz  644
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                        644
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz  644
 ##                                                                               mtime
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                       2026-09-24 23:04:31
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-24 23:04:31
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                       2026-09-25 16:44:58
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-25 16:44:58
 ##                                                                               ctime
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                       2026-09-24 23:04:31
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-24 23:04:31
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                       2026-09-25 16:44:58
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-25 16:44:58
 ##                                                                               atime
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                       2026-09-24 23:04:30
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-24 23:04:31
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                       2026-09-25 16:44:58
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-25 16:44:58
 ##                                                                  uid  gid
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                       1001 1001
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz 1001 1001
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                       1001 1001
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz 1001 1001
 ##                                                                  uname grname
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                       runner runner
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz runner runner
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                       runner runner
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz runner runner
 ##                                                                                                  fname
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                                             GSE70970_RAW.tar
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz GSE70970_characteristics_readme.txt.gz
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                                             GSE70970_RAW.tar
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz GSE70970_characteristics_readme.txt.gz
 ##                                                                                  destdir
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                       /tmp/Rtmp6MRCx5/GSE70970
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz /tmp/Rtmp6MRCx5/GSE70970
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                       /tmp/RtmpYaBAMK/GSE70970
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz /tmp/RtmpYaBAMK/GSE70970
 ##                                                                                                                        filepath
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                                             /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                                             /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz
 ##                                                                      GEO
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_RAW.tar                       GSE70970
-## /tmp/Rtmp6MRCx5/GSE70970/GSE70970_characteristics_readme.txt.gz GSE70970
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_RAW.tar                       GSE70970
+## /tmp/RtmpYaBAMK/GSE70970/GSE70970_characteristics_readme.txt.gz GSE70970
 # Unzip data
 untar(
   tarfile = file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"),
@@ -295,17 +295,17 @@ expr_counts <- GSE70970[["nacho"]][
 ```
 
     ##                             GSM1824143_NPC-T-1.RCC.gz
-    ## bkv-miR-B1-3p+jcv-miR-J1-3p                         4
-    ## bkv-miR-B1-5p                                       0
-    ## ebv-miR-BART1-3p                                 3526
-    ## ebv-miR-BART1-5p                                  196
-    ## ebv-miR-BART10                                  22936
+    ## bkv-miR-B1-3p+jcv-miR-J1-3p                       4.0
+    ## bkv-miR-B1-5p                                     0.1
+    ## ebv-miR-BART1-3p                               3526.0
+    ## ebv-miR-BART1-5p                                196.0
+    ## ebv-miR-BART10                                22936.0
     ##                             GSM1824144_NPC-T-10.RCC.gz
-    ## bkv-miR-B1-3p+jcv-miR-J1-3p                         20
-    ## bkv-miR-B1-5p                                        0
-    ## ebv-miR-BART1-3p                                  2799
-    ## ebv-miR-BART1-5p                                    95
-    ## ebv-miR-BART10                                    5833
+    ## bkv-miR-B1-3p+jcv-miR-J1-3p                       20.0
+    ## bkv-miR-B1-5p                                      0.1
+    ## ebv-miR-BART1-3p                                2799.0
+    ## ebv-miR-BART1-5p                                  95.0
+    ## ebv-miR-BART10                                  5833.0
     ##                             GSM1824145_NPC-T-100.RCC.gz
     ## bkv-miR-B1-3p+jcv-miR-J1-3p                          49
     ## bkv-miR-B1-5p                                        13
@@ -313,17 +313,17 @@ expr_counts <- GSE70970[["nacho"]][
     ## ebv-miR-BART1-5p                                     92
     ## ebv-miR-BART10                                     3717
     ##                             GSM1824146_NPC-T-101.RCC.gz
-    ## bkv-miR-B1-3p+jcv-miR-J1-3p                           7
-    ## bkv-miR-B1-5p                                         0
-    ## ebv-miR-BART1-3p                                   2880
-    ## ebv-miR-BART1-5p                                     73
-    ## ebv-miR-BART10                                     5084
+    ## bkv-miR-B1-3p+jcv-miR-J1-3p                         7.0
+    ## bkv-miR-B1-5p                                       0.1
+    ## ebv-miR-BART1-3p                                 2880.0
+    ## ebv-miR-BART1-5p                                   73.0
+    ## ebv-miR-BART10                                   5084.0
     ##                             GSM1824147_NPC-T-102.RCC.gz
-    ## bkv-miR-B1-3p+jcv-miR-J1-3p                           0
-    ## bkv-miR-B1-5p                                         0
-    ## ebv-miR-BART1-3p                                   4877
-    ## ebv-miR-BART1-5p                                     44
-    ## ebv-miR-BART10                                     6195
+    ## bkv-miR-B1-3p+jcv-miR-J1-3p                         0.1
+    ## bkv-miR-B1-5p                                       0.1
+    ## ebv-miR-BART1-3p                                 4877.0
+    ## ebv-miR-BART1-5p                                   44.0
+    ## ebv-miR-BART10                                   6195.0
 
 Alternatively, `"Accession"` number is also available.
 
@@ -365,10 +365,10 @@ eBayes(lmFit(expr_counts, design))
 ## An object of class "MArrayLM"
 ## $coefficients
 ##                             (Intercept) `disease.event:ch1`1
-## bkv-miR-B1-3p+jcv-miR-J1-3p   17.127907            -2.845856
-## bkv-miR-B1-5p                  6.430233             2.954383
+## bkv-miR-B1-3p+jcv-miR-J1-3p   17.138372            -2.843500
+## bkv-miR-B1-5p                  6.459302             2.961210
 ## ebv-miR-BART1-3p            3133.732558           211.446929
-## ebv-miR-BART1-5p             197.895349             5.361061
+## ebv-miR-BART1-5p             197.898837             5.365265
 ## ebv-miR-BART10              7537.651163          2137.528324
 ## 730 more rows ...
 ## 
@@ -382,7 +382,7 @@ eBayes(lmFit(expr_counts, design))
 ## 730 more rows ...
 ## 
 ## $sigma
-## [1]    29.30267    13.43225  4850.90726   351.44426 10106.31634
+## [1]    29.29642    13.41464  4850.90726   351.44148 10106.31634
 ## 730 more elements ...
 ## 
 ## $df.residual
@@ -402,11 +402,11 @@ eBayes(lmFit(expr_counts, design))
 ## 
 ## $Amean
 ## bkv-miR-B1-3p+jcv-miR-J1-3p               bkv-miR-B1-5p 
-##                      16.240                       7.352 
+##                     16.2512                      7.3832 
 ##            ebv-miR-BART1-3p            ebv-miR-BART1-5p 
-##                    3199.704                     199.568 
+##                   3199.7040                    199.5728 
 ##              ebv-miR-BART10 
-##                    8204.560 
+##                   8204.5600 
 ## 730 more elements ...
 ## 
 ## $method
@@ -422,58 +422,58 @@ eBayes(lmFit(expr_counts, design))
 ## 120 more rows ...
 ## 
 ## $df.prior
-## [1] 0.5117845
+## [1] 0.5116399
 ## 
 ## $s2.prior
-## [1] 640.0967
+## [1] 638.9296
 ## 
 ## $var.prior
-## [1] 2.499622e-02 1.562264e-05
+## [1] 2.504188e-02 1.565118e-05
 ## 
 ## $proportion
 ## [1] 0.01
 ## 
 ## $s2.post
-## [1] 8.577407e+02 1.823300e+02 2.343380e+07 1.230039e+05 1.017144e+08
+## [1] 8.573719e+02 1.818537e+02 2.343383e+07 1.230021e+05 1.017145e+08
 ## 730 more elements ...
 ## 
 ## $t
 ##                             (Intercept) `disease.event:ch1`1
-## bkv-miR-B1-3p+jcv-miR-J1-3p    5.423448          -0.50333994
-## bkv-miR-B1-5p                  4.416181           1.13335046
-## ebv-miR-BART1-3p               6.003297           0.22625936
-## ebv-miR-BART1-5p               5.232694           0.07918042
-## ebv-miR-BART10                 6.930970           1.09786047
+## bkv-miR-B1-3p+jcv-miR-J1-3p    5.427929          -0.50303151
+## bkv-miR-B1-5p                  4.441951           1.13745622
+## ebv-miR-BART1-3p               6.003293           0.22625923
+## ebv-miR-BART1-5p               5.232824           0.07924309
+## ebv-miR-BART10                 6.930966           1.09785983
 ## 730 more rows ...
 ## 
 ## $df.total
-## [1] 123.5118 123.5118 123.5118 123.5118 123.5118
+## [1] 123.5116 123.5116 123.5116 123.5116 123.5116
 ## 730 more elements ...
 ## 
 ## $p.value
 ##                              (Intercept) `disease.event:ch1`1
-## bkv-miR-B1-3p+jcv-miR-J1-3p 2.954450e-07            0.6156218
-## bkv-miR-B1-5p               2.168032e-05            0.2592623
-## ebv-miR-BART1-3p            1.996862e-08            0.8213737
-## ebv-miR-BART1-5p            6.935540e-07            0.9370173
-## ebv-miR-BART10              2.049397e-10            0.2744011
+## bkv-miR-B1-3p+jcv-miR-J1-3p 2.895225e-07            0.6158380
+## bkv-miR-B1-5p               1.955768e-05            0.2575494
+## ebv-miR-BART1-3p            1.996900e-08            0.8213738
+## ebv-miR-BART1-5p            6.931537e-07            0.9369675
+## ebv-miR-BART10              2.049447e-10            0.2744014
 ## 730 more rows ...
 ## 
 ## $lods
 ##                             (Intercept) `disease.event:ch1`1
-## bkv-miR-B1-3p+jcv-miR-J1-3p   3.5923311            -4.595276
-## bkv-miR-B1-5p                 0.9131734            -4.595061
-## ebv-miR-BART1-3p              5.2548055            -4.595319
-## ebv-miR-BART1-5p              3.0624360            -4.595328
-## ebv-miR-BART10                8.0359275            -4.595077
+## bkv-miR-B1-3p+jcv-miR-J1-3p   3.6097221            -4.595276
+## bkv-miR-B1-5p                 0.9808053            -4.595059
+## ebv-miR-BART1-3p              5.2607434            -4.595319
+## ebv-miR-BART1-5p              3.0672696            -4.595328
+## ebv-miR-BART10                8.0438100            -4.595077
 ## 730 more rows ...
 ## 
 ## $F
-## [1] 19.34414 19.17043 27.33152 20.23998 41.96528
+## [1] 19.37878 19.38162 27.33149 20.24126 41.96523
 ## 730 more elements ...
 ## 
 ## $F.p.value
-## [1] 4.916385e-08 5.612484e-08 1.486940e-10 2.494653e-08 1.239518e-14
+## [1] 4.788440e-08 4.778104e-08 1.486979e-10 2.492262e-08 1.239564e-14
 ## 730 more elements ...
 ```
 
@@ -502,20 +502,20 @@ GSE70970[["nacho"]][
 ]
 ##             Name    Accession                 term      Estimate Std. Error
 ##           <char>       <char>               <char>         <num>      <num>
-##  1:  hsa-miR-758 MIMAT0003879          (Intercept)   17.67441860   3.147859
-##  2:  hsa-miR-758 MIMAT0003879 `disease.event:ch1`1   -1.34108527   5.635571
-##  3: hsa-miR-1296 MIMAT0005794          (Intercept)    4.75581395   1.008199
-##  4: hsa-miR-1296 MIMAT0005794 `disease.event:ch1`1   -0.06350626   1.804967
-##  5: hsa-miR-548e MIMAT0005874          (Intercept)   11.69767442   2.761567
-##  6: hsa-miR-548e MIMAT0005874 `disease.event:ch1`1   -2.90280262   4.943998
-##  7:  hsa-miR-874 MIMAT0004911          (Intercept)   45.03488372   6.305849
-##  8:  hsa-miR-874 MIMAT0004911 `disease.event:ch1`1   21.01639833  11.289281
+##  1:  hsa-miR-758 MIMAT0003879          (Intercept)   17.68255814   3.147292
+##  2:  hsa-miR-758 MIMAT0003879 `disease.event:ch1`1   -1.33896840   5.634557
+##  3: hsa-miR-1296 MIMAT0005794          (Intercept)    4.79418605   1.006124
+##  4: hsa-miR-1296 MIMAT0005794 `disease.event:ch1`1   -0.06598092   1.801250
+##  5: hsa-miR-548e MIMAT0005874          (Intercept)   11.71395349   2.760618
+##  6: hsa-miR-548e MIMAT0005874 `disease.event:ch1`1   -2.88574836   4.942300
+##  7:  hsa-miR-874 MIMAT0004911          (Intercept)   45.03604651   6.305683
+##  8:  hsa-miR-874 MIMAT0004911 `disease.event:ch1`1   21.01779964  11.288983
 ##  9: hsa-miR-106b MIMAT0000680          (Intercept) 2707.67441860 256.404262
 ## 10: hsa-miR-106b MIMAT0000680 `disease.event:ch1`1  627.19737627 459.037265
-## 11: hsa-miR-1825 MIMAT0006765          (Intercept)   33.87209302   5.550731
-## 12: hsa-miR-1825 MIMAT0006765 `disease.event:ch1`1    2.97406082   9.937402
-## 13: hsa-miR-133a MIMAT0000427          (Intercept)   40.52325581  13.164808
-## 14: hsa-miR-133a MIMAT0000427 `disease.event:ch1`1   17.55366726  23.568788
+## 11: hsa-miR-1825 MIMAT0006765          (Intercept)   33.87325581   5.550548
+## 12: hsa-miR-1825 MIMAT0006765 `disease.event:ch1`1    2.97802624   9.937075
+## 13: hsa-miR-133a MIMAT0000427          (Intercept)   40.52441860  13.164696
+## 14: hsa-miR-133a MIMAT0000427 `disease.event:ch1`1   17.55763268  23.568586
 ## 15:  hsa-miR-203 MIMAT0000264          (Intercept)  584.37209302 241.138855
 ## 16:  hsa-miR-203 MIMAT0000264 `disease.event:ch1`1  747.44841980 431.707801
 ## 17:  hsa-miR-222 MIMAT0000279          (Intercept) 3400.08139535 378.018063
@@ -526,20 +526,20 @@ GSE70970[["nacho"]][
 ##           <char>       <char>               <char>         <num>      <num>
 ##         t value     Pr(>|t|)
 ##           <num>        <num>
-##  1:  5.61474342 1.242540e-07
-##  2: -0.23796795 8.123019e-01
-##  3:  4.71713580 6.379579e-06
-##  4: -0.03518417 9.719899e-01
-##  5:  4.23588285 4.420711e-05
-##  6: -0.58713668 5.581881e-01
-##  7:  7.14176340 7.066701e-11
-##  8:  1.86162414 6.504302e-02
+##  1:  5.61833992 1.222143e-07
+##  2: -0.23763507 8.125595e-01
+##  3:  4.76500738 5.224757e-06
+##  4: -0.03663063 9.708389e-01
+##  5:  4.24323540 4.296251e-05
+##  6: -0.58388778 5.603651e-01
+##  7:  7.14213626 7.053164e-11
+##  8:  1.86179739 6.501839e-02
 ##  9: 10.56017710 5.986499e-19
 ## 10:  1.36633216 1.743274e-01
-## 11:  6.10227619 1.254024e-08
-## 12:  0.29927950 7.652319e-01
-## 13:  3.07815008 2.568721e-03
-## 14:  0.74478448 4.578227e-01
+## 11:  6.10268682 1.251554e-08
+## 12:  0.29968842 7.649207e-01
+## 13:  3.07826469 2.567805e-03
+## 14:  0.74495909 4.577175e-01
 ## 15:  2.42338421 1.683288e-02
 ## 16:  1.73137575 8.589213e-02
 ## 17:  8.99449453 3.561126e-15

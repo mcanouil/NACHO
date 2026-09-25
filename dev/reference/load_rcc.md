@@ -125,7 +125,7 @@ load_rcc(
   \[[data.frame](https://rdrr.io/r/base/data.frame.html)\] A
   `data.frame` with all columns from the sample sheet `ssheet_csv` and
   all computed columns, *i.e.*, quality-control metrics and counts, with
-  one sample per row.
+  one row per sample and probe.
 
 - `outliers_thresholds`:
 

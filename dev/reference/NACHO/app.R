@@ -25,7 +25,7 @@ ui <- shiny::tagList(
     windowTitle = "NACHO",
     collapsible = TRUE,
     id = "main-menu",
-    selected = "qc_metrics",
+    selected = "qc_metrics-tab",
     shiny::tabPanel(
       "Upload RCC Files",
       icon = shiny::icon("file-arrow-up"),
@@ -62,9 +62,9 @@ ui <- shiny::tagList(
               label = shiny::tags$span(
                 "Choose One or Several RCC Files and Optionally a CSV File",
                 shiny::helpText(
-                  "(The CSV file must contains \"IDFILE\",",
+                  "(The CSV file must contain \"IDFILE\",",
                   shiny::tags$i("i.e."),
-                  "\"BASENAME.RCC\", and optionnally \"plexset_id\",",
+                  "\"BASENAME.RCC\", and optionally \"plexset_id\",",
                   shiny::tags$i("i.e."),
                   ", \"S1\", \"S2\", ...)"
                 )
@@ -230,7 +230,7 @@ ui <- shiny::tagList(
         )
       },
       plotInputUI("Positive Factor vs. Negative Factor"),
-      plotInputUI("Housekeeeping Genes Factor", right = TRUE),
+      plotInputUI("Housekeeping Genes Factor", right = TRUE),
       plotInputUI("Normalisation Result", right = TRUE)
     ),
     shiny::tabPanel(
@@ -270,9 +270,13 @@ server <- function(input, output, session) {
           FUN = function(.row) {
             name <- .row[1]
             datapath <- .row[2]
-            type <- .row[3]
-            if (type == "application/x-zip-compressed") {
-              ex_dir <- file.path(dirname(datapath), sub(".zip$", "", name))
+            type <- unname(.row[3])
+            is_zip <- is_zip_upload(name, type) # nolint: object_usage_linter. Defined in utils.R.
+            if (is_zip) {
+              ex_dir <- file.path(
+                dirname(datapath),
+                sub("\\.zip$", "", name, ignore.case = TRUE)
+              )
               utils::unzip(datapath, exdir = ex_dir)
               files <- list.files(ex_dir)
               extracted <- file.path(basename(ex_dir), files)
@@ -299,9 +303,13 @@ server <- function(input, output, session) {
       )
 
       ssheet_dt <- NULL
-      targets_ssheet <- targets[grep("\\.csv", targets[["name"]]), ]
+      targets_ssheet <- targets[
+        grepl("\\.csv$", targets[["name"]], ignore.case = TRUE),
+      ]
       if (nrow(targets_ssheet) > 0) {
-        targets <- targets[grep("\\.RCC", targets[["name"]]), ]
+        targets <- targets[
+          grepl("\\.rcc(\\.gz)?$", targets[["name"]], ignore.case = TRUE),
+        ]
         ssheet_dt <- data.table::fread(targets_ssheet[["datapath"]])
       }
 
@@ -325,12 +333,14 @@ server <- function(input, output, session) {
         merge_by <- if (check_multiplex) c("IDFILE", "plexset_id") else "IDFILE"
         missing_columns <- setdiff(merge_by, names(ssheet_dt))
         if (length(missing_columns) > 0) {
-          warning(
-            "[NACHO] Missing ",
-            paste0("\"", missing_columns, "\"", collapse = ", "),
-            if (length(missing_columns) > 1) " columns" else " column",
-            " in sample sheet file!\n",
-            "  Sample sheet file is discarded."
+          shiny::showNotification(
+            ui = paste0(
+              "The sample sheet was discarded, because it has no ",
+              paste0("\"", missing_columns, "\"", collapse = " or "),
+              if (length(missing_columns) > 1) " columns." else " column."
+            ),
+            type = "warning",
+            duration = NULL
           )
         } else {
           targets <- merge(x = targets, y = ssheet_dt, by = merge_by)
@@ -435,22 +445,10 @@ server <- function(input, output, session) {
   # QC metrics UI input
   ## Update UI with thresholds
   shiny::observe({
-    switch(
-      shiny::req(input$qc_bd_metrics),
-      "MAX/FLEX" = {
-        shiny::updateSliderInput(
-          session,
-          "qc_bd_thresh",
-          value = min(shiny::isolate(input$qc_bd_thresh), 2.25)
-        )
-      },
-      "SPRINT" = {
-        shiny::updateSliderInput(
-          session,
-          "qc_bd_thresh",
-          value = min(shiny::isolate(input$qc_bd_thresh), 1.8)
-        )
-      }
+    shiny::updateSliderInput(
+      session,
+      "qc_bd_thresh",
+      value = bd_range(shiny::req(input$qc_bd_metrics)) # nolint: object_usage_linter. Defined in utils.R.
     )
     shiny::updateSliderInput(
       session,
@@ -591,22 +589,22 @@ server <- function(input, output, session) {
           shiny::tags$strong(min(ot[["LoD"]]))
         ),
         shiny::tags$li(
-          "Positive Normalisation Dactor (",
+          "Positive Normalisation Factor (",
           shiny::tags$code("Positive_factor"),
           ") <",
           shiny::tags$strong(min(ot[["Positive_factor"]])),
-          "or Positive Normalisation Dactor (",
+          "or Positive Normalisation Factor (",
           shiny::tags$code("Positive_factor"),
           ") >",
           shiny::tags$strong(max(ot[["Positive_factor"]]))
         ),
         shiny::tags$li(
           "Housekeeping Normalisation Factor (",
-          shiny::tags$code("house_factor"),
+          shiny::tags$code("House_factor"),
           ") <",
           shiny::tags$strong(min(ot[["House_factor"]])),
-          "or Housekeeping Normalisation Dactor (",
-          shiny::tags$code("house_factor"),
+          "or Housekeeping Normalisation Factor (",
+          shiny::tags$code("House_factor"),
           ") >",
           shiny::tags$strong(max(ot[["House_factor"]]))
         )
@@ -634,7 +632,11 @@ server <- function(input, output, session) {
           "-tab"
         ),
         FUN = function(.x) {
-          shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
+          shiny::showTab(
+            "main-menu",
+            target = .x,
+            select = .x == "qc_metrics-tab"
+          )
         }
       )
       shiny::hideTab("main-menu", target = "upload-tab")
@@ -654,7 +656,11 @@ server <- function(input, output, session) {
           "-tab"
         ),
         FUN = function(.x) {
-          shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
+          shiny::showTab(
+            "main-menu",
+            target = .x,
+            select = .x == "qc_metrics-tab"
+          )
         }
       )
     }

@@ -164,7 +164,7 @@ full report.
 ## Data
 
 - [`GSE74821`](https://m.canouil.dev/NACHO/dev/reference/GSE74821.md) :
-  A "nacho" object containing 20 samples of GSE74821 dataset
+  A "nacho" object with 48 samples from the GSE74821 dataset
 
 # Articles
 

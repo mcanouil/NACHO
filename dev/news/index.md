@@ -2,7 +2,7 @@
 
 ## NACHO (development version)
 
-### Breaking changes
+### Dependencies
 
 - In `DESCRIPTION`,
   - build: require R 4.1.0 or newer, ggplot2 4.0.0 or newer, ggforce
@@ -60,6 +60,12 @@
     colours, a light and dark mode switch, and colour contrast that
     meets WCAG AA.
   - docs: group the reference index by task.
+- In `R/normalise.R`, `R/load_rcc.R` and `vignettes/NACHO.Rmd`,
+  - docs: remove the `raw_counts` and `normalised_counts` slots, which
+    never existed, and say that `nacho` holds one row per sample and
+    probe.
+- In `R/GSE74821.R`,
+  - docs: say that `GSE74821` holds 48 samples, not 20.
 
 ### Fixes
 
@@ -73,9 +79,16 @@
     ggplot2 warn that it dropped `colour` for the control probe plots.
   - fix: draw the outlier bands of the `"PFNF"` and `"HF"` plots to the
     panel edges without log-10 warnings about infinite values.
+  - fix: keep each sample’s identifier in the `"BD"`, `"FoV"`, `"PCL"`,
+    `"LoD"`, `"PN"`, `"Positive"`, `"Negative"` and `"Housekeeping"`
+    plots, which drew every point at one position and dropped some of
+    them.
 - In `R/render.R`,
   - fix: include the logo by its absolute path, so pandoc finds it when
     the temporary directory sits behind a symbolic link.
+  - fix: pass the report options as R Markdown parameters, so
+    `outliers_labels = "CartridgeID"` works and column names with quotes
+    no longer break the report.
 - In `inst/app/app.R`,
   - fix: stop writing an `all.rdata` debug file to the working directory
     when uploading RCC files.
@@ -95,6 +108,55 @@
   - fix: replace background-corrected housekeeping counts below 1 with
     1, so values between 0 and 1 no longer inflate `House_factor`.
     ([\#53](https://github.com/mcanouil/NACHO/issues/53))
+- In `R/qc_pca.R`,
+  - fix: compute the PCA with samples as observations and store their
+    scores. `PC01` to `PC10` and the variance explained change, and the
+    PCA plots now show the main sources of variation between samples.
+- In `R/normalise_counts.R`,
+  - fix: apply the 0.1 floor after rounding, so normalised counts at or
+    below background are 0.1 instead of 0. With
+    `housekeeping_predict = TRUE`, the floor can change which
+    housekeeping genes are picked, which in turn changes `House_factor`,
+    the normalised counts and the outlier flags.
+- In `R/qc_pca.R` and `R/normalise_counts.R`,
+  - fix: objects created with an earlier version keep the old values, so
+    run
+    [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
+    again to refresh them.
+- In `R/normalise.R`,
+  - fix: use the `n_comp` passed to
+    [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md),
+    which was ignored.
+  - fix: recompute `is_outlier` when only the thresholds change.
+- In `R/qc_features.R`, `R/qc_limit_detection.R` and
+  `R/check_outliers.R`,
+  - fix: report `PCL` and `LoD` as `NA` when a panel has no `POS_E`
+    probe or when the negative controls do not vary, and do not flag a
+    sample on a metric that could not be measured.
+- In `R/load_rcc.R`,
+  - fix: detect PlexSet files from their content, and add `plexset_id`
+    `S1` to `S8` when the sample sheet lists each file once.
+  - fix: stop converting the caller’s sample sheet to a `data.table`.
+  - fix: stop with a clear message when RCC files mix PlexSet and
+    single-sample files.
+  - fix: stop when a single-sample sample sheet lists the same RCC file
+    twice.
+- In `R/print.R`,
+  - fix: return the object invisibly from
+    [`print()`](https://rdrr.io/r/base/print.html).
+- In `data/`,
+  - fix: rebuild `GSE74821` with the corrected PCA and normalised
+    counts.
+- In `inst/app/`,
+  - fix: set the full binding density range when switching between the
+    MAX/FLEX and SPRINT presets.
+  - fix: accept zip archives sent as `application/zip`, and `.RCC`,
+    `.rcc`, `.RCC.gz` and `.csv` files in any case.
+  - fix: stop warning about row names when unpacking a zip archive.
+  - fix: show a notification when the sample sheet is discarded, instead
+    of a warning in the R console.
+  - fix: correct the typos in the card and outlier labels, and open the
+    app on the QC metrics tab.
 
 ## NACHO 2.0.6
 
@@ -314,7 +376,7 @@ CRAN release: 2020-01-09
 - In `R/autoplot.R`,
   - add `show_outliers` to show outliers differently on plots (-i.e.-,
     in red).
-  - add `outliers_factor` to highligth outliers with different point
+  - add `outliers_factor` to highlight outliers with different point
     size.
   - add `outliers_labels` to print labels on top of outliers.
   - now uses tidyeval via import.
@@ -357,7 +419,7 @@ CRAN release: 2019-10-07
   ([`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)).
 - [`print()`](https://rdrr.io/r/base/print.html) allows to print the
   structure or to print text and figures formatted using markdown
-  (mainly to be used in a Rmakrdown chunk).
+  (mainly to be used in a R Markdown chunk).
 - [`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)
   render figures from
   [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)

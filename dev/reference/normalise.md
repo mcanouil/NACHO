@@ -130,26 +130,12 @@ parameters and data.
   \[[data.frame](https://rdrr.io/r/base/data.frame.html)\] A
   `data.frame` with all columns from the sample sheet `ssheet_csv` and
   all computed columns, *i.e.*, quality-control metrics and counts, with
-  one sample per row.
+  one row per sample and probe.
 
 - `outliers_thresholds`:
 
   \[[list](https://rdrr.io/r/base/list.html)\] A `list` of the
   quality-control thresholds used.
-
-- `raw_counts`:
-
-  \[[data.frame](https://rdrr.io/r/base/data.frame.html)\] Raw counts
-  with probes as rows and samples as columns. With `"CodeClass"` (first
-  column), the type of the probes and `"Name"` (second column), the Name
-  of the probes.
-
-- `normalised_counts`:
-
-  \[[data.frame](https://rdrr.io/r/base/data.frame.html)\] Normalised
-  counts with probes as rows and samples as columns. With `"CodeClass"`
-  (first column)), the type of the probes and `"Name"` (second column),
-  the name of the probes.
 
 ## Details
 

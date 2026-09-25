@@ -92,6 +92,10 @@ print(
 
   Other arguments (*Not used*).
 
+## Value
+
+`x`, invisibly.
+
 ## Examples
 
 ``` r
