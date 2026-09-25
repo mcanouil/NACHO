@@ -368,3 +368,17 @@ plotInput <- function(id, nacho) {
     )
   })
 }
+
+bd_range <- function(instrument) {
+  switch(
+    instrument,
+    "MAX/FLEX" = c(0.1, 2.25),
+    "SPRINT" = c(0.1, 1.8)
+  )
+}
+
+is_zip_upload <- function(name, type) {
+  type %in%
+    c("application/zip", "application/x-zip-compressed") ||
+    grepl("\\.zip$", name, ignore.case = TRUE)
+}
