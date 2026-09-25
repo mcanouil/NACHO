@@ -114,3 +114,28 @@ test_that("normalised counts above background are corrected, scaled and rounded"
     round(expected[above_background])
   )
 })
+
+test_that("PCA stores sample scores on log counts", {
+  wide <- data.table::dcast(
+    gse_df,
+    stats::as.formula(paste("CodeClass + Name ~", gse_id)),
+    value.var = "Count"
+  )
+  counts <- as.matrix(wide[, -c(1, 2)])
+  expected <- stats::prcomp(t(log(counts + 1)))
+  pcs <- per_sample_ref(
+    gse_geo,
+    sprintf("PC%02d", seq_len(gse_geo[["n_comp"]]))
+  )
+  expect_equal(
+    abs(unname(as.matrix(pcs[, -1]))),
+    abs(unname(expected[["x"]][pcs[[gse_id]], seq_len(gse_geo[["n_comp"]])]))
+  )
+  expect_equal(
+    gse_geo[["pc_sum"]][["Proportion of Variance"]],
+    unname(summary(expected)[["importance"]][
+      "Proportion of Variance",
+      seq_len(gse_geo[["n_comp"]])
+    ])
+  )
+})
