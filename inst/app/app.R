@@ -270,7 +270,7 @@ server <- function(input, output, session) {
           FUN = function(.row) {
             name <- .row[1]
             datapath <- .row[2]
-            type <- .row[3]
+            type <- unname(.row[3])
             is_zip <- is_zip_upload(name, type) # nolint: object_usage_linter. Defined in utils.R.
             if (is_zip) {
               ex_dir <- file.path(
