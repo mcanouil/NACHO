@@ -115,6 +115,17 @@ test_that("normalised counts above background are corrected, scaled and rounded"
   )
 })
 
+test_that("normalised counts at or below background are floored at 0.1 after rounding", {
+  expected <- round(
+    (gse_df[["Count"]] - gse_df[["Negative_factor"]]) *
+      gse_df[["Positive_factor"]] *
+      gse_df[["House_factor"]]
+  )
+  expected[expected <= 0] <- 0.1
+  expect_equal(gse_df[["Count_Norm"]], expected)
+  expect_false(any(gse_df[["Count_Norm"]] == 0))
+})
+
 test_that("PCA stores sample scores on log counts", {
   wide <- data.table::dcast(
     gse_df,
