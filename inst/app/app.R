@@ -25,7 +25,7 @@ ui <- shiny::tagList(
     windowTitle = "NACHO",
     collapsible = TRUE,
     id = "main-menu",
-    selected = "qc_metrics",
+    selected = "qc_metrics-tab",
     shiny::tabPanel(
       "Upload RCC Files",
       icon = shiny::icon("file-arrow-up"),
@@ -62,9 +62,9 @@ ui <- shiny::tagList(
               label = shiny::tags$span(
                 "Choose One or Several RCC Files and Optionally a CSV File",
                 shiny::helpText(
-                  "(The CSV file must contains \"IDFILE\",",
+                  "(The CSV file must contain \"IDFILE\",",
                   shiny::tags$i("i.e."),
-                  "\"BASENAME.RCC\", and optionnally \"plexset_id\",",
+                  "\"BASENAME.RCC\", and optionally \"plexset_id\",",
                   shiny::tags$i("i.e."),
                   ", \"S1\", \"S2\", ...)"
                 )
@@ -230,7 +230,7 @@ ui <- shiny::tagList(
         )
       },
       plotInputUI("Positive Factor vs. Negative Factor"),
-      plotInputUI("Housekeeeping Genes Factor", right = TRUE),
+      plotInputUI("Housekeeping Genes Factor", right = TRUE),
       plotInputUI("Normalisation Result", right = TRUE)
     ),
     shiny::tabPanel(
@@ -589,22 +589,22 @@ server <- function(input, output, session) {
           shiny::tags$strong(min(ot[["LoD"]]))
         ),
         shiny::tags$li(
-          "Positive Normalisation Dactor (",
+          "Positive Normalisation Factor (",
           shiny::tags$code("Positive_factor"),
           ") <",
           shiny::tags$strong(min(ot[["Positive_factor"]])),
-          "or Positive Normalisation Dactor (",
+          "or Positive Normalisation Factor (",
           shiny::tags$code("Positive_factor"),
           ") >",
           shiny::tags$strong(max(ot[["Positive_factor"]]))
         ),
         shiny::tags$li(
           "Housekeeping Normalisation Factor (",
-          shiny::tags$code("house_factor"),
+          shiny::tags$code("House_factor"),
           ") <",
           shiny::tags$strong(min(ot[["House_factor"]])),
-          "or Housekeeping Normalisation Dactor (",
-          shiny::tags$code("house_factor"),
+          "or Housekeeping Normalisation Factor (",
+          shiny::tags$code("House_factor"),
           ") >",
           shiny::tags$strong(max(ot[["House_factor"]]))
         )
@@ -632,7 +632,7 @@ server <- function(input, output, session) {
           "-tab"
         ),
         FUN = function(.x) {
-          shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
+          shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics-tab")
         }
       )
       shiny::hideTab("main-menu", target = "upload-tab")
@@ -652,7 +652,7 @@ server <- function(input, output, session) {
           "-tab"
         ),
         FUN = function(.x) {
-          shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics")
+          shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics-tab")
         }
       )
     }
