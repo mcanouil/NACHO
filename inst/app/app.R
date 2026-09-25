@@ -632,7 +632,11 @@ server <- function(input, output, session) {
           "-tab"
         ),
         FUN = function(.x) {
-          shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics-tab")
+          shiny::showTab(
+            "main-menu",
+            target = .x,
+            select = .x == "qc_metrics-tab"
+          )
         }
       )
       shiny::hideTab("main-menu", target = "upload-tab")
@@ -652,7 +656,11 @@ server <- function(input, output, session) {
           "-tab"
         ),
         FUN = function(.x) {
-          shiny::showTab("main-menu", target = .x, select = .x == "qc_metrics-tab")
+          shiny::showTab(
+            "main-menu",
+            target = .x,
+            select = .x == "qc_metrics-tab"
+          )
         }
       )
     }
