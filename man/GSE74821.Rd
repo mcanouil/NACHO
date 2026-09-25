@@ -3,7 +3,7 @@
 \docType{data}
 \name{GSE74821}
 \alias{GSE74821}
-\title{A "nacho" object containing 20 samples of GSE74821 dataset}
+\title{A "nacho" object with 48 samples from the GSE74821 dataset}
 \format{
 A [\link{list}] object of class \code{"nacho"}.
 }
@@ -14,6 +14,9 @@ A [\link{list}] object of class \code{"nacho"}.
 GSE74821
 }
 \description{
+The 48 samples come from four cartridges, normalised with the \code{"GLM"} method.
+}
+\details{
 NanoString nCounter RUO-PAM50 Gene Expression Custom CodeSet
 }
 \keyword{datasets}
