@@ -1,0 +1,113 @@
+name: Bug report
+description: Report an error or unexpected behaviour in NACHO.
+labels:
+  - "Type: Bug :bug:"
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+
+        This form is for bug reports only.
+        Questions belong in [Discussions, Q&A](https://github.com/mcanouil/NACHO/discussions/new?category=q-a), and ideas in [Discussions, Ideas](https://github.com/mcanouil/NACHO/discussions/new?category=ideas).
+
+  - type: checkboxes
+    attributes:
+      label: Before submitting
+      description: Please confirm each point before you open the issue.
+      options:
+        - label: I searched the [issues](https://github.com/mcanouil/NACHO/issues?q=is%3Aissue) and [discussions](https://github.com/mcanouil/NACHO/discussions) and found no similar report.
+          required: true
+        - label: I reproduced the bug with the latest CRAN release or the development version (`pak::pak("mcanouil/NACHO")`).
+          required: true
+
+  - type: input
+    attributes:
+      label: NACHO version
+      description: The output of `packageVersion("NACHO")`.
+      placeholder: "2.0.6"
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Where does the bug happen?
+      description: Select every part of NACHO involved.
+      multiple: true
+      options:
+        - Shiny application (`visualise()`)
+        - Data import (`load_rcc()`)
+        - Normalisation (`normalise()`)
+        - Plots (`autoplot()`)
+        - Outliers (`check_outliers()`)
+        - Report (`render()`)
+        - Deployment (`deploy()`)
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Data
+      description: Which kind of NanoString nCounter data triggers the bug?
+      options:
+        - Single-sample RCC files
+        - PlexSet RCC files
+        - Public data, such as a GEO series
+        - Other
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Bug description
+      description: Tell us what went wrong.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Minimal reproducible example
+      description: |
+        Paste a self-contained example, ideally made with [reprex](https://reprex.tidyverse.org/).
+        Public data, such as the GEO series used in `?load_rcc`, or a few anonymised RCC files work best.
+        For a bug in the Shiny application, list the steps instead: the data you loaded, the tab, the inputs you changed, and what you saw.
+      render: r
+      placeholder: |
+        library(NACHO)
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected behaviour
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Actual behaviour
+      description: |
+        What happened instead?
+        Paste any error, warning or `traceback()` output as it appeared.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Session information
+      description: The output of `sessioninfo::session_info()` or `sessionInfo()`, run right after you reproduce the bug.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: |
+        Screenshots, related issues, or anything else that might help.
+        Please give every screenshot alt text, for example `![Outlier table with two flagged samples](url)`.
+    validations:
+      required: false
