@@ -295,10 +295,7 @@ plot_metrics <- function(
   }
 
   ggplot2::ggplot(
-    data = nacho_object$nacho[
-      j = (nacho_object$access) := sub("_S[0-9]*$", "", .SD),
-      .SDcols = nacho_object$access
-    ][
+    data = strip_plexset_suffix(nacho_object$nacho, nacho_object$access)[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
@@ -445,9 +442,7 @@ plot_cg <- function(
   }
 
   ggplot2::ggplot(
-    data = nacho_object$nacho[
-      j = (nacho_object$access) := sub("_S[0-9]*$", "", nacho_object$access)
-    ][
+    data = strip_plexset_suffix(nacho_object$nacho, nacho_object$access)[
       CodeClass %in% x
     ][
       j = unique(.SD),
@@ -548,9 +543,7 @@ plot_pn <- function(
 ) {
   CodeClass <- NULL # no visible binding for global variable
   ggplot2::ggplot(
-    data = nacho_object$nacho[
-      j = (nacho_object$access) := sub("_S[0-9]*$", "", nacho_object$access)
-    ][
+    data = strip_plexset_suffix(nacho_object$nacho, nacho_object$access)[
       CodeClass %in% c("Positive", "Negative")
     ][
       j = unique(.SD),
