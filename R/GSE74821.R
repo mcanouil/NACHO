@@ -1,4 +1,6 @@
-#' A "nacho" object containing 20 samples of GSE74821 dataset
+#' A "nacho" object with 48 samples from the GSE74821 dataset
+#'
+#' The 48 samples come from four cartridges, normalised with the `"GLM"` method.
 #'
 #' NanoString nCounter RUO-PAM50 Gene Expression Custom CodeSet
 #'

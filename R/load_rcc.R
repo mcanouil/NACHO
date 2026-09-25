@@ -33,7 +33,7 @@
 #'   \item{`pc_sum`}{[[data.frame]] A `data.frame` with `n_comp` rows and four columns:
 #'     "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
 #'   \item{`nacho`}{[[data.frame]] A `data.frame` with all columns from the sample sheet `ssheet_csv`
-#'     and all computed columns, *i.e.*, quality-control metrics and counts, with one sample per row.}
+#'     and all computed columns, *i.e.*, quality-control metrics and counts, with one row per sample and probe.}
 #'   \item{`outliers_thresholds`}{[[list]] A `list` of the (default) quality-control thresholds used.}
 #' }
 #'
