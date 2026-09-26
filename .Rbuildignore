@@ -3,10 +3,15 @@
 ^\.git$
 ^\.github$
 ^\.gitignore$
+^\.claude$
 ^pkgdown$
+^docs$
 ^codecov\.yml$
+^CITATION\.cff$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
+^revdep$
 ^README\.Rmd$
 ^man/figures/README-nacho_app\.gif$
 ^LICENSE\.md$
 ^data-raw$
-^NACHO/tests/testthat/_snaps$

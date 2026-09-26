@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or help
+    url: https://github.com/mcanouil/NACHO/discussions/new?category=q-a
+    about: Ask a usage question in Discussions.
+  - name: Feature request or idea
+    url: https://github.com/mcanouil/NACHO/discussions/new?category=ideas
+    about: Suggest a new feature or an improvement in Discussions.
+  - name: Documentation
+    url: https://m.canouil.dev/NACHO/
+    about: Read the reference and the vignettes for the released version.
+  - name: Documentation (development version)
+    url: https://m.canouil.dev/NACHO/dev/
+    about: Read the documentation for changes that aren't released yet.
