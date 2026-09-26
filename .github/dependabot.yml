@@ -7,6 +7,8 @@ updates:
       cronjob: "00 12 1 * *"
     labels:
       - "Type: Dependencies :arrow_up:"
+    commit-message:
+      prefix: "ci"
     groups:
       github-actions:
         patterns:
