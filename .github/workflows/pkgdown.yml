@@ -1,0 +1,79 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+name: pkgdown
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "R/**"
+      - "man/**"
+      - "vignettes/**"
+      - "pkgdown/**"
+      - "inst/CITATION"
+      - "DESCRIPTION"
+      - "NEWS.md"
+      - "README.md"
+      - ".github/*.md"
+      - ".github/workflows/pkgdown.yml"
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "R/**"
+      - "man/**"
+      - "vignettes/**"
+      - "pkgdown/**"
+      - "inst/CITATION"
+      - "DESCRIPTION"
+      - "NEWS.md"
+      - "README.md"
+      - ".github/*.md"
+      - ".github/workflows/pkgdown.yml"
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  pkgdown:
+    if: ${{ github.event.pull_request.draft != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Pull requests only build the site, so they can run side by side.
+    # Deployments share one group and are never cancelled, so two never race on gh-pages.
+    concurrency:
+      group: ${{ github.event_name == 'pull_request' && format('pkgdown-pr-{0}', github.ref) || 'pkgdown-deploy' }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    permissions:
+      contents: write
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+        with:
+          extra-packages: any::pkgdown, local::.
+          needs: website
+
+      - name: Build site
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        shell: Rscript {0}
+
+      - name: Deploy to GitHub Pages
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
+        with:
+          clean: false
+          branch: gh-pages
+          folder: docs

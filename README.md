@@ -10,7 +10,7 @@ stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://
 [![GitHub
 tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest%20tag&include_prereleases)](https://github.com/mcanouil/NACHO)
 [![codecov](https://codecov.io/gh/mcanouil/NACHO/branch/main/graph/badge.svg)](https://app.codecov.io/gh/mcanouil/NACHO?branch=main)
-[![R-CMD-check](https://github.com/mcanouil/NACHO/actions/workflows/check-pak.yaml/badge.svg)](https://github.com/mcanouil/NACHO/actions/workflows/check-pak.yaml)
+[![R-CMD-check](https://github.com/mcanouil/NACHO/actions/workflows/R-CMD-check.yml/badge.svg)](https://github.com/mcanouil/NACHO/actions/workflows/R-CMD-check.yml)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
 [![cran
 checks_worst](https://badges.cranchecks.info/worst/NACHO.svg)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
