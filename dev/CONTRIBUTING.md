@@ -1,54 +1,67 @@
 # Contributing to NACHO
 
-This outlines how to propose a change to NACHO. For more detailed info
-about contributing to this, and other tidyverse packages, please see the
-[**development contributing guide**](https://rstd.io/tidy-contrib).
+Thanks for thinking about contributing to NACHO. This page explains how
+to propose a change.
 
-### Fixing typos
+## Where to start
 
-Small typos or grammatical errors in documentation may be edited
-directly using the GitHub web interface, so long as the changes are made
-in the *source* file.
+- Questions go in [Discussions,
+  Q&A](https://github.com/mcanouil/NACHO/discussions/new?category=q-a).
+- Ideas for new features go in [Discussions,
+  Ideas](https://github.com/mcanouil/NACHO/discussions/new?category=ideas).
+- Confirmed bugs go through the [bug report
+  form](https://github.com/mcanouil/NACHO/issues/new?template=bug.yml),
+  with a minimal [reprex](https://reprex.tidyverse.org/).
 
-- YES: you edit a roxygen comment in a `.R` file below `R/`.
-- NO: you edit an `.Rd` file below `man/`.
+Before you start a substantial pull request, please open an issue or a
+discussion first, so we can agree it’s worth doing.
 
-### Prerequisites
+## Fixing typos
 
-Before you make a substantial pull request, you should always file an
-issue and make sure someone from the team agrees that it’s a problem. If
-you’ve found a bug, create an associated issue and illustrate the bug
-with a minimal [reprex](https://www.tidyverse.org/help/#reprex).
+You can fix small typos in the documentation straight from the GitHub
+web interface, as long as you edit the source file.
 
-### Pull request process
+- Edit the roxygen comment in the `.R` file under `R/`.
+- Don’t edit the `.Rd` files under `man/`, because they are generated.
+- Edit `README.Rmd`, not `README.md`, and render it with
+  `devtools::build_readme()`.
 
-- We recommend that you create a Git branch for each pull request
-  (PR).  
-- Look at the Travis and AppVeyor build status before and after making
-  changes. The `README` should contain badges for any continuous
-  integration services used by the package.  
-- New code should follow the tidyverse [style
-  guide](http://style.tidyverse.org). You can use the
-  [styler](https://CRAN.R-project.org/package=styler) package to apply
-  these styles, but please don’t restyle code that has nothing to do
-  with your PR.  
-- We use [roxygen2](https://cran.r-project.org/package=roxygen2), with
-  [Markdown
-  syntax](https://cran.r-project.org/web/packages/roxygen2/vignettes/markdown.html),
-  for documentation.  
-- We use [testthat](https://cran.r-project.org/package=testthat).
-  Contributions with test cases included are easier to accept.  
-- For user-facing changes, add a bullet to the top of `NEWS.md` below
-  the current development version header describing the changes made
-  followed by your GitHub username, and links to relevant
-  issue(s)/PR(s).
+## Pull request process
 
-### Code of Conduct
+- Create a Git branch for each pull request. Name it with a conventional
+  commit type, for example `fix/plexset-detection`.
 
-Please note that the NACHO project is released with a [Contributor Code
-of Conduct](https://m.canouil.dev/NACHO/dev/CODE_OF_CONDUCT.md). By
-contributing to this project you agree to abide by its terms.
+- Format R code with [Air](https://posit-dev.github.io/air/)
+  (`air format .`), and please don’t reformat code your change doesn’t
+  touch.
 
-### See tidyverse [development contributing guide](https://rstd.io/tidy-contrib)
+- Check the code with [lintr](https://lintr.r-lib.org/)
+  (`lintr::lint_package()`) and fix what it reports in the lines you
+  change.
 
-for further details.
+- Document functions with [roxygen2](https://roxygen2.r-lib.org/) using
+  Markdown, then run `devtools::document()`.
+
+- Add or update tests with [testthat](https://testthat.r-lib.org/)
+  (edition 3). Pull requests with tests are much easier to review.
+
+- Run `devtools::check()` before you open the pull request.
+
+- GitHub Actions runs `R CMD check` on macOS, Windows and Ubuntu for
+  every pull request that isn’t a draft.
+
+- For user-facing changes, add an entry to `NEWS.md` under
+  `# NACHO (development version)`. Entries sit under a section such as
+  `## Fixes`, grouped by the file they change, with one
+  `prefix: sentence.` item each:
+
+  ``` markdown
+  - In `R/geometric_housekeeping.R`,
+    - fix: replace background-corrected housekeeping counts below 1 with 1. ([#53](https://github.com/mcanouil/NACHO/issues/53))
+  ```
+
+## Code of Conduct
+
+NACHO is released with a [Contributor Code of
+Conduct](https://m.canouil.dev/NACHO/dev/CODE_OF_CONDUCT.md). By
+contributing, you agree to follow it.

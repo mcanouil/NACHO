@@ -74,6 +74,8 @@
     [`person()`](https://rdrr.io/r/utils/person.html) objects, so the
     citation shows their full initials and spells Leen M. ’t Hart
     correctly.
+  - fix: cite the version of record, Bioinformatics volume 36, issue 3,
+    pages 970 to 971, published in February 2020.
 - In `R/autoplot.R`,
   - fix: stop boxplots inheriting the colour aesthetic, which made
     ggplot2 warn that it dropped `colour` for the control probe plots.

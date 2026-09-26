@@ -85,17 +85,19 @@ and
 [`vignette("NACHO-analysis")`](https://m.canouil.dev/NACHO/dev/articles/NACHO-analysis.md).
 
 Canouil M, Bouland GA, Bonnefond A, Froguel P, ’t Hart LM, Slieker RC
-(2019). “NACHO: an R package for quality control of NanoString nCounter
-data.” *Bioinformatics*. ISSN 1367-4803.
+(2020). “NACHO: an R package for quality control of NanoString nCounter
+data.” *Bioinformatics*, **36**(3), 970–971. ISSN 1367-4803.
 [doi:10.1093/bioinformatics/btz647](https://doi.org/10.1093/bioinformatics/btz647).
 
     @Article{,
       title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
       author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
       journal = {Bioinformatics},
-      address = {Oxford, England},
-      year = {2019},
-      month = {aug},
+      year = {2020},
+      month = {feb},
+      volume = {36},
+      number = {3},
+      pages = {970--971},
       issn = {1367-4803},
       doi = {10.1093/bioinformatics/btz647},
     }
@@ -356,7 +358,7 @@ targets <- targets[codeset %in% "GeneRLF,NS_H_miR_1.4", ]
     ## GSM1824146       3.835728953    T3
     ## GSM1824147       4.292950034    T3
 
-After we extracted the dataset to the `/tmp/RtmpeLG1gf/GSE70970/Data`
+After we extracted the dataset to the `/tmp/Rtmp9mxv6f/GSE70970/Data`
 directory, a `Samplesheet.csv` containing a column with the exact names
 of the files for each sample can be written or used as is.
 

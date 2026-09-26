@@ -1,28 +1,49 @@
 # Getting help with NACHO
 
-Thanks for using NACHO. Before filing an issue, there are a few places
-to explore and pieces to put together to make the process as smooth as
-possible.
+Thanks for using NACHO. Here’s where to go, depending on what you need.
 
-Start by making a minimal **repr**oducible **ex**ample using the
-[reprex](https://reprex.tidyverse.org/) package. If you haven’t heard of
-or used reprex before, you’re in for a treat! Seriously, reprex will
-make all of your R-question-asking endeavors easier (which is a pretty
-insane ROI for the five to ten minutes it’ll take you to learn what it’s
-all about). For additional reprex pointers, check out the [Get
-help!](https://www.tidyverse.org/help/) section of the tidyverse site.
+## Read the documentation
 
-Before opening a new issue, be sure to [search issues and pull
-requests](https://github.com/mcanouil/NACHO/issues) to make sure the bug
-hasn’t been reported and/or already fixed in the development version. By
-default, the search will be pre-populated with `is:issue is:open`. You
-can [edit the
-qualifiers](https://help.github.com/articles/searching-issues-and-pull-requests/)
-(e.g. `is:pr`, `is:closed`) as needed. For example, you’d simply remove
-`is:open` to search *all* issues in the repo, open or closed.
+The documentation site has the reference for every function and the
+vignettes: <https://m.canouil.dev/NACHO/>. Changes that aren’t released
+yet are documented at <https://m.canouil.dev/NACHO/dev/>.
 
-If you *are* in the right place, and need to file an issue, please
-review the [“File issues”](https://www.tidyverse.org/contribute/#issues)
-paragraph from the tidyverse contributing guidelines.
+## Ask a question
 
-Thanks for your help!
+Questions about using NACHO go in [Discussions,
+Q&A](https://github.com/mcanouil/NACHO/discussions/new?category=q-a).
+Please search the existing discussions first, as someone may have asked
+already.
+
+## Suggest an idea
+
+Ideas for new features go in [Discussions,
+Ideas](https://github.com/mcanouil/NACHO/discussions/new?category=ideas).
+
+## Report a bug
+
+Before you report a bug, please check it still happens with the latest
+version. You can install the CRAN release with
+`install.packages("NACHO")`, or the development version with
+`pak::pak("mcanouil/NACHO")`.
+
+Then open an issue with the [bug report
+form](https://github.com/mcanouil/NACHO/issues/new?template=bug.yml). It
+helps a lot if you include:
+
+- The output of `packageVersion("NACHO")`.
+- A minimal reproducible example, made with
+  [reprex](https://reprex.tidyverse.org/) if you can.
+- Whether the problem happens in the Shiny application or in the R
+  functions.
+- Public or anonymised data, such as the GEO series used in
+  [`?load_rcc`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md).
+- The output of
+  [`sessioninfo::session_info()`](https://sessioninfo.r-lib.org/reference/session_info.html)
+  or [`sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html).
+
+## Report a conduct or security concern
+
+Please don’t open a public issue for these. Email Mickaël Canouil at
+<pro@mickael.canouil.dev> instead, as described in the [Code of
+Conduct](https://m.canouil.dev/NACHO/dev/CODE_OF_CONDUCT.md).

@@ -45,14 +45,37 @@
 
 <div id="getting-help-with-nacho" class="section level1">
 
-<p>Thanks for using NACHO. Before filing an issue, there are a few places to explore and pieces to put together to make the process as smooth as possible.</p>
-<p>Start by making a minimal <strong>repr</strong>oducible <strong>ex</strong>ample using the <a href="https://reprex.tidyverse.org/" class="external-link">reprex</a> package. If you haven’t heard of or used reprex before, you’re in for a treat! Seriously, reprex will make all of your R-question-asking endeavors easier (which is a pretty insane ROI for the five to ten minutes it’ll take you to learn what it’s all about). For additional reprex pointers, check out the <a href="https://www.tidyverse.org/help/" class="external-link">Get help!</a> section of the tidyverse site.</p>
-<p>Before opening a new issue, be sure to <a href="https://github.com/mcanouil/NACHO/issues" class="external-link">search issues and pull requests</a> to make sure the bug hasn’t been reported and/or already fixed in the development version. By default, the search will be pre-populated with <code>is:issue is:open</code>. You can <a href="https://help.github.com/articles/searching-issues-and-pull-requests/" class="external-link">edit the qualifiers</a> (e.g. <code>is:pr</code>, <code>is:closed</code>) as needed. For example, you’d simply remove <code>is:open</code> to search <em>all</em> issues in the repo, open or closed.</p>
-<p>If you <em>are</em> in the right place, and need to file an issue, please review the <a href="https://www.tidyverse.org/contribute/#issues" class="external-link">“File issues”</a> paragraph from the tidyverse contributing guidelines.</p>
-<p>Thanks for your help!</p>
+<p>Thanks for using NACHO. Here’s where to go, depending on what you need.</p>
+<div class="section level2">
+<h2 id="read-the-documentation">Read the documentation<a class="anchor" aria-label="anchor" href="#read-the-documentation"></a></h2>
+<p>The documentation site has the reference for every function and the vignettes: <a href="https://m.canouil.dev/NACHO/" class="uri">https://m.canouil.dev/NACHO/</a>. Changes that aren’t released yet are documented at <a href="https://m.canouil.dev/NACHO/dev/" class="uri">https://m.canouil.dev/NACHO/dev/</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="ask-a-question">Ask a question<a class="anchor" aria-label="anchor" href="#ask-a-question"></a></h2>
+<p>Questions about using NACHO go in <a href="https://github.com/mcanouil/NACHO/discussions/new?category=q-a" class="external-link">Discussions, Q&amp;A</a>. Please search the existing discussions first, as someone may have asked already.</p>
+</div>
+<div class="section level2">
+<h2 id="suggest-an-idea">Suggest an idea<a class="anchor" aria-label="anchor" href="#suggest-an-idea"></a></h2>
+<p>Ideas for new features go in <a href="https://github.com/mcanouil/NACHO/discussions/new?category=ideas" class="external-link">Discussions, Ideas</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="report-a-bug">Report a bug<a class="anchor" aria-label="anchor" href="#report-a-bug"></a></h2>
+<p>Before you report a bug, please check it still happens with the latest version. You can install the CRAN release with <code>install.packages("NACHO")</code>, or the development version with <code>pak::pak("mcanouil/NACHO")</code>.</p>
+<p>Then open an issue with the <a href="https://github.com/mcanouil/NACHO/issues/new?template=bug.yml" class="external-link">bug report form</a>. It helps a lot if you include:</p>
+<ul><li>The output of <code>packageVersion("NACHO")</code>.</li>
+<li>A minimal reproducible example, made with <a href="https://reprex.tidyverse.org/" class="external-link">reprex</a> if you can.</li>
+<li>Whether the problem happens in the Shiny application or in the R functions.</li>
+<li>Public or anonymised data, such as the GEO series used in <code><a href="reference/load_rcc.html">?load_rcc</a></code>.</li>
+<li>The output of <code><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">sessioninfo::session_info()</a></code> or <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo()</a></code>.</li>
+</ul></div>
+<div class="section level2">
+<h2 id="report-a-conduct-or-security-concern">Report a conduct or security concern<a class="anchor" aria-label="anchor" href="#report-a-conduct-or-security-concern"></a></h2>
+<p>Please don’t open a public issue for these. Email Mickaël Canouil at <a href="mailto:pro@mickael.canouil.dev">pro@mickael.canouil.dev</a> instead, as described in the <a href="CODE_OF_CONDUCT.html">Code of Conduct</a>.</p>
+</div>
 </div>
 
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

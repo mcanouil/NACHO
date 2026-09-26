@@ -1,8 +1,8 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://m.canouil.dev/NACHO/dev/CODE_OF_CONDUCT.html</loc></url>
 <url><loc>https://m.canouil.dev/NACHO/dev/CONTRIBUTING.html</loc></url>
-<url><loc>https://m.canouil.dev/NACHO/dev/ISSUE_TEMPLATE.html</loc></url>
 <url><loc>https://m.canouil.dev/NACHO/dev/LICENSE.html</loc></url>
+<url><loc>https://m.canouil.dev/NACHO/dev/PULL_REQUEST_TEMPLATE.html</loc></url>
 <url><loc>https://m.canouil.dev/NACHO/dev/SUPPORT.html</loc></url>
 <url><loc>https://m.canouil.dev/NACHO/dev/articles/NACHO-analysis.html</loc></url>
 <url><loc>https://m.canouil.dev/NACHO/dev/articles/NACHO.html</loc></url>
