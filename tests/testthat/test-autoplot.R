@@ -1,20 +1,96 @@
 test_that('Missing "object"', {
-  expect_error(autoplot.nacho(), class = "nacho_error_bad_object")
+  expect_error(NACHO:::autoplot_nacho(), class = "nacho_error_bad_object")
 })
 
-test_that("autoplot() lists the plot types when x is wrong", {
+test_that("autoplot() needs a known plot type", {
   expect_error(autoplot(GSE74821), class = "nacho_error_bad_argument")
-  expect_error(autoplot(GSE74821, x = NULL), class = "nacho_error_bad_argument")
   expect_error(
-    autoplot(GSE74821, x = "PFB"),
+    autoplot(GSE74821, type = "PFB"),
     class = "nacho_error_bad_argument"
   )
-  expect_snapshot(autoplot(GSE74821, x = "bd"), error = TRUE)
+  expect_snapshot(autoplot(GSE74821, type = "bd"), error = TRUE)
+})
+
+test_that("autoplot() points NACHO 2 callers to type", {
+  expect_error(autoplot(GSE74821, x = "BD"), class = "nacho_error_bad_argument")
+  expect_snapshot(autoplot(GSE74821, x = "BD"), error = TRUE)
+})
+
+test_that("autoplot() checks colour and outliers_labels columns", {
+  expect_error(
+    autoplot(GSE74821, type = "BD", colour = "nope"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    autoplot(GSE74821, type = "BD", outliers_labels = "nope"),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("every plot type builds", {
+  for (type in names(NACHO:::nacho_plot_registry)) {
+    expect_s3_class(autoplot(GSE74821, type = type), "ggplot")
+  }
+})
+
+test_that("every plot type of a toy object builds without warnings", {
+  toy <- toy_nacho(6L)
+  for (type in names(NACHO:::nacho_plot_registry)) {
+    expect_no_warning(ggplot2::ggplot_build(autoplot(toy, type = type)))
+  }
+})
+
+test_that("flagged samples of a toy object get their own layers", {
+  toy <- toy_nacho(6L)
+  samples <- toy@samples
+  samples[["BD"]][1] <- 5
+  samples[["is_outlier"]][1] <- TRUE
+  toy@samples <- samples
+  for (type in c("BD", "Positive", "ACBD", "PFNF", "HF")) {
+    plot <- autoplot(toy, type = type, outliers_labels = "IDFILE")
+    expect_no_warning(ggplot2::ggplot_build(plot))
+    expect_true(any(vapply(
+      plot[["layers"]],
+      function(layer) inherits(layer[["geom"]], "GeomLabelRepel"),
+      logical(1)
+    )))
+  }
+})
+
+test_that("PCL and LoD plots of a PlexSet toy object are not available", {
+  toy <- toy_nacho(6L)
+  toy@rcc_type <- "n8"
+  for (type in c("PCL", "LoD")) {
+    expect_warning(
+      plot <- autoplot(toy, type = type),
+      class = "nacho_warning_metric_unavailable"
+    )
+    expect_s3_class(plot, "ggplot")
+    expect_length(plot[["layers"]], 1)
+    expect_identical(
+      ggplot2::ggplot_build(plot)[["data"]][[1]][["label"]],
+      "Not available!"
+    )
+  }
+  expect_no_warning(ggplot2::ggplot_build(autoplot(toy, type = "BD")))
+})
+
+test_that("the Housekeeping plot of a toy object without housekeeping genes is not available", {
+  toy <- toy_nacho(6L)
+  probes <- toy@probes
+  probes[["is_housekeeping"]] <- FALSE
+  toy@probes <- probes
+  expect_warning(
+    plot <- autoplot(toy, type = "Housekeeping"),
+    class = "nacho_warning_metric_unavailable"
+  )
+  expect_length(plot[["layers"]], 1)
+  expect_no_warning(ggplot2::ggplot_build(autoplot(toy, type = "NORM")))
 })
 
 test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable", {
   expect_warning(
-    autoplot(plexset_nacho, x = "PCL"),
+    autoplot(plexset_nacho, type = "PCL"),
     class = "nacho_warning_metric_unavailable"
   )
 })
@@ -41,14 +117,14 @@ metrics <- c(
 for (imetric in metrics) {
   test_that(paste(imetric, "Default parameters", sep = " - "), {
     expect_s3_class(
-      object = autoplot(object = GSE74821, x = imetric),
+      object = autoplot(GSE74821, type = imetric),
       class = "ggplot"
     )
   })
 
   test_that(paste(imetric, "show_legend to FALSE parameters", sep = " - "), {
     expect_s3_class(
-      object = autoplot(object = GSE74821, x = imetric, show_legend = FALSE),
+      object = autoplot(GSE74821, type = imetric, show_legend = FALSE),
       class = "ggplot"
     )
   })
@@ -56,12 +132,12 @@ for (imetric in metrics) {
   test_that(paste(imetric, "show outliers and labels", sep = " - "), {
     expect_s3_class(
       object = autoplot(
-        object = GSE74821,
-        x = imetric,
+        GSE74821,
+        type = imetric,
         show_legend = FALSE,
         show_outliers = TRUE,
         outliers_factor = 1,
-        outliers_labels = TRUE
+        outliers_labels = "CartridgeID"
       ),
       class = "ggplot"
     )
@@ -70,8 +146,8 @@ for (imetric in metrics) {
   test_that(paste(imetric, "hide outliers", sep = " - "), {
     expect_s3_class(
       object = autoplot(
-        object = GSE74821,
-        x = imetric,
+        GSE74821,
+        type = imetric,
         show_legend = FALSE,
         show_outliers = FALSE,
         outliers_factor = 1.2,
@@ -83,7 +159,7 @@ for (imetric in metrics) {
 
   test_that(paste(imetric, "[salmon] Default parameters", sep = " - "), {
     expect_s3_class(
-      object = suppressWarnings(autoplot(object = salmon_nacho, x = imetric)),
+      object = suppressWarnings(autoplot(salmon_nacho, type = imetric)),
       class = "ggplot"
     )
   })
@@ -93,8 +169,8 @@ for (imetric in metrics) {
     {
       expect_s3_class(
         object = suppressWarnings(autoplot(
-          object = salmon_nacho,
-          x = imetric,
+          salmon_nacho,
+          type = imetric,
           show_legend = FALSE
         )),
         class = "ggplot"
@@ -105,12 +181,12 @@ for (imetric in metrics) {
   test_that(paste(imetric, "[salmon] show outliers and labels", sep = " - "), {
     expect_s3_class(
       object = suppressWarnings(autoplot(
-        object = salmon_nacho,
-        x = imetric,
+        salmon_nacho,
+        type = imetric,
         show_legend = FALSE,
         show_outliers = TRUE,
         outliers_factor = 1,
-        outliers_labels = TRUE
+        outliers_labels = "CartridgeID"
       )),
       class = "ggplot"
     )
@@ -119,8 +195,8 @@ for (imetric in metrics) {
   test_that(paste(imetric, "[salmon] hide outliers", sep = " - "), {
     expect_s3_class(
       object = suppressWarnings(autoplot(
-        object = salmon_nacho,
-        x = imetric,
+        salmon_nacho,
+        type = imetric,
         show_legend = FALSE,
         show_outliers = FALSE,
         outliers_factor = 1.2,
@@ -135,9 +211,11 @@ for (imetric in metrics) {
       paste(imetric, "[salmon] NORM without housekeeping genes ", sep = " - "),
       {
         salmon2 <- salmon_nacho
-        salmon2["housekeeping_genes"] <- list(NULL)
+        probes <- salmon2@probes
+        probes[["is_housekeeping"]] <- FALSE
+        salmon2@probes <- probes
         expect_s3_class(
-          object = autoplot(salmon2, x = imetric),
+          object = autoplot(salmon2, type = imetric),
           class = "ggplot"
         )
       }
@@ -147,17 +225,19 @@ for (imetric in metrics) {
 
 test_that(paste("HF", "Default parameters", sep = " - "), {
   expect_s3_class(
-    object = suppressWarnings(autoplot(object = plexset_nacho, x = "HF")),
+    object = suppressWarnings(autoplot(plexset_nacho, type = "HF")),
     class = "ggplot"
   )
 })
 
 test_that(paste("Housekeeping", "no genes", sep = " - "), {
-  plexset_nacho["housekeeping_genes"] <- list(NULL)
+  probes <- plexset_nacho@probes
+  probes[["is_housekeeping"]] <- FALSE
+  plexset_nacho@probes <- probes
   expect_s3_class(
     object = suppressWarnings(autoplot(
-      object = plexset_nacho,
-      x = "Housekeeping"
+      plexset_nacho,
+      type = "Housekeeping"
     )),
     class = "ggplot"
   )
@@ -167,37 +247,33 @@ for (imetric in metrics) {
   test_that(paste(imetric, "builds without warnings", sep = " - "), {
     expect_no_warning(
       ggplot2::ggplot_build(autoplot(
-        object = GSE74821,
-        x = imetric,
+        GSE74821,
+        type = imetric,
         colour = "Date"
       ))
     )
   })
 }
 
-n_samples <- length(unique(GSE74821[["nacho"]][[GSE74821[["access"]]]]))
-
 for (metric in c("BD", "FoV", "PCL", "LoD", "PN")) {
   test_that(paste(metric, "plot keeps one x value per sample"), {
-    plot <- autoplot(GSE74821, x = metric)
-    expect_length(unique(plot[["data"]][[GSE74821[["access"]]]]), n_samples)
+    id <- names(nacho_samples(GSE74821))[1]
+    n_samples <- length(unique(nacho_samples(GSE74821)[[id]]))
+    plot <- autoplot(GSE74821, type = metric)
+    expect_length(unique(plot[["data"]][[id]]), n_samples)
   })
 }
 
 for (metric in c("Positive", "Negative", "Housekeeping")) {
   test_that(paste(metric, "plot keeps every sample and probe"), {
-    nacho_df <- data.table::as.data.table(GSE74821[["nacho"]])
-    expected <- unique(nacho_df[
-      nacho_df[["CodeClass"]] == metric,
-      c(GSE74821[["access"]], "Name"),
-      with = FALSE
-    ])
-    plot <- autoplot(GSE74821, x = metric)
-    expect_identical(nrow(plot[["data"]]), nrow(expected))
+    n_samples <- nrow(nacho_samples(GSE74821))
+    n_probes <- sum(nacho_probes(GSE74821)[["CodeClass"]] == metric)
+    plot <- autoplot(GSE74821, type = metric)
+    expect_identical(nrow(plot[["data"]]), n_samples * n_probes)
   })
 }
 
 test_that("lane-level plots of PlexSet data keep one x value per RCC file", {
-  plot <- autoplot(salmon_nacho, x = "BD")
+  plot <- autoplot(salmon_nacho, type = "BD")
   expect_length(unique(plot[["data"]][["IDFILE"]]), length(salmon_files))
 })
