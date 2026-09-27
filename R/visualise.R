@@ -64,37 +64,7 @@
 #' }
 #'
 visualise <- function(nacho_object) {
-  if (missing(nacho_object)) {
-    stop(
-      '[NACHO] "nacho_object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
-    )
-  }
-  if (!inherits(nacho_object, "nacho")) {
-    stop(
-      '[NACHO] "nacho_object" must be of class "nacho" from "load_rcc()" and/or "normalise()" !'
-    )
-  }
-  mandatory_fields <- c(
-    "access",
-    "housekeeping_genes",
-    "housekeeping_predict",
-    "housekeeping_norm",
-    "normalisation_method",
-    "remove_outliers",
-    "n_comp",
-    "data_directory",
-    "pc_sum",
-    "nacho",
-    "outliers_thresholds"
-  )
-  if (!all(mandatory_fields %in% names(nacho_object))) {
-    stop(
-      '[NACHO] Mandatory fields are missing in "',
-      substitute(nacho_object),
-      '"!\n',
-      '  "load_rcc()" and/or "normalise()" must be called before "visualise()".'
-    )
-  }
+  check_nacho(nacho_object)
 
   nacho_object <- check_outliers(nacho_object)
   shiny::shinyOptions(nacho_object = nacho_object)

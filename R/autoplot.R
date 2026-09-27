@@ -49,11 +49,7 @@ autoplot.nacho <- function(
   outliers_labels = NULL,
   ...
 ) {
-  if (missing(object)) {
-    stop(
-      '[NACHO] "object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
-    )
-  }
+  check_nacho(object)
   if (missing(x) || is.null(x)) {
     stop(
       paste(

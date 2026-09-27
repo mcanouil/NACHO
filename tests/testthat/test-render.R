@@ -35,24 +35,15 @@ test_that("with Rmd", {
 })
 
 test_that("missing object", {
-  if (rmarkdown::pandoc_available()) {
-    expect_error(render())
-  } else {
-    expect_error(render())
-  }
+  expect_error(render(), class = "nacho_error_bad_object")
 })
 
 test_that("wrong attribute", {
   attr(GSE74821, "RCC_type") <- "something_wrong"
-  if (rmarkdown::pandoc_available()) {
-    expect_error(render(
-      nacho_object = GSE74821,
-      output_dir = tempdir(),
-      clean = FALSE
-    ))
-  } else {
-    expect_error(render(nacho_object = GSE74821, output_dir = tempdir()))
-  }
+  expect_error(
+    render(nacho_object = GSE74821, output_dir = tempdir(), clean = FALSE),
+    class = "nacho_error_bad_object"
+  )
 })
 
 test_that("report logo resolves in installed and source packages", {

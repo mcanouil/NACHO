@@ -1,5 +1,5 @@
 test_that('Missing "object"', {
-  expect_error(autoplot.nacho())
+  expect_error(autoplot.nacho(), class = "nacho_error_bad_object")
 })
 
 test_that('Missing "x"', {
@@ -130,7 +130,7 @@ for (imetric in metrics) {
       paste(imetric, "[salmon] NORM without housekeeping genes ", sep = " - "),
       {
         salmon2 <- salmon_nacho
-        salmon2$housekeeping_genes <- NULL
+        salmon2["housekeeping_genes"] <- list(NULL)
         expect_s3_class(
           object = autoplot(salmon2, x = imetric),
           class = "ggplot"
@@ -148,7 +148,7 @@ test_that(paste("HF", "Default parameters", sep = " - "), {
 })
 
 test_that(paste("Housekeeping", "no genes", sep = " - "), {
-  plexset_nacho$housekeeping_genes <- NULL
+  plexset_nacho["housekeeping_genes"] <- list(NULL)
   expect_s3_class(
     object = autoplot(object = plexset_nacho, x = "Housekeeping"),
     class = "ggplot"

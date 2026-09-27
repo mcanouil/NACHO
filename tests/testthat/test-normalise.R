@@ -6,12 +6,12 @@ test_that("default settings", {
 })
 
 test_that("missing nacho", {
-  expect_error(normalise())
+  expect_error(normalise(), class = "nacho_error_bad_object")
 })
 
 test_that("missing field", {
   GSE74821$nacho <- NULL
-  expect_error(normalise(GSE74821))
+  expect_error(normalise(GSE74821), class = "nacho_error_bad_object")
 })
 
 test_that("No POS_E", {
@@ -311,9 +311,9 @@ test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
   expect_s3_class(res, "nacho")
 })
 
-test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
+test_that("wrong attribute", {
   attr(GSE74821, "RCC_type") <- "something"
-  expect_error(normalise(GSE74821))
+  expect_error(normalise(GSE74821), class = "nacho_error_bad_object")
 })
 
 

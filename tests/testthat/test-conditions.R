@@ -50,6 +50,10 @@ test_that("check helpers reject bad input with a bad_argument class", {
   expect_error(k("geo"), class = "nacho_error_bad_argument")
 })
 
+test_that("check_nacho() explains what it expected", {
+  expect_snapshot(check_outliers(list(a = 1)), error = TRUE)
+})
+
 test_that("check_package() names the install command", {
   expect_error(
     NACHO:::check_package(

@@ -246,6 +246,7 @@ load_rcc <- function(
   )
 
   attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
+  class(nacho_object) <- "nacho"
 
   ot <- list(
     BD = c(0.1, 2.25),
@@ -287,8 +288,6 @@ load_rcc <- function(
     "  $ outliers_thresholds : list",
     sep = "\n"
   ))
-
-  class(nacho_object) <- "nacho"
 
   nacho_object
 }

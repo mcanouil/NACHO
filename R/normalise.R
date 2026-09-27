@@ -103,35 +103,7 @@ normalise <- function(
   remove_outliers = nacho_object[["remove_outliers"]],
   outliers_thresholds = nacho_object[["outliers_thresholds"]]
 ) {
-  if (missing(nacho_object)) {
-    stop(
-      '[NACHO] "nacho_object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
-    )
-  }
-  if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
-    stop('[NACHO] RCC type must be either "n1" or "n8"!')
-  }
-  mandatory_fields <- c(
-    "access",
-    "housekeeping_genes",
-    "housekeeping_predict",
-    "housekeeping_norm",
-    "normalisation_method",
-    "remove_outliers",
-    "n_comp",
-    "data_directory",
-    "pc_sum",
-    "nacho",
-    "outliers_thresholds"
-  )
-  if (!all(mandatory_fields %in% names(nacho_object))) {
-    stop(
-      '[NACHO] Mandatory fields are missing in "',
-      substitute(nacho_object),
-      '"!\n',
-      '  "load_rcc()" must be called before "normalise()".'
-    )
-  }
+  check_nacho(nacho_object)
 
   id_colname <- nacho_object[["access"]]
   type_set <- attr(nacho_object, "RCC_type")
@@ -227,6 +199,7 @@ normalise <- function(
   if (!"RCC_type" %in% names(attributes(nacho_object))) {
     attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
   }
+  class(nacho_object) <- "nacho"
 
   nacho_object <- check_outliers(nacho_object)
 
@@ -245,8 +218,6 @@ normalise <- function(
     "  $ outliers_thresholds : list",
     sep = "\n"
   ))
-
-  class(nacho_object) <- "nacho"
 
   nacho_object
 }

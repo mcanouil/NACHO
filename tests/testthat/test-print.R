@@ -8,7 +8,7 @@ test_that("default", {
 })
 
 test_that("missing object", {
-  expect_error(print.nacho())
+  expect_error(print.nacho(), class = "nacho_error_bad_object")
 })
 
 test_that("show_legend to TRUE", {
@@ -25,7 +25,7 @@ test_that("show_legend to TRUE", {
 
 test_that("wrong attribute", {
   attr(GSE74821, "RCC_type") <- "something_wrong"
-  expect_error(print.nacho(GSE74821))
+  expect_error(print.nacho(GSE74821), class = "nacho_error_bad_object")
 })
 
 test_that("numeric column for colour", {
