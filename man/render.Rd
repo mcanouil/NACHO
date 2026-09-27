@@ -13,8 +13,7 @@ render(
   show_legend = TRUE,
   show_outliers = TRUE,
   outliers_factor = 1,
-  outliers_labels = NULL,
-  clean = TRUE
+  outliers_labels = NULL
 )
 }
 \arguments{
@@ -45,9 +44,6 @@ in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 
 \item{outliers_labels}{[\link{character}] Character to indicate which column in \code{nacho_samples(nacho_object)}
 should be used to be printed as the labels for outliers or not. Default is \code{NULL}.}
-
-\item{clean}{[\link{logical}] Boolean to indicate whether the Rmd and RData files used to produce the HTML report
-are removed from \code{output_dir}. Default is \code{TRUE}.}
 }
 \description{
 This function creates an R Markdown script and renders it as an HTML document.

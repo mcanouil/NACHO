@@ -388,8 +388,7 @@ render(
   output_file = "NACHO_QC.html",
   output_dir = ".",
   size = 0.5,
-  show_legend = TRUE,
-  clean = TRUE
+  show_legend = TRUE
 )
 ```
 

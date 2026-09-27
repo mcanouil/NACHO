@@ -2,8 +2,7 @@ test_that("Default parameters", {
   if (rmarkdown::pandoc_available()) {
     expect_null(render(
       nacho_object = GSE74821,
-      output_dir = tempdir(),
-      clean = FALSE
+      output_dir = tempdir()
     ))
   } else {
     expect_error(render(nacho_object = GSE74821, output_dir = tempdir()))
@@ -22,18 +21,6 @@ test_that("with legend", {
   }
 })
 
-test_that("with Rmd", {
-  if (rmarkdown::pandoc_available()) {
-    expect_null(render(
-      nacho_object = GSE74821,
-      output_dir = tempdir(),
-      clean = FALSE
-    ))
-  } else {
-    expect_error(render(nacho_object = GSE74821, output_dir = tempdir()))
-  }
-})
-
 test_that("missing object", {
   expect_error(render(), class = "nacho_error_bad_object")
 })
@@ -42,8 +29,7 @@ test_that("not a nacho object", {
   expect_error(
     render(
       nacho_object = list(nacho = data.frame()),
-      output_dir = tempdir(),
-      clean = FALSE
+      output_dir = tempdir()
     ),
     class = "nacho_error_bad_object"
   )
@@ -78,4 +64,14 @@ test_that("render() keeps a folder named tmp_nacho in output_dir", {
   render(GSE74821, output_dir = output_dir)
   expect_true(file.exists(file.path(output_dir, "NACHO_QC.html")))
   expect_true(file.exists(file.path(user_folder, "notes.txt")))
+})
+
+test_that("render() leaves no working folder in tempdir()", {
+  skip_if_not(rmarkdown::pandoc_available())
+  output_dir <- withr::local_tempdir()
+  render(GSE74821, output_dir = output_dir)
+  expect_length(
+    list.files(tempdir(), pattern = "^nacho-report-", include.dirs = TRUE),
+    0
+  )
 })

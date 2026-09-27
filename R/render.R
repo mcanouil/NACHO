@@ -23,8 +23,6 @@
 #' @param outliers_factor [[numeric]] Size factor for outliers compared to `size`. Default is `1`.
 #' @param outliers_labels [[character]] Character to indicate which column in `nacho_samples(nacho_object)`
 #'   should be used to be printed as the labels for outliers or not. Default is `NULL`.
-#' @param clean [[logical]] Boolean to indicate whether the Rmd and RData files used to produce the HTML report
-#'   are removed from `output_dir`. Default is `TRUE`.
 #'
 #' @return NULL
 #'
@@ -47,15 +45,12 @@ render <- function(
   show_legend = TRUE,
   show_outliers = TRUE,
   outliers_factor = 1,
-  outliers_labels = NULL,
-  clean = TRUE
+  outliers_labels = NULL
 ) {
   check_nacho(nacho_object)
   temp_dir <- tempfile("nacho-report-")
   dir.create(temp_dir)
-  if (clean) {
-    on.exit(unlink(temp_dir, recursive = TRUE), add = TRUE)
-  }
+  on.exit(unlink(temp_dir, recursive = TRUE), add = TRUE)
   temp_file <- file.path(temp_dir, sub("\\.[^.]+$", ".Rmd", output_file))
 
   cat(
