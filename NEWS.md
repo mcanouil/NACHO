@@ -16,6 +16,7 @@
 - fix: `autoplot()` now draws samples whose outlier flag is missing as ordinary points, where NACHO 2 left them out of the plot.
 - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`, and its `clean` argument is gone because the working files now live in a temporary folder.
 - fix: The app detects PlexSet files from their exact code classes.
+- fix: Empty RCC attributes, such as a blank owner or comment, are now read as empty text instead of repeating the attribute name.
 
 # NACHO 2.0.7
 

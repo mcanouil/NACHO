@@ -25,6 +25,27 @@ test_that("read_rcc() reads the RCC FileVersion 2.0 miRNA files", {
   expect_gt(nrow(parsed$code_summary), 100)
 })
 
+test_that("read_rcc() reads an empty attribute value as empty text", {
+  parsed <- NACHO:::read_rcc(first_fixture_file("GSE178516"))
+  expect_identical(
+    unname(parsed$attributes[["Sample_Attributes.sample_Owner"]]),
+    ""
+  )
+  expect_identical(
+    unname(parsed$attributes[["Sample_Attributes.sample_Comments"]]),
+    ""
+  )
+  expect_identical(
+    unname(parsed$attributes[["Lane_Attributes.lane_CartridgeBarcode"]]),
+    ""
+  )
+})
+
+test_that("read_rcc() reads an empty Messages section as empty text", {
+  parsed <- NACHO:::read_rcc(first_fixture_file("GSE178516"))
+  expect_identical(parsed$messages, "")
+})
+
 test_that("read_rcc() matches section tags exactly", {
   lines <- readLines(first_fixture_file("GSE178516"))
   endogenous <- grep("^Endogenous,", lines)[1]
@@ -88,4 +109,33 @@ test_that("duplicated probe names within one file are an rcc_parse error", {
     NACHO:::rcc_samples(NACHO:::read_rcc(path)),
     class = "nacho_error_rcc_parse"
   )
+})
+
+test_that("a PlexSet code class without a 1s to 8s suffix is an rcc_parse error", {
+  file <- list.files(
+    test_path("plexset_data"),
+    pattern = "\\.RCC$",
+    full.names = TRUE
+  )[1]
+  lines <- readLines(file)
+  endogenous <- grep("^Endogenous1s,", lines)[1]
+  lines[endogenous] <- sub("^Endogenous1s,", "Endogenous9s,", lines[endogenous])
+  path <- withr::local_tempfile(fileext = ".RCC")
+  writeLines(lines, path)
+  expect_error(
+    NACHO:::rcc_samples(NACHO:::read_rcc(path)),
+    class = "nacho_error_rcc_parse"
+  )
+})
+
+test_that("is_plexset_rcc() never errors on a partial file", {
+  single <- withr::local_tempfile(fileext = ".RCC")
+  writeLines(c("<Code_Summary>", "Endogenous1,miR-1,MIMAT0000416,12"), single)
+  plexset <- withr::local_tempfile(fileext = ".RCC")
+  writeLines(
+    c("<Code_Summary>", paste0("Endogenous", 1:8, "s,GENE,NM_1,12")),
+    plexset
+  )
+  expect_false(NACHO:::is_plexset_rcc(single))
+  expect_true(NACHO:::is_plexset_rcc(plexset))
 })

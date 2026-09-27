@@ -96,6 +96,9 @@ is_plexset_classes <- function(code_class) {
 
 #' Tell whether an RCC file is a PlexSet file
 #'
+#' Reads the file cheaply, without requiring every section to be present or
+#' closed, so it also works on partial files.
+#'
 #' @param file Path to an `.RCC` or `.RCC.gz` file.
 #'
 #' @keywords internal
@@ -104,7 +107,9 @@ is_plexset_classes <- function(code_class) {
 #' @return `TRUE` when the file holds all eight PlexSet code classes,
 #'   `Endogenous1s` to `Endogenous8s`, matched exactly.
 is_plexset_rcc <- function(file) {
-  is_plexset_classes(read_rcc(file)[["code_summary"]][["CodeClass"]])
+  lines <- readLines(file, warn = FALSE)
+  lines <- sub("[[:space:]]+$", "", lines)
+  is_plexset_classes(sub(",.*$", "", lines))
 }
 
 #' Split a parsed RCC file into its samples
@@ -126,6 +131,19 @@ rcc_samples <- function(parsed) {
     controls <- code_summary[is_control, , drop = FALSE]
     others <- code_summary[!is_control, , drop = FALSE]
     row <- sub("^[A-Za-z]+", "", others[["CodeClass"]])
+    unsuffixed <- unique(others[["CodeClass"]][
+      !row %in% paste0(seq_len(8), "s")
+    ])
+    if (length(unsuffixed) > 0) {
+      nacho_abort(
+        c(
+          "PlexSet code classes must end in {.val 1s} to {.val 8s}.",
+          x = "Not suffixed: {.val {unsuffixed}}."
+        ),
+        class = "rcc_parse",
+        call = NULL
+      )
+    }
     samples <- lapply(paste0(seq_len(8), "s"), function(plex_row) {
       sample <- others[row == plex_row, , drop = FALSE]
       sample[["CodeClass"]] <- sub("[0-8]+s$", "", sample[["CodeClass"]])
