@@ -49,9 +49,9 @@
 <div class="section level2">
 <h2 id="id_1-bump-the-version">1. Bump the version<a class="anchor" aria-label="anchor" href="#id_1-bump-the-version"></a></h2>
 <p>Run the “Release” workflow from <code>main</code> and pick <code>patch</code>, <code>minor</code> or <code>major</code>.</p>
-<p>It updates <code>DESCRIPTION</code>, <code>NEWS.md</code>, <code>CITATION.cff</code> and <code>cran-comments.md</code>, checks spelling and URLs, and opens a pull request called “chore: release NACHO X.Y.Z”. It can also start the R-hub checks on that branch.</p>
+<p>It updates <code>DESCRIPTION</code>, <code>NEWS.md</code>, <code>CITATION.cff</code> and <code>cran-comments.md</code>, checks spelling and URLs, and opens a pull request called “chore: release NACHO X.Y.Z”. The pull request merges straight away, because the bump can’t break anything the checks cover. The checks still run on <code>main</code>, and the submission workflow checks the tarball again before anything goes to CRAN.</p>
+<p>Tick “rhub” to run the R-hub checks as well. They’re optional, and <code>cran-comments.md</code> only lists them when they run.</p>
 <p>Untick “auto-merge” when <code>cran-comments.md</code> needs a note, for example to explain breaking changes. The pull request is then assigned to you: edit the file on it and merge it yourself.</p>
-<p>The required checks use the strict policy, so the pull request only merges when it’s up to date with <code>main</code>. If <code>main</code> moves in the meantime, update the branch from the pull request page.</p>
 </div>
 <div class="section level2">
 <h2 id="id_2-submit-to-cran">2. Submit to CRAN<a class="anchor" aria-label="anchor" href="#id_2-submit-to-cran"></a></h2>

@@ -10,16 +10,17 @@ Run the “Release” workflow from `main` and pick `patch`, `minor` or
 
 It updates `DESCRIPTION`, `NEWS.md`, `CITATION.cff` and
 `cran-comments.md`, checks spelling and URLs, and opens a pull request
-called “chore: release NACHO X.Y.Z”. It can also start the R-hub checks
-on that branch.
+called “chore: release NACHO X.Y.Z”. The pull request merges straight
+away, because the bump can’t break anything the checks cover. The checks
+still run on `main`, and the submission workflow checks the tarball
+again before anything goes to CRAN.
+
+Tick “rhub” to run the R-hub checks as well. They’re optional, and
+`cran-comments.md` only lists them when they run.
 
 Untick “auto-merge” when `cran-comments.md` needs a note, for example to
 explain breaking changes. The pull request is then assigned to you: edit
 the file on it and merge it yourself.
-
-The required checks use the strict policy, so the pull request only
-merges when it’s up to date with `main`. If `main` moves in the
-meantime, update the branch from the pull request page.
 
 ## 2. Submit to CRAN
 
