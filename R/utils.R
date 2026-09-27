@@ -50,7 +50,10 @@ transform_log10_infinite <- function() {
 logo_path <- function() {
   path <- system.file("app", "www", "nacho_hex.png", package = "NACHO")
   if (!nzchar(path)) {
-    stop("[NACHO] Could not find the NACHO logo in the package.")
+    nacho_abort(
+      "The NACHO logo is missing from the installed package.",
+      class = "missing_file"
+    )
   }
   path
 }

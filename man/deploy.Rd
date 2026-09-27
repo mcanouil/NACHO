@@ -4,7 +4,7 @@
 \alias{deploy}
 \title{Deploy (copy) the Shiny application to the specified directory}
 \usage{
-deploy(directory = "/srv/shiny-server", app_name = "NACHO")
+deploy(directory, app_name = "NACHO")
 }
 \arguments{
 \item{directory}{[\link{character}] A character vector of one path to the new location.}
@@ -22,7 +22,7 @@ The app needs the markdown package on the server to show its help pages.
 }
 \examples{
 
-deploy(directory = ".")
+deploy(directory = tempdir())
 
 if (interactive()) {
   shiny::runApp("NACHO")

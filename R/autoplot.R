@@ -50,19 +50,34 @@ autoplot.nacho <- function(
   ...
 ) {
   check_nacho(object)
+  autoplot_types <- c(
+    "BD",
+    "FoV",
+    "PCL",
+    "LoD",
+    "Positive",
+    "Negative",
+    "Housekeeping",
+    "PN",
+    "ACBD",
+    "ACMC",
+    "PCA12",
+    "PCAi",
+    "PCA",
+    "PFNF",
+    "HF",
+    "NORM"
+  )
   if (missing(x) || is.null(x)) {
-    stop(
-      paste(
-        '[NACHO] "x" is missing. It must be one of the following possible values:',
-        '  * "BD", "FoV", "PCL", "LoD"',
-        '  * "Positive", "Negative", "Housekeeping", "PN"',
-        '  * "ACBD", "ACMC"',
-        '  * "PCA12", "PCAi", "PCA"',
-        '  * "PFB", "HF", "NORM"',
-        sep = "\n"
-      )
+    nacho_abort(
+      c(
+        "{.arg x} is missing.",
+        i = "Choose one of {.val {autoplot_types}}."
+      ),
+      class = "bad_argument"
     )
   }
+  x <- check_choice(x, autoplot_types)
   object <- check_outliers(object)
 
   if (!is.null(outliers_labels)) {
@@ -211,17 +226,6 @@ autoplot.nacho <- function(
       colour,
       size,
       show_legend
-    ),
-    stop(
-      paste(
-        '[NACHO] "x" must be one of the following possible values:',
-        '  * "BD", "FoV", "PCL", "LoD"',
-        '  * "Positive", "Negative", "Housekeeping", "PN"',
-        '  * "ACBD", "ACMC"',
-        '  * "PCA12", "PCAi", "PCA"',
-        '  * "PFB", "HF", "NORM"',
-        sep = "\n"
-      )
     )
   )
 }
@@ -259,7 +263,10 @@ plot_metrics <- function(
   )
 
   if (attr(nacho_object, "RCC_type") == "n8" && x %in% c("PCL", "LoD")) {
-    message('[NACHO] "PCL" and "LoD" are not available for RCC type "n8".')
+    nacho_warn(
+      "{.val {x}} is not available for PlexSet (n8) RCC files.",
+      class = "metric_unavailable"
+    )
     return(
       ggplot2::ggplot() +
         ggplot2::labs(
@@ -415,7 +422,10 @@ plot_cg <- function(
     outliers_labels <- nacho_object$access
   }
   if (is.null(nacho_object$housekeeping_genes) && x %in% "Housekeeping") {
-    message("[NACHO] No housekeeping genes found.")
+    nacho_warn(
+      "No housekeeping genes are available.",
+      class = "no_housekeeping"
+    )
     return(
       ggplot2::ggplot() +
         ggplot2::labs(
@@ -1071,7 +1081,10 @@ plot_hf <- function(
 
   is_house_factor <- "House_factor" %in% colnames(nacho_object[["nacho"]])
   if (!is_house_factor) {
-    message('[NACHO] "House_factor" was not computed.')
+    nacho_warn(
+      "The housekeeping factor was not computed.",
+      class = "metric_unavailable"
+    )
     return(
       ggplot2::ggplot() +
         ggplot2::labs(

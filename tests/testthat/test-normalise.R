@@ -14,6 +14,26 @@ test_that("missing field", {
   expect_error(normalise(GSE74821), class = "nacho_error_bad_object")
 })
 
+test_that("normalise() checks its arguments", {
+  expect_error(
+    normalise(GSE74821, normalisation_method = "geo"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    normalise(GSE74821, n_comp = -1),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    normalise(GSE74821, housekeeping_norm = "yes"),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("normalise() says when nothing changes", {
+  withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
+  expect_message(normalise(GSE74821), class = "nacho_message")
+})
+
 test_that("No POS_E", {
   GSE74821$nacho <- GSE74821$nacho[GSE74821$nacho$Name != "POS_E(0.5)", ]
   res <- normalise(

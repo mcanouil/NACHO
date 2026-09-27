@@ -1,6 +1,6 @@
 test_that("visualise() refuses to start outside an interactive session", {
-  skip_if(interactive())
-  expect_error(visualise(GSE74821), "interactive R session")
+  withr::local_options(rlang_interactive = FALSE)
+  expect_error(visualise(GSE74821), class = "nacho_error_not_interactive")
 })
 
 test_that("visualise() rejects an object that is not a nacho object", {

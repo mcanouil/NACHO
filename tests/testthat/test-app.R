@@ -37,13 +37,13 @@ upload_to_app <- function(
 
   nacho <- NULL
   # nolint start: object_usage_linter. testServer() provides session and the app reactives.
-  shiny::testServer(
+  suppressWarnings(shiny::testServer(
     shiny::shinyAppDir(system.file("app", package = "NACHO")),
     {
       session$setInputs(norm_method = "GEO", rcc_files = uploaded)
       nacho <<- nacho_react()
     }
-  )
+  ))
   # nolint end
   nacho
 }
@@ -53,11 +53,9 @@ test_that("app loads uploaded RCC files without a sample sheet", {
 })
 
 test_that("app loads uploaded PlexSet RCC files", {
-  expect_warning(
-    nacho <- upload_to_app("plexset_data"),
-    class = "nacho_warning_no_housekeeping"
-  )
+  nacho <- upload_to_app("plexset_data")
   expect_s3_class(nacho, "nacho")
+  expect_false(nacho[["housekeeping_norm"]])
   expect_type(nacho[["nacho"]][["plexset_id"]], "character")
 })
 

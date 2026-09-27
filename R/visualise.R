@@ -65,21 +65,12 @@
 #'
 visualise <- function(nacho_object) {
   check_nacho(nacho_object)
+  check_interactive("visualise")
+  check_package("markdown", reason = "to show the help pages of the app")
 
   nacho_object <- check_outliers(nacho_object)
   shiny::shinyOptions(nacho_object = nacho_object)
   on.exit(shiny::shinyOptions(nacho_object = NULL))
-
-  if (!interactive()) {
-    stop("[NACHO] Must be run in an interactive R session!")
-  }
-
-  if (!requireNamespace("markdown", quietly = TRUE)) {
-    stop(
-      "[NACHO] The \"markdown\" package is required to run the app.\n",
-      "  Install it with install.packages(\"markdown\")."
-    )
-  }
 
   shiny::runApp(system.file("app", package = "NACHO"))
 }

@@ -104,6 +104,12 @@ normalise <- function(
   outliers_thresholds = nacho_object[["outliers_thresholds"]]
 ) {
   check_nacho(nacho_object)
+  check_character(housekeeping_genes, allow_null = TRUE)
+  check_bool(housekeeping_predict)
+  check_bool(housekeeping_norm)
+  normalisation_method <- check_choice(normalisation_method, c("GEO", "GLM"))
+  check_count(n_comp)
+  check_bool(remove_outliers)
 
   id_colname <- nacho_object[["access"]]
   type_set <- attr(nacho_object, "RCC_type")
@@ -128,27 +134,18 @@ normalise <- function(
   )
 
   if (all(!params_changed)) {
-    message(
-      '[NACHO] Nothing was done. Parameters in "normalise()", were the same as in "',
-      substitute(nacho_object),
-      '".'
+    nacho_inform(
+      "The settings are the same as in the input, so {.fn normalise} returns it unchanged."
     )
     return(nacho_object)
   } else {
-    message(
-      '[NACHO] Normalising "',
-      substitute(nacho_object),
-      '" with new value for parameters:\n',
-      paste(
-        paste0(
-          "  - ",
-          names(params_changed[which(params_changed)]),
-          " = ",
-          params_changed[which(params_changed)]
-        ),
-        collapse = "\n"
+    nacho_inform(c(
+      "Normalising again with new settings:",
+      stats::setNames(
+        names(params_changed)[params_changed],
+        rep("*", sum(params_changed))
       )
-    )
+    ))
   }
 
   if (remove_outliers && !nacho_object[["remove_outliers"]]) {
@@ -172,7 +169,7 @@ normalise <- function(
     nacho_object[["remove_outliers"]] <- remove_outliers
   } else {
     if (remove_outliers) {
-      message("[NACHO] Outliers have already been removed!")
+      nacho_inform("Outliers were already removed from this object.")
     }
 
     if (any(params_changed)) {
@@ -202,22 +199,6 @@ normalise <- function(
   class(nacho_object) <- "nacho"
 
   nacho_object <- check_outliers(nacho_object)
-
-  message(paste(
-    "[NACHO] Returning a list.",
-    "  $ access              : character",
-    "  $ housekeeping_genes  : character",
-    "  $ housekeeping_predict: logical",
-    "  $ housekeeping_norm   : logical",
-    "  $ normalisation_method: character",
-    "  $ remove_outliers     : logical",
-    "  $ n_comp              : numeric",
-    "  $ data_directory      : character",
-    "  $ pc_sum              : data.frame",
-    "  $ nacho               : data.frame",
-    "  $ outliers_thresholds : list",
-    sep = "\n"
-  ))
 
   nacho_object
 }
