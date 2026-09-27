@@ -13,12 +13,12 @@ on:
           - "major"
       auto_merge:
         type: boolean
-        description: "Auto-merge the bump pull request once the required checks pass (untick to edit cran-comments.md first)"
+        description: "Merge the bump pull request straight away (untick to edit cran-comments.md first)"
         default: true
       rhub:
         type: boolean
-        description: "Dispatch R-hub checks on the bump branch"
-        default: true
+        description: "Also run the R-hub checks and list them in cran-comments.md"
+        default: false
 
 permissions:
   contents: read
@@ -42,6 +42,7 @@ jobs:
     env:
       BUMP: ${{ inputs.version }}
       AUTO_MERGE: ${{ inputs.auto_merge }}
+      RHUB: ${{ inputs.rhub }}
 
     steps:
       - name: Create GitHub App token
@@ -98,6 +99,9 @@ jobs:
           sed -E -i 's/^(version:[[:space:]]*).*/\1"'"${VERSION}"'"/' CITATION.cff
           sed -E -i 's/^(date-released:[[:space:]]*).*/\1"'"${DATE}"'"/' CITATION.cff
           sed "s/@VERSION@/${VERSION}/g" .github/templates/cran-comments.md > cran-comments.md
+          if [ "${RHUB}" != "true" ]; then
+            sed -i '/^- R-hub:/d' cran-comments.md
+          fi
           {
             echo "version=${VERSION}"
             echo "branch=ci/release-${VERSION//./-}"
@@ -153,8 +157,13 @@ jobs:
           VERSION: ${{ steps.bump.outputs.version }}
           BRANCH: ${{ steps.bump.outputs.branch }}
         run: |
+          # A merged bump branch is already deleted, so check main instead.
+          ref="${BRANCH}"
+          if [ "${AUTO_MERGE}" = "true" ]; then
+            ref="main"
+          fi
           gh workflow run rhub.yaml \
-            --ref "${BRANCH}" \
+            --ref "${ref}" \
             -f config="linux,windows,macos-arm64,nosuggests" \
             -f name="NACHO ${VERSION}"
 
@@ -168,5 +177,6 @@ jobs:
             echo ""
             echo "- Bump pull request: ${PR_URL}"
             echo "- Auto-merge: ${AUTO_MERGE}"
+            echo "- R-hub: ${RHUB}"
             echo "- Next: the CRAN submission workflow starts when the pull request merges."
           } >> "${GITHUB_STEP_SUMMARY}"
