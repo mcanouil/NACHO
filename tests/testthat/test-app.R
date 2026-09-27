@@ -1,8 +1,13 @@
+expect_nacho <- function(object) {
+  testthat::expect_true(S7::S7_inherits(object, NACHO:::nacho))
+}
+
 upload_to_app <- function(
   data_directory,
   sample_sheet = NULL,
   rcc_type = ""
 ) {
+  testthat::skip_on_cran()
   testthat::skip_if_not_installed("markdown")
   rcc_files <- list.files(
     data_directory,
@@ -35,28 +40,66 @@ upload_to_app <- function(
     )
   }
 
+  app <- suppressPackageStartupMessages(
+    shiny::shinyAppDir(system.file("app", package = "NACHO"))
+  )
   nacho <- NULL
   # nolint start: object_usage_linter. testServer() provides session and the app reactives.
-  suppressWarnings(shiny::testServer(
-    shiny::shinyAppDir(system.file("app", package = "NACHO")),
-    {
-      session$setInputs(norm_method = "GEO", rcc_files = uploaded)
-      nacho <<- nacho_react()
+  withCallingHandlers(
+    shiny::testServer(
+      app,
+      {
+        session$setInputs(norm_method = "GEO", rcc_files = uploaded)
+        nacho <<- nacho_react()
+      }
+    ),
+    nacho_warning_metric_unavailable = function(cnd) {
+      invokeRestart("muffleWarning")
     }
-  ))
+  )
   # nolint end
   nacho
 }
 
 test_that("app loads uploaded RCC files without a sample sheet", {
-  expect_s3_class(upload_to_app("salmon_data"), "nacho")
+  expect_nacho(upload_to_app("salmon_data"))
+})
+
+test_that("app treats single-sample files that mention Endogenous8s as single-sample", {
+  source_files <- list.files(
+    geo_fixture("GSE178516")[["dir"]],
+    pattern = "\\.RCC\\.gz$",
+    full.names = TRUE
+  )
+  directory <- withr::local_tempdir()
+  for (source_file in source_files) {
+    lines <- readLines(source_file)
+    endogenous <- grep("^Endogenous,", lines)[1]
+    lines[endogenous] <- sub(
+      "^Endogenous,[^,]*,",
+      "Endogenous,Endogenous8s_like,",
+      lines[endogenous]
+    )
+    writeLines(
+      lines,
+      file.path(directory, sub("\\.gz$", "", basename(source_file)))
+    )
+  }
+  expect_warning(
+    nacho <- upload_to_app(directory),
+    class = "nacho_warning_n_comp_reduced"
+  )
+  expect_identical(nacho@rcc_type, "n1")
 })
 
 test_that("app loads uploaded PlexSet RCC files", {
-  nacho <- upload_to_app("plexset_data")
-  expect_s3_class(nacho, "nacho")
-  expect_false(nacho[["housekeeping_norm"]])
-  expect_type(nacho[["nacho"]][["plexset_id"]], "character")
+  expect_warning(
+    nacho <- upload_to_app("plexset_data"),
+    class = "nacho_warning_no_housekeeping"
+  )
+  expect_nacho(nacho)
+  expect_false(nacho@settings[["housekeeping_norm"]])
+  expect_type(nacho_samples(nacho)[["plexset_id"]], "character")
 })
 
 test_that("app merges an uploaded sample sheet", {
@@ -67,43 +110,38 @@ test_that("app merges an uploaded sample sheet", {
   )
   sample_sheet[["group"]] <- "case"
   nacho <- upload_to_app("salmon_data", sample_sheet)
-  expect_true("group" %in% names(nacho[["nacho"]]))
+  expect_true("group" %in% names(nacho_samples(nacho)))
 })
 
 test_that("app discards a sample sheet without IDFILE", {
   sample_sheet <- data.frame(file = "salmon_01_01.RCC", group = "case")
   nacho <- upload_to_app("salmon_data", sample_sheet)
-  expect_s3_class(nacho, "nacho")
-  expect_false("group" %in% names(nacho[["nacho"]]))
+  expect_nacho(nacho)
+  expect_false("group" %in% names(nacho_samples(nacho)))
 })
 
 test_that("app merges a sample sheet by IDFILE for single-sample RCC files", {
-  single_directory <- tempfile("single")
-  dir.create(single_directory)
-  on.exit(unlink(single_directory, recursive = TRUE))
-  for (rcc in list.files(
-    "salmon_data",
-    pattern = "\\.RCC$",
-    full.names = TRUE
-  )) {
-    writeLines(
-      gsub("Endogenous8s", "Endogenous", readLines(rcc)),
-      file.path(single_directory, basename(rcc))
-    )
-  }
+  single_directory <- geo_fixture("GSE178516")[["dir"]]
+  rcc_files <- list.files(single_directory, pattern = "\\.RCC\\.gz$")
 
-  merged <- upload_to_app(
-    single_directory,
-    data.frame(IDFILE = list.files(single_directory), group = "case")
+  expect_warning(
+    merged <- upload_to_app(
+      single_directory,
+      data.frame(IDFILE = rcc_files, group = "case")
+    ),
+    class = "nacho_warning_n_comp_reduced"
   )
-  expect_true("group" %in% names(merged[["nacho"]]))
+  expect_true("group" %in% names(nacho_samples(merged)))
 
-  discarded <- upload_to_app(
-    single_directory,
-    data.frame(file = list.files(single_directory), group = "case")
+  expect_warning(
+    discarded <- upload_to_app(
+      single_directory,
+      data.frame(file = rcc_files, group = "case")
+    ),
+    class = "nacho_warning_n_comp_reduced"
   )
-  expect_s3_class(discarded, "nacho")
-  expect_false("group" %in% names(discarded[["nacho"]]))
+  expect_nacho(discarded)
+  expect_false("group" %in% names(nacho_samples(discarded)))
 })
 
 test_that("app discards a PlexSet sample sheet without plexset_id", {
@@ -112,8 +150,8 @@ test_that("app discards a PlexSet sample sheet without plexset_id", {
     group = "case"
   )
   nacho <- upload_to_app("salmon_data", sample_sheet)
-  expect_s3_class(nacho, "nacho")
-  expect_false("group" %in% names(nacho[["nacho"]]))
+  expect_nacho(nacho)
+  expect_false("group" %in% names(nacho_samples(nacho)))
 })
 
 test_that("instrument presets give a full binding density range", {
@@ -138,10 +176,7 @@ test_that("app loads a zip archive whatever MIME type the browser sends", {
     )
   )
   for (mime_type in c("application/zip", "application/x-zip-compressed")) {
-    expect_s3_class(
-      upload_to_app(archive_directory, rcc_type = mime_type),
-      "nacho"
-    )
+    expect_nacho(upload_to_app(archive_directory, rcc_type = mime_type))
   }
 })
 
@@ -159,7 +194,7 @@ test_that("app matches file extensions regardless of case", {
   )
   sample_sheet[["group"]] <- "case"
   nacho <- upload_to_app(lower_directory, sample_sheet)
-  expect_true("group" %in% names(nacho[["nacho"]]))
+  expect_true("group" %in% names(nacho_samples(nacho)))
 })
 
 test_that("app keeps gzipped RCC files next to a sample sheet", {
@@ -176,7 +211,7 @@ test_that("app keeps gzipped RCC files next to a sample sheet", {
   )
   sample_sheet[["group"]] <- "case"
   nacho <- upload_to_app(gz_directory, sample_sheet)
-  expect_true("group" %in% names(nacho[["nacho"]]))
+  expect_true("group" %in% names(nacho_samples(nacho)))
 })
 
 test_that("app tells the user when it discards a sample sheet", {

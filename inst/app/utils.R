@@ -133,7 +133,7 @@ plotInput <- function(id, nacho) {
                   "ID",
                   "ScannerID",
                   "StagePosition",
-                  names(nacho[["nacho"]])
+                  names(NACHO::nacho_samples(nacho))
                 ))
               )
             )
@@ -281,8 +281,8 @@ plotInput <- function(id, nacho) {
         shiny::selectInput(
           ns("outliers_labels"),
           NULL,
-          choices = colnames(nacho$nacho),
-          selected = nacho$access
+          choices = names(NACHO::nacho_samples(nacho)),
+          selected = names(NACHO::nacho_samples(nacho))[1]
         )
       }
     })
@@ -307,8 +307,8 @@ plotInput <- function(id, nacho) {
       )
       x_metrics <- unname(autoplot_values[id])
       p <- NACHO::autoplot(
-        x = x_metrics,
-        object = nacho,
+        nacho,
+        type = x_metrics,
         colour = input[["group_colour"]] %||% "CartridgeID",
         size = input[["point_size"]] %||% 1,
         show_legend = as.logical(input[["show_levels"]] %||% TRUE),

@@ -212,9 +212,9 @@ threshold_layers <- function(limits) {
   )
 }
 
-not_available_plot <- function(x_label, y_label, colour) {
+not_available_plot <- function(x_label, y_label) {
   ggplot2::ggplot() +
-    ggplot2::labs(x = x_label, y = y_label, colour = colour) +
+    ggplot2::labs(x = x_label, y = y_label) +
     ggplot2::annotate(
       "text",
       x = 0.5,
@@ -260,7 +260,7 @@ plot_metrics <- function(
       "{.val {type}} is not available for PlexSet (n8) RCC files.",
       class = "metric_unavailable"
     )
-    return(not_available_plot("CartridgeID", y_label, colour))
+    return(not_available_plot("CartridgeID", y_label))
   }
 
   ggplot2::ggplot(
@@ -331,7 +331,7 @@ plot_cg <- function(
       "No housekeeping genes are available.",
       class = "metric_unavailable"
     )
-    return(not_available_plot("Gene Name", "Counts + 1", colour))
+    return(not_available_plot("Gene Name", "Counts + 1"))
   }
 
   ggplot2::ggplot(
@@ -469,7 +469,8 @@ plot_pn <- function(
       ),
       colour = "black",
       se = TRUE,
-      method = "loess"
+      method = "loess",
+      formula = y ~ x
     ) +
     ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2)) +
     (if (!show_legend) ggplot2::guides(colour = "none"))
@@ -800,7 +801,7 @@ plot_hf <- function(
       "The housekeeping factor was not computed.",
       class = "metric_unavailable"
     )
-    return(not_available_plot("Positive Factor", "Housekeeping Factor", colour))
+    return(not_available_plot("Positive Factor", "Housekeeping Factor"))
   }
 
   ggplot2::ggplot(
@@ -973,7 +974,8 @@ plot_norm <- function(
       ),
       colour = "black",
       se = TRUE,
-      method = "loess"
+      method = "loess",
+      formula = y ~ x
     ) +
     (if (!(show_legend && length(housekeeping_genes) <= 10)) {
       ggplot2::guides(colour = "none")

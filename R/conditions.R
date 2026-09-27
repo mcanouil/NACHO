@@ -235,51 +235,6 @@ check_package <- function(
   invisible(TRUE)
 }
 
-check_nacho_v2 <- function(
-  x,
-  arg = rlang::caller_arg(x),
-  call = rlang::caller_env()
-) {
-  if (missing(x)) {
-    nacho_abort(
-      c(
-        "{.arg {arg}} is missing.",
-        i = "Create a {.cls nacho} object with {.fn load_rcc}."
-      ),
-      class = "bad_object",
-      call = call
-    )
-  }
-  mandatory_fields <- c(
-    "access",
-    "housekeeping_genes",
-    "housekeeping_predict",
-    "housekeeping_norm",
-    "normalisation_method",
-    "remove_outliers",
-    "n_comp",
-    "data_directory",
-    "pc_sum",
-    "nacho",
-    "outliers_thresholds"
-  )
-  is_nacho <- inherits(x, "nacho") &&
-    all(mandatory_fields %in% names(x)) &&
-    identical(length(attr(x, "RCC_type")), 1L) &&
-    attr(x, "RCC_type") %in% c("n1", "n8")
-  if (!is_nacho) {
-    nacho_abort(
-      c(
-        "{.arg {arg}} must be a {.cls nacho} object, not {.obj_type_friendly {x}}.",
-        i = "Create one with {.fn load_rcc}."
-      ),
-      class = "bad_object",
-      call = call
-    )
-  }
-  invisible(x)
-}
-
 #' Tell whether an object is a NACHO 2 list
 #'
 #' @keywords internal
