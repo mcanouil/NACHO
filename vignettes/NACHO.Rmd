@@ -262,11 +262,13 @@ The next step is the actual normalisation.
 The first argument requires the summary which is created with the `load_rcc()` function.
 The second argument requires a vector of gene names.
 In this case, it is a subset of the discovered housekeeping genes we just made.
-With the third argument the user has the choice to remove the outliers.
-Lastly, the normalisation method can be chosen.  
+The third argument turns off housekeeping gene prediction, since the housekeeping genes are already chosen.
+The fourth argument turns on housekeeping normalisation.
+Lastly, the normalisation method can be chosen.
 Here, the user has a choice between `"GLM"` or `"GEO"`.
-The differences between normalisation methods are nuanced, however, a preference for either method is use case specific.  
-In this example, `"GLM"` is used.
+The differences between normalisation methods are nuanced, however, a preference for either method is use case specific.
+In this example, `"GEO"` is used.
+`exclude_outliers()` then drops the flagged samples and normalises the ones that are left again.
 
 ```{r}
 #| label: ex7
@@ -378,8 +380,7 @@ knitr::include_graphics(path = "README-app.png")
 
 ## The `render()` function
 
-The `render()` function renders a comprehensive HTML report, using `print(..., echo = TRUE)`,
-which includes all quality-control metrics and description of those metrics.
+The `render()` function renders a comprehensive HTML report, which includes all quality-control metrics and a description of each.
 
 ```{r}
 #| eval: false
