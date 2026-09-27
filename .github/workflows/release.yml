@@ -72,9 +72,16 @@ jobs:
         uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
         with:
           packages: |
+            deps::.
             any::cffr
             any::spelling
             any::urlchecker
+            any::GEOquery
+            any::Biobase
+            any::pkgload
+
+      - name: Rebuild the GSE74821 example object
+        run: Rscript data-raw/GSE74821.R
 
       - name: Check that NEWS.md starts with the development heading
         run: |
@@ -129,7 +136,7 @@ jobs:
             exit 1
           fi
           git switch -c "${BRANCH}"
-          git add DESCRIPTION NEWS.md CITATION.cff cran-comments.md
+          git add DESCRIPTION NEWS.md CITATION.cff cran-comments.md data/GSE74821.rda
           git commit -m "chore: bump version to ${VERSION}"
           git push origin "${BRANCH}"
           cat > "${RUNNER_TEMP}/pr-body.md" <<EOF

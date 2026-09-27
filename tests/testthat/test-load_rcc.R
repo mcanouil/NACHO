@@ -373,3 +373,26 @@ test_that("load_rcc() leaves the caller's sample sheet unchanged", {
   expect_identical(sample_sheet, salmon_tidy)
   expect_identical(class(sample_sheet), "data.frame")
 })
+
+test_that("load_rcc() refuses a mix of PlexSet and single-sample RCC files offline", {
+  directory <- withr::local_tempdir()
+  plexset <- list.files(
+    test_path("plexset_data"),
+    pattern = "\\.RCC$",
+    full.names = TRUE
+  )[1]
+  single <- list.files(
+    geo_fixture("GSE178516")[["dir"]],
+    pattern = "\\.RCC\\.gz$",
+    full.names = TRUE
+  )[1]
+  file.copy(c(plexset, single), directory)
+  expect_error(
+    suppressMessages(load_rcc(
+      data_directory = directory,
+      ssheet_csv = data.frame(IDFILE = basename(c(plexset, single))),
+      id_colname = "IDFILE"
+    )),
+    "mix PlexSet and single-sample"
+  )
+})

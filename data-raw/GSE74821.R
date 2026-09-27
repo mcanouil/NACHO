@@ -1,6 +1,6 @@
 #' GSE74821
 library(GEOquery)
-devtools::load_all(".")
+pkgload::load_all(".", quiet = TRUE)
 
 gse <- GEOquery::getGEO(GEO = "GSE74821")
 targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
@@ -35,5 +35,4 @@ GSE74821 <- load_rcc(
   normalisation_method = "GLM",
   n_comp = 10
 )
-GSE74821$data_directory <- "~/"
-usethis::use_data(GSE74821, overwrite = TRUE)
+save(GSE74821, file = file.path("data", "GSE74821.rda"), compress = "xz")
