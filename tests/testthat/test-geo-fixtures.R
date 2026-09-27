@@ -20,7 +20,11 @@ test_that("the GSE178516 IO 360 fixture loads offline from gzipped RCC files", {
 
 test_that("the fixtures are single-sample RCC files, not PlexSet", {
   for (series in c("GSE270837", "GSE178516")) {
-    files <- list.files(geo_fixture(series)[["dir"]], pattern = "\\.RCC\\.gz$", full.names = TRUE)
+    files <- list.files(
+      geo_fixture(series)[["dir"]],
+      pattern = "\\.RCC\\.gz$",
+      full.names = TRUE
+    )
     expect_false(any(vapply(files, NACHO:::is_plexset_rcc, logical(1))))
   }
 })
@@ -32,7 +36,11 @@ load_full_series <- function(series) {
     tarfile = file.path(download_dir, series, paste0(series, "_RAW.tar")),
     exdir = file.path(download_dir, series)
   )
-  files <- list.files(file.path(download_dir, series), pattern = "\\.RCC(\\.gz)?$", ignore.case = TRUE)
+  files <- list.files(
+    file.path(download_dir, series),
+    pattern = "\\.RCC(\\.gz)?$",
+    ignore.case = TRUE
+  )
   suppressMessages(NACHO::load_rcc(
     data_directory = file.path(download_dir, series),
     ssheet_csv = data.frame(IDFILE = files),
