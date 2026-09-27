@@ -27,6 +27,7 @@
 - In `vignettes/`,
   - docs: keep only the GSE70970 samples measured with the `NS_H_miR_1.4` CodeSet, since its two CodeSets come from different nSolver versions and `load_rcc()` refuses files that mix versions.
   - docs: attach data.table in the analysis vignette, which uses `dcast()` and `as.data.table()`.
+  - docs: link to GEO over https in the bibliography, since the http address now redirects.
 - In `pkgdown/`,
   - docs: restyle the website for pkgdown 2.2 with the NACHO logo colours, a light and dark mode switch, and colour contrast that meets WCAG AA.
   - docs: group the reference index by task.
