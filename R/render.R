@@ -51,8 +51,11 @@ render <- function(
   clean = TRUE
 ) {
   check_nacho(nacho_object)
-  temp_dir <- file.path(normalizePath(output_dir), "tmp_nacho")
-  dir.create(temp_dir, showWarnings = FALSE)
+  temp_dir <- tempfile("nacho-report-")
+  dir.create(temp_dir)
+  if (clean) {
+    on.exit(unlink(temp_dir, recursive = TRUE), add = TRUE)
+  }
   temp_file <- file.path(temp_dir, sub("\\.[^.]+$", ".Rmd", output_file))
 
   cat(
@@ -77,7 +80,7 @@ render <- function(
     "    fig_height: 4.7",
     "    number_sections: true",
     "    self_contained: true",
-    "    mathjax: default",
+    "    mathjax: null",
     "    df_print: kable",
     "---",
     "\n",
@@ -141,10 +144,6 @@ render <- function(
       outliers_labels = outliers_labels
     )
   )
-
-  if (clean) {
-    unlink(file.path(output_dir, "tmp_nacho"), recursive = TRUE)
-  }
 
   invisible()
 }

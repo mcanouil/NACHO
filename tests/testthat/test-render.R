@@ -68,3 +68,14 @@ test_that("render() accepts a colour column whose name holds quotes", {
   render(quoted, output_dir = output_dir, colour = "batch \"A\"")
   expect_true(file.exists(file.path(output_dir, "NACHO_QC.html")))
 })
+
+test_that("render() keeps a folder named tmp_nacho in output_dir", {
+  skip_if_not(rmarkdown::pandoc_available())
+  output_dir <- withr::local_tempdir()
+  user_folder <- file.path(output_dir, "tmp_nacho")
+  dir.create(user_folder)
+  writeLines("keep me", file.path(user_folder, "notes.txt"))
+  render(GSE74821, output_dir = output_dir)
+  expect_true(file.exists(file.path(output_dir, "NACHO_QC.html")))
+  expect_true(file.exists(file.path(user_folder, "notes.txt")))
+})
