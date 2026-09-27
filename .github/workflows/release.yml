@@ -1,0 +1,172 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: choice
+        description: "Version bump"
+        default: "patch"
+        options:
+          - "patch"
+          - "minor"
+          - "major"
+      auto_merge:
+        type: boolean
+        description: "Auto-merge the bump pull request once the required checks pass (untick to edit cran-comments.md first)"
+        default: true
+      rhub:
+        type: boolean
+        description: "Dispatch R-hub checks on the bump branch"
+        default: true
+
+permissions:
+  contents: read
+
+# Serialise releases and never cancel one in flight: an aborted run could
+# leave a pushed branch without its pull request.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    name: Bump version
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: write
+
+    env:
+      BUMP: ${{ inputs.version }}
+      AUTO_MERGE: ${{ inputs.auto_merge }}
+
+    steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Set up Git user
+        uses: ./.github/actions/setup-git-user
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          app-slug: ${{ steps.app-token.outputs.app-slug }}
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+        with:
+          use-public-rspm: true
+
+      - name: Install release tools
+        uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+        with:
+          packages: |
+            any::cffr
+            any::spelling
+            any::urlchecker
+
+      - name: Check that NEWS.md starts with the development heading
+        run: |
+          first="$(grep -m 1 -v '^[[:space:]]*$' NEWS.md)"
+          if [ "${first}" != "# NACHO (development version)" ]; then
+            echo "::error::NEWS.md must start with '# NACHO (development version)', found '${first}'."
+            exit 1
+          fi
+
+      - name: Bump version and prepare release files
+        id: bump
+        run: |
+          .github/scripts/bump-version.sh "${BUMP}" > "${RUNNER_TEMP}/bump.txt"
+          VERSION="$(sed -n 's/^version=//p' "${RUNNER_TEMP}/bump.txt")"
+          case "${VERSION}" in
+            *.*.*.*)
+              echo "::error::The bump left a development version (${VERSION})."
+              exit 1
+              ;;
+          esac
+          DATE="$(date -u +%Y-%m-%d)"
+          sed -E -i 's/^(version:[[:space:]]*).*/\1"'"${VERSION}"'"/' CITATION.cff
+          sed -E -i 's/^(date-released:[[:space:]]*).*/\1"'"${DATE}"'"/' CITATION.cff
+          sed "s/@VERSION@/${VERSION}/g" .github/templates/cran-comments.md > cran-comments.md
+          {
+            echo "version=${VERSION}"
+            echo "branch=ci/release-${VERSION//./-}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Validate CITATION.cff
+        run: Rscript -e 'if (!isTRUE(cffr::cff_validate("CITATION.cff"))) quit(status = 1L)'
+
+      - name: Check spelling
+        run: |
+          Rscript -e 'res <- spelling::spell_check_package(); if (nrow(res) > 0L) { print(res); quit(status = 1L) }'
+
+      - name: Check URLs
+        run: Rscript -e 'stopifnot(packageVersion("urlchecker") >= "2.0.0"); urlchecker::url_check()'
+
+      - name: Commit and open the bump pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ steps.bump.outputs.version }}
+          BRANCH: ${{ steps.bump.outputs.branch }}
+        run: |
+          if git ls-remote --exit-code --heads origin "${BRANCH}" > /dev/null 2>&1; then
+            echo "::error::${BRANCH} already exists. Close its pull request and delete the branch, then run the release again."
+            exit 1
+          fi
+          git switch -c "${BRANCH}"
+          git add DESCRIPTION NEWS.md CITATION.cff cran-comments.md
+          git commit -m "chore: bump version to ${VERSION}"
+          git push origin "${BRANCH}"
+          cat > "${RUNNER_TEMP}/pr-body.md" <<EOF
+          This bumps NACHO to ${VERSION} and refreshes \`CITATION.cff\` and \`cran-comments.md\`.
+
+          Once it merges, the CRAN submission workflow builds and checks the tarball, then waits for approval on the \`cran\` environment before uploading.
+          EOF
+          PR_URL="$(gh pr create \
+            --base main \
+            --head "${BRANCH}" \
+            --title "chore: release NACHO ${VERSION}" \
+            --body-file "${RUNNER_TEMP}/pr-body.md" \
+            --label "Type: CI/CD :robot:")"
+          echo "pr_url=${PR_URL}" >> "${GITHUB_OUTPUT}"
+          if [ "${AUTO_MERGE}" = "true" ]; then
+            gh pr merge --auto --squash "${PR_URL}"
+          else
+            gh pr edit "${PR_URL}" --add-assignee "${GITHUB_ACTOR}"
+          fi
+
+      - name: Dispatch R-hub checks
+        if: ${{ inputs.rhub }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.bump.outputs.version }}
+          BRANCH: ${{ steps.bump.outputs.branch }}
+        run: |
+          gh workflow run rhub.yaml \
+            --ref "${BRANCH}" \
+            -f config="linux,windows,macos-arm64,nosuggests" \
+            -f name="NACHO ${VERSION}"
+
+      - name: Summary
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+        run: |
+          {
+            echo "## Release ${VERSION}"
+            echo ""
+            echo "- Bump pull request: ${PR_URL}"
+            echo "- Auto-merge: ${AUTO_MERGE}"
+            echo "- Next: the CRAN submission workflow starts when the pull request merges."
+          } >> "${GITHUB_STEP_SUMMARY}"
