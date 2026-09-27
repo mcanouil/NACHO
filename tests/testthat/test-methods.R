@@ -1,8 +1,9 @@
 test_that("print() shows a short summary and returns the object invisibly", {
   x <- toy_nacho()
   expect_snapshot(print(x))
-  expect_invisible(print(x))
-  expect_identical(withVisible(print(x))$value, x)
+  utils::capture.output(expect_invisible(print(x)))
+  utils::capture.output(visible <- withVisible(print(x)))
+  expect_identical(visible$value, x)
 })
 
 test_that("format() gives the lines print() shows", {
@@ -37,4 +38,18 @@ test_that("as.data.frame() gives the samples or the long layout", {
     long$Count[long$IDFILE == "S02.RCC" & long$Name == "GENE1"],
     x@counts["GENE1", "S02.RCC"]
   )
+})
+
+test_that("as.data.frame(long = TRUE) works when the PCA has zero components", {
+  x <- toy_nacho()
+  x@pca <- list(
+    scores = x@pca$scores[, 0, drop = FALSE],
+    importance = x@pca$importance[0, ]
+  )
+  long <- as.data.frame(x, long = TRUE)
+  expect_identical(nrow(long), 44L)
+  expect_false(any(c("PC01", "PC02") %in% names(long)))
+  expect_true(all(
+    c("IDFILE", "CodeClass", "Name", "Count", "Count_Norm") %in% names(long)
+  ))
 })

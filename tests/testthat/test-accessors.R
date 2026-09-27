@@ -13,6 +13,17 @@ test_that("nacho_samples() puts the id first and appends the PCA scores", {
   expect_identical(nrow(samples), 4L)
 })
 
+test_that("nacho_samples() works when the PCA has zero components", {
+  x <- toy_nacho()
+  x@pca <- list(
+    scores = x@pca$scores[, 0, drop = FALSE],
+    importance = x@pca$importance[0, ]
+  )
+  samples <- nacho_samples(x)
+  expect_identical(samples, x@samples)
+  expect_false(any(c("PC01", "PC02") %in% names(samples)))
+})
+
 test_that("nacho_probes() and nacho_qc() return one row per probe and per sample", {
   x <- toy_nacho()
   expect_identical(nrow(nacho_probes(x)), 11L)

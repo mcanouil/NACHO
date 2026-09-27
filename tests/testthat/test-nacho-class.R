@@ -44,6 +44,13 @@ test_that("the validator refuses an unknown RCC type", {
   expect_error(x@rcc_type <- "n2", "rcc_type")
 })
 
+test_that("the validator refuses PCA scores whose row names do not match the sample ids", {
+  x <- toy_nacho()
+  pca <- x@pca
+  rownames(pca$scores) <- rev(rownames(pca$scores))
+  expect_error(x@pca <- pca, "pca\\$scores")
+})
+
 test_that("compute_outliers() matches the NACHO 2 rules", {
   samples <- data.frame(
     BD = c(1, 3, 1, 1),

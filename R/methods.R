@@ -23,39 +23,39 @@ long_table <- function(x, rows = NULL) {
   probe_rows <- rep(seq_len(n_probes), times = n_samples)
   scores <- as.data.frame(x@pca[["scores"]])
   probes <- x@probes[rows, c("CodeClass", "Name", "Accession"), drop = FALSE]
-  long <- cbind(
+  pieces <- list(
     x@samples[sample_rows, , drop = FALSE],
     if (ncol(scores) > 0) scores[sample_rows, , drop = FALSE],
     probes[probe_rows, , drop = FALSE],
     data.frame(Count = as.vector(counts), Count_Norm = as.vector(normalised))
   )
+  long <- do.call(cbind, Filter(Negate(is.null), pieces))
   rownames(long) <- NULL
   data.table::as.data.table(long)
 }
 
 format_nacho <- function(x, ...) {
-  n_samples <- ncol(x@counts) # nolint: object_usage_linter. Used in cli glue interpolation.
-  n_probes <- nrow(x@counts) # nolint: object_usage_linter. Used in cli glue interpolation.
-  n_flagged <- sum(x@samples[["is_outlier"]] %in% TRUE) # nolint: object_usage_linter. Used in cli glue interpolation.
   housekeeping <- x@probes[["Name"]][x@probes[["is_housekeeping"]]]
-  # nolint next: object_usage_linter. Used in cli glue interpolation.
   kind <- if (x@rcc_type == "n8") "PlexSet" else "single-sample"
   uses_housekeeping <- isTRUE(x@settings[["housekeeping_norm"]]) &&
     length(housekeeping) > 0
-  n_housekeeping <- length(housekeeping) # nolint: object_usage_linter. Used in cli glue interpolation.
   c(
     cli::format_inline(
-      "<nacho> {n_samples} sample{?s}, {n_probes} probe{?s}, from {kind} RCC files"
+      "<nacho> {ncol(x@counts)} sample{?s}, {nrow(x@counts)} probe{?s}, from ",
+      kind,
+      " RCC files"
     ),
     cli::format_inline(
       "Normalisation: {x@settings[['normalisation_method']]}, ",
       if (uses_housekeeping) {
-        "with {n_housekeeping} housekeeping gene{?s}"
+        "with {length(housekeeping)} housekeeping gene{?s}"
       } else {
         "without housekeeping genes"
       }
     ),
-    cli::format_inline("Flagged samples: {n_flagged} of {n_samples}"),
+    cli::format_inline(
+      "Flagged samples: {sum(x@samples[['is_outlier']] %in% TRUE)} of {ncol(x@counts)}"
+    ),
     cli::format_inline(
       "Created with NACHO {x@provenance[['nacho_version']]}"
     )

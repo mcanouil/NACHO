@@ -100,6 +100,13 @@ validate_nacho <- function(self) {
       "The sample ids in @samples must match colnames(@counts), in the same order."
     )
   }
+  scores <- self@pca[["scores"]]
+  if (!is.null(scores) && !identical(rownames(scores), ids)) {
+    problems <- c(
+      problems,
+      "The row names of @pca$scores must match the sample ids, in the same order."
+    )
+  }
   probe_columns <- c(
     "CodeClass",
     "Name",
