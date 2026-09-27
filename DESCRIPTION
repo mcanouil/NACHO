@@ -45,6 +45,7 @@ Imports:
     knitr (>= 1.39),
     rlang (>= 1.1.0),
     rmarkdown (>= 1.16),
+    S7 (>= 0.2.2),
     scales (>= 1.4.0),
     shiny (>= 1.7.4),
     shinyWidgets (>= 0.4.9)
@@ -66,3 +67,38 @@ Roxygen: list(markdown = TRUE)
 SystemRequirements: pandoc (>= 2.11)
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.0
+Collate: 
+    'GSE74821.R'
+    'NACHO-package.R'
+    'autoplot.R'
+    'check_outliers.R'
+    'conditions.R'
+    'deploy.R'
+    'factor_calculation.R'
+    'find_housekeeping.R'
+    'format_counts.R'
+    'format_tag_content.R'
+    'geometric_housekeeping.R'
+    'geometric_mean.R'
+    'geometric_probes.R'
+    'load_rcc.R'
+    'qc.R'
+    'nacho-class.R'
+    'norm_geo.R'
+    'norm_glm.R'
+    'normalise.R'
+    'normalise_counts.R'
+    'print.R'
+    'probe_exclusion.R'
+    'qc_features.R'
+    'qc_imaging.R'
+    'qc_limit_detection.R'
+    'qc_pca.R'
+    'qc_positive_control.R'
+    'qc_rcc.R'
+    'read_rcc.R'
+    'read_tags.R'
+    'render.R'
+    'utils.R'
+    'visualise.R'
+    'zzz.R'
