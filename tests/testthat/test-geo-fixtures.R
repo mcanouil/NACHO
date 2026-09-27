@@ -54,12 +54,12 @@ test_that("the full GSE270837 series loads from GEO", {
   skip_on_cran()
   skip_if_offline()
   skip_if_not_installed("GEOquery")
-  expect_no_error(load_full_series("GSE270837"))
+  expect_identical(ncol(load_full_series("GSE270837")), 22L)
 })
 
 test_that("the full GSE178516 series loads from GEO", {
   skip_on_cran()
   skip_if_offline()
   skip_if_not_installed("GEOquery")
-  expect_no_error(load_full_series("GSE178516"))
+  expect_identical(ncol(load_full_series("GSE178516")), 30L)
 })

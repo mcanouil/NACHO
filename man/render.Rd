@@ -18,8 +18,7 @@ render(
 )
 }
 \arguments{
-\item{nacho_object}{[\link{list}] A list object of class \code{"nacho"} obtained
-from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
+\item{nacho_object}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
 \item{colour}{[\link{character}] Character string of the column in \code{ssheet_csv}
 or more generally in \code{nacho_object$nacho} to be used as grouping colour.}

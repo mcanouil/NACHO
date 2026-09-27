@@ -20,22 +20,8 @@
 #' @param n_comp [[numeric]] Number indicating the number of principal components to compute.
 #'  Cannot be more than n-1 samples. Default is `10`.
 #'
-#' @return [[list]] A list object of class `"nacho"`:
-#' \describe{
-#'   \item{`access`}{[[character]] Value passed to [`load_rcc()`] in `id_colname`.}
-#'   \item{`housekeeping_genes`}{[[character]] Value passed to [`load_rcc()`].}
-#'   \item{`housekeeping_predict`}{[[logical]] Value passed to [`load_rcc()`].}
-#'   \item{`housekeeping_norm`}{[[logical]] Value passed to [`load_rcc()`].}
-#'   \item{`normalisation_method`}{[[character]] Value passed to [`load_rcc()`].}
-#'   \item{`remove_outliers`}{[[logical]] `FALSE`.}
-#'   \item{`n_comp`}{[[numeric]] Value passed to [`load_rcc()`].}
-#'   \item{`data_directory`}{[[character]] Value passed to [`load_rcc()`].}
-#'   \item{`pc_sum`}{[[data.frame]] A `data.frame` with `n_comp` rows and four columns:
-#'     "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
-#'   \item{`nacho`}{[[data.frame]] A `data.frame` with all columns from the sample sheet `ssheet_csv`
-#'     and all computed columns, *i.e.*, quality-control metrics and counts, with one row per sample and probe.}
-#'   \item{`outliers_thresholds`}{[[list]] A `list` of the (default) quality-control thresholds used.}
-#' }
+#' @return A `nacho` object; read its content with [nacho_counts()],
+#'   [nacho_samples()], [nacho_probes()] and [nacho_qc()].
 #'
 #' @export
 #'
@@ -261,8 +247,7 @@ load_rcc <- function(
     )
     housekeeping_norm <- FALSE
   }
-  nacho_object <- qc_rcc(
-    data_directory = data_directory,
+  qc <- qc_rcc(
     nacho_df = nacho_df,
     id_colname = id_colname,
     housekeeping_genes = housekeeping_genes,
@@ -271,31 +256,34 @@ load_rcc <- function(
     normalisation_method = normalisation_method,
     n_comp = n_comp
   )
-
-  attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
-  class(nacho_object) <- "nacho"
-
-  ot <- list(
-    BD = c(0.1, 2.25),
-    FoV = 75,
-    LoD = 2,
-    PCL = 0.95,
-    Positive_factor = c(1 / 4, 4),
-    House_factor = c(1 / 11, 11)
-  )
-  nacho_object[["outliers_thresholds"]] <- ot
-  nacho_object <- check_outliers(nacho_object)
-
   nacho_progress_step(
     paste0(
       "Normalising with the {.val {normalisation_method}} method ",
       "{if (housekeeping_norm) 'and' else 'without'} housekeeping genes"
     )
   )
-  nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(
-    data = nacho_object[["nacho"]],
+  long <- qc[["nacho"]]
+  long[["Count_Norm"]] <- normalise_counts(
+    data = long,
     housekeeping_norm = housekeeping_norm
   )
-
-  nacho_object
+  nacho_from_long(
+    long = long,
+    pca = qc[["pca"]],
+    settings = list(
+      id_colname = id_colname,
+      housekeeping_genes = qc[["housekeeping_genes"]],
+      housekeeping_predict = housekeeping_predict,
+      housekeeping_norm = housekeeping_norm,
+      normalisation_method = normalisation_method,
+      n_comp = as.integer(n_comp)
+    ),
+    thresholds = default_thresholds(),
+    rcc_type = type_set,
+    provenance = new_provenance(
+      data_directory = data_directory,
+      file_version = nanostring_versions[["Header.header_FileVersion"]],
+      software_version = nanostring_versions[["Header.header_SoftwareVersion"]]
+    )
+  )
 }

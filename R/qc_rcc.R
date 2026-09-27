@@ -10,7 +10,6 @@
 #'
 #' @return [[list]]
 qc_rcc <- function(
-  data_directory,
   nacho_df,
   id_colname,
   housekeeping_genes,
@@ -111,67 +110,22 @@ qc_rcc <- function(
     id_colname = id_colname,
     count_column = "Count"
   )
-  counts_df <- counts_df[j = .SD, .SDcols = is.numeric]
-
-  if (n_comp > (ncol(counts_df) - 1)) {
-    nacho_warn(
-      c(
-        "{.arg n_comp} = {n_comp} is more than the {ncol(counts_df) - 1} component{?s} available.",
-        i = "Using {.code n_comp = {ncol(counts_df) - 1}}."
-      ),
-      class = "n_comp_reduced"
-    )
-    n_comp <- (ncol(counts_df) - 1)
-  }
-
-  if (anyNA(counts_df)) {
-    nacho_warn(
-      c(
-        "{sum(is.na(counts_df))} missing count{?s} {?was/were} set to 0 before PCA.",
-        i = "Probes absent from some RCC files usually mean mixed CodeSets."
-      ),
-      class = "missing_counts"
-    )
-    counts_df_tmp <- as.matrix(counts_df)
-    counts_df_tmp[is.na(counts_df_tmp)] <- 0
-  } else {
-    counts_df_tmp <- counts_df
-  }
-
-  pcas <- qc_pca(counts = counts_df_tmp, n_comp = n_comp)
-
-  pcsum <- as.data.frame(t(pcas[["pcsum"]]))
-  rownames(pcsum) <- pcsum[["PC"]] <- sprintf(
-    "PC%02d",
-    as.numeric(sub("PC", "", rownames(pcsum)))
-  )
-
-  pcas_pc <- as.data.frame(pcas[["pc"]])
-  colnames(pcas_pc) <- sprintf(
-    "PC%02d",
-    as.numeric(sub("PC", "", colnames(pcas_pc)))
-  )
-  pcas_pc[[id_colname]] <- rownames(pcas_pc)
+  counts_matrix <- as.matrix(counts_df[j = .SD, .SDcols = is.numeric])
+  pca <- compute_pca(counts_matrix, n_comp)
 
   facs_pc_qc <- merge(
-    x = merge(
-      x = qc_values,
-      y = pcas_pc,
-      by = id_colname,
-      all = TRUE
-    ),
+    x = qc_values,
     y = norm_factor,
     by = id_colname,
     all = TRUE
   )
 
-  previous_pcs <- grep("^PC[0-9]+$", colnames(nacho_df), value = TRUE)
   nacho_out <- merge(
     x = nacho_df[
       j = .SD,
       .SDcols = c(
         id_colname,
-        setdiff(colnames(nacho_df), c(colnames(facs_pc_qc), previous_pcs))
+        setdiff(colnames(nacho_df), colnames(facs_pc_qc))
       )
     ],
     y = facs_pc_qc,
@@ -180,15 +134,8 @@ qc_rcc <- function(
   )
 
   list(
-    access = id_colname,
     housekeeping_genes = housekeeping_genes,
-    housekeeping_predict = housekeeping_predict,
-    housekeeping_norm = housekeeping_norm,
-    normalisation_method = normalisation_method,
-    remove_outliers = FALSE,
-    n_comp = n_comp,
-    data_directory = data_directory,
-    pc_sum = pcsum,
+    pca = pca,
     nacho = nacho_out
   )
 }

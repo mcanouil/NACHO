@@ -8,8 +8,7 @@
 visualise(nacho_object)
 }
 \arguments{
-\item{nacho_object}{[\link{list}] A list object of class \code{"nacho"} obtained
-from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
+\item{nacho_object}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 }
 \description{
 This function visualises results from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}

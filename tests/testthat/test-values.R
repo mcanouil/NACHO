@@ -1,3 +1,11 @@
+gse_geo <- suppressMessages(normalise(GSE74821, normalisation_method = "GEO"))
+gse_df <- data.table::as.data.table(as.data.frame(gse_geo, long = TRUE))
+gse_id <- "IDFILE"
+gse_samples <- per_sample_ref(
+  gse_geo,
+  c("Positive_factor", "Negative_factor", "House_factor", "PCL", "LoD", "FoV")
+)
+
 test_that("positive factor is the mean over the sample geometric means of POS_A to POS_E", {
   positives <- gse_df[
     gse_df[["CodeClass"]] == "Positive" & gse_df[["Name"]] != "POS_F(0.125)"
@@ -32,7 +40,8 @@ test_that("negative factor is the geometric mean of the negatives kept after exc
 test_that("housekeeping factor uses background-corrected counts floored at 1", {
   housekeeping <- merge(
     gse_df[
-      gse_df[["Name"]] %in% gse_geo[["housekeeping_genes"]],
+      gse_df[["Name"]] %in%
+        nacho_probes(gse_geo)$Name[nacho_probes(gse_geo)$is_housekeeping],
       c(gse_id, "Name", "Count"),
       with = FALSE
     ],
@@ -136,17 +145,20 @@ test_that("PCA stores sample scores on log counts", {
   expected <- stats::prcomp(t(log(counts + 1)))
   pcs <- per_sample_ref(
     gse_geo,
-    sprintf("PC%02d", seq_len(gse_geo[["n_comp"]]))
+    sprintf("PC%02d", seq_len(ncol(gse_geo@pca$scores)))
   )
   expect_equal(
     abs(unname(as.matrix(pcs[, -1]))),
-    abs(unname(expected[["x"]][pcs[[gse_id]], seq_len(gse_geo[["n_comp"]])]))
+    abs(unname(expected[["x"]][
+      pcs[[gse_id]],
+      seq_len(ncol(gse_geo@pca$scores))
+    ]))
   )
   expect_equal(
-    gse_geo[["pc_sum"]][["Proportion of Variance"]],
+    gse_geo@pca$importance[["Proportion of Variance"]],
     unname(summary(expected)[["importance"]][
       "Proportion of Variance",
-      seq_len(gse_geo[["n_comp"]])
+      seq_len(ncol(gse_geo@pca$scores))
     ])
   )
 })

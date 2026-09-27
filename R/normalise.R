@@ -1,210 +1,217 @@
-#' (re)Normalise a "nacho" object
+#' (Re)normalise a nacho object
 #'
-#' This function creates a list in which your settings, the raw counts and normalised counts are stored,
-#' using the result from a call to [`load_rcc()`].
-#'
-#' @param nacho_object [[list]] A list object of class `"nacho"` obtained
-#'   from [`load_rcc()`] or [`normalise()`].
+#' @param nacho_object A `nacho` object from [load_rcc()] or [normalise()].
 #' @inheritParams load_rcc
-#' @param remove_outliers [[logical]] A boolean to indicate if outliers should be excluded.
-#' @param outliers_thresholds [[list]] List of thresholds to exclude outliers.
+#' @param outliers_thresholds A list of quality-control thresholds with the
+#'   elements `BD`, `FoV`, `LoD`, `PCL`, `Positive_factor` and `House_factor`.
+#' @param ... Must be empty.
 #'
-#' @details Outliers definition (`remove_outliers = TRUE`):
+#' @details When only `outliers_thresholds` changes, `normalise()` keeps the
+#'   counts and recomputes the outlier flags.
+#'   Otherwise it computes the quality-control metrics, the normalisation
+#'   factors, the normalised counts and the PCA again.
 #'
-#'  * Binding Density (`BD`) < 0.1
-#'  * Binding Density (`BD`) > 2.25
-#'  * Field of View (`FoV`) < 75
-#'  * Positive Control Linearity (`PCL`) < 0.95
-#'  * Limit of Detection (`LoD`) < 2
-#'  * Positive normalisation factor (`Positive_factor`) < 0.25
-#'  * Positive normalisation factor (`Positive_factor`) > 4
-#'  * Housekeeping normalisation factor (`house_factor`) < 1/11
-#'  * Housekeeping normalisation factor (`house_factor`) > 11
+#'   Outliers are samples with a binding density (`BD`) outside its range, a
+#'   field of view (`FoV`) below its limit, a positive factor or a
+#'   housekeeping factor outside its range, and, for single-sample RCC files,
+#'   a positive control linearity (`PCL`) or a limit of detection (`LoD`)
+#'   below its limit. See [exclude_outliers()] to drop them.
 #'
-#' @return [[list]] A list containing parameters and data.
-#' \describe{
-#'   \item{`access`}{[[character]] Value passed to [`load_rcc()`] in `id_colname`.}
-#'   \item{`housekeeping_genes`}{[[character]] Value passed to [`load_rcc()`] or [`normalise()`].}
-#'   \item{`housekeeping_predict`}{[[logical]] Value passed to [`load_rcc()`].}
-#'   \item{`housekeeping_norm`}{[[logical]] Value passed to [`load_rcc()`] or [`normalise()`].}
-#'   \item{`normalisation_method`}{[[character]] Value passed to [`load_rcc()`] or [`normalise()`].}
-#'   \item{`remove_outliers`}{[[logical]] Value passed to [`normalise()`].}
-#'   \item{`n_comp`}{[[numeric]] Value passed to [`load_rcc()`].}
-#'   \item{`data_directory`}{[[character]] Value passed to [`load_rcc()`].}
-#'   \item{`pc_sum`}{[[data.frame]] A `data.frame` with `n_comp` rows and four columns:
-#'     "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
-#'   \item{`nacho`}{[[data.frame]] A `data.frame` with all columns from the sample sheet `ssheet_csv`
-#'     and all computed columns, *i.e.*, quality-control metrics and counts, with one row per sample and probe.}
-#'   \item{`outliers_thresholds`}{[[list]] A `list` of the quality-control thresholds used.}
-#' }
-#'
+#' @return A `nacho` object.
 #' @export
 #'
 #' @examples
-#'
 #' data(GSE74821)
-#' GSE74821_norm <- normalise(
-#'   nacho_object = GSE74821,
-#'   housekeeping_norm = TRUE,
-#'   normalisation_method = "GEO",
-#'   remove_outliers = TRUE
-#' )
-#'
-#' if (interactive()) {
-#'   library(GEOquery)
-#'   library(NACHO)
-#'
-#'   # Import data from GEO
-#'   gse <- GEOquery::getGEO(GEO = "GSE74821")
-#'   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
-#'   GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
-#'   utils::untar(
-#'     tarfile = file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),
-#'     exdir = file.path(tempdir(), "GSE74821")
-#'   )
-#'   targets$IDFILE <- list.files(
-#'     path = file.path(tempdir(), "GSE74821"),
-#'     pattern = ".RCC.gz$"
-#'   )
-#'   targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
-#'   utils::write.csv(
-#'     x = targets,
-#'     file = file.path(tempdir(), "GSE74821", "Samplesheet.csv")
-#'   )
-#'
-#'   # Read RCC files and format
-#'   nacho <- load_rcc(
-#'     data_directory = file.path(tempdir(), "GSE74821"),
-#'     ssheet_csv = file.path(tempdir(), "GSE74821", "Samplesheet.csv"),
-#'     id_colname = "IDFILE"
-#'   )
-#'
-#'   # (re)Normalise data by removing outliers
-#'   nacho_norm <- normalise(
-#'     nacho_object = nacho,
-#'     remove_outliers = TRUE
-#'   )
-#'
-#'   # (re)Normalise data with "GLM" method and removing outliers
-#'   nacho_norm <- normalise(
-#'     nacho_object = nacho,
-#'     normalisation_method = "GLM",
-#'     remove_outliers = TRUE
-#'   )
-#' }
-#'
+#' GSE74821_geo <- normalise(GSE74821, normalisation_method = "GEO")
+#' nacho_qc(GSE74821_geo)
 normalise <- function(
   nacho_object,
-  housekeeping_genes = nacho_object[["housekeeping_genes"]],
-  housekeeping_predict = nacho_object[["housekeeping_predict"]],
-  housekeeping_norm = nacho_object[["housekeeping_norm"]],
-  normalisation_method = nacho_object[["normalisation_method"]],
-  n_comp = nacho_object[["n_comp"]],
-  remove_outliers = nacho_object[["remove_outliers"]],
-  outliers_thresholds = nacho_object[["outliers_thresholds"]]
+  housekeeping_genes = nacho_object@settings[["housekeeping_genes"]],
+  housekeeping_predict = nacho_object@settings[["housekeeping_predict"]],
+  housekeeping_norm = nacho_object@settings[["housekeeping_norm"]],
+  normalisation_method = nacho_object@settings[["normalisation_method"]],
+  n_comp = nacho_object@settings[["n_comp"]],
+  outliers_thresholds = nacho_object@thresholds,
+  ...
 ) {
-  check_nacho_v2(nacho_object)
+  check_nacho(nacho_object)
+  dots <- list(...)
+  if ("remove_outliers" %in% names(dots)) {
+    nacho_abort(
+      c(
+        "{.arg remove_outliers} was removed in NACHO 3.0.0.",
+        i = "Drop flagged samples with {.fn exclude_outliers}, or subset with {.code x[, keep]}."
+      ),
+      class = "bad_argument"
+    )
+  }
+  if (length(dots) > 0) {
+    nacho_abort(
+      "Unknown argument{?s}: {.arg {names(dots)}}.",
+      class = "bad_argument"
+    )
+  }
   check_character(housekeeping_genes, allow_null = TRUE)
   check_bool(housekeeping_predict)
   check_bool(housekeeping_norm)
   normalisation_method <- check_choice(normalisation_method, c("GEO", "GLM"))
   check_count(n_comp)
-  check_bool(remove_outliers)
+  check_thresholds(outliers_thresholds)
 
-  id_colname <- nacho_object[["access"]]
-  type_set <- attr(nacho_object, "RCC_type")
-
-  params_changed <- c(
-    "housekeeping_genes" = !isTRUE(all.equal(
-      sort(nacho_object[["housekeeping_genes"]]),
-      sort(housekeeping_genes)
-    )),
-    "housekeeping_predict" = nacho_object[["housekeeping_predict"]] !=
-      housekeeping_predict,
-    "housekeeping_norm" = nacho_object[["housekeeping_norm"]] !=
-      housekeeping_norm,
-    "normalisation_method" = nacho_object[["normalisation_method"]] !=
-      normalisation_method,
-    "n_comp" = nacho_object[["n_comp"]] != n_comp,
-    "remove_outliers" = nacho_object[["remove_outliers"]] != remove_outliers,
-    "outliers_thresholds" = !isTRUE(all.equal(
-      nacho_object[["outliers_thresholds"]],
-      outliers_thresholds
-    ))
+  settings <- list(
+    id_colname = nacho_object@settings[["id_colname"]],
+    housekeeping_genes = housekeeping_genes,
+    housekeeping_predict = housekeeping_predict,
+    housekeeping_norm = housekeeping_norm,
+    normalisation_method = normalisation_method,
+    n_comp = as.integer(n_comp)
   )
+  changed <- vapply(
+    names(settings),
+    function(name) !identical(settings[[name]], nacho_object@settings[[name]]),
+    logical(1)
+  )
+  changed[["housekeeping_genes"]] <- !setequal(
+    housekeeping_genes,
+    nacho_object@settings[["housekeeping_genes"]]
+  )
+  thresholds_changed <- !identical(outliers_thresholds, nacho_object@thresholds)
 
-  if (all(!params_changed)) {
+  if (!any(changed) && !thresholds_changed) {
     nacho_inform(
       "The settings are the same as in the input, so {.fn normalise} returns it unchanged."
     )
     return(nacho_object)
-  } else {
-    nacho_inform(c(
-      "Normalising again with new settings:",
-      stats::setNames(
-        names(params_changed)[params_changed],
-        rep("*", sum(params_changed))
-      )
-    ))
   }
-
-  if (remove_outliers && !nacho_object[["remove_outliers"]]) {
-    nacho_object[["outliers_thresholds"]] <- outliers_thresholds
-    nacho_object <- check_outliers(nacho_object)
-
-    if (any(nacho_object[["nacho"]][, "is_outlier"]) || any(params_changed)) {
-      nacho_object <- qc_rcc(
-        data_directory = nacho_object[["data_directory"]],
-        nacho_df = nacho_object[["nacho"]][
-          which(!nacho_object[["nacho"]][, "is_outlier"]),
-        ],
-        id_colname = id_colname,
-        housekeeping_genes = housekeeping_genes,
-        housekeeping_predict = housekeeping_predict,
-        housekeeping_norm = housekeeping_norm,
-        normalisation_method = normalisation_method,
-        n_comp = n_comp
-      )
-    }
-    nacho_object[["remove_outliers"]] <- remove_outliers
-  } else {
-    if (remove_outliers) {
-      nacho_inform("Outliers were already removed from this object.")
-    }
-
-    if (any(params_changed)) {
-      nacho_object <- qc_rcc(
-        data_directory = nacho_object[["data_directory"]],
-        nacho_df = nacho_object[["nacho"]],
-        id_colname = id_colname,
-        housekeeping_genes = housekeeping_genes,
-        housekeeping_predict = housekeeping_predict,
-        housekeeping_norm = housekeeping_norm,
-        normalisation_method = normalisation_method,
-        n_comp = n_comp
-      )
-    }
+  if (!any(changed)) {
+    nacho_object@thresholds <- outliers_thresholds
+    return(check_outliers(nacho_object))
   }
-
-  nacho_object[["outliers_thresholds"]] <- outliers_thresholds
-
-  nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(
-    data = nacho_object[["nacho"]],
-    housekeeping_norm = housekeeping_norm
-  )
-
-  if (!"RCC_type" %in% names(attributes(nacho_object))) {
-    attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
-  }
-  class(nacho_object) <- "nacho"
-
-  nacho_object <- check_outliers(nacho_object)
-
-  nacho_object
+  nacho_inform(c(
+    "Normalising again with new settings:",
+    stats::setNames(names(changed)[changed], rep("*", sum(changed)))
+  ))
+  run_normalisation(nacho_object, settings, outliers_thresholds)
 }
-
 
 #' @export
 #' @rdname normalise
 #' @usage NULL
 normalize <- normalise
+
+run_normalisation <- function(x, settings, thresholds) {
+  qc <- qc_rcc(
+    nacho_df = long_table(x),
+    id_colname = settings[["id_colname"]],
+    housekeeping_genes = settings[["housekeeping_genes"]],
+    housekeeping_predict = settings[["housekeeping_predict"]],
+    housekeeping_norm = settings[["housekeeping_norm"]],
+    normalisation_method = settings[["normalisation_method"]],
+    n_comp = settings[["n_comp"]]
+  )
+  long <- qc[["nacho"]]
+  long[["Count_Norm"]] <- normalise_counts(
+    data = long,
+    housekeeping_norm = settings[["housekeeping_norm"]]
+  )
+  settings[["housekeeping_genes"]] <- qc[["housekeeping_genes"]]
+  pc_columns <- grep("^PC[0-9]+$", names(long), value = TRUE)
+  long <- long[,
+    setdiff(names(long), c(pc_columns, "is_outlier")),
+    with = FALSE
+  ]
+  nacho_from_long(
+    long = long,
+    pca = qc[["pca"]],
+    settings = settings,
+    thresholds = thresholds,
+    rcc_type = x@rcc_type,
+    provenance = x@provenance
+  )
+}
+
+#' Flag outliers of a nacho object
+#'
+#' Recomputes `is_outlier` in [nacho_qc()] from the object's thresholds.
+#' [normalise()] and [load_rcc()] already do this, so you only need it after
+#' changing thresholds by hand.
+#'
+#' @inheritParams normalise
+#' @return A `nacho` object.
+#' @export
+#' @examples
+#' data(GSE74821)
+#' table(nacho_qc(check_outliers(GSE74821))$is_outlier)
+check_outliers <- function(nacho_object) {
+  check_nacho(nacho_object)
+  samples <- nacho_object@samples
+  samples[["is_outlier"]] <- compute_outliers(
+    samples,
+    nacho_object@thresholds,
+    nacho_object@rcc_type
+  )
+  nacho_object@samples <- samples
+  nacho_object
+}
+
+#' Drop outliers and normalise the other samples again
+#'
+#' Removes the samples flagged in [nacho_qc()] and runs the normalisation again
+#' on the samples that are left, with the same settings and thresholds.
+#' The new factors can flag more samples; call `exclude_outliers()` again to
+#' drop those too.
+#'
+#' @inheritParams normalise
+#' @return A `nacho` object without the flagged samples.
+#' @export
+#' @examples
+#' data(GSE74821)
+#' ncol(exclude_outliers(GSE74821))
+exclude_outliers <- function(nacho_object) {
+  check_nacho(nacho_object)
+  flagged <- nacho_object@samples[["is_outlier"]] %in% TRUE
+  if (!any(flagged)) {
+    nacho_inform("No sample is flagged, so nothing is removed.")
+    return(nacho_object)
+  }
+  if (all(flagged)) {
+    nacho_abort(
+      c(
+        "Every sample is flagged, so no sample would be left.",
+        i = "Check the thresholds with {.code summary(x)}."
+      ),
+      class = "bad_argument"
+    )
+  }
+  nacho_inform(
+    "Removing {sum(flagged)} flagged sample{?s} and normalising the other {sum(!flagged)} again."
+  )
+  kept <- nacho_object[, !flagged]
+  run_normalisation(kept, kept@settings, kept@thresholds)
+}
+
+check_thresholds <- function(
+  thresholds,
+  arg = rlang::caller_arg(thresholds),
+  call = rlang::caller_env()
+) {
+  problems <- if (is.list(thresholds)) {
+    validate_thresholds(thresholds)
+  } else {
+    "Thresholds must be a list."
+  }
+  if (length(problems) > 0) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} is not a valid set of thresholds.",
+        stats::setNames(
+          sub("^@thresholds", "thresholds", problems),
+          rep("x", length(problems))
+        )
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(thresholds)
+}

@@ -3,22 +3,21 @@
 \name{normalise}
 \alias{normalise}
 \alias{normalize}
-\title{(re)Normalise a "nacho" object}
+\title{(Re)normalise a nacho object}
 \usage{
 normalise(
   nacho_object,
-  housekeeping_genes = nacho_object[["housekeeping_genes"]],
-  housekeeping_predict = nacho_object[["housekeeping_predict"]],
-  housekeeping_norm = nacho_object[["housekeeping_norm"]],
-  normalisation_method = nacho_object[["normalisation_method"]],
-  n_comp = nacho_object[["n_comp"]],
-  remove_outliers = nacho_object[["remove_outliers"]],
-  outliers_thresholds = nacho_object[["outliers_thresholds"]]
+  housekeeping_genes = nacho_object@settings[["housekeeping_genes"]],
+  housekeeping_predict = nacho_object@settings[["housekeeping_predict"]],
+  housekeeping_norm = nacho_object@settings[["housekeeping_norm"]],
+  normalisation_method = nacho_object@settings[["normalisation_method"]],
+  n_comp = nacho_object@settings[["n_comp"]],
+  outliers_thresholds = nacho_object@thresholds,
+  ...
 )
 }
 \arguments{
-\item{nacho_object}{[\link{list}] A list object of class \code{"nacho"} obtained
-from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
+\item{nacho_object}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
 \item{housekeeping_genes}{[\link{character}] A vector of names of the miRNAs/mRNAs
 that should be used as housekeeping genes. Default is \code{NULL}.}
@@ -36,97 +35,31 @@ or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 \item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
 
-\item{remove_outliers}{[\link{logical}] A boolean to indicate if outliers should be excluded.}
+\item{outliers_thresholds}{A list of quality-control thresholds with the
+elements \code{BD}, \code{FoV}, \code{LoD}, \code{PCL}, \code{Positive_factor} and \code{House_factor}.}
 
-\item{outliers_thresholds}{[\link{list}] List of thresholds to exclude outliers.}
+\item{...}{Must be empty.}
 }
 \value{
-[\link{list}] A list containing parameters and data.
-\describe{
-\item{\code{access}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}} in \code{id_colname}.}
-\item{\code{housekeeping_genes}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
-\item{\code{housekeeping_predict}}{[\link{logical}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{housekeeping_norm}}{[\link{logical}] Value passed to \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
-\item{\code{normalisation_method}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
-\item{\code{remove_outliers}}{[\link{logical}] Value passed to \code{\link[=normalise]{normalise()}}.}
-\item{\code{n_comp}}{[\link{numeric}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{data_directory}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{pc_sum}}{[\link{data.frame}] A \code{data.frame} with \code{n_comp} rows and four columns:
-"Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
-\item{\code{nacho}}{[\link{data.frame}] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
-and all computed columns, \emph{i.e.}, quality-control metrics and counts, with one row per sample and probe.}
-\item{\code{outliers_thresholds}}{[\link{list}] A \code{list} of the quality-control thresholds used.}
-}
+A \code{nacho} object.
 }
 \description{
-This function creates a list in which your settings, the raw counts and normalised counts are stored,
-using the result from a call to \code{\link[=load_rcc]{load_rcc()}}.
+(Re)normalise a nacho object
 }
 \details{
-Outliers definition (\code{remove_outliers = TRUE}):
-\itemize{
-\item Binding Density (\code{BD}) < 0.1
-\item Binding Density (\code{BD}) > 2.25
-\item Field of View (\code{FoV}) < 75
-\item Positive Control Linearity (\code{PCL}) < 0.95
-\item Limit of Detection (\code{LoD}) < 2
-\item Positive normalisation factor (\code{Positive_factor}) < 0.25
-\item Positive normalisation factor (\code{Positive_factor}) > 4
-\item Housekeeping normalisation factor (\code{house_factor}) < 1/11
-\item Housekeeping normalisation factor (\code{house_factor}) > 11
-}
+When only \code{outliers_thresholds} changes, \code{normalise()} keeps the
+counts and recomputes the outlier flags.
+Otherwise it computes the quality-control metrics, the normalisation
+factors, the normalised counts and the PCA again.
+
+Outliers are samples with a binding density (\code{BD}) outside its range, a
+field of view (\code{FoV}) below its limit, a positive factor or a
+housekeeping factor outside its range, and, for single-sample RCC files,
+a positive control linearity (\code{PCL}) or a limit of detection (\code{LoD})
+below its limit. See \code{\link[=exclude_outliers]{exclude_outliers()}} to drop them.
 }
 \examples{
-
 data(GSE74821)
-GSE74821_norm <- normalise(
-  nacho_object = GSE74821,
-  housekeeping_norm = TRUE,
-  normalisation_method = "GEO",
-  remove_outliers = TRUE
-)
-
-if (interactive()) {
-  library(GEOquery)
-  library(NACHO)
-
-  # Import data from GEO
-  gse <- GEOquery::getGEO(GEO = "GSE74821")
-  targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
-  GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
-  utils::untar(
-    tarfile = file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),
-    exdir = file.path(tempdir(), "GSE74821")
-  )
-  targets$IDFILE <- list.files(
-    path = file.path(tempdir(), "GSE74821"),
-    pattern = ".RCC.gz$"
-  )
-  targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
-  utils::write.csv(
-    x = targets,
-    file = file.path(tempdir(), "GSE74821", "Samplesheet.csv")
-  )
-
-  # Read RCC files and format
-  nacho <- load_rcc(
-    data_directory = file.path(tempdir(), "GSE74821"),
-    ssheet_csv = file.path(tempdir(), "GSE74821", "Samplesheet.csv"),
-    id_colname = "IDFILE"
-  )
-
-  # (re)Normalise data by removing outliers
-  nacho_norm <- normalise(
-    nacho_object = nacho,
-    remove_outliers = TRUE
-  )
-
-  # (re)Normalise data with "GLM" method and removing outliers
-  nacho_norm <- normalise(
-    nacho_object = nacho,
-    normalisation_method = "GLM",
-    remove_outliers = TRUE
-  )
-}
-
+GSE74821_geo <- normalise(GSE74821, normalisation_method = "GEO")
+nacho_qc(GSE74821_geo)
 }

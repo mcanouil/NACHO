@@ -131,39 +131,35 @@ test_that("load_rcc() warns when it turns housekeeping normalisation off", {
 })
 
 test_that("no housekeeping norm", {
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = "salmon_data",
-        ssheet_csv = salmon_tidy,
-        id_colname = "IDFILE",
-        housekeeping_genes = NULL,
-        housekeeping_predict = FALSE,
-        housekeeping_norm = FALSE,
-        normalisation_method = "GLM",
-        n_comp = 10
-      )
-    },
-    "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = "salmon_data",
+      ssheet_csv = salmon_tidy,
+      id_colname = "IDFILE",
+      housekeeping_genes = NULL,
+      housekeeping_predict = FALSE,
+      housekeeping_norm = FALSE,
+      normalisation_method = "GLM",
+      n_comp = 10
+    ),
+    NACHO:::nacho
+  ))
 })
 
 test_that("no housekeeping norm and prediction", {
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = "salmon_data",
-        ssheet_csv = salmon_tidy,
-        id_colname = "IDFILE",
-        housekeeping_genes = NULL,
-        housekeeping_predict = TRUE,
-        housekeeping_norm = FALSE,
-        normalisation_method = "GLM",
-        n_comp = 10
-      )
-    },
-    "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = "salmon_data",
+      ssheet_csv = salmon_tidy,
+      id_colname = "IDFILE",
+      housekeeping_genes = NULL,
+      housekeeping_predict = TRUE,
+      housekeeping_norm = FALSE,
+      normalisation_method = "GLM",
+      n_comp = 10
+    ),
+    NACHO:::nacho
+  ))
 })
 
 test_that("using GEO GSE74821", {
@@ -195,38 +191,34 @@ test_that("using GEO GSE74821", {
   )
 
   # using GEO GSE74821
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE74821"),
-        ssheet_csv = head(targets, 20),
-        id_colname = "IDFILE",
-        housekeeping_genes = NULL,
-        housekeeping_predict = FALSE,
-        housekeeping_norm = TRUE,
-        normalisation_method = "GLM",
-        n_comp = 10
-      )
-    },
-    "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = file.path(tempdir(), "GSE74821"),
+      ssheet_csv = head(targets, 20),
+      id_colname = "IDFILE",
+      housekeeping_genes = NULL,
+      housekeeping_predict = FALSE,
+      housekeeping_norm = TRUE,
+      normalisation_method = "GLM",
+      n_comp = 10
+    ),
+    NACHO:::nacho
+  ))
 
   # using GEO GSE74821 with prediction
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE74821"),
-        ssheet_csv = head(targets, 20),
-        id_colname = "IDFILE",
-        housekeeping_genes = NULL,
-        housekeeping_predict = TRUE,
-        housekeeping_norm = TRUE,
-        normalisation_method = "GLM",
-        n_comp = 10
-      )
-    },
-    "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = file.path(tempdir(), "GSE74821"),
+      ssheet_csv = head(targets, 20),
+      id_colname = "IDFILE",
+      housekeeping_genes = NULL,
+      housekeeping_predict = TRUE,
+      housekeeping_norm = TRUE,
+      normalisation_method = "GLM",
+      n_comp = 10
+    ),
+    NACHO:::nacho
+  ))
 })
 
 test_that("using GEO GSE70970", {
@@ -258,81 +250,71 @@ test_that("using GEO GSE70970", {
   )
 
   # using GEO GSE70970
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE70970"),
-        ssheet_csv = head(targets, 20),
-        id_colname = "IDFILE",
-        housekeeping_genes = NULL,
-        housekeeping_predict = FALSE,
-        housekeeping_norm = TRUE,
-        normalisation_method = "GLM",
-        n_comp = 10
-      )
-    },
-    "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = file.path(tempdir(), "GSE70970"),
+      ssheet_csv = head(targets, 20),
+      id_colname = "IDFILE",
+      housekeeping_genes = NULL,
+      housekeeping_predict = FALSE,
+      housekeeping_norm = TRUE,
+      normalisation_method = "GLM",
+      n_comp = 10
+    ),
+    NACHO:::nacho
+  ))
 
   # using GEO GSE70970 with prediction
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE70970"),
-        ssheet_csv = head(targets, 20),
-        id_colname = "IDFILE",
-        housekeeping_genes = NULL,
-        housekeeping_predict = TRUE,
-        housekeeping_norm = TRUE,
-        normalisation_method = "GLM",
-        n_comp = 10
-      )
-    },
-    "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = file.path(tempdir(), "GSE70970"),
+      ssheet_csv = head(targets, 20),
+      id_colname = "IDFILE",
+      housekeeping_genes = NULL,
+      housekeeping_predict = TRUE,
+      housekeeping_norm = TRUE,
+      normalisation_method = "GLM",
+      n_comp = 10
+    ),
+    NACHO:::nacho
+  ))
 
   # ssheet_csv as vector
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE70970"),
-        ssheet_csv = head(targets[["IDFILE"]], 20),
-        id_colname = "IDFILE",
-        housekeeping_predict = TRUE,
-        housekeeping_norm = TRUE
-      )
-    },
-    class = "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = file.path(tempdir(), "GSE70970"),
+      ssheet_csv = head(targets[["IDFILE"]], 20),
+      id_colname = "IDFILE",
+      housekeeping_predict = TRUE,
+      housekeeping_norm = TRUE
+    ),
+    NACHO:::nacho
+  ))
 
   # ssheet_csv as vector without id_colname
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE70970"),
-        ssheet_csv = head(targets[["IDFILE"]], 20),
-        housekeeping_predict = TRUE,
-        housekeeping_norm = TRUE
-      )
-    },
-    class = "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = file.path(tempdir(), "GSE70970"),
+      ssheet_csv = head(targets[["IDFILE"]], 20),
+      housekeeping_predict = TRUE,
+      housekeeping_norm = TRUE
+    ),
+    NACHO:::nacho
+  ))
 
   # ssheet_csv as a named vector
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = file.path(tempdir(), "GSE70970"),
-        ssheet_csv = `names<-`(
-          head(targets[["IDFILE"]], 20),
-          head(letters, 20)
-        ),
-        housekeeping_predict = TRUE,
-        housekeeping_norm = TRUE
-      )
-    },
-    class = "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = file.path(tempdir(), "GSE70970"),
+      ssheet_csv = `names<-`(
+        head(targets[["IDFILE"]], 20),
+        head(letters, 20)
+      ),
+      housekeeping_predict = TRUE,
+      housekeeping_norm = TRUE
+    ),
+    NACHO:::nacho
+  ))
 
   # id_colname not defined when using df
   expect_error({
@@ -346,16 +328,14 @@ test_that("using GEO GSE70970", {
 })
 
 test_that("using RAW RCC multiplexed", {
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = "salmon_data",
-        ssheet_csv = salmon_tidy,
-        id_colname = "IDFILE"
-      )
-    },
-    "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = "salmon_data",
+      ssheet_csv = salmon_tidy,
+      id_colname = "IDFILE"
+    ),
+    NACHO:::nacho
+  ))
 })
 
 test_that("using RAW RCC multiplexed without plexset_id", {
@@ -404,18 +384,16 @@ test_that("Too high number of components", {
 })
 
 test_that("plexset", {
-  expect_s3_class(
-    {
-      load_rcc(
-        data_directory = "plexset_data",
-        ssheet_csv = plexset_tidy,
-        id_colname = "IDFILE",
-        housekeeping_predict = TRUE,
-        housekeeping_norm = TRUE
-      )
-    },
-    class = "nacho"
-  )
+  expect_true(S7::S7_inherits(
+    load_rcc(
+      data_directory = "plexset_data",
+      ssheet_csv = plexset_tidy,
+      id_colname = "IDFILE",
+      housekeeping_predict = TRUE,
+      housekeeping_norm = TRUE
+    ),
+    NACHO:::nacho
+  ))
 })
 
 test_that("heterogenous", {
@@ -454,12 +432,12 @@ test_that("PlexSet files are detected from their content", {
     ssheet_csv = unique_ids,
     id_colname = "IDFILE"
   ))
-  expect_identical(attr(res, "RCC_type"), "n8")
+  expect_identical(res@rcc_type, "n8")
   expect_setequal(
-    unique(res[["nacho"]][["IDFILE"]]),
-    unique(salmon_nacho[["nacho"]][["IDFILE"]])
+    nacho_samples(res)[["IDFILE"]],
+    nacho_samples(salmon_nacho)[["IDFILE"]]
   )
-  expect_false(all(res[["nacho"]][["is_outlier"]]))
+  expect_false(all(nacho_qc(res)[["is_outlier"]]))
 })
 
 test_that("PlexSet detection needs the exact PlexSet code classes", {

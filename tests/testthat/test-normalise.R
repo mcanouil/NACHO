@@ -2,16 +2,16 @@ test_that("default settings", {
   res <- normalise(
     nacho_object = GSE74821
   )
-  expect_s3_class(res, "nacho")
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
 })
 
 test_that("missing nacho", {
   expect_error(normalise(), class = "nacho_error_bad_object")
 })
 
-test_that("missing field", {
-  GSE74821$nacho <- NULL
-  expect_error(normalise(GSE74821), class = "nacho_error_bad_object")
+test_that("normalise() refuses a NACHO 2 list", {
+  old <- structure(list(nacho = data.frame()), class = "nacho")
+  expect_error(normalise(old), class = "nacho_error_bad_object")
 })
 
 test_that("normalise() checks its arguments", {
@@ -35,25 +35,18 @@ test_that("normalise() says when nothing changes", {
 })
 
 test_that("No POS_E", {
-  GSE74821$nacho <- GSE74821$nacho[GSE74821$nacho$Name != "POS_E(0.5)", ]
+  no_pos_e <- GSE74821[nacho_probes(GSE74821)[["Name"]] != "POS_E(0.5)", ]
   res <- normalise(
-    nacho_object = GSE74821,
+    nacho_object = no_pos_e,
     housekeeping_genes = NULL,
     housekeeping_predict = FALSE,
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 10,
-    remove_outliers = FALSE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
+    outliers_thresholds = NACHO:::default_thresholds()
   )
-  expect_s3_class(res, "nacho")
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
+  expect_false("POS_E(0.5)" %in% nacho_probes(res)[["Name"]])
 })
 
 test_that("genes not null", {
@@ -64,17 +57,15 @@ test_that("genes not null", {
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 10,
-    remove_outliers = FALSE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
+    outliers_thresholds = NACHO:::default_thresholds()
   )
-  expect_s3_class(res, "nacho")
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
+  expect_setequal(res@settings[["housekeeping_genes"]], c("RPLP0", "ACTB"))
+  probes <- nacho_probes(res)
+  expect_setequal(
+    probes[["Name"]][probes[["is_housekeeping"]]],
+    c("RPLP0", "ACTB")
+  )
 })
 
 test_that("predict TRUE", {
@@ -85,17 +76,10 @@ test_that("predict TRUE", {
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 10,
-    remove_outliers = FALSE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
+    outliers_thresholds = NACHO:::default_thresholds()
   )
-  expect_s3_class(res, "nacho")
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
+  expect_true(res@settings[["housekeeping_predict"]])
 })
 
 test_that("norm TRUE", {
@@ -106,17 +90,10 @@ test_that("norm TRUE", {
     housekeeping_norm = TRUE,
     normalisation_method = "GEO",
     n_comp = 10,
-    remove_outliers = FALSE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
+    outliers_thresholds = NACHO:::default_thresholds()
   )
-  expect_s3_class(res, "nacho")
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
+  expect_true(res@settings[["housekeeping_norm"]])
 })
 
 test_that("method GLM", {
@@ -127,17 +104,10 @@ test_that("method GLM", {
     housekeeping_norm = FALSE,
     normalisation_method = "GLM",
     n_comp = 10,
-    remove_outliers = FALSE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
+    outliers_thresholds = NACHO:::default_thresholds()
   )
-  expect_s3_class(res, "nacho")
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
+  expect_identical(res@settings[["normalisation_method"]], "GLM")
 })
 
 test_that("n_comp 2", {
@@ -148,17 +118,10 @@ test_that("n_comp 2", {
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 2,
-    remove_outliers = FALSE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
+    outliers_thresholds = NACHO:::default_thresholds()
   )
-  expect_s3_class(res, "nacho")
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
+  expect_identical(ncol(res@pca[["scores"]]), 2L)
 })
 
 test_that("n_comp 10", {
@@ -169,253 +132,179 @@ test_that("n_comp 10", {
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 10,
-    remove_outliers = FALSE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
+    outliers_thresholds = NACHO:::default_thresholds()
   )
-  expect_s3_class(res, "nacho")
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
+  expect_identical(ncol(res@pca[["scores"]]), 10L)
 })
-
-test_that("outliers TRUE", {
-  res <- normalise(
-    nacho_object = GSE74821,
-    housekeeping_genes = NULL,
-    housekeeping_predict = FALSE,
-    housekeeping_norm = FALSE,
-    normalisation_method = "GEO",
-    n_comp = 10,
-    remove_outliers = FALSE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
-  )
-  expect_s3_class(res, "nacho")
-})
-
-
-test_that("Test outliers", {
-  res <- normalise(
-    nacho_object = GSE74821,
-    remove_outliers = TRUE,
-    outliers_thresholds = list(
-      BD = c(0.15, 2.25),
-      FoV = 95,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
-  )
-  expect_s3_class(res, "nacho")
-})
-
 
 test_that("All LoD to zero", {
-  GSE74821$nacho$LoD <- 0
+  zero_lod <- GSE74821
+  samples <- zero_lod@samples
+  samples[["LoD"]] <- 0
+  zero_lod@samples <- samples
   res <- normalise(
-    nacho_object = GSE74821,
+    nacho_object = zero_lod,
     housekeeping_genes = c("RPLP0", "ACTB"),
     housekeeping_predict = FALSE,
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 10,
-    remove_outliers = FALSE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
+    outliers_thresholds = NACHO:::default_thresholds()
   )
-  expect_s3_class(res, "nacho")
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
 })
-
-test_that("All PC to zero", {
-  GSE74821$nacho$PC <- 0
-  res <- normalise(
-    nacho_object = GSE74821,
-    housekeeping_genes = c("RPLP0", "ACTB"),
-    housekeeping_predict = FALSE,
-    housekeeping_norm = FALSE,
-    normalisation_method = "GEO",
-    n_comp = 10,
-    remove_outliers = FALSE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
-  )
-  expect_s3_class(res, "nacho")
-})
-
-test_that("housekeeping_norm to FALSE and remove_outliers to TRUE", {
-  GSE74821$nacho$PC <- 0
-  res <- normalise(
-    nacho_object = GSE74821,
-    housekeeping_genes = NULL,
-    housekeeping_predict = FALSE,
-    housekeeping_norm = FALSE,
-    normalisation_method = "GEO",
-    n_comp = 10,
-    remove_outliers = TRUE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
-  )
-  expect_s3_class(res, "nacho")
-})
-
-test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
-  GSE74821$nacho$PC <- 0
-  res <- normalise(
-    nacho_object = GSE74821,
-    housekeeping_genes = NULL,
-    housekeeping_predict = FALSE,
-    housekeeping_norm = TRUE,
-    normalisation_method = "GEO",
-    n_comp = 10,
-    remove_outliers = TRUE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
-  )
-  expect_s3_class(res, "nacho")
-})
-
-test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
-  GSE74821$nacho$PC <- 0
-  res <- normalise(
-    nacho_object = GSE74821,
-    housekeeping_genes = NULL,
-    housekeeping_predict = FALSE,
-    housekeeping_norm = TRUE,
-    normalisation_method = "GEO",
-    n_comp = 10,
-    remove_outliers = TRUE,
-    outliers_thresholds = list(
-      BD = c(0.1, 2.25),
-      FoV = 75,
-      LoD = 2,
-      PCL = 0.95,
-      Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
-    )
-  )
-  expect_s3_class(res, "nacho")
-})
-
-test_that("wrong attribute", {
-  attr(GSE74821, "RCC_type") <- "something"
-  expect_error(normalise(GSE74821), class = "nacho_error_bad_object")
-})
-
 
 test_that("Missing values in counts", {
-  index <- sample(which(GSE74821$nacho$CodeClass == "Endogenous"), size = 25)
-  GSE74821$nacho[index, "Count"] <- NA
-  GSE74821$nacho[index, "Count_Norm"] <- NA
+  with_na <- GSE74821
+  endogenous <- which(nacho_probes(with_na)[["CodeClass"]] == "Endogenous")
+  counts <- with_na@counts
+  counts[sample(endogenous, size = 25), 1] <- NA_integer_
+  with_na@counts <- counts
   expect_warning(
-    object = normalise(GSE74821, normalisation_method = "GEO"),
+    object = normalise(with_na, normalisation_method = "GEO"),
     class = "nacho_warning_missing_counts"
   ) |>
     suppressMessages()
 })
 
 test_that("plexset", {
-  expect_s3_class(
-    object = {
-      normalise(
-        plexset_nacho,
-        housekeeping_predict = TRUE,
-        housekeeping_norm = TRUE
-      )
-    },
-    class = "nacho"
+  res <- normalise(
+    plexset_nacho,
+    housekeeping_predict = TRUE,
+    housekeeping_norm = TRUE
   )
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
+  expect_identical(res@rcc_type, "n8")
 })
 
 test_that("plexset GLM", {
-  expect_s3_class(
-    object = {
-      normalise(
-        plexset_nacho,
-        housekeeping_predict = TRUE,
-        housekeeping_norm = TRUE,
-        normalisation_method = "GLM"
-      )
-    },
-    class = "nacho"
+  res <- normalise(
+    plexset_nacho,
+    housekeeping_predict = TRUE,
+    housekeeping_norm = TRUE,
+    normalisation_method = "GLM"
   )
+  expect_true(S7::S7_inherits(res, NACHO:::nacho))
+  expect_identical(res@settings[["normalisation_method"]], "GLM")
 })
 
 test_that("normalise() uses the n_comp it receives", {
   res <- suppressMessages(normalise(GSE74821, n_comp = 3))
-  expect_identical(res[["n_comp"]], 3)
-  expect_identical(nrow(res[["pc_sum"]]), 3L)
+  expect_identical(res@settings[["n_comp"]], 3L)
+  expect_identical(nrow(res@pca[["importance"]]), 3L)
   expect_identical(
-    grep("^PC[0-9]+$", names(res[["nacho"]]), value = TRUE),
+    grep("^PC[0-9]+$", names(nacho_samples(res)), value = TRUE),
     sprintf("PC%02d", 1:3)
   )
 })
 
-test_that("normalise() keeps the requested n_comp when it removes outliers", {
-  thresholds <- GSE74821[["outliers_thresholds"]]
+test_that("exclude_outliers() keeps the requested n_comp", {
+  thresholds <- GSE74821@thresholds
   thresholds[["FoV"]] <- 99.5
-  res <- suppressMessages(normalise(
+  flagged <- suppressMessages(normalise(
     GSE74821,
     n_comp = 4,
-    remove_outliers = TRUE,
     outliers_thresholds = thresholds
   ))
-  expect_identical(res[["n_comp"]], 4)
-  expect_identical(nrow(res[["pc_sum"]]), 4L)
+  res <- suppressMessages(exclude_outliers(flagged))
+  expect_identical(res@settings[["n_comp"]], 4L)
+  expect_identical(nrow(res@pca[["importance"]]), 4L)
 })
 
 test_that("normalise() flags outliers against new thresholds", {
-  thresholds <- GSE74821[["outliers_thresholds"]]
+  thresholds <- GSE74821@thresholds
   thresholds[["BD"]] <- c(0.1, 0.2)
   res <- suppressMessages(normalise(GSE74821, outliers_thresholds = thresholds))
   expect_identical(
-    res[["nacho"]][["is_outlier"]],
-    check_outliers(res)[["nacho"]][["is_outlier"]]
+    nacho_qc(res)[["is_outlier"]],
+    nacho_qc(check_outliers(res))[["is_outlier"]]
   )
-  expect_true(any(res[["nacho"]][["is_outlier"]]))
+  expect_true(any(nacho_qc(res)[["is_outlier"]]))
 })
 
 test_that("a panel without POS_E gives NA for PCL and LoD, not a failure", {
-  no_pos_e <- GSE74821
-  no_pos_e[["nacho"]] <- no_pos_e[["nacho"]][
-    no_pos_e[["nacho"]][["Name"]] != "POS_E(0.5)",
-  ]
+  no_pos_e <- GSE74821[nacho_probes(GSE74821)[["Name"]] != "POS_E(0.5)", ]
   res <- suppressMessages(normalise(no_pos_e, normalisation_method = "GEO"))
-  expect_true(all(is.na(res[["nacho"]][["PCL"]])))
-  expect_true(all(is.na(res[["nacho"]][["LoD"]])))
-  expect_false(anyNA(res[["nacho"]][["is_outlier"]]))
+  expect_true(all(is.na(nacho_qc(res)[["PCL"]])))
+  expect_true(all(is.na(nacho_qc(res)[["LoD"]])))
+  expect_false(anyNA(nacho_qc(res)[["is_outlier"]]))
+})
+
+test_that("normalise() returns a nacho object", {
+  x <- suppressMessages(normalise(salmon_nacho, normalisation_method = "GLM"))
+  expect_true(S7::S7_inherits(x, NACHO:::nacho))
+  expect_identical(x@settings$normalisation_method, "GLM")
+})
+
+test_that("normalise() with new thresholds only recomputes the flags", {
+  tight <- salmon_nacho@thresholds
+  tight$BD <- c(0.5, 0.6)
+  x <- suppressMessages(normalise(salmon_nacho, outliers_thresholds = tight))
+  expect_identical(x@thresholds, tight)
+  expect_identical(
+    nacho_counts(x, normalised = TRUE),
+    nacho_counts(salmon_nacho, normalised = TRUE)
+  )
+  expect_identical(
+    nacho_qc(x)$is_outlier,
+    NACHO:::compute_outliers(x@samples, tight, x@rcc_type)
+  )
+})
+
+test_that("normalise() refuses remove_outliers and points to exclude_outliers()", {
+  expect_error(
+    normalise(salmon_nacho, remove_outliers = TRUE),
+    class = "nacho_error_bad_argument"
+  )
+  expect_snapshot(normalise(salmon_nacho, remove_outliers = TRUE), error = TRUE)
+})
+
+test_that("normalise() refuses insane thresholds", {
+  bad <- salmon_nacho@thresholds
+  bad$FoV <- 150
+  expect_error(
+    normalise(salmon_nacho, outliers_thresholds = bad),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("exclude_outliers() drops every flagged sample and normalises the rest", {
+  tight <- plexset_nacho@thresholds
+  tight$Positive_factor <- c(0.9, 1.1)
+  flagged <- suppressMessages(normalise(
+    plexset_nacho,
+    outliers_thresholds = tight
+  ))
+  n_flagged <- sum(nacho_qc(flagged)$is_outlier)
+  skip_if(
+    n_flagged == 0 || n_flagged == ncol(flagged),
+    "Tight thresholds flag no sample or every sample."
+  )
+  kept <- suppressMessages(exclude_outliers(flagged))
+  expect_identical(ncol(kept), ncol(flagged) - n_flagged)
+  expect_false(any(
+    nacho_samples(kept)$IDFILE %in%
+      nacho_samples(flagged)$IDFILE[nacho_qc(flagged)$is_outlier]
+  ))
+  expect_identical(kept@thresholds, tight)
+})
+
+test_that("exclude_outliers() refuses to drop every sample", {
+  flagged <- plexset_nacho
+  samples <- flagged@samples
+  samples$is_outlier <- TRUE
+  flagged@samples <- samples
+  expect_error(exclude_outliers(flagged), class = "nacho_error_bad_argument")
+})
+
+test_that("check_outliers() recomputes the flags from the thresholds", {
+  x <- salmon_nacho
+  samples <- x@samples
+  samples$is_outlier <- !samples$is_outlier
+  x@samples <- samples
+  expect_identical(
+    nacho_qc(check_outliers(x))$is_outlier,
+    nacho_qc(salmon_nacho)$is_outlier
+  )
 })

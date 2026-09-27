@@ -42,22 +42,8 @@ or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
 Cannot be more than n-1 samples. Default is \code{10}.}
 }
 \value{
-[\link{list}] A list object of class \code{"nacho"}:
-\describe{
-\item{\code{access}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}} in \code{id_colname}.}
-\item{\code{housekeeping_genes}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{housekeeping_predict}}{[\link{logical}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{housekeeping_norm}}{[\link{logical}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{normalisation_method}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{remove_outliers}}{[\link{logical}] \code{FALSE}.}
-\item{\code{n_comp}}{[\link{numeric}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{data_directory}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{pc_sum}}{[\link{data.frame}] A \code{data.frame} with \code{n_comp} rows and four columns:
-"Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
-\item{\code{nacho}}{[\link{data.frame}] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
-and all computed columns, \emph{i.e.}, quality-control metrics and counts, with one row per sample and probe.}
-\item{\code{outliers_thresholds}}{[\link{list}] A \code{list} of the (default) quality-control thresholds used.}
-}
+A \code{nacho} object; read its content with \code{\link[=nacho_counts]{nacho_counts()}},
+\code{\link[=nacho_samples]{nacho_samples()}}, \code{\link[=nacho_probes]{nacho_probes()}} and \code{\link[=nacho_qc]{nacho_qc()}}.
 }
 \description{
 This function is used to preprocess the data from NanoString nCounter.
