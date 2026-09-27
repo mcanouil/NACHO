@@ -55,6 +55,8 @@
     [`dcast()`](https://rdrr.io/pkg/data.table/man/dcast.data.table.html)
     and
     [`as.data.table()`](https://rdrr.io/pkg/data.table/man/as.data.table.html).
+  - docs: link to GEO over https in the bibliography, since the http
+    address now redirects.
 - In `pkgdown/`,
   - docs: restyle the website for pkgdown 2.2 with the NACHO logo
     colours, a light and dark mode switch, and colour contrast that
