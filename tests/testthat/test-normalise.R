@@ -321,10 +321,11 @@ test_that("Missing values in counts", {
   index <- sample(which(GSE74821$nacho$CodeClass == "Endogenous"), size = 25)
   GSE74821$nacho[index, "Count"] <- NA
   GSE74821$nacho[index, "Count_Norm"] <- NA
-  expect_message(
+  expect_warning(
     object = normalise(GSE74821, normalisation_method = "GEO"),
-    regexp = "Missing values have been replaced with zeros for PCA"
-  )
+    class = "nacho_warning_missing_counts"
+  ) |>
+    suppressMessages()
 })
 
 test_that("plexset", {

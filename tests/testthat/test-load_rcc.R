@@ -1,37 +1,115 @@
 test_that("missing directory", {
-  expect_error(load_rcc(
-    ssheet_csv = salmon_tidy,
-    id_colname = "IDFILE",
-    housekeeping_genes = NULL,
-    housekeeping_predict = FALSE,
-    housekeeping_norm = TRUE,
-    normalisation_method = "GLM",
-    n_comp = 10
-  ))
+  expect_error(
+    load_rcc(
+      ssheet_csv = salmon_tidy,
+      id_colname = "IDFILE",
+      housekeeping_genes = NULL,
+      housekeeping_predict = FALSE,
+      housekeeping_norm = TRUE,
+      normalisation_method = "GLM",
+      n_comp = 10
+    ),
+    class = "nacho_error_bad_argument"
+  )
 })
 
 test_that("missing sample sheet", {
-  expect_error(load_rcc(
-    data_directory = "salmon_data",
-    id_colname = "IDFILE",
-    housekeeping_genes = NULL,
-    housekeeping_predict = FALSE,
-    housekeeping_norm = TRUE,
-    normalisation_method = "GLM",
-    n_comp = 10
-  ))
+  expect_error(
+    load_rcc(
+      data_directory = "salmon_data",
+      id_colname = "IDFILE",
+      housekeeping_genes = NULL,
+      housekeeping_predict = FALSE,
+      housekeeping_norm = TRUE,
+      normalisation_method = "GLM",
+      n_comp = 10
+    ),
+    class = "nacho_error_bad_argument"
+  )
 })
 
 test_that("missing id_colname", {
-  expect_error(load_rcc(
-    data_directory = "salmon_data",
-    ssheet_csv = salmon_tidy,
-    housekeeping_genes = NULL,
-    housekeeping_predict = FALSE,
-    housekeeping_norm = TRUE,
-    normalisation_method = "GLM",
-    n_comp = 10
-  ))
+  expect_error(
+    load_rcc(
+      data_directory = "salmon_data",
+      ssheet_csv = salmon_tidy,
+      housekeeping_genes = NULL,
+      housekeeping_predict = FALSE,
+      housekeeping_norm = TRUE,
+      normalisation_method = "GLM",
+      n_comp = 10
+    ),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("load_rcc() checks its arguments before reading any file", {
+  expect_error(
+    load_rcc(
+      test_path("plexset_data"),
+      plexset_tidy,
+      "IDFILE",
+      normalisation_method = "geo"
+    ),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    load_rcc(test_path("plexset_data"), plexset_tidy, "IDFILE", n_comp = 0),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    load_rcc(
+      test_path("plexset_data"),
+      plexset_tidy,
+      "IDFILE",
+      housekeeping_norm = NA
+    ),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    load_rcc(test_path("plexset_data"), plexset_tidy, "NOT_A_COLUMN"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    load_rcc(file.path(tempdir(), "no-such-directory"), plexset_tidy, "IDFILE"),
+    class = "nacho_error_missing_file"
+  )
+})
+
+test_that("load_rcc() names the RCC files it cannot find", {
+  sheet <- plexset_tidy
+  sheet$IDFILE[1:8] <- "missing.RCC"
+  expect_error(
+    load_rcc(test_path("plexset_data"), sheet, "IDFILE"),
+    class = "nacho_error_missing_file"
+  )
+  expect_snapshot(
+    load_rcc(test_path("plexset_data"), sheet, "IDFILE"),
+    error = TRUE
+  )
+})
+
+test_that("load_rcc() reports its stages unless nacho.quiet is set", {
+  withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
+  expect_message(
+    load_rcc(test_path("plexset_data"), plexset_tidy, "IDFILE"),
+    "Reading 12 RCC files"
+  )
+  withr::local_options(nacho.quiet = TRUE)
+  expect_no_message(load_rcc(test_path("plexset_data"), plexset_tidy, "IDFILE"))
+})
+
+test_that("load_rcc() warns when it turns housekeeping normalisation off", {
+  expect_warning(
+    load_rcc(
+      test_path("plexset_data"),
+      plexset_tidy,
+      "IDFILE",
+      housekeeping_genes = NULL
+    ),
+    class = "nacho_warning_no_housekeeping"
+  ) |>
+    suppressMessages()
 })
 
 test_that("no housekeeping norm", {
@@ -266,29 +344,35 @@ test_that("using RAW RCC multiplexed without plexset_id", {
   targets_tidy <- salmon_tidy
   targets_tidy$plexset_id <- NULL
 
-  expect_error({
-    load_rcc(
-      data_directory = "salmon_data",
-      ssheet_csv = targets_tidy,
-      id_colname = "IDFILE"
-    )
-  })
+  expect_error(
+    {
+      load_rcc(
+        data_directory = "salmon_data",
+        ssheet_csv = targets_tidy,
+        id_colname = "IDFILE"
+      )
+    },
+    class = "nacho_error_duplicate_id"
+  )
 })
 
 test_that("using RAW RCC multiplexed with wrong path", {
   targets_tidy <- salmon_tidy
   targets_tidy$IDFILE[1] <- "something_wrong.RCC" # wrong path
-  expect_error({
-    load_rcc(
-      data_directory = "salmon_data",
-      ssheet_csv = targets_tidy,
-      id_colname = "IDFILE"
-    )
-  })
+  expect_error(
+    {
+      load_rcc(
+        data_directory = "salmon_data",
+        ssheet_csv = targets_tidy,
+        id_colname = "IDFILE"
+      )
+    },
+    class = "nacho_error_missing_file"
+  )
 })
 
 test_that("Too high number of components", {
-  expect_message(
+  expect_warning(
     {
       load_rcc(
         data_directory = "salmon_data",
@@ -297,7 +381,7 @@ test_that("Too high number of components", {
         n_comp = 1000
       )
     },
-    "has been set to"
+    class = "nacho_warning_n_comp_reduced"
   )
 })
 
@@ -317,15 +401,18 @@ test_that("plexset", {
 })
 
 test_that("heterogenous", {
-  expect_error({
-    load_rcc(
-      data_directory = ".",
-      ssheet_csv = plexset_salmon_tidy,
-      id_colname = "IDFILE",
-      housekeeping_predict = TRUE,
-      housekeeping_norm = TRUE
-    )
-  })
+  expect_error(
+    {
+      load_rcc(
+        data_directory = ".",
+        ssheet_csv = plexset_salmon_tidy,
+        id_colname = "IDFILE",
+        housekeeping_predict = TRUE,
+        housekeeping_norm = TRUE
+      )
+    },
+    class = "nacho_error_missing_file"
+  )
 })
 
 test_that("PlexSet files are detected from their content", {
@@ -393,6 +480,6 @@ test_that("load_rcc() refuses a mix of PlexSet and single-sample RCC files offli
       ssheet_csv = data.frame(IDFILE = basename(c(plexset, single))),
       id_colname = "IDFILE"
     )),
-    "mix PlexSet and single-sample"
+    class = "nacho_error_mixed_rcc_types"
   )
 })
