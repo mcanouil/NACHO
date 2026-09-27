@@ -53,6 +53,18 @@ out="$("${scripts}/release-guard.sh" "${tmp}/submitted")"
 check "guard skips an already submitted version" false \
   "$(field submit <<<"${out}")"
 
+make_repo "${tmp}/upstream" 2.0.7
+git clone -q "${tmp}/upstream" "${tmp}/rerun"
+printf 'Version: 2.0.7\nDate: 2026-10-01 10:00:00 UTC\nSHA: abc\n' \
+  >"${tmp}/upstream/CRAN-SUBMISSION"
+git -C "${tmp}/upstream" add CRAN-SUBMISSION
+git -C "${tmp}/upstream" -c user.name=test -c user.email=test@example.com \
+  -c commit.gpgsign=false commit -q -m record
+git -C "${tmp}/rerun" fetch -q origin
+out="$("${scripts}/release-guard.sh" "${tmp}/rerun")"
+check "guard skips a version recorded on origin/main" false \
+  "$(field submit <<<"${out}")"
+
 mkdir -p "${tmp}/empty"
 check "guard fails without a version" 1 \
   "$(status_of "${scripts}/release-guard.sh" "${tmp}/empty")"

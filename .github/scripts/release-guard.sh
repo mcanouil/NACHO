@@ -24,13 +24,17 @@ if git -C "${dir}" rev-parse -q --verify "refs/tags/v${version}" >/dev/null; the
   exit 0
 fi
 
-record="${dir}/CRAN-SUBMISSION"
-if [ -f "${record}" ]; then
-  recorded="$(sed -n 's/^Version:[[:space:]]*//p' "${record}")"
-  if [ "${recorded}" = "${version}" ]; then
-    emit false "${version} was already submitted to CRAN"
-    exit 0
+recorded_versions() {
+  if [ -f "${dir}/CRAN-SUBMISSION" ]; then
+    sed -n 's/^Version:[[:space:]]*//p' "${dir}/CRAN-SUBMISSION"
   fi
+  git -C "${dir}" show origin/main:CRAN-SUBMISSION 2>/dev/null |
+    sed -n 's/^Version:[[:space:]]*//p' || true
+}
+
+if grep -Fxq "${version}" <<<"$(recorded_versions)"; then
+  emit false "${version} was already submitted to CRAN"
+  exit 0
 fi
 
 emit true "${version} is ready to submit"

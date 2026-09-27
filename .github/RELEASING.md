@@ -25,9 +25,23 @@ It then waits for your approval on the `cran` environment.
 Approve it, and the workflow uploads the tarball and records the submission in `CRAN-SUBMISSION` on `main`.
 CRAN then emails the maintainer, and the submission only counts once you click the link in that email.
 
+Before the upload, the workflow checks `main` again.
+If `CRAN-SUBMISSION` there already records this version, it stops, so a re-run never submits twice.
+
 To rehearse without uploading, run "CRAN submission" by hand from `main` with "dry run" ticked.
+It builds and checks the tarball of whatever version `main` holds, even a development one.
+It still asks for approval on the `cran` environment, then stops before uploading.
 
 If the upload step fails because devtools changed, submit from a local checkout with `devtools::submit_cran()`.
+
+### When CRAN asks for changes
+
+A rejected version stays recorded in `CRAN-SUBMISSION`, so the workflow won't submit it again on its own.
+
+1. Open a pull request that fixes what CRAN asked for, deletes `CRAN-SUBMISSION`, and adds a "Resubmission" section to `cran-comments.md` saying what changed.
+2. Merge it once the checks pass.
+3. Run "CRAN submission" by hand from `main` with "dry run" unticked, then approve it as before.
+   If the pull request changed `DESCRIPTION`, the merge has already started that workflow, so approve that run instead.
 
 ## 3. Publish the release
 

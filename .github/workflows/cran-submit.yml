@@ -37,12 +37,20 @@ jobs:
 
       - name: Run the release guard
         id: guard
+        env:
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         run: |
-          .github/scripts/release-guard.sh . | tee -a "${GITHUB_OUTPUT}"
+          .github/scripts/release-guard.sh . > "${RUNNER_TEMP}/guard.txt"
+          if [ "${DRY_RUN}" = "true" ]; then
+            sed -i -e 's/^submit=.*/submit=true/' \
+              -e 's/^reason=.*/reason=dry run: build, check and stop before uploading/' \
+              "${RUNNER_TEMP}/guard.txt"
+          fi
+          tee -a "${GITHUB_OUTPUT}" < "${RUNNER_TEMP}/guard.txt"
           {
             echo "## CRAN submission guard"
             echo ""
-            sed 's/^/- /' "${GITHUB_OUTPUT}"
+            sed 's/^/- /' "${RUNNER_TEMP}/guard.txt"
           } >> "${GITHUB_STEP_SUMMARY}"
 
   check:
@@ -149,6 +157,16 @@ jobs:
         with:
           name: cran-tarball
           path: cran
+
+      - name: Check that main has no submission of this version
+        if: ${{ env.DRY_RUN != 'true' }}
+        run: |
+          git fetch -q --tags origin main
+          .github/scripts/release-guard.sh . > "${RUNNER_TEMP}/guard.txt"
+          if ! grep -qx 'submit=true' "${RUNNER_TEMP}/guard.txt"; then
+            echo "::error::$(sed -n 's/^reason=//p' "${RUNNER_TEMP}/guard.txt"). Nothing was uploaded."
+            exit 1
+          fi
 
       - name: Upload to CRAN
         run: |
