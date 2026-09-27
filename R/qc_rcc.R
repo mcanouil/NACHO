@@ -127,7 +127,7 @@ qc_rcc <- function(
   if (anyNA(counts_df)) {
     nacho_warn(
       c(
-        "{sum(is.na(counts_df))} missing count{?s} were set to 0 before PCA.",
+        "{sum(is.na(counts_df))} missing count{?s} {?was/were} set to 0 before PCA.",
         i = "Probes absent from some RCC files usually mean mixed CodeSets."
       ),
       class = "missing_counts"

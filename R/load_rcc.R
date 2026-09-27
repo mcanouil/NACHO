@@ -169,27 +169,10 @@ load_rcc <- function(
     )
   }
   has_duplicates <- anyDuplicated(nacho_df[[id_colname]]) != 0
-  if (all(is_plexset) && !"plexset_id" %in% colnames(nacho_df)) {
-    if (has_duplicates) {
-      # Used only inside the cli glue string below.
-      dups <- unique(nacho_df[[id_colname]][duplicated(nacho_df[[id_colname]])]) # nolint: object_usage_linter.
-      nacho_abort(
-        c(
-          "{.field {id_colname}} contains duplicated values: {.val {utils::head(dups, 3)}}.",
-          i = "PlexSet RCC files hold 8 samples each; add a {.field plexset_id} column ({.val S1} to {.val S8}).",
-          i = "For single-sample RCC files, make {.field {id_colname}} unique."
-        ),
-        class = "duplicate_id"
-      )
-    }
-    nacho_df <- nacho_df[rep(seq_len(nrow(nacho_df)), each = 8)]
-    nacho_df[["plexset_id"]] <- rep(
-      paste0("S", seq_len(8)),
-      times = nrow(nacho_df) / 8
-    )
-  }
-  if (!all(is_plexset) && has_duplicates) {
-    dups <- unique(nacho_df[[id_colname]][duplicated(nacho_df[[id_colname]])])
+  has_plexset_id <- "plexset_id" %in% colnames(nacho_df)
+  if (has_duplicates && !(all(is_plexset) && has_plexset_id)) {
+    # Used only inside the cli glue string below.
+    dups <- unique(nacho_df[[id_colname]][duplicated(nacho_df[[id_colname]])]) # nolint: object_usage_linter.
     nacho_abort(
       c(
         "{.field {id_colname}} contains duplicated values: {.val {utils::head(dups, 3)}}.",
@@ -197,6 +180,13 @@ load_rcc <- function(
         i = "For single-sample RCC files, make {.field {id_colname}} unique."
       ),
       class = "duplicate_id"
+    )
+  }
+  if (all(is_plexset) && !has_plexset_id) {
+    nacho_df <- nacho_df[rep(seq_len(nrow(nacho_df)), each = 8)]
+    nacho_df[["plexset_id"]] <- rep(
+      paste0("S", seq_len(8)),
+      times = nrow(nacho_df) / 8
     )
   }
 
