@@ -106,3 +106,17 @@ test_that("compute_pca() handles a single sample", {
   expect_identical(dim(pca$scores), c(1L, 0L))
   expect_identical(nrow(pca$importance), 0L)
 })
+
+test_that("compute_pca() caps components by the number of probes too", {
+  counts <- matrix(
+    1:4,
+    nrow = 1,
+    dimnames = list("a", c("s1", "s2", "s3", "s4"))
+  )
+  expect_warning(
+    pca <- NACHO:::compute_pca(counts, 2L),
+    class = "nacho_warning_n_comp_reduced"
+  )
+  expect_identical(dim(pca$scores), c(4L, 1L))
+  expect_identical(nrow(pca$importance), 1L)
+})

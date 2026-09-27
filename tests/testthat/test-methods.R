@@ -133,3 +133,11 @@ test_that("a named single subscript is unambiguous", {
   )
   expect_identical(dim(sub), c(11L, 2L))
 })
+
+test_that("subsetting to one probe keeps a valid object", {
+  x <- toy_nacho()
+  expect_warning(sub <- x[1, ], class = "nacho_warning_n_comp_reduced")
+  expect_identical(dim(sub), c(1L, 4L))
+  expect_identical(ncol(sub@pca$scores), 1L)
+  expect_true(S7::S7_inherits(sub, NACHO:::nacho))
+})

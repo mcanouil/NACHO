@@ -57,7 +57,8 @@ compute_outliers <- function(samples, thresholds, rcc_type) {
 #' @noRd
 compute_pca <- function(counts, n_comp) {
   n_samples <- ncol(counts)
-  max_comp <- max(n_samples - 1L, 0L)
+  n_probes <- nrow(counts)
+  max_comp <- max(min(n_samples - 1L, n_probes), 0L)
   if (n_comp > max_comp) {
     nacho_warn(
       c(
