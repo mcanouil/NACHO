@@ -111,7 +111,7 @@ jobs:
           Rscript -e 'res <- spelling::spell_check_package(); if (nrow(res) > 0L) { print(res); quit(status = 1L) }'
 
       - name: Check URLs
-        run: Rscript .github/scripts/check-urls.R
+        run: Rscript -e 'stopifnot(packageVersion("urlchecker") >= "2.0.0"); urlchecker::url_check()'
 
       - name: Commit and open the bump pull request
         id: pr

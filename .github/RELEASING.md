@@ -46,4 +46,3 @@ Run their tests from the repository root:
 
 - `.github/scripts/tests/test-release-scripts.sh`
 - `Rscript --vanilla .github/scripts/tests/test-cran-upload.R`
-- `Rscript --vanilla .github/scripts/tests/test-check-urls.R`
