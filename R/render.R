@@ -6,7 +6,7 @@
 #'
 #' @inheritParams normalise
 #' @param colour [[character]] Character string of the column in `ssheet_csv`
-#'   or more generally in `nacho_object$nacho` to be used as grouping colour.
+#'   or more generally in `nacho_samples(nacho_object)` to be used as grouping colour.
 #' @param output_file [[character]] The name of the output file.
 #' @param output_dir [[character]] The output directory for the rendered output_file.
 #'   This allows for a choice of an alternate directory to which the output file should be written
@@ -21,7 +21,7 @@
 #' @param show_outliers [[logical]] Boolean to indicate whether the outliers should be highlighted
 #'   in red (`TRUE`) or not (`FALSE`). Default is `TRUE`.
 #' @param outliers_factor [[numeric]] Size factor for outliers compared to `size`. Default is `1`.
-#' @param outliers_labels [[character]] Character to indicate which column in `nacho_object$nacho`
+#' @param outliers_labels [[character]] Character to indicate which column in `nacho_samples(nacho_object)`
 #'   should be used to be printed as the labels for outliers or not. Default is `NULL`.
 #' @param clean [[logical]] Boolean to indicate whether the Rmd and RData files used to produce the HTML report
 #'   are removed from `output_dir`. Default is `TRUE`.
@@ -50,7 +50,7 @@ render <- function(
   outliers_labels = NULL,
   clean = TRUE
 ) {
-  check_nacho_v2(nacho_object)
+  check_nacho(nacho_object)
   temp_dir <- file.path(normalizePath(output_dir), "tmp_nacho")
   dir.create(temp_dir, showWarnings = FALSE)
   temp_file <- file.path(temp_dir, sub("\\.[^.]+$", ".Rmd", output_file))
@@ -109,15 +109,14 @@ render <- function(
     "\n",
     "```{r}",
     "#| label: nacho-qc",
-    "print.nacho(",
+    "NACHO:::report_markdown(",
     '  x = params[["nacho_object"]],',
     '  colour = params[["colour"]],',
     '  size = params[["size"]],',
     '  show_legend = params[["show_legend"]],',
     '  show_outliers = params[["show_outliers"]],',
     '  outliers_factor = params[["outliers_factor"]],',
-    '  outliers_labels = params[["outliers_labels"]],',
-    "  echo = TRUE",
+    '  outliers_labels = params[["outliers_labels"]]',
     ")",
     "```",
     "\n\n",

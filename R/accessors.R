@@ -21,6 +21,13 @@ NULL
 #'   quality-control metrics, normalisation factors and `is_outlier`.
 #'
 #' @name nacho-accessors
+#'
+#' @examples
+#' data(GSE74821)
+#' nacho_counts(GSE74821)[1:5, 1:3]
+#' head(nacho_samples(GSE74821)[, 1:5])
+#' head(nacho_probes(GSE74821))
+#' head(nacho_qc(GSE74821))
 NULL
 
 #' @rdname nacho-accessors

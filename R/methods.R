@@ -133,6 +133,14 @@ as_data_frame_nacho <- function(
 #'
 #' @name nacho-methods
 #' @usage NULL
+#'
+#' @examples
+#' data(GSE74821)
+#' print(GSE74821)
+#' summary(GSE74821)
+#' dim(GSE74821)
+#' head(as.data.frame(GSE74821, long = TRUE)[, 1:5])
+#' GSE74821[, 1:12]
 NULL
 
 resolve_index <- function(index, names, arg, call = rlang::caller_env()) {

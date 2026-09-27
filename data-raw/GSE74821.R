@@ -35,4 +35,5 @@ GSE74821 <- load_rcc(
   normalisation_method = "GLM",
   n_comp = 10
 )
+GSE74821@provenance[["data_directory"]] <- NULL
 save(GSE74821, file = file.path("data", "GSE74821.rda"), compress = "xz")

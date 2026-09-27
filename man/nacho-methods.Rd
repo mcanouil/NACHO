@@ -29,3 +29,11 @@ sample (the NACHO 2 \verb{$nacho} layout) instead of one row per sample.
 }
 }
 
+\examples{
+data(GSE74821)
+print(GSE74821)
+summary(GSE74821)
+dim(GSE74821)
+head(as.data.frame(GSE74821, long = TRUE)[, 1:5])
+GSE74821[, 1:12]
+}

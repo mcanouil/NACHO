@@ -4,7 +4,7 @@
 #'
 #' NanoString nCounter RUO-PAM50 Gene Expression Custom CodeSet
 #'
-#' @format A [[list]] object of class `"nacho"`.
+#' @format A \code{nacho} object with 48 samples and 72 probes.
 #'
 #' @source [GSE74821](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74821)
 "GSE74821"
