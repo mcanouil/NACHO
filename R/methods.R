@@ -135,8 +135,64 @@ as_data_frame_nacho <- function(
 #' @usage NULL
 NULL
 
+resolve_index <- function(index, names, arg, call = rlang::caller_env()) {
+  # Used only inside the cli glue strings below.
+  what <- if (identical(arg, "i")) "probe" else "sample" # nolint: object_usage_linter.
+  positions <- unname(stats::setNames(seq_along(names), names)[index])
+  n_missing <- sum(is.na(positions))
+  if (n_missing > 0) {
+    nacho_abort(
+      paste0(
+        "{.arg {arg}} selects {n_missing} {what}{cli::qty(n_missing)}{?s} ",
+        "that {cli::qty(n_missing)}{?does/do} not exist."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  if (anyDuplicated(positions) > 0) {
+    nacho_abort(
+      "{.arg {arg}} selects the same {what} more than once.",
+      class = "bad_argument",
+      call = call
+    )
+  }
+  positions
+}
+
+subset_nacho <- function(x, i, j, ..., drop = FALSE) {
+  rows <- if (missing(i)) {
+    seq_len(nrow(x@counts))
+  } else {
+    resolve_index(i, rownames(x@counts), "i")
+  }
+  columns <- if (missing(j)) {
+    seq_len(ncol(x@counts))
+  } else {
+    resolve_index(j, colnames(x@counts), "j")
+  }
+  counts <- x@counts[rows, columns, drop = FALSE]
+  samples <- x@samples[columns, , drop = FALSE]
+  rownames(samples) <- NULL
+  samples[["is_outlier"]] <- compute_outliers(samples, x@thresholds, x@rcc_type)
+  probes <- x@probes[rows, , drop = FALSE]
+  rownames(probes) <- NULL
+  nacho(
+    counts = counts,
+    normalised = x@normalised[rows, columns, drop = FALSE],
+    probes = probes,
+    samples = samples,
+    settings = x@settings,
+    thresholds = x@thresholds,
+    pca = compute_pca(counts, x@settings[["n_comp"]]),
+    rcc_type = x@rcc_type,
+    provenance = x@provenance
+  )
+}
+
 S7::method(print, nacho) <- print_nacho
 S7::method(format, nacho) <- format_nacho
 S7::method(summary, nacho) <- summary_nacho
 S7::method(dim, nacho) <- function(x) dim(x@counts)
 S7::method(as.data.frame, nacho) <- as_data_frame_nacho
+S7::method(`[`, nacho) <- subset_nacho
