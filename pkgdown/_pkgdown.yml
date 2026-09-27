@@ -43,7 +43,10 @@ reference:
     contents:
       - visualise
       - autoplot.nacho
-      - print.nacho
+      - nacho-methods
+      - nacho-accessors
+      - exclude_outliers
+      - check_outliers
       - render
   - title: Shiny application
     contents:

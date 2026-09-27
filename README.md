@@ -31,17 +31,16 @@ pak::pak("mcanouil/NACHO")
 ## Overview
 
 *NACHO* (**NA**noString quality **C**ontrol das**H**b**O**ard) is
-developed for NanoString nCounter data.  
+developed for NanoString nCounter data.\
 NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA)
-expression assay and works with fluorescent barcodes.  
+expression assay and works with fluorescent barcodes.\
 Each barcode is assigned an mRNA/miRNA, which can be counted after
-bonding with its target.  
+bonding with its target.\
 As a result each count of a specific barcode represents the presence of
 its target mRNA/miRNA.
 
 *NACHO* is able to load, visualise and normalise the exported NanoString
-nCounter data and facilitates the user in performing a quality
-control.  
+nCounter data and facilitates the user in performing a quality control.\
 *NACHO* does this by visualising quality control metrics, expression of
 control genes, principal components and sample specific size factors in
 an interactive web application.
@@ -90,8 +89,8 @@ visualise(GSE74821)
 <p>
 
 Canouil M, Bouland GA, Bonnefond A, Froguel P, ’t Hart LM, Slieker RC
-(2019). “NACHO: an R package for quality control of NanoString nCounter
-data.” <em>Bioinformatics</em>. ISSN 1367-4803.
+(2020). “NACHO: an R package for quality control of NanoString nCounter
+data.” <em>Bioinformatics</em>, <b>36</b>(3), 970–971. ISSN 1367-4803.
 <a href="https://doi.org/10.1093/bioinformatics/btz647">doi:10.1093/bioinformatics/btz647</a>.
 </p>
 
@@ -99,9 +98,11 @@ data.” <em>Bioinformatics</em>. ISSN 1367-4803.
       title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
       author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
       journal = {Bioinformatics},
-      address = {Oxford, England},
-      year = {2019},
-      month = {aug},
+      year = {2020},
+      month = {feb},
+      volume = {36},
+      number = {3},
+      pages = {970--971},
       issn = {1367-4803},
       doi = {10.1093/bioinformatics/btz647},
     }
@@ -111,12 +112,12 @@ data.” <em>Bioinformatics</em>. ISSN 1367-4803.
 ## Getting help
 
 If you encounter a clear bug, please file a minimal reproducible example
-on [GitHub](https://github.com/mcanouil/NACHO/issues).  
+on [GitHub](https://github.com/mcanouil/NACHO/issues).\
 For questions and other discussion, please contact the package
 maintainer.
 
 ## Code of Conduct
 
 Please note that this project is released with a [Contributor Code of
-Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).  
+Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).\
 By contributing to this project, you agree to abide by its terms.

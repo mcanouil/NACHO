@@ -81,7 +81,6 @@ print(citation("NACHO"), "bibtex")
 
 ```{r}
 library(NACHO)
-library(data.table)
 library(GEOquery, quietly = TRUE, warn.conflicts = FALSE)
 ```
 
@@ -133,10 +132,10 @@ library(limma)
 ### Get the phenotypes
 
 ```{r}
-selected_pheno <- GSE70970[["nacho"]][
-  j = lapply(unique(.SD), function(x) ifelse(x == "NA", NA, x)),
-  .SDcols = c("IDFILE", "age:ch1", "gender:ch1", "chemo:ch1", "disease.event:ch1")
+selected_pheno <- nacho_samples(GSE70970)[
+  c("IDFILE", "age:ch1", "gender:ch1", "chemo:ch1", "disease.event:ch1")
 ]
+selected_pheno[] <- lapply(selected_pheno, function(x) ifelse(x == "NA", NA, x))
 selected_pheno <- na.exclude(selected_pheno)
 ```
 
@@ -148,14 +147,8 @@ head(selected_pheno)
 ### Get the normalised counts
 
 ```{r}
-expr_counts <- GSE70970[["nacho"]][
-  i = grepl("Endogenous", CodeClass),
-  j = as.matrix(
-    dcast(.SD, Name ~ IDFILE, value.var = "Count_Norm"),
-    "Name"
-  ),
-  .SDcols = c("IDFILE", "Name", "Count_Norm")
-]
+endogenous <- grepl("Endogenous", nacho_probes(GSE70970)$CodeClass)
+expr_counts <- nacho_counts(GSE70970, normalised = TRUE)[endogenous, ]
 ```
 
 ```{r}
@@ -167,14 +160,8 @@ Alternatively, `"Accession"` number is also available.
 
 ```{r}
 #| eval: false
-GSE70970[["nacho"]][
-  i = grepl("Endogenous", CodeClass),
-  j = as.matrix(
-    dcast(.SD, Accession ~ IDFILE, value.var = "Count_Norm"),
-    "Accession"
-  ),
-  .SDcols = c("IDFILE", "Accession", "Count_Norm")
-]
+expr_counts_accession <- expr_counts
+rownames(expr_counts_accession) <- nacho_probes(GSE70970)$Accession[endogenous]
 ```
 
 ### Select phenotypes and counts
@@ -184,7 +171,7 @@ GSE70970[["nacho"]][
 ```{r}
 samples_kept <- intersect(selected_pheno[["IDFILE"]], colnames(expr_counts))
 expr_counts <- expr_counts[, samples_kept]
-selected_pheno <- selected_pheno[IDFILE %in% c(samples_kept)]
+selected_pheno <- selected_pheno[selected_pheno$IDFILE %in% samples_kept, ]
 ```
 
 2. Build the numeric design matrix
@@ -203,23 +190,11 @@ eBayes(lmFit(expr_counts, design))
 ## Perform the analyses using `lm` (or any other model)
 
 ```{r}
-GSE70970[["nacho"]][
-  i = grepl("Endogenous", CodeClass),
-  j = lapply(unique(.SD), function(x) ifelse(x == "NA", NA, x)),
-  .SDcols = c(
-    "IDFILE", "Name", "Accession", "Count", "Count_Norm",
-    "age:ch1", "gender:ch1", "chemo:ch1", "disease.event:ch1"
-  )
-][
-  Name %in% head(unique(Name), 10)
-][
-  j = as.data.table(
-    coef(summary(lm(
-      formula = Count_Norm ~ `disease.event:ch1`,
-      data = na.exclude(.SD)
-    ))),
-    "term"
-  ),
-  by = c("Name", "Accession")
-]
+long <- as.data.frame(GSE70970, long = TRUE)
+long <- long[grepl("Endogenous", long$CodeClass) & long$Name %in% head(unique(long$Name), 10), ]
+long$`disease.event:ch1` <- ifelse(long$`disease.event:ch1` == "NA", NA, long$`disease.event:ch1`)
+do.call(rbind, lapply(split(long, long$Name), function(gene) {
+  fit <- coef(summary(lm(Count_Norm ~ `disease.event:ch1`, data = na.exclude(gene))))
+  data.frame(Name = gene$Name[1], Accession = gene$Accession[1], term = rownames(fit), fit, row.names = NULL)
+}))
 ```
