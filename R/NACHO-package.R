@@ -7,3 +7,5 @@
 #' @import data.table
 ## usethis namespace: end
 NULL
+
+utils::globalVariables(c(".SD", ".N", ".I", ".GRP", ".BY", ":="))
