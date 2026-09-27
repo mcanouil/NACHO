@@ -17,7 +17,7 @@
 #' head(nacho_object$nacho)
 #'
 check_outliers <- function(nacho_object) {
-  check_nacho(nacho_object)
+  check_nacho_v2(nacho_object)
 
   ot <- nacho_object[["outliers_thresholds"]]
   nacho_df <- nacho_object[["nacho"]]

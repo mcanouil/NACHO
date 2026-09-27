@@ -38,7 +38,7 @@ print.nacho <- function(
   ...
 ) {
   is_outlier <- NULL # no visible binding for global variable
-  check_nacho(x)
+  check_nacho_v2(x)
   if (!echo) {
     utils::str(x, 1)
     return(invisible(x))

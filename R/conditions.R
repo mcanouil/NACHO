@@ -1,3 +1,6 @@
+#' @include nacho-class.R
+NULL
+
 #' Raise a classed NACHO error
 #'
 #' @param message A cli message, a character vector with optional `i`, `x`
@@ -232,7 +235,7 @@ check_package <- function(
   invisible(TRUE)
 }
 
-check_nacho <- function(
+check_nacho_v2 <- function(
   x,
   arg = rlang::caller_arg(x),
   call = rlang::caller_env()
@@ -265,6 +268,61 @@ check_nacho <- function(
     identical(length(attr(x, "RCC_type")), 1L) &&
     attr(x, "RCC_type") %in% c("n1", "n8")
   if (!is_nacho) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} must be a {.cls nacho} object, not {.obj_type_friendly {x}}.",
+        i = "Create one with {.fn load_rcc}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+#' Tell whether an object is a NACHO 2 list
+#'
+#' @keywords internal
+#' @noRd
+is_nacho_v2 <- function(x) {
+  is.list(x) &&
+    inherits(x, "nacho") &&
+    !S7::S7_inherits(x) &&
+    "nacho" %in% names(x)
+}
+
+#' Check that an object is a "nacho" S7 object
+#'
+#' @inheritParams check_bool
+#'
+#' @keywords internal
+#' @noRd
+check_nacho <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (missing(x)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} is missing.",
+        i = "Create a {.cls nacho} object with {.fn load_rcc}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  if (is_nacho_v2(x)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} is a NACHO 2 object, which NACHO 3 cannot use.",
+        i = "Load the RCC files again with {.fn load_rcc}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  if (!S7::S7_inherits(x, nacho)) {
     nacho_abort(
       c(
         "{.arg {arg}} must be a {.cls nacho} object, not {.obj_type_friendly {x}}.",

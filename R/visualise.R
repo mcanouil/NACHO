@@ -64,7 +64,7 @@
 #' }
 #'
 visualise <- function(nacho_object) {
-  check_nacho(nacho_object)
+  check_nacho_v2(nacho_object)
   check_interactive("visualise")
   check_package("markdown", reason = "to show the help pages of the app")
 

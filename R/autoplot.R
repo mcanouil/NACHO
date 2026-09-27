@@ -49,7 +49,7 @@ autoplot.nacho <- function(
   outliers_labels = NULL,
   ...
 ) {
-  check_nacho(object)
+  check_nacho_v2(object)
   autoplot_types <- c(
     "BD",
     "FoV",

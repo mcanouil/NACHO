@@ -50,7 +50,7 @@ render <- function(
   outliers_labels = NULL,
   clean = TRUE
 ) {
-  check_nacho(nacho_object)
+  check_nacho_v2(nacho_object)
   temp_dir <- file.path(normalizePath(output_dir), "tmp_nacho")
   dir.create(temp_dir, showWarnings = FALSE)
   temp_file <- file.path(temp_dir, sub("\\.[^.]+$", ".Rmd", output_file))

@@ -103,7 +103,7 @@ normalise <- function(
   remove_outliers = nacho_object[["remove_outliers"]],
   outliers_thresholds = nacho_object[["outliers_thresholds"]]
 ) {
-  check_nacho(nacho_object)
+  check_nacho_v2(nacho_object)
   check_character(housekeeping_genes, allow_null = TRUE)
   check_bool(housekeeping_predict)
   check_bool(housekeeping_norm)
