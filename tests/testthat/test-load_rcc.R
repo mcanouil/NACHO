@@ -99,15 +99,13 @@ test_that("load_rcc() names the RCC files it cannot find", {
 
 test_that("load_rcc() reports its stages unless nacho.quiet is set", {
   withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
-  expect_message(
-    load_rcc(
-      test_path("plexset_data"),
-      plexset_tidy,
-      "IDFILE",
-      housekeeping_norm = FALSE
-    ),
-    "Reading 12 RCC files"
-  )
+  messages <- capture_messages(load_rcc(
+    test_path("plexset_data"),
+    plexset_tidy,
+    "IDFILE",
+    housekeeping_norm = FALSE
+  ))
+  expect_match(messages, "Reading 12 RCC files", all = FALSE)
   withr::local_options(nacho.quiet = TRUE)
   expect_no_message(load_rcc(
     test_path("plexset_data"),
@@ -165,9 +163,12 @@ test_that("no housekeeping norm and prediction", {
 test_that("using GEO GSE74821", {
   skip_on_cran()
   skip_if_offline()
-  skip_if_not_installed("GEOquery")
+  suppressMessages(skip_if_not_installed("GEOquery"))
   skip_if_not_installed("Biobase")
-  gse <- try(GEOquery::getGEO(GEO = "GSE74821"), silent = TRUE)
+  gse <- try(
+    suppressMessages(GEOquery::getGEO(GEO = "GSE74821")),
+    silent = TRUE
+  )
   skip_if(inherits(gse, "try-error"), "GEO is unavailable.")
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
   geo_files <- try(
@@ -224,9 +225,12 @@ test_that("using GEO GSE74821", {
 test_that("using GEO GSE70970", {
   skip_on_cran()
   skip_if_offline()
-  skip_if_not_installed("GEOquery")
+  suppressMessages(skip_if_not_installed("GEOquery"))
   skip_if_not_installed("Biobase")
-  gse <- try(GEOquery::getGEO(GEO = "GSE70970"), silent = TRUE)
+  gse <- try(
+    suppressMessages(GEOquery::getGEO(GEO = "GSE70970")),
+    silent = TRUE
+  )
   skip_if(inherits(gse, "try-error"), "GEO is unavailable.")
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
   geo_files <- try(

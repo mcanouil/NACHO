@@ -33,7 +33,10 @@ test_that("the fixtures are single-sample RCC files, not PlexSet", {
 
 load_full_series <- function(series) {
   download_dir <- withr::local_tempdir(.local_envir = parent.frame())
-  GEOquery::getGEOSuppFiles(GEO = series, baseDir = download_dir)
+  suppressMessages(GEOquery::getGEOSuppFiles(
+    GEO = series,
+    baseDir = download_dir
+  ))
   utils::untar(
     tarfile = file.path(download_dir, series, paste0(series, "_RAW.tar")),
     exdir = file.path(download_dir, series)
@@ -53,13 +56,13 @@ load_full_series <- function(series) {
 test_that("the full GSE270837 series loads from GEO", {
   skip_on_cran()
   skip_if_offline()
-  skip_if_not_installed("GEOquery")
+  suppressMessages(skip_if_not_installed("GEOquery"))
   expect_identical(ncol(load_full_series("GSE270837")), 22L)
 })
 
 test_that("the full GSE178516 series loads from GEO", {
   skip_on_cran()
   skip_if_offline()
-  skip_if_not_installed("GEOquery")
+  suppressMessages(skip_if_not_installed("GEOquery"))
   expect_identical(ncol(load_full_series("GSE178516")), 30L)
 })
