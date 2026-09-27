@@ -164,5 +164,8 @@ test_that("PCA stores sample scores on log counts", {
 })
 
 test_that("limit of detection is NA when the negatives do not vary", {
-  expect_identical(NACHO:::qc_limit_detection(10, c(0, 0, 0, 0)), NA_real_)
+  expect_identical(
+    NACHO:::sample_lod(matrix(10), matrix(c(0, 0, 0, 0), ncol = 1)),
+    NA_real_
+  )
 })
