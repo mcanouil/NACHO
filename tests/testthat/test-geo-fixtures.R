@@ -4,7 +4,8 @@ test_that("the GSE270837 miRNA fixture loads offline from gzipped RCC files", {
   expect_no_error(suppressMessages(NACHO::load_rcc(
     data_directory = fixture[["dir"]],
     ssheet_csv = fixture[["samplesheet"]],
-    id_colname = "IDFILE"
+    id_colname = "IDFILE",
+    n_comp = 5
   )))
 })
 
@@ -14,7 +15,8 @@ test_that("the GSE178516 IO 360 fixture loads offline from gzipped RCC files", {
   expect_no_error(suppressMessages(NACHO::load_rcc(
     data_directory = fixture[["dir"]],
     ssheet_csv = fixture[["samplesheet"]],
-    id_colname = "IDFILE"
+    id_colname = "IDFILE",
+    n_comp = 5
   )))
 })
 

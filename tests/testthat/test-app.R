@@ -53,7 +53,10 @@ test_that("app loads uploaded RCC files without a sample sheet", {
 })
 
 test_that("app loads uploaded PlexSet RCC files", {
-  nacho <- upload_to_app("plexset_data")
+  expect_warning(
+    nacho <- upload_to_app("plexset_data"),
+    class = "nacho_warning_no_housekeeping"
+  )
   expect_s3_class(nacho, "nacho")
   expect_type(nacho[["nacho"]][["plexset_id"]], "character")
 })

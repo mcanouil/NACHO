@@ -85,18 +85,36 @@ test_that("load_rcc() names the RCC files it cannot find", {
   )
   expect_snapshot(
     load_rcc(test_path("plexset_data"), sheet, "IDFILE"),
-    error = TRUE
+    error = TRUE,
+    transform = function(x) {
+      gsub(
+        normalizePath(test_path("plexset_data")),
+        "<data_directory>",
+        x,
+        fixed = TRUE
+      )
+    }
   )
 })
 
 test_that("load_rcc() reports its stages unless nacho.quiet is set", {
   withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
   expect_message(
-    load_rcc(test_path("plexset_data"), plexset_tidy, "IDFILE"),
+    load_rcc(
+      test_path("plexset_data"),
+      plexset_tidy,
+      "IDFILE",
+      housekeeping_norm = FALSE
+    ),
     "Reading 12 RCC files"
   )
   withr::local_options(nacho.quiet = TRUE)
-  expect_no_message(load_rcc(test_path("plexset_data"), plexset_tidy, "IDFILE"))
+  expect_no_message(load_rcc(
+    test_path("plexset_data"),
+    plexset_tidy,
+    "IDFILE",
+    housekeeping_norm = FALSE
+  ))
 })
 
 test_that("load_rcc() warns when it turns housekeeping normalisation off", {
@@ -401,17 +419,31 @@ test_that("plexset", {
 })
 
 test_that("heterogenous", {
+  sheet <- transform(plexset_salmon_tidy, IDFILE = name)
   expect_error(
     {
       load_rcc(
-        data_directory = ".",
-        ssheet_csv = plexset_salmon_tidy,
+        data_directory = test_path(),
+        ssheet_csv = sheet,
         id_colname = "IDFILE",
         housekeeping_predict = TRUE,
         housekeeping_norm = TRUE
       )
     },
-    class = "nacho_error_missing_file"
+    class = "nacho_error_mixed_versions"
+  )
+  expect_snapshot(
+    suppressMessages(load_rcc(
+      data_directory = test_path(),
+      ssheet_csv = sheet,
+      id_colname = "IDFILE",
+      housekeeping_predict = TRUE,
+      housekeeping_norm = TRUE
+    )),
+    error = TRUE,
+    transform = function(x) {
+      gsub(normalizePath(test_path()), "<data_directory>", x, fixed = TRUE)
+    }
   )
 })
 

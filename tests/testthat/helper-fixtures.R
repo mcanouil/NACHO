@@ -12,7 +12,8 @@ plexset_tidy <- data.frame(
 plexset_nacho <- suppressMessages(load_rcc(
   data_directory = test_path("plexset_data"),
   ssheet_csv = plexset_tidy,
-  id_colname = "IDFILE"
+  id_colname = "IDFILE",
+  housekeeping_norm = FALSE
 ))
 
 salmon_files <- list.files(
