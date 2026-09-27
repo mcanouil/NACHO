@@ -1,0 +1,102 @@
+name: CRAN post-release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cran-post-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish the release
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Set up Git user
+        uses: ./.github/actions/setup-git-user
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          app-slug: ${{ steps.app-token.outputs.app-slug }}
+
+      - name: Check that CRAN serves the submitted version
+        id: accepted
+        run: .github/scripts/cran-accepted.sh CRAN-SUBMISSION >> "${GITHUB_OUTPUT}"
+
+      - name: Extract the release notes
+        env:
+          VERSION: ${{ steps.accepted.outputs.version }}
+          SHA: ${{ steps.accepted.outputs.sha }}
+        run: |
+          git show "${SHA}:NEWS.md" \
+            | .github/scripts/news-section.sh "${VERSION}" - \
+            > "${RUNNER_TEMP}/release-notes.md"
+
+      - name: Create the tag and the GitHub release
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ steps.accepted.outputs.version }}
+          SHA: ${{ steps.accepted.outputs.sha }}
+        run: |
+          if gh release view "v${VERSION}" > /dev/null 2>&1; then
+            echo "::error::The release v${VERSION} already exists."
+            exit 1
+          fi
+          gh release create "v${VERSION}" \
+            --target "${SHA}" \
+            --title "NACHO ${VERSION}" \
+            --notes-file "${RUNNER_TEMP}/release-notes.md"
+
+      - name: Start the next development version
+        id: dev
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ steps.accepted.outputs.version }}
+        run: |
+          BRANCH="ci/dev-version-${VERSION//./-}"
+          .github/scripts/bump-version.sh dev
+          git rm -q CRAN-SUBMISSION
+          git switch -c "${BRANCH}"
+          git add DESCRIPTION NEWS.md
+          git commit -m "chore: start development after NACHO ${VERSION}"
+          git push origin "${BRANCH}"
+          PR_URL="$(gh pr create \
+            --base main \
+            --head "${BRANCH}" \
+            --title "chore: start development after NACHO ${VERSION}" \
+            --body "NACHO ${VERSION} is on CRAN and tagged as v${VERSION}. This moves main to the next development version and removes CRAN-SUBMISSION." \
+            --label "Type: CI/CD :robot:")"
+          gh pr merge --auto --squash "${PR_URL}"
+          echo "pr_url=${PR_URL}" >> "${GITHUB_OUTPUT}"
+
+      - name: Summary
+        env:
+          VERSION: ${{ steps.accepted.outputs.version }}
+          PR_URL: ${{ steps.dev.outputs.pr_url }}
+        run: |
+          {
+            echo "## NACHO ${VERSION} released"
+            echo ""
+            echo "- Release: https://github.com/${GITHUB_REPOSITORY}/releases/tag/v${VERSION}"
+            echo "- Development version pull request: ${PR_URL}"
+          } >> "${GITHUB_STEP_SUMMARY}"
