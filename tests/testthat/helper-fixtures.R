@@ -9,15 +9,12 @@ plexset_tidy <- data.frame(
   IDFILE = basename(plexset_files),
   plexset_id = rep(paste0("S", seq_len(8)), each = length(plexset_files))
 )
-plexset_nacho <- tryCatch(
-  suppressMessages(load_rcc(
-    data_directory = test_path("plexset_data"),
-    ssheet_csv = plexset_tidy,
-    id_colname = "IDFILE",
-    housekeeping_norm = FALSE
-  )),
-  error = function(cnd) NULL
-)
+plexset_nacho <- suppressMessages(load_rcc(
+  data_directory = test_path("plexset_data"),
+  ssheet_csv = plexset_tidy,
+  id_colname = "IDFILE",
+  housekeeping_norm = FALSE
+))
 
 salmon_files <- list.files(
   test_path("salmon_data"),
@@ -30,14 +27,11 @@ salmon_tidy <- data.frame(
   IDFILE = basename(salmon_files),
   plexset_id = rep(paste0("S", seq_len(8)), each = length(salmon_files))
 )
-salmon_nacho <- tryCatch(
-  suppressMessages(load_rcc(
-    data_directory = test_path("salmon_data"),
-    ssheet_csv = salmon_tidy,
-    id_colname = "IDFILE"
-  )),
-  error = function(cnd) NULL
-)
+salmon_nacho <- suppressMessages(load_rcc(
+  data_directory = test_path("salmon_data"),
+  ssheet_csv = salmon_tidy,
+  id_colname = "IDFILE"
+))
 
 plexset_salmon_files <- list.files(
   test_path(),

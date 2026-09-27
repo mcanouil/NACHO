@@ -38,7 +38,8 @@ test_that("missing probes in some files keep QC working", {
     x <- suppressMessages(load_rcc(
       directory,
       fixture$samplesheet[1:3, ],
-      "IDFILE"
+      "IDFILE",
+      n_comp = 2
     )),
     class = "nacho_warning_missing_counts"
   )
