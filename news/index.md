@@ -2,6 +2,8 @@
 
 ## NACHO 2.0.7
 
+CRAN release: 2026-09-27
+
 ### Dependencies
 
 - In `DESCRIPTION`,

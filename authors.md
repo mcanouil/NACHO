@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/mcanouil/NACHO/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/mcanouil/NACHO/blob/v2.0.7/inst/CITATION)
 
 Canouil, M., Bouland, G. A., Bonnefond, A., Froguel, P., 't Hart, L. M.,
 & Slieker, R. C. (2020). "NACHO: an R package for quality control of

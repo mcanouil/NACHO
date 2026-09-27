@@ -353,7 +353,7 @@ targets <- targets[codeset %in% "GeneRLF,NS_H_miR_1.4", ]
     ## GSM1824146       3.835728953    T3
     ## GSM1824147       4.292950034    T3
 
-After we extracted the dataset to the `/tmp/RtmpM8r4sb/GSE70970/Data`
+After we extracted the dataset to the `/tmp/RtmpDT50Ek/GSE70970/Data`
 directory, a `Samplesheet.csv` containing a column with the exact names
 of the files for each sample can be written or used as is.
 
