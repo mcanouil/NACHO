@@ -138,6 +138,26 @@ NULL
 resolve_index <- function(index, names, arg, call = rlang::caller_env()) {
   # Used only inside the cli glue strings below.
   what <- if (identical(arg, "i")) "probe" else "sample" # nolint: object_usage_linter.
+  n <- length(names)
+  if (is.logical(index)) {
+    if (length(index) != n) {
+      nacho_abort(
+        paste0(
+          "{.arg {arg}} is a logical vector of length {length(index)}, ",
+          "but {cli::qty(n)}{?there is/there are} {n} {what}{cli::qty(n)}{?s}."
+        ),
+        class = "bad_argument",
+        call = call
+      )
+    }
+    if (anyNA(index)) {
+      nacho_abort(
+        "{.arg {arg}} contains a missing value; every element must be {.code TRUE} or {.code FALSE}.",
+        class = "bad_argument",
+        call = call
+      )
+    }
+  }
   positions <- unname(stats::setNames(seq_along(names), names)[index])
   n_missing <- sum(is.na(positions))
   if (n_missing > 0) {
@@ -161,6 +181,15 @@ resolve_index <- function(index, names, arg, call = rlang::caller_env()) {
 }
 
 subset_nacho <- function(x, i, j, ..., drop = FALSE) {
+  if (nargs() < 3) {
+    nacho_abort(
+      c(
+        "{.code x[i]} does not say whether {.arg i} selects probes or samples.",
+        i = "Use {.code x[i, ]} to select probes or {.code x[, j]} to select samples."
+      ),
+      class = "bad_argument"
+    )
+  }
   rows <- if (missing(i)) {
     seq_len(nrow(x@counts))
   } else {

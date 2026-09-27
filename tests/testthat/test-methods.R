@@ -79,11 +79,16 @@ test_that("x[i, ] subsets probes by name, position or logical", {
 
 test_that("x[, j] accepts sample ids and logical vectors", {
   x <- toy_nacho()
-  expect_identical(ncol(suppressWarnings(x[, c("S01.RCC", "S03.RCC")])), 2L)
-  expect_identical(
-    ncol(suppressWarnings(x[, c(TRUE, FALSE, TRUE, FALSE)])),
-    2L
+  expect_warning(
+    sub_ids <- x[, c("S01.RCC", "S03.RCC")],
+    class = "nacho_warning_n_comp_reduced"
   )
+  expect_identical(ncol(sub_ids), 2L)
+  expect_warning(
+    sub_logical <- x[, c(TRUE, FALSE, TRUE, FALSE)],
+    class = "nacho_warning_n_comp_reduced"
+  )
+  expect_identical(ncol(sub_logical), 2L)
 })
 
 test_that("subsetting to two samples keeps a valid object", {
@@ -98,4 +103,23 @@ test_that("subsetting refuses unknown or repeated ids", {
   expect_error(x[, "nope"], class = "nacho_error_bad_argument")
   expect_error(x[, c(1, 1)], class = "nacho_error_bad_argument")
   expect_error(x[, 99], class = "nacho_error_bad_argument")
+})
+
+test_that("a logical index must match the dimension length", {
+  x <- toy_nacho()
+  expect_error(x[, c(TRUE, FALSE)], class = "nacho_error_bad_argument")
+  expect_error(x[c(TRUE, FALSE), ], class = "nacho_error_bad_argument")
+})
+
+test_that("a logical index cannot contain NA", {
+  x <- toy_nacho()
+  expect_error(
+    x[, c(TRUE, NA, FALSE, TRUE)],
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("x[i] without a comma is refused", {
+  x <- toy_nacho()
+  expect_error(x[1:2], class = "nacho_error_bad_argument")
 })
