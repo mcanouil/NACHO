@@ -181,10 +181,13 @@ resolve_index <- function(index, names, arg, call = rlang::caller_env()) {
 }
 
 subset_nacho <- function(x, i, j, ..., drop = FALSE) {
-  if (nargs() < 3) {
+  # `i` or `j` given by name (e.g. `x[i = 1:2]`) is unambiguous even without
+  # a comma; only a bare positional single index (or `x[]`) is refused.
+  named_index <- any(names(sys.call()) %in% c("i", "j"))
+  if (nargs() < 3 && !named_index) {
     nacho_abort(
       c(
-        "{.code x[i]} does not say whether {.arg i} selects probes or samples.",
+        "{.code x[i]} does not say whether it selects probes or samples.",
         i = "Use {.code x[i, ]} to select probes or {.code x[, j]} to select samples."
       ),
       class = "bad_argument"

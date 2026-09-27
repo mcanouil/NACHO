@@ -123,3 +123,13 @@ test_that("x[i] without a comma is refused", {
   x <- toy_nacho()
   expect_error(x[1:2], class = "nacho_error_bad_argument")
 })
+
+test_that("a named single subscript is unambiguous", {
+  x <- toy_nacho()
+  expect_identical(dim(x[i = 1:2]), c(2L, 4L))
+  expect_warning(
+    sub <- x[j = 1:2],
+    class = "nacho_warning_n_comp_reduced"
+  )
+  expect_identical(dim(sub), c(11L, 2L))
+})
