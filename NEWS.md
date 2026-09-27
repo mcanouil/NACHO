@@ -6,7 +6,7 @@
 - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.
 - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
 - feat: `normalise()` checks `outliers_thresholds` before it runs, and `check_outliers()` recomputes `is_outlier` from the object's thresholds.
-- feat: the load path of the data moves to the object's provenance and is no longer stored in `GSE74821`.
+- feat: The load path of the data moves to the object's provenance and is no longer stored in `GSE74821`.
 - feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
 - build: NACHO now requires R 4.3 or newer.
 - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
@@ -15,7 +15,7 @@
 - feat: `print()` shows a short summary; the full report stays in `render()`.
 - fix: `autoplot()` now draws samples whose outlier flag is missing as ordinary points, where NACHO 2 left them out of the plot.
 - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`, and its `clean` argument is gone because the working files now live in a temporary folder.
-- fix: the app detects PlexSet files from their exact code classes.
+- fix: The app detects PlexSet files from their exact code classes.
 
 # NACHO 2.0.7
 
