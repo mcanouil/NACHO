@@ -1,0 +1,49 @@
+# Releasing NACHO
+
+Releases go to CRAN through three workflows.
+Each one is started or approved by the maintainer, so nothing reaches CRAN by accident.
+
+## 1. Bump the version
+
+Run the "Release" workflow from `main` and pick `patch`, `minor` or `major`.
+
+It updates `DESCRIPTION`, `NEWS.md`, `CITATION.cff` and `cran-comments.md`, checks spelling and URLs, and opens a pull request called "chore: release NACHO X.Y.Z".
+It can also start the R-hub checks on that branch.
+
+Untick "auto-merge" when `cran-comments.md` needs a note, for example to explain breaking changes.
+The pull request is then assigned to you: edit the file on it and merge it yourself.
+
+The required checks use the strict policy, so the pull request only merges when it's up to date with `main`.
+If `main` moves in the meantime, update the branch from the pull request page.
+
+## 2. Submit to CRAN
+
+Merging the bump starts the "CRAN submission" workflow.
+It builds the tarball with the PDF manual and runs `R CMD check --as-cran`.
+
+It then waits for your approval on the `cran` environment.
+Approve it, and the workflow uploads the tarball and records the submission in `CRAN-SUBMISSION` on `main`.
+CRAN then emails the maintainer, and the submission only counts once you click the link in that email.
+
+To rehearse without uploading, run "CRAN submission" by hand from `main` with "dry run" ticked.
+
+If the upload step fails because devtools changed, submit from a local checkout with `devtools::submit_cran()`.
+
+## 3. Publish the release
+
+Once CRAN's acceptance email arrives, run the "CRAN post-release" workflow from `main`.
+
+It checks that CRAN serves the version, tags `vX.Y.Z` on the submitted commit, and publishes the "NACHO X.Y.Z" release with the notes from `NEWS.md`.
+The release deploys the pkgdown site.
+It then opens a pull request that starts the next development version and removes `CRAN-SUBMISSION`.
+
+If CRAN doesn't serve the version yet, the workflow stops without changing anything, and you can run it again later.
+
+## Scripts and tests
+
+The workflows call the scripts in `.github/scripts/`.
+Run their tests from the repository root:
+
+- `.github/scripts/tests/test-release-scripts.sh`
+- `Rscript --vanilla .github/scripts/tests/test-cran-upload.R`
+- `Rscript --vanilla .github/scripts/tests/test-check-urls.R`
