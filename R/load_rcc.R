@@ -67,8 +67,6 @@ load_rcc <- function(
   normalisation_method = "GEO",
   n_comp = 10
 ) {
-  file_path <- Code_Summary <- CodeClass <- NULL # no visible binding for global variable
-
   if (missing(data_directory) || missing(ssheet_csv)) {
     nacho_abort(
       "{.arg data_directory} and {.arg ssheet_csv} must both be provided.",
@@ -136,14 +134,13 @@ load_rcc <- function(
       class = "missing_file"
     )
   }
-  nacho_progress_step(
-    "Reading {length(unique(nacho_df[['file_path']]))} RCC files"
-  )
-
+  files <- unique(nacho_df[["file_path"]])
+  nacho_progress_step("Reading {length(files)} RCC files")
+  parsed <- lapply(files, read_rcc)
   is_plexset <- vapply(
-    X = unique(nacho_df[["file_path"]]),
-    FUN = is_plexset_rcc,
-    FUN.VALUE = logical(1)
+    parsed,
+    function(p) is_plexset_classes(p[["code_summary"]][["CodeClass"]]),
+    logical(1)
   )
   if (any(is_plexset) && !all(is_plexset)) {
     nacho_abort(
@@ -154,83 +151,114 @@ load_rcc <- function(
       class = "mixed_rcc_types"
     )
   }
-  has_duplicates <- anyDuplicated(nacho_df[[id_colname]]) != 0
-  has_plexset_id <- "plexset_id" %in% colnames(nacho_df)
-  if (has_duplicates && !(all(is_plexset) && has_plexset_id)) {
-    # Used only inside the cli glue string below.
-    dups <- unique(nacho_df[[id_colname]][duplicated(nacho_df[[id_colname]])]) # nolint: object_usage_linter.
-    nacho_abort(
-      c(
-        "{.field {id_colname}} contains duplicated values: {.val {utils::head(dups, 3)}}.",
-        i = "PlexSet RCC files hold 8 samples each; add a {.field plexset_id} column ({.val S1} to {.val S8}).",
-        i = "For single-sample RCC files, make {.field {id_colname}} unique."
-      ),
-      class = "duplicate_id"
-    )
-  }
-  if (all(is_plexset) && !has_plexset_id) {
-    nacho_df <- nacho_df[rep(seq_len(nrow(nacho_df)), each = 8)]
+  rcc_type <- if (all(is_plexset)) "n8" else "n1"
+  duplicated_ids <- unique(
+    nacho_df[[id_colname]][duplicated(nacho_df[[id_colname]])]
+  )
+  if (rcc_type == "n8" && !"plexset_id" %in% names(nacho_df)) {
+    if (length(duplicated_ids) > 0) {
+      abort_duplicate_ids(duplicated_ids, id_colname)
+    }
+    nacho_df <- nacho_df[rep(seq_len(nrow(nacho_df)), each = 8), ]
     nacho_df[["plexset_id"]] <- rep(
       paste0("S", seq_len(8)),
       times = nrow(nacho_df) / 8
     )
   }
-
-  if (all(is_plexset)) {
-    type_set <- "n8"
-    nacho_df <- merge(
-      x = nacho_df,
-      y = nacho_df[
-        j = unique(.SD),
-        .SDcols = c(id_colname, "file_path")
-      ][
-        j = data.table::rbindlist(lapply(X = file_path, FUN = read_rcc)),
-        by = c(id_colname, "file_path")
-      ],
-      by = c(id_colname, "file_path", "plexset_id"),
-      all.x = TRUE
-    )[
-      j = (id_colname) := apply(.SD, 1, paste, collapse = "_"),
-      .SDcols = c(id_colname, "plexset_id")
-    ]
-    nacho_df <- nacho_df[
-      j = unlist(Code_Summary, recursive = FALSE),
-      by = setdiff(names(nacho_df), "Code_Summary")
-    ][
-      j = `:=`(CodeClass = sub("[0-8]+s$", "", CodeClass))
-    ]
-  } else {
-    type_set <- "n1"
-    nacho_df <- nacho_df[
-      j = data.table::rbindlist(lapply(X = file_path, FUN = read_rcc)),
-      by = c(unique(c(id_colname, "file_path", names(nacho_df))))
-    ]
-    nacho_df <- nacho_df[
-      j = unlist(Code_Summary, recursive = FALSE),
-      by = setdiff(names(nacho_df), "Code_Summary")
-    ]
+  if (rcc_type == "n8" && "plexset_id" %in% names(nacho_df)) {
+    abort_bad_plexset_ids(nacho_df[["plexset_id"]])
+    abort_duplicate_plexset_pairs(nacho_df, id_colname)
+  }
+  if (rcc_type == "n1" && length(duplicated_ids) > 0) {
+    abort_duplicate_ids(duplicated_ids, id_colname)
   }
 
-  nanostring_versions <- nacho_df[
-    j = unique(.SD),
-    .SDcols = c("Header.header_FileVersion", "Header.header_SoftwareVersion")
-  ]
-  if (nrow(nanostring_versions) > 1) {
+  versions <- unique(do.call(
+    rbind,
+    lapply(parsed, function(p) {
+      data.frame(
+        file = unname(p[["attributes"]]["Header.header_FileVersion"]),
+        software = unname(p[["attributes"]]["Header.header_SoftwareVersion"])
+      )
+    })
+  ))
+  if (nrow(versions) > 1) {
     nacho_abort(
       c(
         "RCC files come from more than one NanoString file or software version.",
-        "*" = "File versions: {.val {unique(nanostring_versions[['Header.header_FileVersion']])}}.",
-        "*" = "Software versions: {.val {unique(nanostring_versions[['Header.header_SoftwareVersion']])}}.",
+        "*" = "File versions: {.val {unique(versions[['file']])}}.",
+        "*" = "Software versions: {.val {unique(versions[['software']])}}.",
         i = "Load each version separately."
       ),
       class = "mixed_versions"
     )
   }
 
-  nacho_progress_step("Computing quality-control metrics")
-  has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
+  nacho_progress_step("Assembling {nrow(nacho_df)} sample{?s}")
+  file_index <- match(nacho_df[["file_path"]], files)
+  pieces <- lapply(parsed, rcc_samples)
+  sample_codes <- lapply(seq_len(nrow(nacho_df)), function(k) {
+    piece <- pieces[[file_index[k]]]
+    if (rcc_type == "n8") piece[[nacho_df[["plexset_id"]][k]]] else piece[[1]]
+  })
+  if (rcc_type == "n8") {
+    nacho_df[[id_colname]] <- paste(
+      nacho_df[[id_colname]],
+      nacho_df[["plexset_id"]],
+      sep = "_"
+    )
+  }
+  ids <- as.character(nacho_df[[id_colname]])
+
+  probes <- as.data.frame(unique(data.table::rbindlist(
+    lapply(sample_codes, `[`, c("CodeClass", "Name", "Accession"))
+  )))
+  probes <- probes[
+    order(probes[["CodeClass"]], probes[["Name"]], method = "radix"),
+  ]
+  rownames(probes) <- NULL
+  if (anyDuplicated(probes[["Name"]]) > 0) {
+    # Used only inside the cli glue string below.
+    clashes <- unique(probes[["Name"]][duplicated(probes[["Name"]])]) # nolint: object_usage_linter.
+    nacho_abort(
+      c(
+        "The same probe name has different code classes or accessions across RCC files.",
+        x = "Probe{?s}: {.val {utils::head(clashes, 5)}}.",
+        i = "Load files from the same CodeSet together."
+      ),
+      class = "rcc_parse"
+    )
+  }
+  counts <- matrix(
+    NA_integer_,
+    nrow = nrow(probes),
+    ncol = length(ids),
+    dimnames = list(probes[["Name"]], ids)
+  )
+  for (k in seq_along(sample_codes)) {
+    code <- sample_codes[[k]]
+    counts[match(code[["Name"]], probes[["Name"]]), k] <- code[["Count"]]
+  }
+
+  attributes <- data.table::rbindlist(
+    lapply(parsed, function(p) {
+      as.list(c(p[["attributes"]], Messages = p[["messages"]]))
+    }),
+    fill = TRUE
+  )
+  sheet <- as.data.frame(nacho_df)
+  sheet <- sheet[, setdiff(names(sheet), "file_path"), drop = FALSE]
+  samples <- cbind(
+    sheet[, c(id_colname, setdiff(names(sheet), id_colname)), drop = FALSE],
+    as.data.frame(attributes)[file_index, , drop = FALSE]
+  )
+  sample_order <- order(ids, method = "radix")
+  samples <- samples[sample_order, , drop = FALSE]
+  rownames(samples) <- NULL
+  counts <- counts[, sample_order, drop = FALSE]
+
   if (
-    !has_hkg &&
+    !any(grepl("Housekeeping", probes[["CodeClass"]])) &&
       is.null(housekeeping_genes) &&
       !housekeeping_predict &&
       housekeeping_norm
@@ -247,43 +275,81 @@ load_rcc <- function(
     )
     housekeeping_norm <- FALSE
   }
-  qc <- qc_rcc(
-    nacho_df = nacho_df,
-    id_colname = id_colname,
-    housekeeping_genes = housekeeping_genes,
-    housekeeping_predict = housekeeping_predict,
-    housekeeping_norm = housekeeping_norm,
-    normalisation_method = normalisation_method,
-    n_comp = n_comp
-  )
-  nacho_progress_step(
-    paste0(
-      "Normalising with the {.val {normalisation_method}} method ",
-      "{if (housekeeping_norm) 'and' else 'without'} housekeeping genes"
-    )
-  )
-  long <- qc[["nacho"]]
-  long[["Count_Norm"]] <- normalise_counts(
-    data = long,
-    housekeeping_norm = housekeeping_norm
-  )
-  nacho_from_long(
-    long = long,
-    pca = qc[["pca"]],
+
+  nacho_progress_step("Computing quality-control metrics and normalising")
+  build_nacho(
+    counts = counts,
+    probes = probes,
+    samples = samples,
     settings = list(
       id_colname = id_colname,
-      housekeeping_genes = qc[["housekeeping_genes"]],
+      housekeeping_genes = housekeeping_genes,
       housekeeping_predict = housekeeping_predict,
       housekeeping_norm = housekeeping_norm,
       normalisation_method = normalisation_method,
       n_comp = as.integer(n_comp)
     ),
     thresholds = default_thresholds(),
-    rcc_type = type_set,
+    rcc_type = rcc_type,
     provenance = new_provenance(
       data_directory = data_directory,
-      file_version = nanostring_versions[["Header.header_FileVersion"]],
-      software_version = nanostring_versions[["Header.header_SoftwareVersion"]]
+      file_version = versions[["file"]],
+      software_version = versions[["software"]]
     )
   )
+}
+
+abort_duplicate_ids <- function(
+  duplicated_ids,
+  id_colname,
+  call = rlang::caller_env()
+) {
+  nacho_abort(
+    c(
+      "{.field {id_colname}} contains duplicated values: {.val {utils::head(duplicated_ids, 3)}}.",
+      i = "PlexSet RCC files hold 8 samples each; add a {.field plexset_id} column ({.val S1} to {.val S8}).",
+      i = "For single-sample RCC files, make {.field {id_colname}} unique."
+    ),
+    class = "duplicate_id",
+    call = call
+  )
+}
+
+abort_bad_plexset_ids <- function(plexset_id, call = rlang::caller_env()) {
+  valid_values <- paste0("S", seq_len(8))
+  bad_values <- unique(plexset_id[!plexset_id %in% valid_values])
+  if (length(bad_values) > 0) {
+    nacho_abort(
+      c(
+        "{.field plexset_id} must be one of {.val {valid_values}}.",
+        x = "Found: {.val {utils::head(bad_values, 5)}}."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(plexset_id)
+}
+
+abort_duplicate_plexset_pairs <- function(
+  nacho_df,
+  id_colname,
+  call = rlang::caller_env()
+) {
+  pairs <- paste(nacho_df[[id_colname]], nacho_df[["plexset_id"]], sep = "\r")
+  duplicated_ids <- unique(nacho_df[[id_colname]][duplicated(pairs)])
+  if (length(duplicated_ids) > 0) {
+    nacho_abort(
+      c(
+        paste0(
+          "{.field {id_colname}} and {.field plexset_id} together contain duplicated pairs: ",
+          "{.val {utils::head(duplicated_ids, 3)}}."
+        ),
+        i = "Each PlexSet sample needs a unique {.field {id_colname}}/{.field plexset_id} pair."
+      ),
+      class = "duplicate_id",
+      call = call
+    )
+  }
+  invisible(nacho_df)
 }

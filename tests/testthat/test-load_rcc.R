@@ -497,3 +497,55 @@ test_that("load_rcc() refuses a mix of PlexSet and single-sample RCC files offli
     class = "nacho_error_mixed_rcc_types"
   )
 })
+
+test_that("load_rcc() names plexset_id values outside S1 to S8", {
+  sheet <- plexset_tidy
+  sheet$plexset_id[1] <- "S9"
+  sheet$plexset_id[2] <- "bad"
+  expect_error(
+    load_rcc(
+      data_directory = test_path("plexset_data"),
+      ssheet_csv = sheet,
+      id_colname = "IDFILE"
+    ),
+    class = "nacho_error_bad_argument",
+    regexp = "S9"
+  )
+})
+
+test_that("load_rcc() rejects duplicated id/plexset_id pairs", {
+  sheet <- plexset_tidy
+  sheet$IDFILE[2] <- sheet$IDFILE[1]
+  expect_error(
+    load_rcc(
+      data_directory = test_path("plexset_data"),
+      ssheet_csv = sheet,
+      id_colname = "IDFILE"
+    ),
+    class = "nacho_error_duplicate_id"
+  )
+})
+
+test_that("load_rcc() reports a probe clash across single-sample RCC files", {
+  source_files <- list.files(
+    geo_fixture("GSE178516")[["dir"]],
+    pattern = "\\.RCC\\.gz$",
+    full.names = TRUE
+  )[1:2]
+  directory <- withr::local_tempdir()
+  file.copy(source_files, directory)
+  copied <- list.files(directory, pattern = "\\.RCC\\.gz$", full.names = TRUE)
+  lines <- readLines(gzfile(copied[1]))
+  lines <- sub("NM_021147.4", "NM_021147.5", lines, fixed = TRUE)
+  con <- gzfile(copied[1], "w")
+  writeLines(lines, con)
+  close(con)
+  expect_error(
+    suppressMessages(load_rcc(
+      data_directory = directory,
+      ssheet_csv = data.frame(IDFILE = basename(copied)),
+      id_colname = "IDFILE"
+    )),
+    class = "nacho_error_rcc_parse"
+  )
+})

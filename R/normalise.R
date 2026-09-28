@@ -100,29 +100,10 @@ normalise <- function(
 normalize <- normalise
 
 run_normalisation <- function(x, settings, thresholds) {
-  qc <- qc_rcc(
-    nacho_df = long_table(x),
-    id_colname = settings[["id_colname"]],
-    housekeeping_genes = settings[["housekeeping_genes"]],
-    housekeeping_predict = settings[["housekeeping_predict"]],
-    housekeeping_norm = settings[["housekeeping_norm"]],
-    normalisation_method = settings[["normalisation_method"]],
-    n_comp = settings[["n_comp"]]
-  )
-  long <- qc[["nacho"]]
-  long[["Count_Norm"]] <- normalise_counts(
-    data = long,
-    housekeeping_norm = settings[["housekeeping_norm"]]
-  )
-  settings[["housekeeping_genes"]] <- qc[["housekeeping_genes"]]
-  pc_columns <- grep("^PC[0-9]+$", names(long), value = TRUE)
-  long <- long[,
-    setdiff(names(long), c(pc_columns, "is_outlier")),
-    with = FALSE
-  ]
-  nacho_from_long(
-    long = long,
-    pca = qc[["pca"]],
+  build_nacho(
+    counts = x@counts,
+    probes = x@probes,
+    samples = x@samples,
     settings = settings,
     thresholds = thresholds,
     rcc_type = x@rcc_type,
