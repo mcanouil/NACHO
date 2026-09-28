@@ -21,6 +21,8 @@ quality-control metrics, the normalised counts, the PCA and the outlier
 flags again with the NACHO 3 definitions.
 }
 \examples{
+# A NACHO 2 object is converted; GSE74821 is already a NACHO 3 object,
+# so it comes back unchanged.
 data(GSE74821)
 identical(upgrade_nacho(GSE74821), GSE74821)
 }

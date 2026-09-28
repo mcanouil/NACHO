@@ -40,6 +40,23 @@ test_that("upgrade_nacho() leaves NACHO 3 objects alone and refuses anything els
   expect_error(upgrade_nacho(list(a = 1)), class = "nacho_error_bad_object")
 })
 
+test_that("upgrade_nacho() names a missing RCC type or ID column", {
+  no_type <- nacho_2()
+  attr(no_type, "RCC_type") <- NULL
+  expect_error(
+    upgrade_nacho(no_type),
+    regexp = "RCC_type",
+    class = "nacho_error_bad_object"
+  )
+  no_access <- nacho_2()
+  no_access$access <- NULL
+  expect_error(
+    upgrade_nacho(no_access),
+    regexp = "access",
+    class = "nacho_error_bad_object"
+  )
+})
+
 test_that("upgrade_nacho() refuses a missing argument", {
   expect_error(upgrade_nacho(), class = "nacho_error_bad_object")
 })
@@ -77,6 +94,8 @@ test_that("read_nacho() reads the frozen schema-1 object", {
   expect_identical(dim(x), c(40L, 4L))
   expect_identical(nacho_counts(x), readRDS(path)@counts)
   expect_identical(x@provenance$schema_version, 1L)
+  expect_false(identical(S7::S7_class(readRDS(path)), NACHO:::nacho))
+  expect_identical(S7::S7_class(x), NACHO:::nacho)
 })
 
 test_that("read_nacho() upgrades a saved NACHO 2 object", {
@@ -112,7 +131,7 @@ test_that("read_nacho() asks for a newer NACHO for a newer schema", {
   path <- save_with_schema(99L)
   expect_error(
     read_nacho(path),
-    regexp = "object schema 99.*newer.*Update NACHO",
+    regexp = "Schema 99 is newer.*Update NACHO",
     class = "nacho_error_bad_object"
   )
 })
@@ -122,4 +141,17 @@ test_that("read_nacho() does not ask for an update for an older schema", {
   err <- expect_error(read_nacho(path), class = "nacho_error_bad_object")
   expect_no_match(conditionMessage(err), "Update NACHO")
   expect_match(conditionMessage(err), "schema 0")
+})
+
+test_that("a missing or malformed schema version is named as such", {
+  for (schema in list(1, NULL)) {
+    path <- save_with_schema(schema)
+    err <- expect_error(read_nacho(path), class = "nacho_error_bad_object")
+    expect_match(conditionMessage(err), "missing or malformed")
+    expect_no_match(conditionMessage(err), "Update NACHO")
+  }
+  x <- GSE74821
+  attr(x, "provenance")$schema_version <- 1
+  err <- expect_error(nacho_samples(x), class = "nacho_error_bad_object")
+  expect_match(conditionMessage(err), "missing or malformed")
 })

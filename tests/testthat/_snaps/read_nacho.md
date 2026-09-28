@@ -31,6 +31,6 @@
       nacho_samples(x)
     Condition
       Error in `nacho_samples()`:
-      ! `x` was made with object schema 99.
+      ! `x` was made with an object schema this NACHO cannot read.
       i Schema 99 is newer than schema 1, which this NACHO reads. Update NACHO to read it.
 

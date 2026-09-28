@@ -301,7 +301,7 @@ check_nacho <- function(
   if (!identical(schema, nacho_schema_version)) {
     nacho_abort(
       c(
-        "{.arg {arg}} was made with object schema {schema}.",
+        "{.arg {arg}} was made with an object schema this NACHO cannot read.",
         i = "{schema_hint(schema)}"
       ),
       class = "bad_object",
@@ -315,19 +315,22 @@ check_nacho <- function(
 #'
 #' @param schema The schema version stored in a `nacho` object.
 #'
-#' @return A string: a newer schema asks for a NACHO update, any other one
-#'   cannot be read.
+#' @return A string: a newer schema asks for a NACHO update, a missing or
+#'   malformed one is named as such, and any other one cannot be read.
 #'
 #' @keywords internal
 #' @noRd
 schema_hint <- function(schema) {
-  if (rlang::is_scalar_integerish(schema) && schema > nacho_schema_version) {
+  if (!rlang::is_scalar_integer(schema) || is.na(schema)) {
+    return("The schema version is missing or malformed.")
+  }
+  if (schema > nacho_schema_version) {
     cli::format_inline(
       "Schema {schema} is newer than schema {nacho_schema_version}, which this NACHO reads. Update NACHO to read it."
     )
   } else {
     cli::format_inline(
-      "This NACHO reads schema {nacho_schema_version} only, so it cannot read schema {schema}."
+      "This NACHO reads schema {nacho_schema_version} only, not schema {schema}."
     )
   }
 }

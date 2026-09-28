@@ -13,6 +13,8 @@
 #' @seealso [read_nacho()]
 #' @export
 #' @examples
+#' # A NACHO 2 object is converted; GSE74821 is already a NACHO 3 object,
+#' # so it comes back unchanged.
 #' data(GSE74821)
 #' identical(upgrade_nacho(GSE74821), GSE74821)
 upgrade_nacho <- function(x) {
@@ -34,6 +36,21 @@ upgrade_nacho <- function(x) {
   if (!is_nacho_v2(x)) {
     nacho_abort(
       "{.arg x} must be a NACHO 2 object, not {.obj_type_friendly {x}}.",
+      class = "bad_object"
+    )
+  }
+  invalid <- c(
+    access = !rlang::is_string(x[["access"]]),
+    RCC_type = !rlang::is_string(attr(x, "RCC_type"))
+  )
+  if (any(invalid)) {
+    # Used only inside the cli glue string below.
+    fields <- names(invalid)[invalid] # nolint: object_usage_linter.
+    nacho_abort(
+      c(
+        "{.arg x} is an incomplete NACHO 2 object.",
+        x = "Missing or invalid: {.field {fields}}."
+      ),
       class = "bad_object"
     )
   }
@@ -145,7 +162,7 @@ read_nacho <- function(path) {
   if (!identical(schema, nacho_schema_version)) {
     nacho_abort(
       c(
-        "{.file {path}} was saved with object schema {schema}.",
+        "{.file {path}} was saved with an object schema this NACHO cannot read.",
         i = "{schema_hint(schema)}"
       ),
       class = "bad_object"

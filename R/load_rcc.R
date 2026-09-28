@@ -307,8 +307,9 @@ build_probe_counts <- function(
   clash_class,
   call = rlang::caller_env()
 ) {
-  codes <- as.data.frame(codes)
-  probes <- unique(codes[, c("CodeClass", "Name", "Accession")])
+  probe_columns <- c("CodeClass", "Name", "Accession")
+  probes <- unique(data.table::as.data.table(codes), by = probe_columns)
+  probes <- as.data.frame(probes)[, probe_columns]
   probes <- probes[
     order(probes[["CodeClass"]], probes[["Name"]], method = "radix"),
   ]
