@@ -25,6 +25,7 @@
 - fix: Predicting housekeeping genes no longer misaligns probes when some RCC files lack a probe.
 - fix: PCA components now have a fixed sign, so plots no longer flip between machines.
 - feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
+- feat: Duplicated probe names within one RCC sample are now refused with a clear error.
 
 # NACHO 2.0.7
 
