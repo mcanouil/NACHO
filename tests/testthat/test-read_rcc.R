@@ -68,11 +68,12 @@ test_that("read_rcc() strips only the trailing numeric suffix of probe names", {
   path <- withr::local_tempfile(fileext = ".RCC")
   writeLines(lines, path)
   parsed <- NACHO:::read_rcc(path)$code_summary
+  written <- match(c("P1|2", "MIMAT0000415"), parsed$Accession)
+  expect_false(anyNA(written))
   expect_identical(
-    parsed$Name[1:2],
+    parsed$Name[written],
     c("4E-BP1(53H11)|NA|EIF4EBP1|53H11", "hsa-let-7i-5p")
   )
-  expect_identical(parsed$Accession[1:2], c("P1|2", "MIMAT0000415"))
 })
 
 test_that("read_rcc() reads CRLF files with trailing spaces", {

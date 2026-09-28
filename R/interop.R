@@ -23,6 +23,8 @@ check_bioconductor <- function(packages, reason, call = rlang::caller_env()) {
 #' `NanoStringRccSet` read by `NanoStringNCTools::readNanoStringRccSet()`.
 #' The dates of a `NanoStringRccSet` are written as `YYYYMMDD`, as in RCC
 #' files.
+#' Its probe names lose a trailing numeric suffix such as `|0`, as in
+#' [load_rcc()], so both give the same probe names for the same RCC files.
 #' It computes the quality-control
 #' metrics and the normalisation from the raw counts; settings and thresholds
 #' come from `metadata()$nacho` when present, and are the defaults otherwise.
@@ -354,7 +356,7 @@ nacho_from_rccset <- function(x, id_colname, call = rlang::caller_env()) {
   features <- Biobase::fData(x)
   probes <- data.frame(
     CodeClass = features[["CodeClass"]],
-    Name = features[["GeneName"]],
+    Name = strip_probe_suffix(features[["GeneName"]]),
     Accession = features[["Accession"]]
   )
   protocol <- Biobase::pData(Biobase::protocolData(x))

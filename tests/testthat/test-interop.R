@@ -243,19 +243,22 @@ test_that("as_nacho() on a NanoStringRccSet matches load_rcc() on the same files
       "IDFILE"
     )
   )
-  rccset_counts <- nacho_counts(from_rccset)[, basename(files)]
-  file_counts <- nacho_counts(from_files)[, basename(files)]
-  suffixed <- setdiff(rownames(rccset_counts), rownames(file_counts))
-  expect_length(suffixed, 29)
-  expect_true(all(endsWith(suffixed, "|0")))
   rccset_probes <- nacho_probes(from_rccset)
-  expect_true(all(startsWith(
-    rccset_probes$CodeClass[match(suffixed, rccset_probes$Name)],
-    "PROTEIN"
-  )))
-  rownames(rccset_counts) <- sub("[|]0$", "", rownames(rccset_counts))
-  expect_setequal(rownames(rccset_counts), rownames(file_counts))
-  expect_identical(rccset_counts[rownames(file_counts), ], file_counts)
+  file_probes <- nacho_probes(from_files)
+  expect_false(anyDuplicated(rccset_probes$Name) > 0)
+  expect_false(anyDuplicated(file_probes$Name) > 0)
+  expect_setequal(rccset_probes$Name, file_probes$Name)
+  same_order <- match(file_probes$Name, rccset_probes$Name)
+  expect_identical(
+    rccset_probes[same_order, c("CodeClass", "Name", "Accession")],
+    file_probes[, c("CodeClass", "Name", "Accession")],
+    ignore_attr = "row.names"
+  )
+  file_counts <- nacho_counts(from_files)
+  expect_identical(
+    nacho_counts(from_rccset)[rownames(file_counts), ],
+    file_counts
+  )
   expect_identical(nacho_samples(from_rccset)[["IDFILE"]], basename(files))
   expect_equal(nacho_qc(from_rccset)$FoV, nacho_qc(from_files)$FoV)
   expect_equal(nacho_qc(from_rccset)$PCL, nacho_qc(from_files)$PCL)
