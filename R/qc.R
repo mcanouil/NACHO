@@ -392,9 +392,44 @@ sample_metrics <- function(counts, probes, samples) {
     pcl <- lod <- rep(NA_real_, ncol(counts))
   }
   endogenous <- counts[grepl("Endogenous", code_class), , drop = FALSE]
-  lane <- function(name) samples[[paste0("Lane_Attributes.lane_", name)]]
+  lane_names <- c(
+    "ID",
+    "BindingDensity",
+    "ScannerID",
+    "StagePosition",
+    "CartridgeID",
+    "FovCounted",
+    "FovCount"
+  )
+  missing_lane <- lane_names[
+    !paste0("Lane_Attributes.lane_", lane_names) %in% names(samples)
+  ]
+  missing_date <- !"Sample_Attributes.sample_Date" %in% names(samples)
+  missing <- c(missing_lane, if (missing_date) "Date")
+  if (length(missing) > 0) {
+    nacho_warn(
+      c(
+        "Some lane attributes are missing, so the metrics that need them are {.val NA}.",
+        i = "Missing: {.field {missing}}."
+      ),
+      class = "metric_unavailable"
+    )
+  }
+  lane <- function(name) {
+    column <- paste0("Lane_Attributes.lane_", name)
+    if (column %in% names(samples)) {
+      samples[[column]]
+    } else {
+      rep(NA_character_, nrow(samples))
+    }
+  }
+  date <- if (missing_date) {
+    rep(NA_character_, nrow(samples))
+  } else {
+    samples[["Sample_Attributes.sample_Date"]]
+  }
   data.frame(
-    Date = samples[["Sample_Attributes.sample_Date"]],
+    Date = date,
     ID = lane("ID"),
     BD = as.numeric(lane("BindingDensity")),
     ScannerID = lane("ScannerID"),
