@@ -536,6 +536,7 @@ test_that("load_rcc() reports a probe clash across single-sample RCC files", {
   file.copy(source_files, directory)
   copied <- list.files(directory, pattern = "\\.RCC\\.gz$", full.names = TRUE)
   lines <- readLines(gzfile(copied[1]))
+  expect_length(grep("NM_021147.4", lines, fixed = TRUE), 1)
   lines <- sub("NM_021147.4", "NM_021147.5", lines, fixed = TRUE)
   con <- gzfile(copied[1], "w")
   writeLines(lines, con)
@@ -547,5 +548,13 @@ test_that("load_rcc() reports a probe clash across single-sample RCC files", {
       id_colname = "IDFILE"
     )),
     class = "nacho_error_rcc_parse"
+  )
+  expect_snapshot(
+    suppressMessages(load_rcc(
+      data_directory = directory,
+      ssheet_csv = data.frame(IDFILE = basename(copied)),
+      id_colname = "IDFILE"
+    )),
+    error = TRUE
   )
 })

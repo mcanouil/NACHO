@@ -20,3 +20,14 @@
       * Software versions: "3.1.0.1" and "4.0.0.3".
       i Load each version separately.
 
+# load_rcc() reports a probe clash across single-sample RCC files
+
+    Code
+      suppressMessages(load_rcc(data_directory = directory, ssheet_csv = data.frame(
+        IDFILE = basename(copied)), id_colname = "IDFILE"))
+    Condition
+      Error in `load_rcc()`:
+      ! The same probe name has different code classes or accessions across RCC files.
+      x Probe: "CCNO".
+      i Load files from the same CodeSet together.
+

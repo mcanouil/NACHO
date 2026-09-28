@@ -62,7 +62,8 @@ test_that("read_rcc() matches section tags exactly", {
 
 test_that("read_rcc() strips only the trailing numeric suffix of probe names", {
   lines <- readLines(first_fixture_file("GSE178516"))
-  endogenous <- grep("^Endogenous,", lines)[1:4]
+  endogenous <- utils::head(grep("^Endogenous,", lines), 4)
+  expect_length(endogenous, 4)
   lines[endogenous] <- c(
     "Endogenous,4E-BP1(53H11)|NA|EIF4EBP1|53H11|0,P1|2,12",
     "Endogenous,hsa-let-7i-5p|0.014,MIMAT0000415,34",
