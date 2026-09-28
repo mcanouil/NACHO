@@ -210,10 +210,9 @@ load_rcc <- function(
   }
   ids <- as.character(nacho_df[[id_colname]])
 
-  probes <- unique(do.call(
-    rbind,
+  probes <- as.data.frame(unique(data.table::rbindlist(
     lapply(sample_codes, `[`, c("CodeClass", "Name", "Accession"))
-  ))
+  )))
   probes <- probes[
     order(probes[["CodeClass"]], probes[["Name"]], method = "radix"),
   ]
