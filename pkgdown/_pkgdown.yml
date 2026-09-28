@@ -38,7 +38,6 @@ reference:
       - load_rcc
       - read_nacho
       - upgrade_nacho
-      - as_nacho
       - as_summarized_experiment
       - normalise
       - check_outliers

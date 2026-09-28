@@ -15,8 +15,9 @@ default_thresholds <- function() {
 
 #' Settings for data that do not come from NACHO
 #'
-#' The defaults are those of [load_rcc()], except `housekeeping_norm`, which
-#' is on only when the probes include `Housekeeping` ones.
+#' The defaults match those of [load_rcc()], which a test checks, except
+#' `housekeeping_norm`, which is on only when the probes include
+#' `Housekeeping` ones.
 #'
 #' @param probes The probe table, with a `CodeClass` column.
 #' @param id_colname The name of the sample id column.
@@ -24,14 +25,13 @@ default_thresholds <- function() {
 #' @keywords internal
 #' @noRd
 default_settings <- function(probes, id_colname) {
-  defaults <- formals(load_rcc)
   list(
     id_colname = id_colname,
-    housekeeping_genes = defaults[["housekeeping_genes"]],
-    housekeeping_predict = defaults[["housekeeping_predict"]],
+    housekeeping_genes = NULL,
+    housekeeping_predict = FALSE,
     housekeeping_norm = any(grepl("Housekeeping", probes[["CodeClass"]])),
-    normalisation_method = defaults[["normalisation_method"]],
-    n_comp = as.integer(defaults[["n_comp"]])
+    normalisation_method = "GEO",
+    n_comp = 10L
   )
 }
 

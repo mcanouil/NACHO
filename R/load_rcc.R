@@ -241,24 +241,12 @@ load_rcc <- function(
   rownames(samples) <- NULL
   counts <- counts[, sample_order, drop = FALSE]
 
-  if (
-    !any(grepl("Housekeeping", probes[["CodeClass"]])) &&
-      is.null(housekeeping_genes) &&
-      !housekeeping_predict &&
-      housekeeping_norm
-  ) {
-    nacho_warn(
-      c(
-        "Housekeeping normalisation is off, because no housekeeping genes are available.",
-        i = paste0(
-          "The RCC files have no {.val Housekeeping} probes, {.arg housekeeping_genes} is {.code NULL} ",
-          "and {.arg housekeeping_predict} is {.code FALSE}."
-        )
-      ),
-      class = "no_housekeeping"
-    )
-    housekeeping_norm <- FALSE
-  }
+  housekeeping_norm <- resolve_housekeeping_norm(
+    probes[["CodeClass"]],
+    housekeeping_genes,
+    housekeeping_predict,
+    housekeeping_norm
+  )
 
   nacho_progress_step("Computing quality-control metrics and normalising")
   build_nacho(
@@ -281,6 +269,42 @@ load_rcc <- function(
       software_version = versions[["software"]]
     )
   )
+}
+
+#' Turn housekeeping normalisation off when no housekeeping gene is available
+#'
+#' @param code_class The code class of each probe.
+#'
+#' @return `housekeeping_norm`, set to `FALSE` with a warning when there are
+#'   no `Housekeeping` probes, no `housekeeping_genes` and no prediction.
+#'
+#' @keywords internal
+#' @noRd
+resolve_housekeeping_norm <- function(
+  code_class,
+  housekeeping_genes,
+  housekeeping_predict,
+  housekeeping_norm
+) {
+  if (
+    !any(grepl("Housekeeping", code_class)) &&
+      is.null(housekeeping_genes) &&
+      !housekeeping_predict &&
+      housekeeping_norm
+  ) {
+    nacho_warn(
+      c(
+        "Housekeeping normalisation is off, because no housekeeping genes are available.",
+        i = paste0(
+          "There are no {.val Housekeeping} probes, {.arg housekeeping_genes} is {.code NULL} ",
+          "and {.arg housekeeping_predict} is {.code FALSE}."
+        )
+      ),
+      class = "no_housekeeping"
+    )
+    return(FALSE)
+  }
+  housekeeping_norm
 }
 
 #' Build the probe table and the counts matrix from long probe counts

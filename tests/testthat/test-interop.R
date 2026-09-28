@@ -265,3 +265,89 @@ test_that("as_nacho() on a NanoStringRccSet needs NanoStringNCTools", {
   local_mocked_bindings(has_package = function(package) FALSE)
   expect_error(as_nacho(rccset), class = "nacho_error_missing_package")
 })
+
+test_that("as_nacho() needs a counts assay", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(GSE74821)
+  SummarizedExperiment::assayNames(se) <- c("raw", "normalised")
+  expect_error(as_nacho(se), class = "nacho_error_bad_object")
+})
+
+test_that("as_nacho() keeps the missing counts of probes absent from some files", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(GSE74821)
+  endogenous <- which(
+    SummarizedExperiment::rowData(se)$CodeClass == "Endogenous"
+  )
+  counts <- SummarizedExperiment::assay(se, "counts")
+  counts[endogenous[[1]], 1] <- NA_integer_
+  SummarizedExperiment::assay(se, "counts") <- counts
+  expect_warning(
+    x <- suppressMessages(as_nacho(se)),
+    class = "nacho_warning_missing_counts"
+  )
+  expect_identical(nacho_counts(x), counts)
+  expect_warning(
+    round_trip <- suppressMessages(as_nacho(as_summarized_experiment(x))),
+    class = "nacho_warning_missing_counts"
+  )
+  expect_identical(nacho_counts(round_trip), counts)
+  expect_equal(nacho_qc(round_trip), nacho_qc(x))
+})
+
+test_that("as_nacho() drops saved housekeeping genes the rows no longer hold", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(GSE74821)
+  keep <- SummarizedExperiment::rowData(se)$CodeClass != "Housekeeping"
+  expect_warning(
+    x <- suppressMessages(as_nacho(se[keep, ])),
+    class = "nacho_warning_no_housekeeping"
+  )
+  expect_null(x@settings$housekeeping_genes)
+  expect_false(x@settings$housekeeping_norm)
+  expect_false(anyNA(nacho_counts(x, normalised = TRUE)))
+})
+
+test_that("as_nacho() fills missing settings with the defaults", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- se_with_nacho_metadata("settings", list(id_colname = "IDFILE"))
+  x <- suppressMessages(as_nacho(se))
+  expect_identical(x@settings$normalisation_method, "GEO")
+  expect_identical(x@settings$n_comp, 10L)
+  expect_true(x@settings$housekeeping_norm)
+})
+
+test_that("as_nacho() checks the provenance saved in the metadata", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- se_with_nacho_metadata("provenance", "old")
+  expect_error(as_nacho(se), class = "nacho_error_bad_argument")
+  expect_snapshot(as_nacho(se), error = TRUE)
+})
+
+test_that("as_nacho() does not overwrite a different sample id column", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(GSE74821)
+  S4Vectors::metadata(se) <- list()
+  se$IDFILE <- rev(se$IDFILE)
+  expect_error(as_nacho(se), class = "nacho_error_bad_argument")
+  expect_snapshot(as_nacho(se), error = TRUE)
+  x <- suppressMessages(as_nacho(se, id_colname = "sample"))
+  expect_identical(nacho_samples(x)$sample, colnames(se))
+  expect_identical(nacho_samples(x)$IDFILE, rev(colnames(se)))
+})
+
+test_that("default_settings() follows the load_rcc() defaults", {
+  defaults <- lapply(
+    as.list(formals(load_rcc))[c(
+      "housekeeping_genes",
+      "housekeeping_predict",
+      "normalisation_method",
+      "n_comp"
+    )],
+    eval
+  )
+  defaults$n_comp <- as.integer(defaults$n_comp)
+  settings <- NACHO:::default_settings(nacho_probes(GSE74821), "IDFILE")
+  expect_identical(settings[names(defaults)], defaults)
+  expect_identical(formals(load_rcc)$housekeeping_norm, TRUE)
+})

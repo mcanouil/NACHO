@@ -89,16 +89,16 @@ as_nacho <- function(x, id_colname = "IDFILE") {
 }
 
 check_raw_counts <- function(counts, call = rlang::caller_env()) {
+  values <- if (is.numeric(counts)) counts[!is.na(counts)]
   if (
     !is.numeric(counts) ||
-      anyNA(counts) ||
-      any(counts != round(counts)) ||
-      any(counts < 0) ||
-      any(counts > .Machine[["integer.max"]])
+      any(values != round(values)) ||
+      any(values < 0) ||
+      any(values > .Machine[["integer.max"]])
   ) {
     nacho_abort(
       c(
-        "The counts must be raw, non-negative whole numbers.",
+        "The counts must be raw, non-negative whole numbers, or missing.",
         i = "They must also be at most {.val {(.Machine[['integer.max']])}}."
       ),
       class = "bad_object",
@@ -171,12 +171,30 @@ nacho_from_parts <- function(
   rownames(probes) <- NULL
   rownames(counts) <- probes[["Name"]]
   check_nacho_metadata(metadata, call = call)
-  id_colname <- metadata[["settings"]][["id_colname"]] %||% id_colname
+  settings <- nacho_metadata_settings(
+    metadata[["settings"]],
+    probes,
+    id_colname,
+    call = call
+  )
+  id_colname <- settings[["id_colname"]]
+  if (
+    id_colname %in%
+      names(samples) &&
+      !identical(as.character(samples[[id_colname]]), colnames(counts))
+  ) {
+    nacho_abort(
+      c(
+        "The sample data already has a column {.field {id_colname}} that differs from the sample names.",
+        i = "Pass another {.arg id_colname}, or rename that column."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
   samples[[id_colname]] <- colnames(counts)
   samples <- column_first(samples, id_colname)
   rownames(samples) <- NULL
-  settings <- metadata[["settings"]] %||%
-    default_settings(probes, id_colname)
   provenance <- metadata[["provenance"]] %||%
     new_provenance(
       data_directory = NULL,
@@ -196,29 +214,15 @@ nacho_from_parts <- function(
 }
 
 check_nacho_metadata <- function(metadata, call = rlang::caller_env()) {
-  settings <- metadata[["settings"]]
-  if (!is.null(settings)) {
-    if (!is.list(settings)) {
+  for (field in c("settings", "provenance")) {
+    value <- metadata[[field]]
+    if (!is.null(value) && !(is.list(value) && rlang::is_named(value))) {
       nacho_abort(
-        "{.arg metadata(x)$nacho$settings} must be a list, not {.obj_type_friendly {settings}}.",
+        "{.arg metadata(x)$nacho${field}} must be a named list, not {.obj_type_friendly {value}}.",
         class = "bad_argument",
         call = call
       )
     }
-    check_string(
-      settings[["id_colname"]],
-      arg = "metadata(x)$nacho$settings$id_colname",
-      call = call
-    )
-    check_settings(
-      settings[["housekeeping_genes"]],
-      settings[["housekeeping_predict"]],
-      settings[["housekeeping_norm"]],
-      settings[["normalisation_method"]],
-      settings[["n_comp"]],
-      arg_prefix = "metadata(x)$nacho$settings$",
-      call = call
-    )
   }
   if (!is.null(metadata[["thresholds"]])) {
     check_thresholds(
@@ -236,6 +240,60 @@ check_nacho_metadata <- function(metadata, call = rlang::caller_env()) {
     )
   }
   invisible(metadata)
+}
+
+#' Complete and check the settings saved in the metadata
+#'
+#' Saved settings override `default_settings()`, and saved housekeeping genes
+#' that are no longer probes are dropped.
+#'
+#' @param settings `metadata(x)$nacho$settings`, a named list or `NULL`.
+#' @param probes The probe table.
+#' @param id_colname The sample id column to use when `settings` has none.
+#' @inheritParams nacho_abort
+#'
+#' @return The complete settings list.
+#'
+#' @keywords internal
+#' @noRd
+nacho_metadata_settings <- function(
+  settings,
+  probes,
+  id_colname,
+  call = rlang::caller_env()
+) {
+  merged <- default_settings(probes, id_colname)
+  merged[names(settings)] <- settings
+  check_string(
+    merged[["id_colname"]],
+    arg = "metadata(x)$nacho$settings$id_colname",
+    call = call
+  )
+  check_settings(
+    merged[["housekeeping_genes"]],
+    merged[["housekeeping_predict"]],
+    merged[["housekeeping_norm"]],
+    merged[["normalisation_method"]],
+    merged[["n_comp"]],
+    arg_prefix = "metadata(x)$nacho$settings$",
+    call = call
+  )
+  housekeeping_genes <- merged[["housekeeping_genes"]]
+  housekeeping_genes <- housekeeping_genes[
+    housekeeping_genes %in% probes[["Name"]]
+  ]
+  if (length(housekeeping_genes) == 0) {
+    merged["housekeeping_genes"] <- list(NULL)
+  } else {
+    merged[["housekeeping_genes"]] <- housekeeping_genes
+  }
+  merged[["housekeeping_norm"]] <- resolve_housekeeping_norm(
+    probes[["CodeClass"]],
+    merged[["housekeeping_genes"]],
+    merged[["housekeeping_predict"]],
+    merged[["housekeeping_norm"]]
+  )
+  merged
 }
 
 nacho_from_se <- function(x, id_colname, call = rlang::caller_env()) {

@@ -26,10 +26,15 @@ test_that("normalise_matrix() rounds, then floors at 0.1", {
 test_that("sample_metrics() gives NA and one warning when lane attributes are missing", {
   x <- GSE74821
   samples <- x@samples[, !grepl("^Lane_Attributes", names(x@samples))]
-  expect_warning(
-    metrics <- NACHO:::sample_metrics(x@counts, x@probes, samples),
-    class = "nacho_warning_metric_unavailable"
+  warnings <- list()
+  metrics <- withCallingHandlers(
+    NACHO:::sample_metrics(x@counts, x@probes, samples),
+    nacho_warning_metric_unavailable = function(cnd) {
+      warnings <<- c(warnings, list(cnd))
+      invokeRestart("muffleWarning")
+    }
   )
+  expect_length(warnings, 1)
   expect_true(all(is.na(metrics$FoV)))
   expect_true(all(is.na(metrics$BD)))
   expect_false(anyNA(metrics$MC))

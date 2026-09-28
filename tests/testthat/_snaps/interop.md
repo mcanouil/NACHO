@@ -50,3 +50,20 @@
       ! The SummarizedExperiment package is needed to build a SummarizedExperiment.
       i Install it with `BiocManager::install("SummarizedExperiment")`.
 
+# as_nacho() checks the provenance saved in the metadata
+
+    Code
+      as_nacho(se)
+    Condition
+      Error in `as_nacho()`:
+      ! `metadata(x)$nacho$provenance` must be a named list, not a string.
+
+# as_nacho() does not overwrite a different sample id column
+
+    Code
+      as_nacho(se)
+    Condition
+      Error in `as_nacho()`:
+      ! The sample data already has a column IDFILE that differs from the sample names.
+      i Pass another `id_colname`, or rename that column.
+
