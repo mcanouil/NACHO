@@ -40,6 +40,10 @@ test_that("upgrade_nacho() leaves NACHO 3 objects alone and refuses anything els
   expect_error(upgrade_nacho(list(a = 1)), class = "nacho_error_bad_object")
 })
 
+test_that("upgrade_nacho() refuses a missing argument", {
+  expect_error(upgrade_nacho(), class = "nacho_error_bad_object")
+})
+
 test_that("verbs point NACHO 2 objects to upgrade_nacho()", {
   expect_error(normalise(nacho_2()), class = "nacho_error_bad_object")
   expect_snapshot(normalise(nacho_2()), error = TRUE)
@@ -64,4 +68,36 @@ test_that("check_nacho() refuses an object from another schema", {
   attr(x, "provenance")$schema_version <- 99L
   expect_error(nacho_samples(x), class = "nacho_error_bad_object")
   expect_snapshot(nacho_samples(x), error = TRUE)
+})
+
+test_that("read_nacho() reads the frozen schema-1 object", {
+  path <- test_path("fixtures", "nacho-schema-1.rds")
+  x <- read_nacho(path)
+  expect_true(S7::S7_inherits(x, NACHO:::nacho))
+  expect_identical(dim(x), c(40L, 4L))
+  expect_identical(nacho_counts(x), readRDS(path)@counts)
+  expect_identical(x@provenance$schema_version, 1L)
+})
+
+test_that("read_nacho() upgrades a saved NACHO 2 object", {
+  expect_warning(
+    x <- suppressMessages(read_nacho(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))),
+    class = "nacho_warning_n_comp_reduced"
+  )
+  expect_true(S7::S7_inherits(x, NACHO:::nacho))
+})
+
+test_that("read_nacho() refuses files without a NACHO object", {
+  path <- withr::local_tempfile(fileext = ".rds")
+  saveRDS(list(a = 1), path)
+  expect_error(read_nacho(path), class = "nacho_error_bad_object")
+  expect_error(read_nacho(file.path(tempdir(), "none.rds")), class = "nacho_error_missing_file")
+})
+
+test_that("read_nacho() refuses objects from a newer schema", {
+  x <- readRDS(test_path("fixtures", "nacho-schema-1.rds"))
+  attr(x, "provenance")$schema_version <- 99L
+  path <- withr::local_tempfile(fileext = ".rds")
+  saveRDS(x, path)
+  expect_error(read_nacho(path), class = "nacho_error_bad_object")
 })

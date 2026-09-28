@@ -10,11 +10,21 @@
 #'   NACHO 2.
 #'
 #' @return A `nacho` object.
+#' @seealso [read_nacho()]
 #' @export
 #' @examples
 #' data(GSE74821)
 #' identical(upgrade_nacho(GSE74821), GSE74821)
 upgrade_nacho <- function(x) {
+  if (missing(x)) {
+    nacho_abort(
+      c(
+        "{.arg x} is missing.",
+        i = "Pass a NACHO 2 object, as returned by {.fn load_rcc} or {.fn normalise} in NACHO 2."
+      ),
+      class = "bad_object"
+    )
+  }
   if (S7::S7_inherits(x, nacho)) {
     nacho_inform(
       "{.arg x} is already a NACHO 3 object, so it is returned unchanged."
@@ -105,4 +115,49 @@ upgrade_nacho <- function(x) {
     }
   ))
   upgraded
+}
+
+#' Read a saved NACHO object
+#'
+#' Reads an `.rds` file written with [saveRDS()] from any NACHO version.
+#' NACHO 2 objects go through [upgrade_nacho()].
+#' NACHO 3 objects are rebuilt with the current class, because each saved S7
+#' object carries a copy of the class it was made with.
+#'
+#' @param path Path to an `.rds` file.
+#'
+#' @return A `nacho` object.
+#' @seealso [upgrade_nacho()]
+#' @export
+#' @examples
+#' path <- tempfile(fileext = ".rds")
+#' saveRDS(GSE74821, path)
+#' read_nacho(path)
+read_nacho <- function(path) {
+  check_string(path)
+  if (!file.exists(path)) {
+    nacho_abort("The file {.file {path}} does not exist.", class = "missing_file")
+  }
+  x <- readRDS(path)
+  if (is_nacho_v2(x)) {
+    return(upgrade_nacho(x))
+  }
+  if (!S7::S7_inherits(x, nacho)) {
+    nacho_abort(
+      "{.file {path}} does not hold a NACHO object, but {.obj_type_friendly {x}}.",
+      class = "bad_object"
+    )
+  }
+  properties <- S7::props(x)
+  schema <- properties[["provenance"]][["schema_version"]]
+  if (!identical(schema, nacho_schema_version)) {
+    nacho_abort(
+      c(
+        "{.file {path}} was saved with object schema {schema}, and this NACHO reads schema {nacho_schema_version}.",
+        i = "Update NACHO to read it."
+      ),
+      class = "bad_object"
+    )
+  }
+  do.call(nacho, properties)
 }

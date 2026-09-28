@@ -24,3 +24,6 @@ flags again with the NACHO 3 definitions.
 data(GSE74821)
 identical(upgrade_nacho(GSE74821), GSE74821)
 }
+\seealso{
+\code{\link[=read_nacho]{read_nacho()}}
+}
