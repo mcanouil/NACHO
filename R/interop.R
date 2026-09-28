@@ -116,7 +116,7 @@ check_unique_names <- function(names, what, call = rlang::caller_env()) {
       call = call
     )
   }
-  duplicated_names <- unique(names[duplicated(names)])
+  duplicated_names <- duplicated_values(names)
   if (length(duplicated_names) > 0) {
     nacho_abort(
       "The {what} names must be unique; {.val {utils::head(duplicated_names, 3)}} {?is/are} duplicated.",
@@ -173,20 +173,10 @@ nacho_from_parts <- function(
   check_nacho_metadata(metadata, call = call)
   id_colname <- metadata[["settings"]][["id_colname"]] %||% id_colname
   samples[[id_colname]] <- colnames(counts)
-  samples <- samples[,
-    c(id_colname, setdiff(names(samples), id_colname)),
-    drop = FALSE
-  ]
+  samples <- column_first(samples, id_colname)
   rownames(samples) <- NULL
   settings <- metadata[["settings"]] %||%
-    list(
-      id_colname = id_colname,
-      housekeeping_genes = NULL,
-      housekeeping_predict = FALSE,
-      housekeeping_norm = any(grepl("Housekeeping", probes[["CodeClass"]])),
-      normalisation_method = "GEO",
-      n_comp = 10L
-    )
+    default_settings(probes, id_colname)
   provenance <- metadata[["provenance"]] %||%
     new_provenance(
       data_directory = NULL,
@@ -220,31 +210,13 @@ check_nacho_metadata <- function(metadata, call = rlang::caller_env()) {
       arg = "metadata(x)$nacho$settings$id_colname",
       call = call
     )
-    check_character(
+    check_settings(
       settings[["housekeeping_genes"]],
-      allow_null = TRUE,
-      arg = "metadata(x)$nacho$settings$housekeeping_genes",
-      call = call
-    )
-    check_bool(
       settings[["housekeeping_predict"]],
-      arg = "metadata(x)$nacho$settings$housekeeping_predict",
-      call = call
-    )
-    check_bool(
       settings[["housekeeping_norm"]],
-      arg = "metadata(x)$nacho$settings$housekeeping_norm",
-      call = call
-    )
-    check_choice(
       settings[["normalisation_method"]],
-      c("GEO", "GLM"),
-      arg = "metadata(x)$nacho$settings$normalisation_method",
-      call = call
-    )
-    check_count(
       settings[["n_comp"]],
-      arg = "metadata(x)$nacho$settings$n_comp",
+      arg_prefix = "metadata(x)$nacho$settings$",
       call = call
     )
   }

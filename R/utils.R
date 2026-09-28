@@ -72,3 +72,11 @@ strip_plexset_suffix <- function(data, id_colname) {
   data[[id_colname]] <- sub("_S[0-9]*$", "", data[[id_colname]])
   data
 }
+
+#' Move a column to the front of a data frame
+#'
+#' @keywords internal
+#' @noRd
+column_first <- function(data, column) {
+  data[, c(column, setdiff(names(data), column)), drop = FALSE]
+}
