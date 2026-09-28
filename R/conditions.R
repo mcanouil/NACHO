@@ -362,6 +362,31 @@ check_nacho <- function(
   invisible(x)
 }
 
+#' Refuse a NACHO 2 object in a NACHO 3 method
+#'
+#' The S3 methods for the NACHO 2 class `nacho` call this, so a NACHO 2 list
+#' gets the `check_nacho()` error instead of a base R fallback.
+#'
+#' @inheritParams check_nacho
+#'
+#' @keywords internal
+#' @noRd
+abort_nacho_v2 <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  check_nacho(x, arg = arg, call = call)
+  nacho_abort(
+    c(
+      "{.arg {arg}} is not a NACHO 3 object.",
+      i = "Convert it with {.fn upgrade_nacho}."
+    ),
+    class = "bad_object",
+    call = call
+  )
+}
+
 #' Check that an object schema is the one this NACHO reads
 #'
 #' @param schema The schema version stored in a `nacho` object.

@@ -148,3 +148,39 @@ test_that("package code runs data.table expressions without data.table attached"
   expect_identical(nrow(long), as.integer(prod(dim(GSE74821))))
   expect_s3_class(autoplot(GSE74821, type = "PCA"), "ggplot")
 })
+
+test_that("print() and format() of a NACHO 2 object point to upgrade_nacho()", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  expect_match(format(old), "upgrade_nacho()", fixed = TRUE)
+  output <- utils::capture.output(visible <- withVisible(print(old)))
+  expect_match(paste(output, collapse = "\n"), "upgrade_nacho()", fixed = TRUE)
+  expect_false(visible$visible)
+  expect_identical(visible$value, old)
+})
+
+test_that("the other methods refuse a NACHO 2 object", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  calls <- list(
+    summary = function() summary(old),
+    dim = function() dim(old),
+    as.data.frame = function() as.data.frame(old),
+    subset = function() old[1, ]
+  )
+  for (name in names(calls)) {
+    error <- expect_error(calls[[name]](), class = "nacho_error_bad_object")
+    expect_match(
+      conditionMessage(error),
+      "upgrade_nacho",
+      fixed = TRUE,
+      info = name
+    )
+  }
+})
+
+test_that("format() of a list with only the NACHO 2 class points to load_rcc()", {
+  expect_match(
+    format(structure(list(), class = "nacho")),
+    "load_rcc()",
+    fixed = TRUE
+  )
+})

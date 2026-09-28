@@ -236,3 +236,62 @@ S7::method(summary, nacho) <- summary_nacho
 S7::method(dim, nacho) <- function(x) dim(x@counts)
 S7::method(as.data.frame, nacho) <- as_data_frame_nacho
 S7::method(`[`, nacho) <- subset_nacho
+
+#' Point NACHO 2 objects to the converters
+#'
+#' NACHO 2 objects are S3 lists of class `nacho`, which the S7 methods above
+#' never see. `print()` and `format()` describe the object in one line, and
+#' the other methods refuse it, so base R does not dump or coerce the list.
+#' `S7::method<-` leaves local copies of the base generics in the namespace,
+#' so these methods name `base::` to reach the base methods table.
+#'
+#' @param x,object A NACHO 2 object.
+#' @param ... Ignored.
+#'
+#' @keywords internal
+#' @noRd
+#' @exportS3Method base::format
+format.nacho <- function(x, ...) {
+  if (is_nacho_v2(x)) {
+    cli::format_inline(
+      "<nacho> A NACHO 2 object. ",
+      "Convert it with {.code upgrade_nacho()}, or read the saved file with {.code read_nacho()}."
+    )
+  } else {
+    cli::format_inline(
+      "<nacho> A list with the NACHO 2 class but not the NACHO 2 data. ",
+      "Create a NACHO 3 object with {.code load_rcc()}."
+    )
+  }
+}
+
+#' @noRd
+#' @exportS3Method base::print
+print.nacho <- function(x, ...) {
+  cat(format.nacho(x), sep = "\n")
+  invisible(x)
+}
+
+#' @noRd
+#' @exportS3Method base::summary
+summary.nacho <- function(object, ...) {
+  abort_nacho_v2(object)
+}
+
+#' @noRd
+#' @exportS3Method base::dim
+dim.nacho <- function(x) {
+  abort_nacho_v2(x)
+}
+
+#' @noRd
+#' @exportS3Method base::as.data.frame
+as.data.frame.nacho <- function(x, ...) {
+  abort_nacho_v2(x)
+}
+
+#' @noRd
+#' @exportS3Method base::"[" nacho
+`[.nacho` <- function(x, ...) {
+  abort_nacho_v2(x)
+}
