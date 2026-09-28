@@ -18,6 +18,13 @@
 - fix: The app detects PlexSet files from their exact code classes.
 - fix: Empty RCC attributes, such as a blank owner or comment, are now read as empty text instead of repeating the attribute name.
 - fix: `load_rcc()` now checks a supplied `plexset_id` column: values outside `S1` to `S8` and duplicated id/`plexset_id` pairs raise a classed error before any file is read into a matrix.
+- perf: `load_rcc()` reads each RCC file once, with exact section tags, and computes quality control on count matrices. Loading 768 samples takes about 2.5 seconds instead of about 9 in NACHO 2.
+- feat: `load_rcc()` reads gzipped RCC files directly and accepts files with Windows line endings.
+- fix: A probe named like an RCC section, such as `Messages`, no longer breaks parsing.
+- fix: Housekeeping prediction no longer returns missing gene names when fewer than five candidates exist.
+- fix: Predicting housekeeping genes no longer misaligns probes when some RCC files lack a probe.
+- fix: PCA components now have a fixed sign, so plots no longer flip between machines.
+- feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
 
 # NACHO 2.0.7
 
