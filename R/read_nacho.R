@@ -39,25 +39,13 @@ upgrade_nacho <- function(x) {
   }
   long <- as.data.frame(x[["nacho"]])
   id <- x[["access"]]
-  probe_columns <- c("CodeClass", "Name", "Accession")
-  probes <- unique(long[, probe_columns])
-  probes <- probes[
-    order(probes[["CodeClass"]], probes[["Name"]], method = "radix"),
-  ]
-  rownames(probes) <- NULL
-  if (anyDuplicated(probes[["Name"]]) > 0) {
-    nacho_abort(
-      "{.arg x} has probes whose name appears with more than one code class or accession.",
-      class = "bad_object"
-    )
-  }
   dropped <- c(
-    probe_columns,
+    "CodeClass",
+    "Name",
+    "Accession",
     "Count",
     "Count_Norm",
-    "file_path",
-    grep("^PC[0-9]+$", names(long), value = TRUE),
-    computed_sample_columns
+    "file_path"
   )
   sample_columns <- setdiff(names(long), c(dropped, id))
   samples <- long[!duplicated(long[[id]]), c(id, sample_columns), drop = FALSE]
@@ -68,17 +56,15 @@ upgrade_nacho <- function(x) {
   ]
   rownames(samples) <- NULL
   ids <- as.character(samples[[id]])
-  counts <- matrix(
-    NA_integer_,
-    nrow = nrow(probes),
-    ncol = length(ids),
-    dimnames = list(probes[["Name"]], ids)
+  probe_counts <- build_probe_counts(
+    codes = long,
+    column = match(long[[id]], ids),
+    ids = ids,
+    clash_message = "{.arg x} has probes whose name appears with more than one code class or accession.",
+    clash_class = "bad_object"
   )
-  counts[cbind(
-    match(long[["Name"]], probes[["Name"]]),
-    match(long[[id]], ids)
-  )] <-
-    as.integer(long[["Count"]])
+  probes <- probe_counts[["probes"]]
+  counts <- probe_counts[["counts"]]
 
   thresholds <- x[["outliers_thresholds"]]
   check_thresholds(thresholds, arg = "x$outliers_thresholds")
@@ -156,22 +142,11 @@ read_nacho <- function(path) {
   }
   properties <- S7::props(x)
   schema <- properties[["provenance"]][["schema_version"]]
-  is_newer <- rlang::is_scalar_integerish(schema) &&
-    schema > nacho_schema_version
-  if (is_newer) {
-    nacho_abort(
-      c(
-        "{.file {path}} was saved with a newer object schema {schema}.",
-        i = "This NACHO reads schema {nacho_schema_version}. Update NACHO to read it."
-      ),
-      class = "bad_object"
-    )
-  }
   if (!identical(schema, nacho_schema_version)) {
     nacho_abort(
       c(
-        "{.file {path}} was saved with object schema {schema}, which this NACHO cannot read.",
-        i = "This NACHO reads schema {nacho_schema_version} only."
+        "{.file {path}} was saved with object schema {schema}.",
+        i = "{schema_hint(schema)}"
       ),
       class = "bad_object"
     )

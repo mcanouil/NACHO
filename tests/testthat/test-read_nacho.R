@@ -112,7 +112,7 @@ test_that("read_nacho() asks for a newer NACHO for a newer schema", {
   path <- save_with_schema(99L)
   expect_error(
     read_nacho(path),
-    regexp = "newer object schema 99.*Update NACHO",
+    regexp = "object schema 99.*newer.*Update NACHO",
     class = "nacho_error_bad_object"
   )
 })

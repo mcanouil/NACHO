@@ -297,15 +297,37 @@ check_nacho <- function(
       call = call
     )
   }
-  if (!identical(x@provenance[["schema_version"]], nacho_schema_version)) {
+  schema <- x@provenance[["schema_version"]]
+  if (!identical(schema, nacho_schema_version)) {
     nacho_abort(
       c(
-        "{.arg {arg}} was made by another version of NACHO.",
-        i = "Read the saved file with {.fn read_nacho}, which rebuilds it."
+        "{.arg {arg}} was made with object schema {schema}.",
+        i = "{schema_hint(schema)}"
       ),
       class = "bad_object",
       call = call
     )
   }
   invisible(x)
+}
+
+#' Explain why an object schema cannot be read
+#'
+#' @param schema The schema version stored in a `nacho` object.
+#'
+#' @return A string: a newer schema asks for a NACHO update, any other one
+#'   cannot be read.
+#'
+#' @keywords internal
+#' @noRd
+schema_hint <- function(schema) {
+  if (rlang::is_scalar_integerish(schema) && schema > nacho_schema_version) {
+    cli::format_inline(
+      "Schema {schema} is newer than schema {nacho_schema_version}, which this NACHO reads. Update NACHO to read it."
+    )
+  } else {
+    cli::format_inline(
+      "This NACHO reads schema {nacho_schema_version} only, so it cannot read schema {schema}."
+    )
+  }
 }

@@ -31,6 +31,6 @@
       nacho_samples(x)
     Condition
       Error in `nacho_samples()`:
-      ! `x` was made by another version of NACHO.
-      i Read the saved file with `read_nacho()`, which rebuilds it.
+      ! `x` was made with object schema 99.
+      i Schema 99 is newer than schema 1, which this NACHO reads. Update NACHO to read it.
 
