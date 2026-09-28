@@ -9,6 +9,10 @@
   - feat: The load path of the data moves to the object's provenance and is no longer stored in `GSE74821`.
 - In `R/read_nacho.R`,
   - feat: `upgrade_nacho()` converts a NACHO 2 object, and `read_nacho()` reads a saved object from any NACHO version.
+- In `R/interop.R`,
+  - feat: `as_summarized_experiment()` and `as_nacho()` convert between `nacho` objects and `SummarizedExperiment`, and `as_nacho()` also reads a `NanoStringRccSet` from NanoStringNCTools.
+- In `R/qc.R`,
+  - feat: Quality control runs on data without lane attributes; the metrics that need them are `NA`, with one warning.
 - In `R/conditions.R`,
   - feat: Errors, warnings and messages now use cli and carry classes such as `nacho_error_bad_argument`, so code can catch them selectively.
   - feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
