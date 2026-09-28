@@ -14,7 +14,9 @@ as_nacho(x, id_colname = "IDFILE")
 \code{SummarizedExperiment} or a \code{NanoStringRccSet} for \code{as_nacho()}.}
 
 \item{id_colname}{Name of the sample id column to create when \code{x} does not
-come from NACHO.}
+come from NACHO.
+When \code{metadata(x)$nacho$settings} exists, its \code{id_colname} wins and this
+argument is ignored.}
 }
 \value{
 A \code{SummarizedExperiment}, or a \code{nacho} object.
@@ -31,6 +33,10 @@ type and provenance in \code{metadata()$nacho}.
 It computes the quality-control
 metrics and the normalisation from the raw counts; settings and thresholds
 come from \code{metadata()$nacho} when present, and are the defaults otherwise.
+They are checked like the arguments of \code{\link[=normalise]{normalise()}}.
+The result always carries the current object schema.
+A \code{nacho} object is checked and returned as is, and a NACHO 2 object gets a
+hint to use \code{\link[=upgrade_nacho]{upgrade_nacho()}}.
 }
 \examples{
 if (requireNamespace("SummarizedExperiment", quietly = TRUE)) {

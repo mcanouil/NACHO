@@ -24,11 +24,17 @@ check_bioconductor <- function(packages, reason, call = rlang::caller_env()) {
 #' It computes the quality-control
 #' metrics and the normalisation from the raw counts; settings and thresholds
 #' come from `metadata()$nacho` when present, and are the defaults otherwise.
+#' They are checked like the arguments of [normalise()].
+#' The result always carries the current object schema.
+#' A `nacho` object is checked and returned as is, and a NACHO 2 object gets a
+#' hint to use [upgrade_nacho()].
 #'
 #' @param x A `nacho` object for `as_summarized_experiment()`; a
 #'   `SummarizedExperiment` or a `NanoStringRccSet` for `as_nacho()`.
 #' @param id_colname Name of the sample id column to create when `x` does not
 #'   come from NACHO.
+#'   When `metadata(x)$nacho$settings` exists, its `id_colname` wins and this
+#'   argument is ignored.
 #'
 #' @return A `SummarizedExperiment`, or a `nacho` object.
 #' @export
@@ -66,7 +72,8 @@ as_summarized_experiment <- function(x) {
 #' @export
 as_nacho <- function(x, id_colname = "IDFILE") {
   check_string(id_colname)
-  if (S7::S7_inherits(x, nacho)) {
+  if (inherits(x, "nacho") || S7::S7_inherits(x, nacho)) {
+    check_nacho(x)
     return(x)
   }
   if (methods::is(x, "NanoStringRccSet")) {
@@ -163,6 +170,7 @@ nacho_from_parts <- function(
   }
   rownames(probes) <- NULL
   rownames(counts) <- probes[["Name"]]
+  check_nacho_metadata(metadata, call = call)
   id_colname <- metadata[["settings"]][["id_colname"]] %||% id_colname
   samples[[id_colname]] <- colnames(counts)
   samples <- samples[,
@@ -179,6 +187,13 @@ nacho_from_parts <- function(
       normalisation_method = "GEO",
       n_comp = 10L
     )
+  provenance <- metadata[["provenance"]] %||%
+    new_provenance(
+      data_directory = NULL,
+      file_version = samples[["Header.header_FileVersion"]],
+      software_version = samples[["Header.header_SoftwareVersion"]]
+    )
+  provenance[["schema_version"]] <- nacho_schema_version
   build_nacho(
     counts = counts,
     probes = probes,
@@ -186,13 +201,69 @@ nacho_from_parts <- function(
     settings = settings,
     thresholds = metadata[["thresholds"]] %||% default_thresholds(),
     rcc_type = metadata[["rcc_type"]] %||% "n1",
-    provenance = metadata[["provenance"]] %||%
-      new_provenance(
-        data_directory = NULL,
-        file_version = samples[["Header.header_FileVersion"]],
-        software_version = samples[["Header.header_SoftwareVersion"]]
-      )
+    provenance = provenance
   )
+}
+
+check_nacho_metadata <- function(metadata, call = rlang::caller_env()) {
+  settings <- metadata[["settings"]]
+  if (!is.null(settings)) {
+    if (!is.list(settings)) {
+      nacho_abort(
+        "{.arg metadata(x)$nacho$settings} must be a list, not {.obj_type_friendly {settings}}.",
+        class = "bad_argument",
+        call = call
+      )
+    }
+    check_string(
+      settings[["id_colname"]],
+      arg = "metadata(x)$nacho$settings$id_colname",
+      call = call
+    )
+    check_character(
+      settings[["housekeeping_genes"]],
+      allow_null = TRUE,
+      arg = "metadata(x)$nacho$settings$housekeeping_genes",
+      call = call
+    )
+    check_bool(
+      settings[["housekeeping_predict"]],
+      arg = "metadata(x)$nacho$settings$housekeeping_predict",
+      call = call
+    )
+    check_bool(
+      settings[["housekeeping_norm"]],
+      arg = "metadata(x)$nacho$settings$housekeeping_norm",
+      call = call
+    )
+    check_choice(
+      settings[["normalisation_method"]],
+      c("GEO", "GLM"),
+      arg = "metadata(x)$nacho$settings$normalisation_method",
+      call = call
+    )
+    check_count(
+      settings[["n_comp"]],
+      arg = "metadata(x)$nacho$settings$n_comp",
+      call = call
+    )
+  }
+  if (!is.null(metadata[["thresholds"]])) {
+    check_thresholds(
+      metadata[["thresholds"]],
+      arg = "metadata(x)$nacho$thresholds",
+      call = call
+    )
+  }
+  if (!is.null(metadata[["rcc_type"]])) {
+    check_choice(
+      metadata[["rcc_type"]],
+      c("n1", "n8"),
+      arg = "metadata(x)$nacho$rcc_type",
+      call = call
+    )
+  }
+  invisible(metadata)
 }
 
 nacho_from_se <- function(x, id_colname, call = rlang::caller_env()) {

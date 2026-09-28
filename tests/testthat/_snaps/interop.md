@@ -15,6 +15,32 @@
       ! The probe data has no "Positive" or "Negative" control probes.
       i Keep the control probes when you subset the rows.
 
+# as_nacho() points NACHO 2 objects to upgrade_nacho()
+
+    Code
+      as_nacho(nacho_2)
+    Condition
+      Error in `as_nacho()`:
+      ! `x` is a NACHO 2 object, which NACHO 3 cannot use.
+      i Convert it with `upgrade_nacho(x)`, or read the saved file with `read_nacho()`.
+
+# as_nacho() checks the settings saved in the metadata
+
+    Code
+      as_nacho(se_with_setting("normalisation_method", "foo"))
+    Condition
+      Error in `as_nacho()`:
+      ! `metadata(x)$nacho$settings$normalisation_method` must be one of "GEO" or "GLM", not "foo".
+
+# as_nacho() checks the thresholds and RCC type saved in the metadata
+
+    Code
+      as_nacho(se)
+    Condition
+      Error in `as_nacho()`:
+      ! `metadata(x)$nacho$rcc_type` must be one of "n1" or "n8", not "n2".
+      i Did you mean "n1"?
+
 # a missing Bioconductor package gives the install command
 
     Code

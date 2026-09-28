@@ -146,6 +146,73 @@ test_that("as_nacho() refuses other objects", {
   expect_error(as_nacho(data.frame()), class = "nacho_error_bad_object")
 })
 
+test_that("as_nacho() points NACHO 2 objects to upgrade_nacho()", {
+  nacho_2 <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  expect_error(as_nacho(nacho_2), class = "nacho_error_bad_object")
+  expect_snapshot(as_nacho(nacho_2), error = TRUE)
+})
+
+test_that("as_nacho() checks a nacho object and returns it unchanged", {
+  expect_identical(as_nacho(GSE74821), GSE74821)
+  stale <- GSE74821
+  attr(stale, "provenance")$schema_version <- 99L
+  expect_error(as_nacho(stale), class = "nacho_error_bad_object")
+})
+
+test_that("as_nacho() stamps the current schema on saved provenance", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(GSE74821)
+  S4Vectors::metadata(se)$nacho$provenance$schema_version <- 99L
+  x <- suppressMessages(as_nacho(se))
+  expect_identical(x@provenance, GSE74821@provenance)
+  expect_identical(nacho_samples(x), nacho_samples(GSE74821))
+})
+
+se_with_nacho_metadata <- function(field, value) {
+  se <- as_summarized_experiment(NACHO::GSE74821)
+  nacho_metadata <- S4Vectors::metadata(se)$nacho
+  nacho_metadata[[field]] <- value
+  S4Vectors::metadata(se)$nacho <- nacho_metadata
+  se
+}
+
+se_with_setting <- function(setting, value) {
+  settings <- NACHO::GSE74821@settings
+  settings[setting] <- list(value)
+  se_with_nacho_metadata("settings", settings)
+}
+
+test_that("as_nacho() checks the settings saved in the metadata", {
+  skip_if_not_installed("SummarizedExperiment")
+  bad_settings <- list(
+    id_colname = 1,
+    housekeeping_genes = 1,
+    housekeeping_predict = "yes",
+    housekeeping_norm = NA,
+    normalisation_method = "foo",
+    n_comp = 1.5
+  )
+  for (setting in names(bad_settings)) {
+    se <- se_with_setting(setting, bad_settings[[setting]])
+    expect_error(as_nacho(se), class = "nacho_error_bad_argument")
+  }
+  se <- se_with_nacho_metadata("settings", "GEO")
+  expect_error(as_nacho(se), class = "nacho_error_bad_argument")
+  expect_snapshot(
+    as_nacho(se_with_setting("normalisation_method", "foo")),
+    error = TRUE
+  )
+})
+
+test_that("as_nacho() checks the thresholds and RCC type saved in the metadata", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- se_with_nacho_metadata("thresholds", list(a = 1))
+  expect_error(as_nacho(se), class = "nacho_error_bad_argument")
+  se <- se_with_nacho_metadata("rcc_type", "n2")
+  expect_error(as_nacho(se), class = "nacho_error_bad_argument")
+  expect_snapshot(as_nacho(se), error = TRUE)
+})
+
 test_that("a missing Bioconductor package gives the install command", {
   local_mocked_bindings(has_package = function(package) FALSE)
   expect_error(
