@@ -40,6 +40,12 @@ toy_nacho <- function(n_samples = 4L) {
     is_outlier = FALSE
   )
   thresholds <- NACHO:::default_thresholds()
+  provenance <- NACHO:::new_provenance(
+    data_directory = NULL,
+    file_version = "1.7",
+    software_version = "4.0.0.3"
+  )
+  provenance[["nacho_version"]] <- "0.0.0"
   NACHO:::nacho(
     counts = counts,
     normalised = counts * 1,
@@ -56,10 +62,6 @@ toy_nacho <- function(n_samples = 4L) {
     thresholds = thresholds,
     pca = suppressWarnings(NACHO:::compute_pca(counts, 2L)),
     rcc_type = "n1",
-    provenance = NACHO:::new_provenance(
-      data_directory = NULL,
-      file_version = "1.7",
-      software_version = "4.0.0.3"
-    )
+    provenance = provenance
   )
 }
