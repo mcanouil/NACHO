@@ -85,6 +85,15 @@ compute_outliers <- function(samples, thresholds, rcc_type) {
 #' @keywords internal
 #' @noRd
 compute_pca <- function(counts, n_comp) {
+  if (!rlang::is_scalar_integerish(n_comp, finite = TRUE) || n_comp < 0) {
+    nacho_abort(
+      c(
+        "{.arg n_comp} must be a whole number of at least 0, not {.obj_type_friendly {n_comp}}.",
+        i = "This is an internal error in NACHO; the object settings may have been changed through {.code @}."
+      ),
+      class = "internal"
+    )
+  }
   n_samples <- ncol(counts)
   n_probes <- nrow(counts)
   max_comp <- max(min(n_samples - 1L, n_probes), 0L)

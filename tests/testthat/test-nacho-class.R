@@ -298,3 +298,15 @@ test_that("compute_pca() gives consistent signs for a row-permuted matrix", {
     expect_equal(pca_permuted$scores, pca$scores, tolerance = 1e-8)
   }
 })
+
+test_that("compute_pca() refuses a missing n_comp with an internal error", {
+  counts <- matrix(
+    1:20,
+    nrow = 5,
+    dimnames = list(paste0("p", 1:5), paste0("s", 1:4))
+  )
+  expect_error(
+    NACHO:::compute_pca(counts, NULL),
+    class = "nacho_error_internal"
+  )
+})
