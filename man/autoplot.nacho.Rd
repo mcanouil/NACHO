@@ -50,7 +50,7 @@ Draws any of the quality-control figures of the Shiny app
 \item \code{"NORM"}: Normalisation factor.
 }
 \item \code{colour}: The column of \code{nacho_samples(object)} that colours the points.
-\item \code{size}: The point size.
+\item \code{size}: The point size, and the line width in the \code{"NORM"} plot.
 \item \code{show_legend}: If \code{FALSE}, hide the colour legend.
 \item \code{show_outliers}: If \code{TRUE}, draw the flagged samples in red.
 \item \code{outliers_factor}: The size of the flagged samples, relative to \code{size}.

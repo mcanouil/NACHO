@@ -17,7 +17,7 @@ nacho_probes(x)
 nacho_qc(x)
 }
 \arguments{
-\item{x}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}}, \code{\link[=normalise]{normalise()}} or \code{as_nacho()}.}
+\item{x}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
 \item{normalised}{If \code{TRUE}, return the normalised counts instead of the
 raw counts.}

@@ -5,7 +5,7 @@ NULL
 #'
 #' These accessors are the only public way into a `nacho` object.
 #'
-#' @param x A `nacho` object from [load_rcc()], [normalise()] or `as_nacho()`.
+#' @param x A `nacho` object from [load_rcc()] or [normalise()].
 #' @param normalised If `TRUE`, return the normalised counts instead of the
 #'   raw counts.
 #' @param log2 If `TRUE`, return `log2(count + 1)`.

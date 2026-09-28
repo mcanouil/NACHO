@@ -40,7 +40,7 @@ NULL
 #'   * `"HF"`: Housekeeping factor.
 #'   * `"NORM"`: Normalisation factor.
 #' * `colour`: The column of `nacho_samples(object)` that colours the points.
-#' * `size`: The point size.
+#' * `size`: The point size, and the line width in the `"NORM"` plot.
 #' * `show_legend`: If `FALSE`, hide the colour legend.
 #' * `show_outliers`: If `TRUE`, draw the flagged samples in red.
 #' * `outliers_factor`: The size of the flagged samples, relative to `size`.

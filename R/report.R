@@ -63,9 +63,11 @@ report_markdown <- function(
   )
   cat(
     "  - Housekeeping genes available:",
-    paste(housekeeping_genes[-length(housekeeping_genes)], collapse = ", "),
-    "and",
-    housekeeping_genes[length(housekeeping_genes)],
+    if (length(housekeeping_genes) == 0) {
+      "none"
+    } else {
+      cli::ansi_collapse(housekeeping_genes)
+    },
     "\n"
   )
   cat("  - Normalise using:", x@settings[["normalisation_method"]], "\n")

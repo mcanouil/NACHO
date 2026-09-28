@@ -44,4 +44,27 @@ test_that("numeric column for colour", {
   )
 })
 
+test_that("the settings list the housekeeping genes, or none", {
+  housekeeping_line <- function(is_housekeeping) {
+    toy <- toy_nacho(4L)
+    probes <- toy@probes
+    probes[["is_housekeeping"]] <- is_housekeeping
+    toy@probes <- probes
+    output <- utils::capture.output(NACHO:::report_markdown(toy))
+    grep("Housekeeping genes available", output, value = TRUE)
+  }
+  expect_identical(
+    housekeeping_line(FALSE),
+    "  - Housekeeping genes available: none "
+  )
+  expect_identical(
+    housekeeping_line(c(rep(FALSE, 8), TRUE, FALSE, FALSE)),
+    "  - Housekeeping genes available: HK1 "
+  )
+  expect_identical(
+    housekeeping_line(c(rep(FALSE, 8), TRUE, TRUE, FALSE)),
+    "  - Housekeeping genes available: HK1 and GENE1 "
+  )
+})
+
 grDevices::dev.off(null_device)
