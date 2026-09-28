@@ -95,6 +95,15 @@ test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable
   )
 })
 
+muffle_unavailable <- function(expr) {
+  withCallingHandlers(
+    expr,
+    nacho_warning_metric_unavailable = function(cnd) {
+      invokeRestart("muffleWarning")
+    }
+  )
+}
+
 metrics <- c(
   "BD",
   "FoV",
@@ -159,7 +168,7 @@ for (imetric in metrics) {
 
   test_that(paste(imetric, "[salmon] Default parameters", sep = " - "), {
     expect_s3_class(
-      object = suppressWarnings(autoplot(salmon_nacho, type = imetric)),
+      object = muffle_unavailable(autoplot(salmon_nacho, type = imetric)),
       class = "ggplot"
     )
   })
@@ -168,7 +177,7 @@ for (imetric in metrics) {
     paste(imetric, "[salmon] show_legend to FALSE parameters", sep = " - "),
     {
       expect_s3_class(
-        object = suppressWarnings(autoplot(
+        object = muffle_unavailable(autoplot(
           salmon_nacho,
           type = imetric,
           show_legend = FALSE
@@ -180,7 +189,7 @@ for (imetric in metrics) {
 
   test_that(paste(imetric, "[salmon] show outliers and labels", sep = " - "), {
     expect_s3_class(
-      object = suppressWarnings(autoplot(
+      object = muffle_unavailable(autoplot(
         salmon_nacho,
         type = imetric,
         show_legend = FALSE,
@@ -194,7 +203,7 @@ for (imetric in metrics) {
 
   test_that(paste(imetric, "[salmon] hide outliers", sep = " - "), {
     expect_s3_class(
-      object = suppressWarnings(autoplot(
+      object = muffle_unavailable(autoplot(
         salmon_nacho,
         type = imetric,
         show_legend = FALSE,
@@ -225,7 +234,7 @@ for (imetric in metrics) {
 
 test_that(paste("HF", "Default parameters", sep = " - "), {
   expect_s3_class(
-    object = suppressWarnings(autoplot(plexset_nacho, type = "HF")),
+    object = muffle_unavailable(autoplot(plexset_nacho, type = "HF")),
     class = "ggplot"
   )
 })
@@ -235,7 +244,7 @@ test_that(paste("Housekeeping", "no genes", sep = " - "), {
   probes[["is_housekeeping"]] <- FALSE
   plexset_nacho@probes <- probes
   expect_s3_class(
-    object = suppressWarnings(autoplot(
+    object = muffle_unavailable(autoplot(
       plexset_nacho,
       type = "Housekeeping"
     )),
