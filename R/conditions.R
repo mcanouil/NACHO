@@ -216,13 +216,17 @@ check_interactive <- function(fn, call = rlang::caller_env()) {
   invisible(TRUE)
 }
 
+has_package <- function(package) {
+  requireNamespace(package, quietly = TRUE)
+}
+
 check_package <- function(
   package,
   reason,
   install = sprintf('install.packages("%s")', package),
   call = rlang::caller_env()
 ) {
-  if (!requireNamespace(package, quietly = TRUE)) {
+  if (!has_package(package)) {
     nacho_abort(
       c(
         "The {.pkg {package}} package is needed {reason}.",

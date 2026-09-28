@@ -81,6 +81,7 @@ Collate:
     'autoplot.R'
     'conditions.R'
     'deploy.R'
+    'interop.R'
     'load_rcc.R'
     'methods.R'
     'normalise.R'
