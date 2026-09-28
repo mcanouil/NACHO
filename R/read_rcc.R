@@ -9,9 +9,13 @@
 #' @keywords internal
 #' @noRd
 read_rcc <- function(file) {
-  lines <- readLines(file, warn = FALSE)
-  lines <- sub("[[:space:]]+$", "", lines)
-  lines <- sub("[|]+[[:digit:]]+\\.*[[:digit:]]*", "", lines)
+  lines <- trim_trailing_space(readLines(file, warn = FALSE))
+  has_bar <- grepl("|", lines, fixed = TRUE)
+  lines[has_bar] <- sub(
+    "[|]+[[:digit:]]+\\.*[[:digit:]]*",
+    "",
+    lines[has_bar]
+  )
 
   section <- function(tag, required = TRUE) {
     start <- match(paste0("<", tag, ">"), lines)
@@ -82,6 +86,23 @@ read_rcc <- function(file) {
   )
 }
 
+#' Remove trailing white space from lines
+#'
+#' Runs the regular expression only on lines that do not end in a printable
+#' ASCII character, since the others have nothing to trim.
+#' The result is the same as `sub("[[:space:]]+$", "", lines)`, much faster.
+#'
+#' @param lines A character vector.
+#'
+#' @keywords internal
+#' @noRd
+trim_trailing_space <- function(lines) {
+  last_character <- substring(lines, nchar(lines))
+  to_trim <- !grepl("[!-~]", last_character)
+  lines[to_trim] <- sub("[[:space:]]+$", "", lines[to_trim])
+  lines
+}
+
 #' Tell whether a code class vector is a PlexSet RCC file
 #'
 #' `TRUE` when `Endogenous1s` to `Endogenous8s` are all present, matched exactly.
@@ -107,8 +128,7 @@ is_plexset_classes <- function(code_class) {
 #' @return `TRUE` when the file holds all eight PlexSet code classes,
 #'   `Endogenous1s` to `Endogenous8s`, matched exactly.
 is_plexset_rcc <- function(file) {
-  lines <- readLines(file, warn = FALSE)
-  lines <- sub("[[:space:]]+$", "", lines)
+  lines <- trim_trailing_space(readLines(file, warn = FALSE))
   is_plexset_classes(sub(",.*$", "", lines))
 }
 

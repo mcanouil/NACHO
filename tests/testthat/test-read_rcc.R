@@ -72,6 +72,25 @@ test_that("read_rcc() reads CRLF files with trailing spaces", {
   )
 })
 
+test_that("trim_trailing_space() trims like the full regular expression", {
+  lines <- c(
+    "a ",
+    "b \t\r",
+    "",
+    "  ",
+    "c ",
+    "d　 ",
+    "e>",
+    "f\v",
+    "café ",
+    "g"
+  )
+  expect_identical(
+    NACHO:::trim_trailing_space(lines),
+    sub("[[:space:]]+$", "", lines)
+  )
+})
+
 test_that("read_rcc() names the file and the section when a tag is missing", {
   path <- withr::local_tempfile(fileext = ".RCC")
   writeLines(c("<Header>", "FileVersion,1.7", "</Header>"), path)
