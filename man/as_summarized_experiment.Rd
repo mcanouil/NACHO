@@ -30,6 +30,8 @@ type and provenance in \code{metadata()$nacho}.
 \details{
 \code{as_nacho()} goes the other way, from a \code{SummarizedExperiment} or from a
 \code{NanoStringRccSet} read by \code{NanoStringNCTools::readNanoStringRccSet()}.
+The dates of a \code{NanoStringRccSet} are written as \code{YYYYMMDD}, as in RCC
+files.
 It computes the quality-control
 metrics and the normalisation from the raw counts; settings and thresholds
 come from \code{metadata()$nacho} when present, and are the defaults otherwise.

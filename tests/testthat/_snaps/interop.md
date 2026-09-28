@@ -67,3 +67,20 @@
       ! The sample data already has a column IDFILE that differs from the sample names.
       i Pass another `id_colname`, or rename that column.
 
+# as_nacho() checks the NACHO metadata block
+
+    Code
+      as_nacho(se)
+    Condition
+      Error in `as_nacho()`:
+      ! `metadata(x)$nacho` must be a named list, not a string.
+
+# as_nacho() refuses unknown saved settings
+
+    Code
+      as_nacho(se)
+    Condition
+      Error in `as_nacho()`:
+      ! `metadata(x)$nacho$settings` has unknown setting: n_comps.
+      i Known settings: id_colname, housekeeping_genes, housekeeping_predict, housekeeping_norm, normalisation_method, and n_comp.
+

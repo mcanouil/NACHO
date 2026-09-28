@@ -427,7 +427,10 @@ sample_metrics <- function(counts, probes, samples) {
     !paste0("Lane_Attributes.lane_", lane_names) %in% names(samples)
   ]
   missing_date <- !"Sample_Attributes.sample_Date" %in% names(samples)
-  missing <- c(missing_lane, if (missing_date) "Date")
+  missing <- c(
+    if (length(missing_lane) > 0) paste0("Lane_Attributes.lane_", missing_lane),
+    if (missing_date) "Sample_Attributes.sample_Date"
+  )
   if (length(missing) > 0) {
     nacho_warn(
       c(

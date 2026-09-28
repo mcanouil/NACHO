@@ -21,6 +21,8 @@ check_bioconductor <- function(packages, reason, call = rlang::caller_env()) {
 #'
 #' `as_nacho()` goes the other way, from a `SummarizedExperiment` or from a
 #' `NanoStringRccSet` read by `NanoStringNCTools::readNanoStringRccSet()`.
+#' The dates of a `NanoStringRccSet` are written as `YYYYMMDD`, as in RCC
+#' files.
 #' It computes the quality-control
 #' metrics and the normalisation from the raw counts; settings and thresholds
 #' come from `metadata()$nacho` when present, and are the defaults otherwise.
@@ -214,6 +216,13 @@ nacho_from_parts <- function(
 }
 
 check_nacho_metadata <- function(metadata, call = rlang::caller_env()) {
+  if (!is.null(metadata) && !(is.list(metadata) && rlang::is_named(metadata))) {
+    nacho_abort(
+      "{.arg metadata(x)$nacho} must be a named list, not {.obj_type_friendly {metadata}}.",
+      class = "bad_argument",
+      call = call
+    )
+  }
   for (field in c("settings", "provenance")) {
     value <- metadata[[field]]
     if (!is.null(value) && !(is.list(value) && rlang::is_named(value))) {
@@ -263,13 +272,24 @@ nacho_metadata_settings <- function(
   call = rlang::caller_env()
 ) {
   merged <- default_settings(probes, id_colname)
+  unknown <- setdiff(names(settings), names(merged))
+  if (length(unknown) > 0) {
+    nacho_abort(
+      c(
+        "{.arg metadata(x)$nacho$settings} has unknown setting{?s}: {.field {unknown}}.",
+        i = "Known settings: {.field {names(merged)}}."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
   merged[names(settings)] <- settings
   check_string(
     merged[["id_colname"]],
     arg = "metadata(x)$nacho$settings$id_colname",
     call = call
   )
-  check_settings(
+  merged[["normalisation_method"]] <- check_settings(
     merged[["housekeeping_genes"]],
     merged[["housekeeping_predict"]],
     merged[["housekeeping_norm"]],

@@ -35,6 +35,11 @@ test_that("sample_metrics() gives NA and one warning when lane attributes are mi
     }
   )
   expect_length(warnings, 1)
+  expect_match(
+    conditionMessage(warnings[[1]]),
+    "Lane_Attributes.lane_BindingDensity",
+    fixed = TRUE
+  )
   expect_true(all(is.na(metrics$FoV)))
   expect_true(all(is.na(metrics$BD)))
   expect_false(anyNA(metrics$MC))

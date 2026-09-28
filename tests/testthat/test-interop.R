@@ -351,3 +351,45 @@ test_that("default_settings() follows the load_rcc() defaults", {
   expect_identical(settings[names(defaults)], defaults)
   expect_identical(formals(load_rcc)$housekeeping_norm, TRUE)
 })
+
+test_that("as_nacho() matches a saved normalisation method like load_rcc()", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- se_with_setting("normalisation_method", c("GEO", "GLM"))
+  x <- suppressMessages(as_nacho(se))
+  expect_identical(x@settings$normalisation_method, "GEO")
+})
+
+test_that("as_nacho() checks the NACHO metadata block", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(GSE74821)
+  S4Vectors::metadata(se)$nacho <- "GEO"
+  expect_error(as_nacho(se), class = "nacho_error_bad_argument")
+  expect_snapshot(as_nacho(se), error = TRUE)
+  S4Vectors::metadata(se)$nacho <- list("GEO")
+  expect_error(as_nacho(se), class = "nacho_error_bad_argument")
+})
+
+test_that("as_nacho() refuses unknown saved settings", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- se_with_setting("n_comps", 5)
+  expect_error(as_nacho(se), class = "nacho_error_bad_argument")
+  expect_snapshot(as_nacho(se), error = TRUE)
+})
+
+test_that("as_nacho() round-trips a PlexSet object", {
+  skip_if_not_installed("SummarizedExperiment")
+  x <- plexset_nacho
+  expect_identical(x@rcc_type, "n8")
+  y <- suppressMessages(as_nacho(as_summarized_experiment(x)))
+  expect_identical(y@rcc_type, "n8")
+  expect_identical(nacho_samples(y)$IDFILE, nacho_samples(x)$IDFILE)
+  expect_true(all(grepl("_S[1-8]$", nacho_samples(y)$IDFILE)))
+  expect_identical(nacho_samples(y)$plexset_id, nacho_samples(x)$plexset_id)
+  expect_identical(nacho_counts(y), nacho_counts(x))
+  expect_equal(nacho_qc(y), nacho_qc(x))
+  expect_equal(
+    nacho_counts(y, normalised = TRUE),
+    nacho_counts(x, normalised = TRUE)
+  )
+  expect_identical(y@settings, x@settings)
+})
