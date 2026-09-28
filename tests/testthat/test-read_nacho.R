@@ -57,6 +57,49 @@ test_that("upgrade_nacho() names a missing RCC type or ID column", {
   )
 })
 
+test_that("upgrade_nacho() checks the NACHO 2 settings it keeps", {
+  bad_method <- nacho_2()
+  bad_method$normalisation_method <- "geo"
+  expect_error(
+    upgrade_nacho(bad_method),
+    regexp = "x\\$normalisation_method",
+    class = "nacho_error_bad_argument"
+  )
+  bad_n_comp <- nacho_2()
+  bad_n_comp$n_comp <- 0
+  expect_error(
+    upgrade_nacho(bad_n_comp),
+    regexp = "x\\$n_comp",
+    class = "nacho_error_bad_argument"
+  )
+  bad_type <- nacho_2()
+  attr(bad_type, "RCC_type") <- "n4"
+  expect_error(
+    upgrade_nacho(bad_type),
+    regexp = "RCC_type",
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("upgrade_nacho() keeps every PlexSet sample and its counts", {
+  old <- readRDS(test_path("fixtures", "nacho-2-plexset.rds"))
+  x <- suppressMessages(upgrade_nacho(old))
+  expect_identical(x@rcc_type, "n8")
+  expect_identical(ncol(x), 16L)
+  counts <- nacho_counts(x)
+  long <- as.data.frame(old$nacho)
+  sample <- colnames(counts)[9]
+  probe <- rownames(counts)[1]
+  cell <- long[long$IDFILE == sample & long$Name == probe, "Count"]
+  expect_identical(counts[probe, sample], as.integer(cell))
+})
+
+test_that("upgrade_nacho() checks the schema of a NACHO 3 object", {
+  x <- GSE74821
+  attr(x, "provenance")$schema_version <- 99L
+  expect_error(upgrade_nacho(x), class = "nacho_error_bad_object")
+})
+
 test_that("upgrade_nacho() refuses a missing argument", {
   expect_error(upgrade_nacho(), class = "nacho_error_bad_object")
 })

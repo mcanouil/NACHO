@@ -297,18 +297,34 @@ check_nacho <- function(
       call = call
     )
   }
-  schema <- x@provenance[["schema_version"]]
+  check_schema(
+    x@provenance[["schema_version"]],
+    subject = cli::format_inline("{.arg {arg}}"),
+    call = call
+  )
+  invisible(x)
+}
+
+#' Check that an object schema is the one this NACHO reads
+#'
+#' @param schema The schema version stored in a `nacho` object.
+#' @param subject The formatted name of the object or file, for the message.
+#' @inheritParams nacho_abort
+#'
+#' @keywords internal
+#' @noRd
+check_schema <- function(schema, subject, call = rlang::caller_env()) {
   if (!identical(schema, nacho_schema_version)) {
     nacho_abort(
       c(
-        "{.arg {arg}} was made with an object schema this NACHO cannot read.",
+        "{subject} has an object schema this NACHO cannot read.",
         i = "{schema_hint(schema)}"
       ),
       class = "bad_object",
       call = call
     )
   }
-  invisible(x)
+  invisible(schema)
 }
 
 #' Explain why an object schema cannot be read

@@ -28,6 +28,7 @@ upgrade_nacho <- function(x) {
     )
   }
   if (S7::S7_inherits(x, nacho)) {
+    check_nacho(x)
     nacho_inform(
       "{.arg x} is already a NACHO 3 object, so it is returned unchanged."
     )
@@ -85,6 +86,17 @@ upgrade_nacho <- function(x) {
 
   thresholds <- x[["outliers_thresholds"]]
   check_thresholds(thresholds, arg = "x$outliers_thresholds")
+  check_choice(
+    x[["normalisation_method"]],
+    c("GEO", "GLM"),
+    arg = "x$normalisation_method"
+  )
+  check_count(x[["n_comp"]], arg = "x$n_comp")
+  check_choice(
+    attr(x, "RCC_type"),
+    c("n1", "n8"),
+    arg = "attr(x, \"RCC_type\")"
+  )
   provenance <- new_provenance(
     data_directory = x[["data_directory"]],
     file_version = samples[["Header.header_FileVersion"]],
@@ -158,15 +170,9 @@ read_nacho <- function(path) {
     )
   }
   properties <- S7::props(x)
-  schema <- properties[["provenance"]][["schema_version"]]
-  if (!identical(schema, nacho_schema_version)) {
-    nacho_abort(
-      c(
-        "{.file {path}} was saved with an object schema this NACHO cannot read.",
-        i = "{schema_hint(schema)}"
-      ),
-      class = "bad_object"
-    )
-  }
+  check_schema(
+    properties[["provenance"]][["schema_version"]],
+    subject = cli::format_inline("{.file {path}}")
+  )
   do.call(nacho, properties)
 }
