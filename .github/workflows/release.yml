@@ -78,7 +78,6 @@ jobs:
             any::urlchecker
             any::GEOquery
             any::Biobase
-            any::pkgload
 
       - name: Rebuild the GSE74821 example object
         run: Rscript data-raw/GSE74821.R

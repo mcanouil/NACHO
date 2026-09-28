@@ -1,6 +1,23 @@
 #' GSE74821
 library(GEOquery)
-pkgload::load_all(".", quiet = TRUE)
+
+# Build from an installed NACHO, not pkgload::load_all(), so the saved
+# object carries no source references to this working tree or a temp
+# install library.
+Sys.setenv(R_KEEP_PKG_SOURCE = "no")
+lib <- tempfile("nacho-install-")
+dir.create(lib)
+install_log <- system2(
+  file.path(R.home("bin"), "R"),
+  c("CMD", "INSTALL", "--no-docs", "--no-help", paste0("--library=", lib), "."),
+  stdout = TRUE,
+  stderr = TRUE
+)
+if (!is.null(attr(install_log, "status")) && attr(install_log, "status") != 0) {
+  cat(install_log, sep = "\n")
+  stop("R CMD INSTALL failed while building GSE74821.")
+}
+library(NACHO, lib.loc = lib)
 
 gse <- GEOquery::getGEO(GEO = "GSE74821")
 targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
@@ -25,7 +42,7 @@ select_cartridge <- unlist(lapply(
   x = targets$IDFILE
 ))
 
-GSE74821 <- load_rcc(
+GSE74821 <- NACHO::load_rcc(
   data_directory = file.path(tempdir(), "GSE74821"),
   ssheet_csv = targets[select_cartridge, ],
   id_colname = "IDFILE",
