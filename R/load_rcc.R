@@ -165,6 +165,10 @@ load_rcc <- function(
       times = nrow(nacho_df) / 8
     )
   }
+  if (rcc_type == "n8" && "plexset_id" %in% names(nacho_df)) {
+    abort_bad_plexset_ids(nacho_df[["plexset_id"]])
+    abort_duplicate_plexset_pairs(nacho_df, id_colname)
+  }
   if (rcc_type == "n1" && length(duplicated_ids) > 0) {
     abort_duplicate_ids(duplicated_ids, id_colname)
   }
@@ -310,4 +314,43 @@ abort_duplicate_ids <- function(
     class = "duplicate_id",
     call = call
   )
+}
+
+abort_bad_plexset_ids <- function(plexset_id, call = rlang::caller_env()) {
+  valid_values <- paste0("S", seq_len(8))
+  bad_values <- unique(plexset_id[!plexset_id %in% valid_values])
+  if (length(bad_values) > 0) {
+    nacho_abort(
+      c(
+        "{.field plexset_id} must be one of {.val {valid_values}}.",
+        x = "Found: {.val {utils::head(bad_values, 5)}}."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(plexset_id)
+}
+
+abort_duplicate_plexset_pairs <- function(
+  nacho_df,
+  id_colname,
+  call = rlang::caller_env()
+) {
+  pairs <- paste(nacho_df[[id_colname]], nacho_df[["plexset_id"]], sep = "\r")
+  duplicated_ids <- unique(nacho_df[[id_colname]][duplicated(pairs)])
+  if (length(duplicated_ids) > 0) {
+    nacho_abort(
+      c(
+        paste0(
+          "{.field {id_colname}} and {.field plexset_id} together contain duplicated pairs: ",
+          "{.val {utils::head(duplicated_ids, 3)}}."
+        ),
+        i = "Each PlexSet sample needs a unique {.field {id_colname}}/{.field plexset_id} pair."
+      ),
+      class = "duplicate_id",
+      call = call
+    )
+  }
+  invisible(nacho_df)
 }

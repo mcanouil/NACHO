@@ -17,6 +17,7 @@
 - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`, and its `clean` argument is gone because the working files now live in a temporary folder.
 - fix: The app detects PlexSet files from their exact code classes.
 - fix: Empty RCC attributes, such as a blank owner or comment, are now read as empty text instead of repeating the attribute name.
+- fix: `load_rcc()` now checks a supplied `plexset_id` column: values outside `S1` to `S8` and duplicated id/`plexset_id` pairs raise a classed error before any file is read into a matrix.
 
 # NACHO 2.0.7
 
