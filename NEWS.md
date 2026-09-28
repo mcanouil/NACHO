@@ -64,6 +64,9 @@
   - fix: PCA components now have a fixed sign, so plots no longer flip between machines.
   - fix: The warning about missing lane or sample attributes now comes once, when the object is built.
     `normalise()` and `exclude_outliers()` no longer repeat it.
+- In `R/nacho-class.R`,
+  - fix: Outlier thresholds must now be finite.
+    `normalise()` and the `nacho` validator refuse an infinite `LoD` or an infinite upper bound with a classed error.
 
 ## Dependencies
 

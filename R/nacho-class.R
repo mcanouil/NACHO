@@ -24,26 +24,30 @@ validate_thresholds <- function(thresholds) {
     if (
       !is.numeric(value) ||
         length(value) != 2 ||
-        anyNA(value) ||
+        !all(is.finite(value)) ||
         value[1] < 0 ||
         value[1] > value[2]
     ) {
       problems <- c(
         problems,
         sprintf(
-          "@thresholds$%s must be two increasing non-negative numbers.",
+          "@thresholds$%s must be two increasing, finite, non-negative numbers.",
           name
         )
       )
     }
   }
-  limits <- list(FoV = c(0, 100), LoD = c(-Inf, Inf), PCL = c(0, 1))
+  lod <- thresholds[["LoD"]]
+  if (!is.numeric(lod) || length(lod) != 1 || !is.finite(lod)) {
+    problems <- c(problems, "@thresholds$LoD must be one finite number.")
+  }
+  limits <- list(FoV = c(0, 100), PCL = c(0, 1))
   for (name in names(limits)) {
     value <- thresholds[[name]]
     if (
       !is.numeric(value) ||
         length(value) != 1 ||
-        is.na(value) ||
+        !is.finite(value) ||
         value < limits[[name]][1] ||
         value > limits[[name]][2]
     ) {

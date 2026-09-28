@@ -103,6 +103,21 @@ test_that("the validator refuses insane thresholds", {
   expect_error(x@thresholds <- thresholds, "LoD")
 })
 
+test_that("the validator refuses infinite thresholds", {
+  x <- toy_nacho()
+  thresholds <- x@thresholds
+  thresholds$LoD <- Inf
+  expect_error(x@thresholds <- thresholds, "LoD")
+  thresholds <- x@thresholds
+  thresholds$LoD <- -Inf
+  expect_error(x@thresholds <- thresholds, "LoD")
+  for (name in c("BD", "Positive_factor", "House_factor")) {
+    thresholds <- x@thresholds
+    thresholds[[name]] <- c(thresholds[[name]][1], Inf)
+    expect_error(x@thresholds <- thresholds, name)
+  }
+})
+
 test_that("the validator refuses an unknown RCC type", {
   x <- toy_nacho()
   expect_error(x@rcc_type <- "n2", "rcc_type")

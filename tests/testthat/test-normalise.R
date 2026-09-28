@@ -269,6 +269,21 @@ test_that("normalise() refuses insane thresholds", {
   )
 })
 
+test_that("normalise() refuses infinite thresholds", {
+  bad <- salmon_nacho@thresholds
+  bad$LoD <- Inf
+  expect_error(
+    normalise(salmon_nacho, outliers_thresholds = bad),
+    class = "nacho_error_bad_argument"
+  )
+  bad <- salmon_nacho@thresholds
+  bad$BD <- c(0.1, Inf)
+  expect_error(
+    normalise(salmon_nacho, outliers_thresholds = bad),
+    class = "nacho_error_bad_argument"
+  )
+})
+
 test_that("exclude_outliers() drops every flagged sample and normalises the rest", {
   tight <- plexset_nacho@thresholds
   tight$Positive_factor <- c(0.9, 1.1)
