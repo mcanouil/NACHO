@@ -243,15 +243,19 @@ test_that("as_nacho() on a NanoStringRccSet matches load_rcc() on the same files
       "IDFILE"
     )
   )
-  common <- intersect(
-    rownames(nacho_counts(from_rccset)),
-    rownames(nacho_counts(from_files))
-  )
-  expect_gt(length(common), 0.9 * nrow(from_files))
-  expect_identical(
-    nacho_counts(from_rccset)[common, basename(files)],
-    nacho_counts(from_files)[common, basename(files)]
-  )
+  rccset_counts <- nacho_counts(from_rccset)[, basename(files)]
+  file_counts <- nacho_counts(from_files)[, basename(files)]
+  suffixed <- setdiff(rownames(rccset_counts), rownames(file_counts))
+  expect_length(suffixed, 29)
+  expect_true(all(endsWith(suffixed, "|0")))
+  rccset_probes <- nacho_probes(from_rccset)
+  expect_true(all(startsWith(
+    rccset_probes$CodeClass[match(suffixed, rccset_probes$Name)],
+    "PROTEIN"
+  )))
+  rownames(rccset_counts) <- sub("[|]0$", "", rownames(rccset_counts))
+  expect_setequal(rownames(rccset_counts), rownames(file_counts))
+  expect_identical(rccset_counts[rownames(file_counts), ], file_counts)
   expect_identical(nacho_samples(from_rccset)[["IDFILE"]], basename(files))
   expect_equal(nacho_qc(from_rccset)$FoV, nacho_qc(from_files)$FoV)
   expect_equal(nacho_qc(from_rccset)$PCL, nacho_qc(from_files)$PCL)
