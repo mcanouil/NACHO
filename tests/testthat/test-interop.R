@@ -154,3 +154,47 @@ test_that("a missing Bioconductor package gives the install command", {
   )
   expect_snapshot(as_summarized_experiment(GSE74821), error = TRUE)
 })
+
+rcc_set_files <- function() {
+  directory <- system.file(
+    "extdata",
+    "3D_Bio_Example_Data",
+    package = "NanoStringNCTools"
+  )
+  dir(directory, pattern = "^SKMEL.*RCC$", full.names = TRUE)
+}
+
+test_that("as_nacho() on a NanoStringRccSet matches load_rcc() on the same files", {
+  skip_if_not_installed("NanoStringNCTools")
+  files <- rcc_set_files()
+  rccset <- NanoStringNCTools::readNanoStringRccSet(files)
+  from_rccset <- suppressMessages(as_nacho(rccset))
+  from_files <- suppressMessages(
+    load_rcc(
+      dirname(files[[1]]),
+      data.frame(IDFILE = basename(files)),
+      "IDFILE"
+    )
+  )
+  common <- intersect(
+    rownames(nacho_counts(from_rccset)),
+    rownames(nacho_counts(from_files))
+  )
+  expect_gt(length(common), 0.9 * nrow(from_files))
+  expect_identical(
+    nacho_counts(from_rccset)[common, basename(files)],
+    nacho_counts(from_files)[common, basename(files)]
+  )
+  expect_identical(nacho_samples(from_rccset)[["IDFILE"]], basename(files))
+  expect_equal(nacho_qc(from_rccset)$FoV, nacho_qc(from_files)$FoV)
+  expect_equal(nacho_qc(from_rccset)$PCL, nacho_qc(from_files)$PCL)
+  expect_identical(nacho_qc(from_rccset)$Date, nacho_qc(from_files)$Date)
+  expect_identical(nacho_qc(from_rccset)$ID, nacho_qc(from_files)$ID)
+})
+
+test_that("as_nacho() on a NanoStringRccSet needs NanoStringNCTools", {
+  skip_if_not_installed("NanoStringNCTools")
+  rccset <- NanoStringNCTools::readNanoStringRccSet(rcc_set_files())
+  local_mocked_bindings(has_package = function(package) FALSE)
+  expect_error(as_nacho(rccset), class = "nacho_error_missing_package")
+})

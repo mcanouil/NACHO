@@ -19,13 +19,14 @@ check_bioconductor <- function(packages, reason, call = rlang::caller_env()) {
 #' `colData`, [nacho_probes()] as `rowData`, and the settings, thresholds, RCC
 #' type and provenance in `metadata()$nacho`.
 #'
-#' `as_nacho()` goes the other way, from a `SummarizedExperiment`.
+#' `as_nacho()` goes the other way, from a `SummarizedExperiment` or from a
+#' `NanoStringRccSet` read by `NanoStringNCTools::readNanoStringRccSet()`.
 #' It computes the quality-control
 #' metrics and the normalisation from the raw counts; settings and thresholds
 #' come from `metadata()$nacho` when present, and are the defaults otherwise.
 #'
 #' @param x A `nacho` object for `as_summarized_experiment()`; a
-#'   `SummarizedExperiment` for `as_nacho()`.
+#'   `SummarizedExperiment` or a `NanoStringRccSet` for `as_nacho()`.
 #' @param id_colname Name of the sample id column to create when `x` does not
 #'   come from NACHO.
 #'
@@ -68,11 +69,14 @@ as_nacho <- function(x, id_colname = "IDFILE") {
   if (S7::S7_inherits(x, nacho)) {
     return(x)
   }
+  if (methods::is(x, "NanoStringRccSet")) {
+    return(nacho_from_rccset(x, id_colname))
+  }
   if (methods::is(x, "SummarizedExperiment")) {
     return(nacho_from_se(x, id_colname))
   }
   nacho_abort(
-    "{.arg x} must be a {.cls SummarizedExperiment}, not {.obj_type_friendly {x}}.",
+    "{.arg x} must be a {.cls SummarizedExperiment} or a {.cls NanoStringRccSet}, not {.obj_type_friendly {x}}.",
     class = "bad_object"
   )
 }
@@ -209,6 +213,55 @@ nacho_from_se <- function(x, id_colname, call = rlang::caller_env()) {
     probes = as.data.frame(SummarizedExperiment::rowData(x), optional = TRUE),
     samples = as.data.frame(SummarizedExperiment::colData(x), optional = TRUE),
     metadata = S4Vectors::metadata(x)[["nacho"]],
+    id_colname = id_colname,
+    call = call
+  )
+}
+
+nacho_from_rccset <- function(x, id_colname, call = rlang::caller_env()) {
+  check_bioconductor(
+    c("Biobase", "NanoStringNCTools"),
+    "to read a NanoStringRccSet",
+    call = call
+  )
+  features <- Biobase::fData(x)
+  probes <- data.frame(
+    CodeClass = features[["CodeClass"]],
+    Name = features[["GeneName"]],
+    Accession = features[["Accession"]]
+  )
+  protocol <- Biobase::pData(Biobase::protocolData(x))
+  rcc_names <- c(
+    FileVersion = "Header.header_FileVersion",
+    SoftwareVersion = "Header.header_SoftwareVersion",
+    SampleID = "Sample_Attributes.sample_ID",
+    SampleOwner = "Sample_Attributes.sample_Owner",
+    SampleComments = "Sample_Attributes.sample_Comments",
+    SampleDate = "Sample_Attributes.sample_Date",
+    SystemAPF = "Sample_Attributes.sample_SystemAPF",
+    LaneID = "Lane_Attributes.lane_ID",
+    FovCount = "Lane_Attributes.lane_FovCount",
+    FovCounted = "Lane_Attributes.lane_FovCounted",
+    ScannerID = "Lane_Attributes.lane_ScannerID",
+    StagePosition = "Lane_Attributes.lane_StagePosition",
+    BindingDensity = "Lane_Attributes.lane_BindingDensity",
+    CartridgeID = "Lane_Attributes.lane_CartridgeID",
+    CartridgeBarcode = "Lane_Attributes.lane_CartridgeBarcode"
+  )
+  renamed <- names(protocol) %in% names(rcc_names)
+  names(protocol)[renamed] <- rcc_names[names(protocol)[renamed]]
+  protocol[] <- lapply(protocol, function(column) {
+    if (inherits(column, "Date")) {
+      format(column, "%Y%m%d")
+    } else {
+      as.character(column)
+    }
+  })
+  nacho_from_parts(
+    counts = Biobase::exprs(x),
+    probes = probes,
+    samples = cbind(Biobase::pData(x), protocol),
+    metadata = NULL,
     id_colname = id_colname,
     call = call
   )

@@ -11,7 +11,7 @@ as_nacho(x, id_colname = "IDFILE")
 }
 \arguments{
 \item{x}{A \code{nacho} object for \code{as_summarized_experiment()}; a
-\code{SummarizedExperiment} for \code{as_nacho()}.}
+\code{SummarizedExperiment} or a \code{NanoStringRccSet} for \code{as_nacho()}.}
 
 \item{id_colname}{Name of the sample id column to create when \code{x} does not
 come from NACHO.}
@@ -26,7 +26,8 @@ normalised counts as assays \code{counts} and \code{normalised}, \code{\link[=na
 type and provenance in \code{metadata()$nacho}.
 }
 \details{
-\code{as_nacho()} goes the other way, from a \code{SummarizedExperiment}.
+\code{as_nacho()} goes the other way, from a \code{SummarizedExperiment} or from a
+\code{NanoStringRccSet} read by \code{NanoStringNCTools::readNanoStringRccSet()}.
 It computes the quality-control
 metrics and the normalisation from the raw counts; settings and thresholds
 come from \code{metadata()$nacho} when present, and are the defaults otherwise.
