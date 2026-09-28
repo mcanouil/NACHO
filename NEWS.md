@@ -1,5 +1,11 @@
 # NACHO (development version)
 
+- feat: Errors, warnings and messages now use cli and carry classes such as `nacho_error_bad_argument`, so code can catch them selectively.
+- feat: `load_rcc()` and `normalise()` check their arguments before reading any file.
+- feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
+- build: NACHO now requires R 4.3 or newer.
+- feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
+
 # NACHO 2.0.7
 
 ## Dependencies

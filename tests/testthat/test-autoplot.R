@@ -1,17 +1,22 @@
 test_that('Missing "object"', {
-  expect_error(autoplot.nacho())
+  expect_error(autoplot.nacho(), class = "nacho_error_bad_object")
 })
 
-test_that('Missing "x"', {
-  expect_error(autoplot(object = GSE74821))
+test_that("autoplot() lists the plot types when x is wrong", {
+  expect_error(autoplot(GSE74821), class = "nacho_error_bad_argument")
+  expect_error(autoplot(GSE74821, x = NULL), class = "nacho_error_bad_argument")
+  expect_error(
+    autoplot(GSE74821, x = "PFB"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_snapshot(autoplot(GSE74821, x = "bd"), error = TRUE)
 })
 
-test_that('Null "x"', {
-  expect_error(autoplot(object = GSE74821, x = NULL))
-})
-
-test_that('Wrong "x"', {
-  expect_error(autoplot(object = GSE74821, x = "FAKE_VALUE"))
+test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable", {
+  expect_warning(
+    autoplot(plexset_nacho, x = "PCL"),
+    class = "nacho_warning_metric_unavailable"
+  )
 })
 
 metrics <- c(
@@ -78,7 +83,7 @@ for (imetric in metrics) {
 
   test_that(paste(imetric, "[salmon] Default parameters", sep = " - "), {
     expect_s3_class(
-      object = autoplot(object = salmon_nacho, x = imetric),
+      object = suppressWarnings(autoplot(object = salmon_nacho, x = imetric)),
       class = "ggplot"
     )
   })
@@ -87,11 +92,11 @@ for (imetric in metrics) {
     paste(imetric, "[salmon] show_legend to FALSE parameters", sep = " - "),
     {
       expect_s3_class(
-        object = autoplot(
+        object = suppressWarnings(autoplot(
           object = salmon_nacho,
           x = imetric,
           show_legend = FALSE
-        ),
+        )),
         class = "ggplot"
       )
     }
@@ -99,28 +104,28 @@ for (imetric in metrics) {
 
   test_that(paste(imetric, "[salmon] show outliers and labels", sep = " - "), {
     expect_s3_class(
-      object = autoplot(
+      object = suppressWarnings(autoplot(
         object = salmon_nacho,
         x = imetric,
         show_legend = FALSE,
         show_outliers = TRUE,
         outliers_factor = 1,
         outliers_labels = TRUE
-      ),
+      )),
       class = "ggplot"
     )
   })
 
   test_that(paste(imetric, "[salmon] hide outliers", sep = " - "), {
     expect_s3_class(
-      object = autoplot(
+      object = suppressWarnings(autoplot(
         object = salmon_nacho,
         x = imetric,
         show_legend = FALSE,
         show_outliers = FALSE,
         outliers_factor = 1.2,
         outliers_labels = NULL
-      ),
+      )),
       class = "ggplot"
     )
   })
@@ -130,7 +135,7 @@ for (imetric in metrics) {
       paste(imetric, "[salmon] NORM without housekeeping genes ", sep = " - "),
       {
         salmon2 <- salmon_nacho
-        salmon2$housekeeping_genes <- NULL
+        salmon2["housekeeping_genes"] <- list(NULL)
         expect_s3_class(
           object = autoplot(salmon2, x = imetric),
           class = "ggplot"
@@ -142,15 +147,18 @@ for (imetric in metrics) {
 
 test_that(paste("HF", "Default parameters", sep = " - "), {
   expect_s3_class(
-    object = autoplot(object = plexset_nacho, x = "HF"),
+    object = suppressWarnings(autoplot(object = plexset_nacho, x = "HF")),
     class = "ggplot"
   )
 })
 
 test_that(paste("Housekeeping", "no genes", sep = " - "), {
-  plexset_nacho$housekeeping_genes <- NULL
+  plexset_nacho["housekeeping_genes"] <- list(NULL)
   expect_s3_class(
-    object = autoplot(object = plexset_nacho, x = "Housekeeping"),
+    object = suppressWarnings(autoplot(
+      object = plexset_nacho,
+      x = "Housekeeping"
+    )),
     class = "ggplot"
   )
 })

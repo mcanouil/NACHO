@@ -33,15 +33,17 @@ License: GPL-3
 URL: https://github.com/mcanouil/NACHO/,
     https://m.canouil.dev/NACHO/
 BugReports: https://github.com/mcanouil/NACHO/issues
-Depends: 
-    R (>= 4.1.0)
+Depends:
+    R (>= 4.3)
 Imports:
     utils,
+    cli (>= 3.6.0),
     data.table,
     ggplot2 (>= 4.0.0),
     ggforce (>= 0.5.0),
     ggrepel (>= 0.9.6),
     knitr (>= 1.39),
+    rlang (>= 1.1.0),
     rmarkdown (>= 1.16),
     scales (>= 1.4.0),
     shiny (>= 1.7.4),

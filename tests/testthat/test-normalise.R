@@ -6,12 +6,32 @@ test_that("default settings", {
 })
 
 test_that("missing nacho", {
-  expect_error(normalise())
+  expect_error(normalise(), class = "nacho_error_bad_object")
 })
 
 test_that("missing field", {
   GSE74821$nacho <- NULL
-  expect_error(normalise(GSE74821))
+  expect_error(normalise(GSE74821), class = "nacho_error_bad_object")
+})
+
+test_that("normalise() checks its arguments", {
+  expect_error(
+    normalise(GSE74821, normalisation_method = "geo"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    normalise(GSE74821, n_comp = -1),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    normalise(GSE74821, housekeeping_norm = "yes"),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("normalise() says when nothing changes", {
+  withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
+  expect_message(normalise(GSE74821), class = "nacho_message")
 })
 
 test_that("No POS_E", {
@@ -311,9 +331,9 @@ test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
   expect_s3_class(res, "nacho")
 })
 
-test_that("housekeeping_norm to TRUE and remove_outliers to TRUE", {
+test_that("wrong attribute", {
   attr(GSE74821, "RCC_type") <- "something"
-  expect_error(normalise(GSE74821))
+  expect_error(normalise(GSE74821), class = "nacho_error_bad_object")
 })
 
 
@@ -321,10 +341,11 @@ test_that("Missing values in counts", {
   index <- sample(which(GSE74821$nacho$CodeClass == "Endogenous"), size = 25)
   GSE74821$nacho[index, "Count"] <- NA
   GSE74821$nacho[index, "Count_Norm"] <- NA
-  expect_message(
+  expect_warning(
     object = normalise(GSE74821, normalisation_method = "GEO"),
-    regexp = "Missing values have been replaced with zeros for PCA"
-  )
+    class = "nacho_warning_missing_counts"
+  ) |>
+    suppressMessages()
 })
 
 test_that("plexset", {

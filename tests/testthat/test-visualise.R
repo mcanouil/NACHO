@@ -1,14 +1,14 @@
 test_that("visualise() refuses to start outside an interactive session", {
-  skip_if(interactive())
-  expect_error(visualise(GSE74821), "interactive R session")
+  withr::local_options(rlang_interactive = FALSE)
+  expect_error(visualise(GSE74821), class = "nacho_error_not_interactive")
 })
 
 test_that("visualise() rejects an object that is not a nacho object", {
-  expect_error(visualise(iris), "must be of class")
+  expect_error(visualise(iris), class = "nacho_error_bad_object")
 })
 
 test_that("visualise() needs an object", {
-  expect_error(visualise(), "is missing")
+  expect_error(visualise(), class = "nacho_error_bad_object")
 })
 
 mandatory_fields <- c(
@@ -29,6 +29,6 @@ for (field in mandatory_fields) {
   test_that(paste("visualise() needs the", field, "field"), {
     incomplete <- GSE74821
     incomplete[[field]] <- NULL
-    expect_error(visualise(incomplete), "Mandatory fields are missing")
+    expect_error(visualise(incomplete), class = "nacho_error_bad_object")
   })
 }

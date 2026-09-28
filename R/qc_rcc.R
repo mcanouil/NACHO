@@ -37,12 +37,7 @@ qc_rcc <- function(
   probes_to_exclude <- probe_exclusion(control_genes_df = control_genes_df)
 
   if (housekeeping_predict) {
-    message("[NACHO] Searching for the best housekeeping genes.")
-    message(
-      '[NACHO] Computing normalisation factors using "',
-      normalisation_method,
-      '" method for housekeeping genes prediction.'
-    )
+    nacho_inform("Searching for the best housekeeping genes.")
     temp_facs <- factor_calculation(
       nacho_df = nacho_df,
       id_colname = id_colname,
@@ -78,14 +73,18 @@ qc_rcc <- function(
     if (
       is.null(predicted_housekeeping) || length(predicted_housekeeping) == 0
     ) {
-      message(
-        "[NACHO] Could not find suitable houskeeping genes, default will be used."
+      nacho_warn(
+        "No suitable housekeeping genes were found; the default ones are used.",
+        class = "no_housekeeping"
       )
     } else {
-      message(
-        "[NACHO] The following predicted housekeeping genes will be used for normalisation:\n",
-        paste0("  - ", predicted_housekeeping, collapse = "\n")
-      )
+      nacho_inform(c(
+        "Normalising with the predicted housekeeping genes:",
+        stats::setNames(
+          predicted_housekeeping,
+          rep("*", length(predicted_housekeeping))
+        )
+      ))
       housekeeping_genes <- predicted_housekeeping
 
       control_genes_df <- format_counts(
@@ -97,11 +96,6 @@ qc_rcc <- function(
     }
   }
 
-  message(
-    '[NACHO] Computing normalisation factors using "',
-    normalisation_method,
-    '" method.'
-  )
   qc_values <- qc_features(data = nacho_df, id_colname = id_colname)
   norm_factor <- factor_calculation(
     nacho_df = nacho_df,
@@ -120,12 +114,24 @@ qc_rcc <- function(
   counts_df <- counts_df[j = .SD, .SDcols = is.numeric]
 
   if (n_comp > (ncol(counts_df) - 1)) {
-    message(paste('"n_comp" has been set to "n-1:"', (ncol(counts_df) - 1)))
+    nacho_warn(
+      c(
+        "{.arg n_comp} = {n_comp} is more than the {ncol(counts_df) - 1} component{?s} available.",
+        i = "Using {.code n_comp = {ncol(counts_df) - 1}}."
+      ),
+      class = "n_comp_reduced"
+    )
     n_comp <- (ncol(counts_df) - 1)
   }
 
   if (anyNA(counts_df)) {
-    message("[NACHO] Missing values have been replaced with zeros for PCA.")
+    nacho_warn(
+      c(
+        "{sum(is.na(counts_df))} missing count{?s} {?was/were} set to 0 before PCA.",
+        i = "Probes absent from some RCC files usually mean mixed CodeSets."
+      ),
+      class = "missing_counts"
+    )
     counts_df_tmp <- as.matrix(counts_df)
     counts_df_tmp[is.na(counts_df_tmp)] <- 0
   } else {

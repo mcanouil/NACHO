@@ -3,12 +3,12 @@ test_that("Default check_outliers", {
 })
 
 test_that("missing object", {
-  expect_error(check_outliers())
+  expect_error(check_outliers(), class = "nacho_error_bad_object")
 })
 
 test_that("wrong attribute", {
   attr(GSE74821, "RCC_type") <- "something_wrong"
-  expect_error(check_outliers(GSE74821))
+  expect_error(check_outliers(GSE74821), class = "nacho_error_bad_object")
 })
 
 test_that("PlexSet objects ignore PCL and LoD when flagging outliers", {

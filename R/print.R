@@ -38,14 +38,7 @@ print.nacho <- function(
   ...
 ) {
   is_outlier <- NULL # no visible binding for global variable
-  if (missing(x)) {
-    stop(
-      '[NACHO] "x" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
-    )
-  }
-  if (!attr(x, "RCC_type") %in% c("n1", "n8")) {
-    stop('[NACHO] RCC type must be either "n1" or "n8"!')
-  }
+  check_nacho(x)
   if (!echo) {
     utils::str(x, 1)
     return(invisible(x))

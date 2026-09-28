@@ -82,11 +82,29 @@ load_rcc <- function(
   n_comp = 10
 ) {
   file_path <- Code_Summary <- CodeClass <- NULL # no visible binding for global variable
+
   if (missing(data_directory) || missing(ssheet_csv)) {
-    stop('[NACHO] "data_directory" and "ssheet_csv" must be provided.')
+    nacho_abort(
+      "{.arg data_directory} and {.arg ssheet_csv} must both be provided.",
+      class = "bad_argument"
+    )
   }
-  data_directory <- normalizePath(data_directory, mustWork = TRUE)
-  if (is.vector(ssheet_csv, "character") && length(ssheet_csv) > 1) {
+
+  check_string(data_directory)
+  if (!dir.exists(data_directory)) {
+    nacho_abort(
+      "The directory {.path {data_directory}} does not exist.",
+      class = "missing_file"
+    )
+  }
+  data_directory <- normalizePath(data_directory)
+  check_character(housekeeping_genes, allow_null = TRUE)
+  check_bool(housekeeping_predict)
+  check_bool(housekeeping_norm)
+  normalisation_method <- check_choice(normalisation_method, c("GEO", "GLM"))
+  check_count(n_comp)
+
+  if (is.character(ssheet_csv) && length(ssheet_csv) > 1) {
     if (is.null(names(ssheet_csv))) {
       ssheet_csv <- data.frame(IDFILE = ssheet_csv)
     } else {
@@ -95,33 +113,46 @@ load_rcc <- function(
     }
     id_colname <- "IDFILE"
   }
-
-  requires_id_colname <- inherits(ssheet_csv, "data.frame") ||
-    (is.vector(ssheet_csv, "character") && length(ssheet_csv) == 1)
-  if (is.null(id_colname) && requires_id_colname) {
-    stop('[NACHO] "id_colname" must be provided as a column of "ssheet_csv".')
+  if (rlang::is_string(ssheet_csv)) {
+    if (!file.exists(ssheet_csv)) {
+      nacho_abort(
+        "The sample sheet {.file {ssheet_csv}} does not exist.",
+        class = "missing_file"
+      )
+    }
+    ssheet_csv <- data.table::fread(file = ssheet_csv, header = TRUE, sep = ",")
   }
-
-  message("[NACHO] Importing RCC files.")
-  nacho_df <- switch(
-    EXPR = paste(
-      as.integer(inherits(ssheet_csv, c("data.frame", "character"), TRUE) > 0),
-      collapse = ""
-    ),
-    "10" = ssheet_csv,
-    "01" = data.table::fread(file = ssheet_csv, header = TRUE, sep = ","),
-    stop('[NACHO] "ssheet_csv" must be a "data.frame" or path to csv.')
-  )
-
-  nacho_df <- data.table::as.data.table(nacho_df)[
-    j = `:=`(
-      "file_path" = file.path(data_directory, nacho_df[[id_colname]])
+  if (!is.data.frame(ssheet_csv)) {
+    nacho_abort(
+      "{.arg ssheet_csv} must be a data frame or the path to a CSV file, not {.obj_type_friendly {ssheet_csv}}.",
+      class = "bad_argument"
     )
-  ]
-
-  if (nacho_df[j = !all(sapply(X = file_path, FUN = file.exists))]) {
-    stop('[NACHO] Not all values from "id_colname" are mapped to an RCC file.')
   }
+  check_string(id_colname)
+  check_column(id_colname, ssheet_csv)
+
+  nacho_df <- data.table::as.data.table(ssheet_csv)
+  nacho_df[["file_path"]] <- file.path(data_directory, nacho_df[[id_colname]])
+
+  missing_files <- unique(nacho_df[[id_colname]][
+    !file.exists(nacho_df[["file_path"]])
+  ])
+  if (length(missing_files) > 0) {
+    nacho_abort(
+      c(
+        paste0(
+          "{length(missing_files)} value{?s} of {.field {id_colname}} {?does/do} not match ",
+          "an RCC file in {.path {data_directory}}."
+        ),
+        x = "Missing: {.file {utils::head(missing_files, 5)}}{if (length(missing_files) > 5) ', ...'}.",
+        i = "Check that {.arg id_colname} holds file names, including the {.val .RCC} or {.val .RCC.gz} extension."
+      ),
+      class = "missing_file"
+    )
+  }
+  nacho_progress_step(
+    "Reading {length(unique(nacho_df[['file_path']]))} RCC files"
+  )
 
   is_plexset <- vapply(
     X = unique(nacho_df[["file_path"]]),
@@ -129,29 +160,33 @@ load_rcc <- function(
     FUN.VALUE = logical(1)
   )
   if (any(is_plexset) && !all(is_plexset)) {
-    stop(
-      "[NACHO] RCC files mix PlexSet and single-sample files.\n",
-      "  Load each kind of file separately."
+    nacho_abort(
+      c(
+        "RCC files mix PlexSet and single-sample files.",
+        i = "Load each kind of file separately."
+      ),
+      class = "mixed_rcc_types"
     )
   }
   has_duplicates <- anyDuplicated(nacho_df[[id_colname]]) != 0
-  if (all(is_plexset) && !"plexset_id" %in% colnames(nacho_df)) {
-    if (has_duplicates) {
-      stop(
-        '[NACHO] "id_colname" contains duplicates and "plexset_id" was not provided.\n',
-        '  For PlexSet RCC files, "plexset_id" column is required to identify samples.'
-      )
-    }
+  has_plexset_id <- "plexset_id" %in% colnames(nacho_df)
+  if (has_duplicates && !(all(is_plexset) && has_plexset_id)) {
+    # Used only inside the cli glue string below.
+    dups <- unique(nacho_df[[id_colname]][duplicated(nacho_df[[id_colname]])]) # nolint: object_usage_linter.
+    nacho_abort(
+      c(
+        "{.field {id_colname}} contains duplicated values: {.val {utils::head(dups, 3)}}.",
+        i = "PlexSet RCC files hold 8 samples each; add a {.field plexset_id} column ({.val S1} to {.val S8}).",
+        i = "For single-sample RCC files, make {.field {id_colname}} unique."
+      ),
+      class = "duplicate_id"
+    )
+  }
+  if (all(is_plexset) && !has_plexset_id) {
     nacho_df <- nacho_df[rep(seq_len(nrow(nacho_df)), each = 8)]
     nacho_df[["plexset_id"]] <- rep(
       paste0("S", seq_len(8)),
       times = nrow(nacho_df) / 8
-    )
-  }
-  if (!all(is_plexset) && has_duplicates) {
-    stop(
-      '[NACHO] "id_colname" contains duplicates, but the RCC files are not PlexSet files.\n',
-      '  Each single-sample RCC file must appear once in "ssheet_csv".'
     )
   }
 
@@ -189,34 +224,24 @@ load_rcc <- function(
       by = setdiff(names(nacho_df), "Code_Summary")
     ]
   }
-  cat("\n")
 
   nanostring_versions <- nacho_df[
     j = unique(.SD),
     .SDcols = c("Header.header_FileVersion", "Header.header_SoftwareVersion")
   ]
   if (nrow(nanostring_versions) > 1) {
-    stop(
-      "[NACHO] Multiple NanoString file/software versions detected.\n",
-      "  Please provide a set of files with the same version.\n",
-      paste(
-        sapply(
-          X = c("Header.header_FileVersion", "Header.header_SoftwareVersion"),
-          FUN = function(x) {
-            sprintf(
-              "  - %s: '%s'",
-              sub("Header.header_", "", x),
-              paste(nanostring_versions[[x]], collapse = "', '")
-            )
-          },
-          USE.NAMES = FALSE
-        ),
-        collapse = "\n"
-      )
+    nacho_abort(
+      c(
+        "RCC files come from more than one NanoString file or software version.",
+        "*" = "File versions: {.val {unique(nanostring_versions[['Header.header_FileVersion']])}}.",
+        "*" = "Software versions: {.val {unique(nanostring_versions[['Header.header_SoftwareVersion']])}}.",
+        i = "Load each version separately."
+      ),
+      class = "mixed_versions"
     )
   }
 
-  message("[NACHO] Performing QC and formatting data.")
+  nacho_progress_step("Computing quality-control metrics")
   has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
   if (
     !has_hkg &&
@@ -224,14 +249,16 @@ load_rcc <- function(
       !housekeeping_predict &&
       housekeeping_norm
   ) {
-    message(paste(
-      '[NACHO] "housekeeping_norm" has been set to FALSE.',
-      "  Note:",
-      "  - No default housekeeping genes available in your data;",
-      '  - "housekeeping_genes" is NULL;',
-      '  - "housekeeping_predict" is FALSE.',
-      sep = "\n"
-    ))
+    nacho_warn(
+      c(
+        "Housekeeping normalisation is off, because no housekeeping genes are available.",
+        i = paste0(
+          "The RCC files have no {.val Housekeeping} probes, {.arg housekeeping_genes} is {.code NULL} ",
+          "and {.arg housekeeping_predict} is {.code FALSE}."
+        )
+      ),
+      class = "no_housekeeping"
+    )
     housekeeping_norm <- FALSE
   }
   nacho_object <- qc_rcc(
@@ -246,6 +273,7 @@ load_rcc <- function(
   )
 
   attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
+  class(nacho_object) <- "nacho"
 
   ot <- list(
     BD = c(0.1, 2.25),
@@ -258,37 +286,16 @@ load_rcc <- function(
   nacho_object[["outliers_thresholds"]] <- ot
   nacho_object <- check_outliers(nacho_object)
 
-  message(
+  nacho_progress_step(
     paste0(
-      '[NACHO] Normalising data using "',
-      normalisation_method,
-      '" method ',
-      if (housekeeping_norm) "with" else "without",
-      " housekeeping genes."
+      "Normalising with the {.val {normalisation_method}} method ",
+      "{if (housekeeping_norm) 'and' else 'without'} housekeeping genes"
     )
   )
   nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(
     data = nacho_object[["nacho"]],
     housekeeping_norm = housekeeping_norm
   )
-
-  message(paste(
-    "[NACHO] Returning a list.",
-    "  $ access              : character",
-    "  $ housekeeping_genes  : character",
-    "  $ housekeeping_predict: logical",
-    "  $ housekeeping_norm   : logical",
-    "  $ normalisation_method: character",
-    "  $ remove_outliers     : logical",
-    "  $ n_comp              : numeric",
-    "  $ data_directory      : character",
-    "  $ pc_sum              : data.frame",
-    "  $ nacho               : data.frame",
-    "  $ outliers_thresholds : list",
-    sep = "\n"
-  ))
-
-  class(nacho_object) <- "nacho"
 
   nacho_object
 }

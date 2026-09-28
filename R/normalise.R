@@ -103,35 +103,13 @@ normalise <- function(
   remove_outliers = nacho_object[["remove_outliers"]],
   outliers_thresholds = nacho_object[["outliers_thresholds"]]
 ) {
-  if (missing(nacho_object)) {
-    stop(
-      '[NACHO] "nacho_object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
-    )
-  }
-  if (!attr(nacho_object, "RCC_type") %in% c("n1", "n8")) {
-    stop('[NACHO] RCC type must be either "n1" or "n8"!')
-  }
-  mandatory_fields <- c(
-    "access",
-    "housekeeping_genes",
-    "housekeeping_predict",
-    "housekeeping_norm",
-    "normalisation_method",
-    "remove_outliers",
-    "n_comp",
-    "data_directory",
-    "pc_sum",
-    "nacho",
-    "outliers_thresholds"
-  )
-  if (!all(mandatory_fields %in% names(nacho_object))) {
-    stop(
-      '[NACHO] Mandatory fields are missing in "',
-      substitute(nacho_object),
-      '"!\n',
-      '  "load_rcc()" must be called before "normalise()".'
-    )
-  }
+  check_nacho(nacho_object)
+  check_character(housekeeping_genes, allow_null = TRUE)
+  check_bool(housekeeping_predict)
+  check_bool(housekeeping_norm)
+  normalisation_method <- check_choice(normalisation_method, c("GEO", "GLM"))
+  check_count(n_comp)
+  check_bool(remove_outliers)
 
   id_colname <- nacho_object[["access"]]
   type_set <- attr(nacho_object, "RCC_type")
@@ -156,27 +134,18 @@ normalise <- function(
   )
 
   if (all(!params_changed)) {
-    message(
-      '[NACHO] Nothing was done. Parameters in "normalise()", were the same as in "',
-      substitute(nacho_object),
-      '".'
+    nacho_inform(
+      "The settings are the same as in the input, so {.fn normalise} returns it unchanged."
     )
     return(nacho_object)
   } else {
-    message(
-      '[NACHO] Normalising "',
-      substitute(nacho_object),
-      '" with new value for parameters:\n',
-      paste(
-        paste0(
-          "  - ",
-          names(params_changed[which(params_changed)]),
-          " = ",
-          params_changed[which(params_changed)]
-        ),
-        collapse = "\n"
+    nacho_inform(c(
+      "Normalising again with new settings:",
+      stats::setNames(
+        names(params_changed)[params_changed],
+        rep("*", sum(params_changed))
       )
-    )
+    ))
   }
 
   if (remove_outliers && !nacho_object[["remove_outliers"]]) {
@@ -200,7 +169,7 @@ normalise <- function(
     nacho_object[["remove_outliers"]] <- remove_outliers
   } else {
     if (remove_outliers) {
-      message("[NACHO] Outliers have already been removed!")
+      nacho_inform("Outliers were already removed from this object.")
     }
 
     if (any(params_changed)) {
@@ -227,26 +196,9 @@ normalise <- function(
   if (!"RCC_type" %in% names(attributes(nacho_object))) {
     attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
   }
+  class(nacho_object) <- "nacho"
 
   nacho_object <- check_outliers(nacho_object)
-
-  message(paste(
-    "[NACHO] Returning a list.",
-    "  $ access              : character",
-    "  $ housekeeping_genes  : character",
-    "  $ housekeeping_predict: logical",
-    "  $ housekeeping_norm   : logical",
-    "  $ normalisation_method: character",
-    "  $ remove_outliers     : logical",
-    "  $ n_comp              : numeric",
-    "  $ data_directory      : character",
-    "  $ pc_sum              : data.frame",
-    "  $ nacho               : data.frame",
-    "  $ outliers_thresholds : list",
-    sep = "\n"
-  ))
-
-  class(nacho_object) <- "nacho"
 
   nacho_object
 }

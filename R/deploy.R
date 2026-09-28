@@ -10,13 +10,19 @@
 #'
 #' @examples
 #'
-#' deploy(directory = ".")
+#' deploy(directory = tempdir())
 #'
 #' if (interactive()) {
 #'   shiny::runApp("NACHO")
 #' }
 #'
-deploy <- function(directory = "/srv/shiny-server", app_name = "NACHO") {
+deploy <- function(directory, app_name = "NACHO") {
+  if (missing(directory)) {
+    nacho_abort("{.arg directory} must be provided.", class = "bad_argument")
+  }
+  check_string(directory)
+  check_string(app_name)
+
   dir.create(
     file.path(directory, app_name),
     showWarnings = FALSE,

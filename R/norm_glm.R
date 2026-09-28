@@ -31,7 +31,6 @@ norm_glm <- function(data) {
       )$coeff[c(1, 2)]
     }
   )
-  cat("\n")
 
   list(
     geometric_mean_neg = glms[1, ],

@@ -29,12 +29,7 @@ factor_calculation <- function(
     order(Name)
   ]
 
-  factors_norm_fun <- switch(
-    EXPR = normalisation_method,
-    "GLM" = norm_glm,
-    "GEO" = norm_geo,
-    stop('[NACHO] "normalisation_method" should be either "GLM" or "GEO"!')
-  )
+  factors_norm_fun <- if (normalisation_method == "GLM") norm_glm else norm_geo
   factors_norm <- factors_norm_fun(
     data = split(control_data, control_data[[id_colname]])
   )
