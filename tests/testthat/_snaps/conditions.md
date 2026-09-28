@@ -1,3 +1,20 @@
+# check_choice() reports a bad choice once, with a suggestion
+
+    Code
+      k("geo")
+    Condition
+      Error in `k()`:
+      ! `value` must be one of "GEO" or "GLM", not "geo".
+      i Did you mean "GEO"?
+
+---
+
+    Code
+      k("nope")
+    Condition
+      Error in `k()`:
+      ! `value` must be one of "GEO" or "GLM", not "nope".
+
 # check_nacho() explains what it expected
 
     Code

@@ -50,6 +50,15 @@ test_that("check helpers reject bad input with a bad_argument class", {
   expect_error(k("geo"), class = "nacho_error_bad_argument")
 })
 
+test_that("check_choice() reports a bad choice once, with a suggestion", {
+  k <- function(value) NACHO:::check_choice(value, c("GEO", "GLM"))
+  error <- expect_error(k("geo"), class = "nacho_error_bad_argument")
+  expect_null(error$parent)
+  expect_identical(deparse(error$call), "k(\"geo\")")
+  expect_snapshot(k("geo"), error = TRUE)
+  expect_snapshot(k("nope"), error = TRUE)
+})
+
 test_that("check_nacho() explains what it expected", {
   expect_snapshot(check_outliers(list(a = 1)), error = TRUE)
 })

@@ -161,11 +161,18 @@ check_choice <- function(
   rlang::try_fetch(
     rlang::arg_match(x, values, error_arg = arg, error_call = call),
     error = function(cnd) {
+      hint <- unname(rlang::cnd_body(cnd))
       nacho_abort(
-        "{.arg {arg}} must be one of {.val {values}}.",
+        c(
+          if (rlang::is_string(x)) {
+            "{.arg {arg}} must be one of {.or {.val {values}}}, not {.val {x}}."
+          } else {
+            "{.arg {arg}} must be one of {.or {.val {values}}}, not {.obj_type_friendly {x}}."
+          },
+          rlang::set_names(hint, rep("i", length(hint)))
+        ),
         class = "bad_argument",
-        call = call,
-        parent = cnd
+        call = call
       )
     }
   )
