@@ -230,10 +230,25 @@ test_that("the NACHO 2 guard stops on an object check_nacho() accepts", {
   expect_match(conditionMessage(error), "check_nacho()", fixed = TRUE)
 })
 
-test_that("format() of a list with only the NACHO 2 class points to load_rcc()", {
-  expect_match(
-    format(structure(list(), class = "nacho")),
-    "load_rcc()",
-    fixed = TRUE
-  )
+test_that("format() of an object with only the NACHO 2 class points to load_rcc()", {
+  for (x in list(
+    structure(list(), class = "nacho"),
+    structure(1:3, class = "nacho")
+  )) {
+    line <- format(x)
+    expect_match(line, "An object with the NACHO 2 class", fixed = TRUE)
+    expect_match(line, "load_rcc()", fixed = TRUE)
+  }
+})
+
+test_that("dim() names no object it cannot see", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  expect_snapshot(nrow(old), error = TRUE)
+  expect_snapshot(do.call(dim, list(old)), error = TRUE)
+})
+
+test_that("dim() answers other packages as base R does", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  from_stats <- list2env(list(x = old), parent = asNamespace("stats"))
+  expect_null(evalq(dim(x), from_stats))
 })

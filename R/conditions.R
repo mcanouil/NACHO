@@ -367,6 +367,8 @@ check_nacho <- function(
 #' The S3 methods for the NACHO 2 class `nacho` call this, so a NACHO 2 list
 #' gets the `check_nacho()` error instead of a base R fallback. The final stop
 #' only guards the invariant that no such method returns.
+#' `arg = NULL` gives a message that names no object, for callers that cannot
+#' tell which expression the user typed.
 #'
 #' @inheritParams check_nacho
 #'
@@ -377,6 +379,16 @@ abort_nacho_v2 <- function(
   arg = rlang::caller_arg(x),
   call = rlang::caller_env()
 ) {
+  if (is.null(arg)) {
+    nacho_abort(
+      c(
+        "This object has the NACHO 2 class {.cls nacho}, which NACHO 3 cannot use.",
+        i = "Convert a NACHO 2 object with {.fn upgrade_nacho}, or read the saved file with {.fn read_nacho}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
   check_nacho(x, arg = arg, call = call)
   nacho_abort(
     c(

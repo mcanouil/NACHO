@@ -26,3 +26,21 @@
       ! `old` is a NACHO 2 object, which NACHO 3 cannot use.
       i Convert it with `upgrade_nacho(old)`, or read the saved file with `read_nacho()`.
 
+# dim() names no object it cannot see
+
+    Code
+      nrow(old)
+    Condition
+      Error in `dim()`:
+      ! This object has the NACHO 2 class <nacho>, which NACHO 3 cannot use.
+      i Convert a NACHO 2 object with `upgrade_nacho()`, or read the saved file with `read_nacho()`.
+
+---
+
+    Code
+      do.call(dim, list(old))
+    Condition
+      Error in `dim()`:
+      ! This object has the NACHO 2 class <nacho>, which NACHO 3 cannot use.
+      i Convert a NACHO 2 object with `upgrade_nacho()`, or read the saved file with `read_nacho()`.
+

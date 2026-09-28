@@ -246,7 +246,7 @@ S7::method(`[`, nacho) <- subset_nacho
 #' so these methods name `base::` to reach the base methods table.
 #'
 #' @param x,object A NACHO 2 object.
-#' @param row.names,optional,... Ignored.
+#' @param row.names,optional,... Never used, because these methods always fail.
 #'
 #' @keywords internal
 #' @noRd
@@ -259,7 +259,7 @@ format.nacho <- function(x, ...) {
     )
   } else {
     cli::format_inline(
-      "<nacho> A list with the NACHO 2 class but not the NACHO 2 data. ",
+      "<nacho> An object with the NACHO 2 class but not the NACHO 2 data. ",
       "Create a NACHO 3 object with {.code load_rcc()}."
     )
   }
@@ -268,7 +268,7 @@ format.nacho <- function(x, ...) {
 #' @noRd
 #' @exportS3Method base::print
 print.nacho <- function(x, ...) {
-  cat(format.nacho(x), sep = "\n")
+  cat(format(x, ...), sep = "\n")
   invisible(x)
 }
 
@@ -281,9 +281,29 @@ summary.nacho <- function(object, ...) {
 #' @noRd
 #' @exportS3Method base::dim
 dim.nacho <- function(x) {
-  # dim() is a builtin, so its dispatch passes the value, not the expression;
-  # the call still holds what the user typed.
-  abort_nacho_v2(x, arg = rlang::as_label(sys.call()[[2]]))
+  caller <- parent.frame()
+  home <- topenv(caller)
+  home_name <- if (isNamespace(home)) getNamespaceName(home) else ""
+  # Other packages, such as vctrs when rlang formats a backtrace, ask for the
+  # dimensions of any value; refusing them would replace the real error.
+  if (!home_name %in% c("", "base", "NACHO")) {
+    return(NextMethod())
+  }
+  user_code <- home_name != "base"
+  # dim() is a builtin, so its dispatch passes the value, not the expression.
+  # The call names the object only when it is a symbol bound to `x` in user
+  # code: nrow() and ncol() call dim(x) on their own `x`, and do.call() puts
+  # the value itself in the call. The error call is fixed, because
+  # formatting a call that holds the value would run dim() on it.
+  expr <- sys.call()[[2]]
+  named <- user_code &&
+    is.symbol(expr) &&
+    identical(get0(as.character(expr), envir = caller), x)
+  abort_nacho_v2(
+    x,
+    arg = if (named) rlang::as_label(expr),
+    call = quote(dim())
+  )
 }
 
 #' @noRd
