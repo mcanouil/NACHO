@@ -271,7 +271,17 @@ check_nacho <- function(
     nacho_abort(
       c(
         "{.arg {arg}} is a NACHO 2 object, which NACHO 3 cannot use.",
-        i = "Load the RCC files again with {.fn load_rcc}."
+        i = "Convert it with {.code upgrade_nacho({arg})}, or read the saved file with {.fn read_nacho}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  if (inherits(x, "nacho") && !S7::S7_inherits(x)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} has the NACHO 2 class {.cls nacho}, but not the NACHO 2 data.",
+        i = "Create a NACHO 3 object with {.fn load_rcc}."
       ),
       class = "bad_object",
       call = call
@@ -282,6 +292,16 @@ check_nacho <- function(
       c(
         "{.arg {arg}} must be a {.cls nacho} object, not {.obj_type_friendly {x}}.",
         i = "Create one with {.fn load_rcc}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  if (!identical(x@provenance[["schema_version"]], nacho_schema_version)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} was made by another version of NACHO.",
+        i = "Read the saved file with {.fn read_nacho}, which rebuilds it."
       ),
       class = "bad_object",
       call = call
