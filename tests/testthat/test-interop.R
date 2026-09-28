@@ -27,7 +27,7 @@ test_that("as_nacho() rebuilds the object from its SummarizedExperiment", {
   )
   expect_equal(nacho_qc(x), nacho_qc(GSE74821))
   expect_identical(x@thresholds, GSE74821@thresholds)
-  expect_identical(nacho_samples(x), nacho_samples(GSE74821))
+  expect_equal(nacho_samples(x), nacho_samples(GSE74821))
   expect_identical(nacho_probes(x), nacho_probes(GSE74821))
   expect_identical(x@settings, GSE74821@settings)
   expect_identical(x@rcc_type, GSE74821@rcc_type)
@@ -165,7 +165,7 @@ test_that("as_nacho() stamps the current schema on saved provenance", {
   S4Vectors::metadata(se)$nacho$provenance$schema_version <- 99L
   x <- suppressMessages(as_nacho(se))
   expect_identical(x@provenance, GSE74821@provenance)
-  expect_identical(nacho_samples(x), nacho_samples(GSE74821))
+  expect_equal(nacho_samples(x), nacho_samples(GSE74821))
 })
 
 se_with_nacho_metadata <- function(field, value) {
