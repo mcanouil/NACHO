@@ -84,3 +84,12 @@
       ! `metadata(x)$nacho$settings` has unknown setting: n_comps.
       i Known settings: id_colname, housekeeping_genes, housekeeping_predict, housekeeping_norm, normalisation_method, and n_comp.
 
+# as_nacho() points a saved id column clash to the metadata
+
+    Code
+      as_nacho(se)
+    Condition
+      Error in `as_nacho()`:
+      ! The sample data already has a column IDFILE that differs from the sample names.
+      i Rename that column, or remove id_colname from `metadata(x)$nacho$settings`.
+

@@ -185,10 +185,15 @@ nacho_from_parts <- function(
       names(samples) &&
       !identical(as.character(samples[[id_colname]]), colnames(counts))
   ) {
+    hint <- if (is.null(metadata[["settings"]][["id_colname"]])) {
+      "Pass another {.arg id_colname}, or rename that column."
+    } else {
+      "Rename that column, or remove {.field id_colname} from {.arg metadata(x)$nacho$settings}."
+    }
     nacho_abort(
       c(
         "The sample data already has a column {.field {id_colname}} that differs from the sample names.",
-        i = "Pass another {.arg id_colname}, or rename that column."
+        i = hint
       ),
       class = "bad_argument",
       call = call
@@ -298,6 +303,7 @@ nacho_metadata_settings <- function(
     arg_prefix = "metadata(x)$nacho$settings$",
     call = call
   )
+  merged[["n_comp"]] <- as.integer(merged[["n_comp"]])
   housekeeping_genes <- merged[["housekeeping_genes"]]
   housekeeping_genes <- housekeeping_genes[
     housekeeping_genes %in% probes[["Name"]]

@@ -441,10 +441,11 @@ sample_metrics <- function(counts, probes, samples) {
     )
   }
   lane <- function(name) {
-    if (name %in% missing_lane) {
-      rep(NA_character_, nrow(samples))
+    column <- paste0("Lane_Attributes.lane_", name)
+    if (column %in% names(samples)) {
+      samples[[column]]
     } else {
-      samples[[paste0("Lane_Attributes.lane_", name)]]
+      rep(NA_character_, nrow(samples))
     }
   }
   date <- if (missing_date) {

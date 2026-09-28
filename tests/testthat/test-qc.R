@@ -40,6 +40,22 @@ test_that("sample_metrics() gives NA and one warning when lane attributes are mi
     "Lane_Attributes.lane_BindingDensity",
     fixed = TRUE
   )
+  expect_named(
+    metrics,
+    c(
+      "Date",
+      "ID",
+      "BD",
+      "ScannerID",
+      "StagePosition",
+      "CartridgeID",
+      "FoV",
+      "PCL",
+      "LoD",
+      "MC",
+      "MedC"
+    )
+  )
   expect_true(all(is.na(metrics$FoV)))
   expect_true(all(is.na(metrics$BD)))
   expect_false(anyNA(metrics$MC))

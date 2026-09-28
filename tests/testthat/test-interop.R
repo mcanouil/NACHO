@@ -393,3 +393,25 @@ test_that("as_nacho() round-trips a PlexSet object", {
   )
   expect_identical(y@settings, x@settings)
 })
+
+test_that("as_nacho() points a saved id column clash to the metadata", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(GSE74821)
+  se$IDFILE <- rev(se$IDFILE)
+  expect_error(as_nacho(se), class = "nacho_error_bad_argument")
+  expect_snapshot(as_nacho(se), error = TRUE)
+})
+
+test_that("as_nacho() stores a saved n_comp as an integer", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- se_with_setting("n_comp", 5)
+  x <- suppressMessages(as_nacho(se))
+  expect_identical(x@settings$n_comp, 5L)
+  withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
+  expect_message(
+    same <- normalise(x, n_comp = 5),
+    "settings are the same",
+    class = "nacho_message"
+  )
+  expect_identical(same, x)
+})
