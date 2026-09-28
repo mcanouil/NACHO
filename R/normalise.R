@@ -51,11 +51,13 @@ normalise <- function(
       class = "bad_argument"
     )
   }
-  check_character(housekeeping_genes, allow_null = TRUE)
-  check_bool(housekeeping_predict)
-  check_bool(housekeeping_norm)
-  normalisation_method <- check_choice(normalisation_method, c("GEO", "GLM"))
-  check_count(n_comp)
+  normalisation_method <- check_settings(
+    housekeeping_genes,
+    housekeeping_predict,
+    housekeeping_norm,
+    normalisation_method,
+    n_comp
+  )
   check_thresholds(outliers_thresholds)
 
   settings <- list(

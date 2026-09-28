@@ -1,4 +1,5 @@
 #' @keywords internal
+#' @importFrom rlang %||%
 "_PACKAGE"
 
 .datatable.aware <- TRUE

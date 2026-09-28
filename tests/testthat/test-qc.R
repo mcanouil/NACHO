@@ -23,6 +23,44 @@ test_that("normalise_matrix() rounds, then floors at 0.1", {
   expect_identical(out, matrix(c(10, 0.1, 27, 0.1), nrow = 2))
 })
 
+test_that("sample_metrics() gives NA and one warning when lane attributes are missing", {
+  x <- GSE74821
+  samples <- x@samples[, !grepl("^Lane_Attributes", names(x@samples))]
+  warnings <- list()
+  metrics <- withCallingHandlers(
+    NACHO:::sample_metrics(x@counts, x@probes, samples),
+    nacho_warning_metric_unavailable = function(cnd) {
+      warnings <<- c(warnings, list(cnd))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_length(warnings, 1)
+  expect_match(
+    conditionMessage(warnings[[1]]),
+    "Lane_Attributes.lane_BindingDensity",
+    fixed = TRUE
+  )
+  expect_named(
+    metrics,
+    c(
+      "Date",
+      "ID",
+      "BD",
+      "ScannerID",
+      "StagePosition",
+      "CartridgeID",
+      "FoV",
+      "PCL",
+      "LoD",
+      "MC",
+      "MedC"
+    )
+  )
+  expect_true(all(is.na(metrics$FoV)))
+  expect_true(all(is.na(metrics$BD)))
+  expect_false(anyNA(metrics$MC))
+})
+
 test_that("missing probes in some files keep QC working", {
   fixture <- geo_fixture("GSE178516")
   directory <- withr::local_tempdir()

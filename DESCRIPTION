@@ -36,6 +36,7 @@ BugReports: https://github.com/mcanouil/NACHO/issues
 Depends:
     R (>= 4.3)
 Imports:
+    methods,
     utils,
     cli (>= 3.6.0),
     data.table,
@@ -57,8 +58,12 @@ Suggests:
     covr (>= 3.3.2),
     Biobase,
     GEOquery,
-    limma
-VignetteBuilder: 
+    limma,
+    NanoStringNCTools,
+    S4Vectors,
+    SummarizedExperiment
+biocViews:
+VignetteBuilder:
     knitr
 Encoding: UTF-8
 Language: en-GB
@@ -76,6 +81,7 @@ Collate:
     'autoplot.R'
     'conditions.R'
     'deploy.R'
+    'interop.R'
     'load_rcc.R'
     'methods.R'
     'normalise.R'

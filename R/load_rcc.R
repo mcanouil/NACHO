@@ -82,11 +82,13 @@ load_rcc <- function(
     )
   }
   data_directory <- normalizePath(data_directory)
-  check_character(housekeeping_genes, allow_null = TRUE)
-  check_bool(housekeeping_predict)
-  check_bool(housekeeping_norm)
-  normalisation_method <- check_choice(normalisation_method, c("GEO", "GLM"))
-  check_count(n_comp)
+  normalisation_method <- check_settings(
+    housekeeping_genes,
+    housekeeping_predict,
+    housekeeping_norm,
+    normalisation_method,
+    n_comp
+  )
 
   if (is.character(ssheet_csv) && length(ssheet_csv) > 1) {
     if (is.null(names(ssheet_csv))) {
@@ -152,9 +154,7 @@ load_rcc <- function(
     )
   }
   rcc_type <- if (all(is_plexset)) "n8" else "n1"
-  duplicated_ids <- unique(
-    nacho_df[[id_colname]][duplicated(nacho_df[[id_colname]])]
-  )
+  duplicated_ids <- duplicated_values(nacho_df[[id_colname]])
   if (rcc_type == "n8" && !"plexset_id" %in% names(nacho_df)) {
     if (length(duplicated_ids) > 0) {
       abort_duplicate_ids(duplicated_ids, id_colname)
@@ -233,7 +233,7 @@ load_rcc <- function(
   sheet <- as.data.frame(nacho_df)
   sheet <- sheet[, setdiff(names(sheet), "file_path"), drop = FALSE]
   samples <- cbind(
-    sheet[, c(id_colname, setdiff(names(sheet), id_colname)), drop = FALSE],
+    column_first(sheet, id_colname),
     as.data.frame(attributes)[file_index, , drop = FALSE]
   )
   sample_order <- order(ids, method = "radix")
@@ -241,24 +241,12 @@ load_rcc <- function(
   rownames(samples) <- NULL
   counts <- counts[, sample_order, drop = FALSE]
 
-  if (
-    !any(grepl("Housekeeping", probes[["CodeClass"]])) &&
-      is.null(housekeeping_genes) &&
-      !housekeeping_predict &&
-      housekeeping_norm
-  ) {
-    nacho_warn(
-      c(
-        "Housekeeping normalisation is off, because no housekeeping genes are available.",
-        i = paste0(
-          "The RCC files have no {.val Housekeeping} probes, {.arg housekeeping_genes} is {.code NULL} ",
-          "and {.arg housekeeping_predict} is {.code FALSE}."
-        )
-      ),
-      class = "no_housekeeping"
-    )
-    housekeeping_norm <- FALSE
-  }
+  housekeeping_norm <- resolve_housekeeping_norm(
+    probes[["CodeClass"]],
+    housekeeping_genes,
+    housekeeping_predict,
+    housekeeping_norm
+  )
 
   nacho_progress_step("Computing quality-control metrics and normalising")
   build_nacho(
@@ -281,6 +269,42 @@ load_rcc <- function(
       software_version = versions[["software"]]
     )
   )
+}
+
+#' Turn housekeeping normalisation off when no housekeeping gene is available
+#'
+#' @param code_class The code class of each probe.
+#'
+#' @return `housekeeping_norm`, set to `FALSE` with a warning when there are
+#'   no `Housekeeping` probes, no `housekeeping_genes` and no prediction.
+#'
+#' @keywords internal
+#' @noRd
+resolve_housekeeping_norm <- function(
+  code_class,
+  housekeeping_genes,
+  housekeeping_predict,
+  housekeeping_norm
+) {
+  if (
+    !any(grepl("Housekeeping", code_class)) &&
+      is.null(housekeeping_genes) &&
+      !housekeeping_predict &&
+      housekeeping_norm
+  ) {
+    nacho_warn(
+      c(
+        "Housekeeping normalisation is off, because no housekeeping genes are available.",
+        i = paste0(
+          "There are no {.val Housekeeping} probes, {.arg housekeeping_genes} is {.code NULL} ",
+          "and {.arg housekeeping_predict} is {.code FALSE}."
+        )
+      ),
+      class = "no_housekeeping"
+    )
+    return(FALSE)
+  }
+  housekeeping_norm
 }
 
 #' Build the probe table and the counts matrix from long probe counts
@@ -314,9 +338,9 @@ build_probe_counts <- function(
     order(probes[["CodeClass"]], probes[["Name"]], method = "radix"),
   ]
   rownames(probes) <- NULL
-  if (anyDuplicated(probes[["Name"]]) > 0) {
-    # Used only inside the cli glue string of clash_message.
-    clashes <- unique(probes[["Name"]][duplicated(probes[["Name"]])]) # nolint: object_usage_linter.
+  # Used only inside the cli glue string of clash_message.
+  clashes <- duplicated_values(probes[["Name"]]) # nolint: object_usage_linter.
+  if (length(clashes) > 0) {
     nacho_abort(clash_message, class = clash_class, call = call)
   }
   counts <- matrix(

@@ -181,6 +181,59 @@ check_choice <- function(
   )
 }
 
+#' Check the normalisation settings
+#'
+#' @param arg_prefix Prepended to each setting name in error messages, such as
+#'   `"metadata(x)$nacho$settings$"`.
+#' @inheritParams nacho_abort
+#'
+#' @return The matched `normalisation_method`.
+#'
+#' @keywords internal
+#' @noRd
+check_settings <- function(
+  housekeeping_genes,
+  housekeeping_predict,
+  housekeeping_norm,
+  normalisation_method,
+  n_comp,
+  arg_prefix = "",
+  call = rlang::caller_env()
+) {
+  check_character(
+    housekeeping_genes,
+    allow_null = TRUE,
+    arg = paste0(arg_prefix, "housekeeping_genes"),
+    call = call
+  )
+  check_bool(
+    housekeeping_predict,
+    arg = paste0(arg_prefix, "housekeeping_predict"),
+    call = call
+  )
+  check_bool(
+    housekeeping_norm,
+    arg = paste0(arg_prefix, "housekeeping_norm"),
+    call = call
+  )
+  normalisation_method <- check_choice(
+    normalisation_method,
+    c("GEO", "GLM"),
+    arg = paste0(arg_prefix, "normalisation_method"),
+    call = call
+  )
+  check_count(n_comp, arg = paste0(arg_prefix, "n_comp"), call = call)
+  normalisation_method
+}
+
+#' List the values that appear more than once
+#'
+#' @keywords internal
+#' @noRd
+duplicated_values <- function(x) {
+  unique(x[duplicated(x)])
+}
+
 check_column <- function(
   column,
   data,
@@ -216,13 +269,17 @@ check_interactive <- function(fn, call = rlang::caller_env()) {
   invisible(TRUE)
 }
 
+has_package <- function(package) {
+  requireNamespace(package, quietly = TRUE)
+}
+
 check_package <- function(
   package,
   reason,
   install = sprintf('install.packages("%s")', package),
   call = rlang::caller_env()
 ) {
-  if (!requireNamespace(package, quietly = TRUE)) {
+  if (!has_package(package)) {
     nacho_abort(
       c(
         "The {.pkg {package}} package is needed {reason}.",
