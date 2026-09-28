@@ -10,12 +10,6 @@
 #' @noRd
 read_rcc <- function(file) {
   lines <- trim_trailing_space(readLines(file, warn = FALSE))
-  has_bar <- grepl("|", lines, fixed = TRUE)
-  lines[has_bar] <- sub(
-    "[|]+[[:digit:]]+\\.*[[:digit:]]*",
-    "",
-    lines[has_bar]
-  )
 
   section <- function(tag, required = TRUE) {
     start <- match(paste0("<", tag, ">"), lines)
@@ -73,6 +67,12 @@ read_rcc <- function(file) {
     )
   }
   code_summary <- code_summary[, c("CodeClass", "Name", "Accession", "Count")]
+  has_bar <- grepl("|", code_summary[["Name"]], fixed = TRUE)
+  code_summary[["Name"]][has_bar] <- sub(
+    "[|]+[[:digit:]]+\\.*[[:digit:]]*$",
+    "",
+    code_summary[["Name"]][has_bar]
+  )
   code_summary[["Count"]] <- as.integer(code_summary[["Count"]])
 
   list(

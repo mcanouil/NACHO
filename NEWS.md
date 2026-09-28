@@ -46,6 +46,7 @@
 - In `R/read_rcc.R`,
   - fix: Empty RCC attributes, such as a blank owner or comment, are now read as empty text instead of repeating the attribute name.
   - fix: A probe named like an RCC section, such as `Messages`, no longer breaks parsing.
+  - fix: Probe names keep every inner `|` field, so protein names such as `4E-BP1(53H11)|NA|EIF4EBP1|53H11|0` are no longer mangled. Only a trailing numeric suffix such as `|0` is removed, as before.
 - In `R/load_rcc.R`,
   - fix: `load_rcc()` now checks a supplied `plexset_id` column: values outside `S1` to `S8` and duplicated id/`plexset_id` pairs raise a classed error before any file is read into a matrix.
 - In `R/qc.R`,
