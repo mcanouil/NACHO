@@ -97,6 +97,36 @@ test_that("compute_pca() returns sample scores and caps the components", {
   )
 })
 
+test_that("compute_pca() matches prcomp() whichever dimension is smaller", {
+  withr::local_seed(42)
+  for (shape in list(c(40L, 15L), c(15L, 40L))) {
+    counts <- matrix(
+      stats::rpois(prod(shape), 200),
+      nrow = shape[1],
+      dimnames = list(
+        paste0("p", seq_len(shape[1])),
+        paste0("s", seq_len(shape[2]))
+      )
+    )
+    pca <- NACHO:::compute_pca(counts, 4L)
+    expected <- stats::prcomp(t(log(counts + 1)))
+    importance <- summary(expected)[["importance"]][, 1:4]
+    expect_equal(
+      abs(pca$scores),
+      abs(expected$x[, 1:4]),
+      tolerance = 1e-8,
+      ignore_attr = TRUE
+    )
+    expect_identical(rownames(pca$scores), colnames(counts))
+    expect_equal(
+      as.matrix(pca$importance[, -1]),
+      t(importance),
+      tolerance = 1e-8,
+      ignore_attr = TRUE
+    )
+  }
+})
+
 test_that("compute_pca() handles a single sample", {
   counts <- matrix(1:3, ncol = 1, dimnames = list(c("a", "b", "c"), "s1"))
   expect_warning(
