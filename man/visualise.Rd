@@ -8,8 +8,7 @@
 visualise(nacho_object)
 }
 \arguments{
-\item{nacho_object}{[\link{list}] A list object of class \code{"nacho"} obtained
-from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
+\item{nacho_object}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 }
 \description{
 This function visualises results from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}
@@ -54,20 +53,12 @@ if (interactive()) {
   )
   visualise(nacho)
 
-  # (re)Normalise data by removing outliers
-  nacho_norm <- normalise(
-    nacho_object = nacho,
-    remove_outliers = TRUE
-  )
-  visualise(nacho_norm)
+  # Drop the outliers and normalise the other samples again
+  visualise(exclude_outliers(nacho))
 
-  # (re)Normalise data with "GLM" method and removing outliers
-  nacho_norm <- normalise(
-    nacho_object = nacho,
-    normalisation_method = "GLM",
-    remove_outliers = TRUE
-  )
-  visualise(nacho_norm)
+  # Normalise with the "GLM" method, then drop the outliers
+  nacho_glm <- normalise(nacho, normalisation_method = "GLM")
+  visualise(exclude_outliers(nacho_glm))
 }
 
 }

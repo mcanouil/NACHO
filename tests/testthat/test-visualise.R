@@ -11,24 +11,23 @@ test_that("visualise() needs an object", {
   expect_error(visualise(), class = "nacho_error_bad_object")
 })
 
-mandatory_fields <- c(
-  "access",
-  "housekeeping_genes",
-  "housekeeping_predict",
-  "housekeeping_norm",
-  "normalisation_method",
-  "remove_outliers",
-  "n_comp",
-  "data_directory",
-  "pc_sum",
-  "nacho",
-  "outliers_thresholds"
-)
+test_that("visualise() refuses a NACHO 2 list", {
+  old <- structure(list(nacho = data.frame()), class = "nacho")
+  expect_error(visualise(old), class = "nacho_error_bad_object")
+})
 
-for (field in mandatory_fields) {
-  test_that(paste("visualise() needs the", field, "field"), {
-    incomplete <- GSE74821
-    incomplete[[field]] <- NULL
-    expect_error(visualise(incomplete), class = "nacho_error_bad_object")
-  })
-}
+test_that("visualise() hands the nacho object to the app", {
+  skip_if_not_installed("markdown")
+  withr::local_options(rlang_interactive = TRUE)
+  shared <- NULL
+  local_mocked_bindings(
+    runApp = function(...) {
+      shared <<- shiny::getShinyOption("nacho_object")
+    },
+    .package = "shiny"
+  )
+  visualise(GSE74821)
+  expect_true(S7::S7_inherits(shared, NACHO:::nacho))
+  expect_identical(nacho_qc(shared), nacho_qc(GSE74821))
+  expect_null(shiny::getShinyOption("nacho_object"))
+})

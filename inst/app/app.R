@@ -256,7 +256,7 @@ ui <- shiny::tagList(
 server <- function(input, output, session) {
   # Upload ----
   nacho_react <- shiny::reactive({
-    if (inherits(nacho_object, "nacho")) {
+    if (S7::S7_inherits(nacho_object)) {
       return(nacho_object)
     }
 
@@ -313,9 +313,10 @@ server <- function(input, output, session) {
         ssheet_dt <- data.table::fread(targets_ssheet[["datapath"]])
       }
 
-      check_multiplex <- all(sapply(
-        X = targets$datapath,
-        FUN = function(.x) any(grepl("Endogenous8s", readLines(.x)))
+      check_multiplex <- all(vapply(
+        targets$datapath,
+        NACHO:::is_plexset_rcc,
+        logical(1)
       ))
       if (check_multiplex) {
         targets <- merge(
@@ -497,25 +498,27 @@ server <- function(input, output, session) {
   # Get nacho object and update thresholds
   nacho_custom <- shiny::reactive({
     nacho <- shiny::req(nacho_react())
-
-    nacho$outliers_thresholds[["BD"]] <- input$qc_bd_thresh %||%
-      nacho$outliers_thresholds[["BD"]]
-    nacho$outliers_thresholds[["FoV"]] <- input$qc_fov_thresh %||%
-      nacho$outliers_thresholds[["FoV"]]
-    nacho$outliers_thresholds[["LoD"]] <- input$qc_lod_thresh %||%
-      nacho$outliers_thresholds[["LoD"]]
-    nacho$outliers_thresholds[["PCL"]] <- input$qc_pcl_thresh %||%
-      nacho$outliers_thresholds[["PCL"]]
-    nacho$outliers_thresholds[["Positive_factor"]] <- input$qc_pf_thresh %||%
-      nacho$outliers_thresholds[["Positive_factor"]]
-    nacho$outliers_thresholds[["House_factor"]] <- input$qc_hgf_thresh %||%
-      nacho$outliers_thresholds[["House_factor"]]
-
-    NACHO::check_outliers(nacho)
+    thresholds <- nacho@thresholds
+    NACHO::normalise(
+      nacho,
+      outliers_thresholds = list(
+        BD = input$qc_bd_thresh %||% thresholds[["BD"]],
+        FoV = input$qc_fov_thresh %||% thresholds[["FoV"]],
+        LoD = input$qc_lod_thresh %||% thresholds[["LoD"]],
+        PCL = input$qc_pcl_thresh %||% thresholds[["PCL"]],
+        Positive_factor = input$qc_pf_thresh %||%
+          thresholds[["Positive_factor"]],
+        House_factor = input$qc_hgf_thresh %||% thresholds[["House_factor"]]
+      )
+    ) |>
+      suppressMessages()
   })
   shiny::observe({
-    if (inherits(nacho_object, "nacho")) {
-      nacho_object$outliers_thresholds <- nacho_custom()$outliers_thresholds
+    if (S7::S7_inherits(nacho_object)) {
+      nacho_object <- suppressMessages(NACHO::normalise(
+        nacho_object,
+        outliers_thresholds = nacho_custom()@thresholds
+      ))
       message(
         '[NACHO] Updated "nacho_object" can be loaded with:\n',
         '  nacho_object <- readRDS("',
@@ -531,33 +534,16 @@ server <- function(input, output, session) {
 
   # Output ----
   outliers_list <- shiny::reactive({
-    is_outlier <- NULL # no visible binding for global variable
-    columns_qc <- intersect(
-      c(
-        "IDFILE",
-        "CartridgeID",
-        "BD",
-        "FoV",
-        "PCL",
-        "LoD",
-        "MC",
-        "MedC",
-        "Positive_factor",
-        "House_factor"
-      ),
-      colnames(nacho_custom()$nacho)
-    )
-    unique(
-      data.table::as.data.table(nacho_custom()$nacho)[
-        (is_outlier),
-        .SD,
-        .SDcols = columns_qc
-      ]
-    )
+    qc <- NACHO::nacho_qc(nacho_custom())
+    qc[
+      qc[["is_outlier"]] %in% TRUE,
+      setdiff(names(qc), "is_outlier"),
+      drop = FALSE
+    ]
   })
   output[["outliers"]] <- shiny::renderTable(outliers_list())
   output[["outliers-thresholds"]] <- shiny::renderUI({
-    ot <- lapply(nacho_custom()$outliers_thresholds, round, digits = 3)
+    ot <- lapply(nacho_custom()@thresholds, round, digits = 3)
     shiny::tags$div(
       shiny::tags$ul(
         shiny::tags$li(
@@ -614,7 +600,7 @@ server <- function(input, output, session) {
 
   # Show / Hide tabs ----
   shiny::observe({
-    if (!inherits(nacho_object, "nacho") && is.null(input$rcc_files)) {
+    if (!S7::S7_inherits(nacho_object) && is.null(input$rcc_files)) {
       shiny::showTab("main-menu", target = "upload-tab", select = TRUE)
       lapply(
         X = paste0(
@@ -625,7 +611,7 @@ server <- function(input, output, session) {
       )
     }
 
-    if (inherits(nacho_object, "nacho") && is.null(input$rcc_files)) {
+    if (S7::S7_inherits(nacho_object) && is.null(input$rcc_files)) {
       lapply(
         X = paste0(
           c("qc_metrics", "qc_control", "qc_count", "norm", "outliers"),

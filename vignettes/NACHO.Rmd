@@ -230,12 +230,13 @@ Each sample in the plots can be coloured based on either technical specification
 *NACHO* allows the discovery of housekeeping genes within your own dataset.
 *NACHO* finds the five best suitable housekeeping genes, however, it is possible that one of these five genes might not be suitable, which is why a subset of these discovered housekeeping genes might work better in some cases.
 For this example, we use the **GSE70970** dataset from the previous example.
-The discovered housekeeping genes are saved in the result object as **predicted_housekeeping**.
+The discovered housekeeping genes are flagged in the `is_housekeeping` column of `nacho_probes()`.
 
 ```{r}
 #| label: ex5
 #| eval: !expr '!inherits(gse, "try-error")'
-print(GSE70970_sum[["housekeeping_genes"]])
+housekeeping <- nacho_probes(GSE70970_sum)$Name[nacho_probes(GSE70970_sum)$is_housekeeping]
+print(housekeeping)
 ```
 
 ```{r}
@@ -244,8 +245,8 @@ print(GSE70970_sum[["housekeeping_genes"]])
 #| echo: false
 #| results: asis
 cat(
-  "Let's say _", GSE70970_sum[["housekeeping_genes"]][1],
-  "_ and _", GSE70970_sum[["housekeeping_genes"]][2],
+  "Let's say _", housekeeping[1],
+  "_ and _", housekeeping[2],
   "_ are not suitable, therefore, you want to exclude these genes from the normalisation process.",
   sep = ""
 )
@@ -253,7 +254,7 @@ cat(
 
 ```{r}
 #| eval: !expr '!inherits(gse, "try-error")'
-my_housekeeping <- GSE70970_sum[["housekeeping_genes"]][-c(1, 2)]
+my_housekeeping <- housekeeping[-c(1, 2)]
 print(my_housekeeping)
 ```
 
@@ -261,11 +262,13 @@ The next step is the actual normalisation.
 The first argument requires the summary which is created with the `load_rcc()` function.
 The second argument requires a vector of gene names.
 In this case, it is a subset of the discovered housekeeping genes we just made.
-With the third argument the user has the choice to remove the outliers.
-Lastly, the normalisation method can be chosen.  
+The third argument turns off housekeeping gene prediction, since the housekeeping genes are already chosen.
+The fourth argument turns on housekeeping normalisation.
+Lastly, the normalisation method can be chosen.
 Here, the user has a choice between `"GLM"` or `"GEO"`.
-The differences between normalisation methods are nuanced, however, a preference for either method is use case specific.  
-In this example, `"GLM"` is used.
+The differences between normalisation methods are nuanced, however, a preference for either method is use case specific.
+In this example, `"GEO"` is used.
+`exclude_outliers()` then drops the flagged samples and normalises the ones that are left again.
 
 ```{r}
 #| label: ex7
@@ -275,13 +278,13 @@ GSE70970_norm <- normalise(
   housekeeping_genes = my_housekeeping,
   housekeeping_predict = FALSE,
   housekeeping_norm = TRUE,
-  normalisation_method = "GEO",
-  remove_outliers = TRUE
-)
+  normalisation_method = "GEO"
+) |>
+  exclude_outliers()
 ```
 
-`normalise()` returns a `list` object, like `load_rcc()`.
-Its `nacho` slot holds the raw counts in `Count` and the normalised counts in `Count_Norm`.
+`normalise()` returns a `nacho` object, like `load_rcc()`.
+Read the raw and normalised counts with `nacho_counts()`, and the per-sample metrics with `nacho_qc()`.
 
 ## The `autoplot()` function
 
@@ -290,15 +293,15 @@ The `autoplot()` function provides an easy way to plot any quality-control from 
 ```{r}
 #| eval: false
 autoplot(
-  object = GSE74821,
-  x = "BD",
+  GSE74821,
+  type = "BD",
   colour = "CartridgeID",
   size = 0.5,
   show_legend = TRUE
 )
 ```
 
-The possible metrics (`x`) are:
+The possible plot types (`type`) are:
 
 * `"BD"` (Binding Density)
 * `"FoV"` (Imaging)
@@ -341,7 +344,7 @@ metrics <- c(
 
 for (imetric in seq_along(metrics)) {
   cat("\n\n###", metrics[imetric], "\n\n")
-  print(autoplot(object = GSE74821, x = names(metrics[imetric])))
+  print(autoplot(GSE74821, type = names(metrics[imetric])))
   cat("\n")
 }
 ```
@@ -377,35 +380,24 @@ knitr::include_graphics(path = "README-app.png")
 
 ## The `render()` function
 
-The `render()` function renders a comprehensive HTML report, using `print(..., echo = TRUE)`,
-which includes all quality-control metrics and description of those metrics.
+The `render()` function renders a comprehensive HTML report, which includes all quality-control metrics and a description of each.
 
 ```{r}
 #| eval: false
 render(
   nacho_object = GSE74821,
   colour = "CartridgeID",
-  output_file = "NACHO_QC.html",
   output_dir = ".",
   size = 0.5,
-  show_legend = TRUE,
-  clean = TRUE
+  show_legend = TRUE
 )
 ```
 
-The underneath function `print()` can be used directly within any R Markdown chunk, setting the parameter `echo = TRUE`.
+`print()` shows a short summary of the object.
 
 ```{r}
 #| label: print
-#| results: asis
-print(
-  x = GSE74821,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE,
-  echo = TRUE,
-  title_level = 3
-)
+print(GSE74821)
 ```
 
 # References

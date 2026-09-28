@@ -13,16 +13,14 @@ render(
   show_legend = TRUE,
   show_outliers = TRUE,
   outliers_factor = 1,
-  outliers_labels = NULL,
-  clean = TRUE
+  outliers_labels = NULL
 )
 }
 \arguments{
-\item{nacho_object}{[\link{list}] A list object of class \code{"nacho"} obtained
-from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
+\item{nacho_object}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
 \item{colour}{[\link{character}] Character string of the column in \code{ssheet_csv}
-or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
+or more generally in \code{nacho_samples(nacho_object)} to be used as grouping colour.}
 
 \item{output_file}{[\link{character}] The name of the output file.}
 
@@ -44,11 +42,8 @@ in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
 
 \item{outliers_factor}{[\link{numeric}] Size factor for outliers compared to \code{size}. Default is \code{1}.}
 
-\item{outliers_labels}{[\link{character}] Character to indicate which column in \code{nacho_object$nacho}
+\item{outliers_labels}{[\link{character}] Character to indicate which column in \code{nacho_samples(nacho_object)}
 should be used to be printed as the labels for outliers or not. Default is \code{NULL}.}
-
-\item{clean}{[\link{logical}] Boolean to indicate whether the Rmd and RData files used to produce the HTML report
-are removed from \code{output_dir}. Default is \code{TRUE}.}
 }
 \description{
 This function creates an R Markdown script and renders it as an HTML document.

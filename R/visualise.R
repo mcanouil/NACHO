@@ -47,20 +47,12 @@
 #'   )
 #'   visualise(nacho)
 #'
-#'   # (re)Normalise data by removing outliers
-#'   nacho_norm <- normalise(
-#'     nacho_object = nacho,
-#'     remove_outliers = TRUE
-#'   )
-#'   visualise(nacho_norm)
+#'   # Drop the outliers and normalise the other samples again
+#'   visualise(exclude_outliers(nacho))
 #'
-#'   # (re)Normalise data with "GLM" method and removing outliers
-#'   nacho_norm <- normalise(
-#'     nacho_object = nacho,
-#'     normalisation_method = "GLM",
-#'     remove_outliers = TRUE
-#'   )
-#'   visualise(nacho_norm)
+#'   # Normalise with the "GLM" method, then drop the outliers
+#'   nacho_glm <- normalise(nacho, normalisation_method = "GLM")
+#'   visualise(exclude_outliers(nacho_glm))
 #' }
 #'
 visualise <- function(nacho_object) {

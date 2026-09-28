@@ -38,12 +38,14 @@ reference:
       - load_rcc
       - normalise
       - check_outliers
+      - exclude_outliers
   - title: Visualise and report
     desc: Explore quality control interactively, plot a single metric, or write a full report.
     contents:
       - visualise
       - autoplot.nacho
-      - print.nacho
+      - nacho-methods
+      - nacho-accessors
       - render
   - title: Shiny application
     contents:

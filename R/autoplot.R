@@ -1,46 +1,73 @@
-#' Plot quality-control metrics and thresholds of a "nacho" object
+#' @include nacho-class.R
+NULL
+
+#' Plot the quality control of a nacho object
 #'
-#' This function plots any of the quality-control figures available
-#' within the Shiny app using [`visualise()`] or in the HTML report from [`render()`].
+#' Draws any of the quality-control figures of the Shiny app
+#' ([visualise()]) and of the HTML report ([render()]).
 #'
-#' @inheritParams render
-#' @param object [[list]] List obtained from [`load_rcc()`] or [`normalise()`].
-#' @param x [[character]] Character string naming the quality-control metrics to plot from `nacho_object`.
-#'  The possible values are:
+#' @section Usage:
+#' ```r
+#' autoplot(
+#'   object,
+#'   type,
+#'   colour = "CartridgeID",
+#'   size = 0.5,
+#'   show_legend = TRUE,
+#'   show_outliers = TRUE,
+#'   outliers_factor = 1,
+#'   outliers_labels = NULL
+#' )
+#' ```
 #'
-#'    * `"BD"` (Binding Density)
-#'    * `"FoV"` (Imaging)
-#'    * `"PCL"` (Positive Control Linearity)
-#'    * `"LoD"` (Limit of Detection)
-#'    * `"Positive"` (Positive Controls)
-#'    * `"Negative"` (Negative Controls)
-#'    * `"Housekeeping"` (Housekeeping Genes)
-#'    * `"PN"` (Positive Controls vs. Negative Controls)
-#'    * `"ACBD"` (Average Counts vs. Binding Density)
-#'    * `"ACMC"` (Average Counts vs. Median Counts)
-#'    * `"PCA12"` (Principal Component 1 vs. 2)
-#'    * `"PCAi"` (Principal Component scree plot)
-#'    * `"PCA"` (Principal Components planes)
-#'    * `"PFNF"` (Positive Factor vs. Negative Factor)
-#'    * `"HF"` (Housekeeping Factor)
-#'    * `"NORM"` (Normalisation Factor)
+#' @section Arguments:
+#' * `object`: A `nacho` object from [load_rcc()] or [normalise()].
+#' * `type`: The plot to draw, one of:
+#'   * `"BD"`: Binding Density.
+#'   * `"FoV"`: Field of View (imaging).
+#'   * `"PCL"`: Positive Control Linearity.
+#'   * `"LoD"`: Limit of Detection.
+#'   * `"Positive"`: Positive controls.
+#'   * `"Negative"`: Negative controls.
+#'   * `"Housekeeping"`: Housekeeping genes.
+#'   * `"PN"`: Positive controls against negative controls.
+#'   * `"ACBD"`: Average counts against binding density.
+#'   * `"ACMC"`: Average counts against median counts.
+#'   * `"PCA12"`: Principal component 1 against 2.
+#'   * `"PCAi"`: Scree plot of the principal components.
+#'   * `"PCA"`: Planes of the first principal components.
+#'   * `"PFNF"`: Positive factor against negative factor.
+#'   * `"HF"`: Housekeeping factor.
+#'   * `"NORM"`: Normalisation factor.
+#' * `colour`: The column of `nacho_samples(object)` that colours the points.
+#' * `size`: The point size, and the line width in the `"NORM"` plot.
+#' * `show_legend`: If `FALSE`, hide the colour legend.
+#' * `show_outliers`: If `TRUE`, draw the flagged samples in red.
+#' * `outliers_factor`: The size of the flagged samples, relative to `size`.
+#' * `outliers_labels`: The column of `nacho_samples(object)` that labels the
+#'   flagged samples, or `NULL` for no labels.
+#'   Labels imply `show_outliers = TRUE`.
 #'
-#' @param ... Other arguments (Not used).
+#' @return A `ggplot` object.
 #'
-#' @return NULL
-#' @export
-#'
+#' @name autoplot.nacho
+#' @usage NULL
 #' @importFrom ggplot2 .data
 #'
 #' @examples
-#'
-#' data(GSE74821)
-#'
-#' autoplot(GSE74821, x = "BD")
-#'
-autoplot.nacho <- function(
+#' autoplot(GSE74821, type = "BD")
+NULL
+
+metric_labels <- c(
+  "BD" = "Binding Density",
+  "FoV" = "Field of View",
+  "PCL" = "Positive Control Linearity",
+  "LoD" = "Limit of Detection"
+)
+
+autoplot_nacho <- function(
   object,
-  x,
+  type,
   colour = "CartridgeID",
   size = 0.5,
   show_legend = TRUE,
@@ -50,197 +77,170 @@ autoplot.nacho <- function(
   ...
 ) {
   check_nacho(object)
-  autoplot_types <- c(
-    "BD",
-    "FoV",
-    "PCL",
-    "LoD",
-    "Positive",
-    "Negative",
-    "Housekeeping",
-    "PN",
-    "ACBD",
-    "ACMC",
-    "PCA12",
-    "PCAi",
-    "PCA",
-    "PFNF",
-    "HF",
-    "NORM"
-  )
-  if (missing(x) || is.null(x)) {
+  dots <- list(...)
+  if ("x" %in% names(dots)) {
     nacho_abort(
       c(
-        "{.arg x} is missing.",
-        i = "Choose one of {.val {autoplot_types}}."
+        "{.arg x} was renamed {.arg type} in NACHO 3.0.0.",
+        i = "Use {.code autoplot(object, type = {encodeString(dots[['x']], quote = '\"')})}."
       ),
       class = "bad_argument"
     )
   }
-  x <- check_choice(x, autoplot_types)
-  object <- check_outliers(object)
-
+  if (missing(type)) {
+    nacho_abort(
+      c(
+        "{.arg type} is missing.",
+        i = "Choose one of {.val {names(nacho_plot_registry)}}."
+      ),
+      class = "bad_argument"
+    )
+  }
+  type <- check_choice(type, names(nacho_plot_registry))
+  check_string(colour)
+  check_column(
+    colour,
+    nacho_samples(object),
+    data_arg = "nacho_samples(object)"
+  )
+  check_string(outliers_labels, allow_null = TRUE)
   if (!is.null(outliers_labels)) {
+    check_column(
+      outliers_labels,
+      nacho_samples(object),
+      data_arg = "nacho_samples(object)"
+    )
     show_outliers <- TRUE
   }
+  check_bool(show_legend)
+  check_bool(show_outliers)
+  nacho_plot_registry[[type]](
+    object = object,
+    type = type,
+    colour = colour,
+    size = size,
+    show_legend = show_legend,
+    show_outliers = show_outliers,
+    outliers_factor = outliers_factor,
+    outliers_labels = outliers_labels
+  )
+}
 
-  switch(
-    EXPR = x,
-    "BD" = plot_metrics(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend,
-      show_outliers,
-      outliers_factor,
-      outliers_labels
+plot_samples <- function(object, colour) {
+  samples <- data.table::as.data.table(nacho_samples(object))
+  if (is.numeric(samples[[colour]])) {
+    samples[[colour]] <- as.character(samples[[colour]])
+  }
+  samples
+}
+
+plot_probes <- function(object, rows, colour) {
+  long <- long_table(object, rows = rows)
+  if (is.numeric(long[[colour]])) {
+    long[[colour]] <- as.character(long[[colour]])
+  }
+  long
+}
+
+outlier_layers <- function(
+  show_outliers,
+  colour,
+  size,
+  outliers_factor,
+  outliers_labels,
+  jitter
+) {
+  position <- if (jitter) {
+    ggplot2::position_jitter(width = 0.25, height = 0)
+  } else {
+    "identity"
+  }
+  inliers <- ggplot2::geom_point(
+    data = if (show_outliers) function(d) d[!d[["is_outlier"]] %in% TRUE, ],
+    mapping = ggplot2::aes(colour = .data[[colour]]),
+    size = size,
+    na.rm = TRUE,
+    position = position
+  )
+  if (!show_outliers) {
+    return(list(inliers))
+  }
+  list(
+    inliers,
+    ggplot2::geom_point(
+      data = function(d) d[d[["is_outlier"]] %in% TRUE, ],
+      size = size * outliers_factor,
+      colour = "#b22222",
+      na.rm = TRUE,
+      position = position
     ),
-    "FoV" = plot_metrics(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend,
-      show_outliers,
-      outliers_factor,
-      outliers_labels
+    if (!is.null(outliers_labels)) {
+      ggrepel::geom_label_repel(
+        data = function(d) d[d[["is_outlier"]] %in% TRUE, ],
+        mapping = ggplot2::aes(label = .data[[outliers_labels]]),
+        colour = "#b22222",
+        na.rm = TRUE
+      )
+    }
+  )
+}
+
+threshold_layers <- function(limits) {
+  list(
+    ggplot2::geom_rect(
+      data = data.frame(
+        ymin = limits,
+        ymax = c(-Inf, Inf)[seq_along(limits)]
+      ),
+      mapping = ggplot2::aes(
+        xmin = -Inf,
+        xmax = Inf,
+        ymin = .data[["ymin"]],
+        ymax = .data[["ymax"]]
+      ),
+      fill = "#b22222",
+      alpha = 0.2,
+      colour = "transparent",
+      inherit.aes = FALSE
     ),
-    "PCL" = plot_metrics(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend,
-      show_outliers,
-      outliers_factor,
-      outliers_labels
-    ),
-    "LoD" = plot_metrics(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend,
-      show_outliers,
-      outliers_factor,
-      outliers_labels
-    ),
-    "Positive" = plot_cg(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend,
-      show_outliers,
-      outliers_factor,
-      outliers_labels
-    ),
-    "Negative" = plot_cg(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend,
-      show_outliers,
-      outliers_factor,
-      outliers_labels
-    ),
-    "Housekeeping" = plot_cg(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend,
-      show_outliers,
-      outliers_factor,
-      outliers_labels
-    ),
-    "PN" = plot_pn(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend
-    ),
-    "ACBD" = plot_acbd(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend,
-      show_outliers,
-      outliers_factor,
-      outliers_labels
-    ),
-    "ACMC" = plot_acmc(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend
-    ),
-    "PCA12" = plot_pca12(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend
-    ),
-    "PCAi" = plot_pcai(
-      nacho_object = object,
-      x,
-      colour,
-      size
-    ),
-    "PCA" = plot_pca(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend
-    ),
-    "PFNF" = plot_pfnf(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend,
-      show_outliers,
-      outliers_factor,
-      outliers_labels
-    ),
-    "HF" = plot_hf(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend,
-      show_outliers,
-      outliers_factor,
-      outliers_labels
-    ),
-    "NORM" = plot_norm(
-      nacho_object = object,
-      x,
-      colour,
-      size,
-      show_legend
+    ggplot2::geom_hline(
+      data = data.frame(value = limits),
+      mapping = ggplot2::aes(yintercept = .data[["value"]]),
+      colour = "#b22222",
+      linetype = "longdash"
     )
   )
 }
 
-#' plot_metrics
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
+not_available_plot <- function(x_label, y_label) {
+  ggplot2::ggplot() +
+    ggplot2::labs(x = x_label, y = y_label) +
+    ggplot2::annotate(
+      "text",
+      x = 0.5,
+      y = 0.5,
+      label = "Not available!",
+      angle = 30,
+      size = 24,
+      colour = "#b22222",
+      alpha = 0.25
+    ) +
+    ggplot2::theme(axis.text = ggplot2::element_blank())
+}
+
+warn_too_few_components <- function(type) {
+  nacho_warn(
+    c(
+      "{.val {type}} needs at least two principal components.",
+      i = "Keep more probes or samples to compute them."
+    ),
+    class = "metric_unavailable"
+  )
+}
+
 plot_metrics <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
   size,
   show_legend,
@@ -248,63 +248,39 @@ plot_metrics <- function(
   outliers_factor,
   outliers_labels
 ) {
-  ymax <- ymin <- NULL # no visible binding for global variable
-  labels <- c(
-    "BD" = "Binding Density",
-    "FoV" = "Field of View",
-    "PCL" = "Positive Control Linearity",
-    "LoD" = "Limit of Detection"
-  )
+  id <- object@settings[["id_colname"]]
   units <- c(
     "BD" = '"(Optical features / ", mu, m^2, ")"',
     "FoV" = '"(% Counted)"',
     "PCL" = '"(R^2)"',
     "LoD" = '"(Z)"'
   )
+  y_label <- parse(
+    text = paste0(
+      "atop(\"",
+      metric_labels[type],
+      "\", paste(",
+      units[type],
+      "))"
+    )
+  )
 
-  if (attr(nacho_object, "RCC_type") == "n8" && x %in% c("PCL", "LoD")) {
+  if (object@rcc_type == "n8" && type %in% c("PCL", "LoD")) {
     nacho_warn(
-      "{.val {x}} is not available for PlexSet (n8) RCC files.",
+      "{.val {type}} is not available for PlexSet (n8) RCC files.",
       class = "metric_unavailable"
     )
-    return(
-      ggplot2::ggplot() +
-        ggplot2::labs(
-          x = "CartridgeID",
-          y = parse(
-            text = paste0("atop(\"", labels[x], "\", paste(", units[x], "))")
-          ),
-          colour = colour
-        ) +
-        ggplot2::annotate(
-          "text",
-          x = 0.5,
-          y = 0.5,
-          label = "Not available!",
-          angle = 30,
-          size = 24,
-          colour = "#b22222",
-          alpha = 0.25
-        ) +
-        ggplot2::theme(axis.text = ggplot2::element_blank())
-    )
-  }
-
-  if (
-    !is.null(outliers_labels) &&
-      !outliers_labels %in% colnames(nacho_object$nacho)
-  ) {
-    outliers_labels <- nacho_object$access
+    return(not_available_plot("CartridgeID", y_label))
   }
 
   ggplot2::ggplot(
-    data = strip_plexset_suffix(nacho_object$nacho, nacho_object$access)[
+    data = strip_plexset_suffix(plot_samples(object, colour), id)[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
         colour,
-        nacho_object$access,
-        x,
+        id,
+        type,
         "is_outlier",
         outliers_labels
       ))
@@ -312,7 +288,7 @@ plot_metrics <- function(
   ) +
     ggplot2::aes(
       x = .data[["CartridgeID"]],
-      y = .data[[x]]
+      y = .data[[type]]
     ) +
     ggplot2::scale_colour_viridis_d(
       option = "plasma",
@@ -326,87 +302,29 @@ plot_metrics <- function(
       na.rm = TRUE,
       show.legend = FALSE
     ) +
-    (if (show_outliers) {
-      list(
-        ggplot2::geom_point(
-          data = ~ .x[!(is_outlier)],
-          mapping = ggplot2::aes(colour = .data[[colour]]),
-          size = size,
-          na.rm = TRUE,
-          position = ggplot2::position_jitter(width = 0.25, height = 0)
-        ),
-        ggplot2::geom_point(
-          data = ~ .x[(is_outlier)],
-          size = size * outliers_factor,
-          colour = "#b22222",
-          na.rm = TRUE,
-          position = ggplot2::position_jitter(width = 0.25, height = 0)
-        ),
-        if (!is.null(outliers_labels)) {
-          ggrepel::geom_label_repel(
-            data = ~ .x[(is_outlier)],
-            mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-            colour = "#b22222",
-            na.rm = TRUE
-          )
-        }
-      )
-    } else {
-      ggplot2::geom_point(
-        mapping = ggplot2::aes(colour = .data[[colour]]),
-        size = size,
-        na.rm = TRUE,
-        position = ggplot2::position_jitter(width = 0.25, height = 0)
-      )
-    }) +
+    outlier_layers(
+      show_outliers,
+      colour,
+      size,
+      outliers_factor,
+      outliers_labels,
+      jitter = TRUE
+    ) +
     ggplot2::labs(
       x = "CartridgeID",
-      y = parse(
-        text = paste0("atop(\"", labels[x], "\", paste(", units[x], "))")
-      ),
+      y = y_label,
       colour = colour
     ) +
-    ggplot2::geom_rect(
-      data = data.table::data.table(
-        ymin = nacho_object$outliers_thresholds[[x]]
-      )[j = ymax := c(-Inf, Inf)[seq_along(ymin)]],
-      mapping = ggplot2::aes(
-        xmin = -Inf,
-        xmax = Inf,
-        ymin = .data[["ymin"]],
-        ymax = .data[["ymax"]]
-      ),
-      fill = "#b22222",
-      alpha = 0.2,
-      colour = "transparent",
-      inherit.aes = FALSE
-    ) +
-    ggplot2::geom_hline(
-      data = data.table::data.table(
-        value = nacho_object$outliers_thresholds[[x]]
-      ),
-      mapping = ggplot2::aes(yintercept = .data[["value"]]),
-      colour = "#b22222",
-      linetype = "longdash"
-    ) +
+    threshold_layers(object@thresholds[[type]]) +
     (if (!show_legend) ggplot2::guides(colour = "none")) +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(angle = 30, hjust = 1, vjust = 1)
     )
 }
 
-
-#' plot_cg
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
 plot_cg <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
   size,
   show_legend,
@@ -414,48 +332,32 @@ plot_cg <- function(
   outliers_factor,
   outliers_labels
 ) {
-  CodeClass <- NULL # no visible binding for global variable
-  if (
-    !is.null(outliers_labels) &&
-      !outliers_labels %in% colnames(nacho_object$nacho)
-  ) {
-    outliers_labels <- nacho_object$access
-  }
-  if (is.null(nacho_object$housekeeping_genes) && x %in% "Housekeeping") {
+  id <- object@settings[["id_colname"]]
+  housekeeping_genes <- object@probes[["Name"]][object@probes[[
+    "is_housekeeping"
+  ]]]
+  if (length(housekeeping_genes) == 0 && type %in% "Housekeeping") {
     nacho_warn(
       "No housekeeping genes are available.",
-      class = "no_housekeeping"
+      class = "metric_unavailable"
     )
-    return(
-      ggplot2::ggplot() +
-        ggplot2::labs(
-          x = "Gene Name",
-          y = "Counts + 1",
-          colour = colour
-        ) +
-        ggplot2::annotate(
-          "text",
-          x = 0.5,
-          y = 0.5,
-          label = "Not available!",
-          angle = 30,
-          size = 24,
-          colour = "#b22222",
-          alpha = 0.25
-        ) +
-        ggplot2::theme(axis.text = ggplot2::element_blank())
-    )
+    return(not_available_plot("Gene Name", "Counts + 1"))
   }
 
   ggplot2::ggplot(
-    data = strip_plexset_suffix(nacho_object$nacho, nacho_object$access)[
-      CodeClass %in% x
-    ][
+    data = strip_plexset_suffix(
+      plot_probes(
+        object,
+        which(object@probes[["CodeClass"]] %in% type),
+        colour
+      ),
+      id
+    )[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
         colour,
-        nacho_object$access,
+        id,
         "Name",
         "Count",
         "is_outlier",
@@ -479,44 +381,23 @@ plot_cg <- function(
       na.rm = TRUE,
       show.legend = FALSE
     ) +
-    (if (show_outliers) {
-      list(
-        ggplot2::geom_point(
-          data = ~ .x[!(is_outlier)],
-          mapping = ggplot2::aes(colour = .data[[colour]]),
-          size = size,
-          na.rm = TRUE,
-          position = ggplot2::position_jitter(width = 0.25, height = 0)
-        ),
-        ggplot2::geom_point(
-          data = ~ .x[(is_outlier)],
-          size = size * outliers_factor,
-          colour = "#b22222",
-          na.rm = TRUE,
-          position = ggplot2::position_jitter(width = 0.25, height = 0)
-        ),
-        if (!is.null(outliers_labels)) {
-          ggrepel::geom_label_repel(
-            data = ~ .x[(is_outlier)],
-            mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-            colour = "#b22222",
-            na.rm = TRUE
-          )
-        }
-      )
-    } else {
-      ggplot2::geom_point(
-        mapping = ggplot2::aes(colour = .data[[colour]]),
-        size = size,
-        na.rm = TRUE,
-        position = ggplot2::position_jitter(width = 0.25, height = 0)
-      )
-    }) +
+    outlier_layers(
+      show_outliers,
+      colour,
+      size,
+      outliers_factor,
+      outliers_labels,
+      jitter = TRUE
+    ) +
     ggplot2::scale_y_log10(
       labels = function(x) format(x, big.mark = ",")
     ) +
     ggplot2::labs(
-      x = if (x %in% c("Negative", "Positive")) "Control Name" else "Gene Name",
+      x = if (type %in% c("Negative", "Positive")) {
+        "Control Name"
+      } else {
+        "Gene Name"
+      },
       y = "Counts + 1",
       colour = colour
     ) +
@@ -531,32 +412,31 @@ plot_cg <- function(
     )
 }
 
-
-#' plot_pn
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
 plot_pn <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
-  CodeClass <- NULL # no visible binding for global variable
+  id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
-    data = strip_plexset_suffix(nacho_object$nacho, nacho_object$access)[
-      CodeClass %in% c("Positive", "Negative")
-    ][
+    data = strip_plexset_suffix(
+      plot_probes(
+        object,
+        which(object@probes[["CodeClass"]] %in% c("Positive", "Negative")),
+        colour
+      ),
+      id
+    )[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
         colour,
-        nacho_object$access,
+        id,
         "CodeClass",
         "Name",
         "Count",
@@ -565,7 +445,7 @@ plot_pn <- function(
     ]
   ) +
     ggplot2::aes(
-      x = .data[[nacho_object$access]],
+      x = .data[[id]],
       y = .data[["Count"]] + 1,
       colour = .data[["Name"]],
       group = .data[["Name"]]
@@ -593,30 +473,22 @@ plot_pn <- function(
     ) +
     ggplot2::geom_smooth(
       mapping = ggplot2::aes(
-        x = as.numeric(as.factor(.data[[nacho_object$access]])),
+        x = as.numeric(as.factor(.data[[id]])),
         linetype = "Loess",
         group = "CodeClass"
       ),
       colour = "black",
       se = TRUE,
-      method = "loess"
+      method = "loess",
+      formula = y ~ x
     ) +
     ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2)) +
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
-
-#' plot_acbd
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
 plot_acbd <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
   size,
   show_legend,
@@ -624,20 +496,14 @@ plot_acbd <- function(
   outliers_factor,
   outliers_labels
 ) {
-  ymax <- ymin <- NULL # no visible binding for global variable
-  if (
-    !is.null(outliers_labels) &&
-      !outliers_labels %in% colnames(nacho_object$nacho)
-  ) {
-    outliers_labels <- nacho_object$access
-  }
+  id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
-    data = nacho_object$nacho[
+    data = plot_samples(object, colour)[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
         colour,
-        nacho_object$access,
+        id,
         "MC",
         "BD",
         "is_outlier",
@@ -655,31 +521,14 @@ plot_acbd <- function(
       direction = 1,
       end = 0.85
     ) +
-    (if (show_outliers) {
-      list(
-        ggplot2::geom_point(
-          data = ~ .x[!(is_outlier)],
-          size = size,
-          na.rm = TRUE
-        ),
-        ggplot2::geom_point(
-          data = ~ .x[(is_outlier)],
-          size = size * outliers_factor,
-          colour = "#b22222",
-          na.rm = TRUE
-        ),
-        if (!is.null(outliers_labels)) {
-          ggrepel::geom_label_repel(
-            data = ~ .x[(is_outlier)],
-            mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-            colour = "#b22222",
-            na.rm = TRUE
-          )
-        }
-      )
-    } else {
-      ggplot2::geom_point(size = size, na.rm = TRUE)
-    }) +
+    outlier_layers(
+      show_outliers,
+      colour,
+      size,
+      outliers_factor,
+      outliers_labels,
+      jitter = FALSE
+    ) +
     ggplot2::scale_x_continuous(labels = function(x) {
       format(x, big.mark = ",")
     }) +
@@ -690,57 +539,28 @@ plot_acbd <- function(
       ),
       colour = colour
     ) +
-    ggplot2::geom_rect(
-      data = data.table::data.table(
-        ymin = nacho_object$outliers_thresholds[["BD"]]
-      )[
-        j = ymax := c(-Inf, Inf)[seq_along(ymin)]
-      ],
-      mapping = ggplot2::aes(
-        xmin = -Inf,
-        xmax = Inf,
-        ymin = .data[["ymin"]],
-        ymax = .data[["ymax"]]
-      ),
-      fill = "#b22222",
-      alpha = 0.2,
-      colour = "transparent",
-      inherit.aes = FALSE
-    ) +
-    ggplot2::geom_hline(
-      data = data.table::data.table(
-        value = nacho_object$outliers_thresholds[["BD"]]
-      ),
-      mapping = ggplot2::aes(yintercept = .data[["value"]]),
-      colour = "#b22222",
-      linetype = "longdash"
-    ) +
+    threshold_layers(object@thresholds[["BD"]]) +
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
-
-#' plot_acmc
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
 plot_acmc <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
+  id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
-    data = nacho_object$nacho[
+    data = plot_samples(object, colour)[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
         colour,
-        nacho_object$access,
+        id,
         "MC",
         "MedC"
       ))
@@ -771,29 +591,28 @@ plot_acmc <- function(
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
-
-#' plot_pca12
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
 plot_pca12 <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
+  if (ncol(object@pca[["scores"]]) < 2) {
+    warn_too_few_components(type)
+    return(not_available_plot("PC01", "PC02"))
+  }
+  id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
-    data = nacho_object$nacho[
+    data = plot_samples(object, colour)[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
         colour,
-        nacho_object$access,
+        id,
         "PC01",
         "PC02"
       ))
@@ -822,55 +641,45 @@ plot_pca12 <- function(
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
-
-#' plot_pca
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
 plot_pca <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
-  X.PC <- Y.PC <- NULL # no visible binding for global variable
+  X.PC <- Y.PC <- NULL
+  if (ncol(object@pca[["scores"]]) < 2) {
+    warn_too_few_components(type)
+    return(not_available_plot(NULL, NULL))
+  }
+  id <- object@settings[["id_colname"]]
+  components <- sprintf("PC%02d", seq_len(min(ncol(object@pca[["scores"]]), 5)))
+  keys <- unique(c("CartridgeID", id, colour))
   ggplot2::ggplot(
-    data = nacho_object$nacho[
+    data = plot_samples(object, colour)[
       j = merge(
         x = data.table::melt(
           data = unique(.SD),
-          id.vars = unique(c("CartridgeID", nacho_object$access, colour)),
-          measure.vars = sprintf(
-            "PC%02d",
-            seq_len(min(nacho_object$n_comp, 5))
-          ),
+          id.vars = keys,
+          measure.vars = components,
           variable.name = "X.PC",
           value.name = "X"
         ),
         y = data.table::melt(
           data = unique(.SD),
-          id.vars = unique(c("CartridgeID", nacho_object$access, colour)),
-          measure.vars = sprintf(
-            "PC%02d",
-            seq_len(min(nacho_object$n_comp, 5))
-          ),
+          id.vars = keys,
+          measure.vars = components,
           variable.name = "Y.PC",
           value.name = "Y"
         ),
-        by = c(unique(c("CartridgeID", nacho_object$access, colour))),
+        by = keys,
         allow.cartesian = TRUE
       ),
-      .SDcols = unique(c(
-        "CartridgeID",
-        colour,
-        nacho_object$access,
-        sprintf("PC%02d", seq_len(min(nacho_object$n_comp, 5)))
-      ))
+      .SDcols = unique(c("CartridgeID", colour, id, components))
     ][
       as.numeric(sub("PC", "", X.PC)) < as.numeric(sub("PC", "", Y.PC))
     ]
@@ -904,25 +713,20 @@ plot_pca <- function(
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
-
-#' plot_pcai
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
 plot_pcai <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
-  size
+  size,
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
-  PoV <- `Proportion of Variance` <- NULL # no visible binding for global variable
+  PoV <- `Proportion of Variance` <- NULL
   ggplot2::ggplot(
     data = data.table::as.data.table(
-      nacho_object$pc_sum
+      object@pca[["importance"]]
     )[
       j = PoV := sprintf("%0.2f%%", `Proportion of Variance` * 100)
     ]
@@ -946,18 +750,9 @@ plot_pcai <- function(
     ggplot2::labs(x = "Principal Components", y = "Proportion of Variance")
 }
 
-
-#' plot_pfnf
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
 plot_pfnf <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
   size,
   show_legend,
@@ -965,19 +760,14 @@ plot_pfnf <- function(
   outliers_factor,
   outliers_labels
 ) {
-  if (
-    !is.null(outliers_labels) &&
-      !outliers_labels %in% colnames(nacho_object$nacho)
-  ) {
-    outliers_labels <- nacho_object$access
-  }
+  id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
-    data = nacho_object$nacho[
+    data = plot_samples(object, colour)[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
         colour,
-        nacho_object$access,
+        id,
         "Negative_factor",
         "Positive_factor",
         "is_outlier",
@@ -995,76 +785,27 @@ plot_pfnf <- function(
       direction = 1,
       end = 0.85
     ) +
-    (if (show_outliers) {
-      list(
-        ggplot2::geom_point(
-          data = ~ .x[!(is_outlier)],
-          size = size,
-          na.rm = TRUE
-        ),
-        ggplot2::geom_point(
-          data = ~ .x[(is_outlier)],
-          size = size * outliers_factor,
-          colour = "#b22222",
-          na.rm = TRUE
-        ),
-        if (!is.null(outliers_labels)) {
-          ggrepel::geom_label_repel(
-            data = ~ .x[(is_outlier)],
-            mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-            colour = "#b22222",
-            na.rm = TRUE
-          )
-        }
-      )
-    } else {
-      ggplot2::geom_point(size = size, na.rm = TRUE)
-    }) +
+    outlier_layers(
+      show_outliers,
+      colour,
+      size,
+      outliers_factor,
+      outliers_labels,
+      jitter = FALSE
+    ) +
     ggplot2::labs(
       x = "Negative Factor",
       y = "Positive Factor",
       colour = colour
     ) +
     ggplot2::scale_y_continuous(transform = transform_log10_infinite()) +
-    ggplot2::geom_rect(
-      data = data.table::data.table(
-        ymin = nacho_object$outliers_thresholds[["Positive_factor"]],
-        ymax = c(-Inf, Inf)
-      ),
-      mapping = ggplot2::aes(
-        xmin = -Inf,
-        xmax = Inf,
-        ymin = .data[["ymin"]],
-        ymax = .data[["ymax"]]
-      ),
-      fill = "#b22222",
-      alpha = 0.2,
-      colour = "transparent",
-      inherit.aes = FALSE
-    ) +
-    ggplot2::geom_hline(
-      data = data.table::data.table(
-        value = nacho_object$outliers_thresholds[["Positive_factor"]]
-      ),
-      mapping = ggplot2::aes(yintercept = .data[["value"]]),
-      colour = "#b22222",
-      linetype = "longdash"
-    ) +
+    threshold_layers(object@thresholds[["Positive_factor"]]) +
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
-
-#' plot_hf
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
 plot_hf <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
   size,
   show_legend,
@@ -1072,47 +813,22 @@ plot_hf <- function(
   outliers_factor,
   outliers_labels
 ) {
-  if (
-    !is.null(outliers_labels) &&
-      !outliers_labels %in% colnames(nacho_object$nacho)
-  ) {
-    outliers_labels <- nacho_object$access
-  }
-
-  is_house_factor <- "House_factor" %in% colnames(nacho_object[["nacho"]])
-  if (!is_house_factor) {
+  id <- object@settings[["id_colname"]]
+  if (!"House_factor" %in% names(object@samples)) {
     nacho_warn(
       "The housekeeping factor was not computed.",
       class = "metric_unavailable"
     )
-    return(
-      ggplot2::ggplot() +
-        ggplot2::labs(
-          x = "Positive Factor",
-          y = "Housekeeping Factor",
-          colour = colour
-        ) +
-        ggplot2::annotate(
-          "text",
-          x = 0.5,
-          y = 0.5,
-          label = "Not available!",
-          angle = 30,
-          size = 24,
-          colour = "#b22222",
-          alpha = 0.25
-        ) +
-        ggplot2::theme(axis.text = ggplot2::element_blank())
-    )
+    return(not_available_plot("Positive Factor", "Housekeeping Factor"))
   }
 
   ggplot2::ggplot(
-    data = nacho_object$nacho[
+    data = plot_samples(object, colour)[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
         colour,
-        nacho_object$access,
+        id,
         "House_factor",
         "Positive_factor",
         "is_outlier",
@@ -1130,31 +846,14 @@ plot_hf <- function(
       direction = 1,
       end = 0.85
     ) +
-    (if (show_outliers) {
-      list(
-        ggplot2::geom_point(
-          data = ~ .x[!(is_outlier)],
-          size = size,
-          na.rm = TRUE
-        ),
-        ggplot2::geom_point(
-          data = ~ .x[(is_outlier)],
-          size = size * outliers_factor,
-          colour = "#b22222",
-          na.rm = TRUE
-        ),
-        if (!is.null(outliers_labels)) {
-          ggrepel::geom_label_repel(
-            data = ~ .x[(is_outlier)],
-            mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-            colour = "#b22222",
-            na.rm = TRUE
-          )
-        }
-      )
-    } else {
-      ggplot2::geom_point(size = size, na.rm = TRUE)
-    }) +
+    outlier_layers(
+      show_outliers,
+      colour,
+      size,
+      outliers_factor,
+      outliers_labels,
+      jitter = FALSE
+    ) +
     ggplot2::labs(
       x = "Positive Factor",
       y = "Housekeeping Factor",
@@ -1163,18 +862,10 @@ plot_hf <- function(
     ggplot2::scale_x_continuous(transform = transform_log10_infinite()) +
     ggplot2::scale_y_continuous(transform = transform_log10_infinite()) +
     ggplot2::geom_rect(
-      data = data.table::data.table(
-        xmin = c(
-          -Inf,
-          -Inf,
-          nacho_object$outliers_thresholds[["Positive_factor"]]
-        ),
+      data = data.frame(
+        xmin = c(-Inf, -Inf, object@thresholds[["Positive_factor"]]),
         xmax = c(Inf, Inf, -Inf, Inf),
-        ymin = c(
-          nacho_object$outliers_thresholds[["House_factor"]],
-          -Inf,
-          -Inf
-        ),
+        ymin = c(object@thresholds[["House_factor"]], -Inf, -Inf),
         ymax = c(-Inf, Inf, Inf, Inf)
       ),
       mapping = ggplot2::aes(
@@ -1189,17 +880,13 @@ plot_hf <- function(
       inherit.aes = FALSE
     ) +
     ggplot2::geom_hline(
-      data = data.table::data.table(
-        value = nacho_object$outliers_thresholds[["House_factor"]]
-      ),
+      data = data.frame(value = object@thresholds[["House_factor"]]),
       mapping = ggplot2::aes(yintercept = .data[["value"]]),
       colour = "#b22222",
       linetype = "longdash"
     ) +
     ggplot2::geom_vline(
-      data = data.table::data.table(
-        value = nacho_object$outliers_thresholds[["Positive_factor"]]
-      ),
+      data = data.frame(value = object@thresholds[["Positive_factor"]]),
       mapping = ggplot2::aes(xintercept = .data[["value"]]),
       colour = "#b22222",
       linetype = "longdash"
@@ -1207,33 +894,29 @@ plot_hf <- function(
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
-
-#' plot_norm
-#'
-#' @inheritParams autoplot.nacho
-#'
-#' @keywords internal
-#' @noRd
-#'
-#' @return NULL
 plot_norm <- function(
-  nacho_object,
-  x,
+  object,
+  type,
   colour,
   size,
-  show_legend
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
 ) {
-  Status <- Count <- NULL # no visible binding for global variable
-  if (is.null(nacho_object$housekeeping_genes)) {
-    probe_var <- "CodeClass"
-    probe_type <- "Positive"
+  Status <- Count <- NULL
+  id <- object@settings[["id_colname"]]
+  housekeeping_genes <- object@probes[["Name"]][object@probes[[
+    "is_housekeeping"
+  ]]]
+  rows <- if (length(housekeeping_genes) == 0) {
+    which(object@probes[["CodeClass"]] == "Positive")
   } else {
-    probe_var <- "Name"
-    probe_type <- nacho_object$housekeeping_genes
+    which(object@probes[["is_housekeeping"]])
   }
 
   ggplot2::ggplot(
-    data = nacho_object$nacho[
+    data = plot_probes(object, rows, "CartridgeID")[
       j = c("Count", "Count_Norm") := lapply(.SD, as.double),
       .SDcols = c("Count", "Count_Norm")
     ][
@@ -1241,7 +924,7 @@ plot_norm <- function(
         data = unique(.SD),
         id.vars = unique(c(
           "CartridgeID",
-          nacho_object$access,
+          id,
           "Name",
           "CodeClass",
           "is_outlier"
@@ -1252,15 +935,13 @@ plot_norm <- function(
       ),
       .SDcols = unique(c(
         "CartridgeID",
-        nacho_object$access,
+        id,
         "Count",
         "Count_Norm",
         "Name",
         "CodeClass",
         "is_outlier"
       ))
-    ][
-      get(probe_var) %in% c(probe_type)
     ][
       j = `:=`(
         Status = factor(
@@ -1272,7 +953,7 @@ plot_norm <- function(
     ]
   ) +
     ggplot2::aes(
-      x = .data[[nacho_object$access]],
+      x = .data[[id]],
       y = .data[["Count"]]
     ) +
     ggplot2::geom_line(
@@ -1293,7 +974,7 @@ plot_norm <- function(
     ggplot2::labs(
       x = "Sample Index",
       y = "Counts + 1",
-      colour = if (is.null(nacho_object$housekeeping_genes)) {
+      colour = if (length(housekeeping_genes) == 0) {
         "Positive Control"
       } else {
         "Housekeeping Genes"
@@ -1306,14 +987,36 @@ plot_norm <- function(
     ) +
     ggplot2::geom_smooth(
       mapping = ggplot2::aes(
-        x = as.numeric(as.factor(.data[[nacho_object$access]])),
+        x = as.numeric(as.factor(.data[[id]])),
         linetype = "Loess"
       ),
       colour = "black",
       se = TRUE,
-      method = "loess"
+      method = "loess",
+      formula = y ~ x
     ) +
-    (if (!(show_legend && length(nacho_object$housekeeping_genes) <= 10)) {
+    (if (!(show_legend && length(housekeeping_genes) <= 10)) {
       ggplot2::guides(colour = "none")
     })
 }
+
+nacho_plot_registry <- list(
+  BD = plot_metrics,
+  FoV = plot_metrics,
+  PCL = plot_metrics,
+  LoD = plot_metrics,
+  Positive = plot_cg,
+  Negative = plot_cg,
+  Housekeeping = plot_cg,
+  PN = plot_pn,
+  ACBD = plot_acbd,
+  ACMC = plot_acmc,
+  PCA12 = plot_pca12,
+  PCAi = plot_pcai,
+  PCA = plot_pca,
+  PFNF = plot_pfnf,
+  HF = plot_hf,
+  NORM = plot_norm
+)
+
+S7::method(autoplot, nacho) <- autoplot_nacho
