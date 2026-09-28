@@ -275,13 +275,15 @@ print.nacho <- function(x, ...) {
 #' @noRd
 #' @exportS3Method base::summary
 summary.nacho <- function(object, ...) {
-  abort_nacho_v2(object)
+  abort_nacho_v2(object, arg = rlang::caller_arg(object))
 }
 
 #' @noRd
 #' @exportS3Method base::dim
 dim.nacho <- function(x) {
-  abort_nacho_v2(x)
+  # dim() is a builtin, so its dispatch passes the value, not the expression;
+  # the call still holds what the user typed.
+  abort_nacho_v2(x, arg = rlang::as_label(sys.call()[[2]]))
 }
 
 #' @noRd
@@ -292,11 +294,11 @@ as.data.frame.nacho <- function(
   optional = FALSE,
   ...
 ) {
-  abort_nacho_v2(x)
+  abort_nacho_v2(x, arg = rlang::caller_arg(x))
 }
 
 #' @noRd
 #' @exportS3Method base::"[" nacho
 `[.nacho` <- function(x, ...) {
-  abort_nacho_v2(x)
+  abort_nacho_v2(x, arg = rlang::caller_arg(x))
 }

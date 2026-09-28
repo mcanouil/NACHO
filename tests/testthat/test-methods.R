@@ -180,6 +180,41 @@ test_that("the other methods refuse a NACHO 2 object", {
   }
 })
 
+call_from_outside <- function(fun, x, ...) {
+  env <- new.env(parent = emptyenv())
+  env$x <- x
+  eval(as.call(c(fun, quote(x), list(...))), env)
+}
+
+test_that("the NACHO 2 methods dispatch from outside the namespace", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  output <- utils::capture.output(call_from_outside(base::print, old))
+  expect_match(output, "upgrade_nacho()", fixed = TRUE)
+  expect_match(
+    call_from_outside(base::format, old),
+    "upgrade_nacho()",
+    fixed = TRUE
+  )
+  refusals <- list(
+    base::summary,
+    base::dim,
+    base::as.data.frame,
+    ggplot2::autoplot
+  )
+  for (fun in refusals) {
+    expect_error(call_from_outside(fun, old), class = "nacho_error_bad_object")
+  }
+  expect_error(
+    call_from_outside(base::`[`, old, 1, quote(expr = )),
+    class = "nacho_error_bad_object"
+  )
+})
+
+test_that("autoplot() refuses a NACHO 2 object", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  expect_error(autoplot(old), class = "nacho_error_bad_object")
+})
+
 test_that("NACHO 2 method errors name the argument", {
   old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
   expect_snapshot(dim(old), error = TRUE)
@@ -189,7 +224,7 @@ test_that("NACHO 2 method errors name the argument", {
 test_that("the NACHO 2 guard stops on an object check_nacho() accepts", {
   error <- expect_error(
     NACHO:::abort_nacho_v2(GSE74821),
-    class = "nacho_error_bad_object"
+    class = "nacho_error_internal"
   )
   expect_no_match(conditionMessage(error), "upgrade_nacho", fixed = TRUE)
   expect_match(conditionMessage(error), "check_nacho()", fixed = TRUE)

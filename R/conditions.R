@@ -383,7 +383,7 @@ abort_nacho_v2 <- function(
       "Internal error: {.arg {arg}} reached a NACHO 2 method, but {.fn check_nacho} accepts it.",
       i = "Please report this with a reproducible example."
     ),
-    class = "bad_object",
+    class = "internal",
     call = call
   )
 }

@@ -13,8 +13,8 @@
       autoplot(nacho_2(), type = "BD")
     Condition
       Error in `autoplot()`:
-      ! `object` is a NACHO 2 object, which NACHO 3 cannot use.
-      i Convert it with `upgrade_nacho(object)`, or read the saved file with `read_nacho()`.
+      ! `nacho_2()` is a NACHO 2 object, which NACHO 3 cannot use.
+      i Convert it with `upgrade_nacho(nacho_2())`, or read the saved file with `read_nacho()`.
 
 # check_nacho() names an incomplete NACHO 2 object
 

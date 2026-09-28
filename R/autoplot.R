@@ -1033,5 +1033,5 @@ S7::method(autoplot, nacho) <- autoplot_nacho
 #' @noRd
 #' @exportS3Method ggplot2::autoplot
 autoplot.nacho <- function(object, ...) {
-  abort_nacho_v2(object)
+  abort_nacho_v2(object, arg = rlang::caller_arg(object))
 }

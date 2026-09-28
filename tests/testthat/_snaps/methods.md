@@ -14,8 +14,8 @@
       dim(old)
     Condition
       Error in `dim()`:
-      ! `x` is a NACHO 2 object, which NACHO 3 cannot use.
-      i Convert it with `upgrade_nacho(x)`, or read the saved file with `read_nacho()`.
+      ! `old` is a NACHO 2 object, which NACHO 3 cannot use.
+      i Convert it with `upgrade_nacho(old)`, or read the saved file with `read_nacho()`.
 
 ---
 
@@ -23,6 +23,6 @@
       summary(old)
     Condition
       Error in `summary()`:
-      ! `object` is a NACHO 2 object, which NACHO 3 cannot use.
-      i Convert it with `upgrade_nacho(object)`, or read the saved file with `read_nacho()`.
+      ! `old` is a NACHO 2 object, which NACHO 3 cannot use.
+      i Convert it with `upgrade_nacho(old)`, or read the saved file with `read_nacho()`.
 
