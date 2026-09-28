@@ -5,7 +5,7 @@
 # Build from an installed NACHO, not pkgload::load_all(), so the saved
 # object carries no source references to this working tree or a temp
 # install library.
-options(keep.source = FALSE)
+Sys.setenv(R_KEEP_PKG_SOURCE = "no")
 lib <- tempfile("nacho-install-")
 dir.create(lib)
 install_log <- system2(
