@@ -56,7 +56,7 @@ compute_outliers <- function(samples, thresholds, rcc_type) {
 #' of each component.
 #' An eigen decomposition of the smaller cross product replaces the full
 #' singular value decomposition, which is about twice as slow at 768 samples.
-#' Each component then gets a fixed sign through [fix_pca_signs()], since
+#' Each component then gets a fixed sign through `fix_pca_signs()`, since
 #' `eigen()` returns eigenvectors of arbitrary sign that can otherwise differ
 #' between machines.
 #'
