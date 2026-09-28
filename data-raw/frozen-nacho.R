@@ -25,4 +25,8 @@ dir <- file.path("inst", "extdata", "GSE178516")
 x <- load_rcc(dir, utils::read.csv(file.path(dir, "samplesheet.csv")), "IDFILE")
 x <- suppressWarnings(x[seq_len(40), 1:4])
 x@provenance[["data_directory"]] <- NULL
-saveRDS(x, file.path("tests", "testthat", "fixtures", "nacho-schema-1.rds"), compress = "xz")
+saveRDS(
+  x,
+  file.path("tests", "testthat", "fixtures", "nacho-schema-1.rds"),
+  compress = "xz"
+)

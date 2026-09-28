@@ -81,7 +81,10 @@ test_that("read_nacho() reads the frozen schema-1 object", {
 
 test_that("read_nacho() upgrades a saved NACHO 2 object", {
   expect_warning(
-    x <- suppressMessages(read_nacho(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))),
+    x <- suppressMessages(read_nacho(test_path(
+      "fixtures",
+      "nacho-2-GSE74821-subset.rds"
+    ))),
     class = "nacho_warning_n_comp_reduced"
   )
   expect_true(S7::S7_inherits(x, NACHO:::nacho))
@@ -91,7 +94,10 @@ test_that("read_nacho() refuses files without a NACHO object", {
   path <- withr::local_tempfile(fileext = ".rds")
   saveRDS(list(a = 1), path)
   expect_error(read_nacho(path), class = "nacho_error_bad_object")
-  expect_error(read_nacho(file.path(tempdir(), "none.rds")), class = "nacho_error_missing_file")
+  expect_error(
+    read_nacho(file.path(tempdir(), "none.rds")),
+    class = "nacho_error_missing_file"
+  )
 })
 
 test_that("read_nacho() refuses objects from a newer schema", {

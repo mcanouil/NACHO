@@ -136,7 +136,10 @@ upgrade_nacho <- function(x) {
 read_nacho <- function(path) {
   check_string(path)
   if (!file.exists(path)) {
-    nacho_abort("The file {.file {path}} does not exist.", class = "missing_file")
+    nacho_abort(
+      "The file {.file {path}} does not exist.",
+      class = "missing_file"
+    )
   }
   x <- readRDS(path)
   if (is_nacho_v2(x)) {
