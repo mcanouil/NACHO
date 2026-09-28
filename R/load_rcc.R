@@ -210,35 +210,19 @@ load_rcc <- function(
   }
   ids <- as.character(nacho_df[[id_colname]])
 
-  probes <- as.data.frame(unique(data.table::rbindlist(
-    lapply(sample_codes, `[`, c("CodeClass", "Name", "Accession"))
-  )))
-  probes <- probes[
-    order(probes[["CodeClass"]], probes[["Name"]], method = "radix"),
-  ]
-  rownames(probes) <- NULL
-  if (anyDuplicated(probes[["Name"]]) > 0) {
-    # Used only inside the cli glue string below.
-    clashes <- unique(probes[["Name"]][duplicated(probes[["Name"]])]) # nolint: object_usage_linter.
-    nacho_abort(
-      c(
-        "The same probe name has different code classes or accessions across RCC files.",
-        x = "Probe{?s}: {.val {utils::head(clashes, 5)}}.",
-        i = "Load files from the same CodeSet together."
-      ),
-      class = "rcc_parse"
-    )
-  }
-  counts <- matrix(
-    NA_integer_,
-    nrow = nrow(probes),
-    ncol = length(ids),
-    dimnames = list(probes[["Name"]], ids)
+  probe_counts <- build_probe_counts(
+    codes = data.table::rbindlist(sample_codes),
+    column = rep(seq_along(sample_codes), vapply(sample_codes, nrow, 1L)),
+    ids = ids,
+    clash_message = c(
+      "The same probe name has different code classes or accessions across RCC files.",
+      x = "Probe{?s}: {.val {utils::head(clashes, 5)}}.",
+      i = "Load files from the same CodeSet together."
+    ),
+    clash_class = "rcc_parse"
   )
-  for (k in seq_along(sample_codes)) {
-    code <- sample_codes[[k]]
-    counts[match(code[["Name"]], probes[["Name"]]), k] <- code[["Count"]]
-  }
+  probes <- probe_counts[["probes"]]
+  counts <- probe_counts[["counts"]]
 
   attributes <- data.table::rbindlist(
     lapply(parsed, function(p) {
@@ -297,6 +281,53 @@ load_rcc <- function(
       software_version = versions[["software"]]
     )
   )
+}
+
+#' Build the probe table and the counts matrix from long probe counts
+#'
+#' @param codes A data frame with the columns `CodeClass`, `Name`, `Accession`
+#'   and `Count`, one row per probe and sample.
+#' @param column The column of the counts matrix for each row of `codes`.
+#' @param ids The sample identifiers, used as the column names.
+#' @param clash_message The cli message raised when a probe name has more than
+#'   one code class or accession. It can refer to `clashes`, the clashing names.
+#' @param clash_class The error class, without the `nacho_error_` prefix.
+#' @param call The call to report in the error.
+#'
+#' @return A list with `probes`, the unique probes ordered by code class then
+#'   name, and `counts`, an integer matrix of probes by samples.
+#'
+#' @keywords internal
+#' @noRd
+build_probe_counts <- function(
+  codes,
+  column,
+  ids,
+  clash_message,
+  clash_class,
+  call = rlang::caller_env()
+) {
+  probe_columns <- c("CodeClass", "Name", "Accession")
+  probes <- unique(data.table::as.data.table(codes), by = probe_columns)
+  probes <- as.data.frame(probes)[, probe_columns]
+  probes <- probes[
+    order(probes[["CodeClass"]], probes[["Name"]], method = "radix"),
+  ]
+  rownames(probes) <- NULL
+  if (anyDuplicated(probes[["Name"]]) > 0) {
+    # Used only inside the cli glue string of clash_message.
+    clashes <- unique(probes[["Name"]][duplicated(probes[["Name"]])]) # nolint: object_usage_linter.
+    nacho_abort(clash_message, class = clash_class, call = call)
+  }
+  counts <- matrix(
+    NA_integer_,
+    nrow = nrow(probes),
+    ncol = length(ids),
+    dimnames = list(probes[["Name"]], ids)
+  )
+  counts[cbind(match(codes[["Name"]], probes[["Name"]]), column)] <-
+    as.integer(codes[["Count"]])
+  list(probes = probes, counts = counts)
 }
 
 abort_duplicate_ids <- function(

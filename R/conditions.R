@@ -271,7 +271,17 @@ check_nacho <- function(
     nacho_abort(
       c(
         "{.arg {arg}} is a NACHO 2 object, which NACHO 3 cannot use.",
-        i = "Load the RCC files again with {.fn load_rcc}."
+        i = "Convert it with {.code upgrade_nacho({arg})}, or read the saved file with {.fn read_nacho}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  if (inherits(x, "nacho") && !S7::S7_inherits(x)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} has the NACHO 2 class {.cls nacho}, but not the NACHO 2 data.",
+        i = "Create a NACHO 3 object with {.fn load_rcc}."
       ),
       class = "bad_object",
       call = call
@@ -287,5 +297,56 @@ check_nacho <- function(
       call = call
     )
   }
+  check_schema(
+    x@provenance[["schema_version"]],
+    subject = cli::format_inline("{.arg {arg}}"),
+    call = call
+  )
   invisible(x)
+}
+
+#' Check that an object schema is the one this NACHO reads
+#'
+#' @param schema The schema version stored in a `nacho` object.
+#' @param subject The formatted name of the object or file, for the message.
+#' @inheritParams nacho_abort
+#'
+#' @keywords internal
+#' @noRd
+check_schema <- function(schema, subject, call = rlang::caller_env()) {
+  if (!identical(schema, nacho_schema_version)) {
+    nacho_abort(
+      c(
+        "{subject} has an object schema this NACHO cannot read.",
+        i = "{schema_hint(schema)}"
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  invisible(schema)
+}
+
+#' Explain why an object schema cannot be read
+#'
+#' @param schema The schema version stored in a `nacho` object.
+#'
+#' @return A string: a newer schema asks for a NACHO update, a missing or
+#'   malformed one is named as such, and any other one cannot be read.
+#'
+#' @keywords internal
+#' @noRd
+schema_hint <- function(schema) {
+  if (!rlang::is_scalar_integer(schema) || is.na(schema)) {
+    return("The schema version is missing or malformed.")
+  }
+  if (schema > nacho_schema_version) {
+    cli::format_inline(
+      "Schema {schema} is newer than schema {nacho_schema_version}, which this NACHO reads. Update NACHO to read it."
+    )
+  } else {
+    cli::format_inline(
+      "This NACHO reads schema {nacho_schema_version} only, not schema {schema}."
+    )
+  }
 }

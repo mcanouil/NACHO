@@ -1,31 +1,58 @@
 # NACHO (development version)
 
-- feat: Errors, warnings and messages now use cli and carry classes such as `nacho_error_bad_argument`, so code can catch them selectively.
-- feat: `load_rcc()` and `normalise()` check their arguments before reading any file.
-- feat: `load_rcc()` and `normalise()` return an S7 `nacho` object. Read it with `nacho_counts()`, `nacho_samples()`, `nacho_probes()` and `nacho_qc()`; the `$nacho` long table and the other list slots are gone, and `as.data.frame(x, long = TRUE)` gives the long layout.
-- feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.
-- feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
-- feat: `normalise()` checks `outliers_thresholds` before it runs, and `check_outliers()` recomputes `is_outlier` from the object's thresholds.
-- feat: The load path of the data moves to the object's provenance and is no longer stored in `GSE74821`.
-- feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
-- build: NACHO now requires R 4.3 or newer.
-- feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
-- feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
-- feat: `autoplot()` checks that `colour` and `outliers_labels` name columns of `nacho_samples()`, and `outliers_labels` must be a column name.
-- feat: `print()` shows a short summary; the full report stays in `render()`.
-- fix: `autoplot()` now draws samples whose outlier flag is missing as ordinary points, where NACHO 2 left them out of the plot.
-- fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`, and its `clean` argument is gone because the working files now live in a temporary folder.
-- fix: The app detects PlexSet files from their exact code classes.
-- fix: Empty RCC attributes, such as a blank owner or comment, are now read as empty text instead of repeating the attribute name.
-- fix: `load_rcc()` now checks a supplied `plexset_id` column: values outside `S1` to `S8` and duplicated id/`plexset_id` pairs raise a classed error before any file is read into a matrix.
-- perf: `load_rcc()` reads each RCC file once, with exact section tags, and computes quality control on count matrices. Loading 768 samples takes about 2.5 seconds instead of about 9 in NACHO 2.
-- feat: `load_rcc()` reads gzipped RCC files directly and accepts files with Windows line endings.
-- fix: A probe named like an RCC section, such as `Messages`, no longer breaks parsing.
-- fix: Housekeeping prediction no longer returns missing gene names when fewer than five candidates exist.
-- fix: Predicting housekeeping genes no longer misaligns probes when some RCC files lack a probe.
-- fix: PCA components now have a fixed sign, so plots no longer flip between machines.
-- feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
-- feat: Duplicated probe names within one RCC sample are now refused with a clear error.
+## New features
+
+- In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
+  - feat: `load_rcc()` and `normalise()` return an S7 `nacho` object. Read it with `nacho_counts()`, `nacho_samples()`, `nacho_probes()` and `nacho_qc()`; the `$nacho` long table and the other list slots are gone, and `as.data.frame(x, long = TRUE)` gives the long layout.
+  - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.
+  - feat: `print()` shows a short summary; the full report stays in `render()`.
+  - feat: The load path of the data moves to the object's provenance and is no longer stored in `GSE74821`.
+- In `R/read_nacho.R`,
+  - feat: `upgrade_nacho()` converts a NACHO 2 object, and `read_nacho()` reads a saved object from any NACHO version.
+- In `R/conditions.R`,
+  - feat: Errors, warnings and messages now use cli and carry classes such as `nacho_error_bad_argument`, so code can catch them selectively.
+  - feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
+- In `R/load_rcc.R`,
+  - feat: `load_rcc()` and `normalise()` check their arguments before reading any file.
+  - feat: `load_rcc()` reads gzipped RCC files directly and accepts files with Windows line endings.
+  - feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
+  - feat: Duplicated probe names within one RCC sample are now refused with a clear error.
+- In `R/normalise.R`,
+  - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
+  - feat: `normalise()` checks `outliers_thresholds` before it runs, and `check_outliers()` recomputes `is_outlier` from the object's thresholds.
+- In `R/autoplot.R`,
+  - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
+  - feat: `autoplot()` checks that `colour` and `outliers_labels` name columns of `nacho_samples()`, and `outliers_labels` must be a column name.
+- In `R/deploy.R`,
+  - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
+
+## Performance
+
+- In `R/read_rcc.R`, `R/load_rcc.R` and `R/qc.R`,
+  - perf: `load_rcc()` reads each RCC file once, with exact section tags, and computes quality control on count matrices. Loading 768 samples takes about 2.5 seconds instead of about 9 in NACHO 2.
+
+## Fixes
+
+- In `R/autoplot.R`,
+  - fix: `autoplot()` now draws samples whose outlier flag is missing as ordinary points, where NACHO 2 left them out of the plot.
+- In `R/render.R`,
+  - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`, and its `clean` argument is gone because the working files now live in a temporary folder.
+- In `inst/app/`,
+  - fix: The app detects PlexSet files from their exact code classes.
+- In `R/read_rcc.R`,
+  - fix: Empty RCC attributes, such as a blank owner or comment, are now read as empty text instead of repeating the attribute name.
+  - fix: A probe named like an RCC section, such as `Messages`, no longer breaks parsing.
+- In `R/load_rcc.R`,
+  - fix: `load_rcc()` now checks a supplied `plexset_id` column: values outside `S1` to `S8` and duplicated id/`plexset_id` pairs raise a classed error before any file is read into a matrix.
+- In `R/qc.R`,
+  - fix: Housekeeping prediction no longer returns missing gene names when fewer than five candidates exist.
+  - fix: Predicting housekeeping genes no longer misaligns probes when some RCC files lack a probe.
+  - fix: PCA components now have a fixed sign, so plots no longer flip between machines.
+
+## Dependencies
+
+- In `DESCRIPTION`,
+  - build: NACHO now requires R 4.3 or newer.
 
 # NACHO 2.0.7
 

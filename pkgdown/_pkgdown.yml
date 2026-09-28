@@ -36,6 +36,8 @@ reference:
     desc: Read RCC files, compute quality-control metrics and normalise counts.
     contents:
       - load_rcc
+      - read_nacho
+      - upgrade_nacho
       - normalise
       - check_outliers
       - exclude_outliers

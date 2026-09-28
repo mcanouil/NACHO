@@ -1020,3 +1020,25 @@ nacho_plot_registry <- list(
 )
 
 S7::method(autoplot, nacho) <- autoplot_nacho
+
+#' Point NACHO 2 objects to the converters
+#'
+#' NACHO 2 objects are S3 lists of class `nacho`, so without this method
+#' ggplot2 would answer them with its generic error.
+#'
+#' @param object A NACHO 2 object.
+#' @param ... Ignored.
+#'
+#' @keywords internal
+#' @noRd
+#' @exportS3Method ggplot2::autoplot
+autoplot.nacho <- function(object, ...) {
+  check_nacho(object)
+  nacho_abort(
+    c(
+      "{.arg object} is not a NACHO 3 object.",
+      i = "Convert it with {.fn upgrade_nacho}."
+    ),
+    class = "bad_object"
+  )
+}
