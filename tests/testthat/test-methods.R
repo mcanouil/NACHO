@@ -162,7 +162,6 @@ test_that("the other methods refuse a NACHO 2 object", {
   old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
   calls <- list(
     summary = function() summary(old),
-    dim = function() dim(old),
     as.data.frame = function() as.data.frame(old),
     as.data.frame_arguments = function() {
       as.data.frame(old, row.names = NULL, optional = FALSE)
@@ -197,7 +196,6 @@ test_that("the NACHO 2 methods dispatch from outside the namespace", {
   )
   refusals <- list(
     base::summary,
-    base::dim,
     base::as.data.frame,
     ggplot2::autoplot
   )
@@ -217,8 +215,10 @@ test_that("autoplot() refuses a NACHO 2 object", {
 
 test_that("NACHO 2 method errors name the argument", {
   old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
-  expect_snapshot(dim(old), error = TRUE)
   expect_snapshot(summary(old), error = TRUE)
+  expect_snapshot(as.data.frame(old), error = TRUE)
+  expect_snapshot(old[1, ], error = TRUE)
+  expect_snapshot(autoplot(old), error = TRUE)
 })
 
 test_that("the NACHO 2 guard stops on an object check_nacho() accepts", {
@@ -241,14 +241,12 @@ test_that("format() of an object with only the NACHO 2 class points to load_rcc(
   }
 })
 
-test_that("dim() names no object it cannot see", {
+test_that("dim() of a NACHO 2 object is base R's answer for a list", {
   old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
-  expect_snapshot(nrow(old), error = TRUE)
-  expect_snapshot(do.call(dim, list(old)), error = TRUE)
-})
-
-test_that("dim() answers other packages as base R does", {
-  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
-  from_stats <- list2env(list(x = old), parent = asNamespace("stats"))
-  expect_null(evalq(dim(x), from_stats))
+  expect_null(dim(old))
+  expect_match(
+    utils::capture.output(print(old)),
+    "upgrade_nacho()",
+    fixed = TRUE
+  )
 })

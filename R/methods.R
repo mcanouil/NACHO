@@ -279,34 +279,6 @@ summary.nacho <- function(object, ...) {
 }
 
 #' @noRd
-#' @exportS3Method base::dim
-dim.nacho <- function(x) {
-  caller <- parent.frame()
-  home <- topenv(caller)
-  home_name <- if (isNamespace(home)) getNamespaceName(home) else ""
-  # Other packages, such as vctrs when rlang formats a backtrace, ask for the
-  # dimensions of any value; refusing them would replace the real error.
-  if (!home_name %in% c("", "base", "NACHO")) {
-    return(NextMethod())
-  }
-  user_code <- home_name != "base"
-  # dim() is a builtin, so its dispatch passes the value, not the expression.
-  # The call names the object only when it is a symbol bound to `x` in user
-  # code: nrow() and ncol() call dim(x) on their own `x`, and do.call() puts
-  # the value itself in the call. The error call is fixed, because
-  # formatting a call that holds the value would run dim() on it.
-  expr <- sys.call()[[2]]
-  named <- user_code &&
-    is.symbol(expr) &&
-    identical(get0(as.character(expr), envir = caller), x)
-  abort_nacho_v2(
-    x,
-    arg = if (named) rlang::as_label(expr),
-    call = quote(dim())
-  )
-}
-
-#' @noRd
 #' @exportS3Method base::as.data.frame
 as.data.frame.nacho <- function(
   x,

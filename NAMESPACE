@@ -2,7 +2,6 @@
 
 S3method(base::"[",nacho)
 S3method(base::as.data.frame,nacho)
-S3method(base::dim,nacho)
 S3method(base::format,nacho)
 S3method(base::print,nacho)
 S3method(base::summary,nacho)
