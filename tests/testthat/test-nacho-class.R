@@ -150,3 +150,72 @@ test_that("compute_pca() caps components by the number of probes too", {
   expect_identical(dim(pca$scores), c(4L, 1L))
   expect_identical(nrow(pca$importance), 1L)
 })
+
+#' Flip each column so its largest absolute value is positive
+#'
+#' The reference implementation of the sign convention, used to check
+#' `compute_pca()` from outside its own code.
+fix_signs <- function(scores) {
+  for (j in seq_len(ncol(scores))) {
+    largest <- which.max(abs(scores[, j]))
+    if (scores[largest, j] < 0) {
+      scores[, j] <- -scores[, j]
+    }
+  }
+  scores
+}
+
+test_that("compute_pca() gives each component a fixed sign", {
+  withr::local_seed(42)
+  for (shape in list(c(40L, 15L), c(15L, 40L))) {
+    counts <- matrix(
+      stats::rpois(prod(shape), 200),
+      nrow = shape[1],
+      dimnames = list(
+        paste0("p", seq_len(shape[1])),
+        paste0("s", seq_len(shape[2]))
+      )
+    )
+    pca <- NACHO:::compute_pca(counts, 4L)
+    expect_identical(unname(pca$scores), unname(fix_signs(pca$scores)))
+  }
+})
+
+test_that("compute_pca() matches prcomp() up to the sign convention", {
+  withr::local_seed(42)
+  for (shape in list(c(40L, 15L), c(15L, 40L))) {
+    counts <- matrix(
+      stats::rpois(prod(shape), 200),
+      nrow = shape[1],
+      dimnames = list(
+        paste0("p", seq_len(shape[1])),
+        paste0("s", seq_len(shape[2]))
+      )
+    )
+    pca <- NACHO:::compute_pca(counts, 4L)
+    expected <- stats::prcomp(t(log(counts + 1)))
+    expect_equal(
+      unname(pca$scores),
+      unname(fix_signs(expected$x[, 1:4])),
+      tolerance = 1e-8
+    )
+  }
+})
+
+test_that("compute_pca() gives consistent signs for a row-permuted matrix", {
+  withr::local_seed(42)
+  for (shape in list(c(40L, 15L), c(15L, 40L))) {
+    counts <- matrix(
+      stats::rpois(prod(shape), 200),
+      nrow = shape[1],
+      dimnames = list(
+        paste0("p", seq_len(shape[1])),
+        paste0("s", seq_len(shape[2]))
+      )
+    )
+    permuted <- counts[sample(nrow(counts)), , drop = FALSE]
+    pca <- NACHO:::compute_pca(counts, 4L)
+    pca_permuted <- NACHO:::compute_pca(permuted, 4L)
+    expect_equal(pca_permuted$scores, pca$scores, tolerance = 1e-8)
+  }
+})

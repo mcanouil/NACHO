@@ -56,6 +56,9 @@ compute_outliers <- function(samples, thresholds, rcc_type) {
 #' of each component.
 #' An eigen decomposition of the smaller cross product replaces the full
 #' singular value decomposition, which is about twice as slow at 768 samples.
+#' Each component then gets a fixed sign through [fix_pca_signs()], since
+#' `eigen()` returns eigenvectors of arbitrary sign that can otherwise differ
+#' between machines.
 #'
 #' @keywords internal
 #' @noRd
@@ -114,6 +117,7 @@ compute_pca <- function(counts, n_comp) {
     scores <- centred %*% decomposition[["vectors"]][, keep, drop = FALSE]
   }
   dimnames(scores) <- list(colnames(counts), components)
+  scores <- fix_pca_signs(scores)
   variance <- values / max(1, n_samples - 1)
   proportion <- values / sum(centred^2)
   list(
@@ -126,6 +130,25 @@ compute_pca <- function(counts, n_comp) {
       check.names = FALSE
     )
   )
+}
+
+#' Give each principal component a fixed sign
+#'
+#' `eigen()` returns eigenvectors of arbitrary sign, which differs from
+#' `prcomp()` and can differ between LAPACK builds.
+#' Each column is flipped, if needed, so the score with the largest absolute
+#' value is positive; the first such sample wins a tie.
+#'
+#' @keywords internal
+#' @noRd
+fix_pca_signs <- function(scores) {
+  for (component in seq_len(ncol(scores))) {
+    largest <- which.max(abs(scores[, component]))
+    if (scores[largest, component] < 0) {
+      scores[, component] <- -scores[, component]
+    }
+  }
+  scores
 }
 
 #' Record where an object comes from
