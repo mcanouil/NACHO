@@ -87,18 +87,18 @@ read_rcc <- function(file) {
 #' or `hsa-let-7i-5p|0.014`.
 #' Only that final suffix is removed; inner pipe fields are kept.
 #'
-#' @param names Character vector of probe names.
+#' @param probe_names Character vector of probe names.
 #'
 #' @keywords internal
 #' @noRd
-strip_probe_suffix <- function(names) {
-  has_bar <- grepl("|", names, fixed = TRUE)
-  names[has_bar] <- sub(
-    "[|]+[[:digit:]]+\\.*[[:digit:]]*$",
+strip_probe_suffix <- function(probe_names) {
+  has_bar <- grepl("|", probe_names, fixed = TRUE)
+  probe_names[has_bar] <- sub(
+    "[|][[:digit:]]+([.][[:digit:]]+)?$",
     "",
-    names[has_bar]
+    probe_names[has_bar]
   )
-  names
+  probe_names
 }
 
 #' Remove trailing white space from lines

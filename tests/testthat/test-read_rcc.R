@@ -62,17 +62,36 @@ test_that("read_rcc() matches section tags exactly", {
 
 test_that("read_rcc() strips only the trailing numeric suffix of probe names", {
   lines <- readLines(first_fixture_file("GSE178516"))
-  endogenous <- grep("^Endogenous,", lines)[1:2]
-  lines[endogenous[1]] <- "Endogenous,4E-BP1(53H11)|NA|EIF4EBP1|53H11|0,P1|2,12"
-  lines[endogenous[2]] <- "Endogenous,hsa-let-7i-5p|0.014,MIMAT0000415,34"
+  endogenous <- grep("^Endogenous,", lines)[1:4]
+  lines[endogenous] <- c(
+    "Endogenous,4E-BP1(53H11)|NA|EIF4EBP1|53H11|0,P1|2,12",
+    "Endogenous,hsa-let-7i-5p|0.014,MIMAT0000415,34",
+    "Endogenous,ABC|12.,ACC_DOT,56",
+    "Endogenous,GENE||0,ACC_PIPES,78"
+  )
   path <- withr::local_tempfile(fileext = ".RCC")
   writeLines(lines, path)
   parsed <- NACHO:::read_rcc(path)$code_summary
-  written <- match(c("P1|2", "MIMAT0000415"), parsed$Accession)
+  written <- match(
+    c("P1|2", "MIMAT0000415", "ACC_DOT", "ACC_PIPES"),
+    parsed$Accession
+  )
   expect_false(anyNA(written))
   expect_identical(
     parsed$Name[written],
-    c("4E-BP1(53H11)|NA|EIF4EBP1|53H11", "hsa-let-7i-5p")
+    c("4E-BP1(53H11)|NA|EIF4EBP1|53H11", "hsa-let-7i-5p", "ABC|12.", "GENE|")
+  )
+})
+
+test_that("read_rcc() keeps attribute values that contain a pipe and digits", {
+  lines <- readLines(first_fixture_file("GSE178516"))
+  lines[lines == "Comments,"] <- "Comments,Batch|2"
+  path <- withr::local_tempfile(fileext = ".RCC")
+  writeLines(lines, path)
+  parsed <- NACHO:::read_rcc(path)
+  expect_identical(
+    unname(parsed$attributes[["Sample_Attributes.sample_Comments"]]),
+    "Batch|2"
   )
 })
 

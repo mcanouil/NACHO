@@ -49,6 +49,7 @@
   - fix: Probe names keep every inner `|` field, so protein names such as `4E-BP1(53H11)|NA|EIF4EBP1|53H11|0` are no longer mangled.
     Only a trailing numeric suffix such as `|0` is removed from probe names, as before.
     Accessions and RCC attributes that contain `|` followed by digits are no longer altered.
+    Accessions are read exactly as written, so probes whose accessions differ between files are reported as a clash.
 - In `R/interop.R`,
   - fix: `as_nacho()` on a `NanoStringRccSet` now gives the same probe names as `load_rcc()` on the same RCC files.
 - In `R/load_rcc.R`,
