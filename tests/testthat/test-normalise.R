@@ -308,3 +308,42 @@ test_that("check_outliers() recomputes the flags from the thresholds", {
     nacho_qc(salmon_nacho)$is_outlier
   )
 })
+
+test_that("the missing attributes warning comes once, when the object is built", {
+  samples <- GSE74821@samples
+  samples <- samples[, !grepl("^Lane_Attributes", names(samples))]
+  count_unavailable <- function(expr) {
+    n <- 0L
+    value <- withCallingHandlers(
+      expr,
+      nacho_warning_metric_unavailable = function(cnd) {
+        n <<- n + 1L
+        invokeRestart("muffleWarning")
+      }
+    )
+    list(value = value, n = n)
+  }
+  built <- count_unavailable(NACHO:::build_nacho(
+    counts = GSE74821@counts,
+    probes = GSE74821@probes,
+    samples = samples,
+    settings = GSE74821@settings,
+    thresholds = GSE74821@thresholds,
+    rcc_type = GSE74821@rcc_type,
+    provenance = GSE74821@provenance
+  ))
+  expect_identical(built$n, 1L)
+  x <- built$value
+  expect_no_warning(suppressMessages(normalise(x, n_comp = 5)))
+  expect_no_warning(suppressMessages(normalise(
+    x,
+    normalisation_method = "GEO"
+  )))
+  flagged <- x
+  flagged_samples <- flagged@samples
+  flagged_samples$is_outlier <- seq_len(nrow(flagged_samples)) == 1L
+  flagged@samples <- flagged_samples
+  expect_no_warning(suppressMessages(exclude_outliers(flagged)))
+  expect_no_warning(check_outliers(x))
+  expect_no_warning(x[, 1:20])
+})

@@ -62,6 +62,8 @@
   - fix: Housekeeping prediction no longer returns missing gene names when fewer than five candidates exist.
   - fix: Predicting housekeeping genes no longer misaligns probes when some RCC files lack a probe.
   - fix: PCA components now have a fixed sign, so plots no longer flip between machines.
+  - fix: The warning about missing lane or sample attributes now comes once, when the object is built.
+    `normalise()` and `exclude_outliers()` no longer repeat it.
 
 ## Dependencies
 

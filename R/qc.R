@@ -399,7 +399,7 @@ sample_lod <- function(pos_e, negatives) {
 #'
 #' @keywords internal
 #' @noRd
-sample_metrics <- function(counts, probes, samples) {
+sample_metrics <- function(counts, probes, samples, warn_missing = TRUE) {
   probe_names <- probes[["Name"]]
   code_class <- probes[["CodeClass"]]
   positive <- code_class == "Positive"
@@ -431,7 +431,7 @@ sample_metrics <- function(counts, probes, samples) {
     if (length(missing_lane) > 0) paste0("Lane_Attributes.lane_", missing_lane),
     if (missing_date) "Sample_Attributes.sample_Date"
   )
-  if (length(missing) > 0) {
+  if (warn_missing && length(missing) > 0) {
     nacho_warn(
       c(
         "Some lane or sample attributes are missing, so the metrics that need them are {.val NA}.",
@@ -483,6 +483,9 @@ sample_metrics <- function(counts, probes, samples) {
 #'   per row of `counts`.
 #' @param samples Data frame with the id column first and the RCC attribute
 #'   columns, one row per column of `counts`.
+#' @param warn_missing Whether to warn about missing lane or sample
+#'   attributes.
+#'   Only a first build warns, so rebuilding an object does not repeat it.
 #'
 #' @keywords internal
 #' @noRd
@@ -493,7 +496,8 @@ build_nacho <- function(
   settings,
   thresholds,
   rcc_type,
-  provenance
+  provenance,
+  warn_missing = TRUE
 ) {
   probes <- as.data.frame(probes)[, c("CodeClass", "Name", "Accession")]
   samples <- as.data.frame(samples)
@@ -556,7 +560,7 @@ build_nacho <- function(
     house_factor <- mean(geometric) / geometric
   }
 
-  metrics <- sample_metrics(counts, probes, samples)
+  metrics <- sample_metrics(counts, probes, samples, warn_missing)
   metrics[["Positive_factor"]] <- unname(factors[["positive_factor"]])
   metrics[["Negative_factor"]] <- unname(factors[["negative_factor"]])
   if (!is.null(house_factor)) {
