@@ -124,6 +124,9 @@ upgrade_nacho <- function(x) {
 #' NACHO 3 objects are rebuilt with the current class, because each saved S7
 #' object carries a copy of the class it was made with.
 #'
+#' Only read files you trust: [readRDS()] can run code stored in a crafted
+#' file, notably in R before 4.4.0.
+#'
 #' @param path Path to an `.rds` file.
 #'
 #' @return A `nacho` object.
@@ -153,11 +156,22 @@ read_nacho <- function(path) {
   }
   properties <- S7::props(x)
   schema <- properties[["provenance"]][["schema_version"]]
+  is_newer <- rlang::is_scalar_integerish(schema) &&
+    schema > nacho_schema_version
+  if (is_newer) {
+    nacho_abort(
+      c(
+        "{.file {path}} was saved with a newer object schema {schema}.",
+        i = "This NACHO reads schema {nacho_schema_version}. Update NACHO to read it."
+      ),
+      class = "bad_object"
+    )
+  }
   if (!identical(schema, nacho_schema_version)) {
     nacho_abort(
       c(
-        "{.file {path}} was saved with object schema {schema}, and this NACHO reads schema {nacho_schema_version}.",
-        i = "Update NACHO to read it."
+        "{.file {path}} was saved with object schema {schema}, which this NACHO cannot read.",
+        i = "This NACHO reads schema {nacho_schema_version} only."
       ),
       class = "bad_object"
     )

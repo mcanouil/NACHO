@@ -100,10 +100,26 @@ test_that("read_nacho() refuses files without a NACHO object", {
   )
 })
 
-test_that("read_nacho() refuses objects from a newer schema", {
-  x <- readRDS(test_path("fixtures", "nacho-schema-1.rds"))
-  attr(x, "provenance")$schema_version <- 99L
-  path <- withr::local_tempfile(fileext = ".rds")
+save_with_schema <- function(schema, env = parent.frame()) {
+  x <- readRDS(testthat::test_path("fixtures", "nacho-schema-1.rds"))
+  attr(x, "provenance")$schema_version <- schema
+  path <- withr::local_tempfile(fileext = ".rds", .local_envir = env)
   saveRDS(x, path)
-  expect_error(read_nacho(path), class = "nacho_error_bad_object")
+  path
+}
+
+test_that("read_nacho() asks for a newer NACHO for a newer schema", {
+  path <- save_with_schema(99L)
+  expect_error(
+    read_nacho(path),
+    regexp = "newer object schema 99.*Update NACHO",
+    class = "nacho_error_bad_object"
+  )
+})
+
+test_that("read_nacho() does not ask for an update for an older schema", {
+  path <- save_with_schema(0L)
+  err <- expect_error(read_nacho(path), class = "nacho_error_bad_object")
+  expect_no_match(conditionMessage(err), "Update NACHO")
+  expect_match(conditionMessage(err), "schema 0")
 })

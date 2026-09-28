@@ -18,6 +18,10 @@ NACHO 2 objects go through \code{\link[=upgrade_nacho]{upgrade_nacho()}}.
 NACHO 3 objects are rebuilt with the current class, because each saved S7
 object carries a copy of the class it was made with.
 }
+\details{
+Only read files you trust: \code{\link[=readRDS]{readRDS()}} can run code stored in a crafted
+file, notably in R before 4.4.0.
+}
 \examples{
 path <- tempfile(fileext = ".rds")
 saveRDS(GSE74821, path)
