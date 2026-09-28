@@ -57,6 +57,52 @@ test_that("upgrade_nacho() names a missing RCC type or ID column", {
   )
 })
 
+test_that("upgrade_nacho() names a missing NACHO 2 table or column", {
+  bad_access <- nacho_2()
+  bad_access$access <- "NOT_A_COLUMN"
+  expect_error(
+    upgrade_nacho(bad_access),
+    regexp = "NOT_A_COLUMN",
+    class = "nacho_error_bad_object"
+  )
+  no_name <- nacho_2()
+  no_name$nacho$Name <- NULL
+  expect_error(
+    upgrade_nacho(no_name),
+    regexp = "Name",
+    class = "nacho_error_bad_object"
+  )
+  no_table <- nacho_2()
+  no_table$nacho <- list(1)
+  expect_error(upgrade_nacho(no_table), class = "nacho_error_bad_object")
+})
+
+test_that("upgrade_nacho() checks the NACHO 2 housekeeping settings", {
+  for (field in c("housekeeping_norm", "housekeeping_predict")) {
+    bad <- nacho_2()
+    bad[[field]] <- NA
+    expect_error(
+      upgrade_nacho(bad),
+      regexp = paste0("x\\$", field),
+      class = "nacho_error_bad_argument"
+    )
+  }
+  bad_genes <- nacho_2()
+  bad_genes$housekeeping_genes <- 1:3
+  expect_error(
+    upgrade_nacho(bad_genes),
+    regexp = "x\\$housekeeping_genes",
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("read_nacho() names a file it cannot read as RDS", {
+  path <- withr::local_tempfile(fileext = ".rds")
+  writeLines("not an RDS file", path)
+  expect_error(read_nacho(path), class = "nacho_error_bad_object")
+  expect_error(read_nacho(tempdir()), class = "nacho_error_bad_object")
+})
+
 test_that("upgrade_nacho() checks the NACHO 2 settings it keeps", {
   bad_method <- nacho_2()
   bad_method$normalisation_method <- "geo"
@@ -115,6 +161,13 @@ test_that("autoplot() points NACHO 2 objects to upgrade_nacho()", {
     class = "nacho_error_bad_object"
   )
   expect_snapshot(autoplot(nacho_2(), type = "BD"), error = TRUE)
+})
+
+test_that("the S3 autoplot() method never returns an object", {
+  expect_error(
+    NACHO:::autoplot.nacho(GSE74821),
+    class = "nacho_error_bad_object"
+  )
 })
 
 test_that("check_nacho() names an incomplete NACHO 2 object", {

@@ -40,13 +40,26 @@ upgrade_nacho <- function(x) {
       class = "bad_object"
     )
   }
+  table <- x[["nacho"]]
   invalid <- c(
     access = !rlang::is_string(x[["access"]]),
-    RCC_type = !rlang::is_string(attr(x, "RCC_type"))
+    RCC_type = !rlang::is_string(attr(x, "RCC_type")),
+    nacho = !is.data.frame(table)
   )
-  if (any(invalid)) {
-    # Used only inside the cli glue string below.
-    fields <- names(invalid)[invalid] # nolint: object_usage_linter.
+  missing_columns <- if (is.data.frame(table)) {
+    setdiff(
+      c(
+        if (!invalid[["access"]]) x[["access"]],
+        "CodeClass",
+        "Name",
+        "Accession",
+        "Count"
+      ),
+      names(table)
+    )
+  }
+  fields <- c(names(invalid)[invalid], sprintf("nacho$%s", missing_columns))
+  if (length(fields) > 0) {
     nacho_abort(
       c(
         "{.arg x} is an incomplete NACHO 2 object.",
@@ -55,7 +68,7 @@ upgrade_nacho <- function(x) {
       class = "bad_object"
     )
   }
-  long <- as.data.frame(x[["nacho"]])
+  long <- as.data.frame(table)
   id <- x[["access"]]
   dropped <- c(
     "CodeClass",
@@ -92,6 +105,13 @@ upgrade_nacho <- function(x) {
     arg = "x$normalisation_method"
   )
   check_count(x[["n_comp"]], arg = "x$n_comp")
+  check_character(
+    x[["housekeeping_genes"]],
+    allow_null = TRUE,
+    arg = "x$housekeeping_genes"
+  )
+  check_bool(x[["housekeeping_norm"]], arg = "x$housekeeping_norm")
+  check_bool(x[["housekeeping_predict"]], arg = "x$housekeeping_predict")
   check_choice(
     attr(x, "RCC_type"),
     c("n1", "n8"),
@@ -114,7 +134,7 @@ upgrade_nacho <- function(x) {
       id_colname = id,
       housekeeping_genes = x[["housekeeping_genes"]],
       housekeeping_predict = FALSE,
-      housekeeping_norm = isTRUE(x[["housekeeping_norm"]]),
+      housekeeping_norm = x[["housekeeping_norm"]],
       normalisation_method = x[["normalisation_method"]],
       n_comp = as.integer(x[["n_comp"]])
     ),
@@ -125,7 +145,7 @@ upgrade_nacho <- function(x) {
   nacho_inform(c(
     "Converted a NACHO 2 object to NACHO 3.",
     i = "The PCA, normalised counts and outlier flags are recomputed with NACHO 3 and may differ from the saved ones.",
-    i = if (isTRUE(x[["housekeeping_predict"]])) {
+    i = if (x[["housekeeping_predict"]]) {
       "The housekeeping genes NACHO 2 predicted are kept, and are not predicted again."
     }
   ))
@@ -152,6 +172,7 @@ upgrade_nacho <- function(x) {
 #' saveRDS(GSE74821, path)
 #' read_nacho(path)
 read_nacho <- function(path) {
+  call <- rlang::current_env()
   check_string(path)
   if (!file.exists(path)) {
     nacho_abort(
@@ -159,7 +180,18 @@ read_nacho <- function(path) {
       class = "missing_file"
     )
   }
-  x <- readRDS(path)
+  abort_unreadable <- function(parent = NULL) {
+    nacho_abort(
+      "{.file {path}} could not be read as an {.val .rds} file.",
+      class = "bad_object",
+      parent = parent,
+      call = call
+    )
+  }
+  if (dir.exists(path)) {
+    abort_unreadable()
+  }
+  x <- rlang::try_fetch(readRDS(path), error = abort_unreadable)
   if (is_nacho_v2(x)) {
     return(upgrade_nacho(x))
   }

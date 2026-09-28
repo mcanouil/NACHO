@@ -1034,4 +1034,11 @@ S7::method(autoplot, nacho) <- autoplot_nacho
 #' @exportS3Method ggplot2::autoplot
 autoplot.nacho <- function(object, ...) {
   check_nacho(object)
+  nacho_abort(
+    c(
+      "{.arg object} is not a NACHO 3 object.",
+      i = "Convert it with {.fn upgrade_nacho}."
+    ),
+    class = "bad_object"
+  )
 }
