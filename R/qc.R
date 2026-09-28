@@ -409,7 +409,7 @@ sample_metrics <- function(counts, probes, samples) {
   if (length(missing) > 0) {
     nacho_warn(
       c(
-        "Some lane attributes are missing, so the metrics that need them are {.val NA}.",
+        "Some lane or sample attributes are missing, so the metrics that need them are {.val NA}.",
         i = "Missing: {.field {missing}}."
       ),
       class = "metric_unavailable"
