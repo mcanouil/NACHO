@@ -365,7 +365,8 @@ check_nacho <- function(
 #' Refuse a NACHO 2 object in a NACHO 3 method
 #'
 #' The S3 methods for the NACHO 2 class `nacho` call this, so a NACHO 2 list
-#' gets the `check_nacho()` error instead of a base R fallback.
+#' gets the `check_nacho()` error instead of a base R fallback. The final stop
+#' only guards the invariant that no such method returns.
 #'
 #' @inheritParams check_nacho
 #'
@@ -379,8 +380,8 @@ abort_nacho_v2 <- function(
   check_nacho(x, arg = arg, call = call)
   nacho_abort(
     c(
-      "{.arg {arg}} is not a NACHO 3 object.",
-      i = "Convert it with {.fn upgrade_nacho}."
+      "Internal error: {.arg {arg}} reached a NACHO 2 method, but {.fn check_nacho} accepts it.",
+      i = "Please report this with a reproducible example."
     ),
     class = "bad_object",
     call = call

@@ -8,3 +8,21 @@
       Flagged samples: 0 of 4
       Created with NACHO 0.0.0
 
+# NACHO 2 method errors name the argument
+
+    Code
+      dim(old)
+    Condition
+      Error in `dim()`:
+      ! `x` is a NACHO 2 object, which NACHO 3 cannot use.
+      i Convert it with `upgrade_nacho(x)`, or read the saved file with `read_nacho()`.
+
+---
+
+    Code
+      summary(old)
+    Condition
+      Error in `summary()`:
+      ! `object` is a NACHO 2 object, which NACHO 3 cannot use.
+      i Convert it with `upgrade_nacho(object)`, or read the saved file with `read_nacho()`.
+

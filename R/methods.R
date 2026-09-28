@@ -246,7 +246,7 @@ S7::method(`[`, nacho) <- subset_nacho
 #' so these methods name `base::` to reach the base methods table.
 #'
 #' @param x,object A NACHO 2 object.
-#' @param ... Ignored.
+#' @param row.names,optional,... Ignored.
 #'
 #' @keywords internal
 #' @noRd
@@ -286,7 +286,12 @@ dim.nacho <- function(x) {
 
 #' @noRd
 #' @exportS3Method base::as.data.frame
-as.data.frame.nacho <- function(x, ...) {
+as.data.frame.nacho <- function(
+  x,
+  row.names = NULL,
+  optional = FALSE,
+  ...
+) {
   abort_nacho_v2(x)
 }
 

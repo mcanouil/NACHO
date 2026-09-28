@@ -164,6 +164,9 @@ test_that("the other methods refuse a NACHO 2 object", {
     summary = function() summary(old),
     dim = function() dim(old),
     as.data.frame = function() as.data.frame(old),
+    as.data.frame_arguments = function() {
+      as.data.frame(old, row.names = NULL, optional = FALSE)
+    },
     subset = function() old[1, ]
   )
   for (name in names(calls)) {
@@ -175,6 +178,21 @@ test_that("the other methods refuse a NACHO 2 object", {
       info = name
     )
   }
+})
+
+test_that("NACHO 2 method errors name the argument", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  expect_snapshot(dim(old), error = TRUE)
+  expect_snapshot(summary(old), error = TRUE)
+})
+
+test_that("the NACHO 2 guard stops on an object check_nacho() accepts", {
+  error <- expect_error(
+    NACHO:::abort_nacho_v2(GSE74821),
+    class = "nacho_error_bad_object"
+  )
+  expect_no_match(conditionMessage(error), "upgrade_nacho", fixed = TRUE)
+  expect_match(conditionMessage(error), "check_nacho()", fixed = TRUE)
 })
 
 test_that("format() of a list with only the NACHO 2 class points to load_rcc()", {
