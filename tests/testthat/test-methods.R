@@ -141,3 +141,10 @@ test_that("subsetting to one probe keeps a valid object", {
   expect_identical(ncol(sub@pca$scores), 1L)
   expect_true(S7::S7_inherits(sub, NACHO:::nacho))
 })
+
+test_that("package code runs data.table expressions without data.table attached", {
+  expect_false("package:data.table" %in% search())
+  long <- as.data.frame(GSE74821, long = TRUE)
+  expect_identical(nrow(long), as.integer(prod(dim(GSE74821))))
+  expect_s3_class(autoplot(GSE74821, type = "PCA"), "ggplot")
+})
