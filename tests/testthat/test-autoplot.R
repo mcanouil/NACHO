@@ -277,3 +277,21 @@ test_that("lane-level plots of PlexSet data keep one x value per RCC file", {
   plot <- autoplot(salmon_nacho, type = "BD")
   expect_length(unique(plot[["data"]][["IDFILE"]]), length(salmon_files))
 })
+
+test_that("PCA plots with fewer than two components are not available", {
+  expect_warning(
+    two_samples <- GSE74821[, 1:2],
+    class = "nacho_warning_n_comp_reduced"
+  )
+  for (type in c("PCA12", "PCA")) {
+    expect_warning(
+      plot <- autoplot(two_samples, type = type),
+      class = "nacho_warning_metric_unavailable"
+    )
+    expect_length(plot[["layers"]], 1)
+    expect_identical(
+      ggplot2::ggplot_build(plot)[["data"]][[1]][["label"]],
+      "Not available!"
+    )
+  }
+})

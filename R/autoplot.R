@@ -228,6 +228,16 @@ not_available_plot <- function(x_label, y_label) {
     ggplot2::theme(axis.text = ggplot2::element_blank())
 }
 
+warn_too_few_components <- function(type) {
+  nacho_warn(
+    c(
+      "{.val {type}} needs at least two principal components.",
+      i = "Keep more probes or samples to compute them."
+    ),
+    class = "metric_unavailable"
+  )
+}
+
 plot_metrics <- function(
   object,
   type,
@@ -591,6 +601,10 @@ plot_pca12 <- function(
   outliers_factor,
   outliers_labels
 ) {
+  if (ncol(object@pca[["scores"]]) < 2) {
+    warn_too_few_components(type)
+    return(not_available_plot("PC01", "PC02"))
+  }
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
     data = plot_samples(object, colour)[
@@ -638,6 +652,10 @@ plot_pca <- function(
   outliers_labels
 ) {
   X.PC <- Y.PC <- NULL
+  if (ncol(object@pca[["scores"]]) < 2) {
+    warn_too_few_components(type)
+    return(not_available_plot(NULL, NULL))
+  }
   id <- object@settings[["id_colname"]]
   components <- sprintf("PC%02d", seq_len(min(ncol(object@pca[["scores"]]), 5)))
   keys <- unique(c("CartridgeID", id, colour))
