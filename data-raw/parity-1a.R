@@ -34,7 +34,10 @@ salmon_tidy <- data.frame(
 
 geo_fixture <- function(series) {
   dir <- file.path("inst", "extdata", series)
-  list(dir = dir, sheet = utils::read.csv(file.path(dir, "samplesheet.csv")))
+  list(
+    dir = dir,
+    samplesheet = utils::read.csv(file.path(dir, "samplesheet.csv"))
+  )
 }
 io360 <- geo_fixture("GSE178516")
 mirna <- geo_fixture("GSE270837")
@@ -56,27 +59,27 @@ objects <- list(
   ),
   io360_geo = load_quiet(
     io360[["dir"]],
-    io360[["sheet"]],
+    io360[["samplesheet"]],
     "IDFILE",
     n_comp = 5
   ),
   io360_glm = load_quiet(
     io360[["dir"]],
-    io360[["sheet"]],
+    io360[["samplesheet"]],
     "IDFILE",
     normalisation_method = "GLM",
     n_comp = 5
   ),
   io360_predict = load_quiet(
     io360[["dir"]],
-    io360[["sheet"]],
+    io360[["samplesheet"]],
     "IDFILE",
     housekeeping_predict = TRUE,
     n_comp = 5
   ),
   mirna = load_quiet(
     mirna[["dir"]],
-    mirna[["sheet"]],
+    mirna[["samplesheet"]],
     "IDFILE",
     n_comp = 5
   )
