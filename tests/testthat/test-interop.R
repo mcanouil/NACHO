@@ -243,14 +243,21 @@ test_that("as_nacho() on a NanoStringRccSet matches load_rcc() on the same files
       "IDFILE"
     )
   )
-  common <- intersect(
-    rownames(nacho_counts(from_rccset)),
-    rownames(nacho_counts(from_files))
-  )
-  expect_gt(length(common), 0.9 * nrow(from_files))
+  rccset_probes <- nacho_probes(from_rccset)
+  file_probes <- nacho_probes(from_files)
+  expect_false(anyDuplicated(rccset_probes$Name) > 0)
+  expect_false(anyDuplicated(file_probes$Name) > 0)
+  expect_setequal(rccset_probes$Name, file_probes$Name)
+  same_order <- match(file_probes$Name, rccset_probes$Name)
   expect_identical(
-    nacho_counts(from_rccset)[common, basename(files)],
-    nacho_counts(from_files)[common, basename(files)]
+    rccset_probes[same_order, c("CodeClass", "Name", "Accession")],
+    file_probes[, c("CodeClass", "Name", "Accession")],
+    ignore_attr = "row.names"
+  )
+  file_counts <- nacho_counts(from_files)
+  expect_identical(
+    nacho_counts(from_rccset)[rownames(file_counts), ],
+    file_counts
   )
   expect_identical(nacho_samples(from_rccset)[["IDFILE"]], basename(files))
   expect_equal(nacho_qc(from_rccset)$FoV, nacho_qc(from_files)$FoV)

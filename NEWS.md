@@ -46,6 +46,13 @@
 - In `R/read_rcc.R`,
   - fix: Empty RCC attributes, such as a blank owner or comment, are now read as empty text instead of repeating the attribute name.
   - fix: A probe named like an RCC section, such as `Messages`, no longer breaks parsing.
+  - fix: Probe names keep every inner `|` field, so protein names such as `4E-BP1(53H11)|NA|EIF4EBP1|53H11|0` are no longer mangled.
+    Only a trailing pipe and number, such as `|0` or `|0.014`, is removed.
+  - fix: Attribute values that contain `|` followed by digits, such as a comment `Batch|2`, are kept as written.
+  - fix: Accessions are read exactly as written.
+    Probes whose accessions differ between files are reported as a clash.
+- In `R/interop.R`,
+  - fix: `as_nacho()` on a `NanoStringRccSet` now gives the same probe names as `load_rcc()` on the same RCC files.
 - In `R/load_rcc.R`,
   - fix: `load_rcc()` now checks a supplied `plexset_id` column: values outside `S1` to `S8` and duplicated id/`plexset_id` pairs raise a classed error before any file is read into a matrix.
 - In `R/qc.R`,

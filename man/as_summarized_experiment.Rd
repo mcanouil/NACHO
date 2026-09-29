@@ -32,6 +32,8 @@ type and provenance in \code{metadata()$nacho}.
 \code{NanoStringRccSet} read by \code{NanoStringNCTools::readNanoStringRccSet()}.
 The dates of a \code{NanoStringRccSet} are written as \code{YYYYMMDD}, as in RCC
 files.
+Its probe names lose a trailing numeric suffix such as \verb{|0}, as in
+\code{\link[=load_rcc]{load_rcc()}}, so both give the same probe names for the same RCC files.
 It computes the quality-control
 metrics and the normalisation from the raw counts; settings and thresholds
 come from \code{metadata()$nacho} when present, and are the defaults otherwise.

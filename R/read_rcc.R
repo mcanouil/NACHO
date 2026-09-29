@@ -10,12 +10,6 @@
 #' @noRd
 read_rcc <- function(file) {
   lines <- trim_trailing_space(readLines(file, warn = FALSE))
-  has_bar <- grepl("|", lines, fixed = TRUE)
-  lines[has_bar] <- sub(
-    "[|]+[[:digit:]]+\\.*[[:digit:]]*",
-    "",
-    lines[has_bar]
-  )
 
   section <- function(tag, required = TRUE) {
     start <- match(paste0("<", tag, ">"), lines)
@@ -73,6 +67,7 @@ read_rcc <- function(file) {
     )
   }
   code_summary <- code_summary[, c("CodeClass", "Name", "Accession", "Count")]
+  code_summary[["Name"]] <- strip_probe_suffix(code_summary[["Name"]])
   code_summary[["Count"]] <- as.integer(code_summary[["Count"]])
 
   list(
@@ -84,6 +79,26 @@ read_rcc <- function(file) {
     messages = paste(section("Messages", required = FALSE), collapse = "; "),
     code_summary = code_summary
   )
+}
+
+#' Remove the trailing numeric suffix of probe names
+#'
+#' RCC files may end a probe name with a pipe and a number, such as `ACTB|0`
+#' or `hsa-let-7i-5p|0.014`.
+#' Only that final suffix is removed; inner pipe fields are kept.
+#'
+#' @param probe_names Character vector of probe names.
+#'
+#' @keywords internal
+#' @noRd
+strip_probe_suffix <- function(probe_names) {
+  has_bar <- grepl("|", probe_names, fixed = TRUE)
+  probe_names[has_bar] <- sub(
+    "[|][[:digit:]]+([.][[:digit:]]+)?$",
+    "",
+    probe_names[has_bar]
+  )
+  probe_names
 }
 
 #' Remove trailing white space from lines
