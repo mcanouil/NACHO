@@ -17,4 +17,4 @@ n =  768: load_rcc 2.49 s, object 7.9 MB
 targets at 768 samples: load_rcc under 3 s PASS, object under 10 MB PASS
 ```
 
-For comparison, the same run before the matrix rewrite took 0.83 s, 3.15 s and 14.34 s, for objects of 1.0 MB, 2.4 MB and 7.9 MB.
+For comparison, computing quality control on the long, row-per-probe-per-sample table instead of matrices takes 0.83 s, 3.15 s and 14.34 s, for objects of 1.0 MB, 2.4 MB and 7.9 MB.
