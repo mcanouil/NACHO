@@ -4,45 +4,12 @@ library(GEOquery)
 # Build from an installed NACHO, not pkgload::load_all(), so the saved
 # object carries no source references to this working tree or a temp
 # install library.
+source(file.path("data-raw", "install-nacho.R"))
+
 build_gse74821 <- function() {
-  Sys.setenv(R_KEEP_PKG_SOURCE = "no")
-  lib <- tempfile("nacho-install-")
-  dir.create(lib)
-  on.exit(
-    {
-      if ("package:NACHO" %in% search()) {
-        detach("package:NACHO", unload = TRUE, character.only = TRUE)
-      }
-      if (unlink(lib, recursive = TRUE) != 0) {
-        warning(
-          "Could not remove the temporary install library: ",
-          lib,
-          call. = FALSE
-        )
-      }
-    },
-    add = TRUE
-  )
-  install_log <- system2(
-    file.path(R.home("bin"), "R"),
-    c(
-      "CMD",
-      "INSTALL",
-      "--no-docs",
-      "--no-help",
-      paste0("--library=", lib),
-      "."
-    ),
-    stdout = TRUE,
-    stderr = TRUE
-  )
-  if (
-    !is.null(attr(install_log, "status")) && attr(install_log, "status") != 0
-  ) {
-    cat(install_log, sep = "\n")
-    stop("R CMD INSTALL failed while building GSE74821.")
-  }
-  library(NACHO, lib.loc = lib)
+  # install_nacho() is defined by the source() call above.
+  nacho <- install_nacho(".") # nolint: object_usage_linter.
+  on.exit(nacho$cleanup(), add = TRUE)
 
   gse <- GEOquery::getGEO(GEO = "GSE74821")
   targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))

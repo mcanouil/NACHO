@@ -246,12 +246,12 @@ excluded_negatives <- function(counts, code_class) {
 #'
 #' @keywords internal
 #' @noRd
-control_concentrations <- function(names) {
+control_concentrations <- function(probe_names) {
   pattern <- "^[^(]*\\((.*)\\)$"
-  if (all(grepl(pattern, names))) {
-    return(as.numeric(sub(pattern, "\\1", names)))
+  if (all(grepl(pattern, probe_names))) {
+    return(as.numeric(sub(pattern, "\\1", probe_names)))
   }
-  unname(c(NEG = 0, POS = 32)[sub("(NEG).*|(POS).*", "\\1\\2", names)])
+  unname(c(NEG = 0, POS = 32)[sub("(NEG).*|(POS).*", "\\1\\2", probe_names)])
 }
 
 #' Positive and negative normalisation factors of each sample
@@ -259,11 +259,11 @@ control_concentrations <- function(names) {
 #' @keywords internal
 #' @noRd
 control_factors <- function(counts, probes, excluded, method) {
-  names <- probes[["Name"]]
+  probe_names <- probes[["Name"]]
   code_class <- probes[["CodeClass"]]
   used <- code_class %in%
     c("Positive", "Negative") &
-    !names %in% c("POS_F(0.125)", excluded)
+    !probe_names %in% c("POS_F(0.125)", excluded)
   if (method == "GEO") {
     positive <- geometric_means(
       counts[used & code_class == "Positive", , drop = FALSE]
@@ -276,7 +276,7 @@ control_factors <- function(counts, probes, excluded, method) {
       negative_factor = negative
     ))
   }
-  concentration <- control_concentrations(names[used])
+  concentration <- control_concentrations(probe_names[used])
   controls <- counts[used, , drop = FALSE]
   coefficients <- vapply(
     seq_len(ncol(controls)),
