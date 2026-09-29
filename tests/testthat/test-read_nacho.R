@@ -35,6 +35,13 @@ test_that("upgrade_nacho() keeps the raw counts, settings and thresholds", {
   expect_false(any(c("PC01", "Count_Norm") %in% names(x@samples)))
 })
 
+test_that("upgrade_nacho() keeps an open House_factor upper bound", {
+  old <- nacho_2()
+  old$outliers_thresholds$House_factor <- c(1 / 11, Inf)
+  x <- suppressMessages(upgrade_subset(old))
+  expect_identical(x@thresholds$House_factor, c(1 / 11, Inf))
+})
+
 test_that("upgrade_nacho() leaves NACHO 3 objects alone and refuses anything else", {
   expect_identical(suppressMessages(upgrade_nacho(GSE74821)), GSE74821)
   expect_error(upgrade_nacho(list(a = 1)), class = "nacho_error_bad_object")

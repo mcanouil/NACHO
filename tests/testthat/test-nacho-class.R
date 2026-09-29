@@ -103,17 +103,31 @@ test_that("the validator refuses insane thresholds", {
   expect_error(x@thresholds <- thresholds, "LoD")
 })
 
-test_that("the validator refuses infinite thresholds", {
+test_that("the validator accepts infinities that mean no bound", {
   x <- toy_nacho()
   thresholds <- x@thresholds
-  thresholds$LoD <- Inf
-  expect_error(x@thresholds <- thresholds, "LoD")
-  thresholds <- x@thresholds
   thresholds$LoD <- -Inf
-  expect_error(x@thresholds <- thresholds, "LoD")
-  for (name in c("BD", "Positive_factor", "House_factor")) {
+  thresholds$House_factor <- c(1 / 11, Inf)
+  thresholds$BD <- c(-Inf, 2.25)
+  thresholds$Positive_factor <- c(-Inf, Inf)
+  x@thresholds <- thresholds
+  expect_identical(x@thresholds, thresholds)
+})
+
+test_that("the validator refuses infinities that are not an open bound", {
+  x <- toy_nacho()
+  refused <- list(
+    LoD = Inf,
+    LoD = NaN,
+    BD = c(Inf, Inf),
+    BD = c(-Inf, -Inf),
+    Positive_factor = c(NaN, 4),
+    House_factor = c(11, 1 / 11)
+  )
+  for (k in seq_along(refused)) {
+    name <- names(refused)[k]
     thresholds <- x@thresholds
-    thresholds[[name]] <- c(thresholds[[name]][1], Inf)
+    thresholds[[name]] <- refused[[k]]
     expect_error(x@thresholds <- thresholds, name)
   }
 })
@@ -305,8 +319,14 @@ test_that("compute_pca() refuses a missing n_comp with an internal error", {
     nrow = 5,
     dimnames = list(paste0("p", 1:5), paste0("s", 1:4))
   )
-  expect_error(
+  error <- expect_error(
     NACHO:::compute_pca(counts, NULL),
     class = "nacho_error_internal"
   )
+  expect_match(conditionMessage(error), "NULL", fixed = TRUE)
+  error <- expect_error(
+    NACHO:::compute_pca(counts, -1L),
+    class = "nacho_error_internal"
+  )
+  expect_match(conditionMessage(error), "at least 0, not -1.", fixed = TRUE)
 })

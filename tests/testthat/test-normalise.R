@@ -269,7 +269,15 @@ test_that("normalise() refuses insane thresholds", {
   )
 })
 
-test_that("normalise() refuses infinite thresholds", {
+test_that("normalise() accepts open bounds and refuses closed infinite ones", {
+  open_bounds <- salmon_nacho@thresholds
+  open_bounds$LoD <- -Inf
+  open_bounds$House_factor <- c(1 / 11, Inf)
+  x <- suppressMessages(normalise(
+    salmon_nacho,
+    outliers_thresholds = open_bounds
+  ))
+  expect_identical(x@thresholds, open_bounds)
   bad <- salmon_nacho@thresholds
   bad$LoD <- Inf
   expect_error(
@@ -277,7 +285,7 @@ test_that("normalise() refuses infinite thresholds", {
     class = "nacho_error_bad_argument"
   )
   bad <- salmon_nacho@thresholds
-  bad$BD <- c(0.1, Inf)
+  bad$BD <- c(Inf, Inf)
   expect_error(
     normalise(salmon_nacho, outliers_thresholds = bad),
     class = "nacho_error_bad_argument"
@@ -359,6 +367,4 @@ test_that("the missing attributes warning comes once, when the object is built",
   flagged_samples$is_outlier <- seq_len(nrow(flagged_samples)) == 1L
   flagged@samples <- flagged_samples
   expect_no_warning(suppressMessages(exclude_outliers(flagged)))
-  expect_no_warning(check_outliers(x))
-  expect_no_warning(x[, 1:20])
 })

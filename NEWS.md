@@ -65,8 +65,8 @@
   - fix: The warning about missing lane or sample attributes now comes once, when the object is built.
     `normalise()` and `exclude_outliers()` no longer repeat it.
 - In `R/nacho-class.R`,
-  - fix: Outlier thresholds must now be finite.
-    `normalise()` and the `nacho` validator refuse an infinite `LoD` or an infinite upper bound with a classed error.
+  - fix: Outlier thresholds accept `-Inf` as a lower bound, `Inf` as an upper bound and `-Inf` as `LoD` to mean no bound.
+    `normalise()`, `upgrade_nacho()` and the `nacho` validator refuse `NaN`, an `Inf` lower bound, a `-Inf` upper bound and an `Inf` `LoD` with a classed error.
 
 ## Dependencies
 
