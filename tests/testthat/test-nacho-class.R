@@ -39,6 +39,31 @@ test_that("the validator reports duplicated sample ids", {
   expect_match(conditionMessage(err), "S01.RCC", fixed = TRUE)
 })
 
+test_that("the validator lists at most three duplicated sample ids", {
+  x <- toy_nacho(8L)
+  ids <- rep(sprintf("S%02d.RCC", 1:4), each = 2)
+  samples <- x@samples
+  samples$IDFILE <- ids
+  counts <- x@counts
+  colnames(counts) <- ids
+  err <- expect_error(
+    S7::set_props(
+      x,
+      samples = samples,
+      counts = counts,
+      normalised = counts * 1,
+      pca = list()
+    ),
+    "Sample ids must be unique"
+  )
+  expect_match(
+    conditionMessage(err),
+    "S01.RCC, S02.RCC, S03.RCC",
+    fixed = TRUE
+  )
+  expect_no_match(conditionMessage(err), "S04.RCC", fixed = TRUE)
+})
+
 test_that("the validator refuses probes that do not match the counts", {
   x <- toy_nacho()
   probes <- x@probes
