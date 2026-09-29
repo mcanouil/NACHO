@@ -19,11 +19,75 @@ test_that("the validator refuses duplicated or misaligned sample ids", {
   expect_error(x@samples <- samples, "must match")
 })
 
+test_that("the validator reports duplicated sample ids", {
+  x <- toy_nacho()
+  ids <- c("S01.RCC", "S01.RCC", "S03.RCC", "S04.RCC")
+  samples <- x@samples
+  samples$IDFILE <- ids
+  counts <- x@counts
+  colnames(counts) <- ids
+  err <- expect_error(
+    S7::set_props(
+      x,
+      samples = samples,
+      counts = counts,
+      normalised = counts * 1,
+      pca = list()
+    ),
+    "Sample ids must be unique"
+  )
+  expect_match(conditionMessage(err), "S01.RCC", fixed = TRUE)
+})
+
+test_that("the validator lists at most three duplicated sample ids", {
+  x <- toy_nacho(8L)
+  ids <- rep(sprintf("S%02d.RCC", 1:4), each = 2)
+  samples <- x@samples
+  samples$IDFILE <- ids
+  counts <- x@counts
+  colnames(counts) <- ids
+  err <- expect_error(
+    S7::set_props(
+      x,
+      samples = samples,
+      counts = counts,
+      normalised = counts * 1,
+      pca = list()
+    ),
+    "Sample ids must be unique"
+  )
+  expect_match(
+    conditionMessage(err),
+    "S01.RCC, S02.RCC, S03.RCC",
+    fixed = TRUE
+  )
+  expect_no_match(conditionMessage(err), "S04.RCC", fixed = TRUE)
+})
+
 test_that("the validator refuses probes that do not match the counts", {
   x <- toy_nacho()
   probes <- x@probes
   probes$Name[1] <- "OTHER"
   expect_error(x@probes <- probes, "must match")
+})
+
+test_that("the validator reports duplicated probe names", {
+  x <- toy_nacho()
+  probes <- x@probes
+  probes$Name[2] <- probes$Name[1]
+  counts <- x@counts
+  rownames(counts) <- probes$Name
+  normalised <- x@normalised
+  rownames(normalised) <- probes$Name
+  expect_error(
+    S7::set_props(
+      x,
+      probes = probes,
+      counts = counts,
+      normalised = normalised
+    ),
+    "Probe names must be unique"
+  )
 })
 
 test_that("the validator refuses insane thresholds", {

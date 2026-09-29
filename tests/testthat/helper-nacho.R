@@ -65,3 +65,20 @@ toy_nacho <- function(n_samples = 4L) {
     provenance = provenance
   )
 }
+
+expect_not_available <- function(object, type) {
+  plot <- NULL
+  testthat::expect_warning(
+    plot <- NACHO::autoplot(object, type = type),
+    class = "nacho_warning_metric_unavailable",
+    info = type
+  )
+  testthat::expect_s3_class(plot, "ggplot")
+  testthat::expect_no_warning(built <- ggplot2::ggplot_build(plot))
+  testthat::expect_length(plot[["layers"]], 1)
+  testthat::expect_identical(
+    built[["data"]][[1]][["label"]],
+    "Not available!",
+    info = type
+  )
+}

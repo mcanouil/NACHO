@@ -61,16 +61,7 @@ test_that("PCL and LoD plots of a PlexSet toy object are not available", {
   toy <- toy_nacho(6L)
   toy@rcc_type <- "n8"
   for (type in c("PCL", "LoD")) {
-    expect_warning(
-      plot <- autoplot(toy, type = type),
-      class = "nacho_warning_metric_unavailable"
-    )
-    expect_s3_class(plot, "ggplot")
-    expect_length(plot[["layers"]], 1)
-    expect_identical(
-      ggplot2::ggplot_build(plot)[["data"]][[1]][["label"]],
-      "Not available!"
-    )
+    expect_not_available(toy, type)
   }
   expect_no_warning(ggplot2::ggplot_build(autoplot(toy, type = "BD")))
 })
@@ -89,10 +80,9 @@ test_that("the Housekeeping plot of a toy object without housekeeping genes is n
 })
 
 test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable", {
-  expect_warning(
-    autoplot(plexset_nacho, type = "PCL"),
-    class = "nacho_warning_metric_unavailable"
-  )
+  for (type in c("PCL", "LoD")) {
+    expect_not_available(plexset_nacho, type)
+  }
 })
 
 muffle_unavailable <- function(expr) {
