@@ -103,6 +103,78 @@ test_that("the validator refuses insane thresholds", {
   expect_error(x@thresholds <- thresholds, "LoD")
 })
 
+test_that("the validator accepts infinities that mean no bound", {
+  x <- toy_nacho()
+  thresholds <- x@thresholds
+  thresholds$LoD <- -Inf
+  thresholds$House_factor <- c(1 / 11, Inf)
+  thresholds$BD <- c(-Inf, 2.25)
+  thresholds$Positive_factor <- c(-Inf, Inf)
+  x@thresholds <- thresholds
+  expect_identical(x@thresholds, thresholds)
+})
+
+test_that("the validator refuses infinities that are not an open bound", {
+  x <- toy_nacho()
+  refused <- list(
+    LoD = Inf,
+    LoD = NaN,
+    BD = c(Inf, Inf),
+    BD = c(-Inf, -Inf),
+    BD = c(-Inf, -5),
+    Positive_factor = c(NaN, 4),
+    House_factor = c(11, 1 / 11)
+  )
+  for (k in seq_along(refused)) {
+    name <- names(refused)[k]
+    thresholds <- x@thresholds
+    thresholds[[name]] <- refused[[k]]
+    expect_error(x@thresholds <- thresholds, name)
+  }
+})
+
+test_that("the validator explains a negative upper bound and an infinite LoD", {
+  thresholds <- NACHO:::default_thresholds()
+  thresholds$BD <- c(-Inf, -5)
+  thresholds$LoD <- Inf
+  problems <- NACHO:::validate_thresholds(thresholds)
+  expect_match(
+    problems,
+    "BD: the upper bound must not be negative",
+    all = FALSE,
+    fixed = TRUE
+  )
+  expect_match(problems, "set a finite LoD, or -Inf", all = FALSE)
+})
+
+test_that("the validator names the offending side of a pair", {
+  problem <- function(value) {
+    thresholds <- NACHO:::default_thresholds()
+    thresholds$BD <- value
+    NACHO:::validate_thresholds(thresholds)
+  }
+  expect_identical(
+    problem(c(Inf, Inf)),
+    "@thresholds$BD: -Inf is only allowed as the lower bound and Inf only as the upper bound."
+  )
+  expect_identical(
+    problem(c(0, -Inf)),
+    "@thresholds$BD: -Inf is only allowed as the lower bound and Inf only as the upper bound."
+  )
+  expect_identical(
+    problem(c(-1, 2)),
+    "@thresholds$BD: the lower bound must not be negative; use -Inf for no lower bound."
+  )
+  expect_identical(
+    problem(c(2, 1)),
+    "@thresholds$BD: the bounds must be increasing."
+  )
+  expect_identical(
+    problem("a"),
+    "@thresholds$BD must be two numbers, a lower and an upper bound."
+  )
+})
+
 test_that("the validator refuses an unknown RCC type", {
   x <- toy_nacho()
   expect_error(x@rcc_type <- "n2", "rcc_type")
@@ -282,4 +354,22 @@ test_that("compute_pca() gives consistent signs for a row-permuted matrix", {
     pca_permuted <- NACHO:::compute_pca(permuted, 4L)
     expect_equal(pca_permuted$scores, pca$scores, tolerance = 1e-8)
   }
+})
+
+test_that("compute_pca() refuses a missing n_comp with an internal error", {
+  counts <- matrix(
+    1:20,
+    nrow = 5,
+    dimnames = list(paste0("p", 1:5), paste0("s", 1:4))
+  )
+  error <- expect_error(
+    NACHO:::compute_pca(counts, NULL),
+    class = "nacho_error_internal"
+  )
+  expect_match(conditionMessage(error), "NULL", fixed = TRUE)
+  error <- expect_error(
+    NACHO:::compute_pca(counts, -1L),
+    class = "nacho_error_internal"
+  )
+  expect_match(conditionMessage(error), "at least 0, not -1.", fixed = TRUE)
 })

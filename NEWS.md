@@ -62,6 +62,13 @@
   - fix: Housekeeping prediction no longer returns missing gene names when fewer than five candidates exist.
   - fix: Predicting housekeeping genes no longer misaligns probes when some RCC files lack a probe.
   - fix: PCA components now have a fixed sign, so plots no longer flip between machines.
+  - fix: The warning about missing lane or sample attributes now comes once, when the object is built.
+    `normalise()` and `exclude_outliers()` no longer repeat it.
+- In `R/nacho-class.R`,
+  - fix: Outlier thresholds accept `-Inf` as a lower bound, `Inf` as an upper bound and `-Inf` as `LoD` to mean no bound.
+    `normalise()`, `upgrade_nacho()`, `read_nacho()` and the `nacho` validator refuse `NaN`, an `Inf` lower bound, a negative upper bound and an `Inf` `LoD` with a classed error.
+    A saved object with `LoD = Inf` must have it changed to a finite value or `-Inf` before it can be read.
+    `autoplot()` draws no threshold line for an open bound, `summary()` shows it as `NA`, and the report leaves it out.
 
 ## Dependencies
 

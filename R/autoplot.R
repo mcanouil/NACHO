@@ -185,6 +185,10 @@ outlier_layers <- function(
   )
 }
 
+finite_values <- function(x) {
+  x[is.finite(x)]
+}
+
 threshold_layers <- function(limits) {
   list(
     ggplot2::geom_rect(
@@ -204,7 +208,7 @@ threshold_layers <- function(limits) {
       inherit.aes = FALSE
     ),
     ggplot2::geom_hline(
-      data = data.frame(value = limits),
+      data = data.frame(value = finite_values(limits)),
       mapping = ggplot2::aes(yintercept = .data[["value"]]),
       colour = "#b22222",
       linetype = "longdash"
@@ -880,13 +884,17 @@ plot_hf <- function(
       inherit.aes = FALSE
     ) +
     ggplot2::geom_hline(
-      data = data.frame(value = object@thresholds[["House_factor"]]),
+      data = data.frame(
+        value = finite_values(object@thresholds[["House_factor"]])
+      ),
       mapping = ggplot2::aes(yintercept = .data[["value"]]),
       colour = "#b22222",
       linetype = "longdash"
     ) +
     ggplot2::geom_vline(
-      data = data.frame(value = object@thresholds[["Positive_factor"]]),
+      data = data.frame(
+        value = finite_values(object@thresholds[["Positive_factor"]])
+      ),
       mapping = ggplot2::aes(xintercept = .data[["value"]]),
       colour = "#b22222",
       linetype = "longdash"

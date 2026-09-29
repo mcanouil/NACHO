@@ -294,3 +294,33 @@ test_that("PCA plots with fewer than two components are not available", {
     )
   }
 })
+
+test_that("open threshold bounds draw no line", {
+  x <- GSE74821
+  thresholds <- x@thresholds
+  thresholds$House_factor <- c(1 / 11, Inf)
+  thresholds$Positive_factor <- c(-Inf, 4)
+  thresholds$BD <- c(-Inf, 2.25)
+  thresholds$LoD <- -Inf
+  x@thresholds <- thresholds
+  line_values <- function(plot) {
+    lines <- Filter(
+      function(layer) {
+        inherits(layer$geom, "GeomHline") || inherits(layer$geom, "GeomVline")
+      },
+      plot$layers
+    )
+    unlist(lapply(lines, function(layer) layer$data$value), use.names = FALSE)
+  }
+  expected <- list(
+    HF = c(1 / 11, 4),
+    PFNF = 4,
+    BD = 2.25,
+    LoD = numeric(0)
+  )
+  for (type in names(expected)) {
+    plot <- muffle_unavailable(autoplot(x, type = type))
+    expect_identical(line_values(plot), expected[[type]], info = type)
+    expect_no_warning(ggplot2::ggplot_build(plot))
+  }
+})

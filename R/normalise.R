@@ -109,7 +109,8 @@ run_normalisation <- function(x, settings, thresholds) {
     settings = settings,
     thresholds = thresholds,
     rcc_type = x@rcc_type,
-    provenance = x@provenance
+    provenance = x@provenance,
+    warn_missing = FALSE
   )
 }
 

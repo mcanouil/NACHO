@@ -269,6 +269,63 @@ test_that("normalise() refuses insane thresholds", {
   )
 })
 
+test_that("normalise() accepts open bounds and refuses closed infinite ones", {
+  open_bounds <- salmon_nacho@thresholds
+  open_bounds$LoD <- -Inf
+  open_bounds$House_factor <- c(1 / 11, Inf)
+  x <- suppressMessages(normalise(
+    salmon_nacho,
+    outliers_thresholds = open_bounds
+  ))
+  expect_identical(x@thresholds, open_bounds)
+  bad <- salmon_nacho@thresholds
+  bad$LoD <- Inf
+  expect_error(
+    normalise(salmon_nacho, outliers_thresholds = bad),
+    class = "nacho_error_bad_argument"
+  )
+  bad <- salmon_nacho@thresholds
+  bad$BD <- c(Inf, Inf)
+  expect_error(
+    normalise(salmon_nacho, outliers_thresholds = bad),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("an open bound stops flagging the samples beyond it", {
+  open_bounds <- list(
+    BD = c(-Inf, Inf),
+    FoV = 0,
+    LoD = -Inf,
+    PCL = 0,
+    Positive_factor = c(-Inf, Inf),
+    House_factor = c(-Inf, Inf)
+  )
+  flags <- function(thresholds) {
+    x <- suppressMessages(normalise(
+      GSE74821,
+      outliers_thresholds = thresholds
+    ))
+    nacho_qc(x)$is_outlier
+  }
+  qc <- nacho_qc(GSE74821)
+  expect_false(any(flags(open_bounds)))
+
+  house <- open_bounds
+  house$House_factor <- c(1, 1)
+  expect_true(any(flags(house)))
+  house$House_factor <- c(1, Inf)
+  expect_identical(flags(house), qc$House_factor < 1)
+  house$House_factor <- c(-Inf, 1)
+  expect_identical(flags(house), qc$House_factor > 1)
+
+  lod <- open_bounds
+  lod$LoD <- stats::median(qc$LoD)
+  expect_true(any(flags(lod)))
+  lod$LoD <- -Inf
+  expect_false(any(flags(lod)))
+})
+
 test_that("exclude_outliers() drops every flagged sample and normalises the rest", {
   tight <- plexset_nacho@thresholds
   tight$Positive_factor <- c(0.9, 1.1)
@@ -307,4 +364,41 @@ test_that("check_outliers() recomputes the flags from the thresholds", {
     nacho_qc(check_outliers(x))$is_outlier,
     nacho_qc(salmon_nacho)$is_outlier
   )
+})
+
+test_that("the missing attributes warning comes once, when the object is built", {
+  samples <- GSE74821@samples
+  samples <- samples[, !grepl("^Lane_Attributes", names(samples))]
+  count_unavailable <- function(expr) {
+    n <- 0L
+    value <- withCallingHandlers(
+      expr,
+      nacho_warning_metric_unavailable = function(cnd) {
+        n <<- n + 1L
+        invokeRestart("muffleWarning")
+      }
+    )
+    list(value = value, n = n)
+  }
+  built <- count_unavailable(NACHO:::build_nacho(
+    counts = GSE74821@counts,
+    probes = GSE74821@probes,
+    samples = samples,
+    settings = GSE74821@settings,
+    thresholds = GSE74821@thresholds,
+    rcc_type = GSE74821@rcc_type,
+    provenance = GSE74821@provenance
+  ))
+  expect_identical(built$n, 1L)
+  x <- built$value
+  expect_no_warning(suppressMessages(normalise(x, n_comp = 5)))
+  expect_no_warning(suppressMessages(normalise(
+    x,
+    normalisation_method = "GEO"
+  )))
+  flagged <- x
+  flagged_samples <- flagged@samples
+  flagged_samples$is_outlier <- seq_len(nrow(flagged_samples)) == 1L
+  flagged@samples <- flagged_samples
+  expect_no_warning(suppressMessages(exclude_outliers(flagged)))
 })
