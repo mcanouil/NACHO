@@ -6,7 +6,7 @@
 #   tests/testthat/plexset_data, loaded with the NACHO 2.0.7 load_rcc().
 # Run from the repository root: Rscript data-raw/nacho-2-fixtures.R
 
-Sys.setenv(R_KEEP_PKG_SOURCE = "no")
+source(file.path("data-raw", "install-nacho.R"))
 
 run <- function(command, args, what) {
   output <- system2(command, args, stdout = TRUE, stderr = TRUE)
@@ -39,22 +39,10 @@ write_fixtures <- function(source_ref = "v2.0.7") {
     ),
     add = TRUE
   )
-  lib <- tempfile("nacho-2-library-")
-  dir.create(lib)
-  run(
-    file.path(R.home("bin"), "R"),
-    c(
-      "CMD",
-      "INSTALL",
-      "--no-docs",
-      "--no-help",
-      paste0("--library=", lib),
-      source_dir
-    ),
-    "Installing NACHO 2.0.7"
-  )
-  loadNamespace("NACHO", lib.loc = lib)
-  stopifnot(utils::packageVersion("NACHO", lib.loc = lib) == "2.0.7")
+  # install_nacho() is defined by the source() call above.
+  nacho <- install_nacho(source_dir) # nolint: object_usage_linter.
+  on.exit(nacho$cleanup(), add = TRUE)
+  stopifnot(utils::packageVersion("NACHO", lib.loc = nacho$lib) == "2.0.7")
   fixtures <- file.path("tests", "testthat", "fixtures")
 
   gse <- new.env()
