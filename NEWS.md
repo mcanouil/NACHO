@@ -66,7 +66,9 @@
     `normalise()` and `exclude_outliers()` no longer repeat it.
 - In `R/nacho-class.R`,
   - fix: Outlier thresholds accept `-Inf` as a lower bound, `Inf` as an upper bound and `-Inf` as `LoD` to mean no bound.
-    `normalise()`, `upgrade_nacho()` and the `nacho` validator refuse `NaN`, an `Inf` lower bound, a `-Inf` upper bound and an `Inf` `LoD` with a classed error.
+    `normalise()`, `upgrade_nacho()`, `read_nacho()` and the `nacho` validator refuse `NaN`, an `Inf` lower bound, a negative upper bound and an `Inf` `LoD` with a classed error.
+    A saved object with `LoD = Inf` must have it changed to a finite value or `-Inf` before it can be read.
+    `autoplot()` draws no threshold line for an open bound.
 
 ## Dependencies
 

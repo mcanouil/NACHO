@@ -121,6 +121,7 @@ test_that("the validator refuses infinities that are not an open bound", {
     LoD = NaN,
     BD = c(Inf, Inf),
     BD = c(-Inf, -Inf),
+    BD = c(-Inf, -5),
     Positive_factor = c(NaN, 4),
     House_factor = c(11, 1 / 11)
   )
@@ -130,6 +131,15 @@ test_that("the validator refuses infinities that are not an open bound", {
     thresholds[[name]] <- refused[[k]]
     expect_error(x@thresholds <- thresholds, name)
   }
+})
+
+test_that("the validator explains a negative upper bound and an infinite LoD", {
+  thresholds <- NACHO:::default_thresholds()
+  thresholds$BD <- c(-Inf, -5)
+  thresholds$LoD <- Inf
+  problems <- NACHO:::validate_thresholds(thresholds)
+  expect_match(problems, "BD must be two increasing non-negative", all = FALSE)
+  expect_match(problems, "set a finite LoD, or -Inf", all = FALSE)
 })
 
 test_that("the validator refuses an unknown RCC type", {

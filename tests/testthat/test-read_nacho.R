@@ -42,6 +42,30 @@ test_that("upgrade_nacho() keeps an open House_factor upper bound", {
   expect_identical(x@thresholds$House_factor, c(1 / 11, Inf))
 })
 
+test_that("upgrade_nacho() and read_nacho() name an infinite LoD", {
+  old <- nacho_2()
+  old$outliers_thresholds$LoD <- Inf
+  error <- expect_error(upgrade_nacho(old), class = "nacho_error_bad_argument")
+  expect_match(conditionMessage(error), "LoD", fixed = TRUE)
+  expect_match(
+    conditionMessage(error),
+    "set a finite LoD, or -Inf",
+    fixed = TRUE
+  )
+  x <- GSE74821
+  thresholds <- x@thresholds
+  thresholds$LoD <- Inf
+  attr(x, "thresholds") <- thresholds
+  path <- withr::local_tempfile(fileext = ".rds")
+  saveRDS(x, path)
+  error <- expect_error(read_nacho(path), class = "nacho_error_bad_argument")
+  expect_match(
+    conditionMessage(error),
+    "set a finite LoD, or -Inf",
+    fixed = TRUE
+  )
+})
+
 test_that("upgrade_nacho() leaves NACHO 3 objects alone and refuses anything else", {
   expect_identical(suppressMessages(upgrade_nacho(GSE74821)), GSE74821)
   expect_error(upgrade_nacho(list(a = 1)), class = "nacho_error_bad_object")

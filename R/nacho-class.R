@@ -26,7 +26,7 @@ validate_thresholds <- function(thresholds) {
         length(value) != 2 ||
         anyNA(value) ||
         value[1] == Inf ||
-        value[2] == -Inf ||
+        value[2] < 0 ||
         (value[1] < 0 && value[1] != -Inf) ||
         value[1] > value[2]
     ) {
@@ -43,7 +43,7 @@ validate_thresholds <- function(thresholds) {
   if (!is.numeric(lod) || length(lod) != 1 || is.na(lod) || lod == Inf) {
     problems <- c(
       problems,
-      "@thresholds$LoD must be one number, with -Inf for no bound."
+      "@thresholds$LoD must be one number; Inf flags every sample, so set a finite LoD, or -Inf for no bound."
     )
   }
   limits <- list(FoV = c(0, 100), PCL = c(0, 1))

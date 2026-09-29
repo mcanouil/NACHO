@@ -206,5 +206,6 @@ read_nacho <- function(path) {
     properties[["provenance"]][["schema_version"]],
     subject = cli::format_inline("{.file {path}}")
   )
+  check_thresholds(properties[["thresholds"]], arg = "@thresholds")
   do.call(nacho, properties)
 }
