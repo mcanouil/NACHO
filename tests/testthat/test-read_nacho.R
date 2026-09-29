@@ -166,7 +166,7 @@ test_that("autoplot() points NACHO 2 objects to upgrade_nacho()", {
 test_that("the S3 autoplot() method never returns an object", {
   expect_error(
     NACHO:::autoplot.nacho(GSE74821),
-    class = "nacho_error_bad_object"
+    class = "nacho_error_internal"
   )
 })
 

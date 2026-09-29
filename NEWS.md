@@ -37,6 +37,9 @@
 
 ## Fixes
 
+- In `R/methods.R`,
+  - fix: `print()` and `format()` on a NACHO 2 object now show one line pointing to `upgrade_nacho()`, instead of dumping the list.
+    `summary()`, `as.data.frame()` and `[` refuse it with the same classed error as `autoplot()`.
 - In `R/autoplot.R`,
   - fix: `autoplot()` now draws samples whose outlier flag is missing as ordinary points, where NACHO 2 left them out of the plot.
 - In `R/render.R`,

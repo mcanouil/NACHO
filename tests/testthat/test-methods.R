@@ -148,3 +148,105 @@ test_that("package code runs data.table expressions without data.table attached"
   expect_identical(nrow(long), as.integer(prod(dim(GSE74821))))
   expect_s3_class(autoplot(GSE74821, type = "PCA"), "ggplot")
 })
+
+test_that("print() and format() of a NACHO 2 object point to upgrade_nacho()", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  expect_match(format(old), "upgrade_nacho()", fixed = TRUE)
+  output <- utils::capture.output(visible <- withVisible(print(old)))
+  expect_match(paste(output, collapse = "\n"), "upgrade_nacho()", fixed = TRUE)
+  expect_false(visible$visible)
+  expect_identical(visible$value, old)
+})
+
+test_that("the other methods refuse a NACHO 2 object", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  calls <- list(
+    summary = function() summary(old),
+    as.data.frame = function() as.data.frame(old),
+    as.data.frame_arguments = function() {
+      as.data.frame(old, row.names = NULL, optional = FALSE)
+    },
+    subset = function() old[1, ]
+  )
+  for (name in names(calls)) {
+    error <- expect_error(calls[[name]](), class = "nacho_error_bad_object")
+    expect_match(
+      conditionMessage(error),
+      "upgrade_nacho",
+      fixed = TRUE,
+      info = name
+    )
+  }
+})
+
+call_from_outside <- function(fun, x, ...) {
+  env <- new.env(parent = emptyenv())
+  env$x <- x
+  eval(as.call(c(fun, quote(x), list(...))), env)
+}
+
+test_that("the NACHO 2 methods dispatch from outside the namespace", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  output <- utils::capture.output(call_from_outside(base::print, old))
+  expect_match(output, "upgrade_nacho()", fixed = TRUE)
+  expect_match(
+    call_from_outside(base::format, old),
+    "upgrade_nacho()",
+    fixed = TRUE
+  )
+  refusals <- list(
+    base::summary,
+    base::as.data.frame,
+    ggplot2::autoplot
+  )
+  for (fun in refusals) {
+    expect_error(call_from_outside(fun, old), class = "nacho_error_bad_object")
+  }
+  expect_error(
+    call_from_outside(base::`[`, old, 1, quote(expr = )),
+    class = "nacho_error_bad_object"
+  )
+})
+
+test_that("autoplot() refuses a NACHO 2 object", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  expect_error(autoplot(old), class = "nacho_error_bad_object")
+})
+
+test_that("NACHO 2 method errors name the argument", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  expect_snapshot(summary(old), error = TRUE)
+  expect_snapshot(as.data.frame(old), error = TRUE)
+  expect_snapshot(old[1, ], error = TRUE)
+  expect_snapshot(autoplot(old), error = TRUE)
+})
+
+test_that("the NACHO 2 guard stops on an object check_nacho() accepts", {
+  error <- expect_error(
+    NACHO:::abort_nacho_v2(GSE74821),
+    class = "nacho_error_internal"
+  )
+  expect_no_match(conditionMessage(error), "upgrade_nacho", fixed = TRUE)
+  expect_match(conditionMessage(error), "check_nacho()", fixed = TRUE)
+})
+
+test_that("format() of an object with only the NACHO 2 class points to load_rcc()", {
+  for (x in list(
+    structure(list(), class = "nacho"),
+    structure(1:3, class = "nacho")
+  )) {
+    line <- format(x)
+    expect_match(line, "An object with the NACHO 2 class", fixed = TRUE)
+    expect_match(line, "load_rcc()", fixed = TRUE)
+  }
+})
+
+test_that("dim() of a NACHO 2 object is base R's answer for a list", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  expect_null(dim(old))
+  expect_match(
+    utils::capture.output(print(old)),
+    "upgrade_nacho()",
+    fixed = TRUE
+  )
+})
