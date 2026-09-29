@@ -400,12 +400,12 @@ sample_lod <- function(pos_e, negatives) {
 #' @keywords internal
 #' @noRd
 sample_metrics <- function(counts, probes, samples) {
-  names <- probes[["Name"]]
+  probe_names <- probes[["Name"]]
   code_class <- probes[["CodeClass"]]
   positive <- code_class == "Positive"
-  pos_e <- which(positive & grepl("POS_E", names))
+  pos_e <- which(positive & grepl("POS_E", probe_names))
   if (length(pos_e) == 1) {
-    pcl <- sample_pcl(counts[positive, , drop = FALSE], names[positive])
+    pcl <- sample_pcl(counts[positive, , drop = FALSE], probe_names[positive])
     lod <- sample_lod(
       counts[pos_e, , drop = FALSE],
       counts[code_class == "Negative", , drop = FALSE]
