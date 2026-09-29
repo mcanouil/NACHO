@@ -15,6 +15,7 @@ install_log <- system2(
 )
 if (!is.null(attr(install_log, "status")) && attr(install_log, "status") != 0) {
   cat(install_log, sep = "\n")
+  unlink(lib, recursive = TRUE)
   stop("R CMD INSTALL failed while building GSE74821.")
 }
 library(NACHO, lib.loc = lib)
@@ -54,3 +55,4 @@ GSE74821 <- NACHO::load_rcc(
 )
 GSE74821@provenance[["data_directory"]] <- NULL
 save(GSE74821, file = file.path("data", "GSE74821.rda"), compress = "xz")
+unlink(lib, recursive = TRUE)
