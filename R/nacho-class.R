@@ -1,4 +1,6 @@
 #' @include qc.R
+NULL
+
 #' The nacho class
 #'
 #' NACHO stores RCC data, quality-control metrics and normalised counts in an
