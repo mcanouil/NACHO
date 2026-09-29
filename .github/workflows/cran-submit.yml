@@ -93,7 +93,9 @@ jobs:
           Rscript -e 'path <- pkgbuild::build(".", dest_path = "cran", manual = TRUE); cat("tarball=", path, "\n", sep = "", file = Sys.getenv("GITHUB_OUTPUT"), append = TRUE)'
 
       - name: Install HTML Tidy
-        run: sudo apt-get install -y tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tidy
 
       - name: Run R CMD check --as-cran
         env:
