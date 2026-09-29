@@ -89,10 +89,12 @@ test_that("the Housekeeping plot of a toy object without housekeeping genes is n
 })
 
 test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable", {
-  expect_warning(
-    autoplot(plexset_nacho, type = "PCL"),
-    class = "nacho_warning_metric_unavailable"
-  )
+  for (type in c("PCL", "LoD")) {
+    expect_warning(
+      autoplot(plexset_nacho, type = type),
+      class = "nacho_warning_metric_unavailable"
+    )
+  }
 })
 
 muffle_unavailable <- function(expr) {
