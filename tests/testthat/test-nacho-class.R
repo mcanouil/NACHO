@@ -19,11 +19,58 @@ test_that("the validator refuses duplicated or misaligned sample ids", {
   expect_error(x@samples <- samples, "must match")
 })
 
+test_that("the validator reports duplicated sample ids", {
+  x <- toy_nacho()
+  ids <- c("S01.RCC", "S01.RCC", "S03.RCC", "S04.RCC")
+  samples <- x@samples
+  samples$IDFILE <- ids
+  counts <- x@counts
+  colnames(counts) <- ids
+  expect_error(
+    NACHO:::nacho(
+      counts = counts,
+      normalised = counts * 1,
+      probes = x@probes,
+      samples = samples,
+      settings = x@settings,
+      thresholds = x@thresholds,
+      pca = list(),
+      rcc_type = x@rcc_type,
+      provenance = x@provenance
+    ),
+    "Sample ids must be unique"
+  )
+})
+
 test_that("the validator refuses probes that do not match the counts", {
   x <- toy_nacho()
   probes <- x@probes
   probes$Name[1] <- "OTHER"
   expect_error(x@probes <- probes, "must match")
+})
+
+test_that("the validator reports duplicated probe names", {
+  x <- toy_nacho()
+  probes <- x@probes
+  probes$Name[2] <- probes$Name[1]
+  counts <- x@counts
+  rownames(counts) <- probes$Name
+  normalised <- x@normalised
+  rownames(normalised) <- probes$Name
+  expect_error(
+    NACHO:::nacho(
+      counts = counts,
+      normalised = normalised,
+      probes = probes,
+      samples = x@samples,
+      settings = x@settings,
+      thresholds = x@thresholds,
+      pca = x@pca,
+      rcc_type = x@rcc_type,
+      provenance = x@provenance
+    ),
+    "Probe names must be unique"
+  )
 })
 
 test_that("the validator refuses insane thresholds", {
