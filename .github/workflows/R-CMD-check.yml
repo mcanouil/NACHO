@@ -57,7 +57,9 @@ jobs:
 
       - name: Install HTML Tidy
         if: runner.os == 'Linux'
-        run: sudo apt-get install -y tidy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tidy
 
       - uses: r-lib/actions/check-r-package@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
         with:
