@@ -58,12 +58,14 @@ test_that("upgrade_nacho() and read_nacho() name an infinite LoD", {
   attr(x, "thresholds") <- thresholds
   path <- withr::local_tempfile(fileext = ".rds")
   saveRDS(x, path)
-  error <- expect_error(read_nacho(path), class = "nacho_error_bad_argument")
+  error <- expect_error(read_nacho(path), class = "nacho_error_bad_object")
   expect_match(
     conditionMessage(error),
     "set a finite LoD, or -Inf",
     fixed = TRUE
   )
+  expect_match(conditionMessage(error), basename(path), fixed = TRUE)
+  expect_match(conditionMessage(error), "saveRDS", fixed = TRUE)
 })
 
 test_that("upgrade_nacho() leaves NACHO 3 objects alone and refuses anything else", {

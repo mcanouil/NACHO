@@ -76,44 +76,44 @@ report_markdown <- function(
     x@settings[["n_comp"]],
     "\n"
   )
-  cat(
-    "\n",
-    "    + ",
-    "Binding Density (BD) <",
-    round(thresholds[["BD"]][1], 3),
-    "\n",
-    "    + ",
-    "Binding Density (BD) >",
-    round(thresholds[["BD"]][2], 3),
-    "\n",
-    "    + ",
-    "Field of View (FoV) <",
-    round(thresholds[["FoV"]], 3),
-    "\n",
-    "    + ",
-    "Positive Control Linearity (PCL) <",
-    round(thresholds[["PCL"]], 3),
-    "\n",
-    "    + ",
-    "Limit of Detection (LoD) <",
-    round(thresholds[["LoD"]], 3),
-    "\n",
-    "    + ",
-    "Positive normalisation factor (Positive_factor) <",
-    round(thresholds[["Positive_factor"]][1], 3),
-    "\n",
-    "    + ",
-    "Positive normalisation factor (Positive_factor) >",
-    round(thresholds[["Positive_factor"]][2], 3),
-    "\n",
-    "    + ",
-    "Housekeeping normalisation factor (house_factor) <",
-    round(thresholds[["House_factor"]][1], 3),
-    "\n",
-    "    + ",
-    "Housekeeping normalisation factor (house_factor) >",
-    round(thresholds[["House_factor"]][2], 3),
-    "\n"
+  threshold_lines <- list(
+    list("Binding Density (BD) <", thresholds[["BD"]][1]),
+    list("Binding Density (BD) >", thresholds[["BD"]][2]),
+    list("Field of View (FoV) <", thresholds[["FoV"]]),
+    list("Positive Control Linearity (PCL) <", thresholds[["PCL"]]),
+    list("Limit of Detection (LoD) <", thresholds[["LoD"]]),
+    list(
+      "Positive normalisation factor (Positive_factor) <",
+      thresholds[["Positive_factor"]][1]
+    ),
+    list(
+      "Positive normalisation factor (Positive_factor) >",
+      thresholds[["Positive_factor"]][2]
+    ),
+    list(
+      "Housekeeping normalisation factor (house_factor) <",
+      thresholds[["House_factor"]][1]
+    ),
+    list(
+      "Housekeeping normalisation factor (house_factor) >",
+      thresholds[["House_factor"]][2]
+    )
+  )
+  threshold_lines <- Filter(
+    function(line) is.finite(line[[2]]),
+    threshold_lines
+  )
+  do.call(
+    cat,
+    c(
+      list("\n"),
+      unlist(
+        lapply(threshold_lines, function(line) {
+          list("    + ", line[[1]], round(line[[2]], 3), "\n")
+        }),
+        recursive = FALSE
+      )
+    )
   )
 
   details <- vapply(

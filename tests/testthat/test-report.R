@@ -44,6 +44,21 @@ test_that("numeric column for colour", {
   )
 })
 
+test_that("the report leaves out open threshold bounds", {
+  x <- toy_nacho(4L)
+  thresholds <- x@thresholds
+  thresholds$BD <- c(-Inf, 2.25)
+  thresholds$House_factor <- c(1 / 11, Inf)
+  thresholds$LoD <- -Inf
+  x@thresholds <- thresholds
+  output <- utils::capture.output(NACHO:::report_markdown(x))
+  expect_false(any(grepl("Inf", output, fixed = TRUE)))
+  expect_length(grep("Binding Density (BD)", output, fixed = TRUE), 1L)
+  expect_length(grep("Limit of Detection (LoD) <", output, fixed = TRUE), 0L)
+  expect_length(grep("(house_factor) <", output, fixed = TRUE), 1L)
+  expect_length(grep("(house_factor) >", output, fixed = TRUE), 0L)
+})
+
 test_that("the settings list the housekeeping genes, or none", {
   housekeeping_line <- function(is_housekeeping) {
     toy <- toy_nacho(4L)

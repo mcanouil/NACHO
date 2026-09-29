@@ -74,13 +74,18 @@ summary_nacho <- function(object, ...) {
   }
   metrics <- intersect(metrics, names(object@samples))
   thresholds <- object@thresholds
+  bound <- function(value) if (is.finite(value)) value else NA_real_
   data.frame(
     metric = metrics,
-    lower = vapply(metrics, function(m) min(thresholds[[m]]), numeric(1)),
+    lower = vapply(metrics, function(m) bound(thresholds[[m]][1]), numeric(1)),
     upper = vapply(
       metrics,
       function(m) {
-        if (length(thresholds[[m]]) == 2) max(thresholds[[m]]) else NA_real_
+        if (length(thresholds[[m]]) == 2) {
+          bound(thresholds[[m]][2])
+        } else {
+          NA_real_
+        }
       },
       numeric(1)
     ),

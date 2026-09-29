@@ -25,6 +25,22 @@ test_that("summary() counts failures per metric", {
   expect_identical(summary_table$n_fail[summary_table$metric == "BD"], 1L)
 })
 
+test_that("summary() shows an open bound as NA", {
+  x <- toy_nacho()
+  thresholds <- x@thresholds
+  thresholds$BD <- c(-Inf, 2.25)
+  thresholds$House_factor <- c(1 / 11, Inf)
+  thresholds$LoD <- -Inf
+  x@thresholds <- thresholds
+  summary_table <- summary(x)
+  row <- function(metric) summary_table[summary_table$metric == metric, ]
+  expect_true(is.na(row("BD")$lower))
+  expect_identical(row("BD")$upper, 2.25)
+  expect_true(is.na(row("LoD")$lower))
+  expect_true(all(is.finite(summary_table$lower) | is.na(summary_table$lower)))
+  expect_true(all(is.finite(summary_table$upper) | is.na(summary_table$upper)))
+})
+
 test_that("as.data.frame() gives the samples or the long layout", {
   x <- toy_nacho()
   expect_identical(as.data.frame(x), nacho_samples(x))

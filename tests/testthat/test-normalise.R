@@ -292,6 +292,40 @@ test_that("normalise() accepts open bounds and refuses closed infinite ones", {
   )
 })
 
+test_that("an open bound stops flagging the samples beyond it", {
+  open_bounds <- list(
+    BD = c(-Inf, Inf),
+    FoV = 0,
+    LoD = -Inf,
+    PCL = 0,
+    Positive_factor = c(-Inf, Inf),
+    House_factor = c(-Inf, Inf)
+  )
+  flags <- function(thresholds) {
+    x <- suppressMessages(normalise(
+      GSE74821,
+      outliers_thresholds = thresholds
+    ))
+    nacho_qc(x)$is_outlier
+  }
+  qc <- nacho_qc(GSE74821)
+  expect_false(any(flags(open_bounds)))
+
+  house <- open_bounds
+  house$House_factor <- c(1, 1)
+  expect_true(any(flags(house)))
+  house$House_factor <- c(1, Inf)
+  expect_identical(flags(house), qc$House_factor < 1)
+  house$House_factor <- c(-Inf, 1)
+  expect_identical(flags(house), qc$House_factor > 1)
+
+  lod <- open_bounds
+  lod$LoD <- stats::median(qc$LoD)
+  expect_true(any(flags(lod)))
+  lod$LoD <- -Inf
+  expect_false(any(flags(lod)))
+})
+
 test_that("exclude_outliers() drops every flagged sample and normalises the rest", {
   tight <- plexset_nacho@thresholds
   tight$Positive_factor <- c(0.9, 1.1)

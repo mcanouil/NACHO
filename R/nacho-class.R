@@ -9,6 +9,25 @@
 #' @noRd
 nacho_schema_version <- 1L
 
+bounds_problem <- function(name, value) {
+  if (!is.numeric(value) || length(value) != 2 || anyNA(value)) {
+    return(sprintf(
+      "@thresholds$%s must be two numbers, a lower and an upper bound.",
+      name
+    ))
+  }
+  problem <- if (value[1] == Inf || value[2] == -Inf) {
+    "-Inf is only allowed as the lower bound and Inf only as the upper bound."
+  } else if (value[1] < 0 && value[1] != -Inf) {
+    "the lower bound must not be negative; use -Inf for no lower bound."
+  } else if (value[2] < 0) {
+    "the upper bound must not be negative."
+  } else if (value[1] > value[2]) {
+    "the bounds must be increasing."
+  }
+  if (!is.null(problem)) sprintf("@thresholds$%s: %s", name, problem)
+}
+
 validate_thresholds <- function(thresholds) {
   required <- names(default_thresholds())
   missing_names <- setdiff(required, names(thresholds))
@@ -20,24 +39,7 @@ validate_thresholds <- function(thresholds) {
   }
   problems <- character(0)
   for (name in c("BD", "Positive_factor", "House_factor")) {
-    value <- thresholds[[name]]
-    if (
-      !is.numeric(value) ||
-        length(value) != 2 ||
-        anyNA(value) ||
-        value[1] == Inf ||
-        value[2] < 0 ||
-        (value[1] < 0 && value[1] != -Inf) ||
-        value[1] > value[2]
-    ) {
-      problems <- c(
-        problems,
-        sprintf(
-          "@thresholds$%s must be two increasing non-negative numbers, with -Inf or Inf for no bound.",
-          name
-        )
-      )
-    }
+    problems <- c(problems, bounds_problem(name, thresholds[[name]]))
   }
   lod <- thresholds[["LoD"]]
   if (!is.numeric(lod) || length(lod) != 1 || is.na(lod) || lod == Inf) {

@@ -206,6 +206,16 @@ read_nacho <- function(path) {
     properties[["provenance"]][["schema_version"]],
     subject = cli::format_inline("{.file {path}}")
   )
-  check_thresholds(properties[["thresholds"]], arg = "@thresholds")
+  problems <- validate_thresholds(properties[["thresholds"]])
+  if (length(problems) > 0) {
+    nacho_abort(
+      c(
+        "{.file {path}} holds thresholds that NACHO 3 refuses.",
+        stats::setNames(problems, rep("x", length(problems))),
+        i = "Change {.code attr(x, \"thresholds\")} after {.fn readRDS}, then save it with {.fn saveRDS}."
+      ),
+      class = "bad_object"
+    )
+  }
   do.call(nacho, properties)
 }
