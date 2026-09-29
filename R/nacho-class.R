@@ -1,7 +1,7 @@
 #' @include qc.R
 NULL
 
-#' Schema version of the fields stored in @provenance
+#' Schema version of the fields stored in `@provenance`
 #'
 #' @noRd
 nacho_schema_version <- 1L

@@ -19,7 +19,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/autoplot.R`,
   - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
 - In `R/render.R`,
-  - fix: `render()`'s `clean` argument is gone; the working files now live in a temporary folder.
+  - feat: `render()`'s `clean` argument is gone; the working files now live in a temporary folder.
 - In `R/deploy.R`,
   - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
 - In `DESCRIPTION`,
