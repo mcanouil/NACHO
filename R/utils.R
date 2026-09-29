@@ -14,7 +14,6 @@ NULL
 #' Maps `-Inf` and `Inf` to themselves, so shaded bands can extend
 #' to the panel edges on a log-10 axis without triggering a warning.
 #'
-#' @keywords internal
 #' @noRd
 #'
 #' @return A `transform` object from [scales::new_transform()].
@@ -43,7 +42,6 @@ transform_log10_infinite <- function() {
 #' The app ships the logo, and `system.file()` finds it both in an installed
 #' package and in a source tree loaded with `pkgload::load_all()`.
 #'
-#' @keywords internal
 #' @noRd
 #'
 #' @return A `character` path to `nacho_hex.png`.
@@ -63,7 +61,6 @@ logo_path <- function() {
 #' PlexSet samples are named `<file>_S1` to `<file>_S8`. Lane-level plots
 #' group the eight samples of a lane back under their file name.
 #'
-#' @keywords internal
 #' @noRd
 #'
 #' @return A copy of `data` with the suffix removed from `id_colname`.
@@ -75,7 +72,6 @@ strip_plexset_suffix <- function(data, id_colname) {
 
 #' Move a column to the front of a data frame
 #'
-#' @keywords internal
 #' @noRd
 column_first <- function(data, column) {
   data[, c(column, setdiff(names(data), column)), drop = FALSE]

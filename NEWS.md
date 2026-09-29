@@ -12,10 +12,14 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: Errors, warnings and messages now use cli and carry classes such as `nacho_error_bad_argument`, so code can catch them selectively.
 - In `R/load_rcc.R`,
   - feat: `load_rcc()` refuses duplicated sample ids for single-sample RCC files; PlexSet files may repeat an id, since `plexset_id` tells the samples apart.
+  - feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
+  - feat: Duplicated probe names within one RCC sample are now refused with a clear error.
 - In `R/normalise.R`,
   - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
 - In `R/autoplot.R`,
   - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
+- In `R/render.R`,
+  - fix: `render()`'s `clean` argument is gone; the working files now live in a temporary folder.
 - In `R/deploy.R`,
   - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
 - In `DESCRIPTION`,
@@ -36,8 +40,6 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/load_rcc.R`,
   - feat: `load_rcc()` and `normalise()` check their arguments before reading any file.
   - feat: `load_rcc()` reads gzipped RCC files directly and accepts files with Windows line endings.
-  - feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
-  - feat: Duplicated probe names within one RCC sample are now refused with a clear error.
 - In `R/normalise.R`,
   - feat: `normalise()` checks `outliers_thresholds` before it runs, and `check_outliers()` recomputes `is_outlier` from the object's thresholds.
 - In `R/autoplot.R`,
@@ -56,7 +58,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/autoplot.R`,
   - fix: `autoplot()` now draws samples whose outlier flag is missing as ordinary points, where NACHO 2 left them out of the plot.
 - In `R/render.R`,
-  - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`, and its `clean` argument is gone because the working files now live in a temporary folder.
+  - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`.
 - In `inst/app/`,
   - fix: The app detects PlexSet files from their exact code classes.
 - In `R/read_rcc.R`,

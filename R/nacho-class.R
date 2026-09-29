@@ -1,13 +1,8 @@
 #' @include qc.R
 NULL
 
-#' The nacho class
+#' Schema version of the fields stored in @provenance
 #'
-#' NACHO stores RCC data, quality-control metrics and normalised counts in an
-#' S7 object. Reach its content through [nacho_counts()], [nacho_samples()],
-#' [nacho_probes()] and [nacho_qc()], never through `@`.
-#'
-#' @keywords internal
 #' @noRd
 nacho_schema_version <- 1L
 
@@ -155,6 +150,13 @@ validate_nacho <- function(self) {
   if (length(problems) == 0) NULL else problems
 }
 
+#' The nacho class
+#'
+#' NACHO stores RCC data, quality-control metrics and normalised counts in an
+#' S7 object. Reach its content through [nacho_counts()], [nacho_samples()],
+#' [nacho_probes()] and [nacho_qc()], never through `@`.
+#'
+#' @noRd
 nacho <- S7::new_class(
   name = "nacho",
   package = "NACHO",

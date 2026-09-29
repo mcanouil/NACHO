@@ -9,7 +9,6 @@ NULL
 #' @param x A `nacho` object.
 #' @param rows Probe row indices to keep; `NULL` keeps every probe.
 #'
-#' @keywords internal
 #' @noRd
 long_table <- function(x, rows = NULL) {
   if (is.null(rows)) {

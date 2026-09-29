@@ -6,7 +6,6 @@
 #'
 #' @param file Path to an `.RCC` or `.RCC.gz` file.
 #'
-#' @keywords internal
 #' @noRd
 read_rcc <- function(file) {
   lines <- trim_trailing_space(readLines(file, warn = FALSE))
@@ -109,7 +108,6 @@ strip_probe_suffix <- function(probe_names) {
 #'
 #' @param lines A character vector.
 #'
-#' @keywords internal
 #' @noRd
 trim_trailing_space <- function(lines) {
   last_character <- substring(lines, nchar(lines))
@@ -124,7 +122,6 @@ trim_trailing_space <- function(lines) {
 #'
 #' @param code_class A character vector, the `CodeClass` column of a `Code_Summary` section.
 #'
-#' @keywords internal
 #' @noRd
 is_plexset_classes <- function(code_class) {
   all(paste0("Endogenous", seq_len(8), "s") %in% code_class)
@@ -137,7 +134,6 @@ is_plexset_classes <- function(code_class) {
 #'
 #' @param file Path to an `.RCC` or `.RCC.gz` file.
 #'
-#' @keywords internal
 #' @noRd
 #'
 #' @return `TRUE` when the file holds all eight PlexSet code classes,
@@ -155,7 +151,6 @@ is_plexset_rcc <- function(file) {
 #'
 #' @param parsed The output of `read_rcc()`.
 #'
-#' @keywords internal
 #' @noRd
 rcc_samples <- function(parsed) {
   code_summary <- parsed[["code_summary"]]
