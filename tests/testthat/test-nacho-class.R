@@ -26,20 +26,17 @@ test_that("the validator reports duplicated sample ids", {
   samples$IDFILE <- ids
   counts <- x@counts
   colnames(counts) <- ids
-  expect_error(
-    NACHO:::nacho(
+  err <- expect_error(
+    S7::set_props(
+      x,
+      samples = samples,
       counts = counts,
       normalised = counts * 1,
-      probes = x@probes,
-      samples = samples,
-      settings = x@settings,
-      thresholds = x@thresholds,
-      pca = list(),
-      rcc_type = x@rcc_type,
-      provenance = x@provenance
+      pca = list()
     ),
     "Sample ids must be unique"
   )
+  expect_match(conditionMessage(err), "S01.RCC", fixed = TRUE)
 })
 
 test_that("the validator refuses probes that do not match the counts", {
@@ -58,16 +55,11 @@ test_that("the validator reports duplicated probe names", {
   normalised <- x@normalised
   rownames(normalised) <- probes$Name
   expect_error(
-    NACHO:::nacho(
-      counts = counts,
-      normalised = normalised,
+    S7::set_props(
+      x,
       probes = probes,
-      samples = x@samples,
-      settings = x@settings,
-      thresholds = x@thresholds,
-      pca = x@pca,
-      rcc_type = x@rcc_type,
-      provenance = x@provenance
+      counts = counts,
+      normalised = normalised
     ),
     "Probe names must be unique"
   )
