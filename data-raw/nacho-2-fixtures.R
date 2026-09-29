@@ -40,7 +40,7 @@ write_fixtures <- function(source_ref = "v2.0.7") {
     add = TRUE
   )
   # install_nacho() is defined by the source() call above.
-  nacho <- install_nacho(source_dir, attach = FALSE) # nolint: object_usage_linter.
+  nacho <- install_nacho(source_dir) # nolint: object_usage_linter.
   on.exit(nacho$cleanup(), add = TRUE)
   stopifnot(utils::packageVersion("NACHO", lib.loc = nacho$lib) == "2.0.7")
   fixtures <- file.path("tests", "testthat", "fixtures")

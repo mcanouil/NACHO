@@ -2,20 +2,22 @@
 #
 # Installs NACHO from `source_dir` (a package source directory, "." for this
 # working tree, or a git worktree checked out at another ref) into a fresh
-# temporary library, then loads it: attached with library() when `attach` is
-# TRUE, or namespace-only with loadNamespace() otherwise.
+# temporary library, then loads its namespace with loadNamespace(), never
+# attached to the search path, so callers must qualify every use with
+# NACHO::.
 # Returns a list with the library path and a `cleanup()` function that
-# detaches or unloads only what this call itself loaded, removes the
+# unloads the namespace only when this call itself loaded it, removes the
 # temporary library and warns if that fails, and restores
 # `R_KEEP_PKG_SOURCE`. Callers must run `cleanup()` from their own
 # `on.exit()`, right after calling this function, so every exit path cleans
 # up.
 
-install_nacho <- function(source_dir = ".", attach = TRUE) {
-  if (attach && "package:NACHO" %in% search()) {
+install_nacho <- function(source_dir = ".") {
+  if (isNamespaceLoaded("NACHO")) {
     stop(
-      "package:NACHO is already attached; the temporary-library guarantee ",
-      "cannot hold. Detach it before running this script.",
+      "The NACHO namespace is already loaded; loadNamespace() would ignore ",
+      "lib.loc and reuse it, so the temporary-library guarantee cannot ",
+      "hold. Unload it before running this script.",
       call. = FALSE
     )
   }
@@ -59,18 +61,11 @@ install_nacho <- function(source_dir = ".", attach = TRUE) {
     )
   }
 
-  if (attach) {
-    library(NACHO, lib.loc = lib)
-  } else {
-    loadNamespace("NACHO", lib.loc = lib)
-  }
+  loadNamespace("NACHO", lib.loc = lib)
+  loaded_here <- TRUE
 
   cleanup <- function() {
-    if (attach) {
-      if ("package:NACHO" %in% search()) {
-        detach("package:NACHO", unload = TRUE, character.only = TRUE)
-      }
-    } else if (isNamespaceLoaded("NACHO")) {
+    if (loaded_here && isNamespaceLoaded("NACHO")) {
       unloadNamespace("NACHO")
     }
     if (unlink(lib, recursive = TRUE) != 0) {

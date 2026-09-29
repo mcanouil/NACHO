@@ -365,14 +365,14 @@ predict_housekeeping <- function(
 #'
 #' @keywords internal
 #' @noRd
-sample_pcl <- function(positives, names) {
+sample_pcl <- function(positives, probe_names) {
   zero <- colSums(positives == 0, na.rm = TRUE) > 0
   measured <- log2(positives)
   measured[, zero] <- log2(positives[, zero, drop = FALSE] + 1)
   known <- log2(suppressWarnings(as.numeric(sub(
     "^[^(]*\\((.*)\\)$",
     "\\1",
-    names
+    probe_names
   ))))
   round(
     apply(measured, 2, function(m) {

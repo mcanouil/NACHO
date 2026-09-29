@@ -1,6 +1,7 @@
 # Writes the frozen schema-1 object that later NACHO versions must still
 # read.
 # Run once; never regenerate it, because its value is that it stays old.
+# Run from the repository root: Rscript data-raw/frozen-nacho.R
 
 # Build from an installed NACHO, not pkgload::load_all(), so the saved
 # object carries no source references to this working tree or a temp
@@ -12,7 +13,8 @@ build_frozen_nacho <- function() {
   nacho <- install_nacho(".") # nolint: object_usage_linter.
   on.exit(nacho$cleanup(), add = TRUE)
 
-  options(nacho.quiet = TRUE)
+  old_options <- options(nacho.quiet = TRUE)
+  on.exit(options(old_options), add = TRUE)
   dir <- file.path("inst", "extdata", "GSE178516")
   x <- NACHO::load_rcc(
     dir,

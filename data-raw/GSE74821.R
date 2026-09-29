@@ -1,5 +1,5 @@
 #' GSE74821
-library(GEOquery)
+# Run from the repository root: Rscript data-raw/GSE74821.R
 
 # Build from an installed NACHO, not pkgload::load_all(), so the saved
 # object carries no source references to this working tree or a temp
