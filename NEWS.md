@@ -1,12 +1,30 @@
 # NACHO (development version)
 
-## New features
+## Breaking changes
+
+NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho()` and `read_nacho()`.
 
 - In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
   - feat: `load_rcc()` and `normalise()` return an S7 `nacho` object. Read it with `nacho_counts()`, `nacho_samples()`, `nacho_probes()` and `nacho_qc()`; the `$nacho` long table and the other list slots are gone, and `as.data.frame(x, long = TRUE)` gives the long layout.
-  - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.
   - feat: `print()` shows a short summary; the full report stays in `render()`.
   - feat: The load path of the data moves to the object's provenance and is no longer stored in `GSE74821`.
+- In `R/conditions.R`,
+  - feat: Errors, warnings and messages now use cli and carry classes such as `nacho_error_bad_argument`, so code can catch them selectively.
+- In `R/load_rcc.R`,
+  - feat: `load_rcc()` refuses duplicated sample ids for single-sample RCC files; PlexSet files may repeat an id, since `plexset_id` tells the samples apart.
+- In `R/normalise.R`,
+  - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
+- In `R/autoplot.R`,
+  - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
+- In `R/deploy.R`,
+  - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
+- In `DESCRIPTION`,
+  - build: NACHO now requires R 4.3 or newer.
+
+## New features
+
+- In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
+  - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.
 - In `R/read_nacho.R`,
   - feat: `upgrade_nacho()` converts a NACHO 2 object, and `read_nacho()` reads a saved object from any NACHO version.
 - In `R/interop.R`,
@@ -14,7 +32,6 @@
 - In `R/qc.R`,
   - feat: Quality control runs on data without lane attributes; the metrics that need them are `NA`, with one warning.
 - In `R/conditions.R`,
-  - feat: Errors, warnings and messages now use cli and carry classes such as `nacho_error_bad_argument`, so code can catch them selectively.
   - feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
 - In `R/load_rcc.R`,
   - feat: `load_rcc()` and `normalise()` check their arguments before reading any file.
@@ -22,13 +39,9 @@
   - feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
   - feat: Duplicated probe names within one RCC sample are now refused with a clear error.
 - In `R/normalise.R`,
-  - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
   - feat: `normalise()` checks `outliers_thresholds` before it runs, and `check_outliers()` recomputes `is_outlier` from the object's thresholds.
 - In `R/autoplot.R`,
-  - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
   - feat: `autoplot()` checks that `colour` and `outliers_labels` name columns of `nacho_samples()`, and `outliers_labels` must be a column name.
-- In `R/deploy.R`,
-  - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
 
 ## Performance
 
@@ -69,11 +82,6 @@
     `normalise()`, `upgrade_nacho()`, `read_nacho()` and the `nacho` validator refuse `NaN`, an `Inf` lower bound, a negative upper bound and an `Inf` `LoD` with a classed error.
     A saved object with `LoD = Inf` must have it changed to a finite value or `-Inf` before it can be read.
     `autoplot()` draws no threshold line for an open bound, `summary()` shows it as `NA`, and the report leaves it out.
-
-## Dependencies
-
-- In `DESCRIPTION`,
-  - build: NACHO now requires R 4.3 or newer.
 
 # NACHO 2.0.7
 
