@@ -702,13 +702,11 @@ build_nacho <- function(
   if (!is.null(house_factor)) {
     metrics[["House_factor"]] <- unname(house_factor)
   }
-  metrics[["Housekeeping_detected"]] <- if (length(housekeeping_genes) == 0) {
+  housekeeping_rows <- probes[["Name"]] %in% housekeeping_genes
+  metrics[["Housekeeping_detected"]] <- if (!any(housekeeping_rows)) {
     NA_integer_
   } else {
-    found <- colSums(
-      hits[probes[["Name"]] %in% housekeeping_genes, , drop = FALSE],
-      na.rm = TRUE
-    )
+    found <- colSums(hits[housekeeping_rows, , drop = FALSE], na.rm = TRUE)
     found[no_limit] <- NA
     unname(as.integer(found))
   }

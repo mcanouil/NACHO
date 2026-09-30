@@ -41,6 +41,9 @@ detected <- function(counts, limits) {
 #' A gene's detection rate is the share of the samples with a detection limit
 #' in which it is detected, so a sample with fewer than two negative probes
 #' does not count.
+#' Endogenous genes whose detection rate is missing, because every sample with
+#' a detection limit has a missing count for them, are dropped, even with
+#' `min_rate = 0`.
 #' An object without endogenous genes comes back unchanged.
 #' When no sample has a detection limit, `filter_detected()` stops with an
 #' error.

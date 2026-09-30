@@ -34,9 +34,9 @@ holds the sample ids, and the PCA scores come last (\code{PC01}, \code{PC02}, ..
 \code{Housekeeping_detected} (the number of housekeeping genes detected) are
 \code{NA} for a sample without a detection limit.
 \item \code{nacho_probes()}: a data frame with one row per probe: \code{CodeClass},
-\code{Name}, \code{Accession}, \code{is_housekeeping}, \code{is_excluded} and
-\code{detection_rate} (the share of samples with a detection limit in which
-the probe is above it).
+\code{Name}, \code{Accession}, \code{detection_rate} (the share of samples with a
+detection limit in which the probe is above it), \code{is_housekeeping} and
+\code{is_excluded}.
 \item \code{nacho_qc()}: a data frame with one row per sample: the id, \code{lane},
 \code{CartridgeID}, each quality-control metric with its status (\code{"pass"},
 \code{"fail"} or \code{NA} when it cannot be assessed), the other factors,

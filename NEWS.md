@@ -70,7 +70,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `nacho_qc()` flags samples with too few housekeeping genes above background, following Bruker's RNA content check.
     The count is in `Housekeeping_detected`, and the nSolver preset flags a sample below 3, while the legacy preset uses 0 and never flags.
   - feat: A sample without a detection limit, because it has fewer than two negative probes with counts, gets a missing `Detection_rate` and `Housekeeping_detected`.
-    `load_rcc()` and `normalise()` then give one `metric_unavailable` warning that names the samples.
+    `load_rcc()` then gives one `metric_unavailable` warning that names the samples.
 - In `R/conditions.R`,
   - feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
 - In `R/load_rcc.R`,

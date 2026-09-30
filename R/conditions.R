@@ -141,8 +141,17 @@ check_proportion <- function(
   call = rlang::caller_env()
 ) {
   if (!is.numeric(x) || length(x) != 1 || is.na(x) || x < 0 || x > 1) {
+    found <- if (is.numeric(x) && length(x) == 1) {
+      "{.val {x}}"
+    } else {
+      "{.obj_type_friendly {x}}"
+    }
     nacho_abort(
-      "{.arg {arg}} must be one number between 0 and 1, not {.obj_type_friendly {x}}.",
+      paste0(
+        "{.arg {arg}} must be one number between 0 and 1, not ",
+        found,
+        "."
+      ),
       class = "bad_argument",
       call = call
     )

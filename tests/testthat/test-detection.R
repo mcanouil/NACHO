@@ -91,6 +91,11 @@ test_that("check_proportion() accepts numbers from 0 to 1 only", {
     class = "nacho_error_bad_argument"
   )
   expect_error(
+    NACHO:::check_proportion(2),
+    "not 2",
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
     NACHO:::check_proportion(NA_real_),
     class = "nacho_error_bad_argument"
   )
@@ -257,4 +262,11 @@ test_that("filter_detected() returns an object without endogenous genes unchange
   keep <- which(GSE74821@probes$CodeClass != "Endogenous")
   x <- suppressWarnings(GSE74821[keep, ])
   expect_identical(filter_detected(x), x)
+})
+
+test_that("Housekeeping_detected is NA when no housekeeping gene matches a probe", {
+  x <- GSE74821
+  x@settings$housekeeping_genes <- "NOT_A_PROBE"
+  built <- suppressWarnings(rebuild_with_counts(x, x@counts, x@probes))
+  expect_true(all(is.na(nacho_samples(built)$Housekeeping_detected)))
 })
