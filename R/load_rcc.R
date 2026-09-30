@@ -278,7 +278,6 @@ load_rcc <- function(
 #' @return `housekeeping_norm`, set to `FALSE` with a warning when there are
 #'   no `Housekeeping` probes, no `housekeeping_genes` and no prediction.
 #'
-#' @keywords internal
 #' @noRd
 resolve_housekeeping_norm <- function(
   code_class,
@@ -321,7 +320,6 @@ resolve_housekeeping_norm <- function(
 #' @return A list with `probes`, the unique probes ordered by code class then
 #'   name, and `counts`, an integer matrix of probes by samples.
 #'
-#' @keywords internal
 #' @noRd
 build_probe_counts <- function(
   codes,

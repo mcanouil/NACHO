@@ -1,6 +1,5 @@
 #' Quality-control thresholds used by NACHO 2
 #'
-#' @keywords internal
 #' @noRd
 default_thresholds <- function() {
   list(
@@ -22,7 +21,6 @@ default_thresholds <- function() {
 #' @param probes The probe table, with a `CodeClass` column.
 #' @param id_colname The name of the sample id column.
 #'
-#' @keywords internal
 #' @noRd
 default_settings <- function(probes, id_colname) {
   list(
@@ -40,7 +38,6 @@ default_settings <- function(probes, id_colname) {
 #' Two limits give a range; one limit is a lower bound.
 #' Missing values never fail.
 #'
-#' @keywords internal
 #' @noRd
 metric_fails <- function(values, limits) {
   if (length(limits) == 2) {
@@ -55,7 +52,6 @@ metric_fails <- function(values, limits) {
 #' PCL and LoD are not flagged for PlexSet files, whose controls are shared by
 #' the eight samples of a lane.
 #'
-#' @keywords internal
 #' @noRd
 compute_outliers <- function(samples, thresholds, rcc_type) {
   metrics <- c(
@@ -82,7 +78,6 @@ compute_outliers <- function(samples, thresholds, rcc_type) {
 #' `eigen()` returns eigenvectors of arbitrary sign that can otherwise differ
 #' between machines.
 #'
-#' @keywords internal
 #' @noRd
 compute_pca <- function(counts, n_comp) {
   hint <- "This is an internal error in NACHO; the object settings may have been changed through {.code @}."
@@ -180,7 +175,6 @@ compute_pca <- function(counts, n_comp) {
 #' Each column is flipped, if needed, so the score with the largest absolute
 #' value is positive; the first such sample wins a tie.
 #'
-#' @keywords internal
 #' @noRd
 fix_pca_signs <- function(scores) {
   for (component in seq_len(ncol(scores))) {
@@ -194,7 +188,6 @@ fix_pca_signs <- function(scores) {
 
 #' Record where an object comes from
 #'
-#' @keywords internal
 #' @noRd
 new_provenance <- function(data_directory, file_version, software_version) {
   list(
@@ -209,7 +202,6 @@ new_provenance <- function(data_directory, file_version, software_version) {
 
 #' Sample columns computed by the quality-control pipeline
 #'
-#' @keywords internal
 #' @noRd
 computed_sample_columns <- c(
   "Date",
@@ -233,7 +225,6 @@ computed_sample_columns <- c(
 #'
 #' Zeros count as 1 and missing probes are ignored.
 #'
-#' @keywords internal
 #' @noRd
 geometric_means <- function(m) {
   m[m == 0] <- 1
@@ -245,7 +236,6 @@ geometric_means <- function(m) {
 #' A probe is excluded when its median is more than 50 % away from the median
 #' of every negative count; when every probe would be excluded, none is.
 #'
-#' @keywords internal
 #' @noRd
 excluded_negatives <- function(counts, code_class) {
   negatives <- counts[code_class == "Negative", , drop = FALSE]
@@ -263,7 +253,6 @@ excluded_negatives <- function(counts, code_class) {
 #' Read from the name, for example `POS_A(128)`, or 0 for negatives and 32 for
 #' positives when some names carry no concentration.
 #'
-#' @keywords internal
 #' @noRd
 control_concentrations <- function(probe_names) {
   pattern <- "^[^(]*\\((.*)\\)$"
@@ -275,7 +264,6 @@ control_concentrations <- function(probe_names) {
 
 #' Positive and negative normalisation factors of each sample
 #'
-#' @keywords internal
 #' @noRd
 control_factors <- function(counts, probes, excluded, method) {
   probe_names <- probes[["Name"]]
@@ -320,7 +308,6 @@ control_factors <- function(counts, probes, excluded, method) {
 #'
 #' Corrected counts below 1 are floored at 1.
 #'
-#' @keywords internal
 #' @noRd
 housekeeping_geometric_means <- function(
   counts,
@@ -337,7 +324,6 @@ housekeeping_geometric_means <- function(
 #'
 #' Background-corrected and scaled counts are rounded, then floored at 0.1.
 #'
-#' @keywords internal
 #' @noRd
 normalise_matrix <- function(
   counts,
@@ -357,7 +343,6 @@ normalise_matrix <- function(
 
 #' Predict the five most stable housekeeping genes
 #'
-#' @keywords internal
 #' @noRd
 predict_housekeeping <- function(
   counts,
@@ -382,7 +367,6 @@ predict_housekeeping <- function(
 #'
 #' The squared Pearson correlation of log2 counts on log2 concentrations.
 #'
-#' @keywords internal
 #' @noRd
 sample_pcl <- function(positives, probe_names) {
   zero <- colSums(positives == 0, na.rm = TRUE) > 0
@@ -405,7 +389,6 @@ sample_pcl <- function(positives, probe_names) {
 #'
 #' The z-score of POS_E against the negatives, or `NA` when they do not vary.
 #'
-#' @keywords internal
 #' @noRd
 sample_lod <- function(pos_e, negatives) {
   spread <- apply(negatives, 2, stats::sd, na.rm = TRUE)
@@ -416,7 +399,6 @@ sample_lod <- function(pos_e, negatives) {
 
 #' Per-sample quality-control metrics
 #'
-#' @keywords internal
 #' @noRd
 sample_metrics <- function(counts, probes, samples, warn_missing = TRUE) {
   probe_names <- probes[["Name"]]
@@ -506,7 +488,6 @@ sample_metrics <- function(counts, probes, samples, warn_missing = TRUE) {
 #'   attributes.
 #'   Only a first build warns, so rebuilding an object does not repeat it.
 #'
-#' @keywords internal
 #' @noRd
 build_nacho <- function(
   counts,

@@ -270,7 +270,6 @@ check_nacho_metadata <- function(metadata, call = rlang::caller_env()) {
 #'
 #' @return The complete settings list.
 #'
-#' @keywords internal
 #' @noRd
 nacho_metadata_settings <- function(
   settings,

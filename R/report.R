@@ -13,7 +13,6 @@ NULL
 #'
 #' @return `x`, invisibly.
 #'
-#' @keywords internal
 #' @noRd
 report_markdown <- function(
   x,

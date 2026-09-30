@@ -10,7 +10,6 @@ NULL
 #' @param call The call reported in the error, the user-facing function.
 #' @param .envir The environment where cli interpolates `{}` expressions.
 #'
-#' @keywords internal
 #' @noRd
 nacho_abort <- function(
   message,
@@ -36,7 +35,6 @@ nacho_abort <- function(
 #' @inheritParams nacho_abort
 #' @param class The specific class, without the `nacho_warning_` prefix.
 #'
-#' @keywords internal
 #' @noRd
 nacho_warn <- function(message, class = NULL, ..., .envir = parent.frame()) {
   cli::cli_warn(
@@ -52,7 +50,6 @@ nacho_warn <- function(message, class = NULL, ..., .envir = parent.frame()) {
 
 #' Tell whether NACHO should stay quiet
 #'
-#' @keywords internal
 #' @noRd
 nacho_is_quiet <- function() {
   isTRUE(getOption("nacho.quiet")) ||
@@ -63,7 +60,6 @@ nacho_is_quiet <- function() {
 #'
 #' @inheritParams nacho_abort
 #'
-#' @keywords internal
 #' @noRd
 nacho_inform <- function(message, ..., .envir = parent.frame()) {
   if (nacho_is_quiet()) {
@@ -78,7 +74,6 @@ nacho_inform <- function(message, ..., .envir = parent.frame()) {
 #'
 #' @inheritParams nacho_abort
 #'
-#' @keywords internal
 #' @noRd
 nacho_progress_step <- function(message, .envir = parent.frame()) {
   if (nacho_is_quiet()) {
@@ -189,7 +184,6 @@ check_choice <- function(
 #'
 #' @return The matched `normalisation_method`.
 #'
-#' @keywords internal
 #' @noRd
 check_settings <- function(
   housekeeping_genes,
@@ -228,7 +222,6 @@ check_settings <- function(
 
 #' List the values that appear more than once
 #'
-#' @keywords internal
 #' @noRd
 duplicated_values <- function(x) {
   unique(x[duplicated(x)])
@@ -294,7 +287,6 @@ check_package <- function(
 
 #' Tell whether an object is a NACHO 2 list
 #'
-#' @keywords internal
 #' @noRd
 is_nacho_v2 <- function(x) {
   is.list(x) &&
@@ -307,7 +299,6 @@ is_nacho_v2 <- function(x) {
 #'
 #' @inheritParams check_bool
 #'
-#' @keywords internal
 #' @noRd
 check_nacho <- function(
   x,
@@ -394,7 +385,6 @@ abort_nacho_v2 <- function(
 #' @param subject The formatted name of the object or file, for the message.
 #' @inheritParams nacho_abort
 #'
-#' @keywords internal
 #' @noRd
 check_schema <- function(schema, subject, call = rlang::caller_env()) {
   if (!identical(schema, nacho_schema_version)) {
@@ -417,7 +407,6 @@ check_schema <- function(schema, subject, call = rlang::caller_env()) {
 #' @return A string: a newer schema asks for a NACHO update, a missing or
 #'   malformed one is named as such, and any other one cannot be read.
 #'
-#' @keywords internal
 #' @noRd
 schema_hint <- function(schema) {
   if (!rlang::is_scalar_integer(schema) || is.na(schema)) {

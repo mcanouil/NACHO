@@ -1037,7 +1037,6 @@ S7::method(autoplot, nacho) <- autoplot_nacho
 #' @param object A NACHO 2 object.
 #' @param ... Ignored.
 #'
-#' @keywords internal
 #' @noRd
 #' @exportS3Method ggplot2::autoplot
 autoplot.nacho <- function(object, ...) {
