@@ -49,6 +49,7 @@ reference:
       - autoplot.nacho
       - nacho-methods
       - nacho-accessors
+      - filter_detected
       - render
   - title: Shiny application
     contents:

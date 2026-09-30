@@ -187,6 +187,7 @@ computed_sample_columns <- c(
   "MedC",
   "Positive_factor",
   "Negative_factor",
+  "Detection_rate",
   "Background",
   "House_factor",
   "is_outlier"
@@ -618,6 +619,8 @@ build_nacho <- function(
     excluded,
     settings[["normalisation_method"]]
   )
+  limits <- detection_limits(counts, code_class, excluded)
+  hits <- detected(counts, limits)
   background <- background_levels(
     counts,
     code_class,
@@ -665,6 +668,24 @@ build_nacho <- function(
     NA_real_
   }
   metrics[["Background"]] <- background %||% NA_real_
+  no_limits <- all(is.na(limits))
+  if (no_limits && warn_missing) {
+    nacho_warn(
+      c(
+        "Detection rates need two kept negative probes, so they are {.val NA}.",
+        i = "Add negative probes, or check that none was excluded."
+      ),
+      class = "metric_unavailable"
+    )
+  }
+  metrics[["Detection_rate"]] <- if (no_limits) {
+    NA_real_
+  } else {
+    unname(colMeans(
+      hits[grepl("Endogenous", code_class), , drop = FALSE],
+      na.rm = TRUE
+    ))
+  }
   if (!is.null(house_factor)) {
     metrics[["House_factor"]] <- unname(house_factor)
   }
@@ -678,6 +699,11 @@ build_nacho <- function(
     scaled
   }
 
+  probes[["detection_rate"]] <- if (no_limits) {
+    NA_real_
+  } else {
+    unname(rowMeans(hits, na.rm = TRUE))
+  }
   probes[["is_housekeeping"]] <- probes[["Name"]] %in% housekeeping_genes
   probes[["is_excluded"]] <- probes[["Name"]] %in% excluded
   provenance[["excluded_negatives"]] <- excluded

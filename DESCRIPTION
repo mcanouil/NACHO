@@ -82,6 +82,7 @@ Collate:
     'autoplot.R'
     'conditions.R'
     'deploy.R'
+    'detection.R'
     'interop.R'
     'load_rcc.R'
     'methods.R'

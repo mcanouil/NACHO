@@ -135,6 +135,21 @@ check_character <- function(
   invisible(x)
 }
 
+check_proportion <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (!is.numeric(x) || length(x) != 1 || is.na(x) || x < 0 || x > 1) {
+    nacho_abort(
+      "{.arg {arg}} must be one number between 0 and 1, not {.obj_type_friendly {x}}.",
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
 check_count <- function(
   x,
   arg = rlang::caller_arg(x),
