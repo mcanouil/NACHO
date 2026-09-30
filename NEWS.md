@@ -1,5 +1,10 @@
 # NACHO (development version)
 
+## Bug Fixes
+
+- In `inst/app/`,
+  - fix: open the help pages of the quality-control metrics, whose links never matched their input names.
+
 # NACHO 2.0.7
 
 ## Dependencies
