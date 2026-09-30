@@ -469,16 +469,9 @@ server <- function(input, output, session) {
 
   ## Help for QC metrics
   lapply(
-    X = c(
-      "Binding Density",
-      "Field of View",
-      "Positive Control Linearity",
-      "Limit of Detection",
-      "Positive Factor",
-      "Housekeeping Genes Factor"
-    ),
+    X = names(about_pages), # nolint: object_usage_linter. Defined in utils.R.
     FUN = function(.x) {
-      short_x <- about_id(.x) # nolint: object_usage_linter. Defined in utils.R.
+      short_x <- about_pages[[.x]] # nolint: object_usage_linter. Defined in utils.R.
       shiny::observeEvent(input[[paste0("about_", short_x)]], {
         shiny::showModal(shiny::modalDialog(
           title = .x,

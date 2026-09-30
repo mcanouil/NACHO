@@ -383,9 +383,14 @@ is_zip_upload <- function(name, type) {
     grepl("\\.zip$", name, ignore.case = TRUE)
 }
 
-about_id <- function(label) {
-  tolower(gsub("\\b(\\pL)\\pL|.", "\\U\\1", label, perl = TRUE))
-}
+about_pages <- c(
+  "Binding Density" = "bd",
+  "Field of View" = "fov",
+  "Positive Control Linearity" = "pcl",
+  "Limit of Detection" = "lod",
+  "Positive Factor" = "pf",
+  "Housekeeping Genes Factor" = "hgf"
+)
 
 include_about <- function(name) {
   about <- readLines(
