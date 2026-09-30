@@ -593,7 +593,8 @@ plot_pn <- function(
       ),
       colour = "black",
       se = TRUE,
-      method = "loess"
+      method = "loess",
+      formula = y ~ x
     ) +
     ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2)) +
     (if (!show_legend) ggplot2::guides(colour = "none"))
@@ -1302,7 +1303,8 @@ plot_norm <- function(
       ),
       colour = "black",
       se = TRUE,
-      method = "loess"
+      method = "loess",
+      formula = y ~ x
     ) +
     (if (!(show_legend && length(nacho_object$housekeeping_genes) <= 10)) {
       ggplot2::guides(colour = "none")

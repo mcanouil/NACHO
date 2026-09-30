@@ -248,7 +248,7 @@ ui <- shiny::tagList(
       "About",
       icon = shiny::icon("info"),
       value = "about-tab",
-      shiny::tags$p(shiny::includeMarkdown("www/about-nacho.md"))
+      shiny::tags$p(include_about("nacho")) # nolint: object_usage_linter. Defined in utils.R.
     )
   )
 )
@@ -469,24 +469,13 @@ server <- function(input, output, session) {
 
   ## Help for QC metrics
   lapply(
-    X = c(
-      "Binding Density",
-      "Field of View",
-      "Positive Control Linearity",
-      "Limit of Detection",
-      "Positive Factor",
-      "Housekeeping Genes Factor"
-    ),
+    X = names(about_pages), # nolint: object_usage_linter. Defined in utils.R.
     FUN = function(.x) {
-      short_x <- tolower(sub("\\b(\\pL)\\pL|.", "\\U\\1", .x, perl = TRUE))
+      short_x <- about_pages[[.x]] # nolint: object_usage_linter. Defined in utils.R.
       shiny::observeEvent(input[[paste0("about_", short_x)]], {
         shiny::showModal(shiny::modalDialog(
           title = .x,
-          shiny::tags$p(shiny::includeMarkdown(paste0(
-            "www/about-",
-            short_x,
-            ".md"
-          ))),
+          shiny::tags$p(include_about(short_x)), # nolint: object_usage_linter. Defined in utils.R.
           easyClose = TRUE
         ))
       })

@@ -382,3 +382,20 @@ is_zip_upload <- function(name, type) {
     c("application/zip", "application/x-zip-compressed") ||
     grepl("\\.zip$", name, ignore.case = TRUE)
 }
+
+about_pages <- c(
+  "Binding Density" = "bd",
+  "Field of View" = "fov",
+  "Positive Control Linearity" = "pcl",
+  "Limit of Detection" = "lod",
+  "Positive Factor" = "pf",
+  "Housekeeping Genes Factor" = "hgf"
+)
+
+include_about <- function(name) {
+  about <- readLines(
+    file.path("www", paste0("about-", name, ".md")),
+    encoding = "UTF-8"
+  )
+  shiny::HTML(markdown::mark(text = about, output = NULL))
+}
