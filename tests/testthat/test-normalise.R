@@ -402,3 +402,39 @@ test_that("the missing attributes warning comes once, when the object is built",
   flagged@samples <- flagged_samples
   expect_no_warning(suppressMessages(exclude_outliers(flagged)))
 })
+
+test_that("normalise() changes the background and keeps it in the settings", {
+  x <- suppressMessages(normalise(
+    GSE74821,
+    background = "mean_2sd",
+    background_mode = "threshold"
+  ))
+  expect_identical(x@settings$background, "mean_2sd")
+  expect_identical(x@settings$background_mode, "threshold")
+  negatives <- nacho_counts(x)[
+    nacho_probes(x)$CodeClass == "Negative" & !nacho_probes(x)$is_excluded,
+  ]
+  expect_equal(
+    nacho_samples(x)$Background,
+    unname(colMeans(negatives) + 2 * apply(negatives, 2, stats::sd))
+  )
+  m <- nacho_counts(x, normalised = TRUE)
+  expect_false(isTRUE(all.equal(m, round(m))))
+})
+
+test_that("normalise() refuses an unknown background", {
+  expect_error(
+    normalise(GSE74821, background = "mode"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    normalise(GSE74821, background_mode = "floor"),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("the default is no background, and Background is NA", {
+  x <- suppressMessages(normalise(GSE74821, background = "none"))
+  expect_true(all(is.na(nacho_samples(x)$Background)))
+  expect_identical(x@settings$background, "none")
+})

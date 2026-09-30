@@ -136,6 +136,8 @@ upgrade_nacho <- function(x) {
       housekeeping_predict = FALSE,
       housekeeping_norm = x[["housekeeping_norm"]],
       normalisation_method = x[["normalisation_method"]],
+      background = "none",
+      background_mode = "threshold",
       n_comp = as.integer(x[["n_comp"]])
     ),
     thresholds = thresholds,

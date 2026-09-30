@@ -17,6 +17,14 @@
 #' @param normalisation_method [[character]] Either `"GEO"` or `"GLM"`.
 #'   Character string to indicate normalisation using the geometric mean (`"GEO"`)
 #'   or a generalized linear model (`"GLM"`). Default is `"GEO"`.
+#' @param background [[character]] How to estimate each sample's background
+#'   from its negative controls: `"none"` (the default), `"mean"`,
+#'   `"mean_2sd"` (mean plus two standard deviations), `"median"`, `"max"` or
+#'   `"geo"` (geometric mean).
+#' @param background_mode [[character]] What to do with that background:
+#'   `"threshold"` (the default) raises lower counts to it, which Bruker
+#'   recommends when fold changes matter, and `"subtract"` removes it and
+#'   floors at 0.
 #' @param n_comp [[numeric]] Number indicating the number of principal components to compute.
 #'  Cannot be more than n-1 samples. Default is `10`.
 #'
@@ -65,6 +73,8 @@ load_rcc <- function(
   housekeeping_predict = FALSE,
   housekeeping_norm = TRUE,
   normalisation_method = "GEO",
+  background = "none",
+  background_mode = "threshold",
   n_comp = 10
 ) {
   if (missing(data_directory) || missing(ssheet_csv)) {
@@ -82,12 +92,14 @@ load_rcc <- function(
     )
   }
   data_directory <- normalizePath(data_directory)
-  normalisation_method <- check_settings(
+  choices <- check_settings(
     housekeeping_genes,
     housekeeping_predict,
     housekeeping_norm,
     normalisation_method,
-    n_comp
+    n_comp,
+    background,
+    background_mode
   )
 
   if (is.character(ssheet_csv) && length(ssheet_csv) > 1) {
@@ -258,7 +270,9 @@ load_rcc <- function(
       housekeeping_genes = housekeeping_genes,
       housekeeping_predict = housekeeping_predict,
       housekeeping_norm = housekeeping_norm,
-      normalisation_method = normalisation_method,
+      normalisation_method = choices[["normalisation_method"]],
+      background = choices[["background"]],
+      background_mode = choices[["background_mode"]],
       n_comp = as.integer(n_comp)
     ),
     thresholds = default_thresholds(),

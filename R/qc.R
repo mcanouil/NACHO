@@ -29,6 +29,8 @@ default_settings <- function(probes, id_colname) {
     housekeeping_predict = FALSE,
     housekeeping_norm = any(grepl("Housekeeping", probes[["CodeClass"]])),
     normalisation_method = "GEO",
+    background = "none",
+    background_mode = "threshold",
     n_comp = 10L
   )
 }
@@ -217,6 +219,7 @@ computed_sample_columns <- c(
   "MedC",
   "Positive_factor",
   "Negative_factor",
+  "Background",
   "House_factor",
   "is_outlier"
 )
@@ -361,13 +364,7 @@ control_factors <- function(counts, probes, excluded, method) {
     positive <- geometric_means(
       counts[used & code_class == "Positive", , drop = FALSE]
     )
-    negative <- geometric_means(
-      counts[used & code_class == "Negative", , drop = FALSE]
-    )
-    return(list(
-      positive_factor = mean(positive) / positive,
-      negative_factor = negative
-    ))
+    return(list(positive_factor = mean(positive) / positive))
   }
   concentration <- control_concentrations(probe_names[used])
   controls <- counts[used, , drop = FALSE]
@@ -384,47 +381,30 @@ control_factors <- function(counts, probes, excluded, method) {
     },
     numeric(2)
   )
-  list(
-    positive_factor = mean(coefficients[2, ]) / coefficients[2, ],
-    negative_factor = coefficients[1, ]
-  )
+  list(positive_factor = mean(coefficients[2, ]) / coefficients[2, ])
 }
 
-#' Geometric mean of the background-corrected housekeeping counts
-#'
-#' Corrected counts below 1 are floored at 1.
+#' Apply the background, then the positive factor
 #'
 #' @noRd
-housekeeping_geometric_means <- function(
-  counts,
-  negative_factor,
-  positive_factor
-) {
-  corrected <- sweep(counts, 2, negative_factor, "-")
-  corrected <- sweep(corrected, 2, positive_factor, "*")
-  corrected[!is.na(corrected) & corrected < 1] <- 1
-  geometric_means(corrected)
+scale_counts <- function(counts, background, background_mode, positive_factor) {
+  out <- apply_background(counts, background, background_mode)
+  sweep(out, 2, positive_factor, "*")
 }
 
-#' Normalise a count matrix
+#' Content normalisation factor from reference rows
 #'
-#' Background-corrected and scaled counts are rounded, then floored at 0.1.
+#' Values below 1 count as 1, so a gene at background does not pull the
+#' geometric mean towards 0.
+#'
+#' @param scaled_rows The reference rows of the background-applied,
+#'   positive-scaled counts.
 #'
 #' @noRd
-normalise_matrix <- function(
-  counts,
-  negative_factor,
-  positive_factor,
-  house_factor
-) {
-  out <- sweep(counts, 2, negative_factor, "-")
-  out <- sweep(out, 2, positive_factor, "*")
-  if (!is.null(house_factor)) {
-    out <- sweep(out, 2, house_factor, "*")
-  }
-  out <- round(out)
-  out[!is.na(out) & out <= 0] <- 0.1
-  out
+content_factor <- function(scaled_rows) {
+  scaled_rows[!is.na(scaled_rows) & scaled_rows < 1] <- 1
+  geometric <- geometric_means(scaled_rows)
+  mean(geometric) / geometric
 }
 
 #' Predict the five most stable housekeeping genes
@@ -433,15 +413,16 @@ normalise_matrix <- function(
 predict_housekeeping <- function(
   counts,
   probes,
-  negative_factor,
+  background,
+  background_mode,
   positive_factor
 ) {
   rows <- grepl("Endogenous|Housekeeping", probes[["CodeClass"]])
-  normalised <- normalise_matrix(
+  normalised <- scale_counts(
     counts[rows, , drop = FALSE],
-    negative_factor,
-    positive_factor,
-    house_factor = NULL
+    background,
+    background_mode,
+    positive_factor
   )
   ratios <- log2(sweep(normalised, 2, colMeans(normalised, na.rm = TRUE), "/"))
   ratios[is.infinite(ratios)] <- NA
@@ -613,13 +594,26 @@ build_nacho <- function(
     excluded,
     settings[["normalisation_method"]]
   )
+  background <- background_levels(
+    counts,
+    code_class,
+    excluded,
+    settings[["background"]]
+  )
+  scaled <- scale_counts(
+    counts,
+    background,
+    settings[["background_mode"]],
+    factors[["positive_factor"]]
+  )
 
   if (isTRUE(settings[["housekeeping_predict"]])) {
     nacho_inform("Searching for the best housekeeping genes.")
     predicted <- predict_housekeeping(
       counts,
       probes,
-      factors[["negative_factor"]],
+      background,
+      settings[["background_mode"]],
       factors[["positive_factor"]]
     )
     if (length(predicted) == 0) {
@@ -638,30 +632,33 @@ build_nacho <- function(
 
   house_factor <- NULL
   if (!is.null(housekeeping_genes)) {
-    geometric <- housekeeping_geometric_means(
-      counts[probes[["Name"]] %in% housekeeping_genes, , drop = FALSE],
-      factors[["negative_factor"]],
-      factors[["positive_factor"]]
+    house_factor <- content_factor(
+      scaled[probes[["Name"]] %in% housekeeping_genes, , drop = FALSE]
     )
-    house_factor <- mean(geometric) / geometric
   }
 
   metrics <- sample_metrics(counts, probes, samples, warn_missing)
   metrics[["Positive_factor"]] <- unname(factors[["positive_factor"]])
-  metrics[["Negative_factor"]] <- unname(factors[["negative_factor"]])
+  negatives <- code_class == "Negative" & !probes[["Name"]] %in% excluded
+  metrics[["Negative_factor"]] <- if (any(negatives)) {
+    unname(geometric_means(counts[negatives, , drop = FALSE]))
+  } else {
+    NA_real_
+  }
+  metrics[["Background"]] <- background %||% NA_real_
   if (!is.null(house_factor)) {
     metrics[["House_factor"]] <- unname(house_factor)
   }
   samples <- cbind(samples, metrics)
   samples[["is_outlier"]] <- compute_outliers(samples, thresholds, rcc_type)
 
-  normalised <- normalise_matrix(
-    counts,
-    factors[["negative_factor"]],
-    factors[["positive_factor"]],
-    if (isTRUE(settings[["housekeeping_norm"]])) house_factor
-  )
-  storage.mode(normalised) <- "double"
+  normalised <- if (
+    isTRUE(settings[["housekeeping_norm"]]) && !is.null(house_factor)
+  ) {
+    sweep(scaled, 2, house_factor, "*")
+  } else {
+    scaled
+  }
 
   probes[["is_housekeeping"]] <- probes[["Name"]] %in% housekeeping_genes
   probes[["is_excluded"]] <- probes[["Name"]] %in% excluded
