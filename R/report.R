@@ -75,6 +75,16 @@ report_markdown <- function(
     x@settings[["n_comp"]],
     "\n"
   )
+  instrument <- thresholds[["instrument"]]
+  cat(
+    "  - Thresholds preset:",
+    paste0(
+      thresholds[["preset"]],
+      ", instrument: ",
+      if (is.na(instrument)) "unknown" else instrument
+    ),
+    "\n"
+  )
   threshold_labels <- c(
     BD = "Binding Density (BD)",
     FoV = "Field of View (FoV)",
