@@ -167,6 +167,12 @@ for (imetric in metrics) {
   })
 }
 
+for (metric in c("PN", "NORM")) {
+  test_that(paste(metric, "builds without the geom_smooth() formula message"), {
+    expect_no_message(ggplot2::ggplot_build(autoplot(GSE74821, x = metric)))
+  })
+}
+
 n_samples <- length(unique(GSE74821[["nacho"]][[GSE74821[["access"]]]]))
 
 for (metric in c("BD", "FoV", "PCL", "LoD", "PN")) {
