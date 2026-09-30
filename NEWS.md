@@ -69,6 +69,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/normalise.R`,
   - feat: `normalise()` checks `outliers_thresholds` before it runs.
   - feat: `?normalise` documents the order of the normalisation steps.
+  - feat: Changing only `outliers_thresholds` in `normalise()` recalculates the flags without rebuilding the object.
+  - feat: `normalise()` refuses a thresholds list written for NACHO 2, one without `preset`, and the error points to `nacho_thresholds()`.
 - In `R/autoplot.R`,
   - feat: `autoplot()` checks that `colour` and `outliers_labels` name columns of `nacho_samples()`, and `outliers_labels` must be a column name.
 
