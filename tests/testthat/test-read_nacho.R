@@ -56,6 +56,14 @@ test_that("upgrade_nacho() keeps an open House_factor upper bound", {
   expect_identical(x@thresholds$House_factor, c(1 / 11, Inf))
 })
 
+test_that("upgrade_nacho() refuses thresholds without names", {
+  old <- nacho_2()
+  old$outliers_thresholds <- list(c(0.1, 2.25), 95)
+  expect_error(upgrade_nacho(old), class = "nacho_error_bad_argument")
+  old$outliers_thresholds <- list(c(9, 9), FoV = 50)
+  expect_error(upgrade_nacho(old), class = "nacho_error_bad_argument")
+})
+
 test_that("upgrade_nacho() and read_nacho() name an infinite LoD", {
   old <- nacho_2()
   old$outliers_thresholds$LoD <- Inf

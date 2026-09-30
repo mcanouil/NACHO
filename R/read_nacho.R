@@ -65,6 +65,9 @@ migrate_schema_1 <- function(properties) {
 #'
 #' @noRd
 legacy_thresholds <- function(thresholds, samples) {
+  if (!rlang::is_named(thresholds)) {
+    return(thresholds)
+  }
   filled <- nacho_thresholds(preset = "legacy")
   filled[names(thresholds)] <- thresholds
   filled[["preset"]] <- "legacy"

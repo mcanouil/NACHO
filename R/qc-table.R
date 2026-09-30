@@ -35,13 +35,17 @@ qc_table <- function(samples, thresholds, rcc_type, id_colname) {
   metrics <- qc_metrics[
     qc_metrics %in% names(samples) & qc_metrics %in% names(thresholds)
   ]
-  column <- function(name) {
-    if (name %in% names(samples)) samples[[name]] else rep(NA, nrow(samples))
+  column <- function(name, missing = NA) {
+    if (name %in% names(samples)) {
+      samples[[name]]
+    } else {
+      rep(missing, nrow(samples))
+    }
   }
   out <- data.frame(
     column(id_colname),
-    lane = column("ID"),
-    CartridgeID = column("CartridgeID")
+    lane = column("ID", NA_character_),
+    CartridgeID = column("CartridgeID", NA_character_)
   )
   names(out)[1] <- id_colname
   fails <- matrix(
@@ -65,7 +69,7 @@ qc_table <- function(samples, thresholds, rcc_type, id_colname) {
     fails[, metric] <- status %in% "fail"
   }
   for (name in c("MC", "MedC", "Negative_factor", "Background")) {
-    out[[name]] <- column(name)
+    out[[name]] <- column(name, NA_real_)
   }
   statuses <- out[paste0(metrics, "_status")]
   assessed <- rowSums(!is.na(statuses)) > 0

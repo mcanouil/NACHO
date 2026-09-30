@@ -67,6 +67,14 @@ test_that("PlexSet lane failure reaches every sample of the lane", {
   expect_true(all(is.na(qc$LoD_status)))
 })
 
+test_that("factor columns missing from the samples come back numeric", {
+  samples <- data.frame(IDFILE = "f1", BD = 1, FoV = 90)
+  qc <- NACHO:::qc_table(samples, nacho_thresholds(), "n1", "IDFILE")
+  expect_type(qc$Background, "double")
+  expect_type(qc$MC, "double")
+  expect_type(qc$CartridgeID, "character")
+})
+
 test_that("a lane with no BD or FoV value has no lane status", {
   samples <- data.frame(
     IDFILE = sprintf("f_S%d", 1:2),
