@@ -1,3 +1,42 @@
+#' Settings that reproduce the NACHO 2 background correction
+#'
+#' @noRd
+legacy_settings <- function(settings) {
+  settings[["background"]] <- "geo"
+  settings[["background_mode"]] <- "subtract"
+  settings
+}
+
+#' Rebuild a schema 1 object with the definitions that made it
+#'
+#' @param properties The properties of the saved object, from `S7::props()`.
+#'
+#' @noRd
+migrate_schema_1 <- function(properties) {
+  provenance <- properties[["provenance"]]
+  provenance[["schema_version"]] <- nacho_schema_version
+  provenance[["migrated_from_schema"]] <- 1L
+  settings <- legacy_settings(properties[["settings"]])
+  if (!"Negative" %in% properties[["probes"]][["CodeClass"]]) {
+    settings[["background"]] <- "none"
+  }
+  migrated <- build_nacho(
+    counts = properties[["counts"]],
+    probes = properties[["probes"]],
+    samples = properties[["samples"]],
+    settings = settings,
+    thresholds = properties[["thresholds"]],
+    rcc_type = properties[["rcc_type"]],
+    provenance = provenance,
+    warn_missing = FALSE
+  )
+  nacho_inform(c(
+    "Read an object saved with schema 1 and rebuilt it with schema {nacho_schema_version}.",
+    i = "Normalised counts are recomputed without rounding, with the NACHO 2 background subtraction it was made with."
+  ))
+  migrated
+}
+
 #' Convert a NACHO 2 object to NACHO 3
 #'
 #' NACHO 3 stores data in an S7 `nacho` object instead of the NACHO 2 list.
@@ -136,10 +175,9 @@ upgrade_nacho <- function(x) {
       housekeeping_predict = FALSE,
       housekeeping_norm = x[["housekeeping_norm"]],
       normalisation_method = x[["normalisation_method"]],
-      background = "none",
-      background_mode = "threshold",
       n_comp = as.integer(x[["n_comp"]])
-    ),
+    ) |>
+      legacy_settings(),
     thresholds = thresholds,
     rcc_type = attr(x, "RCC_type"),
     provenance = provenance
@@ -204,6 +242,9 @@ read_nacho <- function(path) {
     )
   }
   properties <- S7::props(x)
+  if (identical(properties[["provenance"]][["schema_version"]], 1L)) {
+    return(migrate_schema_1(properties))
+  }
   check_schema(
     properties[["provenance"]][["schema_version"]],
     subject = cli::format_inline("{.file {path}}")

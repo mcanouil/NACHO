@@ -1,4 +1,9 @@
-gse_geo <- suppressMessages(normalise(GSE74821, normalisation_method = "GEO"))
+gse_geo <- suppressMessages(normalise(
+  GSE74821,
+  normalisation_method = "GEO",
+  background = "geo",
+  background_mode = "subtract"
+))
 gse_df <- data.table::as.data.table(as.data.frame(gse_geo, long = TRUE))
 gse_id <- "IDFILE"
 gse_samples <- per_sample_ref(
@@ -113,26 +118,18 @@ test_that("field of view is the percentage of counted fields", {
   expect_equal(gse_samples[["FoV"]], expected)
 })
 
-test_that("normalised counts above background are corrected, scaled and rounded", {
-  expected <- (gse_df[["Count"]] - gse_df[["Negative_factor"]]) *
+test_that("normalised counts are background-subtracted at 0, scaled and not rounded", {
+  expected <- pmax(gse_df[["Count"]] - gse_df[["Negative_factor"]], 0) *
     gse_df[["Positive_factor"]] *
     gse_df[["House_factor"]]
-  above_background <- expected >= 1
-  expect_equal(
-    gse_df[["Count_Norm"]][above_background],
-    round(expected[above_background])
-  )
+  expect_equal(gse_df[["Count_Norm"]], expected)
+  expect_false(all(gse_df[["Count_Norm"]] == round(gse_df[["Count_Norm"]])))
 })
 
-test_that("normalised counts at or below background are floored at 0.1 after rounding", {
-  expected <- round(
-    (gse_df[["Count"]] - gse_df[["Negative_factor"]]) *
-      gse_df[["Positive_factor"]] *
-      gse_df[["House_factor"]]
-  )
-  expected[expected <= 0] <- 0.1
-  expect_equal(gse_df[["Count_Norm"]], expected)
-  expect_false(any(gse_df[["Count_Norm"]] == 0))
+test_that("normalised counts at or below background are 0 before scaling", {
+  at_background <- gse_df[["Count"]] <= gse_df[["Negative_factor"]]
+  expect_true(any(at_background))
+  expect_true(all(gse_df[["Count_Norm"]][at_background] == 0))
 })
 
 test_that("PCA stores sample scores on log counts", {

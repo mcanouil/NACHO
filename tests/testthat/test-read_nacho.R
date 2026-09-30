@@ -216,15 +216,31 @@ test_that("check_nacho() refuses an object from another schema", {
   expect_snapshot(nacho_samples(x), error = TRUE)
 })
 
-test_that("read_nacho() reads the frozen schema-1 object", {
+test_that("read_nacho() migrates the frozen schema-1 object", {
+  withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
   path <- test_path("fixtures", "nacho-schema-1.rds")
-  x <- read_nacho(path)
+  expect_message(
+    expect_warning(
+      x <- read_nacho(path),
+      class = "nacho_warning_n_comp_reduced"
+    ),
+    "schema 1"
+  )
   expect_true(S7::S7_inherits(x, NACHO:::nacho))
   expect_identical(dim(x), c(40L, 4L))
   expect_identical(nacho_counts(x), readRDS(path)@counts)
-  expect_identical(x@provenance$schema_version, 1L)
-  expect_false(identical(S7::S7_class(readRDS(path)), NACHO:::nacho))
+  expect_identical(x@provenance$schema_version, 2L)
+  expect_identical(x@provenance$migrated_from_schema, 1L)
+  expect_identical(x@settings$background, "none")
+  expect_identical(x@settings$background_mode, "subtract")
   expect_identical(S7::S7_class(x), NACHO:::nacho)
+})
+
+test_that("upgrade_nacho() keeps the NACHO 2 background", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  x <- suppressWarnings(suppressMessages(upgrade_nacho(old)))
+  expect_identical(x@settings$background, "geo")
+  expect_identical(x@settings$background_mode, "subtract")
 })
 
 test_that("read_nacho() upgrades a saved NACHO 2 object", {

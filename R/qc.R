@@ -424,6 +424,10 @@ predict_housekeeping <- function(
     background_mode,
     positive_factor
   )
+  # Rounds and floors as NACHO 2 did, to reproduce its gene selection until
+  # this function is replaced; the stored counts stay unrounded.
+  normalised <- round(normalised)
+  normalised[!is.na(normalised) & normalised <= 0] <- 0.1
   ratios <- log2(sweep(normalised, 2, colMeans(normalised, na.rm = TRUE), "/"))
   ratios[is.infinite(ratios)] <- NA
   spread <- sort(apply(ratios, 1, stats::sd, na.rm = TRUE))

@@ -4,7 +4,7 @@ NULL
 #' Schema version of the fields stored in `@provenance`
 #'
 #' @noRd
-nacho_schema_version <- 1L
+nacho_schema_version <- 2L
 
 bounds_problem <- function(name, value) {
   if (!is.numeric(value) || length(value) != 2 || anyNA(value)) {
