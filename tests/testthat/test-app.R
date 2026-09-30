@@ -194,17 +194,18 @@ test_that("app tells the user when it discards a sample sheet", {
 test_that("app leaves its markdown files untouched under R CMD check", {
   skip_if_not_installed("markdown")
   app_directory <- withr::local_tempdir()
-  file.copy(
+  expect_true(file.copy(
     system.file("app", package = "NACHO"),
     app_directory,
     recursive = TRUE
-  )
+  ))
   app_directory <- file.path(app_directory, "app")
   markdown_files <- list.files(
     file.path(app_directory, "www"),
     pattern = "\\.md$",
     full.names = TRUE
   )
+  expect_length(markdown_files, 7)
   checksums <- tools::md5sum(markdown_files)
   withr::local_envvar(`_R_CHECK_PACKAGE_NAME_` = "NACHO")
   # nolint start: object_usage_linter. testServer() provides session.
@@ -218,4 +219,32 @@ test_that("app leaves its markdown files untouched under R CMD check", {
   })
   # nolint end
   expect_identical(tools::md5sum(markdown_files), checksums)
+})
+
+test_that("each QC metric help link maps to its markdown file", {
+  app_utils <- new.env()
+  sys.source(
+    system.file("app", "utils.R", package = "NACHO"),
+    envir = app_utils
+  )
+  about_ids <- vapply(
+    X = c(
+      "Binding Density",
+      "Field of View",
+      "Positive Control Linearity",
+      "Limit of Detection",
+      "Positive Factor",
+      "Housekeeping Genes Factor"
+    ),
+    FUN = app_utils[["about_id"]],
+    FUN.VALUE = character(1),
+    USE.NAMES = FALSE
+  )
+  expect_identical(about_ids, c("bd", "fov", "pcl", "lod", "pf", "hgf"))
+  expect_true(all(file.exists(system.file(
+    "app",
+    "www",
+    paste0("about-", about_ids, ".md"),
+    package = "NACHO"
+  ))))
 })

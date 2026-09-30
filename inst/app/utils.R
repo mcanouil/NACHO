@@ -383,6 +383,10 @@ is_zip_upload <- function(name, type) {
     grepl("\\.zip$", name, ignore.case = TRUE)
 }
 
+about_id <- function(label) {
+  tolower(gsub("\\b(\\pL)\\pL|.", "\\U\\1", label, perl = TRUE))
+}
+
 include_about <- function(name) {
   about <- readLines(
     file.path("www", paste0("about-", name, ".md")),

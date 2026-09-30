@@ -478,7 +478,7 @@ server <- function(input, output, session) {
       "Housekeeping Genes Factor"
     ),
     FUN = function(.x) {
-      short_x <- tolower(gsub("\\b(\\pL)\\pL|.", "\\U\\1", .x, perl = TRUE))
+      short_x <- about_id(.x) # nolint: object_usage_linter. Defined in utils.R.
       shiny::observeEvent(input[[paste0("about_", short_x)]], {
         shiny::showModal(shiny::modalDialog(
           title = .x,
