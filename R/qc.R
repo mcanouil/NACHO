@@ -409,21 +409,13 @@ content_factor <- function(scaled_rows) {
 
 #' Predict the five most stable housekeeping genes
 #'
+#' @param scaled The background-applied, positive-scaled counts.
+#' @param probes The probe table, with a `CodeClass` column.
+#'
 #' @noRd
-predict_housekeeping <- function(
-  counts,
-  probes,
-  background,
-  background_mode,
-  positive_factor
-) {
+predict_housekeeping <- function(scaled, probes) {
   rows <- grepl("Endogenous|Housekeeping", probes[["CodeClass"]])
-  normalised <- scale_counts(
-    counts[rows, , drop = FALSE],
-    background,
-    background_mode,
-    positive_factor
-  )
+  normalised <- scaled[rows, , drop = FALSE]
   # Rounds and floors as NACHO 2 did, to reproduce its gene selection until
   # this function is replaced; the stored counts stay unrounded.
   normalised <- round(normalised)
@@ -613,13 +605,7 @@ build_nacho <- function(
 
   if (isTRUE(settings[["housekeeping_predict"]])) {
     nacho_inform("Searching for the best housekeeping genes.")
-    predicted <- predict_housekeeping(
-      counts,
-      probes,
-      background,
-      settings[["background_mode"]],
-      factors[["positive_factor"]]
-    )
+    predicted <- predict_housekeeping(scaled, probes)
     if (length(predicted) == 0) {
       nacho_warn(
         "No suitable housekeeping genes were found; the default ones are used.",
