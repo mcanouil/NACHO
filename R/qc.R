@@ -231,6 +231,92 @@ geometric_means <- function(m) {
   exp(colMeans(log(m), na.rm = TRUE))
 }
 
+#' Background statistics and modes
+#'
+#' @noRd
+background_statistics <- c("none", "mean", "mean_2sd", "median", "max", "geo")
+background_modes <- c("threshold", "subtract")
+
+#' Background level of each sample, from its kept negative controls
+#'
+#' @param counts Count matrix of probes by samples, with probe names as row
+#'   names.
+#' @param code_class The code class of each row of `counts`.
+#' @param excluded Names of the negative probes left out.
+#' @param statistic One of `background_statistics`.
+#'
+#' @return One level per sample, or `NULL` for `"none"`.
+#'
+#' @noRd
+background_levels <- function(
+  counts,
+  code_class,
+  excluded,
+  statistic,
+  call = rlang::caller_env()
+) {
+  if (statistic == "none") {
+    return(NULL)
+  }
+  negatives <- counts[
+    code_class == "Negative" & !rownames(counts) %in% excluded,
+    ,
+    drop = FALSE
+  ]
+  if (nrow(negatives) == 0) {
+    nacho_abort(
+      c(
+        "{.code background = {.val {statistic}}} needs negative control probes, and there are none.",
+        i = "Use {.code background = \"none\"}."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  if (statistic == "mean_2sd" && nrow(negatives) < 2) {
+    nacho_abort(
+      c(
+        "{.code background = \"mean_2sd\"} needs at least two negative probes, and {nrow(negatives)} {?is/are} left.",
+        i = "Use another {.arg background} statistic."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  level <- switch(
+    statistic,
+    mean = colMeans(negatives, na.rm = TRUE),
+    mean_2sd = colMeans(negatives, na.rm = TRUE) +
+      2 * apply(negatives, 2, stats::sd, na.rm = TRUE),
+    median = apply(negatives, 2, stats::median, na.rm = TRUE),
+    max = apply(negatives, 2, max, na.rm = TRUE),
+    geo = geometric_means(negatives)
+  )
+  unname(level)
+}
+
+#' Apply a background level to every probe of each sample
+#'
+#' `"threshold"` raises counts below the level to the level, as Bruker
+#' recommends when fold changes matter; `"subtract"` removes the level and
+#' floors at 0.
+#' Missing counts stay missing.
+#'
+#' @noRd
+apply_background <- function(counts, level, mode) {
+  if (is.null(level)) {
+    return(counts * 1)
+  }
+  levels <- matrix(level, nrow(counts), ncol(counts), byrow = TRUE)
+  out <- if (mode == "threshold") {
+    pmax(counts, levels)
+  } else {
+    pmax(counts - levels, 0)
+  }
+  dimnames(out) <- dimnames(counts)
+  out
+}
+
 #' Negative probes whose median is far from the overall median
 #'
 #' A probe is excluded when its median is more than 50 % away from the median
