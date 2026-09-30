@@ -76,6 +76,20 @@ test_that("load_rcc() checks its arguments before reading any file", {
   )
 })
 
+test_that("load_rcc() checks instrument and preset before reading any file", {
+  sheet <- data.frame(IDFILE = "no-such-sample.RCC")
+  for (argument in c("instrument", "preset")) {
+    args <- list(test_path("plexset_data"), sheet, "IDFILE")
+    args[[argument]] <- "not-a-choice"
+    error <- expect_error(
+      do.call(load_rcc, args),
+      class = "nacho_error_bad_argument"
+    )
+    expect_match(conditionMessage(error), argument, fixed = TRUE)
+    expect_no_match(conditionMessage(error), "no-such-sample", fixed = TRUE)
+  }
+})
+
 test_that("load_rcc() names the RCC files it cannot find", {
   sheet <- plexset_tidy
   sheet$IDFILE[1:8] <- "missing.RCC"
