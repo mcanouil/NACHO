@@ -98,9 +98,13 @@ normalise <- function(
     )
     return(nacho_object)
   }
-  if (!any(changed)) {
+  definitions_changed <- !identical(
+    outliers_thresholds[["preset"]],
+    nacho_object@thresholds[["preset"]]
+  )
+  if (!any(changed) && !definitions_changed) {
     nacho_object@thresholds <- outliers_thresholds
-    return(check_outliers(nacho_object))
+    return(nacho_object)
   }
   nacho_inform(c(
     "Normalising again with new settings:",
@@ -127,33 +131,9 @@ run_normalisation <- function(x, settings, thresholds) {
   )
 }
 
-#' Flag outliers of a nacho object
-#'
-#' Recomputes `is_outlier` in [nacho_qc()] from the object's thresholds.
-#' [normalise()] and [load_rcc()] already do this, so you only need it after
-#' changing thresholds by hand.
-#'
-#' @inheritParams normalise
-#' @return A `nacho` object.
-#' @export
-#' @examples
-#' data(GSE74821)
-#' table(nacho_qc(check_outliers(GSE74821))$is_outlier)
-check_outliers <- function(nacho_object) {
-  check_nacho(nacho_object)
-  samples <- nacho_object@samples
-  samples[["is_outlier"]] <- compute_outliers(
-    samples,
-    nacho_object@thresholds,
-    nacho_object@rcc_type
-  )
-  nacho_object@samples <- samples
-  nacho_object
-}
-
 #' Drop outliers and normalise the other samples again
 #'
-#' Removes the samples flagged in [nacho_qc()] and runs the normalisation again
+#' Removes the samples whose `status` in [nacho_qc()] is `"fail"` and runs the normalisation again
 #' on the samples that are left, with the same settings and thresholds.
 #' The new factors can flag more samples; call `exclude_outliers()` again to
 #' drop those too.
@@ -166,7 +146,7 @@ check_outliers <- function(nacho_object) {
 #' ncol(exclude_outliers(GSE74821))
 exclude_outliers <- function(nacho_object) {
   check_nacho(nacho_object)
-  flagged <- nacho_object@samples[["is_outlier"]] %in% TRUE
+  flagged <- flagged_samples(nacho_object)
   if (!any(flagged)) {
     nacho_inform("No sample is flagged, so nothing is removed.")
     return(nacho_object)

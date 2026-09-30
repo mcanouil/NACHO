@@ -35,26 +35,6 @@ metric_fails <- function(values, limits) {
   }
 }
 
-#' Flag samples that fail any quality-control threshold
-#'
-#' PCL and LoD are not flagged for PlexSet files, whose controls are shared by
-#' the eight samples of a lane.
-#'
-#' @noRd
-compute_outliers <- function(samples, thresholds, rcc_type) {
-  metrics <- c(
-    "BD",
-    "FoV",
-    "Positive_factor",
-    if ("House_factor" %in% names(samples)) "House_factor",
-    if (identical(rcc_type, "n1")) c("PCL", "LoD")
-  )
-  fails <- lapply(metrics, function(metric) {
-    metric_fails(samples[[metric]], thresholds[[metric]])
-  })
-  Reduce(`|`, fails, rep(FALSE, nrow(samples)))
-}
-
 #' Principal component analysis of the samples
 #'
 #' Sample scores of `log(counts + 1)` over every probe, as in NACHO 2.0.7.
@@ -206,8 +186,7 @@ computed_sample_columns <- c(
   "Positive_factor",
   "Negative_factor",
   "Background",
-  "House_factor",
-  "is_outlier"
+  "House_factor"
 )
 
 #' Geometric mean of each column
@@ -682,7 +661,6 @@ build_nacho <- function(
     metrics[["House_factor"]] <- unname(house_factor)
   }
   samples <- cbind(samples, metrics)
-  samples[["is_outlier"]] <- compute_outliers(samples, thresholds, rcc_type)
 
   normalised <- if (
     isTRUE(settings[["housekeeping_norm"]]) && !is.null(house_factor)

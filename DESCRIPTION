@@ -86,6 +86,7 @@ Collate:
     'load_rcc.R'
     'methods.R'
     'normalise.R'
+    'qc-table.R'
     'read_nacho.R'
     'read_rcc.R'
     'render.R'

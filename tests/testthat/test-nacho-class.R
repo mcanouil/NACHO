@@ -187,26 +187,6 @@ test_that("the validator refuses PCA scores whose row names do not match the sam
   expect_error(x@pca <- pca, "pca\\$scores")
 })
 
-test_that("compute_outliers() matches the NACHO 2 rules", {
-  samples <- data.frame(
-    BD = c(1, 3, 1, 1),
-    FoV = c(100, 100, 50, 100),
-    PCL = c(1, 1, 1, 0.5),
-    LoD = c(5, 5, 5, 5),
-    Positive_factor = c(1, 1, 1, 1),
-    House_factor = c(1, 1, 1, NA)
-  )
-  thresholds <- nacho_thresholds()
-  expect_identical(
-    NACHO:::compute_outliers(samples, thresholds, "n1"),
-    c(FALSE, TRUE, TRUE, TRUE)
-  )
-  expect_identical(
-    NACHO:::compute_outliers(samples, thresholds, "n8"),
-    c(FALSE, TRUE, TRUE, FALSE)
-  )
-})
-
 test_that("compute_pca() returns sample scores and caps the components", {
   counts <- matrix(
     c(1:12, 12:1, rep(5L, 12)),

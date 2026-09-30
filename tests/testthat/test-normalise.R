@@ -216,11 +216,7 @@ test_that("normalise() flags outliers against new thresholds", {
   thresholds <- GSE74821@thresholds
   thresholds[["BD"]] <- c(0.1, 0.2)
   res <- suppressMessages(normalise(GSE74821, outliers_thresholds = thresholds))
-  expect_identical(
-    nacho_qc(res)[["is_outlier"]],
-    nacho_qc(check_outliers(res))[["is_outlier"]]
-  )
-  expect_true(any(nacho_qc(res)[["is_outlier"]]))
+  expect_true(any(nacho_qc(res)[["status"]] %in% "fail"))
 })
 
 test_that("a panel without POS_E gives NA for PCL and LoD, not a failure", {
@@ -228,7 +224,7 @@ test_that("a panel without POS_E gives NA for PCL and LoD, not a failure", {
   res <- suppressMessages(normalise(no_pos_e, normalisation_method = "GEO"))
   expect_true(all(is.na(nacho_qc(res)[["PCL"]])))
   expect_true(all(is.na(nacho_qc(res)[["LoD"]])))
-  expect_false(anyNA(nacho_qc(res)[["is_outlier"]]))
+  expect_false(anyNA(nacho_qc(res)[["status"]]))
 })
 
 test_that("normalise() returns a nacho object", {
@@ -257,8 +253,8 @@ test_that("normalise() with new thresholds only recomputes the flags", {
     nacho_counts(salmon_nacho, normalised = TRUE)
   )
   expect_identical(
-    nacho_qc(x)$is_outlier,
-    NACHO:::compute_outliers(x@samples, tight, x@rcc_type)
+    nacho_qc(x)$status,
+    NACHO:::qc_table(x@samples, tight, x@rcc_type, "IDFILE")$status
   )
 })
 
@@ -319,7 +315,7 @@ test_that("an open bound stops flagging the samples beyond it", {
       GSE74821,
       outliers_thresholds = thresholds
     ))
-    nacho_qc(x)$is_outlier
+    nacho_qc(x)$status %in% "fail"
   }
   qc <- nacho_qc(GSE74821)
   expect_false(any(flags(open_bounds)))
@@ -346,7 +342,7 @@ test_that("exclude_outliers() drops every flagged sample and normalises the rest
     plexset_nacho,
     outliers_thresholds = tight
   ))
-  n_flagged <- sum(nacho_qc(flagged)$is_outlier)
+  n_flagged <- sum(nacho_qc(flagged)$status %in% "fail")
   skip_if(
     n_flagged == 0 || n_flagged == ncol(flagged),
     "Tight thresholds flag no sample or every sample."
@@ -355,28 +351,15 @@ test_that("exclude_outliers() drops every flagged sample and normalises the rest
   expect_identical(ncol(kept), ncol(flagged) - n_flagged)
   expect_false(any(
     nacho_samples(kept)$IDFILE %in%
-      nacho_samples(flagged)$IDFILE[nacho_qc(flagged)$is_outlier]
+      nacho_samples(flagged)$IDFILE[nacho_qc(flagged)$status %in% "fail"]
   ))
   expect_identical(kept@thresholds, tight)
 })
 
 test_that("exclude_outliers() refuses to drop every sample", {
   flagged <- plexset_nacho
-  samples <- flagged@samples
-  samples$is_outlier <- TRUE
-  flagged@samples <- samples
+  flagged@thresholds$BD <- c(0, 0)
   expect_error(exclude_outliers(flagged), class = "nacho_error_bad_argument")
-})
-
-test_that("check_outliers() recomputes the flags from the thresholds", {
-  x <- salmon_nacho
-  samples <- x@samples
-  samples$is_outlier <- !samples$is_outlier
-  x@samples <- samples
-  expect_identical(
-    nacho_qc(check_outliers(x))$is_outlier,
-    nacho_qc(salmon_nacho)$is_outlier
-  )
 })
 
 test_that("the missing attributes warning comes once, when the object is built", {
@@ -410,9 +393,7 @@ test_that("the missing attributes warning comes once, when the object is built",
     normalisation_method = "GEO"
   )))
   flagged <- x
-  flagged_samples <- flagged@samples
-  flagged_samples$is_outlier <- seq_len(nrow(flagged_samples)) == 1L
-  flagged@samples <- flagged_samples
+  flagged@samples$BD[1] <- 100
   expect_no_warning(suppressMessages(exclude_outliers(flagged)))
 })
 

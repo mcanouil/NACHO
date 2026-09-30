@@ -18,9 +18,9 @@
 # check_nacho() explains what it expected
 
     Code
-      check_outliers(list(a = 1))
+      exclude_outliers(list(a = 1))
     Condition
-      Error in `check_outliers()`:
+      Error in `exclude_outliers()`:
       ! `nacho_object` must be a <nacho> object, not a list.
       i Create one with `load_rcc()`.
 

@@ -75,13 +75,10 @@ test_that("x[, j] subsets samples and recomputes PCA and flags", {
   thresholds <- x@thresholds
   thresholds$BD <- c(0.1, 0.5)
   x@thresholds <- thresholds
-  samples <- x@samples
-  samples$is_outlier <- NACHO:::compute_outliers(samples, thresholds, "n1")
-  x@samples <- samples
   sub <- x[, 2:4]
   expect_identical(colnames(nacho_counts(sub)), colnames(nacho_counts(x))[2:4])
   expect_identical(nrow(nacho_samples(sub)), 3L)
-  expect_identical(nacho_qc(sub)$is_outlier, rep(TRUE, 3))
+  expect_identical(nacho_qc(sub)$status, rep("fail", 3))
   expect_identical(sub@thresholds, thresholds)
   expect_identical(dim(sub@pca$scores), c(3L, 2L))
 })

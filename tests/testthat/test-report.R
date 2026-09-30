@@ -36,7 +36,6 @@ test_that("not a nacho object", {
 test_that("numeric column for colour", {
   x <- GSE74821
   x@thresholds[["FoV"]] <- 95
-  x <- check_outliers(x)
   x@samples[["channel_count"]] <- as.numeric(x@samples[["channel_count"]])
   expect_output(
     NACHO:::report_markdown(x, colour = "channel_count"),

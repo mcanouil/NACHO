@@ -441,7 +441,7 @@ test_that("PlexSet files are detected from their content", {
     nacho_samples(res)[["IDFILE"]],
     nacho_samples(salmon_nacho)[["IDFILE"]]
   )
-  expect_false(all(nacho_qc(res)[["is_outlier"]]))
+  expect_false(all(nacho_qc(res)[["status"]] %in% "fail"))
 })
 
 test_that("PlexSet detection needs the exact PlexSet code classes", {

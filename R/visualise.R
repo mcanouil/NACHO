@@ -60,7 +60,6 @@ visualise <- function(nacho_object) {
   check_interactive("visualise")
   check_package("markdown", reason = "to show the help pages of the app")
 
-  nacho_object <- check_outliers(nacho_object)
   shiny::shinyOptions(nacho_object = nacho_object)
   on.exit(shiny::shinyOptions(nacho_object = NULL))
 
