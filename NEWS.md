@@ -55,6 +55,10 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `nacho_thresholds()` builds thresholds for the MAX, FLEX, PRO and SPRINT instruments.
     `load_rcc()` gains `instrument` and `preset` arguments and reads the instrument from MAX/FLEX files.
     When it cannot read the instrument, it warns with class `nacho_warning_instrument_unknown` and uses the MAX/FLEX values.
+- In `R/detection.R` and `R/accessors.R`,
+  - feat: `nacho_samples()` and `nacho_probes()` give the share of genes and samples above background, and `filter_detected()` keeps genes detected often enough.
+- In `R/thresholds.R`,
+  - feat: The legacy preset never flags a sample on housekeeping detection.
 - In `R/qc-table.R`,
   - feat: For PlexSet files, `nacho_qc()` has a `lane_status`, and a lane failure flags the eight samples of that lane.
     Their reason reads "lane fails" followed by the metric name.
@@ -62,6 +66,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `print()` lists the excluded negative probes.
 - In `R/qc.R`,
   - feat: Quality control runs on data without lane attributes; the metrics that need them are `NA`, with one warning.
+  - feat: `nacho_qc()` flags samples with fewer than three housekeeping genes above background, following Bruker's RNA content check.
+    A sample without a detection limit, with fewer than two negative probes with counts, gets a missing `Detection_rate` and `Housekeeping_detected`, with one `metric_unavailable` warning that names the samples.
 - In `R/conditions.R`,
   - feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
 - In `R/load_rcc.R`,
