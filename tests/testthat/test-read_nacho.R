@@ -62,6 +62,8 @@ test_that("upgrade_nacho() refuses thresholds without names", {
   expect_error(upgrade_nacho(old), class = "nacho_error_bad_argument")
   old$outliers_thresholds <- list(c(9, 9), FoV = 50)
   expect_error(upgrade_nacho(old), class = "nacho_error_bad_argument")
+  old$outliers_thresholds <- list(Fov = 50)
+  expect_error(upgrade_nacho(old), class = "nacho_error_bad_argument")
 })
 
 test_that("upgrade_nacho() and read_nacho() name an infinite LoD", {

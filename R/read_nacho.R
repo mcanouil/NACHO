@@ -65,10 +65,12 @@ migrate_schema_1 <- function(properties) {
 #'
 #' @noRd
 legacy_thresholds <- function(thresholds, samples) {
-  if (!rlang::is_named(thresholds)) {
+  filled <- nacho_thresholds(preset = "legacy")
+  if (
+    !rlang::is_named(thresholds) || !all(names(thresholds) %in% names(filled))
+  ) {
     return(thresholds)
   }
-  filled <- nacho_thresholds(preset = "legacy")
   filled[names(thresholds)] <- thresholds
   filled[["preset"]] <- "legacy"
   filled[["instrument"]] <- detect_instrument(samples)
