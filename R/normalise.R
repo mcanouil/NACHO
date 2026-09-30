@@ -2,8 +2,8 @@
 #'
 #' @param nacho_object A `nacho` object from [load_rcc()] or [normalise()].
 #' @inheritParams load_rcc
-#' @param outliers_thresholds A list of quality-control thresholds with the
-#'   elements `BD`, `FoV`, `LoD`, `PCL`, `Positive_factor` and `House_factor`.
+#' @param outliers_thresholds A list of quality-control thresholds, as
+#'   returned by [nacho_thresholds()].
 #' @param ... Must be empty.
 #'
 #' @details When only `outliers_thresholds` changes, `normalise()` keeps the
@@ -185,30 +185,4 @@ exclude_outliers <- function(nacho_object) {
   )
   kept <- nacho_object[, !flagged]
   run_normalisation(kept, kept@settings, kept@thresholds)
-}
-
-check_thresholds <- function(
-  thresholds,
-  arg = rlang::caller_arg(thresholds),
-  call = rlang::caller_env()
-) {
-  problems <- if (is.list(thresholds)) {
-    validate_thresholds(thresholds)
-  } else {
-    "Thresholds must be a list."
-  }
-  if (length(problems) > 0) {
-    nacho_abort(
-      c(
-        "{.arg {arg}} is not a valid set of thresholds.",
-        stats::setNames(
-          sub("^@thresholds", "thresholds", problems),
-          rep("x", length(problems))
-        )
-      ),
-      class = "bad_argument",
-      call = call
-    )
-  }
-  invisible(thresholds)
 }

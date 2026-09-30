@@ -43,7 +43,7 @@ test_that("No POS_E", {
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 10,
-    outliers_thresholds = NACHO:::default_thresholds()
+    outliers_thresholds = nacho_thresholds()
   )
   expect_true(S7::S7_inherits(res, NACHO:::nacho))
   expect_false("POS_E(0.5)" %in% nacho_probes(res)[["Name"]])
@@ -57,7 +57,7 @@ test_that("genes not null", {
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 10,
-    outliers_thresholds = NACHO:::default_thresholds()
+    outliers_thresholds = nacho_thresholds()
   )
   expect_true(S7::S7_inherits(res, NACHO:::nacho))
   expect_setequal(res@settings[["housekeeping_genes"]], c("RPLP0", "ACTB"))
@@ -76,7 +76,7 @@ test_that("predict TRUE", {
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 10,
-    outliers_thresholds = NACHO:::default_thresholds()
+    outliers_thresholds = nacho_thresholds()
   )
   expect_true(S7::S7_inherits(res, NACHO:::nacho))
   expect_true(res@settings[["housekeeping_predict"]])
@@ -90,7 +90,7 @@ test_that("norm TRUE", {
     housekeeping_norm = TRUE,
     normalisation_method = "GEO",
     n_comp = 10,
-    outliers_thresholds = NACHO:::default_thresholds()
+    outliers_thresholds = nacho_thresholds()
   )
   expect_true(S7::S7_inherits(res, NACHO:::nacho))
   expect_true(res@settings[["housekeeping_norm"]])
@@ -104,7 +104,7 @@ test_that("method GLM", {
     housekeeping_norm = FALSE,
     normalisation_method = "GLM",
     n_comp = 10,
-    outliers_thresholds = NACHO:::default_thresholds()
+    outliers_thresholds = nacho_thresholds()
   )
   expect_true(S7::S7_inherits(res, NACHO:::nacho))
   expect_identical(res@settings[["normalisation_method"]], "GLM")
@@ -118,7 +118,7 @@ test_that("n_comp 2", {
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 2,
-    outliers_thresholds = NACHO:::default_thresholds()
+    outliers_thresholds = nacho_thresholds()
   )
   expect_true(S7::S7_inherits(res, NACHO:::nacho))
   expect_identical(ncol(res@pca[["scores"]]), 2L)
@@ -132,7 +132,7 @@ test_that("n_comp 10", {
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 10,
-    outliers_thresholds = NACHO:::default_thresholds()
+    outliers_thresholds = nacho_thresholds()
   )
   expect_true(S7::S7_inherits(res, NACHO:::nacho))
   expect_identical(ncol(res@pca[["scores"]]), 10L)
@@ -150,7 +150,7 @@ test_that("All LoD to zero", {
     housekeeping_norm = FALSE,
     normalisation_method = "GEO",
     n_comp = 10,
-    outliers_thresholds = NACHO:::default_thresholds()
+    outliers_thresholds = nacho_thresholds()
   )
   expect_true(S7::S7_inherits(res, NACHO:::nacho))
 })
@@ -303,13 +303,16 @@ test_that("normalise() accepts open bounds and refuses closed infinite ones", {
 })
 
 test_that("an open bound stops flagging the samples beyond it", {
-  open_bounds <- list(
-    BD = c(-Inf, Inf),
-    FoV = 0,
-    LoD = -Inf,
-    PCL = 0,
-    Positive_factor = c(-Inf, Inf),
-    House_factor = c(-Inf, Inf)
+  open_bounds <- utils::modifyList(
+    nacho_thresholds(),
+    list(
+      BD = c(-Inf, Inf),
+      FoV = 0,
+      LoD = -Inf,
+      PCL = 0,
+      Positive_factor = c(-Inf, Inf),
+      House_factor = c(-Inf, Inf)
+    )
   )
   flags <- function(thresholds) {
     x <- suppressMessages(normalise(

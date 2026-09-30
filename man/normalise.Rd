@@ -47,8 +47,8 @@ floors at 0.}
 \item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
 
-\item{outliers_thresholds}{A list of quality-control thresholds with the
-elements \code{BD}, \code{FoV}, \code{LoD}, \code{PCL}, \code{Positive_factor} and \code{House_factor}.}
+\item{outliers_thresholds}{A list of quality-control thresholds, as
+returned by \code{\link[=nacho_thresholds]{nacho_thresholds()}}.}
 
 \item{...}{Must be empty.}
 }

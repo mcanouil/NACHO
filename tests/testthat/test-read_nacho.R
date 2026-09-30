@@ -31,8 +31,22 @@ test_that("upgrade_nacho() keeps the raw counts, settings and thresholds", {
   expect_identical(counts[1, 1], as.integer(cell))
   expect_identical(x@settings$normalisation_method, old$normalisation_method)
   expect_setequal(x@settings$housekeeping_genes, old$housekeeping_genes)
-  expect_identical(x@thresholds, old$outliers_thresholds)
+  expect_identical(
+    x@thresholds[names(old$outliers_thresholds)],
+    old$outliers_thresholds
+  )
   expect_false(any(c("PC01", "Count_Norm") %in% names(x@samples)))
+})
+
+test_that("upgrade_nacho() reads NACHO 2 thresholds under the legacy preset", {
+  old <- nacho_2()
+  x <- suppressMessages(upgrade_subset(old))
+  expect_identical(x@thresholds$preset, "legacy")
+  expect_identical(x@thresholds$BD, old$outliers_thresholds$BD)
+  expect_identical(
+    x@thresholds$instrument,
+    NACHO:::detect_instrument(x@samples)
+  )
 })
 
 test_that("upgrade_nacho() keeps an open House_factor upper bound", {
@@ -233,6 +247,7 @@ test_that("read_nacho() migrates the frozen schema-1 object", {
   expect_identical(x@provenance$migrated_from_schema, 1L)
   expect_identical(x@settings$background, "none")
   expect_identical(x@settings$background_mode, "subtract")
+  expect_identical(x@thresholds$preset, "legacy")
   expect_identical(S7::S7_class(x), NACHO:::nacho)
 })
 

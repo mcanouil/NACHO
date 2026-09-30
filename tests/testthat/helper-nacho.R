@@ -40,7 +40,7 @@ toy_nacho <- function(n_samples = 4L) {
     House_factor = 1,
     is_outlier = FALSE
   )
-  thresholds <- NACHO:::default_thresholds()
+  thresholds <- nacho_thresholds(preset = "legacy")
   provenance <- NACHO:::new_provenance(
     data_directory = NULL,
     file_version = "1.7",

@@ -32,7 +32,10 @@ migrate_schema_1 <- function(properties) {
     probes = properties[["probes"]],
     samples = properties[["samples"]],
     settings = settings,
-    thresholds = properties[["thresholds"]],
+    thresholds = legacy_thresholds(
+      properties[["thresholds"]],
+      properties[["samples"]]
+    ),
     rcc_type = properties[["rcc_type"]],
     provenance = provenance,
     warn_missing = FALSE
@@ -53,6 +56,20 @@ migrate_schema_1 <- function(properties) {
     }
   ))
   migrated
+}
+
+#' Thresholds from before presets, under the legacy definitions
+#'
+#' Keeps every saved limit and fills the missing ones from the legacy
+#' preset, so thresholds added later need no change here.
+#'
+#' @noRd
+legacy_thresholds <- function(thresholds, samples) {
+  filled <- nacho_thresholds(preset = "legacy")
+  filled[names(thresholds)] <- thresholds
+  filled[["preset"]] <- "legacy"
+  filled[["instrument"]] <- detect_instrument(samples)
+  filled
 }
 
 #' Convert a NACHO 2 object to NACHO 3
@@ -155,6 +172,9 @@ upgrade_nacho <- function(x) {
   counts <- probe_counts[["counts"]]
 
   thresholds <- x[["outliers_thresholds"]]
+  if (is.list(thresholds)) {
+    thresholds <- legacy_thresholds(thresholds, samples)
+  }
   check_thresholds(thresholds, arg = "x$outliers_thresholds")
   check_choice(
     x[["normalisation_method"]],

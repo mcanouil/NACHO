@@ -1,73 +1,10 @@
-#' @include qc.R
+#' @include qc.R thresholds.R
 NULL
 
 #' Schema version of the fields stored in `@provenance`
 #'
 #' @noRd
 nacho_schema_version <- 2L
-
-bounds_problem <- function(name, value) {
-  if (!is.numeric(value) || length(value) != 2 || anyNA(value)) {
-    return(sprintf(
-      "@thresholds$%s must be two numbers, a lower and an upper bound.",
-      name
-    ))
-  }
-  problem <- if (value[1] == Inf || value[2] == -Inf) {
-    "-Inf is only allowed as the lower bound and Inf only as the upper bound."
-  } else if (value[1] < 0 && value[1] != -Inf) {
-    "the lower bound must not be negative; use -Inf for no lower bound."
-  } else if (value[2] < 0) {
-    "the upper bound must not be negative."
-  } else if (value[1] > value[2]) {
-    "the bounds must be increasing."
-  }
-  if (!is.null(problem)) sprintf("@thresholds$%s: %s", name, problem)
-}
-
-validate_thresholds <- function(thresholds) {
-  required <- names(default_thresholds())
-  missing_names <- setdiff(required, names(thresholds))
-  if (length(missing_names) > 0) {
-    return(sprintf(
-      "@thresholds lacks %s.",
-      paste(missing_names, collapse = ", ")
-    ))
-  }
-  problems <- character(0)
-  for (name in c("BD", "Positive_factor", "House_factor")) {
-    problems <- c(problems, bounds_problem(name, thresholds[[name]]))
-  }
-  lod <- thresholds[["LoD"]]
-  if (!is.numeric(lod) || length(lod) != 1 || is.na(lod) || lod == Inf) {
-    problems <- c(
-      problems,
-      "@thresholds$LoD must be one number; Inf flags every sample, so set a finite LoD, or -Inf for no bound."
-    )
-  }
-  limits <- list(FoV = c(0, 100), PCL = c(0, 1))
-  for (name in names(limits)) {
-    value <- thresholds[[name]]
-    if (
-      !is.numeric(value) ||
-        length(value) != 1 ||
-        is.na(value) ||
-        value < limits[[name]][1] ||
-        value > limits[[name]][2]
-    ) {
-      problems <- c(
-        problems,
-        sprintf(
-          "@thresholds$%s must be one number between %s and %s.",
-          name,
-          limits[[name]][1],
-          limits[[name]][2]
-        )
-      )
-    }
-  }
-  problems
-}
 
 validate_nacho <- function(self) {
   counts <- self@counts

@@ -275,7 +275,7 @@ load_rcc <- function(
       background_mode = choices[["background_mode"]],
       n_comp = as.integer(n_comp)
     ),
-    thresholds = default_thresholds(),
+    thresholds = nacho_thresholds(),
     rcc_type = rcc_type,
     provenance = new_provenance(
       data_directory = data_directory,

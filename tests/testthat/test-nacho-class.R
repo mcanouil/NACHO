@@ -134,7 +134,7 @@ test_that("the validator refuses infinities that are not an open bound", {
 })
 
 test_that("the validator explains a negative upper bound and an infinite LoD", {
-  thresholds <- NACHO:::default_thresholds()
+  thresholds <- nacho_thresholds()
   thresholds$BD <- c(-Inf, -5)
   thresholds$LoD <- Inf
   problems <- NACHO:::validate_thresholds(thresholds)
@@ -149,7 +149,7 @@ test_that("the validator explains a negative upper bound and an infinite LoD", {
 
 test_that("the validator names the offending side of a pair", {
   problem <- function(value) {
-    thresholds <- NACHO:::default_thresholds()
+    thresholds <- nacho_thresholds()
     thresholds$BD <- value
     NACHO:::validate_thresholds(thresholds)
   }
@@ -196,7 +196,7 @@ test_that("compute_outliers() matches the NACHO 2 rules", {
     Positive_factor = c(1, 1, 1, 1),
     House_factor = c(1, 1, 1, NA)
   )
-  thresholds <- NACHO:::default_thresholds()
+  thresholds <- nacho_thresholds()
   expect_identical(
     NACHO:::compute_outliers(samples, thresholds, "n1"),
     c(FALSE, TRUE, TRUE, TRUE)

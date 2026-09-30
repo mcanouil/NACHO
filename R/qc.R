@@ -1,17 +1,3 @@
-#' Quality-control thresholds used by NACHO 2
-#'
-#' @noRd
-default_thresholds <- function() {
-  list(
-    BD = c(0.1, 2.25),
-    FoV = 75,
-    LoD = 2,
-    PCL = 0.95,
-    Positive_factor = c(1 / 4, 4),
-    House_factor = c(1 / 11, 11)
-  )
-}
-
 #' Settings for data that do not come from NACHO
 #'
 #' The defaults match those of [load_rcc()], which a test checks, except
