@@ -224,7 +224,7 @@ test_that("read_nacho() migrates the frozen schema-1 object", {
       x <- read_nacho(path),
       class = "nacho_warning_n_comp_reduced"
     ),
-    "schema 1"
+    "no negative probes"
   )
   expect_true(S7::S7_inherits(x, NACHO:::nacho))
   expect_identical(dim(x), c(40L, 4L))
@@ -240,6 +240,14 @@ test_that("upgrade_nacho() keeps the NACHO 2 background", {
   old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
   x <- suppressWarnings(suppressMessages(upgrade_nacho(old)))
   expect_identical(x@settings$background, "geo")
+  expect_identical(x@settings$background_mode, "subtract")
+})
+
+test_that("upgrade_nacho() uses no background without negative probes", {
+  old <- nacho_2()
+  old$nacho <- old$nacho[old$nacho$CodeClass != "Negative", ]
+  x <- suppressWarnings(suppressMessages(upgrade_nacho(old)))
+  expect_identical(x@settings$background, "none")
   expect_identical(x@settings$background_mode, "subtract")
 })
 

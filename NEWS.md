@@ -24,7 +24,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: Normalised counts are no longer rounded or floored at 0.1.
   - feat: There is no background correction by default (`background = "none"`).
     Choose a statistic with `background` and whether to threshold or subtract with `background_mode`.
-    `background = "geo", background_mode = "subtract"` gives the NACHO 2 correction.
+    `background = "geo", background_mode = "subtract"` gives the NACHO 2 correction, and subtracting floors the counts at 0.
   - feat: `Negative_factor` is always the geometric mean of the kept negative controls, including with `normalisation_method = "GLM"`.
     The background applied is in the new `Background` column.
 - In `R/deploy.R`,

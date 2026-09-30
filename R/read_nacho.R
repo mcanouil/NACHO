@@ -1,8 +1,15 @@
 #' Settings that reproduce the NACHO 2 background correction
 #'
+#' Without negative probes NACHO 2 subtracted nothing, so `background = "none"`
+#' reproduces it.
+#'
+#' @param settings A list of settings.
+#' @param probes The probe table, with a `CodeClass` column.
+#'
 #' @noRd
-legacy_settings <- function(settings) {
-  settings[["background"]] <- "geo"
+legacy_settings <- function(settings, probes) {
+  has_negatives <- "Negative" %in% probes[["CodeClass"]]
+  settings[["background"]] <- if (has_negatives) "geo" else "none"
   settings[["background_mode"]] <- "subtract"
   settings
 }
@@ -16,10 +23,10 @@ migrate_schema_1 <- function(properties) {
   provenance <- properties[["provenance"]]
   provenance[["schema_version"]] <- nacho_schema_version
   provenance[["migrated_from_schema"]] <- 1L
-  settings <- legacy_settings(properties[["settings"]])
-  if (!"Negative" %in% properties[["probes"]][["CodeClass"]]) {
-    settings[["background"]] <- "none"
-  }
+  settings <- legacy_settings(
+    properties[["settings"]],
+    properties[["probes"]]
+  )
   migrated <- build_nacho(
     counts = properties[["counts"]],
     probes = properties[["probes"]],
@@ -32,7 +39,11 @@ migrate_schema_1 <- function(properties) {
   )
   nacho_inform(c(
     "Read an object saved with schema 1 and rebuilt it with schema {nacho_schema_version}.",
-    i = "Normalised counts are recomputed without rounding, with the NACHO 2 background subtraction it was made with."
+    i = if (settings[["background"]] == "geo") {
+      "Normalised counts are recomputed without rounding, with the NACHO 2 background subtraction it was made with."
+    } else {
+      "Normalised counts are recomputed without rounding, and without background subtraction because the object has no negative probes."
+    }
   ))
   migrated
 }
@@ -177,7 +188,7 @@ upgrade_nacho <- function(x) {
       normalisation_method = x[["normalisation_method"]],
       n_comp = as.integer(x[["n_comp"]])
     ) |>
-      legacy_settings(),
+      legacy_settings(probes),
     thresholds = thresholds,
     rcc_type = attr(x, "RCC_type"),
     provenance = provenance
