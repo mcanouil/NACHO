@@ -64,10 +64,16 @@ test_that("nacho objects carry sample and probe detection rates", {
 })
 
 test_that("filter_detected() keeps controls and genes detected often enough", {
-  x <- suppressWarnings(filter_detected(GSE74821, min_rate = 0.9))
+  before <- nacho_probes(GSE74821)
+  min_rate <- max(before$detection_rate, na.rm = TRUE)
+  x <- suppressWarnings(filter_detected(GSE74821, min_rate = min_rate))
   probes <- nacho_probes(x)
   endogenous <- grepl("Endogenous", probes$CodeClass)
-  expect_true(all(probes$detection_rate[endogenous] >= 0.9))
+  expect_lt(
+    sum(grepl("Endogenous", probes$CodeClass)),
+    sum(grepl("Endogenous", before$CodeClass))
+  )
+  expect_true(all(probes$detection_rate[endogenous] >= min_rate))
   expect_identical(
     sum(!grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)),
     sum(!endogenous)
@@ -204,4 +210,13 @@ test_that("Housekeeping_detected is NA per sample without a limit and without ho
     nacho_samples(none)$Housekeeping_detected,
     rep(NA_integer_, ncol(GSE74821@counts))
   )
+})
+
+test_that("the legacy preset passes a sample with no housekeeping genes detected", {
+  x <- GSE74821
+  x@samples$Housekeeping_detected[1] <- 0L
+  x@thresholds <- nacho_thresholds(preset = "legacy")
+  expect_identical(nacho_qc(x)$Housekeeping_detected_status[1], "pass")
+  x@thresholds <- nacho_thresholds(preset = "nsolver")
+  expect_identical(nacho_qc(x)$Housekeeping_detected_status[1], "fail")
 })
