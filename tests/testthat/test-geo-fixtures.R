@@ -5,7 +5,8 @@ test_that("the GSE270837 miRNA fixture loads offline from gzipped RCC files", {
     data_directory = fixture[["dir"]],
     ssheet_csv = fixture[["samplesheet"]],
     id_colname = "IDFILE",
-    n_comp = 5
+    n_comp = 5,
+    instrument = "sprint"
   )))
 })
 
@@ -31,7 +32,7 @@ test_that("the fixtures are single-sample RCC files, not PlexSet", {
   }
 })
 
-load_full_series <- function(series) {
+load_full_series <- function(series, instrument = NULL) {
   download_dir <- withr::local_tempdir(.local_envir = parent.frame())
   suppressMessages(GEOquery::getGEOSuppFiles(
     GEO = series,
@@ -49,7 +50,8 @@ load_full_series <- function(series) {
   suppressMessages(NACHO::load_rcc(
     data_directory = file.path(download_dir, series),
     ssheet_csv = data.frame(IDFILE = files),
-    id_colname = "IDFILE"
+    id_colname = "IDFILE",
+    instrument = instrument
   ))
 }
 
@@ -57,7 +59,10 @@ test_that("the full GSE270837 series loads from GEO", {
   skip_on_cran()
   skip_if_offline()
   suppressMessages(skip_if_not_installed("GEOquery"))
-  expect_identical(ncol(load_full_series("GSE270837")), 22L)
+  expect_identical(
+    ncol(load_full_series("GSE270837", instrument = "sprint")),
+    22L
+  )
 })
 
 test_that("the full GSE178516 series loads from GEO", {

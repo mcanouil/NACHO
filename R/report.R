@@ -198,10 +198,11 @@ report_markdown <- function(
   }
 
   qc <- nacho_qc(x)
-  if (any(qc[["is_outlier"]] %in% TRUE)) {
+  failed <- qc[["status"]] %in% "fail"
+  if (any(failed)) {
     cat(prefix_title(title_level, 1), "Outliers", "\n\n")
     print(knitr::kable(
-      qc[qc[["is_outlier"]] %in% TRUE, setdiff(names(qc), "is_outlier")],
+      qc[failed, c(names(qc)[1], "lane", "CartridgeID", "n_flags", "reason")],
       row.names = FALSE
     ))
   }

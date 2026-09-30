@@ -525,8 +525,8 @@ server <- function(input, output, session) {
   outliers_list <- shiny::reactive({
     qc <- NACHO::nacho_qc(nacho_custom())
     qc[
-      qc[["is_outlier"]] %in% TRUE,
-      setdiff(names(qc), "is_outlier"),
+      qc[["status"]] %in% "fail",
+      c(names(qc)[1], "lane", "CartridgeID", "n_flags", "reason"),
       drop = FALSE
     ]
   })

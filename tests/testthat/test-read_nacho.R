@@ -348,3 +348,13 @@ test_that("a missing or malformed schema version is named as such", {
   err <- expect_error(nacho_samples(x), class = "nacho_error_bad_object")
   expect_match(conditionMessage(err), "missing or malformed")
 })
+
+test_that("upgrade_nacho() keeps the NACHO 2 thresholds under the legacy preset", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  x <- suppressWarnings(
+    suppressMessages(upgrade_nacho(old)),
+    classes = "nacho_warning_n_comp_reduced"
+  )
+  expect_identical(x@thresholds$preset, "legacy")
+  expect_identical(x@thresholds$BD, old$outliers_thresholds$BD)
+})

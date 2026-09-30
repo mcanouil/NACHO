@@ -216,7 +216,8 @@ nacho_from_parts <- function(
     probes = probes,
     samples = samples,
     settings = settings,
-    thresholds = metadata[["thresholds"]] %||% nacho_thresholds(),
+    thresholds = metadata[["thresholds"]] %||%
+      thresholds_for_samples(samples, NULL, "nsolver"),
     rcc_type = metadata[["rcc_type"]] %||% "n1",
     provenance = provenance
   )

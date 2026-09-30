@@ -195,6 +195,7 @@ test_that("using GEO GSE74821", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE74821"),
+      instrument = "max",
       ssheet_csv = head(targets, 20),
       id_colname = "IDFILE",
       housekeeping_genes = NULL,
@@ -210,6 +211,7 @@ test_that("using GEO GSE74821", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE74821"),
+      instrument = "max",
       ssheet_csv = head(targets, 20),
       id_colname = "IDFILE",
       housekeeping_genes = NULL,
@@ -257,6 +259,7 @@ test_that("using GEO GSE70970", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE70970"),
+      instrument = "max",
       ssheet_csv = head(targets, 20),
       id_colname = "IDFILE",
       housekeeping_genes = NULL,
@@ -272,6 +275,7 @@ test_that("using GEO GSE70970", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE70970"),
+      instrument = "max",
       ssheet_csv = head(targets, 20),
       id_colname = "IDFILE",
       housekeeping_genes = NULL,
@@ -287,6 +291,7 @@ test_that("using GEO GSE70970", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE70970"),
+      instrument = "max",
       ssheet_csv = head(targets[["IDFILE"]], 20),
       id_colname = "IDFILE",
       housekeeping_predict = TRUE,
@@ -299,6 +304,7 @@ test_that("using GEO GSE70970", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE70970"),
+      instrument = "max",
       ssheet_csv = head(targets[["IDFILE"]], 20),
       housekeeping_predict = TRUE,
       housekeeping_norm = TRUE
@@ -310,6 +316,7 @@ test_that("using GEO GSE70970", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE70970"),
+      instrument = "max",
       ssheet_csv = `names<-`(
         head(targets[["IDFILE"]], 20),
         head(letters, 20)
@@ -557,4 +564,37 @@ test_that("load_rcc() reports a probe clash across single-sample RCC files", {
     )),
     error = TRUE
   )
+})
+
+test_that("load_rcc() uses nsolver thresholds and detects MAX/FLEX files", {
+  fixture <- geo_fixture("GSE178516")
+  x <- suppressMessages(load_rcc(
+    fixture$dir,
+    fixture$samplesheet,
+    "IDFILE",
+    n_comp = 5
+  ))
+  expect_identical(x@thresholds$preset, "nsolver")
+  expect_identical(x@thresholds$instrument, "max")
+})
+
+test_that("load_rcc() warns for SPRINT files unless instrument is given", {
+  fixture <- geo_fixture("GSE270837")
+  expect_warning(
+    suppressWarnings(
+      suppressMessages(
+        load_rcc(fixture$dir, fixture$samplesheet, "IDFILE", n_comp = 5)
+      ),
+      classes = "nacho_warning_n_comp_reduced"
+    ),
+    class = "nacho_warning_instrument_unknown"
+  )
+  x <- suppressMessages(load_rcc(
+    fixture$dir,
+    fixture$samplesheet,
+    "IDFILE",
+    n_comp = 5,
+    instrument = "sprint"
+  ))
+  expect_identical(x@thresholds$BD, c(0.1, 1.8))
 })

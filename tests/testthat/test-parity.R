@@ -17,10 +17,11 @@ check_parity <- function(x, reference, glm = FALSE) {
       tolerance = 1e-8
     )
   }
+  has_flags <- "is_outlier" %in% names(reference[["metrics"]])
   columns <- if (glm) {
     glm_metrics
   } else {
-    names(reference[["metrics"]])
+    setdiff(names(reference[["metrics"]]), "is_outlier")
   }
   testthat::expect_equal(
     x@samples[, columns],
@@ -28,6 +29,12 @@ check_parity <- function(x, reference, glm = FALSE) {
     tolerance = 1e-8,
     ignore_attr = TRUE
   )
+  if (has_flags) {
+    testthat::expect_identical(
+      nacho_qc(x)$status %in% "fail",
+      reference[["metrics"]][["is_outlier"]] %in% TRUE
+    )
+  }
   testthat::expect_identical(
     sort(x@settings[["housekeeping_genes"]]),
     sort(reference[["housekeeping_genes"]])
@@ -51,7 +58,8 @@ test_that("PlexSet results match the NACHO 2 pipeline", {
     id_colname = "IDFILE",
     housekeeping_norm = FALSE,
     background = "geo",
-    background_mode = "subtract"
+    background_mode = "subtract",
+    preset = "legacy"
   ))
   check_parity(plexset_geo, parity[["plexset"]])
 })
@@ -66,6 +74,7 @@ test_that("single-sample results match the NACHO 2 pipeline", {
       n_comp = 5,
       background = "geo",
       background_mode = "subtract",
+      preset = "legacy",
       ...
     )))
   }
@@ -86,7 +95,8 @@ test_that("miRNA results match the NACHO 2 pipeline", {
     "IDFILE",
     n_comp = 5,
     background = "geo",
-    background_mode = "subtract"
+    background_mode = "subtract",
+    preset = "legacy"
   )))
   check_parity(x, parity[["mirna"]])
 })
@@ -97,7 +107,8 @@ test_that("salmon results match the NACHO 2 pipeline", {
     ssheet_csv = salmon_tidy,
     id_colname = "IDFILE",
     background = "geo",
-    background_mode = "subtract"
+    background_mode = "subtract",
+    preset = "legacy"
   ))
   check_parity(salmon_geo, parity[["salmon"]])
 })

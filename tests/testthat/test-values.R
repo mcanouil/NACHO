@@ -2,7 +2,8 @@ gse_geo <- suppressMessages(normalise(
   GSE74821,
   normalisation_method = "GEO",
   background = "geo",
-  background_mode = "subtract"
+  background_mode = "subtract",
+  outliers_thresholds = nacho_thresholds(preset = "legacy")
 ))
 gse_df <- data.table::as.data.table(as.data.frame(gse_geo, long = TRUE))
 gse_id <- "IDFILE"

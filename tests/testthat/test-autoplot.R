@@ -44,7 +44,6 @@ test_that("flagged samples of a toy object get their own layers", {
   toy <- toy_nacho(6L)
   samples <- toy@samples
   samples[["BD"]][1] <- 5
-  samples[["is_outlier"]][1] <- TRUE
   toy@samples <- samples
   for (type in c("BD", "Positive", "ACBD", "PFNF", "HF")) {
     plot <- autoplot(toy, type = type, outliers_labels = "IDFILE")

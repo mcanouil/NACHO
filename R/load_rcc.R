@@ -25,6 +25,12 @@
 #'   `"threshold"` (the default) raises lower counts to it, which Bruker
 #'   recommends when fold changes matter, and `"subtract"` removes it and
 #'   floors at 0.
+#' @param instrument [[character]] The nCounter instrument, `"max"`,
+#'   `"flex"`, `"pro"` or `"sprint"`, which sets the binding density limits.
+#'   `NULL` (the default) reads it from the RCC files when they say, and
+#'   otherwise uses the MAX/FLEX limits with a warning.
+#' @param preset [[character]] `"nsolver"` (the default) or `"legacy"`; see
+#'   [nacho_thresholds()].
 #' @param n_comp [[numeric]] Number indicating the number of principal components to compute.
 #'  Cannot be more than n-1 samples. Default is `10`.
 #'
@@ -75,6 +81,8 @@ load_rcc <- function(
   normalisation_method = "GEO",
   background = "none",
   background_mode = "threshold",
+  instrument = NULL,
+  preset = "nsolver",
   n_comp = 10
 ) {
   if (missing(data_directory) || missing(ssheet_csv)) {
@@ -101,6 +109,10 @@ load_rcc <- function(
     background,
     background_mode
   )
+  if (!is.null(instrument)) {
+    instrument <- check_choice(instrument, nacho_instruments)
+  }
+  preset <- check_choice(preset, nacho_presets)
 
   if (is.character(ssheet_csv) && length(ssheet_csv) > 1) {
     if (is.null(names(ssheet_csv))) {
@@ -275,7 +287,7 @@ load_rcc <- function(
       background_mode = choices[["background_mode"]],
       n_comp = as.integer(n_comp)
     ),
-    thresholds = nacho_thresholds(),
+    thresholds = thresholds_for_samples(samples, instrument, preset),
     rcc_type = rcc_type,
     provenance = new_provenance(
       data_directory = data_directory,

@@ -37,8 +37,7 @@ toy_nacho <- function(n_samples = 4L) {
     Positive_factor = 1,
     Negative_factor = 1,
     Background = NA_real_,
-    House_factor = 1,
-    is_outlier = FALSE
+    House_factor = 1
   )
   thresholds <- nacho_thresholds(preset = "legacy")
   provenance <- NACHO:::new_provenance(
