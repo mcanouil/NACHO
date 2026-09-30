@@ -89,3 +89,68 @@ test_that("check_proportion() accepts numbers from 0 to 1 only", {
     class = "nacho_error_bad_argument"
   )
 })
+
+rebuild_with_counts <- function(x, counts, probes, warn_missing = TRUE) {
+  NACHO:::build_nacho(
+    counts = counts,
+    probes = probes,
+    samples = x@samples[seq_len(ncol(counts)), , drop = FALSE],
+    settings = x@settings,
+    thresholds = x@thresholds,
+    rcc_type = x@rcc_type,
+    provenance = x@provenance,
+    warn_missing = warn_missing
+  )
+}
+
+count_unavailable <- function(expr) {
+  n <- 0L
+  value <- withCallingHandlers(
+    expr,
+    nacho_warning_metric_unavailable = function(cnd) {
+      n <<- n + 1L
+      invokeRestart("muffleWarning")
+    },
+    warning = function(cnd) {
+      if (!inherits(cnd, "nacho_warning_metric_unavailable")) {
+        invokeRestart("muffleWarning")
+      }
+    }
+  )
+  list(value = value, n = n)
+}
+
+test_that("a build without negative probes gives missing detection rates and one warning", {
+  keep <- GSE74821@probes$CodeClass != "Negative"
+  counts <- GSE74821@counts[keep, 1:3]
+  probes <- GSE74821@probes[keep, ]
+  built <- count_unavailable(rebuild_with_counts(GSE74821, counts, probes))
+  expect_identical(built$n, 1L)
+  expect_true(all(is.na(nacho_samples(built$value)$Detection_rate)))
+  expect_true(all(is.na(nacho_probes(built$value)$detection_rate)))
+  expect_false(any(is.nan(nacho_probes(built$value)$detection_rate)))
+  quiet <- count_unavailable(rebuild_with_counts(
+    GSE74821,
+    counts,
+    probes,
+    FALSE
+  ))
+  expect_identical(quiet$n, 0L)
+})
+
+test_that("a sample without a detection limit gets NA, never NaN, with one warning", {
+  counts <- GSE74821@counts[, 1:3]
+  negative <- GSE74821@probes$CodeClass == "Negative"
+  counts[negative, 2] <- NA
+  built <- count_unavailable(rebuild_with_counts(
+    GSE74821,
+    counts,
+    GSE74821@probes
+  ))
+  expect_identical(built$n, 1L)
+  rate <- nacho_samples(built$value)$Detection_rate
+  expect_true(is.na(rate[2]) && !is.nan(rate[2]))
+  expect_false(anyNA(rate[-2]))
+  expect_false(any(is.nan(nacho_probes(built$value)$detection_rate)))
+  expect_false(anyNA(nacho_probes(built$value)$detection_rate))
+})

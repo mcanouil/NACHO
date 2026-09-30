@@ -478,6 +478,15 @@ sample_lod <- function(pos_e, negatives) {
   round(z, 2)
 }
 
+#' Turn the NaN of a mean over nothing into a plain missing value
+#'
+#' @noRd
+missing_not_nan <- function(x) {
+  x <- unname(x)
+  x[is.nan(x)] <- NA_real_
+  x
+}
+
 #' Per-sample quality-control metrics
 #'
 #' @noRd
@@ -668,24 +677,27 @@ build_nacho <- function(
     NA_real_
   }
   metrics[["Background"]] <- background %||% NA_real_
-  no_limits <- all(is.na(limits))
-  if (no_limits && warn_missing) {
+  no_limit <- is.na(limits)
+  if (any(no_limit) && warn_missing) {
+    lacking <- colnames(counts)[no_limit]
+    n_more <- max(length(lacking) - 5, 0)
     nacho_warn(
       c(
-        "Detection rates need two kept negative probes, so they are {.val NA}.",
-        i = "Add negative probes, or check that none was excluded."
+        "Detection rates need two kept negative probes with counts, so they are {.val NA} for some samples.",
+        i = paste0(
+          "Samples without a detection limit: ",
+          paste(utils::head(lacking, 5), collapse = ", "),
+          if (n_more > 0) paste0(" and ", n_more, " more"),
+          "."
+        )
       ),
       class = "metric_unavailable"
     )
   }
-  metrics[["Detection_rate"]] <- if (no_limits) {
-    NA_real_
-  } else {
-    unname(colMeans(
-      hits[grepl("Endogenous", code_class), , drop = FALSE],
-      na.rm = TRUE
-    ))
-  }
+  metrics[["Detection_rate"]] <- missing_not_nan(colMeans(
+    hits[grepl("Endogenous", code_class), , drop = FALSE],
+    na.rm = TRUE
+  ))
   if (!is.null(house_factor)) {
     metrics[["House_factor"]] <- unname(house_factor)
   }
@@ -699,11 +711,7 @@ build_nacho <- function(
     scaled
   }
 
-  probes[["detection_rate"]] <- if (no_limits) {
-    NA_real_
-  } else {
-    unname(rowMeans(hits, na.rm = TRUE))
-  }
+  probes[["detection_rate"]] <- missing_not_nan(rowMeans(hits, na.rm = TRUE))
   probes[["is_housekeeping"]] <- probes[["Name"]] %in% housekeeping_genes
   probes[["is_excluded"]] <- probes[["Name"]] %in% excluded
   provenance[["excluded_negatives"]] <- excluded
