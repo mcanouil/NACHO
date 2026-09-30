@@ -20,6 +20,13 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
 - In `R/render.R`,
   - feat: `render()`'s `clean` argument is gone; the working files now live in a temporary folder.
+- In `R/qc.R`,
+  - feat: Normalised counts are no longer rounded or floored at 0.1.
+  - feat: There is no background correction by default (`background = "none"`).
+    Choose a statistic with `background` and whether to threshold or subtract with `background_mode`.
+    `background = "geo", background_mode = "subtract"` gives the NACHO 2 correction.
+  - feat: `Negative_factor` is always the geometric mean of the kept negative controls, including with `normalisation_method = "GLM"`.
+    The background applied is in the new `Background` column.
 - In `R/deploy.R`,
   - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
 - In `DESCRIPTION`,
@@ -31,6 +38,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.
 - In `R/read_nacho.R`,
   - feat: `upgrade_nacho()` converts a NACHO 2 object, and `read_nacho()` reads a saved object from any NACHO version.
+  - feat: `read_nacho()` reads objects saved by earlier development versions of NACHO 3 and rebuilds them.
 - In `R/interop.R`,
   - feat: `as_summarized_experiment()` and `as_nacho()` convert between `nacho` objects and `SummarizedExperiment`, and `as_nacho()` also reads a `NanoStringRccSet` from NanoStringNCTools.
 - In `R/qc.R`,
@@ -40,8 +48,10 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/load_rcc.R`,
   - feat: `load_rcc()` and `normalise()` check their arguments before reading any file.
   - feat: `load_rcc()` reads gzipped RCC files directly and accepts files with Windows line endings.
+  - feat: `background` and `background_mode` choose how negative controls correct each sample.
 - In `R/normalise.R`,
   - feat: `normalise()` checks `outliers_thresholds` before it runs, and `check_outliers()` recomputes `is_outlier` from the object's thresholds.
+  - feat: `?normalise` documents the order of the normalisation steps.
 - In `R/autoplot.R`,
   - feat: `autoplot()` checks that `colour` and `outliers_labels` name columns of `nacho_samples()`, and `outliers_labels` must be a column name.
 
