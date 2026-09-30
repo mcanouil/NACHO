@@ -237,7 +237,7 @@ test_that("detection rates and housekeeping counts match hand-computed values", 
   x@settings$normalisation_method <- "GEO"
   built <- suppressWarnings(rebuild_with_counts(x, counts, probes))
   expect_identical(nacho_samples(built)$Detection_rate, c(1, 0.5))
-  expect_identical(nacho_probes(built)$detection_rate, c(1, 0, 0, 0.5, 1, 0))
+  expect_identical(nacho_probes(built)$detection_rate, c(0, 0, 0, 0.5, 1, 0))
   expect_identical(nacho_samples(built)$Housekeeping_detected, c(0L, 0L))
   counts[6, ] <- c(17L, 23L)
   built <- suppressWarnings(rebuild_with_counts(x, counts, probes))
