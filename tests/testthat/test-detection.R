@@ -252,3 +252,9 @@ test_that("filter_detected() refuses an object with no detection rates", {
   x@probes$detection_rate <- NA_real_
   expect_error(filter_detected(x), class = "nacho_error_no_detection_rate")
 })
+
+test_that("filter_detected() returns an object without endogenous genes unchanged", {
+  keep <- which(GSE74821@probes$CodeClass != "Endogenous")
+  x <- suppressWarnings(GSE74821[keep, ])
+  expect_identical(filter_detected(x), x)
+})

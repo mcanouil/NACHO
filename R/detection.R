@@ -41,6 +41,7 @@ detected <- function(counts, limits) {
 #' A gene's detection rate is the share of the samples with a detection limit
 #' in which it is detected, so a sample with fewer than two negative probes
 #' does not count.
+#' An object without endogenous genes comes back unchanged.
 #' When no sample has a detection limit, `filter_detected()` stops with an
 #' error.
 #'
@@ -58,6 +59,9 @@ filter_detected <- function(x, min_rate = 0.5) {
   check_proportion(min_rate)
   rate <- x@probes[["detection_rate"]]
   endogenous <- grepl("Endogenous", x@probes[["CodeClass"]])
+  if (!any(endogenous)) {
+    return(x)
+  }
   if (is.null(rate) || all(is.na(rate[endogenous]))) {
     nacho_abort(
       c(
