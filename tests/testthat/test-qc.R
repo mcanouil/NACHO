@@ -40,6 +40,13 @@ test_that("content_factor() floors at 1 before the geometric mean", {
   expect_equal(NACHO:::content_factor(rows), mean(g) / g)
 })
 
+test_that("content_factor() keeps one missing sample from spoiling the others", {
+  rows <- matrix(c(4, 2, NA, NA, 8, 2), ncol = 3)
+  factor <- NACHO:::content_factor(rows)
+  expect_true(is.nan(factor[[2]]))
+  expect_false(anyNA(factor[-2]))
+})
+
 test_that("sample_metrics() gives NA and one warning when lane attributes are missing", {
   x <- GSE74821
   samples <- x@samples[, !grepl("^Lane_Attributes", names(x@samples))]

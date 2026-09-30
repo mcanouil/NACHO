@@ -40,7 +40,7 @@ migrate_schema_1 <- function(properties) {
   nacho_inform(c(
     "Read an object saved with schema 1 and rebuilt it with schema {nacho_schema_version}.",
     i = if (settings[["background"]] == "geo") {
-      "Normalised counts are recomputed without rounding, with the NACHO 2 background subtraction it was made with."
+      "Normalised counts are recomputed without rounding, with the NACHO 2 geometric mean background subtraction it was made with. A GLM object no longer subtracts the model intercept."
     } else {
       "Normalised counts are recomputed without rounding, and without background subtraction because the object has no negative probes."
     }

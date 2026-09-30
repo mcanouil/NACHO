@@ -407,7 +407,7 @@ scale_counts <- function(counts, background, background_mode, positive_factor) {
 content_factor <- function(scaled_rows) {
   scaled_rows[!is.na(scaled_rows) & scaled_rows < 1] <- 1
   geometric <- geometric_means(scaled_rows)
-  mean(geometric) / geometric
+  mean(geometric, na.rm = TRUE) / geometric
 }
 
 #' Predict the five most stable housekeeping genes

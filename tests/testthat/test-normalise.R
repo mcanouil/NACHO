@@ -237,6 +237,16 @@ test_that("normalise() returns a nacho object", {
   expect_identical(x@settings$normalisation_method, "GLM")
 })
 
+test_that("GLM keeps the geometric mean of the kept negatives as Negative_factor", {
+  x <- suppressMessages(normalise(GSE74821, normalisation_method = "GLM"))
+  probes <- nacho_probes(x)
+  kept <- probes$CodeClass == "Negative" & !probes$is_excluded
+  expect_equal(
+    nacho_samples(x)$Negative_factor,
+    unname(exp(colMeans(log(nacho_counts(x)[kept, , drop = FALSE]))))
+  )
+})
+
 test_that("normalise() with new thresholds only recomputes the flags", {
   tight <- salmon_nacho@thresholds
   tight$BD <- c(0.5, 0.6)
