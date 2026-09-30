@@ -254,6 +254,12 @@ for (imetric in metrics) {
   })
 }
 
+for (metric in c("PN", "NORM")) {
+  test_that(paste(metric, "builds without the geom_smooth() formula message"), {
+    expect_no_message(ggplot2::ggplot_build(autoplot(GSE74821, type = metric)))
+  })
+}
+
 for (metric in c("BD", "FoV", "PCL", "LoD", "PN")) {
   test_that(paste(metric, "plot keeps one x value per sample"), {
     id <- names(nacho_samples(GSE74821))[1]

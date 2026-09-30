@@ -85,6 +85,16 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
     A saved object with `LoD = Inf` must have it changed to a finite value or `-Inf` before it can be read.
     `autoplot()` draws no threshold line for an open bound, `summary()` shows it as `NA`, and the report leaves it out.
 
+# NACHO 2.0.8
+
+## Bug Fixes
+
+- In `inst/app/`,
+  - fix: render the help pages from their text, so the app no longer writes to the installed package when `R CMD check` runs it.
+  - fix: open the help pages of the quality-control metrics, whose links never matched their input names.
+- In `autoplot()`,
+  - fix: set the smoothing formula of the `"PN"` and `"NORM"` plots, which silences the ggplot2 `geom_smooth()` message.
+
 # NACHO 2.0.7
 
 ## Dependencies
