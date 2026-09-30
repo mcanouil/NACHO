@@ -684,7 +684,11 @@ build_nacho <- function(
     n_more <- max(length(lacking) - 5, 0)
     nacho_warn(
       c(
-        "{.field Detection_rate} and {.field Housekeeping_detected} need two kept negative probes with counts, so they are {.val NA} for some samples.",
+        paste(
+          "{.field Detection_rate} and {.field Housekeeping_detected} need",
+          "two kept negative probes with counts,",
+          "so they are {.val NA} for some samples."
+        ),
         i = paste0(
           "Samples without a detection limit: ",
           paste(utils::head(lacking, 5), collapse = ", "),
