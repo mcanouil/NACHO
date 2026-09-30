@@ -191,7 +191,7 @@ test_that("app tells the user when it discards a sample sheet", {
   expect_match(notified, "IDFILE")
 })
 
-test_that("app leaves its markdown files untouched under R CMD check", {
+test_that("app help pages render without writing under R CMD check", {
   skip_if_not_installed("markdown")
   app_directory <- withr::local_tempdir()
   expect_true(file.copy(
@@ -210,32 +210,31 @@ test_that("app leaves its markdown files untouched under R CMD check", {
   app_utils <- new.env()
   sys.source(file.path(app_directory, "utils.R"), envir = app_utils)
   withr::local_envvar(`_R_CHECK_PACKAGE_NAME_` = "NACHO")
-  # nolint start: object_usage_linter. testServer() provides session.
-  shiny::testServer(shiny::shinyAppDir(app_directory), {
-    for (about in app_utils[["about_pages"]]) {
-      do.call(
-        session[["setInputs"]],
-        stats::setNames(list(1), paste0("about_", about))
-      )
-    }
-  })
-  # nolint end
+  withr::local_dir(app_directory)
+  for (about in c("nacho", app_utils[["about_pages"]])) {
+    expect_s3_class(app_utils[["include_about"]](about), "html")
+  }
   expect_identical(tools::md5sum(markdown_files), checksums)
 })
 
-test_that("each QC metric help link maps to its markdown file", {
+test_that("app help links match the help page lookup", {
+  skip_if_not_installed("markdown")
+  app_directory <- system.file("app", package = "NACHO")
   app_utils <- new.env()
-  sys.source(
-    system.file("app", "utils.R", package = "NACHO"),
-    envir = app_utils
+  sys.source(file.path(app_directory, "utils.R"), envir = app_utils)
+  request <- new.env()
+  request[["REQUEST_METHOD"]] <- "GET"
+  request[["PATH_INFO"]] <- "/"
+  request[["QUERY_STRING"]] <- ""
+  request[["HTTP_HOST"]] <- "localhost"
+  response <- shiny::shinyAppDir(app_directory)[["httpHandler"]](request)
+  page <- response[["content"]]
+  if (is.raw(page)) {
+    page <- rawToChar(page)
+  }
+  link_ids <- regmatches(page, gregexpr("id=\"about_[a-z]+\"", page))[[1]]
+  expect_setequal(
+    gsub("^id=\"about_|\"$", "", link_ids),
+    unname(app_utils[["about_pages"]])
   )
-  about_ids <- app_utils[["about_pages"]]
-  expect_gt(length(about_ids), 0)
-  expect_false(anyDuplicated(about_ids) > 0)
-  expect_true(all(file.exists(system.file(
-    "app",
-    "www",
-    paste0("about-", about_ids, ".md"),
-    package = "NACHO"
-  ))))
 })
