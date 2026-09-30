@@ -27,15 +27,17 @@ migrate_schema_1 <- function(properties) {
     properties[["settings"]],
     properties[["probes"]]
   )
+  thresholds <- legacy_thresholds(
+    properties[["thresholds"]],
+    properties[["samples"]]
+  )
+  check_thresholds(thresholds, arg = "thresholds")
   migrated <- build_nacho(
     counts = properties[["counts"]],
     probes = properties[["probes"]],
     samples = properties[["samples"]],
     settings = settings,
-    thresholds = legacy_thresholds(
-      properties[["thresholds"]],
-      properties[["samples"]]
-    ),
+    thresholds = thresholds,
     rcc_type = properties[["rcc_type"]],
     provenance = provenance,
     warn_missing = FALSE

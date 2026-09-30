@@ -368,3 +368,12 @@ test_that("upgrade_nacho() keeps the NACHO 2 thresholds under the legacy preset"
   expect_identical(x@thresholds$preset, "legacy")
   expect_identical(x@thresholds$BD, old$outliers_thresholds$BD)
 })
+
+test_that("migrating a schema 1 object with unknown thresholds gives a classed error", {
+  properties <- S7::props(readRDS(test_path("fixtures", "nacho-schema-1.rds")))
+  properties$thresholds[["not_a_threshold"]] <- c(0, 1)
+  expect_error(
+    suppressMessages(NACHO:::migrate_schema_1(properties)),
+    class = "nacho_error_bad_argument"
+  )
+})

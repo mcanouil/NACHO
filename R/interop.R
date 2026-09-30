@@ -217,7 +217,12 @@ nacho_from_parts <- function(
     samples = samples,
     settings = settings,
     thresholds = metadata[["thresholds"]] %||%
-      thresholds_for_samples(samples, NULL, "nsolver"),
+      thresholds_for_samples(
+        samples,
+        NULL,
+        "nsolver",
+        hint = "Change it with {.code normalise(x, outliers_thresholds = nacho_thresholds(instrument = ...))}."
+      ),
     rcc_type = metadata[["rcc_type"]] %||% "n1",
     provenance = provenance
   )

@@ -324,7 +324,9 @@ excluded_negatives <- function(counts, code_class, preset) {
   if (preset == "legacy") {
     overall <- stats::median(negatives, na.rm = TRUE)
     medians <- apply(negatives, 1, stats::median, na.rm = TRUE)
-    excluded <- rownames(negatives)[abs(overall - medians) > 0.5 * overall]
+    excluded <- rownames(negatives)[which(
+      abs(overall - medians) > 0.5 * overall
+    )]
     return(if (length(excluded) == nrow(negatives)) character(0) else excluded)
   }
   if (nrow(negatives) < 4) {

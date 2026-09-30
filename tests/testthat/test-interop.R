@@ -40,7 +40,9 @@ test_that("as_nacho() builds from a plain SummarizedExperiment with default sett
   S4Vectors::metadata(se) <- list()
   expect_warning(
     x <- suppressMessages(as_nacho(se)),
-    class = "nacho_warning_instrument_unknown"
+    class = "nacho_warning_instrument_unknown",
+    regexp = "nacho_thresholds(instrument = ...)",
+    fixed = TRUE
   )
   expect_identical(x@settings$normalisation_method, "GEO")
   expect_identical(ncol(x), 48L)

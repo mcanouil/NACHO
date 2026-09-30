@@ -47,6 +47,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/read_nacho.R`,
   - feat: `upgrade_nacho()` converts a NACHO 2 object, and `read_nacho()` reads a saved object from any NACHO version.
   - feat: `read_nacho()` reads objects saved by earlier development versions of NACHO 3 and rebuilds them.
+  - feat: Upgraded NACHO 2 objects and migrated schema 1 objects move to the legacy preset, with `background = "geo", background_mode = "subtract"`, so they keep their NACHO 2 flags and background correction.
+    Use `normalise()` to switch to the nSolver preset.
 - In `R/interop.R`,
   - feat: `as_summarized_experiment()` and `as_nacho()` convert between `nacho` objects and `SummarizedExperiment`, and `as_nacho()` also reads a `NanoStringRccSet` from NanoStringNCTools.
 - In `R/thresholds.R` and `R/load_rcc.R`,

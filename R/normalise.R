@@ -6,16 +6,14 @@
 #'   returned by [nacho_thresholds()].
 #' @param ... Must be empty.
 #'
-#' @details When only `outliers_thresholds` changes, `normalise()` keeps the
-#'   counts and recomputes the outlier flags.
+#' @details When only the limits in `outliers_thresholds` change and the preset stays
+#'   the same, `normalise()` keeps the counts and stores the new thresholds; the flags follow them whenever you
+#'   read [nacho_qc()].
 #'   Otherwise it computes the quality-control metrics, the normalisation
 #'   factors, the normalised counts and the PCA again.
 #'
-#'   Outliers are samples with a binding density (`BD`) outside its range, a
-#'   field of view (`FoV`) below its limit, a positive factor or a
-#'   housekeeping factor outside its range, and, for single-sample RCC files,
-#'   a positive control linearity (`PCL`) or a limit of detection (`LoD`)
-#'   below its limit. See [exclude_outliers()] to drop them.
+#'   [nacho_qc()] lists the flags, and [exclude_outliers()] drops the flagged
+#'   samples.
 #'
 #'   The normalisation runs in this order: raw counts, negative probe
 #'   exclusion, background (`background` and `background_mode`), positive

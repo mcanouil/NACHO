@@ -78,14 +78,19 @@ detect_instrument <- function(samples) {
 #' Thresholds for loaded samples, detecting the instrument when not given
 #'
 #' @noRd
-thresholds_for_samples <- function(samples, instrument, preset) {
+thresholds_for_samples <- function(
+  samples,
+  instrument,
+  preset,
+  hint = "Set {.arg instrument} to {.or {.val {nacho_instruments}}}."
+) {
   if (is.null(instrument)) {
     instrument <- detect_instrument(samples)
     if (is.na(instrument)) {
       nacho_warn(
         c(
           "The RCC files do not say which nCounter instrument made them, so the MAX/FLEX thresholds are used.",
-          i = "Set {.arg instrument} to {.or {.val {nacho_instruments}}}."
+          i = hint
         ),
         class = "instrument_unknown"
       )
@@ -186,7 +191,6 @@ validate_thresholds <- function(thresholds) {
   }
   problems
 }
-
 
 check_thresholds <- function(
   thresholds,

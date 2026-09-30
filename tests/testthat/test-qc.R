@@ -47,6 +47,19 @@ test_that("the legacy rule keeps the NACHO 2 median rule", {
   )
 })
 
+test_that("the legacy rule never reports a missing negative probe name", {
+  counts <- matrix(
+    c(10, 10, 10, NA, NA, NA, 10, 11, 9, 30, 31, 29),
+    nrow = 4,
+    byrow = TRUE,
+    dimnames = list(c("A", "B", "C", "D"), 1:3)
+  )
+  expect_identical(
+    NACHO:::excluded_negatives(counts, rep("Negative", 4), "legacy"),
+    "D"
+  )
+})
+
 test_that("nsolver PCL leaves POS_F out and adds 1 to every count", {
   names <- sprintf("POS_%s(%s)", LETTERS[1:6], c(128, 32, 8, 2, 0.5, 0.125))
   positives <- matrix(c(1000, 260, 70, 15, 6, 0), ncol = 1)
