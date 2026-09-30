@@ -354,7 +354,7 @@ control_concentrations <- function(probe_names) {
   unname(c(NEG = 0, POS = 32)[sub("(NEG).*|(POS).*", "\\1\\2", probe_names)])
 }
 
-#' Positive and negative normalisation factors of each sample
+#' Positive normalisation factor of each sample
 #'
 #' @noRd
 control_factors <- function(counts, probes, excluded, method) {
@@ -371,7 +371,7 @@ control_factors <- function(counts, probes, excluded, method) {
   }
   concentration <- control_concentrations(probe_names[used])
   controls <- counts[used, , drop = FALSE]
-  coefficients <- vapply(
+  slopes <- vapply(
     seq_len(ncol(controls)),
     function(k) {
       keep <- !is.na(controls[, k])
@@ -380,11 +380,11 @@ control_factors <- function(counts, probes, excluded, method) {
         family = stats::poisson(link = "identity"),
         data = data.frame(x = concentration[keep], y = controls[keep, k] + 1)
       )
-      unname(stats::coef(fit)[1:2])
+      unname(stats::coef(fit)[[2]])
     },
-    numeric(2)
+    numeric(1)
   )
-  list(positive_factor = mean(coefficients[2, ]) / coefficients[2, ])
+  list(positive_factor = mean(slopes) / slopes)
 }
 
 #' Apply the background, then the positive factor
