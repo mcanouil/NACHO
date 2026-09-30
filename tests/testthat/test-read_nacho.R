@@ -35,7 +35,7 @@ test_that("upgrade_nacho() keeps the raw counts, settings and thresholds", {
     x@thresholds[names(old$outliers_thresholds)],
     old$outliers_thresholds
   )
-  expect_false(any(c("PC01", "Count_Norm") %in% names(x@samples)))
+  expect_false(any(c("PC01", "Count_Norm", "is_outlier") %in% names(x@samples)))
 })
 
 test_that("upgrade_nacho() reads NACHO 2 thresholds under the legacy preset", {

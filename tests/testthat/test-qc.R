@@ -26,6 +26,15 @@ test_that("the Bruker rule drops at most two negatives 3-fold above the others",
   expect_identical(exclude(c(40, 11, 9)), character(0))
 })
 
+test_that("a negative probe with only missing counts is left out of the rule", {
+  counts <- negative_matrix(c(40, 11, 9, 12))
+  counts[c("NEG_C", "NEG_D"), ] <- NA
+  expect_identical(
+    NACHO:::excluded_negatives(counts, rep("Negative", 4), "nsolver"),
+    character(0)
+  )
+})
+
 test_that("the legacy rule keeps the NACHO 2 median rule", {
   counts <- matrix(
     c(10, 10, 10, 30, 10, 11, 9, 31),

@@ -219,6 +219,15 @@ test_that("normalise() flags outliers against new thresholds", {
   expect_true(any(nacho_qc(res)[["status"]] %in% "fail"))
 })
 
+test_that("changing only the preset says so when it normalises again", {
+  withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
+  legacy <- nacho_thresholds(preset = "legacy")
+  expect_message(
+    normalise(GSE74821, outliers_thresholds = legacy),
+    "thresholds preset"
+  )
+})
+
 test_that("a panel without POS_E gives NA for PCL and LoD, not a failure", {
   no_pos_e <- GSE74821[nacho_probes(GSE74821)[["Name"]] != "POS_E(0.5)", ]
   res <- suppressMessages(normalise(no_pos_e, normalisation_method = "GEO"))

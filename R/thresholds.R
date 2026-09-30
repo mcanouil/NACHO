@@ -78,12 +78,7 @@ detect_instrument <- function(samples) {
 #' Thresholds for loaded samples, detecting the instrument when not given
 #'
 #' @noRd
-thresholds_for_samples <- function(
-  samples,
-  instrument,
-  preset,
-  call = rlang::caller_env()
-) {
+thresholds_for_samples <- function(samples, instrument, preset) {
   if (is.null(instrument)) {
     instrument <- detect_instrument(samples)
     if (is.na(instrument)) {

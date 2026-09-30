@@ -106,9 +106,13 @@ normalise <- function(
     nacho_object@thresholds <- outliers_thresholds
     return(nacho_object)
   }
+  changes <- c(
+    names(changed)[changed],
+    if (definitions_changed) "thresholds preset"
+  )
   nacho_inform(c(
     "Normalising again with new settings:",
-    stats::setNames(names(changed)[changed], rep("*", sum(changed)))
+    stats::setNames(changes, rep("*", length(changes)))
   ))
   run_normalisation(nacho_object, settings, outliers_thresholds)
 }

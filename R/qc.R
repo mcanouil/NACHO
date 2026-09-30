@@ -170,6 +170,8 @@ new_provenance <- function(data_directory, file_version, software_version) {
 
 #' Sample columns computed by the quality-control pipeline
 #'
+#' Includes `is_outlier`, which NACHO 2 stored and `nacho_qc()` now replaces.
+#'
 #' @noRd
 computed_sample_columns <- c(
   "Date",
@@ -186,7 +188,8 @@ computed_sample_columns <- c(
   "Positive_factor",
   "Negative_factor",
   "Background",
-  "House_factor"
+  "House_factor",
+  "is_outlier"
 )
 
 #' Geometric mean of each column
@@ -328,6 +331,9 @@ excluded_negatives <- function(counts, code_class, preset) {
     return(character(0))
   }
   means <- sort(rowMeans(negatives, na.rm = TRUE), decreasing = TRUE)
+  if (length(means) < 4) {
+    return(character(0))
+  }
   floored <- pmax(means, 1)
   n_high <- if (floored[2] > 3 * floored[3]) {
     2L

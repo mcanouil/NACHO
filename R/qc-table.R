@@ -88,7 +88,11 @@ qc_table <- function(samples, thresholds, rcc_type, id_colname) {
       lane_key,
       FUN = any
     )
-    lane_assessed <- stats::ave(assessed, lane_key, FUN = any)
+    lane_assessed <- stats::ave(
+      rowSums(!is.na(statuses[paste0(shared, "_status")])) > 0,
+      lane_key,
+      FUN = any
+    )
     out[["lane_status"]] <- ifelse(
       lane_failed,
       "fail",

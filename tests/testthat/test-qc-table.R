@@ -67,6 +67,25 @@ test_that("PlexSet lane failure reaches every sample of the lane", {
   expect_true(all(is.na(qc$LoD_status)))
 })
 
+test_that("a lane with no BD or FoV value has no lane status", {
+  samples <- data.frame(
+    IDFILE = sprintf("f_S%d", 1:2),
+    ID = "1",
+    CartridgeID = "C1",
+    BD = NA_real_,
+    FoV = NA_real_,
+    PCL = 0.1,
+    LoD = 0,
+    MC = 1,
+    MedC = 1,
+    Positive_factor = 1,
+    Negative_factor = 1,
+    Background = NA_real_
+  )
+  qc <- NACHO:::qc_table(samples, nacho_thresholds(), "n8", "IDFILE")
+  expect_true(all(is.na(qc$lane_status)))
+})
+
 test_that("a lane failure propagates to a sample that passes on its own", {
   samples <- data.frame(
     IDFILE = sprintf("f_S%d", 1:4),
