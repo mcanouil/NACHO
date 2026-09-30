@@ -20,8 +20,9 @@ NULL
 #' * `nacho_qc()`: a data frame with one row per sample: the id, `lane`,
 #'   `CartridgeID`, each quality-control metric with its status (`"pass"`,
 #'   `"fail"` or `NA` when it cannot be assessed), the other factors,
-#'   `lane_status` for PlexSet files, `n_flags`, the overall `status` and a
-#'   readable `reason`.
+#'   `lane_status` for PlexSet files, `n_flags` (the sample's own failing
+#'   metrics, not those inherited from its lane), the overall `status` and a
+#'   readable `reason` (which also names the lane metrics a sample inherits).
 #'
 #' @name nacho-accessors
 #'

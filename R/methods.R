@@ -78,6 +78,7 @@ summary_nacho <- function(object, ...) {
   }
   metrics <- intersect(metrics, names(object@samples))
   thresholds <- object@thresholds
+  qc <- nacho_qc(object)
   bound <- function(value) if (is.finite(value)) value else NA_real_
   data.frame(
     metric = metrics,
@@ -95,7 +96,7 @@ summary_nacho <- function(object, ...) {
     ),
     n_fail = vapply(
       metrics,
-      function(m) sum(metric_fails(object@samples[[m]], thresholds[[m]])),
+      function(m) sum(qc[[paste0(m, "_status")]] %in% "fail"),
       integer(1)
     ),
     n_missing = vapply(

@@ -70,13 +70,24 @@ qc_table <- function(samples, thresholds, rcc_type, id_colname) {
   statuses <- out[paste0(metrics, "_status")]
   assessed <- rowSums(!is.na(statuses)) > 0
   failed <- rowSums(fails) > 0
+  inherited <- matrix(
+    FALSE,
+    nrow(samples),
+    length(metrics),
+    dimnames = list(NULL, metrics)
+  )
   if (rcc_type == "n8") {
     lane_key <- paste(out[["CartridgeID"]], out[["lane"]], sep = "\r")
-    lane_fail <- rowSums(
-      fails[, intersect(lane_metrics, metrics), drop = FALSE]
-    ) >
-      0
-    lane_failed <- stats::ave(lane_fail, lane_key, FUN = any)
+    shared <- intersect(lane_metrics, metrics)
+    for (metric in shared) {
+      inherited[, metric] <- stats::ave(fails[, metric], lane_key, FUN = any) &
+        !fails[, metric]
+    }
+    lane_failed <- stats::ave(
+      rowSums(fails[, shared, drop = FALSE]) > 0,
+      lane_key,
+      FUN = any
+    )
     lane_assessed <- stats::ave(assessed, lane_key, FUN = any)
     out[["lane_status"]] <- ifelse(
       lane_failed,
@@ -94,18 +105,19 @@ qc_table <- function(samples, thresholds, rcc_type, id_colname) {
   out[["reason"]] <- vapply(
     seq_len(nrow(samples)),
     function(k) {
-      failing <- metrics[fails[k, ]]
-      if (length(failing) == 0) {
+      own <- vapply(
+        metrics[fails[k, ]],
+        function(m) failure_reason(m, samples[[m]][k], thresholds[[m]]),
+        character(1)
+      )
+      lane <- if (any(inherited[k, ])) {
+        paste("lane fails", paste(metrics[inherited[k, ]], collapse = ", "))
+      }
+      reasons <- c(unname(own), lane)
+      if (length(reasons) == 0) {
         return(NA_character_)
       }
-      paste(
-        vapply(
-          failing,
-          function(m) failure_reason(m, samples[[m]][k], thresholds[[m]]),
-          character(1)
-        ),
-        collapse = "; "
-      )
+      paste(reasons, collapse = "; ")
     },
     character(1)
   )

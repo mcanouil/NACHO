@@ -35,8 +35,9 @@ holds the sample ids, and the PCA scores come last (\code{PC01}, \code{PC02}, ..
 \item \code{nacho_qc()}: a data frame with one row per sample: the id, \code{lane},
 \code{CartridgeID}, each quality-control metric with its status (\code{"pass"},
 \code{"fail"} or \code{NA} when it cannot be assessed), the other factors,
-\code{lane_status} for PlexSet files, \code{n_flags}, the overall \code{status} and a
-readable \code{reason}.
+\code{lane_status} for PlexSet files, \code{n_flags} (the sample's own failing
+metrics, not those inherited from its lane), the overall \code{status} and a
+readable \code{reason} (which also names the lane metrics a sample inherits).
 }
 }
 \description{
