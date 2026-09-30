@@ -80,3 +80,26 @@ test_that("the validator checks preset and instrument", {
   x$instrument <- NA_character_
   expect_length(NACHO:::validate_thresholds(x), 0)
 })
+
+test_that("the housekeeping detection threshold is a lower bound", {
+  expect_identical(nacho_thresholds()$Housekeeping_detected, 3)
+  expect_identical(
+    nacho_thresholds(preset = "legacy")$Housekeeping_detected,
+    0
+  )
+  x <- nacho_thresholds()
+  x$Housekeeping_detected <- Inf
+  expect_match(
+    NACHO:::validate_thresholds(x),
+    "Housekeeping_detected",
+    all = FALSE
+  )
+  x$Housekeeping_detected <- c(1, 2)
+  expect_match(
+    NACHO:::validate_thresholds(x),
+    "Housekeeping_detected",
+    all = FALSE
+  )
+  x$Housekeeping_detected <- NULL
+  expect_match(NACHO:::validate_thresholds(x), "lacks", all = FALSE)
+})

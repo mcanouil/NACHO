@@ -190,6 +190,7 @@ computed_sample_columns <- c(
   "Detection_rate",
   "Background",
   "House_factor",
+  "Housekeeping_detected",
   "is_outlier"
 )
 
@@ -700,6 +701,16 @@ build_nacho <- function(
   ))
   if (!is.null(house_factor)) {
     metrics[["House_factor"]] <- unname(house_factor)
+  }
+  metrics[["Housekeeping_detected"]] <- if (length(housekeeping_genes) == 0) {
+    NA_integer_
+  } else {
+    found <- colSums(
+      hits[probes[["Name"]] %in% housekeeping_genes, , drop = FALSE],
+      na.rm = TRUE
+    )
+    found[no_limit] <- NA
+    unname(as.integer(found))
   }
   samples <- cbind(samples, metrics)
 

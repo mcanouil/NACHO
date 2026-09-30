@@ -154,3 +154,54 @@ test_that("a sample without a detection limit gets NA, never NaN, with one warni
   expect_false(any(is.nan(nacho_probes(built$value)$detection_rate)))
   expect_false(anyNA(nacho_probes(built$value)$detection_rate))
 })
+
+test_that("fewer than three detected housekeeping genes flags the sample", {
+  x <- GSE74821
+  qc <- nacho_qc(x)
+  expect_true("Housekeeping_detected_status" %in% names(qc))
+  x@samples$Housekeeping_detected[1] <- 2L
+  expect_identical(nacho_qc(x)$Housekeeping_detected_status[1], "fail")
+  x@thresholds <- nacho_thresholds(preset = "legacy")
+  expect_identical(nacho_qc(x)$Housekeeping_detected_status[1], "pass")
+})
+
+test_that("Housekeeping_detected counts housekeeping genes above the limit", {
+  samples <- nacho_samples(GSE74821)
+  probes <- nacho_probes(GSE74821)
+  expected <- colSums(
+    NACHO:::detected(
+      GSE74821@counts,
+      NACHO:::detection_limits(
+        GSE74821@counts,
+        probes$CodeClass,
+        probes$Name[probes$is_excluded]
+      )
+    )[probes$is_housekeeping, , drop = FALSE]
+  )
+  expect_identical(samples$Housekeeping_detected, unname(as.integer(expected)))
+})
+
+test_that("Housekeeping_detected is NA per sample without a limit and without housekeeping genes", {
+  counts <- GSE74821@counts[, 1:3]
+  negative <- GSE74821@probes$CodeClass == "Negative"
+  counts[negative, 2] <- NA
+  built <- suppressWarnings(rebuild_with_counts(
+    GSE74821,
+    counts,
+    GSE74821@probes
+  ))
+  found <- nacho_samples(built)$Housekeeping_detected
+  expect_true(is.na(found[2]))
+  expect_false(anyNA(found[-2]))
+  expect_type(found, "integer")
+
+  probes <- GSE74821@probes
+  probes$CodeClass[grepl("Housekeeping", probes$CodeClass)] <- "Endogenous"
+  bare <- GSE74821
+  bare@settings[["housekeeping_genes"]] <- NULL
+  none <- rebuild_with_counts(bare, GSE74821@counts, probes)
+  expect_identical(
+    nacho_samples(none)$Housekeeping_detected,
+    rep(NA_integer_, ncol(GSE74821@counts))
+  )
+})
