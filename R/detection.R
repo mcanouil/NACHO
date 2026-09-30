@@ -29,6 +29,14 @@ detected <- function(counts, limits) {
   counts > matrix(limits, nrow(counts), ncol(counts), byrow = TRUE)
 }
 
+#' Share of samples in which each probe is detected
+#'
+#' @noRd
+probe_detection_rates <- function(counts, code_class, excluded) {
+  limits <- detection_limits(counts, code_class, excluded)
+  missing_not_nan(rowMeans(detected(counts, limits), na.rm = TRUE))
+}
+
 #' Keep genes detected in enough samples
 #'
 #' A gene is detected in a sample when its raw count is above the mean plus

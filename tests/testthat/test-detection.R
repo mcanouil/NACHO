@@ -66,7 +66,7 @@ test_that("nacho objects carry sample and probe detection rates", {
 test_that("filter_detected() keeps controls and genes detected often enough", {
   before <- nacho_probes(GSE74821)
   min_rate <- max(before$detection_rate, na.rm = TRUE)
-  x <- suppressWarnings(filter_detected(GSE74821, min_rate = min_rate))
+  x <- filter_detected(GSE74821, min_rate = min_rate)
   probes <- nacho_probes(x)
   endogenous <- grepl("Endogenous", probes$CodeClass)
   expect_lt(
@@ -269,4 +269,51 @@ test_that("Housekeeping_detected is NA when no housekeeping gene matches a probe
   x@settings$housekeeping_genes <- "NOT_A_PROBE"
   built <- suppressWarnings(rebuild_with_counts(x, x@counts, x@probes))
   expect_true(all(is.na(nacho_samples(built)$Housekeeping_detected)))
+})
+
+test_that("subsetting samples recomputes the probe detection rates", {
+  keep <- 1:5
+  x <- suppressWarnings(
+    GSE74821[, keep],
+    classes = "nacho_warning_n_comp_reduced"
+  )
+  probes <- nacho_probes(x)
+  counts <- nacho_counts(GSE74821)[, keep]
+  all_probes <- nacho_probes(GSE74821)
+  limits <- NACHO:::detection_limits(
+    counts,
+    all_probes$CodeClass,
+    all_probes$Name[all_probes$is_excluded]
+  )
+  expected <- NACHO:::missing_not_nan(rowMeans(
+    NACHO:::detected(counts, limits),
+    na.rm = TRUE
+  ))
+  expect_equal(probes$detection_rate, expected)
+  expect_false(isTRUE(all.equal(
+    probes$detection_rate,
+    all_probes$detection_rate
+  )))
+
+  endogenous <- grepl("Endogenous", probes$CodeClass)
+  filtered <- suppressWarnings(
+    filter_detected(x, min_rate = 1),
+    classes = "nacho_warning_n_comp_reduced"
+  )
+  kept <- nacho_probes(filtered)
+  expect_identical(
+    sum(grepl("Endogenous", kept$CodeClass)),
+    sum(expected[endogenous] >= 1)
+  )
+  expect_true(all(
+    kept$detection_rate[grepl("Endogenous", kept$CodeClass)] == 1
+  ))
+})
+
+test_that("subsetting probes keeps the detection rates of the samples kept", {
+  x <- GSE74821[1:20, ]
+  expect_equal(
+    nacho_probes(x)$detection_rate,
+    nacho_probes(GSE74821)$detection_rate[1:20]
+  )
 })
