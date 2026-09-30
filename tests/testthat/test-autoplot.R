@@ -329,3 +329,27 @@ test_that("open threshold bounds draw no line", {
     expect_no_warning(ggplot2::ggplot_build(plot))
   }
 })
+
+test_that("only the failing sample is flagged in the sample and probe tables", {
+  toy <- toy_nacho(6L)
+  toy@thresholds[["BD"]] <- c(0.1, 0.5)
+  toy@samples[["BD"]][-1] <- 0.3
+  id <- toy@settings[["id_colname"]]
+  failing <- toy@samples[[id]][1]
+
+  samples <- NACHO:::plot_samples(toy, "CartridgeID")
+  expect_identical(samples[["flagged"]], c(TRUE, rep(FALSE, 5)))
+
+  long <- NACHO:::plot_probes(toy, NULL, "CartridgeID")
+  expect_true(all(long[["flagged"]][long[[id]] == failing]))
+  expect_false(any(long[["flagged"]][long[[id]] != failing]))
+})
+
+test_that("the outlier layer of a plot holds only the failing sample", {
+  toy <- toy_nacho(6L)
+  toy@thresholds[["BD"]] <- c(0.1, 0.5)
+  toy@samples[["BD"]][-1] <- 0.3
+  plot <- autoplot(toy, type = "BD")
+  flagged_layer <- ggplot2::layer_data(plot, 3)
+  expect_identical(nrow(flagged_layer), 1L)
+})
