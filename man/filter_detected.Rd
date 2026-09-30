@@ -18,7 +18,11 @@ A \code{nacho} object with fewer probes.
 \description{
 A gene is detected in a sample when its raw count is above the mean plus
 two standard deviations of that sample's negative controls.
-Control and housekeeping probes are always kept.
+Control and housekeeping probes are always kept, where housekeeping probes
+are the probes of CodeClass Housekeeping.
+Endogenous genes chosen as housekeeping genes are filtered like any other
+gene.
+The samples' \code{Detection_rate} is not recomputed after filtering.
 Endogenous genes whose detection rate is missing, because a sample has
 fewer than two negative probes, are dropped.
 }
