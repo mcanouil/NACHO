@@ -220,3 +220,35 @@ test_that("the legacy preset passes a sample with no housekeeping genes detected
   x@thresholds <- nacho_thresholds(preset = "nsolver")
   expect_identical(nacho_qc(x)$Housekeeping_detected_status[1], "fail")
 })
+
+test_that("detection rates and housekeeping counts match hand-computed values", {
+  fixture <- detection_counts()
+  pick <- c(
+    which(GSE74821@probes$CodeClass == "Negative")[1:3],
+    which(GSE74821@probes$CodeClass == "Endogenous")[1:2],
+    which(GSE74821@probes$CodeClass == "Housekeeping")[1]
+  )
+  probes <- GSE74821@probes[pick, ]
+  counts <- fixture$counts
+  rownames(counts) <- probes$Name
+  colnames(counts) <- colnames(GSE74821@counts)[1:2]
+  x <- GSE74821
+  x@settings$housekeeping_genes <- probes$Name[6]
+  x@settings$normalisation_method <- "GEO"
+  built <- suppressWarnings(rebuild_with_counts(x, counts, probes))
+  expect_identical(nacho_samples(built)$Detection_rate, c(1, 0.5))
+  expect_identical(nacho_probes(built)$detection_rate, c(1, 0, 0, 0.5, 1, 0))
+  expect_identical(nacho_samples(built)$Housekeeping_detected, c(0L, 0L))
+  counts[6, ] <- c(17L, 23L)
+  built <- suppressWarnings(rebuild_with_counts(x, counts, probes))
+  expect_identical(nacho_samples(built)$Housekeeping_detected, c(1L, 1L))
+  counts[6, ] <- c(17L, 21L)
+  built <- suppressWarnings(rebuild_with_counts(x, counts, probes))
+  expect_identical(nacho_samples(built)$Housekeeping_detected, c(1L, 0L))
+})
+
+test_that("filter_detected() refuses an object with no detection rates", {
+  x <- GSE74821
+  x@probes$detection_rate <- NA_real_
+  expect_error(filter_detected(x), class = "nacho_error_no_detection_rate")
+})

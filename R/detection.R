@@ -38,12 +38,15 @@ detected <- function(counts, limits) {
 #' Endogenous genes chosen as housekeeping genes are filtered like any other
 #' gene.
 #' The samples' `Detection_rate` is not recomputed after filtering.
-#' Endogenous genes whose detection rate is missing, because a sample has
-#' fewer than two negative probes, are dropped.
+#' A gene's detection rate is the share of the samples with a detection limit
+#' in which it is detected, so a sample with fewer than two negative probes
+#' does not count.
+#' When no sample has a detection limit, `filter_detected()` stops with an
+#' error.
 #'
 #' @param x A `nacho` object from [load_rcc()] or [normalise()].
-#' @param min_rate The smallest share of samples, between 0 and 1, in which an
-#'   endogenous gene must be detected.
+#' @param min_rate The smallest share of samples with a detection limit,
+#'   between 0 and 1, in which an endogenous gene must be detected.
 #'
 #' @return A `nacho` object with fewer probes.
 #' @export
@@ -55,6 +58,15 @@ filter_detected <- function(x, min_rate = 0.5) {
   check_proportion(min_rate)
   rate <- x@probes[["detection_rate"]]
   endogenous <- grepl("Endogenous", x@probes[["CodeClass"]])
+  if (is.null(rate) || all(is.na(rate[endogenous]))) {
+    nacho_abort(
+      c(
+        "No sample has a detection limit, so {.fn filter_detected} cannot tell which genes are detected.",
+        i = "A detection limit needs two kept negative probes with counts."
+      ),
+      class = "no_detection_rate"
+    )
+  }
   keep <- !endogenous | (!is.na(rate) & rate >= min_rate)
   x[which(keep), ]
 }

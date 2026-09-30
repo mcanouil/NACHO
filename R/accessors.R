@@ -17,8 +17,8 @@ NULL
 #'   holds the sample ids, and the PCA scores come last (`PC01`, `PC02`, ...).
 #' * `nacho_probes()`: a data frame with one row per probe: `CodeClass`,
 #'   `Name`, `Accession`, `is_housekeeping`, `is_excluded` and
-#'   `detection_rate` (the share of samples in which the probe is above the
-#'   detection limit).
+#'   `detection_rate` (the share of samples with a detection limit in which
+#'   the probe is above it).
 #' * `nacho_qc()`: a data frame with one row per sample: the id, `lane`,
 #'   `CartridgeID`, each quality-control metric with its status (`"pass"`,
 #'   `"fail"` or `NA` when it cannot be assessed), the other factors,

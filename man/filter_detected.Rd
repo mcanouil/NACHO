@@ -9,8 +9,8 @@ filter_detected(x, min_rate = 0.5)
 \arguments{
 \item{x}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
-\item{min_rate}{The smallest share of samples, between 0 and 1, in which an
-endogenous gene must be detected.}
+\item{min_rate}{The smallest share of samples with a detection limit,
+between 0 and 1, in which an endogenous gene must be detected.}
 }
 \value{
 A \code{nacho} object with fewer probes.
@@ -23,8 +23,11 @@ are the probes of CodeClass Housekeeping.
 Endogenous genes chosen as housekeeping genes are filtered like any other
 gene.
 The samples' \code{Detection_rate} is not recomputed after filtering.
-Endogenous genes whose detection rate is missing, because a sample has
-fewer than two negative probes, are dropped.
+A gene's detection rate is the share of the samples with a detection limit
+in which it is detected, so a sample with fewer than two negative probes
+does not count.
+When no sample has a detection limit, \code{filter_detected()} stops with an
+error.
 }
 \examples{
 data(GSE74821)
