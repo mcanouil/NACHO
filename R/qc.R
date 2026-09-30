@@ -247,8 +247,10 @@ background_modes <- c("threshold", "subtract")
 #' @param code_class The code class of each row of `counts`.
 #' @param excluded Names of the negative probes left out.
 #' @param statistic One of `background_statistics`.
+#' @param warn Whether to warn about samples without a background level.
 #'
 #' @return One level per sample, or `NULL` for `"none"`.
+#'   A sample without a usable negative count gets `NA`.
 #'
 #' @noRd
 background_levels <- function(
@@ -256,6 +258,7 @@ background_levels <- function(
   code_class,
   excluded,
   statistic,
+  warn = TRUE,
   call = rlang::caller_env()
 ) {
   if (statistic == "none") {
@@ -297,6 +300,18 @@ background_levels <- function(
     }),
     geo = geometric_means(negatives)
   )
+  level[is.nan(level)] <- NA_real_
+  unavailable <- colnames(counts)[is.na(level)]
+  if (warn && length(unavailable) > 0) {
+    nacho_warn(
+      c(
+        "{length(unavailable)} sample{?s} ha{?s/ve} no usable negative counts, so the background is {.code NA}.",
+        i = "Affected: {.val {unavailable}}."
+      ),
+      class = "metric_unavailable",
+      call = call
+    )
+  }
   unname(level)
 }
 
@@ -597,7 +612,8 @@ build_nacho <- function(
     counts,
     code_class,
     excluded,
-    settings[["background"]]
+    settings[["background"]],
+    warn = warn_missing
   )
   scaled <- scale_counts(
     counts,

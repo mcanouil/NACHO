@@ -105,16 +105,30 @@ test_that("missing counts stay missing", {
   }
 })
 
-test_that("a sample with only missing negatives has a missing background", {
+test_that("a sample without any kept negative count gets an NA background and a warning", {
   d <- negatives_counts()
   d$counts[1:3, "S2"] <- NA
+  for (statistic in c("geo", "mean", "mean_2sd", "median", "max")) {
+    expect_warning(
+      level <- NACHO:::background_levels(
+        d$counts,
+        d$code_class,
+        character(0),
+        statistic
+      ),
+      class = "nacho_warning_metric_unavailable",
+      regexp = "S2"
+    )
+    expect_false(is.na(level[[1]]), label = statistic)
+    expect_identical(level[[2]], NA_real_, label = statistic)
+  }
   expect_no_warning(
-    level <- NACHO:::background_levels(
+    NACHO:::background_levels(
       d$counts,
       d$code_class,
       character(0),
-      "max"
+      "geo",
+      warn = FALSE
     )
   )
-  expect_equal(level, c(14, NA))
 })
