@@ -2,6 +2,18 @@
 
 ## NACHO (development version)
 
+### Bug Fixes
+
+- In `inst/app/`,
+  - fix: render the help pages from their text, so the app no longer
+    writes to the installed package when `R CMD check` runs it.
+  - fix: open the help pages of the quality-control metrics, whose links
+    never matched their input names.
+- In
+  [`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md),
+  - fix: set the smoothing formula of the `"PN"` and `"NORM"` plots,
+    which silences the ggplot2 `geom_smooth()` message.
+
 ## NACHO 2.0.7
 
 CRAN release: 2026-09-27
