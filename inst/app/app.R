@@ -248,7 +248,7 @@ ui <- shiny::tagList(
       "About",
       icon = shiny::icon("info"),
       value = "about-tab",
-      shiny::tags$p(shiny::includeMarkdown("www/about-nacho.md"))
+      shiny::tags$p(include_about("nacho")) # nolint: object_usage_linter. Defined in utils.R.
     )
   )
 )
@@ -482,11 +482,7 @@ server <- function(input, output, session) {
       shiny::observeEvent(input[[paste0("about_", short_x)]], {
         shiny::showModal(shiny::modalDialog(
           title = .x,
-          shiny::tags$p(shiny::includeMarkdown(paste0(
-            "www/about-",
-            short_x,
-            ".md"
-          ))),
+          shiny::tags$p(include_about(short_x)), # nolint: object_usage_linter. Defined in utils.R.
           easyClose = TRUE
         ))
       })

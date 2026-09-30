@@ -190,3 +190,32 @@ test_that("app tells the user when it discards a sample sheet", {
   upload_to_app("salmon_data", sample_sheet)
   expect_match(notified, "IDFILE")
 })
+
+test_that("app leaves its markdown files untouched under R CMD check", {
+  skip_if_not_installed("markdown")
+  app_directory <- withr::local_tempdir()
+  file.copy(
+    system.file("app", package = "NACHO"),
+    app_directory,
+    recursive = TRUE
+  )
+  app_directory <- file.path(app_directory, "app")
+  markdown_files <- list.files(
+    file.path(app_directory, "www"),
+    pattern = "\\.md$",
+    full.names = TRUE
+  )
+  checksums <- tools::md5sum(markdown_files)
+  withr::local_envvar(`_R_CHECK_PACKAGE_NAME_` = "NACHO")
+  # nolint start: object_usage_linter. testServer() provides session.
+  shiny::testServer(shiny::shinyAppDir(app_directory), {
+    for (about in c("bd", "fov", "pcl", "lod", "pf", "hgf")) {
+      do.call(
+        session[["setInputs"]],
+        stats::setNames(list(1), paste0("about_", about))
+      )
+    }
+  })
+  # nolint end
+  expect_identical(tools::md5sum(markdown_files), checksums)
+})
