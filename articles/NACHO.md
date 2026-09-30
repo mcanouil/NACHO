@@ -353,7 +353,7 @@ targets <- targets[codeset %in% "GeneRLF,NS_H_miR_1.4", ]
     ## GSM1824146       3.835728953    T3
     ## GSM1824147       4.292950034    T3
 
-After we extracted the dataset to the `/tmp/RtmpDT50Ek/GSE70970/Data`
+After we extracted the dataset to the `/tmp/Rtmp8izYkK/GSE70970/Data`
 directory, a `Samplesheet.csv` containing a column with the exact names
 of the files for each sample can be written or used as is.
 
@@ -568,8 +568,6 @@ The possible metrics (`x`) are:
 
 #### Positive Controls vs. Negative Controls
 
-    ## `geom_smooth()` using formula = 'y ~ x'
-
 ![](NACHO_files/figure-html/unnamed-chunk-11-8.png)
 
 #### Average Counts vs. Binding Density
@@ -601,8 +599,6 @@ The possible metrics (`x`) are:
 ![](NACHO_files/figure-html/unnamed-chunk-11-15.png)
 
 #### Normalisation Factor
-
-    ## `geom_smooth()` using formula = 'y ~ x'
 
 ![](NACHO_files/figure-html/unnamed-chunk-11-16.png)
 
@@ -807,8 +803,6 @@ In most (codeset) assays, you will observe that even the **POS_F** probe
 
 ##### Control Probe Expression
 
-    ## `geom_smooth()` using formula = 'y ~ x'
-
 ![](NACHO_files/figure-html/print-8.png)
 
 #### Quality-Control Visuals
@@ -846,8 +840,6 @@ In most (codeset) assays, you will observe that even the **POS_F** probe
 ![](NACHO_files/figure-html/print-15.png)
 
 ##### Normalisation Result
-
-    ## `geom_smooth()` using formula = 'y ~ x'
 
 ![](NACHO_files/figure-html/print-16.png)
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">NACHO</a>
 
-    <small class="nav-text text-white me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.7</small>
+    <small class="nav-text text-white me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,9 +40,22 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/mcanouil/NACHO/blob/v2.0.7/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/mcanouil/NACHO/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.8" id="nacho-208">NACHO 2.0.8<a class="anchor" aria-label="anchor" href="#nacho-208"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-2-0-8">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-2-0-8"></a></h3>
+<ul><li>In <code>inst/app/</code>,
+<ul><li>fix: render the help pages from their text, so the app no longer writes to the installed package when <code>R CMD check</code> runs it.</li>
+<li>fix: open the help pages of the quality-control metrics, whose links never matched their input names.</li>
+</ul></li>
+<li>In <code><a href="../reference/autoplot.html">autoplot()</a></code>,
+<ul><li>fix: set the smoothing formula of the <code>"PN"</code> and <code>"NORM"</code> plots, which silences the ggplot2 <code>geom_smooth()</code> message.</li>
+</ul></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.0.7" id="nacho-207">NACHO 2.0.7<a class="anchor" aria-label="anchor" href="#nacho-207"></a></h2><p class="text-muted">CRAN release: 2026-09-27</p>
 <div class="section level3">

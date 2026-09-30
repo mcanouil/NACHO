@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">NACHO</a>
 
-    <small class="nav-text text-white me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.7</small>
+    <small class="nav-text text-white me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.0.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,9 +73,9 @@ Control dasHbOard</h3>
                         <h4 data-toc-skip class="author">Mickaël
 Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D.</h4>
             
-            <h4 data-toc-skip class="date">September 27, 2026</h4>
+            <h4 data-toc-skip class="date">September 30, 2026</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/mcanouil/NACHO/blob/v2.0.7/vignettes/NACHO.Rmd" class="external-link"><code>vignettes/NACHO.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mcanouil/NACHO/blob/main/vignettes/NACHO.Rmd" class="external-link"><code>vignettes/NACHO.Rmd</code></a></small>
       <div class="d-none name"><code>NACHO.Rmd</code></div>
     </div>
 
@@ -404,7 +404,7 @@ measured with <code>NS_H_miR_1.4</code>.</p>
 <span><span class="co">## GSM1824146       3.835728953    T3</span></span>
 <span><span class="co">## GSM1824147       4.292950034    T3</span></span></code></pre>
 <p>After we extracted the dataset to the
-<code>/tmp/RtmpDT50Ek/GSE70970/Data</code> directory, a
+<code>/tmp/Rtmp8izYkK/GSE70970/Data</code> directory, a
 <code>Samplesheet.csv</code> containing a column with the exact names of
 the files for each sample can be written or used as is.</p>
 </div>
@@ -621,7 +621,6 @@ quality-control from the <code><a href="../reference/visualise.html">visualise()
 <div class="section level4">
 <h4 id="positive-controls-vs--negative-controls">Positive Controls vs. Negative Controls<a class="anchor" aria-label="anchor" href="#positive-controls-vs--negative-controls"></a>
 </h4>
-<pre><code><span><span class="co">## `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre>
 <p><img src="NACHO_files/figure-html/unnamed-chunk-11-8.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
@@ -662,7 +661,6 @@ quality-control from the <code><a href="../reference/visualise.html">visualise()
 <div class="section level4">
 <h4 id="normalisation-factor">Normalisation Factor<a class="anchor" aria-label="anchor" href="#normalisation-factor"></a>
 </h4>
-<pre><code><span><span class="co">## `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre>
 <p><img src="NACHO_files/figure-html/unnamed-chunk-11-16.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>
 </div>
@@ -673,11 +671,11 @@ quality-control from the <code><a href="../reference/visualise.html">visualise()
 Shiny Server configuration. A convenience function <code><a href="../reference/deploy.html">deploy()</a></code>
 is available to directly copy the <em>NACHO</em> app to the default
 directory of a Shiny Server.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/deploy.html">deploy</a></span><span class="op">(</span>directory <span class="op">=</span> <span class="st">"/srv/shiny-server"</span>, app_name <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span></span></code></pre></div>
 <p>The app can also be run directly, without manually summarising and
 normalising RCC files:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"app"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="README-app.png" class="r-plt" alt="NACHO Shiny application on the Upload RCC Files tab, with a choice of normalisation method and a file picker for RCC files." width="650px" style="display: block; margin: auto;"></p>
 </div>
@@ -687,7 +685,7 @@ normalising RCC files:</p>
 <p>The <code><a href="../reference/render.html">render()</a></code> function renders a comprehensive HTML
 report, using <code>print(..., echo = TRUE)</code>, which includes all
 quality-control metrics and description of those metrics.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/render.html">render</a></span><span class="op">(</span></span>
 <span>  nacho_object <span class="op">=</span> <span class="va">GSE74821</span>,</span>
 <span>  colour <span class="op">=</span> <span class="st">"CartridgeID"</span>,</span>
@@ -700,7 +698,7 @@ quality-control metrics and description of those metrics.</p>
 <p>The underneath function <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> can be used directly
 within any R Markdown chunk, setting the parameter
 <code>echo = TRUE</code>.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="va">GSE74821</span>,</span>
 <span>  colour <span class="op">=</span> <span class="st">"CartridgeID"</span>,</span>
@@ -873,7 +871,6 @@ detectable above background.</p>
 <div class="section level5">
 <h5 id="control-probe-expression">Control Probe Expression<a class="anchor" aria-label="anchor" href="#control-probe-expression"></a>
 </h5>
-<pre><code><span><span class="co">## `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre>
 <p><img src="NACHO_files/figure-html/print-8.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>
 </div>
@@ -926,7 +923,6 @@ detectable above background.</p>
 <div class="section level5">
 <h5 id="normalisation-result">Normalisation Result<a class="anchor" aria-label="anchor" href="#normalisation-result"></a>
 </h5>
-<pre><code><span><span class="co">## `geom_smooth()` using formula = 'y ~ x'</span></span></code></pre>
 <p><img src="NACHO_files/figure-html/print-16.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>
 </div>
