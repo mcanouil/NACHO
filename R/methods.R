@@ -52,6 +52,11 @@ format_nacho <- function(x, ...) {
         "without housekeeping genes"
       }
     ),
+    if (any(x@probes[["is_excluded"]])) {
+      cli::format_inline(
+        "Excluded negative probes: {.val {x@probes[['Name']][x@probes[['is_excluded']]]}}"
+      )
+    },
     cli::format_inline(
       "Flagged samples: {sum(x@samples[['is_outlier']] %in% TRUE)} of {ncol(x@counts)}"
     ),

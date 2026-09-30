@@ -243,7 +243,7 @@ test_that("GLM keeps the geometric mean of the kept negatives as Negative_factor
   kept <- probes$CodeClass == "Negative" & !probes$is_excluded
   expect_equal(
     nacho_samples(x)$Negative_factor,
-    unname(exp(colMeans(log(nacho_counts(x)[kept, , drop = FALSE]))))
+    unname(exp(colMeans(log(pmax(nacho_counts(x)[kept, , drop = FALSE], 1)))))
   )
 })
 
