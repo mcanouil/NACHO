@@ -104,3 +104,17 @@ test_that("missing counts stay missing", {
     expect_false(anyNA(out[-1]), info = mode)
   }
 })
+
+test_that("a sample with only missing negatives has a missing background", {
+  d <- negatives_counts()
+  d$counts[1:3, "S2"] <- NA
+  expect_no_warning(
+    level <- NACHO:::background_levels(
+      d$counts,
+      d$code_class,
+      character(0),
+      "max"
+    )
+  )
+  expect_equal(level, c(14, NA))
+})

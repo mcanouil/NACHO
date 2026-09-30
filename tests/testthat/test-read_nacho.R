@@ -236,6 +236,31 @@ test_that("read_nacho() migrates the frozen schema-1 object", {
   expect_identical(S7::S7_class(x), NACHO:::nacho)
 })
 
+test_that("migrating a schema 1 object with negatives subtracts the geometric mean", {
+  properties <- S7::props(readRDS(test_path("fixtures", "nacho-schema-1.rds")))
+  negatives <- data.frame(
+    CodeClass = "Negative",
+    Name = c("NEG_A", "NEG_B"),
+    Accession = "",
+    is_housekeeping = FALSE,
+    is_excluded = FALSE
+  )
+  negative_counts <- matrix(
+    c(4L, 6L, 8L, 10L, 5L, 7L, 9L, 11L),
+    nrow = 2,
+    byrow = TRUE,
+    dimnames = list(negatives$Name, colnames(properties$counts))
+  )
+  properties$probes <- rbind(properties$probes, negatives)
+  properties$counts <- rbind(properties$counts, negative_counts)
+  x <- suppressWarnings(suppressMessages(NACHO:::migrate_schema_1(properties)))
+  expect_identical(x@settings$background, "geo")
+  expect_equal(
+    nacho_samples(x)$Background,
+    unname(exp(colMeans(log(negative_counts))))
+  )
+})
+
 test_that("upgrade_nacho() keeps the NACHO 2 background", {
   old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
   x <- suppressWarnings(suppressMessages(upgrade_nacho(old)))

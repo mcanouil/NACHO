@@ -27,6 +27,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
     `background = "geo", background_mode = "subtract"` gives the NACHO 2 correction, and subtracting floors the counts at 0.
   - feat: `Negative_factor` is always the geometric mean of the kept negative controls, including with `normalisation_method = "GLM"`.
     The background applied is in the new `Background` column.
+    With `"GLM"`, the normalised counts therefore differ from NACHO 2, which subtracted the model intercept.
 - In `R/deploy.R`,
   - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
 - In `DESCRIPTION`,

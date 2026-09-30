@@ -6,7 +6,7 @@ nacho_2_rounding <- function(m) {
   m
 }
 
-glm_metrics <- c("Positive_factor", "PCL", "LoD", "BD", "FoV")
+glm_metrics <- c("MC", "MedC", "Positive_factor", "PCL", "LoD", "BD", "FoV")
 
 check_parity <- function(x, reference, glm = FALSE) {
   testthat::expect_identical(x@counts, reference[["counts"]])

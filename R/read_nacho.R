@@ -1,7 +1,7 @@
 #' Settings that reproduce the NACHO 2 background correction
 #'
-#' Without negative probes NACHO 2 subtracted nothing, so `background = "none"`
-#' reproduces it.
+#' Without negative probes the NACHO 2 geometric mean method subtracted
+#' nothing, so `background = "none"` reproduces it.
 #'
 #' @param settings A list of settings.
 #' @param probes The probe table, with a `CodeClass` column.

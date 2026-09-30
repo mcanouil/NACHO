@@ -292,7 +292,9 @@ background_levels <- function(
     mean_2sd = colMeans(negatives, na.rm = TRUE) +
       2 * apply(negatives, 2, stats::sd, na.rm = TRUE),
     median = apply(negatives, 2, stats::median, na.rm = TRUE),
-    max = apply(negatives, 2, max, na.rm = TRUE),
+    max = apply(negatives, 2, function(x) {
+      if (all(is.na(x))) NA_real_ else max(x, na.rm = TRUE)
+    }),
     geo = geometric_means(negatives)
   )
   unname(level)
@@ -308,7 +310,8 @@ background_levels <- function(
 #' @noRd
 apply_background <- function(counts, level, mode) {
   if (is.null(level)) {
-    return(counts * 1)
+    storage.mode(counts) <- "double"
+    return(counts)
   }
   levels <- matrix(level, nrow(counts), ncol(counts), byrow = TRUE)
   out <- if (mode == "threshold") {
