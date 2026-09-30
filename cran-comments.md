@@ -1,6 +1,6 @@
 ## Submission
 
-This is NACHO 2.0.7.
+This is NACHO 2.0.8.
 NEWS.md lists every change in this release.
 
 ## R CMD check results
