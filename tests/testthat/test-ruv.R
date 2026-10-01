@@ -103,3 +103,11 @@ test_that("ruvg() keeps the other samples of a gene with one missing count", {
   expect_true(is.na(out$corrected[1, gene]))
   expect_true(all(is.finite(out$corrected[-1, gene])))
 })
+
+test_that("ruvg() leaves a gene seen in too few samples uncorrected", {
+  d <- ruv_expr()
+  gene <- which(!d$controls)[1]
+  d$log_expr[-1, gene] <- NA
+  out <- NACHO:::ruvg(d$log_expr, d$controls, k = 2)
+  expect_identical(out$corrected[, gene], d$log_expr[, gene])
+})

@@ -24,6 +24,9 @@
 #'   (housekeeping genes when `housekeeping_norm` is `TRUE`).
 #'   RUVg works on `log2(count + 1)` after the positive factor and returns
 #'   counts on the count scale, floored at 0.
+#'   It replaces the housekeeping scaling, so `housekeeping_norm` has no effect
+#'   and `House_factor` is not computed, and it corrects only the endogenous
+#'   and housekeeping probes.
 #'   Normalised counts are otherwise neither rounded nor floored; use
 #'   `nacho_counts(x, normalised = TRUE, log2 = TRUE)` for `log2(count + 1)`.
 #'

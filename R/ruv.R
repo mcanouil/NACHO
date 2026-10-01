@@ -62,6 +62,9 @@ ruvg <- function(
   corrected <- log_expr
   for (gene in seq_len(ncol(log_expr))) {
     seen <- !is.na(log_expr[, gene])
+    if (sum(seen) <= k) {
+      next
+    }
     w_seen <- w[seen, , drop = FALSE]
     alpha <- solve(crossprod(w_seen), crossprod(w_seen, log_expr[seen, gene]))
     corrected[seen, gene] <- log_expr[seen, gene] - w_seen %*% alpha
