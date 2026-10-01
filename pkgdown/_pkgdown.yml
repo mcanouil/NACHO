@@ -42,6 +42,7 @@ reference:
       - nacho_thresholds
       - normalise
       - exclude_outliers
+      - housekeeping_stability
   - title: Visualise and report
     desc: Explore quality control interactively, plot a single metric, or write a full report.
     contents:

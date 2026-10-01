@@ -419,23 +419,21 @@ content_factor <- function(scaled_rows) {
   mean(geometric, na.rm = TRUE) / geometric
 }
 
-#' Predict the five most stable housekeeping genes
-#'
-#' @param scaled The background-applied, positive-scaled counts.
-#' @param probes The probe table, with a `CodeClass` column.
+#' Predict the five most stable genes with geNorm
 #'
 #' @noRd
-predict_housekeeping <- function(scaled, probes) {
+predict_housekeeping <- function(counts, probes) {
   rows <- grepl("Endogenous|Housekeeping", probes[["CodeClass"]])
-  normalised <- scaled[rows, , drop = FALSE]
-  # Rounds and floors as NACHO 2 did, to reproduce its gene selection until
-  # this function is replaced; the stored counts stay unrounded.
-  normalised <- round(normalised)
-  normalised[!is.na(normalised) & normalised <= 0] <- 0.1
-  ratios <- log2(sweep(normalised, 2, colMeans(normalised, na.rm = TRUE), "/"))
-  ratios[is.infinite(ratios)] <- NA
-  spread <- sort(apply(ratios, 1, stats::sd, na.rm = TRUE))
-  names(spread)[seq_len(min(5, length(spread)))]
+  log_expr <- stability_input(
+    counts[rows, , drop = FALSE],
+    probes[["detection_rate"]][rows],
+    min_detection = 0.9
+  )
+  if (ncol(log_expr) < 3) {
+    return(character(0))
+  }
+  ranking <- genorm_ranking(log_expr)[["ranking"]]
+  ranking[seq_len(min(5, length(ranking)))]
 }
 
 #' Positive control linearity of each sample
@@ -645,9 +643,11 @@ build_nacho <- function(
     factors[["positive_factor"]]
   )
 
+  probes[["detection_rate"]] <- missing_not_nan(rowMeans(hits, na.rm = TRUE))
+
   if (isTRUE(settings[["housekeeping_predict"]])) {
     nacho_inform("Searching for the best housekeeping genes.")
-    predicted <- predict_housekeeping(scaled, probes)
+    predicted <- predict_housekeeping(counts, probes)
     if (length(predicted) == 0) {
       nacho_warn(
         "No suitable housekeeping genes were found; the default ones are used.",
@@ -724,7 +724,6 @@ build_nacho <- function(
     scaled
   }
 
-  probes[["detection_rate"]] <- missing_not_nan(rowMeans(hits, na.rm = TRUE))
   probes[["is_housekeeping"]] <- probes[["Name"]] %in% housekeeping_genes
   probes[["is_excluded"]] <- probes[["Name"]] %in% excluded
   provenance[["excluded_negatives"]] <- excluded

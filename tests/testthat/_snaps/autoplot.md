@@ -4,7 +4,7 @@
       autoplot(GSE74821, type = "bd")
     Condition
       Error in `autoplot()`:
-      ! `type` must be one of "BD", "FoV", "PCL", "LoD", "Positive", "Negative", "Housekeeping", "PN", "ACBD", "ACMC", "PCA12", "PCAi", "PCA", "PFNF", "HF", or "NORM", not "bd".
+      ! `type` must be one of "BD", "FoV", "PCL", "LoD", "Positive", "Negative", "Housekeeping", "PN", "ACBD", "ACMC", "PCA12", "PCAi", "PCA", "PFNF", "HF", "NORM", or "Stability", not "bd".
       i Did you mean "BD"?
 
 # autoplot() points NACHO 2 callers to type

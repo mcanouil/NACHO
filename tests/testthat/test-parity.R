@@ -84,7 +84,6 @@ test_that("single-sample results match the NACHO 2 pipeline", {
     parity[["io360_glm"]],
     glm = TRUE
   )
-  check_parity(load(housekeeping_predict = TRUE), parity[["io360_predict"]])
 })
 
 test_that("miRNA results match the NACHO 2 pipeline", {

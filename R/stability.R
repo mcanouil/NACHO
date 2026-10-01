@@ -119,3 +119,129 @@ normfinder_rho <- function(log_expr, group = NULL, call = rlang::caller_env()) {
   rho <- colMeans(abs(shrunk) + sqrt(shrunk_variance))
   stats::setNames(rho, colnames(log_expr))
 }
+
+#' Log2 counts of genes fit for stability analysis
+#'
+#' Keeps the genes detected in at least `min_detection` of the samples and
+#' with no missing count.
+#' Per-sample scaling cancels out of both geNorm and NormFinder, so raw counts
+#' give the same ranking as positive-normalised ones.
+#'
+#' @noRd
+stability_input <- function(counts, detection_rate, min_detection) {
+  keep <- !is.na(detection_rate) &
+    detection_rate >= min_detection &
+    rowSums(is.na(counts)) == 0
+  t(log2(pmax(counts[keep, , drop = FALSE], 1)))
+}
+
+#' Rank genes by expression stability
+#'
+#' Ranks candidate reference genes with geNorm (Vandesompele et al. 2002) and
+#' NormFinder (Andersen et al. 2004), after keeping the genes detected in most
+#' samples.
+#' With `group`, NormFinder accounts for the groups, and a Kruskal-Wallis test
+#' tells whether each gene's expression differs between them, which makes a
+#' poor reference gene.
+#'
+#' @param x A `nacho` object from [load_rcc()] or [normalise()].
+#' @param genes The genes to rank; `NULL` ranks the `Housekeeping` probes.
+#' @param group A column of `nacho_samples(x)` with the biological groups, or
+#'   `NULL`.
+#' @param min_detection The smallest share of samples in which a gene must be
+#'   above background to be ranked.
+#'
+#' @return A list with `ranking`, a data frame with one row per gene from the
+#'   most to the least stable: `Name`, `CodeClass`, `detection_rate`,
+#'   `mean_log2`, `geNorm_M`, `geNorm_rank`, `NormFinder_rho` and, with
+#'   `group`, `group_p_value` and `group_p_adjusted` (Benjamini-Hochberg); and
+#'   `pairwise_v`, the geNorm pairwise variation `V` for each number of genes.
+#'   A `V` below 0.15 is the usual sign that adding a gene no longer helps.
+#' @export
+#' @examples
+#' data(GSE74821)
+#' housekeeping_stability(GSE74821)$ranking
+housekeeping_stability <- function(
+  x,
+  genes = NULL,
+  group = NULL,
+  min_detection = 0.9
+) {
+  check_nacho(x)
+  check_character(genes, allow_null = TRUE)
+  check_string(group, allow_null = TRUE)
+  check_proportion(min_detection)
+  if (!is.null(group)) {
+    check_column(group, nacho_samples(x), data_arg = "nacho_samples(x)")
+  }
+  probes <- x@probes
+  genes <- genes %||% probes[["Name"]][probes[["CodeClass"]] == "Housekeeping"]
+  unknown <- setdiff(genes, probes[["Name"]])
+  if (length(unknown) > 0) {
+    nacho_abort(
+      "{.arg genes} has name{?s} that {?is/are} not a probe: {.val {utils::head(unknown, 5)}}.",
+      class = "bad_argument"
+    )
+  }
+  rows <- match(genes, probes[["Name"]])
+  log_expr <- stability_input(
+    x@counts[rows, , drop = FALSE],
+    probes[["detection_rate"]][rows],
+    min_detection
+  )
+  if (ncol(log_expr) < 3) {
+    nacho_abort(
+      c(
+        paste(
+          "Ranking needs at least three genes detected in",
+          "{min_detection * 100}% of samples, and {ncol(log_expr)} {?is/are}."
+        ),
+        i = "Pass more {.arg genes}, or lower {.arg min_detection}."
+      ),
+      class = "bad_argument"
+    )
+  }
+  groups <- NULL
+  if (!is.null(group)) {
+    values <- nacho_samples(x)[[group]]
+    if (anyNA(values)) {
+      nacho_abort(
+        c(
+          "{.arg group} must have no missing values.",
+          x = "Column {.field {group}} has {sum(is.na(values))} missing value{?s}."
+        ),
+        class = "bad_argument"
+      )
+    }
+    groups <- factor(values)
+    if (nlevels(groups) < 2) {
+      nacho_abort(
+        "{.arg group} must have at least two levels, and {.field {group}} has {nlevels(groups)}.",
+        class = "bad_argument"
+      )
+    }
+  }
+  genorm <- genorm_ranking(log_expr)
+  kept <- match(colnames(log_expr), probes[["Name"]])
+  ranking <- data.frame(
+    Name = colnames(log_expr),
+    CodeClass = probes[["CodeClass"]][kept],
+    detection_rate = probes[["detection_rate"]][kept],
+    mean_log2 = unname(colMeans(log_expr)),
+    geNorm_M = unname(genorm_m(log_expr)),
+    geNorm_rank = match(colnames(log_expr), genorm[["ranking"]]),
+    NormFinder_rho = unname(normfinder_rho(log_expr, groups))
+  )
+  if (!is.null(groups)) {
+    ranking[["group_p_value"]] <- unname(apply(log_expr, 2, function(values) {
+      stats::kruskal.test(values, groups)[["p.value"]]
+    }))
+    ranking[["group_p_adjusted"]] <- stats::p.adjust(
+      ranking[["group_p_value"]],
+      "BH"
+    )
+  }
+  ranking <- ranking[order(ranking[["geNorm_rank"]]), , drop = FALSE]
+  rownames(ranking) <- NULL
+  list(ranking = ranking, pairwise_v = genorm[["pairwise_v"]])
+}

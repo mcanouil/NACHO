@@ -35,7 +35,7 @@ test_that("every plot type builds", {
 
 test_that("every plot type of a toy object builds without warnings", {
   toy <- toy_nacho(6L)
-  for (type in names(NACHO:::nacho_plot_registry)) {
+  for (type in setdiff(names(NACHO:::nacho_plot_registry), "Stability")) {
     expect_no_warning(ggplot2::ggplot_build(autoplot(toy, type = type)))
   }
 })
@@ -78,6 +78,11 @@ test_that("the Housekeeping plot of a toy object without housekeeping genes is n
   expect_no_warning(ggplot2::ggplot_build(autoplot(toy, type = "NORM")))
 })
 
+test_that("the Stability plot needs three detected housekeeping genes", {
+  toy <- toy_nacho(6L)
+  expect_not_available(toy, "Stability")
+})
+
 test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable", {
   for (type in c("PCL", "LoD")) {
     expect_not_available(plexset_nacho, type)
@@ -109,7 +114,8 @@ metrics <- c(
   "PCA",
   "PFNF",
   "HF",
-  "NORM"
+  "NORM",
+  "Stability"
 )
 
 for (imetric in metrics) {

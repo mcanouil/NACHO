@@ -99,3 +99,88 @@ test_that("NormFinder refuses fewer than three genes and one-sample groups", {
     class = "nacho_error_bad_argument"
   )
 })
+
+test_that("housekeeping_stability() ranks the housekeeping genes", {
+  result <- housekeeping_stability(GSE74821)
+  ranking <- result$ranking
+  housekeeping <- nacho_probes(GSE74821)$Name[
+    nacho_probes(GSE74821)$CodeClass == "Housekeeping"
+  ]
+  expect_setequal(ranking$Name, housekeeping)
+  expect_identical(ranking$geNorm_rank, seq_len(nrow(ranking)))
+  expect_true(all(ranking$NormFinder_rho >= 0))
+  expect_identical(nrow(result$pairwise_v), nrow(ranking) - 2L)
+  expect_false("group_p_value" %in% names(ranking))
+})
+
+test_that("housekeeping_stability() tests genes against a group", {
+  x <- GSE74821
+  x@samples$arm <- rep(c("a", "b"), length.out = ncol(x))
+  ranking <- housekeeping_stability(x, group = "arm")$ranking
+  expect_true(all(ranking$group_p_value >= 0 & ranking$group_p_value <= 1))
+  expect_equal(
+    ranking$group_p_adjusted,
+    stats::p.adjust(ranking$group_p_value, "BH")
+  )
+})
+
+test_that("housekeeping_stability() refuses too few genes or bad arguments", {
+  expect_error(
+    housekeeping_stability(GSE74821, genes = nacho_probes(GSE74821)$Name[1:2]),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    housekeeping_stability(GSE74821, genes = "nope"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    housekeeping_stability(GSE74821, group = "nope"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    housekeeping_stability(GSE74821, min_detection = 1.5),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("housekeeping_stability() refuses a group with one level", {
+  x <- GSE74821
+  x@samples$arm <- "a"
+  expect_error(
+    housekeeping_stability(x, group = "arm"),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("housekeeping_stability() refuses a group with missing values", {
+  x <- GSE74821
+  x@samples$arm <- rep(c("a", "b"), length.out = ncol(x))
+  x@samples$arm[1] <- NA
+  expect_error(
+    housekeeping_stability(x, group = "arm"),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("genes with missing counts are left out of the candidates", {
+  x <- GSE74821
+  housekeeping <- nacho_probes(x)$Name[
+    nacho_probes(x)$CodeClass == "Housekeeping"
+  ]
+  x@counts[housekeeping[1], 1] <- NA_integer_
+  expect_false(housekeeping[1] %in% housekeeping_stability(x)$ranking$Name)
+})
+
+test_that("predicted housekeeping genes are the five most stable by geNorm", {
+  x <- suppressMessages(normalise(GSE74821, housekeeping_predict = TRUE))
+  predicted <- x@settings$housekeeping_genes
+  expect_length(predicted, 5)
+  candidates <- nacho_probes(GSE74821)$Name[
+    grepl("Endogenous|Housekeeping", nacho_probes(GSE74821)$CodeClass) &
+      nacho_probes(GSE74821)$detection_rate >= 0.9
+  ]
+  expected <- housekeeping_stability(GSE74821, genes = candidates)$ranking$Name[
+    1:5
+  ]
+  expect_identical(predicted, expected)
+})

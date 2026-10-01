@@ -48,6 +48,10 @@ Draws any of the quality-control figures of the Shiny app
 \item \code{"PFNF"}: Positive factor against negative factor.
 \item \code{"HF"}: Housekeeping factor.
 \item \code{"NORM"}: Normalisation factor.
+\item \code{"Stability"}: geNorm stability of the housekeeping genes, see
+\code{\link[=housekeeping_stability]{housekeeping_stability()}}.
+The dashed line marks M = 1.5, the limit geNorm suggests for
+homogeneous samples.
 }
 \item \code{colour}: The column of \code{nacho_samples(object)} that colours the points.
 \item \code{size}: The point size, and the line width in the \code{"NORM"} plot.
