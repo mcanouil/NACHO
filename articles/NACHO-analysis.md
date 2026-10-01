@@ -159,38 +159,38 @@ gse <- getGEO("GSE70970")
 ## GSE70970_series_matrix.txt.gz
 getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
 ##                                                                    size isdir
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                       1986560 FALSE
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz     672 FALSE
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                       1986560 FALSE
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz     672 FALSE
 ##                                                                 mode
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                        644
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz  644
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                        644
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz  644
 ##                                                                               mtime
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                       2026-09-30 18:44:22
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-30 18:44:22
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                       2026-10-01 17:07:33
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-10-01 17:07:33
 ##                                                                               ctime
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                       2026-09-30 18:44:22
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-30 18:44:22
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                       2026-10-01 17:07:33
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-10-01 17:07:33
 ##                                                                               atime
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                       2026-09-30 18:44:22
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-09-30 18:44:22
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                       2026-10-01 17:07:33
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz 2026-10-01 17:07:33
 ##                                                                  uid  gid
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                       1001 1001
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz 1001 1001
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                       1001 1001
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz 1001 1001
 ##                                                                  uname grname
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                       runner runner
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz runner runner
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                       runner runner
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz runner runner
 ##                                                                                                  fname
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                                             GSE70970_RAW.tar
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz GSE70970_characteristics_readme.txt.gz
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                                             GSE70970_RAW.tar
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz GSE70970_characteristics_readme.txt.gz
 ##                                                                                  destdir
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                       /tmp/RtmpvErDFx/GSE70970
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz /tmp/RtmpvErDFx/GSE70970
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                       /tmp/RtmpF6sYqR/GSE70970
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz /tmp/RtmpF6sYqR/GSE70970
 ##                                                                                                                        filepath
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                                             /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                                             /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz
 ##                                                                      GEO
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_RAW.tar                       GSE70970
-## /tmp/RtmpvErDFx/GSE70970/GSE70970_characteristics_readme.txt.gz GSE70970
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_RAW.tar                       GSE70970
+## /tmp/RtmpF6sYqR/GSE70970/GSE70970_characteristics_readme.txt.gz GSE70970
 # Unzip data
 untar(
   tarfile = file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"),
