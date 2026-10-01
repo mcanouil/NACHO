@@ -88,6 +88,9 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/stability.R`,
   - feat: `housekeeping_stability()` ranks reference genes with geNorm and NormFinder, gives the geNorm pairwise variation, and tests each gene against a biological group.
     `autoplot(x, type = "Stability")` draws the ranking.
+- In `R/ruv.R`,
+  - feat: `normalisation_method = "RUVg"` removes unwanted variation estimated from the housekeeping genes, and gives the factors as `W_1`, `W_2`, ... in `nacho_samples()`.
+    `suggest_ruv_k()` suggests how many to remove.
 
 ## Performance
 
