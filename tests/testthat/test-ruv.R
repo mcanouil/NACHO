@@ -111,3 +111,15 @@ test_that("ruvg() leaves a gene seen in too few samples uncorrected", {
   out <- NACHO:::ruvg(d$log_expr, d$controls, k = 2)
   expect_identical(out$corrected[, gene], d$log_expr[, gene])
 })
+
+test_that("RUVg errors name normalise(), not the internal builder", {
+  x <- GSE74821
+  control <- x@probes$Name[x@probes$is_housekeeping][1]
+  x@counts[control, 1] <- NA
+  error <- expect_error(
+    normalise(x, normalisation_method = "RUVg", ruv_k = 1),
+    class = "nacho_error_bad_argument",
+    regexp = control
+  )
+  expect_identical(rlang::call_name(error[["call"]]), "normalise")
+})

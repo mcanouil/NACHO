@@ -145,11 +145,16 @@ housekeeping_names <- function(x) {
 #' RLE and PCA diagnostic for each k
 #'
 #' @noRd
-ruv_k_table <- function(log_expr, controls, max_k) {
+ruv_k_table <- function(
+  log_expr,
+  controls,
+  max_k,
+  call = rlang::caller_env()
+) {
   max_k <- min(max_k, sum(controls) - 1L, nrow(log_expr) - 1L)
   table <- data.frame(k = 0:max(max_k, 0L))
   corrected <- lapply(table[["k"]], function(k) {
-    ruvg(log_expr, controls, k)[["corrected"]]
+    ruvg(log_expr, controls, k, call = call)[["corrected"]]
   })
   table[["rle_iqr"]] <- vapply(corrected, rle_iqr, numeric(1))
   table[["pc1_variance"]] <- vapply(

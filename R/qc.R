@@ -404,6 +404,8 @@ control_factors <- function(counts, probes, excluded, method) {
 
 #' Content normalisation of the scaled counts
 #'
+#' @param call The environment whose call names the function in errors.
+#'
 #' @return A list: `normalised`, `house_factor` (or `NULL`), `extra_columns`
 #'   (a data frame of sample columns, possibly with no column) and `settings`.
 #'
@@ -412,20 +414,31 @@ content_normalise <- function(
   scaled,
   probes,
   settings,
-  housekeeping_genes
+  housekeeping_genes,
+  call = rlang::caller_env()
 ) {
   none <- data.frame(row.names = seq_len(ncol(scaled)))
   if (settings[["normalisation_method"]] == "RUVg") {
-    input <- ruv_input_from_scaled(scaled, probes, housekeeping_genes)
+    input <- ruv_input_from_scaled(
+      scaled,
+      probes,
+      housekeeping_genes,
+      call = call
+    )
     k <- settings[["ruv_k"]]
     if (is.null(k)) {
-      table <- ruv_k_table(input[["log_expr"]], input[["controls"]], 5L)
+      table <- ruv_k_table(
+        input[["log_expr"]],
+        input[["controls"]],
+        5L,
+        call = call
+      )
       k <- table[["k"]][table[["suggested"]]]
       nacho_inform(
         "Using RUVg with {.code ruv_k = {k}}, as {.fn suggest_ruv_k} suggests."
       )
     }
-    fit <- ruvg(input[["log_expr"]], input[["controls"]], k)
+    fit <- ruvg(input[["log_expr"]], input[["controls"]], k, call = call)
     normalised <- scaled
     normalised[input[["rows"]], ] <- pmax(2^t(fit[["corrected"]]) - 1, 0)
     settings[["ruv_k"]] <- as.integer(ncol(fit[["W"]]))
@@ -649,6 +662,7 @@ sample_metrics <- function(
 #' @param warn_missing Whether to warn about missing lane or sample
 #'   attributes.
 #'   Only a first build warns, so rebuilding an object does not repeat it.
+#' @param call The environment whose call names the function in errors.
 #'
 #' @noRd
 build_nacho <- function(
@@ -659,7 +673,8 @@ build_nacho <- function(
   thresholds,
   rcc_type,
   provenance,
-  warn_missing = TRUE
+  warn_missing = TRUE,
+  call = rlang::caller_env()
 ) {
   probes <- as.data.frame(probes)[, c("CodeClass", "Name", "Accession")]
   samples <- as.data.frame(samples)
@@ -729,7 +744,8 @@ build_nacho <- function(
     scaled,
     probes,
     settings,
-    housekeeping_genes
+    housekeeping_genes,
+    call = call
   )
   house_factor <- content[["house_factor"]]
   normalised <- content[["normalised"]]

@@ -132,7 +132,12 @@ normalise <- function(
 #' @usage NULL
 normalize <- normalise
 
-run_normalisation <- function(x, settings, thresholds) {
+run_normalisation <- function(
+  x,
+  settings,
+  thresholds,
+  call = rlang::caller_env()
+) {
   build_nacho(
     counts = x@counts,
     probes = x@probes,
@@ -141,7 +146,8 @@ run_normalisation <- function(x, settings, thresholds) {
     thresholds = thresholds,
     rcc_type = x@rcc_type,
     provenance = x@provenance,
-    warn_missing = FALSE
+    warn_missing = FALSE,
+    call = call
   )
 }
 
