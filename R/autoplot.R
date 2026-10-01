@@ -43,6 +43,8 @@ NULL
 #'     [housekeeping_stability()].
 #'     The dashed line marks M = 1.5, the limit geNorm suggests for
 #'     homogeneous samples.
+#'     This plot ignores `colour`, `show_legend`, `show_outliers` and
+#'     `outliers_labels`, and it is not in the Shiny app or the report.
 #' * `colour`: The column of `nacho_samples(object)` that colours the points.
 #' * `size`: The point size, and the line width in the `"NORM"` plot.
 #' * `show_legend`: If `FALSE`, hide the colour legend.
@@ -1031,6 +1033,10 @@ plot_stability <- function(
   ranking <- rlang::try_fetch(
     housekeeping_stability(object)[["ranking"]],
     nacho_error_bad_argument = function(cnd) {
+      reason <<- rlang::cnd_message(cnd)
+      NULL
+    },
+    nacho_error_no_detection_rate = function(cnd) {
       reason <<- rlang::cnd_message(cnd)
       NULL
     }

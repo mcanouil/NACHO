@@ -52,6 +52,8 @@ Draws any of the quality-control figures of the Shiny app
 \code{\link[=housekeeping_stability]{housekeeping_stability()}}.
 The dashed line marks M = 1.5, the limit geNorm suggests for
 homogeneous samples.
+This plot ignores \code{colour}, \code{show_legend}, \code{show_outliers} and
+\code{outliers_labels}, and it is not in the Shiny app or the report.
 }
 \item \code{colour}: The column of \code{nacho_samples(object)} that colours the points.
 \item \code{size}: The point size, and the line width in the \code{"NORM"} plot.

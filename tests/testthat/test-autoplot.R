@@ -78,9 +78,17 @@ test_that("the Housekeeping plot of a toy object without housekeeping genes is n
   expect_no_warning(ggplot2::ggplot_build(autoplot(toy, type = "NORM")))
 })
 
-test_that("the Stability plot needs three detected housekeeping genes", {
+test_that("the Stability plot needs a detection limit", {
   toy <- toy_nacho(6L)
   expect_not_available(toy, "Stability")
+})
+
+test_that("the Stability plot orders the genes by geNorm rank", {
+  expect_no_warning(plot <- autoplot(GSE74821, type = "Stability"))
+  expect_identical(
+    levels(plot[["data"]][["Name"]]),
+    housekeeping_stability(GSE74821)[["ranking"]][["Name"]]
+  )
 })
 
 test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable", {

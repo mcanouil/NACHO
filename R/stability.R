@@ -167,6 +167,14 @@ stability_input <- function(counts, detection_rate, min_detection) {
 #' @param min_detection The smallest share of samples in which a gene must be
 #'   above background to be ranked.
 #'
+#' @details
+#' The two most stable genes share the same geNorm M by construction, so their
+#' order, ranks 1 and 2, is arbitrary.
+#' Without `group`, `NormFinder_rho` is the standard deviation of the
+#' residual variation of the gene.
+#' With `group`, it also counts the variation between the groups, shrunk
+#' towards zero as NormFinder does.
+#'
 #' @return A list with `ranking`, a data frame with one row per gene from the
 #'   most to the least stable: `Name`, `CodeClass`, `detection_rate`,
 #'   `mean_log2`, `geNorm_M`, `geNorm_rank`, `NormFinder_rho` and, with
@@ -215,7 +223,7 @@ housekeeping_stability <- function(
         "No sample has a detection limit, so {.fn housekeeping_stability} cannot tell which genes are detected.",
         i = "A detection limit needs two kept negative probes with counts."
       ),
-      class = "bad_argument"
+      class = "no_detection_rate"
     )
   }
   log_expr <- stability_input(

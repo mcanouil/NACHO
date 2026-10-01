@@ -33,6 +33,14 @@ With \code{group}, NormFinder accounts for the groups, and a Kruskal-Wallis test
 tells whether each gene's expression differs between them, which makes a
 poor reference gene.
 }
+\details{
+The two most stable genes share the same geNorm M by construction, so their
+order, ranks 1 and 2, is arbitrary.
+Without \code{group}, \code{NormFinder_rho} is the standard deviation of the
+residual variation of the gene.
+With \code{group}, it also counts the variation between the groups, shrunk
+towards zero as NormFinder does.
+}
 \examples{
 data(GSE74821)
 housekeeping_stability(GSE74821)$ranking

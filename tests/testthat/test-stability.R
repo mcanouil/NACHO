@@ -217,7 +217,7 @@ test_that("a single sample or no detection limit is a classed error", {
   expect_error(
     housekeeping_stability(x),
     "detection limit",
-    class = "nacho_error_bad_argument"
+    class = "nacho_error_no_detection_rate"
   )
 })
 
