@@ -36,7 +36,25 @@ test_that("ruvg() refuses missing control counts", {
   d$log_expr[1, which(d$controls)[1]] <- NA
   expect_error(
     NACHO:::ruvg(d$log_expr, d$controls, k = 1),
-    class = "nacho_error_bad_argument"
+    class = "nacho_error_bad_argument",
+    regexp = colnames(d$log_expr)[which(d$controls)[1]]
+  )
+})
+
+test_that("ruvg() gives no factor when the controls are constant", {
+  d <- ruv_expr()
+  d$log_expr[, d$controls] <- 5
+  out <- NACHO:::ruvg(d$log_expr, d$controls, k = 1)
+  expect_identical(ncol(out$W), 0L)
+  expect_identical(out$corrected, d$log_expr)
+})
+
+test_that("ruvg() refuses an empty set of controls", {
+  d <- ruv_expr()
+  expect_error(
+    NACHO:::ruvg(d$log_expr, rep(FALSE, ncol(d$log_expr)), k = 1),
+    class = "nacho_error_bad_argument",
+    regexp = "control genes"
   )
 })
 

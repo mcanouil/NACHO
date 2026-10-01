@@ -29,19 +29,34 @@ ruvg <- function(
       call = call
     )
   }
-  if (k == 0) {
-    return(list(
-      W = matrix(
-        numeric(0),
-        nrow(log_expr),
-        0,
-        dimnames = list(rownames(log_expr), NULL)
+  if (ncol(control_expr) == 0 && k > 0) {
+    nacho_abort(
+      c(
+        "RUVg needs control genes.",
+        x = "No gene is marked as a control."
       ),
-      corrected = log_expr
-    ))
+      class = "bad_argument",
+      call = call
+    )
+  }
+  no_factor <- list(
+    W = matrix(
+      numeric(0),
+      nrow(log_expr),
+      0,
+      dimnames = list(rownames(log_expr), NULL)
+    ),
+    corrected = log_expr
+  )
+  if (k == 0) {
+    return(no_factor)
   }
   decomposition <- svd(scale(control_expr, center = TRUE, scale = FALSE))
-  k <- min(k, max(which(decomposition[["d"]] > tolerance)))
+  usable <- sum(decomposition[["d"]] > tolerance)
+  if (usable == 0) {
+    return(no_factor)
+  }
+  k <- min(k, usable)
   w <- decomposition[["u"]][, seq_len(k), drop = FALSE]
   dimnames(w) <- list(rownames(log_expr), paste0("W_", seq_len(k)))
   alpha <- solve(crossprod(w), crossprod(w, log_expr))
