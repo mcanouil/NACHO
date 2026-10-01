@@ -1029,23 +1029,17 @@ plot_stability <- function(
   outliers_factor,
   outliers_labels
 ) {
-  reason <- NULL
+  explain <- function(cnd) rlang::cnd_message(cnd)
   ranking <- rlang::try_fetch(
     housekeeping_stability(object)[["ranking"]],
-    nacho_error_bad_argument = function(cnd) {
-      reason <<- rlang::cnd_message(cnd)
-      NULL
-    },
-    nacho_error_no_detection_rate = function(cnd) {
-      reason <<- rlang::cnd_message(cnd)
-      NULL
-    }
+    nacho_error_bad_argument = explain,
+    nacho_error_no_detection_rate = explain
   )
-  if (is.null(ranking)) {
+  if (is.character(ranking)) {
     nacho_warn(
       c(
         "Stability cannot be drawn.",
-        x = "{reason}"
+        x = "{ranking}"
       ),
       class = "metric_unavailable"
     )
