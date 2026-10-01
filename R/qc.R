@@ -844,10 +844,10 @@ build_nacho <- function(
     metrics[["House_factor"]] <- unname(house_factor)
   }
   housekeeping_rows <- probes[["Name"]] %in% housekeeping_genes
+  skip_housekeeping <- settings[["panel"]] == "mirna" &&
+    !isTRUE(settings[["housekeeping_norm"]])
   metrics[["Housekeeping_detected"]] <- if (
-    (settings[["panel"]] == "mirna" &&
-      !isTRUE(settings[["housekeeping_norm"]])) ||
-      !any(housekeeping_rows)
+    skip_housekeeping || !any(housekeeping_rows)
   ) {
     NA_integer_
   } else {
