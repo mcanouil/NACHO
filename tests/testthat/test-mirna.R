@@ -147,3 +147,31 @@ test_that("mRNA panels get no ligation or haemolysis columns", {
   ))
   expect_false(any(grepl("^(Ligation|Haemolysis)", names(nacho_qc(x)))))
 })
+
+test_that("a constant ligation series gives an R2 of 0 without a warning", {
+  counts <- rbind(
+    LIG_POS_A = c(0, 100),
+    LIG_POS_B = c(0, 10),
+    LIG_POS_C = c(0, 1),
+    LIG_NEG_A = c(5, 5),
+    LIG_NEG_B = c(5, 5)
+  )
+  probes <- data.frame(
+    CodeClass = c(rep("Ligation", 5)),
+    Name = rownames(counts)
+  )
+  expect_no_warning(out <- NACHO:::ligation_metrics(counts, probes, c(1, 1)))
+  expect_identical(out$Ligation_R2[1], 0)
+  expect_gt(out$Ligation_R2[2], 0.95)
+})
+
+test_that("the nSolver preset flags failed ligation", {
+  x <- mirna_fixture()
+  x@samples$Ligation_order[1] <- 0
+  x@samples$Ligation_R2[2] <- 0.1
+  x@samples$Ligation_NEG[3] <- 1
+  qc <- nacho_qc(x)
+  expect_identical(qc$Ligation_order_status[1], "fail")
+  expect_identical(qc$Ligation_R2_status[2], "fail")
+  expect_identical(qc$Ligation_NEG_status[3], "fail")
+})

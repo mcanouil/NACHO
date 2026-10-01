@@ -85,7 +85,7 @@ ligation_metrics <- function(counts, probes, limits) {
       positives[1, ] > positives[2, ] & positives[2, ] > positives[3, ]
     ),
     Ligation_R2 = unname(apply(log2(positives + 1), 2, function(m) {
-      stats::cor(m, 3:1)^2
+      if (length(unique(m)) == 1) 0 else stats::cor(m, 3:1)^2
     })),
     Ligation_NEG = unname(
       apply(counts[negative, , drop = FALSE], 2, max) - limits
