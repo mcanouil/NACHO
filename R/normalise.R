@@ -2,6 +2,9 @@
 #'
 #' @param nacho_object A `nacho` object from [load_rcc()] or [normalise()].
 #' @inheritParams load_rcc
+#' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes.
+#'   `normalise()` reuses the `ruv_k` stored in the object, so pass
+#'   `ruv_k = NULL` to have [suggest_ruv_k()] choose again.
 #' @param outliers_thresholds A list of quality-control thresholds, as
 #'   returned by [nacho_thresholds()].
 #' @param ... Must be empty.

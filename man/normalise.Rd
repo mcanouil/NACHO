@@ -48,8 +48,9 @@ from its negative controls: \code{"none"} (the default), \code{"mean"},
 recommends when fold changes matter, and \code{"subtract"} removes it and
 floors at 0.}
 
-\item{ruv_k}{[\link{numeric}] The number of unwanted factors RUVg removes;
-\code{NULL} uses \code{\link[=suggest_ruv_k]{suggest_ruv_k()}}.}
+\item{ruv_k}{[\link{numeric}] The number of unwanted factors RUVg removes.
+\code{normalise()} reuses the \code{ruv_k} stored in the object, so pass
+\code{ruv_k = NULL} to have \code{\link[=suggest_ruv_k]{suggest_ruv_k()}} choose again.}
 
 \item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
