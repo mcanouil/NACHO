@@ -295,15 +295,18 @@ nacho_metadata_settings <- function(
     arg = "metadata(x)$nacho$settings$id_colname",
     call = call
   )
-  merged[["normalisation_method"]] <- check_settings(
+  choices <- check_settings(
     merged[["housekeeping_genes"]],
     merged[["housekeeping_predict"]],
     merged[["housekeeping_norm"]],
     merged[["normalisation_method"]],
     merged[["n_comp"]],
+    merged[["background"]],
+    merged[["background_mode"]],
     arg_prefix = "metadata(x)$nacho$settings$",
     call = call
   )
+  merged[names(choices)] <- choices
   merged[["n_comp"]] <- as.integer(merged[["n_comp"]])
   housekeeping_genes <- merged[["housekeeping_genes"]]
   housekeeping_genes <- housekeeping_genes[

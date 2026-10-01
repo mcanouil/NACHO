@@ -11,6 +11,8 @@ normalise(
   housekeeping_predict = nacho_object@settings[["housekeeping_predict"]],
   housekeeping_norm = nacho_object@settings[["housekeeping_norm"]],
   normalisation_method = nacho_object@settings[["normalisation_method"]],
+  background = nacho_object@settings[["background"]],
+  background_mode = nacho_object@settings[["background_mode"]],
   n_comp = nacho_object@settings[["n_comp"]],
   outliers_thresholds = nacho_object@thresholds,
   ...
@@ -31,6 +33,16 @@ should be performed. Default is \code{TRUE}.}
 \item{normalisation_method}{[\link{character}] Either \code{"GEO"} or \code{"GLM"}.
 Character string to indicate normalisation using the geometric mean (\code{"GEO"})
 or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
+
+\item{background}{[\link{character}] How to estimate each sample's background
+from its negative controls: \code{"none"} (the default), \code{"mean"},
+\code{"mean_2sd"} (mean plus two standard deviations), \code{"median"}, \code{"max"} or
+\code{"geo"} (geometric mean).}
+
+\item{background_mode}{[\link{character}] What to do with that background:
+\code{"threshold"} (the default) raises lower counts to it, which Bruker
+recommends when fold changes matter, and \code{"subtract"} removes it and
+floors at 0.}
 
 \item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
@@ -57,6 +69,13 @@ field of view (\code{FoV}) below its limit, a positive factor or a
 housekeeping factor outside its range, and, for single-sample RCC files,
 a positive control linearity (\code{PCL}) or a limit of detection (\code{LoD})
 below its limit. See \code{\link[=exclude_outliers]{exclude_outliers()}} to drop them.
+
+The normalisation runs in this order: raw counts, negative probe
+exclusion, background (\code{background} and \code{background_mode}), positive
+control factor (\code{normalisation_method}), then content factor
+(housekeeping genes when \code{housekeeping_norm} is \code{TRUE}).
+Normalised counts are neither rounded nor floored; use
+\code{nacho_counts(x, normalised = TRUE, log2 = TRUE)} for \code{log2(count + 1)}.
 }
 \examples{
 data(GSE74821)

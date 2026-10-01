@@ -182,7 +182,8 @@ check_choice <- function(
 #'   `"metadata(x)$nacho$settings$"`.
 #' @inheritParams nacho_abort
 #'
-#' @return The matched `normalisation_method`.
+#' @return A list of the matched `normalisation_method`, `background` and
+#'   `background_mode`.
 #'
 #' @noRd
 check_settings <- function(
@@ -191,6 +192,8 @@ check_settings <- function(
   housekeeping_norm,
   normalisation_method,
   n_comp,
+  background,
+  background_mode,
   arg_prefix = "",
   call = rlang::caller_env()
 ) {
@@ -217,7 +220,23 @@ check_settings <- function(
     call = call
   )
   check_count(n_comp, arg = paste0(arg_prefix, "n_comp"), call = call)
-  normalisation_method
+  background <- check_choice(
+    background,
+    background_statistics,
+    arg = paste0(arg_prefix, "background"),
+    call = call
+  )
+  background_mode <- check_choice(
+    background_mode,
+    background_modes,
+    arg = paste0(arg_prefix, "background_mode"),
+    call = call
+  )
+  list(
+    normalisation_method = normalisation_method,
+    background = background,
+    background_mode = background_mode
+  )
 }
 
 #' List the values that appear more than once

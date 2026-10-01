@@ -1,3 +1,60 @@
+#' Settings that reproduce the NACHO 2 background correction
+#'
+#' Without negative probes the NACHO 2 geometric mean method subtracted
+#' nothing, so `background = "none"` reproduces it.
+#'
+#' @param settings A list of settings.
+#' @param probes The probe table, with a `CodeClass` column.
+#'
+#' @noRd
+legacy_settings <- function(settings, probes) {
+  has_negatives <- "Negative" %in% probes[["CodeClass"]]
+  settings[["background"]] <- if (has_negatives) "geo" else "none"
+  settings[["background_mode"]] <- "subtract"
+  settings
+}
+
+#' Rebuild a schema 1 object with the definitions that made it
+#'
+#' @param properties The properties of the saved object, from `S7::props()`.
+#'
+#' @noRd
+migrate_schema_1 <- function(properties) {
+  provenance <- properties[["provenance"]]
+  provenance[["schema_version"]] <- nacho_schema_version
+  provenance[["migrated_from_schema"]] <- 1L
+  settings <- legacy_settings(
+    properties[["settings"]],
+    properties[["probes"]]
+  )
+  migrated <- build_nacho(
+    counts = properties[["counts"]],
+    probes = properties[["probes"]],
+    samples = properties[["samples"]],
+    settings = settings,
+    thresholds = properties[["thresholds"]],
+    rcc_type = properties[["rcc_type"]],
+    provenance = provenance,
+    warn_missing = FALSE
+  )
+  nacho_inform(c(
+    "Read an object saved with schema 1 and rebuilt it with schema {nacho_schema_version}.",
+    i = if (settings[["background"]] == "geo") {
+      paste(
+        "Normalised counts are recomputed without rounding,",
+        "with the NACHO 2 geometric mean background subtraction it was made with.",
+        "A GLM object no longer subtracts the model intercept."
+      )
+    } else {
+      paste(
+        "Normalised counts are recomputed without rounding,",
+        "and without background subtraction because the object has no negative probes."
+      )
+    }
+  ))
+  migrated
+}
+
 #' Convert a NACHO 2 object to NACHO 3
 #'
 #' NACHO 3 stores data in an S7 `nacho` object instead of the NACHO 2 list.
@@ -137,7 +194,8 @@ upgrade_nacho <- function(x) {
       housekeeping_norm = x[["housekeeping_norm"]],
       normalisation_method = x[["normalisation_method"]],
       n_comp = as.integer(x[["n_comp"]])
-    ),
+    ) |>
+      legacy_settings(probes),
     thresholds = thresholds,
     rcc_type = attr(x, "RCC_type"),
     provenance = provenance
@@ -202,6 +260,9 @@ read_nacho <- function(path) {
     )
   }
   properties <- S7::props(x)
+  if (identical(properties[["provenance"]][["schema_version"]], 1L)) {
+    return(migrate_schema_1(properties))
+  }
   check_schema(
     properties[["provenance"]][["schema_version"]],
     subject = cli::format_inline("{.file {path}}")

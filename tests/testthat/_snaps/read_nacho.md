@@ -32,5 +32,5 @@
     Condition
       Error in `nacho_samples()`:
       ! `x` has an object schema this NACHO cannot read.
-      i Schema 99 is newer than schema 1, which this NACHO reads. Update NACHO to read it.
+      i Schema 99 is newer than schema 2, which this NACHO reads. Update NACHO to read it.
 

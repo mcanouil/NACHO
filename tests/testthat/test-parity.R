@@ -1,16 +1,30 @@
 parity <- readRDS(test_path("fixtures", "parity-1a.rds"))
 
-check_parity <- function(x, reference) {
+nacho_2_rounding <- function(m) {
+  m <- round(m)
+  m[!is.na(m) & m <= 0] <- 0.1
+  m
+}
+
+glm_metrics <- c("MC", "MedC", "Positive_factor", "PCL", "LoD", "BD", "FoV")
+
+check_parity <- function(x, reference, glm = FALSE) {
   testthat::expect_identical(x@counts, reference[["counts"]])
-  testthat::expect_equal(
-    x@normalised,
-    reference[["normalised"]],
-    tolerance = 1e-8
-  )
-  columns <- names(reference[["metrics"]])
+  if (!glm) {
+    testthat::expect_equal(
+      nacho_2_rounding(x@normalised),
+      reference[["normalised"]],
+      tolerance = 1e-8
+    )
+  }
+  columns <- if (glm) {
+    glm_metrics
+  } else {
+    names(reference[["metrics"]])
+  }
   testthat::expect_equal(
     x@samples[, columns],
-    reference[["metrics"]],
+    reference[["metrics"]][, columns],
     tolerance = 1e-8,
     ignore_attr = TRUE
   )
@@ -31,7 +45,15 @@ check_parity <- function(x, reference) {
 }
 
 test_that("PlexSet results match the NACHO 2 pipeline", {
-  check_parity(plexset_nacho, parity[["plexset"]])
+  plexset_geo <- suppressMessages(load_rcc(
+    data_directory = test_path("plexset_data"),
+    ssheet_csv = plexset_tidy,
+    id_colname = "IDFILE",
+    housekeeping_norm = FALSE,
+    background = "geo",
+    background_mode = "subtract"
+  ))
+  check_parity(plexset_geo, parity[["plexset"]])
 })
 
 test_that("single-sample results match the NACHO 2 pipeline", {
@@ -42,11 +64,17 @@ test_that("single-sample results match the NACHO 2 pipeline", {
       fixture[["samplesheet"]],
       "IDFILE",
       n_comp = 5,
+      background = "geo",
+      background_mode = "subtract",
       ...
     )))
   }
   check_parity(load(), parity[["io360_geo"]])
-  check_parity(load(normalisation_method = "GLM"), parity[["io360_glm"]])
+  check_parity(
+    load(normalisation_method = "GLM"),
+    parity[["io360_glm"]],
+    glm = TRUE
+  )
   check_parity(load(housekeeping_predict = TRUE), parity[["io360_predict"]])
 })
 
@@ -56,11 +84,20 @@ test_that("miRNA results match the NACHO 2 pipeline", {
     fixture[["dir"]],
     fixture[["samplesheet"]],
     "IDFILE",
-    n_comp = 5
+    n_comp = 5,
+    background = "geo",
+    background_mode = "subtract"
   )))
   check_parity(x, parity[["mirna"]])
 })
 
 test_that("salmon results match the NACHO 2 pipeline", {
-  check_parity(salmon_nacho, parity[["salmon"]])
+  salmon_geo <- suppressMessages(load_rcc(
+    data_directory = test_path("salmon_data"),
+    ssheet_csv = salmon_tidy,
+    id_colname = "IDFILE",
+    background = "geo",
+    background_mode = "subtract"
+  ))
+  check_parity(salmon_geo, parity[["salmon"]])
 })

@@ -12,15 +12,39 @@ test_that("excluded_negatives() drops negatives far from the overall median", {
   expect_identical(NACHO:::excluded_negatives(counts, rep("Negative", 4)), "4")
 })
 
-test_that("normalise_matrix() rounds, then floors at 0.1", {
-  counts <- matrix(c(10, 2, 30, 1), nrow = 2)
-  out <- NACHO:::normalise_matrix(
-    counts,
-    negative_factor = c(3, 3),
-    positive_factor = c(1.5, 1),
-    house_factor = NULL
+test_that("normalised counts are neither rounded nor floored", {
+  counts <- matrix(
+    c(3L, 7L, 11L, 2L),
+    ncol = 2,
+    dimnames = list(c("a", "b"), c("S1", "S2"))
   )
-  expect_identical(out, matrix(c(10, 0.1, 27, 0.1), nrow = 2))
+  scaled <- NACHO:::scale_counts(
+    counts,
+    background = c(4, 1),
+    background_mode = "subtract",
+    positive_factor = c(1.5, 0.5)
+  )
+  expect_identical(
+    scaled,
+    matrix(c(0, 4.5, 5, 0.5), ncol = 2, dimnames = dimnames(counts))
+  )
+  expect_identical(
+    NACHO:::scale_counts(counts, NULL, "threshold", c(1.5, 0.5)),
+    matrix(c(4.5, 10.5, 5.5, 1), ncol = 2, dimnames = dimnames(counts))
+  )
+})
+
+test_that("content_factor() floors at 1 before the geometric mean", {
+  rows <- matrix(c(0.5, 4, 2, 8), ncol = 2)
+  g <- c(exp(mean(log(c(1, 4)))), exp(mean(log(c(2, 8)))))
+  expect_equal(NACHO:::content_factor(rows), mean(g) / g)
+})
+
+test_that("content_factor() keeps one missing sample from spoiling the others", {
+  rows <- matrix(c(4, 2, NA, NA, 8, 2), ncol = 3)
+  factor <- NACHO:::content_factor(rows)
+  expect_true(is.nan(factor[[2]]))
+  expect_false(anyNA(factor[-2]))
 })
 
 test_that("sample_metrics() gives NA and one warning when lane attributes are missing", {

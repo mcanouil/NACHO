@@ -12,6 +12,8 @@ load_rcc(
   housekeeping_predict = FALSE,
   housekeeping_norm = TRUE,
   normalisation_method = "GEO",
+  background = "none",
+  background_mode = "threshold",
   n_comp = 10
 )
 }
@@ -37,6 +39,16 @@ should be performed. Default is \code{TRUE}.}
 \item{normalisation_method}{[\link{character}] Either \code{"GEO"} or \code{"GLM"}.
 Character string to indicate normalisation using the geometric mean (\code{"GEO"})
 or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
+
+\item{background}{[\link{character}] How to estimate each sample's background
+from its negative controls: \code{"none"} (the default), \code{"mean"},
+\code{"mean_2sd"} (mean plus two standard deviations), \code{"median"}, \code{"max"} or
+\code{"geo"} (geometric mean).}
+
+\item{background_mode}{[\link{character}] What to do with that background:
+\code{"threshold"} (the default) raises lower counts to it, which Bruker
+recommends when fold changes matter, and \code{"subtract"} removes it and
+floors at 0.}
 
 \item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}

@@ -216,15 +216,64 @@ test_that("check_nacho() refuses an object from another schema", {
   expect_snapshot(nacho_samples(x), error = TRUE)
 })
 
-test_that("read_nacho() reads the frozen schema-1 object", {
+test_that("read_nacho() migrates the frozen schema-1 object", {
+  withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
   path <- test_path("fixtures", "nacho-schema-1.rds")
-  x <- read_nacho(path)
+  expect_message(
+    expect_warning(
+      x <- read_nacho(path),
+      class = "nacho_warning_n_comp_reduced"
+    ),
+    "no negative probes"
+  )
   expect_true(S7::S7_inherits(x, NACHO:::nacho))
   expect_identical(dim(x), c(40L, 4L))
   expect_identical(nacho_counts(x), readRDS(path)@counts)
-  expect_identical(x@provenance$schema_version, 1L)
-  expect_false(identical(S7::S7_class(readRDS(path)), NACHO:::nacho))
+  expect_identical(x@provenance$schema_version, 2L)
+  expect_identical(x@provenance$migrated_from_schema, 1L)
+  expect_identical(x@settings$background, "none")
+  expect_identical(x@settings$background_mode, "subtract")
   expect_identical(S7::S7_class(x), NACHO:::nacho)
+})
+
+test_that("migrating a schema 1 object with negatives subtracts the geometric mean", {
+  properties <- S7::props(readRDS(test_path("fixtures", "nacho-schema-1.rds")))
+  negatives <- data.frame(
+    CodeClass = "Negative",
+    Name = c("NEG_A", "NEG_B"),
+    Accession = "",
+    is_housekeeping = FALSE,
+    is_excluded = FALSE
+  )
+  negative_counts <- matrix(
+    c(4L, 6L, 8L, 10L, 5L, 7L, 9L, 11L),
+    nrow = 2,
+    byrow = TRUE,
+    dimnames = list(negatives$Name, colnames(properties$counts))
+  )
+  properties$probes <- rbind(properties$probes, negatives)
+  properties$counts <- rbind(properties$counts, negative_counts)
+  x <- suppressWarnings(suppressMessages(NACHO:::migrate_schema_1(properties)))
+  expect_identical(x@settings$background, "geo")
+  expect_equal(
+    nacho_samples(x)$Background,
+    unname(exp(colMeans(log(negative_counts))))
+  )
+})
+
+test_that("upgrade_nacho() keeps the NACHO 2 background", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  x <- suppressWarnings(suppressMessages(upgrade_nacho(old)))
+  expect_identical(x@settings$background, "geo")
+  expect_identical(x@settings$background_mode, "subtract")
+})
+
+test_that("upgrade_nacho() uses no background without negative probes", {
+  old <- nacho_2()
+  old$nacho <- old$nacho[old$nacho$CodeClass != "Negative", ]
+  x <- suppressWarnings(suppressMessages(upgrade_nacho(old)))
+  expect_identical(x@settings$background, "none")
+  expect_identical(x@settings$background_mode, "subtract")
 })
 
 test_that("read_nacho() upgrades a saved NACHO 2 object", {

@@ -29,6 +29,8 @@ default_settings <- function(probes, id_colname) {
     housekeeping_predict = FALSE,
     housekeeping_norm = any(grepl("Housekeeping", probes[["CodeClass"]])),
     normalisation_method = "GEO",
+    background = "none",
+    background_mode = "threshold",
     n_comp = 10L
   )
 }
@@ -217,6 +219,7 @@ computed_sample_columns <- c(
   "MedC",
   "Positive_factor",
   "Negative_factor",
+  "Background",
   "House_factor",
   "is_outlier"
 )
@@ -229,6 +232,110 @@ computed_sample_columns <- c(
 geometric_means <- function(m) {
   m[m == 0] <- 1
   exp(colMeans(log(m), na.rm = TRUE))
+}
+
+#' Background statistics and modes
+#'
+#' @noRd
+background_statistics <- c("none", "mean", "mean_2sd", "median", "max", "geo")
+background_modes <- c("threshold", "subtract")
+
+#' Background level of each sample, from its kept negative controls
+#'
+#' @param counts Count matrix of probes by samples, with probe names as row
+#'   names.
+#' @param code_class The code class of each row of `counts`.
+#' @param excluded Names of the negative probes left out.
+#' @param statistic One of `background_statistics`.
+#' @param warn Whether to warn about samples without a background level.
+#'
+#' @return One level per sample, or `NULL` for `"none"`.
+#'   A sample without a usable negative count gets `NA`.
+#'
+#' @noRd
+background_levels <- function(
+  counts,
+  code_class,
+  excluded,
+  statistic,
+  warn = TRUE,
+  call = rlang::caller_env()
+) {
+  if (statistic == "none") {
+    return(NULL)
+  }
+  negatives <- counts[
+    code_class == "Negative" & !rownames(counts) %in% excluded,
+    ,
+    drop = FALSE
+  ]
+  if (nrow(negatives) == 0) {
+    nacho_abort(
+      c(
+        "{.code background = {.val {statistic}}} needs negative control probes, and there are none.",
+        i = "Use {.code background = \"none\"}."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  if (statistic == "mean_2sd" && nrow(negatives) < 2) {
+    nacho_abort(
+      c(
+        "{.code background = \"mean_2sd\"} needs at least two negative probes, and {nrow(negatives)} {?is/are} left.",
+        i = "Use another {.arg background} statistic."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  level <- switch(
+    statistic,
+    mean = colMeans(negatives, na.rm = TRUE),
+    mean_2sd = colMeans(negatives, na.rm = TRUE) +
+      2 * apply(negatives, 2, stats::sd, na.rm = TRUE),
+    median = apply(negatives, 2, stats::median, na.rm = TRUE),
+    max = apply(negatives, 2, function(x) {
+      if (all(is.na(x))) NA_real_ else max(x, na.rm = TRUE)
+    }),
+    geo = geometric_means(negatives)
+  )
+  level[is.nan(level)] <- NA_real_
+  unavailable <- colnames(counts)[is.na(level)]
+  if (warn && length(unavailable) > 0) {
+    nacho_warn(
+      c(
+        "{length(unavailable)} sample{?s} ha{?s/ve} no usable negative counts, so the background is {.code NA}.",
+        i = "Affected: {.val {unavailable}}."
+      ),
+      class = "metric_unavailable",
+      call = call
+    )
+  }
+  unname(level)
+}
+
+#' Apply a background level to every probe of each sample
+#'
+#' `"threshold"` raises counts below the level to the level, as Bruker
+#' recommends when fold changes matter; `"subtract"` removes the level and
+#' floors at 0.
+#' Missing counts stay missing.
+#'
+#' @noRd
+apply_background <- function(counts, level, mode) {
+  if (is.null(level)) {
+    storage.mode(counts) <- "double"
+    return(counts)
+  }
+  levels <- matrix(level, nrow(counts), ncol(counts), byrow = TRUE)
+  out <- if (mode == "threshold") {
+    pmax(counts, levels)
+  } else {
+    pmax(counts - levels, 0)
+  }
+  dimnames(out) <- dimnames(counts)
+  out
 }
 
 #' Negative probes whose median is far from the overall median
@@ -262,7 +369,7 @@ control_concentrations <- function(probe_names) {
   unname(c(NEG = 0, POS = 32)[sub("(NEG).*|(POS).*", "\\1\\2", probe_names)])
 }
 
-#' Positive and negative normalisation factors of each sample
+#' Positive normalisation factor of each sample
 #'
 #' @noRd
 control_factors <- function(counts, probes, excluded, method) {
@@ -275,17 +382,11 @@ control_factors <- function(counts, probes, excluded, method) {
     positive <- geometric_means(
       counts[used & code_class == "Positive", , drop = FALSE]
     )
-    negative <- geometric_means(
-      counts[used & code_class == "Negative", , drop = FALSE]
-    )
-    return(list(
-      positive_factor = mean(positive) / positive,
-      negative_factor = negative
-    ))
+    return(list(positive_factor = mean(positive) / positive))
   }
   concentration <- control_concentrations(probe_names[used])
   controls <- counts[used, , drop = FALSE]
-  coefficients <- vapply(
+  slopes <- vapply(
     seq_len(ncol(controls)),
     function(k) {
       keep <- !is.na(controls[, k])
@@ -294,69 +395,49 @@ control_factors <- function(counts, probes, excluded, method) {
         family = stats::poisson(link = "identity"),
         data = data.frame(x = concentration[keep], y = controls[keep, k] + 1)
       )
-      unname(stats::coef(fit)[1:2])
+      unname(stats::coef(fit)[[2]])
     },
-    numeric(2)
+    numeric(1)
   )
-  list(
-    positive_factor = mean(coefficients[2, ]) / coefficients[2, ],
-    negative_factor = coefficients[1, ]
-  )
+  list(positive_factor = mean(slopes) / slopes)
 }
 
-#' Geometric mean of the background-corrected housekeeping counts
-#'
-#' Corrected counts below 1 are floored at 1.
+#' Apply the background, then the positive factor
 #'
 #' @noRd
-housekeeping_geometric_means <- function(
-  counts,
-  negative_factor,
-  positive_factor
-) {
-  corrected <- sweep(counts, 2, negative_factor, "-")
-  corrected <- sweep(corrected, 2, positive_factor, "*")
-  corrected[!is.na(corrected) & corrected < 1] <- 1
-  geometric_means(corrected)
+scale_counts <- function(counts, background, background_mode, positive_factor) {
+  out <- apply_background(counts, background, background_mode)
+  sweep(out, 2, positive_factor, "*")
 }
 
-#' Normalise a count matrix
+#' Content normalisation factor from reference rows
 #'
-#' Background-corrected and scaled counts are rounded, then floored at 0.1.
+#' Values below 1 count as 1, so a gene at background does not pull the
+#' geometric mean towards 0.
+#'
+#' @param scaled_rows The reference rows of the background-applied,
+#'   positive-scaled counts.
 #'
 #' @noRd
-normalise_matrix <- function(
-  counts,
-  negative_factor,
-  positive_factor,
-  house_factor
-) {
-  out <- sweep(counts, 2, negative_factor, "-")
-  out <- sweep(out, 2, positive_factor, "*")
-  if (!is.null(house_factor)) {
-    out <- sweep(out, 2, house_factor, "*")
-  }
-  out <- round(out)
-  out[!is.na(out) & out <= 0] <- 0.1
-  out
+content_factor <- function(scaled_rows) {
+  scaled_rows[!is.na(scaled_rows) & scaled_rows < 1] <- 1
+  geometric <- geometric_means(scaled_rows)
+  mean(geometric, na.rm = TRUE) / geometric
 }
 
 #' Predict the five most stable housekeeping genes
 #'
+#' @param scaled The background-applied, positive-scaled counts.
+#' @param probes The probe table, with a `CodeClass` column.
+#'
 #' @noRd
-predict_housekeeping <- function(
-  counts,
-  probes,
-  negative_factor,
-  positive_factor
-) {
+predict_housekeeping <- function(scaled, probes) {
   rows <- grepl("Endogenous|Housekeeping", probes[["CodeClass"]])
-  normalised <- normalise_matrix(
-    counts[rows, , drop = FALSE],
-    negative_factor,
-    positive_factor,
-    house_factor = NULL
-  )
+  normalised <- scaled[rows, , drop = FALSE]
+  # Rounds and floors as NACHO 2 did, to reproduce its gene selection until
+  # this function is replaced; the stored counts stay unrounded.
+  normalised <- round(normalised)
+  normalised[!is.na(normalised) & normalised <= 0] <- 0.1
   ratios <- log2(sweep(normalised, 2, colMeans(normalised, na.rm = TRUE), "/"))
   ratios[is.infinite(ratios)] <- NA
   spread <- sort(apply(ratios, 1, stats::sd, na.rm = TRUE))
@@ -527,15 +608,23 @@ build_nacho <- function(
     excluded,
     settings[["normalisation_method"]]
   )
+  background <- background_levels(
+    counts,
+    code_class,
+    excluded,
+    settings[["background"]],
+    warn = warn_missing
+  )
+  scaled <- scale_counts(
+    counts,
+    background,
+    settings[["background_mode"]],
+    factors[["positive_factor"]]
+  )
 
   if (isTRUE(settings[["housekeeping_predict"]])) {
     nacho_inform("Searching for the best housekeeping genes.")
-    predicted <- predict_housekeeping(
-      counts,
-      probes,
-      factors[["negative_factor"]],
-      factors[["positive_factor"]]
-    )
+    predicted <- predict_housekeeping(scaled, probes)
     if (length(predicted) == 0) {
       nacho_warn(
         "No suitable housekeeping genes were found; the default ones are used.",
@@ -552,30 +641,33 @@ build_nacho <- function(
 
   house_factor <- NULL
   if (!is.null(housekeeping_genes)) {
-    geometric <- housekeeping_geometric_means(
-      counts[probes[["Name"]] %in% housekeeping_genes, , drop = FALSE],
-      factors[["negative_factor"]],
-      factors[["positive_factor"]]
+    house_factor <- content_factor(
+      scaled[probes[["Name"]] %in% housekeeping_genes, , drop = FALSE]
     )
-    house_factor <- mean(geometric) / geometric
   }
 
   metrics <- sample_metrics(counts, probes, samples, warn_missing)
   metrics[["Positive_factor"]] <- unname(factors[["positive_factor"]])
-  metrics[["Negative_factor"]] <- unname(factors[["negative_factor"]])
+  negatives <- code_class == "Negative" & !probes[["Name"]] %in% excluded
+  metrics[["Negative_factor"]] <- if (any(negatives)) {
+    unname(geometric_means(counts[negatives, , drop = FALSE]))
+  } else {
+    NA_real_
+  }
+  metrics[["Background"]] <- background %||% NA_real_
   if (!is.null(house_factor)) {
     metrics[["House_factor"]] <- unname(house_factor)
   }
   samples <- cbind(samples, metrics)
   samples[["is_outlier"]] <- compute_outliers(samples, thresholds, rcc_type)
 
-  normalised <- normalise_matrix(
-    counts,
-    factors[["negative_factor"]],
-    factors[["positive_factor"]],
-    if (isTRUE(settings[["housekeeping_norm"]])) house_factor
-  )
-  storage.mode(normalised) <- "double"
+  normalised <- if (
+    isTRUE(settings[["housekeeping_norm"]]) && !is.null(house_factor)
+  ) {
+    sweep(scaled, 2, house_factor, "*")
+  } else {
+    scaled
+  }
 
   probes[["is_housekeeping"]] <- probes[["Name"]] %in% housekeeping_genes
   probes[["is_excluded"]] <- probes[["Name"]] %in% excluded

@@ -36,6 +36,7 @@ toy_nacho <- function(n_samples = 4L) {
     MedC = 10,
     Positive_factor = 1,
     Negative_factor = 1,
+    Background = NA_real_,
     House_factor = 1,
     is_outlier = FALSE
   )
@@ -57,6 +58,8 @@ toy_nacho <- function(n_samples = 4L) {
       housekeeping_predict = FALSE,
       housekeeping_norm = TRUE,
       normalisation_method = "GEO",
+      background = "none",
+      background_mode = "threshold",
       n_comp = 2L
     ),
     thresholds = thresholds,

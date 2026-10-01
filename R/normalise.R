@@ -17,6 +17,13 @@
 #'   a positive control linearity (`PCL`) or a limit of detection (`LoD`)
 #'   below its limit. See [exclude_outliers()] to drop them.
 #'
+#'   The normalisation runs in this order: raw counts, negative probe
+#'   exclusion, background (`background` and `background_mode`), positive
+#'   control factor (`normalisation_method`), then content factor
+#'   (housekeeping genes when `housekeeping_norm` is `TRUE`).
+#'   Normalised counts are neither rounded nor floored; use
+#'   `nacho_counts(x, normalised = TRUE, log2 = TRUE)` for `log2(count + 1)`.
+#'
 #' @return A `nacho` object.
 #' @export
 #'
@@ -30,6 +37,8 @@ normalise <- function(
   housekeeping_predict = nacho_object@settings[["housekeeping_predict"]],
   housekeeping_norm = nacho_object@settings[["housekeeping_norm"]],
   normalisation_method = nacho_object@settings[["normalisation_method"]],
+  background = nacho_object@settings[["background"]],
+  background_mode = nacho_object@settings[["background_mode"]],
   n_comp = nacho_object@settings[["n_comp"]],
   outliers_thresholds = nacho_object@thresholds,
   ...
@@ -51,12 +60,14 @@ normalise <- function(
       class = "bad_argument"
     )
   }
-  normalisation_method <- check_settings(
+  choices <- check_settings(
     housekeeping_genes,
     housekeeping_predict,
     housekeeping_norm,
     normalisation_method,
-    n_comp
+    n_comp,
+    background,
+    background_mode
   )
   check_thresholds(outliers_thresholds)
 
@@ -65,7 +76,9 @@ normalise <- function(
     housekeeping_genes = housekeeping_genes,
     housekeeping_predict = housekeeping_predict,
     housekeeping_norm = housekeeping_norm,
-    normalisation_method = normalisation_method,
+    normalisation_method = choices[["normalisation_method"]],
+    background = choices[["background"]],
+    background_mode = choices[["background_mode"]],
     n_comp = as.integer(n_comp)
   )
   changed <- vapply(
