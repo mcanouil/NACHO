@@ -162,11 +162,12 @@ check_proportion <- function(
 check_count <- function(
   x,
   arg = rlang::caller_arg(x),
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  min = 1
 ) {
-  if (!rlang::is_scalar_integerish(x, finite = TRUE) || x < 1) {
+  if (!rlang::is_scalar_integerish(x, finite = TRUE) || x < min) {
     nacho_abort(
-      "{.arg {arg}} must be a whole number of at least 1, not {.obj_type_friendly {x}}.",
+      "{.arg {arg}} must be a whole number of at least {min}, not {.obj_type_friendly {x}}.",
       class = "bad_argument",
       call = call
     )
@@ -246,7 +247,12 @@ check_settings <- function(
   )
   check_count(n_comp, arg = paste0(arg_prefix, "n_comp"), call = call)
   if (!is.null(ruv_k)) {
-    check_count(ruv_k, arg = paste0(arg_prefix, "ruv_k"), call = call)
+    check_count(
+      ruv_k,
+      arg = paste0(arg_prefix, "ruv_k"),
+      call = call,
+      min = 0
+    )
   }
   background <- check_choice(
     background,

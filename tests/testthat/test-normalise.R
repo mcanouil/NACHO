@@ -486,3 +486,15 @@ test_that("ruv_k must be a whole number", {
     class = "nacho_error_bad_argument"
   )
 })
+
+test_that("ruv_k = 0 normalises without W columns and can be normalised again", {
+  x <- suppressMessages(normalise(
+    GSE74821,
+    normalisation_method = "RUVg",
+    ruv_k = 0
+  ))
+  expect_identical(x@settings$ruv_k, 0L)
+  expect_false(any(grepl("^W_", names(nacho_samples(x)))))
+  y <- suppressMessages(normalise(x, n_comp = 3))
+  expect_identical(y@settings$ruv_k, 0L)
+})

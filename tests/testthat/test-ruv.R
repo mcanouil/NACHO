@@ -80,3 +80,17 @@ test_that("suggest_ruv_k() caps k at what the data allow", {
   x <- suppressWarnings(GSE74821[, 1:3])
   expect_lte(max(suggest_ruv_k(x, max_k = 10)$k), 2L)
 })
+
+test_that("suggest_ruv_k() on two samples caps k at 1", {
+  x <- suppressWarnings(GSE74821[, 1:2])
+  expect_identical(max(suggest_ruv_k(x, max_k = 10)$k), 1L)
+})
+
+test_that("suggest_ruv_k() needs two housekeeping genes, and two are enough", {
+  x <- GSE74821
+  names_hk <- x@probes$Name[x@probes$is_housekeeping]
+  x@probes$is_housekeeping <- x@probes$Name %in% names_hk[1:2]
+  expect_identical(max(suggest_ruv_k(x)$k), 1L)
+  x@probes$is_housekeeping <- x@probes$Name %in% names_hk[1]
+  expect_error(suggest_ruv_k(x), class = "nacho_error_bad_argument")
+})

@@ -315,6 +315,9 @@ nacho_metadata_settings <- function(
   )
   merged[names(choices)] <- choices
   merged[["n_comp"]] <- as.integer(merged[["n_comp"]])
+  if (!is.null(merged[["ruv_k"]])) {
+    merged[["ruv_k"]] <- as.integer(merged[["ruv_k"]])
+  }
   housekeeping_genes <- merged[["housekeeping_genes"]]
   housekeeping_genes <- housekeeping_genes[
     housekeeping_genes %in% probes[["Name"]]
