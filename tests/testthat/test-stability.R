@@ -171,6 +171,28 @@ test_that("genes with missing counts are left out of the candidates", {
   expect_false(housekeeping[1] %in% housekeeping_stability(x)$ranking$Name)
 })
 
+test_that("duplicated gene names are ranked once", {
+  housekeeping <- nacho_probes(GSE74821)$Name[
+    nacho_probes(GSE74821)$CodeClass == "Housekeeping"
+  ]
+  expect_identical(
+    housekeeping_stability(GSE74821, genes = c(housekeeping, housekeeping)),
+    housekeeping_stability(GSE74821, genes = housekeeping)
+  )
+})
+
+test_that("too few genes left after dropping some is an error", {
+  x <- GSE74821
+  housekeeping <- nacho_probes(x)$Name[
+    nacho_probes(x)$CodeClass == "Housekeeping"
+  ]
+  x@counts[housekeeping[-(1:2)], 1] <- NA_integer_
+  expect_error(
+    housekeeping_stability(x),
+    class = "nacho_error_bad_argument"
+  )
+})
+
 test_that("predicted housekeeping genes are the five most stable by geNorm", {
   x <- suppressMessages(normalise(GSE74821, housekeeping_predict = TRUE))
   predicted <- x@settings$housekeeping_genes

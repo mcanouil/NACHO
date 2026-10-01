@@ -183,7 +183,7 @@ housekeeping_stability <- function(
       class = "bad_argument"
     )
   }
-  rows <- match(genes, probes[["Name"]])
+  rows <- match(unique(genes), probes[["Name"]])
   log_expr <- stability_input(
     x@counts[rows, , drop = FALSE],
     probes[["detection_rate"]][rows],
