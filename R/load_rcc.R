@@ -22,6 +22,7 @@
 #'   [nacho_samples()] returns as `W_1`, `W_2`, ... for use as covariates.
 #' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes;
 #'   `NULL` uses [suggest_ruv_k()].
+#'   Other methods ignore it.
 #' @param background [[character]] How to estimate each sample's background
 #'   from its negative controls: `"none"` (the default), `"mean"`,
 #'   `"mean_2sd"` (mean plus two standard deviations), `"median"`, `"max"` or

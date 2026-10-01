@@ -498,3 +498,34 @@ test_that("ruv_k = 0 normalises without W columns and can be normalised again", 
   y <- suppressMessages(normalise(x, n_comp = 3))
   expect_identical(y@settings$ruv_k, 0L)
 })
+
+test_that("RUVg corrects only endogenous and housekeeping probes", {
+  geo <- suppressMessages(normalise(
+    GSE74821,
+    normalisation_method = "GEO",
+    housekeeping_norm = FALSE
+  ))
+  ruv <- suppressMessages(normalise(
+    GSE74821,
+    normalisation_method = "RUVg",
+    ruv_k = 2
+  ))
+  probes <- nacho_probes(ruv)
+  controls <- probes$CodeClass %in% c("Positive", "Negative")
+  expect_equal(
+    nacho_counts(ruv, normalised = TRUE)[controls, ],
+    nacho_counts(geo, normalised = TRUE)[controls, ]
+  )
+  input <- NACHO:::ruv_input(
+    ruv@counts,
+    ruv@probes,
+    ruv@samples,
+    ruv@settings,
+    probes$Name[probes$is_housekeeping]
+  )
+  fit <- NACHO:::ruvg(input$log_expr, input$controls, 2)
+  expect_equal(
+    unname(nacho_counts(ruv, normalised = TRUE)[input$rows, ]),
+    unname(pmax(2^t(fit$corrected) - 1, 0))
+  )
+})

@@ -57,7 +57,8 @@ recommends when fold changes matter, and \code{"subtract"} removes it and
 floors at 0.}
 
 \item{ruv_k}{[\link{numeric}] The number of unwanted factors RUVg removes;
-\code{NULL} uses \code{\link[=suggest_ruv_k]{suggest_ruv_k()}}.}
+\code{NULL} uses \code{\link[=suggest_ruv_k]{suggest_ruv_k()}}.
+Other methods ignore it.}
 
 \item{instrument}{[\link{character}] The nCounter instrument, \code{"max"},
 \code{"flex"}, \code{"pro"} or \code{"sprint"}, which sets the binding density limits.

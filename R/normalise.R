@@ -5,6 +5,7 @@
 #' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes.
 #'   `normalise()` reuses the `ruv_k` stored in the object, so pass
 #'   `ruv_k = NULL` to have [suggest_ruv_k()] choose again.
+#'   Other methods ignore it.
 #' @param outliers_thresholds A list of quality-control thresholds, as
 #'   returned by [nacho_thresholds()].
 #' @param ... Must be empty.
