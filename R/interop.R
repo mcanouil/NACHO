@@ -331,17 +331,17 @@ nacho_metadata_settings <- function(
   } else {
     merged[["housekeeping_genes"]] <- housekeeping_genes
   }
-  if (is.null(merged[["housekeeping_norm"]])) {
-    merged[["housekeeping_norm"]] <- panel == "mrna" &&
-      any(grepl("Housekeeping", probes[["CodeClass"]]))
+  housekeeping_norm <- merged[["housekeeping_norm"]]
+  if (is.null(housekeeping_norm) && panel == "mrna") {
+    housekeeping_norm <- any(grepl("Housekeeping", probes[["CodeClass"]]))
   }
-  merged[["housekeeping_norm"]] <- resolve_housekeeping_norm(
+  merged["housekeeping_norm"] <- list(resolve_housekeeping_norm(
     probes[["CodeClass"]],
     merged[["housekeeping_genes"]],
     merged[["housekeeping_predict"]],
-    merged[["housekeeping_norm"]],
+    housekeeping_norm,
     panel
-  )
+  ))
   merged[["panel"]] <- panel
   merged
 }

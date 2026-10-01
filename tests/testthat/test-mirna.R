@@ -261,3 +261,134 @@ test_that("a miRNA method ignores housekeeping_predict", {
       !grepl("Housekeeping", nacho_probes(x)$CodeClass)
   ))
 })
+
+test_that("missing ligation positive counts give NA metrics without an error", {
+  probes <- data.frame(
+    CodeClass = "Ligation",
+    Name = c("LIG_POS_A", "LIG_POS_B", "LIG_POS_C", "LIG_NEG_A")
+  )
+  counts <- cbind(
+    complete = c(800, 200, 50, 1),
+    one_missing = c(800, NA, 50, 1),
+    all_missing = c(NA, NA, NA, 1)
+  )
+  expect_no_error(
+    out <- suppressWarnings(NACHO:::ligation_metrics(
+      counts,
+      probes,
+      c(2, 2, 2)
+    ))
+  )
+  expect_identical(out$Ligation_R2[2:3], c(NA_real_, NA_real_))
+  expect_gt(out$Ligation_R2[1], 0.95)
+  expect_identical(out$Ligation_order[2:3], c(NA_real_, NA_real_))
+  expect_identical(out$Ligation_NEG, c(-1, -1, -1))
+  expect_identical(
+    NACHO:::ligation_metrics(counts[, 3, drop = FALSE], probes, 2)$Ligation_R2,
+    NA_real_
+  )
+})
+
+test_that("normalise() copes with missing ligation counts", {
+  x <- mirna_fixture()
+  positive <- c("LIG_POS_A", "LIG_POS_B", "LIG_POS_C")
+  x@counts[positive[2], 1] <- NA
+  x@counts[positive, 2] <- NA
+  y <- suppressWarnings(normalise(x, normalisation_method = "GEO", n_comp = 2))
+  samples <- nacho_samples(y)
+  expect_identical(samples$Ligation_R2[1:2], c(NA_real_, NA_real_))
+  expect_false(anyNA(samples$Ligation_R2[-(1:2)]))
+  qc <- nacho_qc(y)
+  expect_true(all(is.na(qc$Ligation_R2_status[1:2])))
+})
+
+test_that("as_nacho() copes with missing ligation counts", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(mirna_fixture())
+  rows <- rownames(se) %in% c("LIG_POS_A", "LIG_POS_B", "LIG_POS_C")
+  SummarizedExperiment::assay(se, "counts")[rows, 1] <- NA
+  y <- suppressWarnings(as_nacho(se))
+  expect_identical(nacho_samples(y)$Ligation_R2[1], NA_real_)
+})
+
+test_that("explicit housekeeping genes turn housekeeping normalisation on for miRNA panels", {
+  genes <- c("hsa-miR-451a", "hsa-miR-23a-3p", "hsa-let-7a-5p")
+  x <- mirna_fixture(housekeeping_genes = genes)
+  expect_true(x@settings$housekeeping_norm)
+  expect_true("House_factor" %in% names(nacho_samples(x)))
+  expect_false(
+    mirna_fixture(
+      housekeeping_genes = genes,
+      housekeeping_norm = FALSE
+    )@settings$housekeeping_norm
+  )
+})
+
+test_that("housekeeping_predict = TRUE turns housekeeping normalisation on for miRNA panels", {
+  x <- mirna_fixture(housekeeping_predict = TRUE)
+  expect_true(x@settings$housekeeping_norm)
+  expect_true("House_factor" %in% names(nacho_samples(x)))
+})
+
+test_that("resolve_housekeeping_norm() follows the panel and the explicit request", {
+  resolve <- function(genes = NULL, predict = FALSE, norm = NULL, panel) {
+    NACHO:::resolve_housekeeping_norm(
+      c("Endogenous", "Housekeeping"),
+      genes,
+      predict,
+      norm,
+      panel
+    )
+  }
+  expect_true(resolve(panel = "mrna"))
+  expect_false(resolve(panel = "mirna"))
+  expect_true(resolve(genes = "a", panel = "mirna"))
+  expect_true(resolve(predict = TRUE, panel = "mirna"))
+  expect_false(resolve(genes = "a", norm = FALSE, panel = "mirna"))
+  expect_true(resolve(norm = TRUE, panel = "mirna"))
+})
+
+test_that("as_nacho() applies saved housekeeping genes on a miRNA panel", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(mirna_fixture())
+  saved <- S4Vectors::metadata(se)[["nacho"]]
+  saved[["settings"]][["housekeeping_genes"]] <- c(
+    "hsa-miR-451a",
+    "hsa-miR-23a-3p",
+    "hsa-let-7a-5p"
+  )
+  saved[["settings"]][["housekeeping_norm"]] <- NULL
+  S4Vectors::metadata(se)[["nacho"]] <- saved
+  y <- suppressMessages(as_nacho(se))
+  expect_true(y@settings$housekeeping_norm)
+})
+
+test_that("each miRNA method's House_factor is the content factor of its reference probes", {
+  for (method in c("stable_mirna", "total_mirna", "spike_in", "ligation")) {
+    x <- mirna_fixture(normalisation_method = method)
+    samples <- nacho_samples(x)
+    background <- samples[["Background"]]
+    scaled <- NACHO:::scale_counts(
+      nacho_counts(x),
+      if (all(is.na(background))) NULL else background,
+      x@settings[["background_mode"]],
+      samples[["Positive_factor"]]
+    )
+    reference <- x@provenance$content_probes
+    expect_equal(
+      unname(samples[["House_factor"]]),
+      unname(NACHO:::content_factor(scaled[rownames(scaled) %in% reference, ])),
+      info = method
+    )
+  }
+  factors <- vapply(
+    c("stable_mirna", "total_mirna", "spike_in", "ligation"),
+    function(method) {
+      nacho_samples(mirna_fixture(normalisation_method = method))[[
+        "House_factor"
+      ]][1]
+    },
+    numeric(1)
+  )
+  expect_gt(length(unique(round(factors, 6))), 1)
+})
