@@ -367,7 +367,7 @@ test_that("default_settings() follows the load_rcc() defaults", {
   defaults$n_comp <- as.integer(defaults$n_comp)
   settings <- NACHO:::default_settings(nacho_probes(GSE74821), "IDFILE")
   expect_identical(settings[names(defaults)], defaults)
-  expect_identical(formals(load_rcc)$housekeeping_norm, TRUE)
+  expect_null(formals(load_rcc)$housekeeping_norm)
 })
 
 test_that("as_nacho() matches a saved normalisation method like load_rcc()", {

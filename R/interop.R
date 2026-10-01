@@ -178,6 +178,7 @@ nacho_from_parts <- function(
   settings <- nacho_metadata_settings(
     metadata[["settings"]],
     probes,
+    samples,
     id_colname,
     call = call
   )
@@ -271,6 +272,7 @@ check_nacho_metadata <- function(metadata, call = rlang::caller_env()) {
 #'
 #' @param settings `metadata(x)$nacho$settings`, a named list or `NULL`.
 #' @param probes The probe table.
+#' @param samples The sample table.
 #' @param id_colname The sample id column to use when `settings` has none.
 #' @inheritParams nacho_abort
 #'
@@ -280,6 +282,7 @@ check_nacho_metadata <- function(metadata, call = rlang::caller_env()) {
 nacho_metadata_settings <- function(
   settings,
   probes,
+  samples,
   id_colname,
   call = rlang::caller_env()
 ) {
@@ -304,7 +307,7 @@ nacho_metadata_settings <- function(
   choices <- check_settings(
     merged[["housekeeping_genes"]],
     merged[["housekeeping_predict"]],
-    merged[["housekeeping_norm"]],
+    merged[["housekeeping_norm"]] %||% TRUE,
     merged[["normalisation_method"]],
     merged[["n_comp"]],
     merged[["background"]],
@@ -318,6 +321,7 @@ nacho_metadata_settings <- function(
   if (!is.null(merged[["ruv_k"]])) {
     merged[["ruv_k"]] <- as.integer(merged[["ruv_k"]])
   }
+  panel <- detect_panel(probes, samples)
   housekeeping_genes <- merged[["housekeeping_genes"]]
   housekeeping_genes <- housekeeping_genes[
     housekeeping_genes %in% probes[["Name"]]
@@ -331,8 +335,10 @@ nacho_metadata_settings <- function(
     probes[["CodeClass"]],
     merged[["housekeeping_genes"]],
     merged[["housekeeping_predict"]],
-    merged[["housekeeping_norm"]]
+    merged[["housekeeping_norm"]],
+    panel
   )
+  merged[["panel"]] <- panel
   merged
 }
 

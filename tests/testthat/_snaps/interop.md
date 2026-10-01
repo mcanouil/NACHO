@@ -82,7 +82,7 @@
     Condition
       Error in `as_nacho()`:
       ! `metadata(x)$nacho$settings` has unknown setting: n_comps.
-      i Known settings: id_colname, housekeeping_genes, housekeeping_predict, housekeeping_norm, normalisation_method, ruv_k, background, background_mode, and n_comp.
+      i Known settings: id_colname, housekeeping_genes, housekeeping_predict, housekeeping_norm, normalisation_method, ruv_k, background, background_mode, n_comp, and panel.
 
 # as_nacho() points a saved id column clash to the metadata
 

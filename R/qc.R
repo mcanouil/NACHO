@@ -13,12 +13,13 @@ default_settings <- function(probes, id_colname) {
     id_colname = id_colname,
     housekeeping_genes = NULL,
     housekeeping_predict = FALSE,
-    housekeeping_norm = any(grepl("Housekeeping", probes[["CodeClass"]])),
+    housekeeping_norm = NULL,
     normalisation_method = "GEO",
     ruv_k = NULL,
     background = "none",
     background_mode = "threshold",
-    n_comp = 10L
+    n_comp = 10L,
+    panel = NULL
   )
 }
 
@@ -689,6 +690,7 @@ build_nacho <- function(
     drop = FALSE
   ]
   code_class <- probes[["CodeClass"]]
+  settings[["panel"]] <- detect_panel(probes, samples)
 
   housekeeping_genes <- settings[["housekeeping_genes"]]
   if (is.null(housekeeping_genes) && any(grepl("Housekeeping", code_class))) {
@@ -789,7 +791,9 @@ build_nacho <- function(
     metrics[["House_factor"]] <- unname(house_factor)
   }
   housekeeping_rows <- probes[["Name"]] %in% housekeeping_genes
-  metrics[["Housekeeping_detected"]] <- if (!any(housekeeping_rows)) {
+  metrics[["Housekeeping_detected"]] <- if (
+    settings[["panel"]] == "mirna" || !any(housekeeping_rows)
+  ) {
     NA_integer_
   } else {
     found <- colSums(hits[housekeeping_rows, , drop = FALSE], na.rm = TRUE)

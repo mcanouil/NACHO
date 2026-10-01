@@ -13,7 +13,10 @@
 #' @param housekeeping_predict [[logical]] Boolean to indicate whether the housekeeping genes
 #'   should be predicted (`TRUE`) or not (`FALSE`). Default is `FALSE`.
 #' @param housekeeping_norm [[logical]] Boolean to indicate whether the housekeeping normalisation
-#'   should be performed. Default is `TRUE`.
+#'   should be performed.
+#'   `NULL` (the default) normalises with housekeeping genes for mRNA panels
+#'   that have them, and not for miRNA panels, whose housekeeping mRNAs sit at
+#'   background.
 #' @param normalisation_method [[character]] `"GEO"` (the default) or `"GLM"`
 #'   scale samples by their positive controls, with the geometric mean or a
 #'   Poisson model, then by the housekeeping genes; `"RUVg"` scales by the
@@ -83,7 +86,7 @@ load_rcc <- function(
   id_colname = NULL,
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
-  housekeeping_norm = TRUE,
+  housekeeping_norm = NULL,
   normalisation_method = "GEO",
   background = "none",
   background_mode = "threshold",
@@ -110,7 +113,7 @@ load_rcc <- function(
   choices <- check_settings(
     housekeeping_genes,
     housekeeping_predict,
-    housekeeping_norm,
+    housekeeping_norm %||% TRUE,
     normalisation_method,
     n_comp,
     background,
@@ -277,7 +280,8 @@ load_rcc <- function(
     probes[["CodeClass"]],
     housekeeping_genes,
     housekeeping_predict,
-    housekeeping_norm
+    housekeeping_norm,
+    detect_panel(probes, samples)
   )
 
   nacho_progress_step("Computing quality-control metrics and normalising")
@@ -309,6 +313,7 @@ load_rcc <- function(
 #' Turn housekeeping normalisation off when no housekeeping gene is available
 #'
 #' @param code_class The code class of each probe.
+#' @param panel `"mirna"` or `"mrna"`, from `detect_panel()`.
 #'
 #' @return `housekeeping_norm`, set to `FALSE` with a warning when there are
 #'   no `Housekeeping` probes, no `housekeeping_genes` and no prediction.
@@ -318,8 +323,12 @@ resolve_housekeeping_norm <- function(
   code_class,
   housekeeping_genes,
   housekeeping_predict,
-  housekeeping_norm
+  housekeeping_norm,
+  panel
 ) {
+  if (is.null(housekeeping_norm)) {
+    housekeeping_norm <- panel == "mrna"
+  }
   if (
     !any(grepl("Housekeeping", code_class)) &&
       is.null(housekeeping_genes) &&

@@ -92,6 +92,7 @@ test_that("miRNA results match the NACHO 2 pipeline", {
     fixture[["dir"]],
     fixture[["samplesheet"]],
     "IDFILE",
+    housekeeping_norm = TRUE,
     n_comp = 5,
     background = "geo",
     background_mode = "subtract",
