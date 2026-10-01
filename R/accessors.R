@@ -15,8 +15,13 @@ NULL
 #'   sample.
 #' * `nacho_samples()`: a data frame with one row per sample; the first column
 #'   holds the sample ids, and the PCA scores come last (`PC01`, `PC02`, ...).
+#'   `Detection_rate` (the share of endogenous genes detected) and
+#'   `Housekeeping_detected` (the number of housekeeping genes detected) are
+#'   `NA` for a sample without a detection limit.
 #' * `nacho_probes()`: a data frame with one row per probe: `CodeClass`,
-#'   `Name`, `Accession`, `is_housekeeping` and `is_excluded`.
+#'   `Name`, `Accession`, `detection_rate` (the share of samples with a
+#'   detection limit in which the probe is above it), `is_housekeeping` and
+#'   `is_excluded`.
 #' * `nacho_qc()`: a data frame with one row per sample: the id, `lane`,
 #'   `CartridgeID`, each quality-control metric with its status (`"pass"`,
 #'   `"fail"` or `NA` when it cannot be assessed), the other factors,

@@ -187,8 +187,10 @@ computed_sample_columns <- c(
   "MedC",
   "Positive_factor",
   "Negative_factor",
+  "Detection_rate",
   "Background",
   "House_factor",
+  "Housekeeping_detected",
   "is_outlier"
 )
 
@@ -477,6 +479,15 @@ sample_lod <- function(pos_e, negatives) {
   round(z, 2)
 }
 
+#' Turn the NaN of a mean over nothing into a plain missing value
+#'
+#' @noRd
+missing_not_nan <- function(x) {
+  x <- unname(x)
+  x[is.nan(x)] <- NA_real_
+  x
+}
+
 #' Per-sample quality-control metrics
 #'
 #' @noRd
@@ -618,6 +629,8 @@ build_nacho <- function(
     excluded,
     settings[["normalisation_method"]]
   )
+  limits <- detection_limits(counts, code_class, excluded)
+  hits <- detected(counts, limits)
   background <- background_levels(
     counts,
     code_class,
@@ -665,8 +678,41 @@ build_nacho <- function(
     NA_real_
   }
   metrics[["Background"]] <- background %||% NA_real_
+  no_limit <- is.na(limits)
+  if (any(no_limit) && warn_missing) {
+    lacking <- colnames(counts)[no_limit]
+    n_more <- max(length(lacking) - 5, 0)
+    nacho_warn(
+      c(
+        paste(
+          "{.field Detection_rate} and {.field Housekeeping_detected} need",
+          "two kept negative probes with counts,",
+          "so they are {.val NA} for some samples."
+        ),
+        i = paste0(
+          "Samples without a detection limit: ",
+          paste(utils::head(lacking, 5), collapse = ", "),
+          if (n_more > 0) paste0(" and ", n_more, " more"),
+          "."
+        )
+      ),
+      class = "metric_unavailable"
+    )
+  }
+  metrics[["Detection_rate"]] <- missing_not_nan(colMeans(
+    hits[grepl("Endogenous", code_class), , drop = FALSE],
+    na.rm = TRUE
+  ))
   if (!is.null(house_factor)) {
     metrics[["House_factor"]] <- unname(house_factor)
+  }
+  housekeeping_rows <- probes[["Name"]] %in% housekeeping_genes
+  metrics[["Housekeeping_detected"]] <- if (!any(housekeeping_rows)) {
+    NA_integer_
+  } else {
+    found <- colSums(hits[housekeeping_rows, , drop = FALSE], na.rm = TRUE)
+    found[no_limit] <- NA
+    unname(as.integer(found))
   }
   samples <- cbind(samples, metrics)
 
@@ -678,6 +724,7 @@ build_nacho <- function(
     scaled
   }
 
+  probes[["detection_rate"]] <- missing_not_nan(rowMeans(hits, na.rm = TRUE))
   probes[["is_housekeeping"]] <- probes[["Name"]] %in% housekeeping_genes
   probes[["is_excluded"]] <- probes[["Name"]] %in% excluded
   provenance[["excluded_negatives"]] <- excluded

@@ -91,7 +91,8 @@ report_markdown <- function(
     PCL = "Positive Control Linearity (PCL)",
     LoD = "Limit of Detection (LoD)",
     Positive_factor = "Positive normalisation factor (Positive_factor)",
-    House_factor = "Housekeeping normalisation factor (house_factor)"
+    House_factor = "Housekeeping normalisation factor (house_factor)",
+    Housekeeping_detected = "Housekeeping genes above background (Housekeeping_detected)"
   )
   threshold_lines <- list()
   for (metric in qc_metrics[qc_metrics %in% names(thresholds)]) {

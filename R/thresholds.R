@@ -12,6 +12,8 @@ nacho_presets <- c("nsolver", "legacy")
 #' least 75 %, positive control linearity at least 0.95 (POS_A to POS_E, with
 #' `log2(count + 1)`), limit of detection at least 2, positive factor 0.3 to 3
 #' and housekeeping factor 0.1 to 10.
+#' It also asks for at least three housekeeping genes above background, as
+#' Bruker asks (`Housekeeping_detected`).
 #'
 #' `"legacy"` reproduces NACHO 2: binding density 0.1 to 2.25 on every
 #' instrument, positive control linearity with POS_F, positive factor 1/4 to 4
@@ -49,7 +51,8 @@ nacho_thresholds <- function(
       PCL = 0.95,
       LoD = 2,
       Positive_factor = c(1 / 4, 4),
-      House_factor = c(1 / 11, 11)
+      House_factor = c(1 / 11, 11),
+      Housekeeping_detected = 0
     )
   } else {
     list(
@@ -58,7 +61,8 @@ nacho_thresholds <- function(
       PCL = 0.95,
       LoD = 2,
       Positive_factor = c(0.3, 3),
-      House_factor = c(0.1, 10)
+      House_factor = c(0.1, 10),
+      Housekeeping_detected = 3
     )
   }
   c(list(preset = preset, instrument = instrument), limits)
@@ -128,7 +132,8 @@ validate_thresholds <- function(thresholds) {
     "LoD",
     "PCL",
     "Positive_factor",
-    "House_factor"
+    "House_factor",
+    "Housekeeping_detected"
   )
   missing_names <- setdiff(required, names(thresholds))
   if (length(missing_names) > 0) {
@@ -166,6 +171,21 @@ validate_thresholds <- function(thresholds) {
     problems <- c(
       problems,
       "@thresholds$LoD must be one number; Inf flags every sample, so set a finite LoD, or -Inf for no bound."
+    )
+  }
+  detected_genes <- thresholds[["Housekeeping_detected"]]
+  if (
+    !is.numeric(detected_genes) ||
+      length(detected_genes) != 1 ||
+      is.na(detected_genes) ||
+      detected_genes == Inf
+  ) {
+    problems <- c(
+      problems,
+      paste(
+        "@thresholds$Housekeeping_detected must be one number;",
+        "Inf flags every sample, so set a finite count, or -Inf for no bound."
+      )
     )
   }
   limits <- list(FoV = c(0, 100), PCL = c(0, 1))

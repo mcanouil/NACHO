@@ -55,6 +55,11 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `nacho_thresholds()` builds thresholds for the MAX, FLEX, PRO and SPRINT instruments.
     `load_rcc()` gains `instrument` and `preset` arguments and reads the instrument from MAX/FLEX files.
     When it cannot read the instrument, it warns with class `nacho_warning_instrument_unknown` and uses the MAX/FLEX values.
+- In `R/detection.R` and `R/accessors.R`,
+  - feat: A gene counts as detected in a sample when its count is above the mean of the kept negative probes plus two standard deviations.
+    `nacho_samples()` gains `Detection_rate`, the share of endogenous genes detected in each sample, and `nacho_probes()` gains `detection_rate`, the share of samples detecting each gene.
+  - feat: `filter_detected(x, min_rate)` keeps the genes detected often enough.
+    `min_rate` is the share of samples in which a gene must be detected.
 - In `R/qc-table.R`,
   - feat: For PlexSet files, `nacho_qc()` has a `lane_status`, and a lane failure flags the eight samples of that lane.
     Their reason reads "lane fails" followed by the metric name.
@@ -62,6 +67,10 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `print()` lists the excluded negative probes.
 - In `R/qc.R`,
   - feat: Quality control runs on data without lane attributes; the metrics that need them are `NA`, with one warning.
+  - feat: `nacho_qc()` flags samples with too few housekeeping genes above background, following Bruker's RNA content check.
+    The count is in `Housekeeping_detected`, and the nSolver preset flags a sample below 3, while the legacy preset uses 0 and never flags.
+  - feat: A sample without a detection limit, because it has fewer than two negative probes with counts, gets a missing `Detection_rate` and `Housekeeping_detected`.
+    `load_rcc()` then gives one `metric_unavailable` warning that names the samples.
 - In `R/conditions.R`,
   - feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
 - In `R/load_rcc.R`,

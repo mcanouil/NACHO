@@ -377,3 +377,17 @@ test_that("migrating a schema 1 object with unknown thresholds gives a classed e
     class = "nacho_error_bad_argument"
   )
 })
+
+test_that("legacy_thresholds() gives Housekeeping_detected 0 to an old list", {
+  old <- nacho_2()$outliers_thresholds
+  expect_false("Housekeeping_detected" %in% names(old))
+  samples <- data.frame(Header.header_FileVersion = "1.7")
+  filled <- NACHO:::legacy_thresholds(old, samples)
+  expect_identical(filled$Housekeeping_detected, 0)
+  expect_identical(filled$preset, "legacy")
+})
+
+test_that("upgrade_nacho() carries Housekeeping_detected into the thresholds", {
+  x <- suppressMessages(upgrade_subset(nacho_2()))
+  expect_identical(x@thresholds$Housekeeping_detected, 0)
+})

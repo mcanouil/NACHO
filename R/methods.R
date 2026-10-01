@@ -224,7 +224,15 @@ subset_nacho <- function(x, i, j, ..., drop = FALSE) {
   counts <- x@counts[rows, columns, drop = FALSE]
   samples <- x@samples[columns, , drop = FALSE]
   rownames(samples) <- NULL
-  probes <- x@probes[rows, , drop = FALSE]
+  probes <- x@probes
+  if (!missing(j)) {
+    probes[["detection_rate"]] <- probe_detection_rates(
+      x@counts[, columns, drop = FALSE],
+      probes[["CodeClass"]],
+      probes[["Name"]][probes[["is_excluded"]]]
+    )
+  }
+  probes <- probes[rows, , drop = FALSE]
   rownames(probes) <- NULL
   nacho(
     counts = counts,

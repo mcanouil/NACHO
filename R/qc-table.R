@@ -4,7 +4,15 @@ NULL
 #' Metrics assessed against thresholds, in display order
 #'
 #' @noRd
-qc_metrics <- c("BD", "FoV", "PCL", "LoD", "Positive_factor", "House_factor")
+qc_metrics <- c(
+  "BD",
+  "FoV",
+  "PCL",
+  "LoD",
+  "Positive_factor",
+  "House_factor",
+  "Housekeeping_detected"
+)
 
 #' Metrics shared by the eight samples of a PlexSet lane
 #'

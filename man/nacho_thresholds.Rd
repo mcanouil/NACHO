@@ -29,6 +29,8 @@ samples.
 least 75 \%, positive control linearity at least 0.95 (POS_A to POS_E, with
 \code{log2(count + 1)}), limit of detection at least 2, positive factor 0.3 to 3
 and housekeeping factor 0.1 to 10.
+It also asks for at least three housekeeping genes above background, as
+Bruker asks (\code{Housekeeping_detected}).
 
 \code{"legacy"} reproduces NACHO 2: binding density 0.1 to 2.25 on every
 instrument, positive control linearity with POS_F, positive factor 1/4 to 4
