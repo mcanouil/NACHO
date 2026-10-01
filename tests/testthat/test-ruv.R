@@ -94,3 +94,12 @@ test_that("suggest_ruv_k() needs two housekeeping genes, and two are enough", {
   x@probes$is_housekeeping <- x@probes$Name %in% names_hk[1]
   expect_error(suggest_ruv_k(x), class = "nacho_error_bad_argument")
 })
+
+test_that("ruvg() keeps the other samples of a gene with one missing count", {
+  d <- ruv_expr()
+  gene <- which(!d$controls)[1]
+  d$log_expr[1, gene] <- NA
+  out <- NACHO:::ruvg(d$log_expr, d$controls, k = 1)
+  expect_true(is.na(out$corrected[1, gene]))
+  expect_true(all(is.finite(out$corrected[-1, gene])))
+})

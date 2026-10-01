@@ -59,8 +59,14 @@ ruvg <- function(
   k <- min(k, usable)
   w <- decomposition[["u"]][, seq_len(k), drop = FALSE]
   dimnames(w) <- list(rownames(log_expr), paste0("W_", seq_len(k)))
-  alpha <- solve(crossprod(w), crossprod(w, log_expr))
-  list(W = w, corrected = log_expr - w %*% alpha)
+  corrected <- log_expr
+  for (gene in seq_len(ncol(log_expr))) {
+    seen <- !is.na(log_expr[, gene])
+    w_seen <- w[seen, , drop = FALSE]
+    alpha <- solve(crossprod(w_seen), crossprod(w_seen, log_expr[seen, gene]))
+    corrected[seen, gene] <- log_expr[seen, gene] - w_seen %*% alpha
+  }
+  list(W = w, corrected = corrected)
 }
 
 #' Mean spread of the relative log expression
@@ -180,7 +186,7 @@ ruv_k_table <- function(log_expr, controls, max_k) {
 #' suggest_ruv_k(GSE74821)
 suggest_ruv_k <- function(x, max_k = 5) {
   check_nacho(x)
-  check_count(max_k)
+  check_count(max_k, min = 0)
   input <- ruv_input(
     x@counts,
     x@probes,
