@@ -35,7 +35,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `Negative_factor` is always the geometric mean of the kept negative controls, including with `normalisation_method = "GLM"`.
     The background applied is in the new `Background` column.
     With `"GLM"`, the normalised counts therefore differ from NACHO 2, which subtracted the model intercept.
-  - feat: `housekeeping_predict = TRUE` picks the five most stable genes by geNorm, among genes above background in at least 90 % of samples, instead of the five with the smallest spread.
+  - feat: `housekeeping_predict = TRUE` picks the five most stable genes by geNorm, among genes above background in at least 90% of samples, instead of the five with the smallest spread.
 - In `R/deploy.R`,
   - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
 - In `DESCRIPTION`,
@@ -86,7 +86,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/autoplot.R`,
   - feat: `autoplot()` checks that `colour` and `outliers_labels` name columns of `nacho_samples()`, and `outliers_labels` must be a column name.
 - In `R/stability.R`,
-  - feat: `housekeeping_stability()` ranks reference genes with geNorm and NormFinder, gives the geNorm pairwise variation, and tests each gene against a biological group. `autoplot(x, type = "Stability")` draws the ranking.
+  - feat: `housekeeping_stability()` ranks reference genes with geNorm and NormFinder, gives the geNorm pairwise variation, and tests each gene against a biological group.
+    `autoplot(x, type = "Stability")` draws the ranking.
 
 ## Performance
 
