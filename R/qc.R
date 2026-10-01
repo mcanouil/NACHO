@@ -410,9 +410,7 @@ control_factors <- function(counts, probes, excluded, method) {
 #' @noRd
 content_normalise <- function(
   scaled,
-  counts,
   probes,
-  samples,
   settings,
   housekeeping_genes
 ) {
@@ -729,9 +727,7 @@ build_nacho <- function(
 
   content <- content_normalise(
     scaled,
-    counts,
     probes,
-    samples,
     settings,
     housekeeping_genes
   )
