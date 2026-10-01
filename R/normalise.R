@@ -2,20 +2,18 @@
 #'
 #' @param nacho_object A `nacho` object from [load_rcc()] or [normalise()].
 #' @inheritParams load_rcc
-#' @param outliers_thresholds A list of quality-control thresholds with the
-#'   elements `BD`, `FoV`, `LoD`, `PCL`, `Positive_factor` and `House_factor`.
+#' @param outliers_thresholds A list of quality-control thresholds, as
+#'   returned by [nacho_thresholds()].
 #' @param ... Must be empty.
 #'
-#' @details When only `outliers_thresholds` changes, `normalise()` keeps the
-#'   counts and recomputes the outlier flags.
+#' @details When only the limits in `outliers_thresholds` change and the preset stays
+#'   the same, `normalise()` keeps the counts and stores the new thresholds; the flags follow them whenever you
+#'   read [nacho_qc()].
 #'   Otherwise it computes the quality-control metrics, the normalisation
 #'   factors, the normalised counts and the PCA again.
 #'
-#'   Outliers are samples with a binding density (`BD`) outside its range, a
-#'   field of view (`FoV`) below its limit, a positive factor or a
-#'   housekeeping factor outside its range, and, for single-sample RCC files,
-#'   a positive control linearity (`PCL`) or a limit of detection (`LoD`)
-#'   below its limit. See [exclude_outliers()] to drop them.
+#'   [nacho_qc()] lists the flags, and [exclude_outliers()] drops the flagged
+#'   samples.
 #'
 #'   The normalisation runs in this order: raw counts, negative probe
 #'   exclusion, background (`background` and `background_mode`), positive
@@ -98,13 +96,21 @@ normalise <- function(
     )
     return(nacho_object)
   }
-  if (!any(changed)) {
+  definitions_changed <- !identical(
+    outliers_thresholds[["preset"]],
+    nacho_object@thresholds[["preset"]]
+  )
+  if (!any(changed) && !definitions_changed) {
     nacho_object@thresholds <- outliers_thresholds
-    return(check_outliers(nacho_object))
+    return(nacho_object)
   }
+  changes <- c(
+    names(changed)[changed],
+    if (definitions_changed) "thresholds preset"
+  )
   nacho_inform(c(
     "Normalising again with new settings:",
-    stats::setNames(names(changed)[changed], rep("*", sum(changed)))
+    stats::setNames(changes, rep("*", length(changes)))
   ))
   run_normalisation(nacho_object, settings, outliers_thresholds)
 }
@@ -127,33 +133,9 @@ run_normalisation <- function(x, settings, thresholds) {
   )
 }
 
-#' Flag outliers of a nacho object
-#'
-#' Recomputes `is_outlier` in [nacho_qc()] from the object's thresholds.
-#' [normalise()] and [load_rcc()] already do this, so you only need it after
-#' changing thresholds by hand.
-#'
-#' @inheritParams normalise
-#' @return A `nacho` object.
-#' @export
-#' @examples
-#' data(GSE74821)
-#' table(nacho_qc(check_outliers(GSE74821))$is_outlier)
-check_outliers <- function(nacho_object) {
-  check_nacho(nacho_object)
-  samples <- nacho_object@samples
-  samples[["is_outlier"]] <- compute_outliers(
-    samples,
-    nacho_object@thresholds,
-    nacho_object@rcc_type
-  )
-  nacho_object@samples <- samples
-  nacho_object
-}
-
 #' Drop outliers and normalise the other samples again
 #'
-#' Removes the samples flagged in [nacho_qc()] and runs the normalisation again
+#' Removes the samples whose `status` in [nacho_qc()] is `"fail"` and runs the normalisation again
 #' on the samples that are left, with the same settings and thresholds.
 #' The new factors can flag more samples; call `exclude_outliers()` again to
 #' drop those too.
@@ -166,7 +148,7 @@ check_outliers <- function(nacho_object) {
 #' ncol(exclude_outliers(GSE74821))
 exclude_outliers <- function(nacho_object) {
   check_nacho(nacho_object)
-  flagged <- nacho_object@samples[["is_outlier"]] %in% TRUE
+  flagged <- flagged_samples(nacho_object)
   if (!any(flagged)) {
     nacho_inform("No sample is flagged, so nothing is removed.")
     return(nacho_object)
@@ -185,30 +167,4 @@ exclude_outliers <- function(nacho_object) {
   )
   kept <- nacho_object[, !flagged]
   run_normalisation(kept, kept@settings, kept@thresholds)
-}
-
-check_thresholds <- function(
-  thresholds,
-  arg = rlang::caller_arg(thresholds),
-  call = rlang::caller_env()
-) {
-  problems <- if (is.list(thresholds)) {
-    validate_thresholds(thresholds)
-  } else {
-    "Thresholds must be a list."
-  }
-  if (length(problems) > 0) {
-    nacho_abort(
-      c(
-        "{.arg {arg}} is not a valid set of thresholds.",
-        stats::setNames(
-          sub("^@thresholds", "thresholds", problems),
-          rep("x", length(problems))
-        )
-      ),
-      class = "bad_argument",
-      call = call
-    )
-  }
-  invisible(thresholds)
 }

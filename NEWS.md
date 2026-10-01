@@ -14,13 +14,20 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `load_rcc()` refuses duplicated sample ids for single-sample RCC files; PlexSet files may repeat an id, since `plexset_id` tells the samples apart.
   - feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
   - feat: Duplicated probe names within one RCC sample are now refused with a clear error.
-- In `R/normalise.R`,
+- In `R/accessors.R` and `R/normalise.R`,
+  - feat: `nacho_qc()` gives a status for each metric, `n_flags`, an overall `status` and a readable `reason`, and replaces `is_outlier`.
+    `check_outliers()` is gone, since the status always follows the object's thresholds.
   - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
 - In `R/autoplot.R`,
   - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
 - In `R/render.R`,
   - feat: `render()`'s `clean` argument is gone; the working files now live in a temporary folder.
+- In `R/thresholds.R`,
+  - feat: Samples are flagged against the nSolver thresholds by default.
+    `nacho_thresholds(preset = "legacy")` keeps the NACHO 2 limits, and with `background = "geo", background_mode = "subtract"` it gives back NACHO 2 outlier calls.
 - In `R/qc.R`,
+  - feat: Negative probes are excluded with Bruker's rule, at most two probes 3-fold above the others; the legacy preset keeps the NACHO 2 rule.
+  - feat: Positive control linearity leaves out POS_F and adds 1 to every count in the nSolver preset.
   - feat: Normalised counts are no longer rounded or floored at 0.1.
   - feat: There is no background correction by default (`background = "none"`).
     Choose a statistic with `background` and whether to threshold or subtract with `background_mode`.
@@ -40,8 +47,19 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/read_nacho.R`,
   - feat: `upgrade_nacho()` converts a NACHO 2 object, and `read_nacho()` reads a saved object from any NACHO version.
   - feat: `read_nacho()` reads objects saved by earlier development versions of NACHO 3 and rebuilds them.
+  - feat: Upgraded NACHO 2 objects and migrated schema 1 objects move to the legacy preset, with `background = "geo", background_mode = "subtract"`, so they keep their NACHO 2 flags and background correction.
+    Use `normalise()` to switch to the nSolver preset.
 - In `R/interop.R`,
   - feat: `as_summarized_experiment()` and `as_nacho()` convert between `nacho` objects and `SummarizedExperiment`, and `as_nacho()` also reads a `NanoStringRccSet` from NanoStringNCTools.
+- In `R/thresholds.R` and `R/load_rcc.R`,
+  - feat: `nacho_thresholds()` builds thresholds for the MAX, FLEX, PRO and SPRINT instruments.
+    `load_rcc()` gains `instrument` and `preset` arguments and reads the instrument from MAX/FLEX files.
+    When it cannot read the instrument, it warns with class `nacho_warning_instrument_unknown` and uses the MAX/FLEX values.
+- In `R/qc-table.R`,
+  - feat: For PlexSet files, `nacho_qc()` has a `lane_status`, and a lane failure flags the eight samples of that lane.
+    Their reason reads "lane fails" followed by the metric name.
+- In `R/methods.R`,
+  - feat: `print()` lists the excluded negative probes.
 - In `R/qc.R`,
   - feat: Quality control runs on data without lane attributes; the metrics that need them are `NA`, with one warning.
 - In `R/conditions.R`,
@@ -51,8 +69,10 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `load_rcc()` reads gzipped RCC files directly and accepts files with Windows line endings.
   - feat: `background` and `background_mode` choose how negative controls correct each sample.
 - In `R/normalise.R`,
-  - feat: `normalise()` checks `outliers_thresholds` before it runs, and `check_outliers()` recomputes `is_outlier` from the object's thresholds.
+  - feat: `normalise()` checks `outliers_thresholds` before it runs.
   - feat: `?normalise` documents the order of the normalisation steps.
+  - feat: Changing only `outliers_thresholds` in `normalise()` recalculates the flags without rebuilding the object.
+  - feat: `normalise()` refuses a thresholds list written for NACHO 2, one without `preset`, and the error points to `nacho_thresholds()`.
 - In `R/autoplot.R`,
   - feat: `autoplot()` checks that `colour` and `outliers_labels` name columns of `nacho_samples()`, and `outliers_labels` must be a column name.
 

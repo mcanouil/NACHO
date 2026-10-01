@@ -488,17 +488,17 @@ server <- function(input, output, session) {
   nacho_custom <- shiny::reactive({
     nacho <- shiny::req(nacho_react())
     thresholds <- nacho@thresholds
+    thresholds[["BD"]] <- input$qc_bd_thresh %||% thresholds[["BD"]]
+    thresholds[["FoV"]] <- input$qc_fov_thresh %||% thresholds[["FoV"]]
+    thresholds[["LoD"]] <- input$qc_lod_thresh %||% thresholds[["LoD"]]
+    thresholds[["PCL"]] <- input$qc_pcl_thresh %||% thresholds[["PCL"]]
+    thresholds[["Positive_factor"]] <- input$qc_pf_thresh %||%
+      thresholds[["Positive_factor"]]
+    thresholds[["House_factor"]] <- input$qc_hgf_thresh %||%
+      thresholds[["House_factor"]]
     NACHO::normalise(
       nacho,
-      outliers_thresholds = list(
-        BD = input$qc_bd_thresh %||% thresholds[["BD"]],
-        FoV = input$qc_fov_thresh %||% thresholds[["FoV"]],
-        LoD = input$qc_lod_thresh %||% thresholds[["LoD"]],
-        PCL = input$qc_pcl_thresh %||% thresholds[["PCL"]],
-        Positive_factor = input$qc_pf_thresh %||%
-          thresholds[["Positive_factor"]],
-        House_factor = input$qc_hgf_thresh %||% thresholds[["House_factor"]]
-      )
+      outliers_thresholds = thresholds
     ) |>
       suppressMessages()
   })
@@ -525,14 +525,19 @@ server <- function(input, output, session) {
   outliers_list <- shiny::reactive({
     qc <- NACHO::nacho_qc(nacho_custom())
     qc[
-      qc[["is_outlier"]] %in% TRUE,
-      setdiff(names(qc), "is_outlier"),
+      qc[["status"]] %in% "fail",
+      c(names(qc)[1], "lane", "CartridgeID", "n_flags", "reason"),
       drop = FALSE
     ]
   })
   output[["outliers"]] <- shiny::renderTable(outliers_list())
   output[["outliers-thresholds"]] <- shiny::renderUI({
-    ot <- lapply(nacho_custom()@thresholds, round, digits = 3)
+    limits <- nacho_custom()@thresholds
+    ot <- lapply(
+      limits[!names(limits) %in% c("preset", "instrument")],
+      round,
+      digits = 3
+    )
     shiny::tags$div(
       shiny::tags$ul(
         shiny::tags$li(

@@ -38,7 +38,12 @@ test_that("as_nacho() builds from a plain SummarizedExperiment with default sett
   skip_if_not_installed("SummarizedExperiment")
   se <- as_summarized_experiment(GSE74821)
   S4Vectors::metadata(se) <- list()
-  expect_no_warning(x <- suppressMessages(as_nacho(se)))
+  expect_warning(
+    x <- suppressMessages(as_nacho(se)),
+    class = "nacho_warning_instrument_unknown",
+    regexp = "nacho_thresholds(instrument = ...)",
+    fixed = TRUE
+  )
   expect_identical(x@settings$normalisation_method, "GEO")
   expect_identical(ncol(x), 48L)
 })
@@ -68,7 +73,10 @@ test_that("as_nacho() builds from counts and code classes only", {
     )
   )
   expect_warning(
-    x <- suppressMessages(as_nacho(se, id_colname = "sample")),
+    x <- suppressWarnings(
+      suppressMessages(as_nacho(se, id_colname = "sample")),
+      classes = "nacho_warning_instrument_unknown"
+    ),
     class = "nacho_warning_metric_unavailable"
   )
   expect_identical(names(nacho_samples(x))[[1]], "sample")
@@ -338,7 +346,10 @@ test_that("as_nacho() does not overwrite a different sample id column", {
   se$IDFILE <- rev(se$IDFILE)
   expect_error(as_nacho(se), class = "nacho_error_bad_argument")
   expect_snapshot(as_nacho(se), error = TRUE)
-  x <- suppressMessages(as_nacho(se, id_colname = "sample"))
+  x <- suppressWarnings(
+    suppressMessages(as_nacho(se, id_colname = "sample")),
+    classes = "nacho_warning_instrument_unknown"
+  )
   expect_identical(nacho_samples(x)$sample, colnames(se))
   expect_identical(nacho_samples(x)$IDFILE, rev(colnames(se)))
 })

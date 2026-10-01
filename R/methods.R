@@ -52,8 +52,13 @@ format_nacho <- function(x, ...) {
         "without housekeeping genes"
       }
     ),
+    if (any(x@probes[["is_excluded"]])) {
+      cli::format_inline(
+        "Excluded negative probes: {.val {x@probes[['Name']][x@probes[['is_excluded']]]}}"
+      )
+    },
     cli::format_inline(
-      "Flagged samples: {sum(x@samples[['is_outlier']] %in% TRUE)} of {ncol(x@counts)}"
+      "Flagged samples: {sum(flagged_samples(x))} of {ncol(x@counts)}"
     ),
     cli::format_inline(
       "Created with NACHO {x@provenance[['nacho_version']]}"
@@ -67,12 +72,13 @@ print_nacho <- function(x, ...) {
 }
 
 summary_nacho <- function(object, ...) {
-  metrics <- c("BD", "FoV", "PCL", "LoD", "Positive_factor", "House_factor")
+  metrics <- qc_metrics
   if (object@rcc_type == "n8") {
-    metrics <- setdiff(metrics, c("PCL", "LoD"))
+    metrics <- setdiff(metrics, plexset_unassessed)
   }
   metrics <- intersect(metrics, names(object@samples))
   thresholds <- object@thresholds
+  qc <- nacho_qc(object)
   bound <- function(value) if (is.finite(value)) value else NA_real_
   data.frame(
     metric = metrics,
@@ -90,7 +96,7 @@ summary_nacho <- function(object, ...) {
     ),
     n_fail = vapply(
       metrics,
-      function(m) sum(metric_fails(object@samples[[m]], thresholds[[m]])),
+      function(m) sum(qc[[paste0(m, "_status")]] %in% "fail"),
       integer(1)
     ),
     n_missing = vapply(
@@ -218,7 +224,6 @@ subset_nacho <- function(x, i, j, ..., drop = FALSE) {
   counts <- x@counts[rows, columns, drop = FALSE]
   samples <- x@samples[columns, , drop = FALSE]
   rownames(samples) <- NULL
-  samples[["is_outlier"]] <- compute_outliers(samples, x@thresholds, x@rcc_type)
   probes <- x@probes[rows, , drop = FALSE]
   rownames(probes) <- NULL
   nacho(

@@ -30,7 +30,7 @@ test_that("nacho_probes() and nacho_qc() return one row per probe and per sample
   qc <- nacho_qc(x)
   expect_identical(nrow(qc), 4L)
   expect_true(all(
-    c("IDFILE", "BD", "FoV", "PCL", "LoD", "is_outlier") %in% names(qc)
+    c("IDFILE", "BD", "FoV", "PCL", "LoD", "status") %in% names(qc)
   ))
 })
 

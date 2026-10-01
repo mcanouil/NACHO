@@ -47,8 +47,8 @@ floors at 0.}
 \item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
 
-\item{outliers_thresholds}{A list of quality-control thresholds with the
-elements \code{BD}, \code{FoV}, \code{LoD}, \code{PCL}, \code{Positive_factor} and \code{House_factor}.}
+\item{outliers_thresholds}{A list of quality-control thresholds, as
+returned by \code{\link[=nacho_thresholds]{nacho_thresholds()}}.}
 
 \item{...}{Must be empty.}
 }
@@ -59,16 +59,14 @@ A \code{nacho} object.
 (Re)normalise a nacho object
 }
 \details{
-When only \code{outliers_thresholds} changes, \code{normalise()} keeps the
-counts and recomputes the outlier flags.
+When only the limits in \code{outliers_thresholds} change and the preset stays
+the same, \code{normalise()} keeps the counts and stores the new thresholds; the flags follow them whenever you
+read \code{\link[=nacho_qc]{nacho_qc()}}.
 Otherwise it computes the quality-control metrics, the normalisation
 factors, the normalised counts and the PCA again.
 
-Outliers are samples with a binding density (\code{BD}) outside its range, a
-field of view (\code{FoV}) below its limit, a positive factor or a
-housekeeping factor outside its range, and, for single-sample RCC files,
-a positive control linearity (\code{PCL}) or a limit of detection (\code{LoD})
-below its limit. See \code{\link[=exclude_outliers]{exclude_outliers()}} to drop them.
+\code{\link[=nacho_qc]{nacho_qc()}} lists the flags, and \code{\link[=exclude_outliers]{exclude_outliers()}} drops the flagged
+samples.
 
 The normalisation runs in this order: raw counts, negative probe
 exclusion, background (\code{background} and \code{background_mode}), positive

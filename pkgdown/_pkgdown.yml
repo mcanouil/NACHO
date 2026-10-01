@@ -39,8 +39,8 @@ reference:
       - read_nacho
       - upgrade_nacho
       - as_summarized_experiment
+      - nacho_thresholds
       - normalise
-      - check_outliers
       - exclude_outliers
   - title: Visualise and report
     desc: Explore quality control interactively, plot a single metric, or write a full report.

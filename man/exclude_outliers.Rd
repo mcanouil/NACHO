@@ -13,7 +13,7 @@ exclude_outliers(nacho_object)
 A \code{nacho} object without the flagged samples.
 }
 \description{
-Removes the samples flagged in \code{\link[=nacho_qc]{nacho_qc()}} and runs the normalisation again
+Removes the samples whose \code{status} in \code{\link[=nacho_qc]{nacho_qc()}} is \code{"fail"} and runs the normalisation again
 on the samples that are left, with the same settings and thresholds.
 The new factors can flag more samples; call \code{exclude_outliers()} again to
 drop those too.

@@ -3,13 +3,79 @@ test_that("geometric_means() sets zeros to 1 and ignores missing probes", {
   expect_equal(NACHO:::geometric_means(m), c(2, 4))
 })
 
-test_that("excluded_negatives() drops negatives far from the overall median", {
-  counts <- matrix(
-    c(10, 10, 10, 40, 10, 10, 11, 42),
-    nrow = 4,
-    dimnames = list(as.character(1:4), c("a", "b"))
+negative_matrix <- function(means) {
+  matrix(
+    rep(means, times = 2),
+    ncol = 2,
+    dimnames = list(sprintf("NEG_%s", LETTERS[seq_along(means)]), c("S1", "S2"))
   )
-  expect_identical(NACHO:::excluded_negatives(counts, rep("Negative", 4)), "4")
+}
+
+test_that("the Bruker rule drops at most two negatives 3-fold above the others", {
+  exclude <- function(means) {
+    NACHO:::excluded_negatives(
+      negative_matrix(means),
+      rep("Negative", length(means)),
+      "nsolver"
+    )
+  }
+  expect_identical(exclude(c(10, 11, 9, 12, 8, 10)), character(0))
+  expect_identical(exclude(c(40, 11, 9, 12, 8, 10)), "NEG_A")
+  expect_identical(exclude(c(40, 50, 9, 12, 8, 10)), c("NEG_B", "NEG_A"))
+  expect_identical(exclude(c(40, 50, 60, 12, 8, 10)), character(0))
+  expect_identical(exclude(c(40, 11, 9)), character(0))
+})
+
+test_that("a negative probe with only missing counts is left out of the rule", {
+  counts <- negative_matrix(c(40, 11, 9, 12))
+  counts[c("NEG_C", "NEG_D"), ] <- NA
+  expect_identical(
+    NACHO:::excluded_negatives(counts, rep("Negative", 4), "nsolver"),
+    character(0)
+  )
+})
+
+test_that("the legacy rule keeps the NACHO 2 median rule", {
+  counts <- matrix(
+    c(10, 10, 10, 30, 10, 11, 9, 31),
+    ncol = 2,
+    dimnames = list(1:4, 1:2)
+  )
+  expect_identical(
+    NACHO:::excluded_negatives(counts, rep("Negative", 4), "legacy"),
+    "4"
+  )
+})
+
+test_that("the legacy rule never reports a missing negative probe name", {
+  counts <- matrix(
+    c(10, 10, 10, NA, NA, NA, 10, 11, 9, 30, 31, 29),
+    nrow = 4,
+    byrow = TRUE,
+    dimnames = list(c("A", "B", "C", "D"), 1:3)
+  )
+  expect_identical(
+    NACHO:::excluded_negatives(counts, rep("Negative", 4), "legacy"),
+    "D"
+  )
+})
+
+test_that("nsolver PCL leaves POS_F out and adds 1 to every count", {
+  names <- sprintf("POS_%s(%s)", LETTERS[1:6], c(128, 32, 8, 2, 0.5, 0.125))
+  positives <- matrix(c(1000, 260, 70, 15, 6, 0), ncol = 1)
+  expected <- stats::cor(
+    log2(positives[1:5] + 1),
+    log2(c(128, 32, 8, 2, 0.5))
+  )^2
+  expect_equal(
+    NACHO:::sample_pcl(positives, names, "nsolver"),
+    round(expected, 5)
+  )
+  legacy <- stats::cor(
+    log2(as.vector(positives) + 1),
+    log2(c(128, 32, 8, 2, 0.5, 0.125))
+  )^2
+  expect_equal(NACHO:::sample_pcl(positives, names, "legacy"), round(legacy, 5))
 })
 
 test_that("normalised counts are neither rounded nor floored", {
@@ -52,7 +118,7 @@ test_that("sample_metrics() gives NA and one warning when lane attributes are mi
   samples <- x@samples[, !grepl("^Lane_Attributes", names(x@samples))]
   warnings <- list()
   metrics <- withCallingHandlers(
-    NACHO:::sample_metrics(x@counts, x@probes, samples),
+    NACHO:::sample_metrics(x@counts, x@probes, samples, "legacy"),
     nacho_warning_metric_unavailable = function(cnd) {
       warnings <<- c(warnings, list(cnd))
       invokeRestart("muffleWarning")

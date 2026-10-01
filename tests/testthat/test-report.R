@@ -36,7 +36,6 @@ test_that("not a nacho object", {
 test_that("numeric column for colour", {
   x <- GSE74821
   x@thresholds[["FoV"]] <- 95
-  x <- check_outliers(x)
   x@samples[["channel_count"]] <- as.numeric(x@samples[["channel_count"]])
   expect_output(
     NACHO:::report_markdown(x, colour = "channel_count"),
@@ -57,6 +56,26 @@ test_that("the report leaves out open threshold bounds", {
   expect_length(grep("Limit of Detection (LoD) <", output, fixed = TRUE), 0L)
   expect_length(grep("(house_factor) <", output, fixed = TRUE), 1L)
   expect_length(grep("(house_factor) >", output, fixed = TRUE), 0L)
+})
+
+test_that("the report names the preset and instrument behind the flags", {
+  flag_line <- function(instrument) {
+    toy <- toy_nacho(4L)
+    thresholds <- toy@thresholds
+    thresholds$preset <- "legacy"
+    thresholds$instrument <- instrument
+    toy@thresholds <- thresholds
+    output <- utils::capture.output(NACHO:::report_markdown(toy))
+    grep("Thresholds preset", output, value = TRUE)
+  }
+  expect_identical(
+    flag_line("sprint"),
+    "  - Thresholds preset: legacy, instrument: sprint "
+  )
+  expect_identical(
+    flag_line(NA_character_),
+    "  - Thresholds preset: legacy, instrument: unknown "
+  )
 })
 
 test_that("the settings list the housekeeping genes, or none", {

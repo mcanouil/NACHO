@@ -75,29 +75,38 @@ report_markdown <- function(
     x@settings[["n_comp"]],
     "\n"
   )
-  threshold_lines <- list(
-    list("Binding Density (BD) <", thresholds[["BD"]][1]),
-    list("Binding Density (BD) >", thresholds[["BD"]][2]),
-    list("Field of View (FoV) <", thresholds[["FoV"]]),
-    list("Positive Control Linearity (PCL) <", thresholds[["PCL"]]),
-    list("Limit of Detection (LoD) <", thresholds[["LoD"]]),
-    list(
-      "Positive normalisation factor (Positive_factor) <",
-      thresholds[["Positive_factor"]][1]
+  instrument <- thresholds[["instrument"]]
+  cat(
+    "  - Thresholds preset:",
+    paste0(
+      thresholds[["preset"]],
+      ", instrument: ",
+      if (is.na(instrument)) "unknown" else instrument
     ),
-    list(
-      "Positive normalisation factor (Positive_factor) >",
-      thresholds[["Positive_factor"]][2]
-    ),
-    list(
-      "Housekeeping normalisation factor (house_factor) <",
-      thresholds[["House_factor"]][1]
-    ),
-    list(
-      "Housekeeping normalisation factor (house_factor) >",
-      thresholds[["House_factor"]][2]
-    )
+    "\n"
   )
+  threshold_labels <- c(
+    BD = "Binding Density (BD)",
+    FoV = "Field of View (FoV)",
+    PCL = "Positive Control Linearity (PCL)",
+    LoD = "Limit of Detection (LoD)",
+    Positive_factor = "Positive normalisation factor (Positive_factor)",
+    House_factor = "Housekeeping normalisation factor (house_factor)"
+  )
+  threshold_lines <- list()
+  for (metric in qc_metrics[qc_metrics %in% names(thresholds)]) {
+    label <- if (metric %in% names(threshold_labels)) {
+      threshold_labels[[metric]]
+    } else {
+      metric
+    }
+    limits <- thresholds[[metric]]
+    threshold_lines <- c(
+      threshold_lines,
+      list(list(paste(label, "<"), limits[1])),
+      if (length(limits) == 2) list(list(paste(label, ">"), limits[2]))
+    )
+  }
   threshold_lines <- Filter(
     function(line) is.finite(line[[2]]),
     threshold_lines
@@ -198,10 +207,11 @@ report_markdown <- function(
   }
 
   qc <- nacho_qc(x)
-  if (any(qc[["is_outlier"]] %in% TRUE)) {
+  failed <- qc[["status"]] %in% "fail"
+  if (any(failed)) {
     cat(prefix_title(title_level, 1), "Outliers", "\n\n")
     print(knitr::kable(
-      qc[qc[["is_outlier"]] %in% TRUE, setdiff(names(qc), "is_outlier")],
+      qc[failed, c(names(qc)[1], "lane", "CartridgeID", "n_flags", "reason")],
       row.names = FALSE
     ))
   }

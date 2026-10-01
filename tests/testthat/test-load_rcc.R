@@ -76,6 +76,20 @@ test_that("load_rcc() checks its arguments before reading any file", {
   )
 })
 
+test_that("load_rcc() checks instrument and preset before reading any file", {
+  sheet <- data.frame(IDFILE = "no-such-sample.RCC")
+  for (argument in c("instrument", "preset")) {
+    args <- list(test_path("plexset_data"), sheet, "IDFILE")
+    args[[argument]] <- "not-a-choice"
+    error <- expect_error(
+      do.call(load_rcc, args),
+      class = "nacho_error_bad_argument"
+    )
+    expect_match(conditionMessage(error), argument, fixed = TRUE)
+    expect_no_match(conditionMessage(error), "no-such-sample", fixed = TRUE)
+  }
+})
+
 test_that("load_rcc() names the RCC files it cannot find", {
   sheet <- plexset_tidy
   sheet$IDFILE[1:8] <- "missing.RCC"
@@ -195,6 +209,7 @@ test_that("using GEO GSE74821", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE74821"),
+      instrument = "max",
       ssheet_csv = head(targets, 20),
       id_colname = "IDFILE",
       housekeeping_genes = NULL,
@@ -210,6 +225,7 @@ test_that("using GEO GSE74821", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE74821"),
+      instrument = "max",
       ssheet_csv = head(targets, 20),
       id_colname = "IDFILE",
       housekeeping_genes = NULL,
@@ -257,6 +273,7 @@ test_that("using GEO GSE70970", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE70970"),
+      instrument = "max",
       ssheet_csv = head(targets, 20),
       id_colname = "IDFILE",
       housekeeping_genes = NULL,
@@ -272,6 +289,7 @@ test_that("using GEO GSE70970", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE70970"),
+      instrument = "max",
       ssheet_csv = head(targets, 20),
       id_colname = "IDFILE",
       housekeeping_genes = NULL,
@@ -287,6 +305,7 @@ test_that("using GEO GSE70970", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE70970"),
+      instrument = "max",
       ssheet_csv = head(targets[["IDFILE"]], 20),
       id_colname = "IDFILE",
       housekeeping_predict = TRUE,
@@ -299,6 +318,7 @@ test_that("using GEO GSE70970", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE70970"),
+      instrument = "max",
       ssheet_csv = head(targets[["IDFILE"]], 20),
       housekeeping_predict = TRUE,
       housekeeping_norm = TRUE
@@ -310,6 +330,7 @@ test_that("using GEO GSE70970", {
   expect_true(S7::S7_inherits(
     load_rcc(
       data_directory = file.path(tempdir(), "GSE70970"),
+      instrument = "max",
       ssheet_csv = `names<-`(
         head(targets[["IDFILE"]], 20),
         head(letters, 20)
@@ -441,7 +462,7 @@ test_that("PlexSet files are detected from their content", {
     nacho_samples(res)[["IDFILE"]],
     nacho_samples(salmon_nacho)[["IDFILE"]]
   )
-  expect_false(all(nacho_qc(res)[["is_outlier"]]))
+  expect_false(all(nacho_qc(res)[["status"]] %in% "fail"))
 })
 
 test_that("PlexSet detection needs the exact PlexSet code classes", {
@@ -557,4 +578,37 @@ test_that("load_rcc() reports a probe clash across single-sample RCC files", {
     )),
     error = TRUE
   )
+})
+
+test_that("load_rcc() uses nsolver thresholds and detects MAX/FLEX files", {
+  fixture <- geo_fixture("GSE178516")
+  x <- suppressMessages(load_rcc(
+    fixture$dir,
+    fixture$samplesheet,
+    "IDFILE",
+    n_comp = 5
+  ))
+  expect_identical(x@thresholds$preset, "nsolver")
+  expect_identical(x@thresholds$instrument, "max")
+})
+
+test_that("load_rcc() warns for SPRINT files unless instrument is given", {
+  fixture <- geo_fixture("GSE270837")
+  expect_warning(
+    suppressWarnings(
+      suppressMessages(
+        load_rcc(fixture$dir, fixture$samplesheet, "IDFILE", n_comp = 5)
+      ),
+      classes = "nacho_warning_n_comp_reduced"
+    ),
+    class = "nacho_warning_instrument_unknown"
+  )
+  x <- suppressMessages(load_rcc(
+    fixture$dir,
+    fixture$samplesheet,
+    "IDFILE",
+    n_comp = 5,
+    instrument = "sprint"
+  ))
+  expect_identical(x@thresholds$BD, c(0.1, 1.8))
 })

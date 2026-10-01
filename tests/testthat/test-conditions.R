@@ -60,7 +60,7 @@ test_that("check_choice() reports a bad choice once, with a suggestion", {
 })
 
 test_that("check_nacho() explains what it expected", {
-  expect_snapshot(check_outliers(list(a = 1)), error = TRUE)
+  expect_snapshot(exclude_outliers(list(a = 1)), error = TRUE)
 })
 
 test_that("check_package() names the install command", {

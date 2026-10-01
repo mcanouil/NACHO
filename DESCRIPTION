@@ -75,6 +75,7 @@ Config/roxygen2/version: 8.1.0
 Collate: 
     'GSE74821.R'
     'NACHO-package.R'
+    'thresholds.R'
     'qc.R'
     'nacho-class.R'
     'accessors.R'
@@ -85,6 +86,7 @@ Collate:
     'load_rcc.R'
     'methods.R'
     'normalise.R'
+    'qc-table.R'
     'read_nacho.R'
     'read_rcc.R'
     'render.R'

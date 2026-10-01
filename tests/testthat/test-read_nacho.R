@@ -31,8 +31,22 @@ test_that("upgrade_nacho() keeps the raw counts, settings and thresholds", {
   expect_identical(counts[1, 1], as.integer(cell))
   expect_identical(x@settings$normalisation_method, old$normalisation_method)
   expect_setequal(x@settings$housekeeping_genes, old$housekeeping_genes)
-  expect_identical(x@thresholds, old$outliers_thresholds)
-  expect_false(any(c("PC01", "Count_Norm") %in% names(x@samples)))
+  expect_identical(
+    x@thresholds[names(old$outliers_thresholds)],
+    old$outliers_thresholds
+  )
+  expect_false(any(c("PC01", "Count_Norm", "is_outlier") %in% names(x@samples)))
+})
+
+test_that("upgrade_nacho() reads NACHO 2 thresholds under the legacy preset", {
+  old <- nacho_2()
+  x <- suppressMessages(upgrade_subset(old))
+  expect_identical(x@thresholds$preset, "legacy")
+  expect_identical(x@thresholds$BD, old$outliers_thresholds$BD)
+  expect_identical(
+    x@thresholds$instrument,
+    NACHO:::detect_instrument(x@samples)
+  )
 })
 
 test_that("upgrade_nacho() keeps an open House_factor upper bound", {
@@ -40,6 +54,16 @@ test_that("upgrade_nacho() keeps an open House_factor upper bound", {
   old$outliers_thresholds$House_factor <- c(1 / 11, Inf)
   x <- suppressMessages(upgrade_subset(old))
   expect_identical(x@thresholds$House_factor, c(1 / 11, Inf))
+})
+
+test_that("upgrade_nacho() refuses thresholds without names", {
+  old <- nacho_2()
+  old$outliers_thresholds <- list(c(0.1, 2.25), 95)
+  expect_error(upgrade_nacho(old), class = "nacho_error_bad_argument")
+  old$outliers_thresholds <- list(c(9, 9), FoV = 50)
+  expect_error(upgrade_nacho(old), class = "nacho_error_bad_argument")
+  old$outliers_thresholds <- list(Fov = 50)
+  expect_error(upgrade_nacho(old), class = "nacho_error_bad_argument")
 })
 
 test_that("upgrade_nacho() and read_nacho() name an infinite LoD", {
@@ -233,6 +257,7 @@ test_that("read_nacho() migrates the frozen schema-1 object", {
   expect_identical(x@provenance$migrated_from_schema, 1L)
   expect_identical(x@settings$background, "none")
   expect_identical(x@settings$background_mode, "subtract")
+  expect_identical(x@thresholds$preset, "legacy")
   expect_identical(S7::S7_class(x), NACHO:::nacho)
 })
 
@@ -332,4 +357,23 @@ test_that("a missing or malformed schema version is named as such", {
   attr(x, "provenance")$schema_version <- 1
   err <- expect_error(nacho_samples(x), class = "nacho_error_bad_object")
   expect_match(conditionMessage(err), "missing or malformed")
+})
+
+test_that("upgrade_nacho() keeps the NACHO 2 thresholds under the legacy preset", {
+  old <- readRDS(test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
+  x <- suppressWarnings(
+    suppressMessages(upgrade_nacho(old)),
+    classes = "nacho_warning_n_comp_reduced"
+  )
+  expect_identical(x@thresholds$preset, "legacy")
+  expect_identical(x@thresholds$BD, old$outliers_thresholds$BD)
+})
+
+test_that("migrating a schema 1 object with unknown thresholds gives a classed error", {
+  properties <- S7::props(readRDS(test_path("fixtures", "nacho-schema-1.rds")))
+  properties$thresholds[["not_a_threshold"]] <- c(0, 1)
+  expect_error(
+    suppressMessages(NACHO:::migrate_schema_1(properties)),
+    class = "nacho_error_bad_argument"
+  )
 })

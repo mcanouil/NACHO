@@ -14,6 +14,8 @@ load_rcc(
   normalisation_method = "GEO",
   background = "none",
   background_mode = "threshold",
+  instrument = NULL,
+  preset = "nsolver",
   n_comp = 10
 )
 }
@@ -49,6 +51,14 @@ from its negative controls: \code{"none"} (the default), \code{"mean"},
 \code{"threshold"} (the default) raises lower counts to it, which Bruker
 recommends when fold changes matter, and \code{"subtract"} removes it and
 floors at 0.}
+
+\item{instrument}{[\link{character}] The nCounter instrument, \code{"max"},
+\code{"flex"}, \code{"pro"} or \code{"sprint"}, which sets the binding density limits.
+\code{NULL} (the default) reads it from the RCC files when they say, and
+otherwise uses the MAX/FLEX limits with a warning.}
+
+\item{preset}{[\link{character}] \code{"nsolver"} (the default) or \code{"legacy"}; see
+\code{\link[=nacho_thresholds]{nacho_thresholds()}}.}
 
 \item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}

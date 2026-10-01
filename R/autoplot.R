@@ -131,6 +131,7 @@ plot_samples <- function(object, colour) {
   if (is.numeric(samples[[colour]])) {
     samples[[colour]] <- as.character(samples[[colour]])
   }
+  samples[["flagged"]] <- flagged_samples(object)
   samples
 }
 
@@ -139,6 +140,10 @@ plot_probes <- function(object, rows, colour) {
   if (is.numeric(long[[colour]])) {
     long[[colour]] <- as.character(long[[colour]])
   }
+  long[["flagged"]] <- flagged_samples(object)[match(
+    long[[object@settings[["id_colname"]]]],
+    colnames(object@counts)
+  )]
   long
 }
 
@@ -156,7 +161,7 @@ outlier_layers <- function(
     "identity"
   }
   inliers <- ggplot2::geom_point(
-    data = if (show_outliers) function(d) d[!d[["is_outlier"]] %in% TRUE, ],
+    data = if (show_outliers) function(d) d[!d[["flagged"]] %in% TRUE, ],
     mapping = ggplot2::aes(colour = .data[[colour]]),
     size = size,
     na.rm = TRUE,
@@ -168,7 +173,7 @@ outlier_layers <- function(
   list(
     inliers,
     ggplot2::geom_point(
-      data = function(d) d[d[["is_outlier"]] %in% TRUE, ],
+      data = function(d) d[d[["flagged"]] %in% TRUE, ],
       size = size * outliers_factor,
       colour = "#b22222",
       na.rm = TRUE,
@@ -176,7 +181,7 @@ outlier_layers <- function(
     ),
     if (!is.null(outliers_labels)) {
       ggrepel::geom_label_repel(
-        data = function(d) d[d[["is_outlier"]] %in% TRUE, ],
+        data = function(d) d[d[["flagged"]] %in% TRUE, ],
         mapping = ggplot2::aes(label = .data[[outliers_labels]]),
         colour = "#b22222",
         na.rm = TRUE
@@ -285,7 +290,7 @@ plot_metrics <- function(
         colour,
         id,
         type,
-        "is_outlier",
+        "flagged",
         outliers_labels
       ))
     ]
@@ -364,7 +369,7 @@ plot_cg <- function(
         id,
         "Name",
         "Count",
-        "is_outlier",
+        "flagged",
         outliers_labels
       ))
     ]
@@ -444,7 +449,7 @@ plot_pn <- function(
         "CodeClass",
         "Name",
         "Count",
-        "is_outlier"
+        "flagged"
       ))
     ]
   ) +
@@ -510,7 +515,7 @@ plot_acbd <- function(
         id,
         "MC",
         "BD",
-        "is_outlier",
+        "flagged",
         outliers_labels
       ))
     ]
@@ -774,7 +779,7 @@ plot_pfnf <- function(
         id,
         "Negative_factor",
         "Positive_factor",
-        "is_outlier",
+        "flagged",
         outliers_labels
       ))
     ]
@@ -835,7 +840,7 @@ plot_hf <- function(
         id,
         "House_factor",
         "Positive_factor",
-        "is_outlier",
+        "flagged",
         outliers_labels
       ))
     ]
@@ -935,7 +940,7 @@ plot_norm <- function(
           id,
           "Name",
           "CodeClass",
-          "is_outlier"
+          "flagged"
         )),
         measure.vars = c("Count", "Count_Norm"),
         variable.name = "Status",
@@ -948,7 +953,7 @@ plot_norm <- function(
         "Count_Norm",
         "Name",
         "CodeClass",
-        "is_outlier"
+        "flagged"
       ))
     ][
       j = `:=`(

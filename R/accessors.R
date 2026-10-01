@@ -17,8 +17,12 @@ NULL
 #'   holds the sample ids, and the PCA scores come last (`PC01`, `PC02`, ...).
 #' * `nacho_probes()`: a data frame with one row per probe: `CodeClass`,
 #'   `Name`, `Accession`, `is_housekeeping` and `is_excluded`.
-#' * `nacho_qc()`: a data frame with one row per sample and the
-#'   quality-control metrics, normalisation factors and `is_outlier`.
+#' * `nacho_qc()`: a data frame with one row per sample: the id, `lane`,
+#'   `CartridgeID`, each quality-control metric with its status (`"pass"`,
+#'   `"fail"` or `NA` when it cannot be assessed), the other factors,
+#'   `lane_status` for PlexSet files, `n_flags` (the sample's own failing
+#'   metrics, not those inherited from its lane), the overall `status` and a
+#'   readable `reason` (which also names the lane metrics a sample inherits).
 #'
 #' @name nacho-accessors
 #'
@@ -66,20 +70,5 @@ nacho_probes <- function(x) {
 #' @export
 nacho_qc <- function(x) {
   check_nacho(x)
-  columns <- c(
-    x@settings[["id_colname"]],
-    "CartridgeID",
-    "ID",
-    "BD",
-    "FoV",
-    "PCL",
-    "LoD",
-    "MC",
-    "MedC",
-    "Positive_factor",
-    "Negative_factor",
-    "House_factor",
-    "is_outlier"
-  )
-  x@samples[, intersect(columns, names(x@samples)), drop = FALSE]
+  qc_table(x@samples, x@thresholds, x@rcc_type, x@settings[["id_colname"]])
 }

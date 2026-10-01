@@ -1,17 +1,3 @@
-#' Quality-control thresholds used by NACHO 2
-#'
-#' @noRd
-default_thresholds <- function() {
-  list(
-    BD = c(0.1, 2.25),
-    FoV = 75,
-    LoD = 2,
-    PCL = 0.95,
-    Positive_factor = c(1 / 4, 4),
-    House_factor = c(1 / 11, 11)
-  )
-}
-
 #' Settings for data that do not come from NACHO
 #'
 #' The defaults match those of [load_rcc()], which a test checks, except
@@ -47,26 +33,6 @@ metric_fails <- function(values, limits) {
   } else {
     !is.na(values) & values < limits
   }
-}
-
-#' Flag samples that fail any quality-control threshold
-#'
-#' PCL and LoD are not flagged for PlexSet files, whose controls are shared by
-#' the eight samples of a lane.
-#'
-#' @noRd
-compute_outliers <- function(samples, thresholds, rcc_type) {
-  metrics <- c(
-    "BD",
-    "FoV",
-    "Positive_factor",
-    if ("House_factor" %in% names(samples)) "House_factor",
-    if (identical(rcc_type, "n1")) c("PCL", "LoD")
-  )
-  fails <- lapply(metrics, function(metric) {
-    metric_fails(samples[[metric]], thresholds[[metric]])
-  })
-  Reduce(`|`, fails, rep(FALSE, nrow(samples)))
 }
 
 #' Principal component analysis of the samples
@@ -204,6 +170,8 @@ new_provenance <- function(data_directory, file_version, software_version) {
 
 #' Sample columns computed by the quality-control pipeline
 #'
+#' Includes `is_outlier`, which NACHO 2 stored and `nacho_qc()` now replaces.
+#'
 #' @noRd
 computed_sample_columns <- c(
   "Date",
@@ -338,21 +306,45 @@ apply_background <- function(counts, level, mode) {
   out
 }
 
-#' Negative probes whose median is far from the overall median
+#' Negative probes to leave out
 #'
-#' A probe is excluded when its median is more than 50 % away from the median
-#' of every negative count; when every probe would be excluded, none is.
+#' `"nsolver"` follows Bruker: drop the one or two negative probes whose mean
+#' count sits more than 3-fold above every other negative, when at least four
+#' negatives exist.
+#' `"legacy"` keeps the NACHO 2 rule: drop probes whose median is more than
+#' 50 % away from the median of every negative count, unless that drops them
+#' all.
 #'
 #' @noRd
-excluded_negatives <- function(counts, code_class) {
+excluded_negatives <- function(counts, code_class, preset) {
   negatives <- counts[code_class == "Negative", , drop = FALSE]
   if (nrow(negatives) == 0) {
     return(character(0))
   }
-  overall <- stats::median(negatives, na.rm = TRUE)
-  medians <- apply(negatives, 1, stats::median, na.rm = TRUE)
-  excluded <- rownames(negatives)[abs(overall - medians) > 0.5 * overall]
-  if (length(excluded) == nrow(negatives)) character(0) else excluded
+  if (preset == "legacy") {
+    overall <- stats::median(negatives, na.rm = TRUE)
+    medians <- apply(negatives, 1, stats::median, na.rm = TRUE)
+    excluded <- rownames(negatives)[which(
+      abs(overall - medians) > 0.5 * overall
+    )]
+    return(if (length(excluded) == nrow(negatives)) character(0) else excluded)
+  }
+  if (nrow(negatives) < 4) {
+    return(character(0))
+  }
+  means <- sort(rowMeans(negatives, na.rm = TRUE), decreasing = TRUE)
+  if (length(means) < 4) {
+    return(character(0))
+  }
+  floored <- pmax(means, 1)
+  n_high <- if (floored[2] > 3 * floored[3]) {
+    2L
+  } else if (floored[1] > 3 * floored[2]) {
+    1L
+  } else {
+    0L
+  }
+  names(means)[seq_len(n_high)]
 }
 
 #' Known concentrations of the control probes
@@ -449,15 +441,22 @@ predict_housekeeping <- function(scaled, probes) {
 #' The squared Pearson correlation of log2 counts on log2 concentrations.
 #'
 #' @noRd
-sample_pcl <- function(positives, probe_names) {
-  zero <- colSums(positives == 0, na.rm = TRUE) > 0
-  measured <- log2(positives)
-  measured[, zero] <- log2(positives[, zero, drop = FALSE] + 1)
+sample_pcl <- function(positives, probe_names, preset) {
   known <- log2(suppressWarnings(as.numeric(sub(
     "^[^(]*\\((.*)\\)$",
     "\\1",
     probe_names
   ))))
+  if (preset == "nsolver") {
+    keep <- !grepl("^POS_F", probe_names)
+    positives <- positives[keep, , drop = FALSE]
+    known <- known[keep]
+    measured <- log2(positives + 1)
+  } else {
+    zero <- colSums(positives == 0, na.rm = TRUE) > 0
+    measured <- log2(positives)
+    measured[, zero] <- log2(positives[, zero, drop = FALSE] + 1)
+  }
   round(
     apply(measured, 2, function(m) {
       stats::cor(m, known, use = "complete.obs")^2
@@ -481,13 +480,23 @@ sample_lod <- function(pos_e, negatives) {
 #' Per-sample quality-control metrics
 #'
 #' @noRd
-sample_metrics <- function(counts, probes, samples, warn_missing = TRUE) {
+sample_metrics <- function(
+  counts,
+  probes,
+  samples,
+  preset,
+  warn_missing = TRUE
+) {
   probe_names <- probes[["Name"]]
   code_class <- probes[["CodeClass"]]
   positive <- code_class == "Positive"
   pos_e <- which(positive & grepl("POS_E", probe_names))
   if (length(pos_e) == 1) {
-    pcl <- sample_pcl(counts[positive, , drop = FALSE], probe_names[positive])
+    pcl <- sample_pcl(
+      counts[positive, , drop = FALSE],
+      probe_names[positive],
+      preset
+    )
     lod <- sample_lod(
       counts[pos_e, , drop = FALSE],
       counts[code_class == "Negative", , drop = FALSE]
@@ -601,7 +610,8 @@ build_nacho <- function(
       code_class
     )])
   }
-  excluded <- excluded_negatives(counts, code_class)
+  preset <- thresholds[["preset"]]
+  excluded <- excluded_negatives(counts, code_class, preset)
   factors <- control_factors(
     counts,
     probes,
@@ -646,7 +656,7 @@ build_nacho <- function(
     )
   }
 
-  metrics <- sample_metrics(counts, probes, samples, warn_missing)
+  metrics <- sample_metrics(counts, probes, samples, preset, warn_missing)
   metrics[["Positive_factor"]] <- unname(factors[["positive_factor"]])
   negatives <- code_class == "Negative" & !probes[["Name"]] %in% excluded
   metrics[["Negative_factor"]] <- if (any(negatives)) {
@@ -659,7 +669,6 @@ build_nacho <- function(
     metrics[["House_factor"]] <- unname(house_factor)
   }
   samples <- cbind(samples, metrics)
-  samples[["is_outlier"]] <- compute_outliers(samples, thresholds, rcc_type)
 
   normalised <- if (
     isTRUE(settings[["housekeeping_norm"]]) && !is.null(house_factor)
@@ -671,6 +680,7 @@ build_nacho <- function(
 
   probes[["is_housekeeping"]] <- probes[["Name"]] %in% housekeeping_genes
   probes[["is_excluded"]] <- probes[["Name"]] %in% excluded
+  provenance[["excluded_negatives"]] <- excluded
   settings[["housekeeping_genes"]] <- housekeeping_genes
 
   nacho(
