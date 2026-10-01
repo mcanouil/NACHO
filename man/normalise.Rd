@@ -30,9 +30,7 @@ should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}
 
 \item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation
 should be performed.
-\code{NULL} (the default) normalises with housekeeping genes for mRNA panels
-that have them, and not for miRNA panels, whose housekeeping mRNAs sit at
-background.}
+The default is the setting stored in \code{nacho_object}, which is \code{TRUE} or \code{FALSE}.}
 
 \item{normalisation_method}{[\link{character}] \code{"GEO"} (the default) or \code{"GLM"}
 scale samples by their positive controls, with the geometric mean or a

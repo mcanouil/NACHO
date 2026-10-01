@@ -331,6 +331,10 @@ nacho_metadata_settings <- function(
   } else {
     merged[["housekeeping_genes"]] <- housekeeping_genes
   }
+  if (is.null(merged[["housekeeping_norm"]])) {
+    merged[["housekeeping_norm"]] <- panel == "mrna" &&
+      any(grepl("Housekeeping", probes[["CodeClass"]]))
+  }
   merged[["housekeeping_norm"]] <- resolve_housekeeping_norm(
     probes[["CodeClass"]],
     merged[["housekeeping_genes"]],

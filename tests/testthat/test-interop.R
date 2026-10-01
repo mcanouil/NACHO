@@ -436,3 +436,15 @@ test_that("as_nacho() stores a saved n_comp as an integer", {
   )
   expect_identical(same, x)
 })
+
+test_that("as_nacho() stays silent without Housekeeping probes and a saved choice", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(GSE74821)
+  keep <- SummarizedExperiment::rowData(se)$CodeClass != "Housekeeping"
+  S4Vectors::metadata(se)$nacho$settings[c(
+    "housekeeping_genes",
+    "housekeeping_norm"
+  )] <- list(NULL, NULL)
+  expect_no_warning(x <- suppressMessages(as_nacho(se[keep, ])))
+  expect_false(x@settings$housekeeping_norm)
+})

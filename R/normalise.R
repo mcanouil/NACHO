@@ -2,6 +2,9 @@
 #'
 #' @param nacho_object A `nacho` object from [load_rcc()] or [normalise()].
 #' @inheritParams load_rcc
+#' @param housekeeping_norm [[logical]] Boolean to indicate whether the housekeeping normalisation
+#'   should be performed.
+#'   The default is the setting stored in `nacho_object`, which is `TRUE` or `FALSE`.
 #' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes.
 #'   `normalise()` reuses the `ruv_k` stored in the object, so pass
 #'   `ruv_k = NULL` to have [suggest_ruv_k()] choose again.
