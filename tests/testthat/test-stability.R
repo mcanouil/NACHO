@@ -193,6 +193,34 @@ test_that("too few genes left after dropping some is an error", {
   )
 })
 
+test_that("min_detection decides which genes are ranked", {
+  x <- GSE74821
+  housekeeping <- nacho_probes(x)$Name[
+    nacho_probes(x)$CodeClass == "Housekeeping"
+  ]
+  x@probes$detection_rate[x@probes$Name == housekeeping[1]] <- 0.5
+  expect_false(housekeeping[1] %in% housekeeping_stability(x)$ranking$Name)
+  expect_true(
+    housekeeping[1] %in%
+      housekeeping_stability(x, min_detection = 0.4)$ranking$Name
+  )
+})
+
+test_that("a single sample or no detection limit is a classed error", {
+  one <- suppressWarnings(GSE74821[, 1])
+  expect_error(
+    housekeeping_stability(one),
+    class = "nacho_error_bad_argument"
+  )
+  x <- GSE74821
+  x@probes$detection_rate <- NA_real_
+  expect_error(
+    housekeeping_stability(x),
+    "detection limit",
+    class = "nacho_error_bad_argument"
+  )
+})
+
 test_that("predicted housekeeping genes are the five most stable by geNorm", {
   x <- suppressMessages(normalise(GSE74821, housekeeping_predict = TRUE))
   predicted <- x@settings$housekeeping_genes

@@ -12,6 +12,16 @@ pairwise_sd <- function(log_expr) {
   sqrt(pmax(outer(variance, variance, "+") - 2 * covariance, 0))
 }
 
+check_enough_samples <- function(log_expr, method, call) {
+  if (nrow(log_expr) < 2) {
+    nacho_abort(
+      "{method} needs at least two samples, not {nrow(log_expr)}.",
+      class = "bad_argument",
+      call = call
+    )
+  }
+}
+
 #' geNorm stability M of each gene
 #'
 #' The mean standard deviation of its log ratios with every other gene
@@ -31,6 +41,7 @@ genorm_m <- function(log_expr) {
 #'
 #' @noRd
 genorm_ranking <- function(log_expr, call = rlang::caller_env()) {
+  check_enough_samples(log_expr, "geNorm", call)
   if (ncol(log_expr) < 3) {
     nacho_abort(
       "geNorm needs at least three genes, not {ncol(log_expr)}.",
@@ -72,6 +83,7 @@ genorm_ranking <- function(log_expr, call = rlang::caller_env()) {
 #'
 #' @noRd
 normfinder_rho <- function(log_expr, group = NULL, call = rlang::caller_env()) {
+  check_enough_samples(log_expr, "NormFinder", call)
   k <- ncol(log_expr)
   if (k < 3) {
     nacho_abort(
@@ -114,8 +126,9 @@ normfinder_rho <- function(log_expr, group = NULL, call = rlang::caller_env()) {
     mean(group_means)
   va <- variance / sizes
   tau <- max(sum(difference^2) / ((m - 1) * (k - 1)) - mean(va), 0)
-  shrunk <- difference * tau / (tau + va)
-  shrunk_variance <- va + tau * va / (tau + va)
+  weight <- ifelse(tau + va > 0, tau / (tau + va), 0)
+  shrunk <- difference * weight
+  shrunk_variance <- va + weight * va
   rho <- colMeans(abs(shrunk) + sqrt(shrunk_variance))
   stats::setNames(rho, colnames(log_expr))
 }
@@ -184,6 +197,15 @@ housekeeping_stability <- function(
     )
   }
   rows <- match(unique(genes), probes[["Name"]])
+  if (all(is.na(probes[["detection_rate"]][rows]))) {
+    nacho_abort(
+      c(
+        "No sample has a detection limit, so {.fn housekeeping_stability} cannot tell which genes are detected.",
+        i = "A detection limit needs two kept negative probes with counts."
+      ),
+      class = "bad_argument"
+    )
+  }
   log_expr <- stability_input(
     x@counts[rows, , drop = FALSE],
     probes[["detection_rate"]][rows],

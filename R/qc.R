@@ -429,7 +429,7 @@ predict_housekeeping <- function(counts, probes) {
     probes[["detection_rate"]][rows],
     min_detection = 0.9
   )
-  if (ncol(log_expr) < 3) {
+  if (ncol(log_expr) < 3 || nrow(log_expr) < 2) {
     return(character(0))
   }
   ranking <- genorm_ranking(log_expr)[["ranking"]]
