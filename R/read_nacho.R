@@ -11,6 +11,7 @@ legacy_settings <- function(settings, probes) {
   has_negatives <- "Negative" %in% probes[["CodeClass"]]
   settings[["background"]] <- if (has_negatives) "geo" else "none"
   settings[["background_mode"]] <- "subtract"
+  settings["ruv_k"] <- list(NULL)
   settings
 }
 
@@ -185,7 +186,7 @@ upgrade_nacho <- function(x) {
   check_thresholds(thresholds, arg = "x$outliers_thresholds")
   check_choice(
     x[["normalisation_method"]],
-    c("GEO", "GLM"),
+    nacho_normalisation_methods,
     arg = "x$normalisation_method"
   )
   check_count(x[["n_comp"]], arg = "x$n_comp")

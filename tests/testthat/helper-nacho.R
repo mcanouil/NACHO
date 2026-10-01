@@ -57,6 +57,7 @@ toy_nacho <- function(n_samples = 4L) {
       housekeeping_predict = FALSE,
       housekeeping_norm = TRUE,
       normalisation_method = "GEO",
+      ruv_k = NULL,
       background = "none",
       background_mode = "threshold",
       n_comp = 2L

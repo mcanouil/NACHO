@@ -372,7 +372,10 @@ test_that("default_settings() follows the load_rcc() defaults", {
 
 test_that("as_nacho() matches a saved normalisation method like load_rcc()", {
   skip_if_not_installed("SummarizedExperiment")
-  se <- se_with_setting("normalisation_method", c("GEO", "GLM"))
+  se <- se_with_setting(
+    "normalisation_method",
+    NACHO:::nacho_normalisation_methods
+  )
   x <- suppressMessages(as_nacho(se))
   expect_identical(x@settings$normalisation_method, "GEO")
 })

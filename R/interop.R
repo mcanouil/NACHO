@@ -309,6 +309,7 @@ nacho_metadata_settings <- function(
     merged[["n_comp"]],
     merged[["background"]],
     merged[["background_mode"]],
+    merged[["ruv_k"]],
     arg_prefix = "metadata(x)$nacho$settings$",
     call = call
   )

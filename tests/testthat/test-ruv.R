@@ -63,3 +63,20 @@ test_that("rle_iqr() matches a hand computation", {
   rle <- sweep(log_expr, 2, apply(log_expr, 2, stats::median))
   expect_equal(NACHO:::rle_iqr(log_expr), mean(apply(rle, 1, stats::IQR)))
 })
+
+test_that("suggest_ruv_k() picks the smallest k close to the best RLE", {
+  table <- suggest_ruv_k(GSE74821, max_k = 3)
+  expect_identical(table$k, 0:3)
+  expect_identical(sum(table$suggested), 1L)
+  best <- min(table$rle_iqr)
+  expect_identical(
+    table$k[table$suggested],
+    min(table$k[table$rle_iqr <= 1.05 * best])
+  )
+  expect_true(all(table$pc1_variance > 0 & table$pc1_variance <= 1))
+})
+
+test_that("suggest_ruv_k() caps k at what the data allow", {
+  x <- suppressWarnings(GSE74821[, 1:3])
+  expect_lte(max(suggest_ruv_k(x, max_k = 10)$k), 2L)
+})

@@ -441,3 +441,48 @@ test_that("the default is no background, and Background is NA", {
   expect_true(all(is.na(nacho_samples(x)$Background)))
   expect_identical(x@settings$background, "none")
 })
+
+test_that("RUVg normalisation stores W and the k it used", {
+  x <- suppressMessages(normalise(
+    GSE74821,
+    normalisation_method = "RUVg",
+    ruv_k = 2
+  ))
+  samples <- nacho_samples(x)
+  expect_true(all(c("W_1", "W_2") %in% names(samples)))
+  expect_false("House_factor" %in% names(samples))
+  expect_identical(x@settings$ruv_k, 2L)
+  expect_false(anyNA(nacho_counts(x, normalised = TRUE)[
+    nacho_probes(x)$CodeClass == "Endogenous",
+  ]))
+  expect_true(all(nacho_counts(x, normalised = TRUE) >= 0, na.rm = TRUE))
+})
+
+test_that("RUVg without ruv_k uses the suggested k and says so", {
+  withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
+  expect_message(
+    x <- normalise(GSE74821, normalisation_method = "RUVg"),
+    "suggest_ruv_k"
+  )
+  expect_identical(
+    x@settings$ruv_k,
+    suggest_ruv_k(GSE74821)$k[suggest_ruv_k(GSE74821)$suggested]
+  )
+})
+
+test_that("going back to GEO drops the W columns", {
+  x <- suppressMessages(normalise(
+    GSE74821,
+    normalisation_method = "RUVg",
+    ruv_k = 1
+  ))
+  y <- suppressMessages(normalise(x, normalisation_method = "GEO"))
+  expect_false("W_1" %in% names(nacho_samples(y)))
+})
+
+test_that("ruv_k must be a whole number", {
+  expect_error(
+    normalise(GSE74821, normalisation_method = "RUVg", ruv_k = 1.5),
+    class = "nacho_error_bad_argument"
+  )
+})

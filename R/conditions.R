@@ -218,6 +218,7 @@ check_settings <- function(
   n_comp,
   background,
   background_mode,
+  ruv_k = NULL,
   arg_prefix = "",
   call = rlang::caller_env()
 ) {
@@ -239,11 +240,14 @@ check_settings <- function(
   )
   normalisation_method <- check_choice(
     normalisation_method,
-    c("GEO", "GLM"),
+    nacho_normalisation_methods,
     arg = paste0(arg_prefix, "normalisation_method"),
     call = call
   )
   check_count(n_comp, arg = paste0(arg_prefix, "n_comp"), call = call)
+  if (!is.null(ruv_k)) {
+    check_count(ruv_k, arg = paste0(arg_prefix, "ruv_k"), call = call)
+  }
   background <- check_choice(
     background,
     background_statistics,

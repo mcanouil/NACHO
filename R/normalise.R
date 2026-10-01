@@ -19,7 +19,9 @@
 #'   exclusion, background (`background` and `background_mode`), positive
 #'   control factor (`normalisation_method`), then content factor
 #'   (housekeeping genes when `housekeeping_norm` is `TRUE`).
-#'   Normalised counts are neither rounded nor floored; use
+#'   RUVg works on `log2(count + 1)` after the positive factor and returns
+#'   counts on the count scale, floored at 0.
+#'   Normalised counts are otherwise neither rounded nor floored; use
 #'   `nacho_counts(x, normalised = TRUE, log2 = TRUE)` for `log2(count + 1)`.
 #'
 #' @return A `nacho` object.
@@ -37,6 +39,7 @@ normalise <- function(
   normalisation_method = nacho_object@settings[["normalisation_method"]],
   background = nacho_object@settings[["background"]],
   background_mode = nacho_object@settings[["background_mode"]],
+  ruv_k = nacho_object@settings[["ruv_k"]],
   n_comp = nacho_object@settings[["n_comp"]],
   outliers_thresholds = nacho_object@thresholds,
   ...
@@ -65,7 +68,8 @@ normalise <- function(
     normalisation_method,
     n_comp,
     background,
-    background_mode
+    background_mode,
+    ruv_k
   )
   check_thresholds(outliers_thresholds)
 
@@ -75,6 +79,7 @@ normalise <- function(
     housekeeping_predict = housekeeping_predict,
     housekeeping_norm = housekeeping_norm,
     normalisation_method = choices[["normalisation_method"]],
+    ruv_k = if (!is.null(ruv_k)) as.integer(ruv_k),
     background = choices[["background"]],
     background_mode = choices[["background_mode"]],
     n_comp = as.integer(n_comp)

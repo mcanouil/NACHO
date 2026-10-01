@@ -14,6 +14,7 @@ load_rcc(
   normalisation_method = "GEO",
   background = "none",
   background_mode = "threshold",
+  ruv_k = NULL,
   instrument = NULL,
   preset = "nsolver",
   n_comp = 10
@@ -38,9 +39,12 @@ should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}
 \item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation
 should be performed. Default is \code{TRUE}.}
 
-\item{normalisation_method}{[\link{character}] Either \code{"GEO"} or \code{"GLM"}.
-Character string to indicate normalisation using the geometric mean (\code{"GEO"})
-or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
+\item{normalisation_method}{[\link{character}] \code{"GEO"} (the default) or \code{"GLM"}
+scale samples by their positive controls, with the geometric mean or a
+Poisson model, then by the housekeeping genes; \code{"RUVg"} scales by the
+positive controls with the geometric mean, then removes \code{ruv_k} factors
+of unwanted variation estimated from the housekeeping genes, which
+\code{\link[=nacho_samples]{nacho_samples()}} returns as \code{W_1}, \code{W_2}, ... for use as covariates.}
 
 \item{background}{[\link{character}] How to estimate each sample's background
 from its negative controls: \code{"none"} (the default), \code{"mean"},
@@ -51,6 +55,9 @@ from its negative controls: \code{"none"} (the default), \code{"mean"},
 \code{"threshold"} (the default) raises lower counts to it, which Bruker
 recommends when fold changes matter, and \code{"subtract"} removes it and
 floors at 0.}
+
+\item{ruv_k}{[\link{numeric}] The number of unwanted factors RUVg removes;
+\code{NULL} uses \code{\link[=suggest_ruv_k]{suggest_ruv_k()}}.}
 
 \item{instrument}{[\link{character}] The nCounter instrument, \code{"max"},
 \code{"flex"}, \code{"pro"} or \code{"sprint"}, which sets the binding density limits.
