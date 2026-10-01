@@ -138,3 +138,12 @@ test_that("thresholds saved before the ligation elements still validate", {
   )] <- NULL
   expect_length(validate_thresholds(saved), 0)
 })
+
+test_that("signed miRNA metrics accept negative bounds", {
+  x <- nacho_thresholds()
+  x$Ligation_NEG <- c(-Inf, -1)
+  x$Haemolysis <- c(-5, 7)
+  expect_length(NACHO:::validate_thresholds(x), 0)
+  x$BD <- c(-1, 2)
+  expect_match(NACHO:::validate_thresholds(x), "lower bound", all = FALSE)
+})

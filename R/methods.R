@@ -76,8 +76,9 @@ summary_nacho <- function(object, ...) {
   if (object@rcc_type == "n8") {
     metrics <- setdiff(metrics, plexset_unassessed)
   }
-  metrics <- intersect(metrics, names(object@samples))
   thresholds <- object@thresholds
+  metrics <- intersect(metrics, names(object@samples))
+  metrics <- intersect(metrics, names(thresholds))
   qc <- nacho_qc(object)
   bound <- function(value) if (is.finite(value)) value else NA_real_
   data.frame(

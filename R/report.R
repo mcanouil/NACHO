@@ -92,10 +92,15 @@ report_markdown <- function(
     LoD = "Limit of Detection (LoD)",
     Positive_factor = "Positive normalisation factor (Positive_factor)",
     House_factor = "Housekeeping normalisation factor (house_factor)",
-    Housekeeping_detected = "Housekeeping genes above background (Housekeeping_detected)"
+    Housekeeping_detected = "Housekeeping genes above background (Housekeeping_detected)",
+    Ligation_order = "Ligation controls in order (Ligation_order)",
+    Ligation_R2 = "Ligation controls linearity (Ligation_R2)",
+    Ligation_NEG = "Ligation negative above detection limit (Ligation_NEG)",
+    Haemolysis = "Haemolysis (Haemolysis)"
   )
   threshold_lines <- list()
-  for (metric in qc_metrics[qc_metrics %in% names(thresholds)]) {
+  reported <- intersect(names(x@samples), names(thresholds))
+  for (metric in qc_metrics[qc_metrics %in% reported]) {
     label <- if (metric %in% names(threshold_labels)) {
       threshold_labels[[metric]]
     } else {

@@ -37,8 +37,11 @@ nacho_presets <- c("nsolver", "legacy")
 #' @param instrument The nCounter instrument: `"max"`, `"flex"`, `"pro"` or
 #'   `"sprint"`.
 #' @param preset `"nsolver"` or `"legacy"`.
-#' @param haemolysis If `TRUE`, flag plasma and serum samples whose miR-451a to
-#'   miR-23a-3p log2 ratio is above 7, a sign of haemolysis.
+#' @param haemolysis If `TRUE`, flag samples of a miRNA panel whose miR-451a to
+#'   miR-23a-3p log2 ratio is above 7, a sign of haemolysis in plasma and
+#'   serum.
+#'   [load_rcc()] does not take it, so pass the thresholds to
+#'   `normalise(outliers_thresholds = )`.
 #'
 #' @return A named list: `preset`, `instrument`, then one element per metric.
 #' @export
@@ -122,7 +125,7 @@ thresholds_for_samples <- function(
   nacho_thresholds(instrument, preset)
 }
 
-bounds_problem <- function(name, value) {
+bounds_problem <- function(name, value, signed = FALSE) {
   if (!is.numeric(value) || length(value) != 2 || anyNA(value)) {
     return(sprintf(
       "@thresholds$%s must be two numbers, a lower and an upper bound.",
@@ -131,9 +134,9 @@ bounds_problem <- function(name, value) {
   }
   problem <- if (value[1] == Inf || value[2] == -Inf) {
     "-Inf is only allowed as the lower bound and Inf only as the upper bound."
-  } else if (value[1] < 0 && value[1] != -Inf) {
+  } else if (!signed && value[1] < 0 && value[1] != -Inf) {
     "the lower bound must not be negative; use -Inf for no lower bound."
-  } else if (value[2] < 0) {
+  } else if (!signed && value[2] < 0) {
     "the upper bound must not be negative."
   } else if (value[1] > value[2]) {
     "the bounds must be increasing."
@@ -187,7 +190,14 @@ validate_thresholds <- function(thresholds) {
     names(thresholds)
   )
   for (name in c(range_names, optional_ranges)) {
-    problems <- c(problems, bounds_problem(name, thresholds[[name]]))
+    problems <- c(
+      problems,
+      bounds_problem(
+        name,
+        thresholds[[name]],
+        signed = name %in% optional_ranges
+      )
+    )
   }
   lod <- thresholds[["LoD"]]
   if (!is.numeric(lod) || length(lod) != 1 || is.na(lod) || lod == Inf) {

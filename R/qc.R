@@ -1,8 +1,8 @@
 #' Settings for data that do not come from NACHO
 #'
-#' The defaults match those of [load_rcc()], which a test checks, except
-#' `housekeeping_norm`, which is on only when the probes include
-#' `Housekeeping` ones.
+#' The defaults match those of [load_rcc()], which a test checks.
+#' `housekeeping_norm` is `NULL`, and `nacho_metadata_settings()` resolves it
+#' from the panel and the probes.
 #'
 #' @param probes The probe table, with a `CodeClass` column.
 #' @param id_colname The name of the sample id column.
@@ -498,7 +498,9 @@ content_normalise <- function(
       content_probes = reference
     ))
   }
-  house_factor <- if (!is.null(housekeeping_genes)) {
+  use_housekeeping <- !identical(settings[["panel"]], "mirna") ||
+    isTRUE(settings[["housekeeping_norm"]])
+  house_factor <- if (!is.null(housekeeping_genes) && use_housekeeping) {
     content_factor(
       scaled[probes[["Name"]] %in% housekeeping_genes, , drop = FALSE]
     )

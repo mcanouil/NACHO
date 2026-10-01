@@ -175,3 +175,30 @@ test_that("the nSolver preset flags failed ligation", {
   expect_identical(qc$Ligation_R2_status[2], "fail")
   expect_identical(qc$Ligation_NEG_status[3], "fail")
 })
+
+test_that("miRNA panels without housekeeping normalisation have no House_factor", {
+  x <- mirna_fixture()
+  expect_false("House_factor" %in% names(nacho_samples(x)))
+  expect_false("House_factor_status" %in% names(nacho_qc(x)))
+  y <- mirna_fixture(housekeeping_norm = TRUE)
+  expect_true("House_factor" %in% names(nacho_samples(y)))
+})
+
+test_that("every miRNA method is a normalisation method", {
+  expect_true(all(
+    NACHO:::mirna_methods %in% NACHO:::nacho_normalisation_methods
+  ))
+})
+
+test_that("summary() copes with thresholds that lack the miRNA metrics", {
+  x <- mirna_fixture()
+  thresholds <- x@thresholds
+  thresholds[["Ligation_order"]] <- NULL
+  x@thresholds <- thresholds
+  expect_false("Ligation_order" %in% summary(x)$metric)
+})
+
+test_that("the report lists only the thresholds of metrics the data have", {
+  output <- capture.output(NACHO:::report_markdown(GSE74821))
+  expect_false(any(grepl("Ligation", output)))
+})

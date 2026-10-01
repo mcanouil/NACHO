@@ -16,8 +16,11 @@ nacho_thresholds(
 
 \item{preset}{\code{"nsolver"} or \code{"legacy"}.}
 
-\item{haemolysis}{If \code{TRUE}, flag plasma and serum samples whose miR-451a to
-miR-23a-3p log2 ratio is above 7, a sign of haemolysis.}
+\item{haemolysis}{If \code{TRUE}, flag samples of a miRNA panel whose miR-451a to
+miR-23a-3p log2 ratio is above 7, a sign of haemolysis in plasma and
+serum.
+\code{\link[=load_rcc]{load_rcc()}} does not take it, so pass the thresholds to
+\code{normalise(outliers_thresholds = )}.}
 }
 \value{
 A named list: \code{preset}, \code{instrument}, then one element per metric.
