@@ -42,7 +42,8 @@ version `main` holds, even a development one. It still asks for approval
 on the `cran` environment, then stops before uploading.
 
 If the upload step fails because devtools changed, submit from a local
-checkout with `devtools::submit_cran()`.
+checkout with
+[`devtools::submit_cran()`](https://devtools.r-lib.org/reference/submit_cran.html).
 
 ### When CRAN asks for changes
 

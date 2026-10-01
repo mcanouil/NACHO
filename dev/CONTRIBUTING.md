@@ -24,7 +24,7 @@ web interface, as long as you edit the source file.
 - Edit the roxygen comment in the `.R` file under `R/`.
 - Don’t edit the `.Rd` files under `man/`, because they are generated.
 - Edit `README.Rmd`, not `README.md`, and render it with
-  `devtools::build_readme()`.
+  [`devtools::build_readme()`](https://devtools.r-lib.org/reference/build_readme.html).
 
 ## Pull request process
 
@@ -40,12 +40,15 @@ web interface, as long as you edit the source file.
   change.
 
 - Document functions with [roxygen2](https://roxygen2.r-lib.org/) using
-  Markdown, then run `devtools::document()`.
+  Markdown, then run
+  [`devtools::document()`](https://devtools.r-lib.org/reference/document.html).
 
 - Add or update tests with [testthat](https://testthat.r-lib.org/)
   (edition 3). Pull requests with tests are much easier to review.
 
-- Run `devtools::check()` before you open the pull request.
+- Run
+  [`devtools::check()`](https://devtools.r-lib.org/reference/check.html)
+  before you open the pull request.
 
 - GitHub Actions runs `R CMD check` on macOS, Windows and Ubuntu for
   every pull request that isn’t a draft.

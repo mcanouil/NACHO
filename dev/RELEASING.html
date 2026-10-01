@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">NACHO</a>
 
-    <small class="nav-text text-white me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.0.7.9000</small>
+    <small class="nav-text text-white me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">2.0.8.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,7 @@
 <p>It then waits for your approval on the <code>cran</code> environment. Approve it, and the workflow uploads the tarball and records the submission in <code>CRAN-SUBMISSION</code> on <code>main</code>. CRAN then emails the maintainer, and the submission only counts once you click the link in that email.</p>
 <p>Before the upload, the workflow checks <code>main</code> again. If <code>CRAN-SUBMISSION</code> there already records this version, it stops, so a re-run never submits twice.</p>
 <p>To rehearse without uploading, run “CRAN submission” by hand from <code>main</code> with “dry run” ticked. It builds and checks the tarball of whatever version <code>main</code> holds, even a development one. It still asks for approval on the <code>cran</code> environment, then stops before uploading.</p>
-<p>If the upload step fails because devtools changed, submit from a local checkout with <code>devtools::submit_cran()</code>.</p>
+<p>If the upload step fails because devtools changed, submit from a local checkout with <code><a href="https://devtools.r-lib.org/reference/submit_cran.html" class="external-link">devtools::submit_cran()</a></code>.</p>
 <div class="section level3">
 <h3 id="when-cran-asks-for-changes">When CRAN asks for changes<a class="anchor" aria-label="anchor" href="#when-cran-asks-for-changes"></a></h3>
 <p>A rejected version stays recorded in <code>CRAN-SUBMISSION</code>, so the workflow won’t submit it again on its own.</p>

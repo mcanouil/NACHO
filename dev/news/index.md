@@ -2,6 +2,10 @@
 
 ## NACHO (development version)
 
+## NACHO 2.0.8
+
+CRAN release: 2026-10-01
+
 ### Bug Fixes
 
 - In `inst/app/`,
