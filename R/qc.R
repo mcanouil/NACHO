@@ -193,6 +193,10 @@ computed_sample_columns <- c(
   "Background",
   "House_factor",
   "Housekeeping_detected",
+  "Ligation_order",
+  "Ligation_R2",
+  "Ligation_NEG",
+  "Haemolysis",
   "is_outlier"
 )
 
@@ -843,6 +847,13 @@ build_nacho <- function(
     found <- colSums(hits[housekeeping_rows, , drop = FALSE], na.rm = TRUE)
     found[no_limit] <- NA
     unname(as.integer(found))
+  }
+  if (settings[["panel"]] == "mirna") {
+    ligation <- ligation_metrics(counts, probes, limits)
+    if (!is.null(ligation)) {
+      metrics <- cbind(metrics, ligation)
+    }
+    metrics[["Haemolysis"]] <- haemolysis_metric(counts, probes)
   }
   samples <- cbind(samples, metrics, content[["extra_columns"]])
 

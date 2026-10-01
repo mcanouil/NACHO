@@ -69,3 +69,81 @@ test_that("miRNA methods are refused for mRNA panels", {
     class = "nacho_error_bad_argument"
   )
 })
+
+test_that("ligation metrics follow the NACHO definitions", {
+  counts <- matrix(
+    c(12807, 1715, 293, 9, 11, 8, 13, 6, 8, 13, 4, 3, 12, 14),
+    ncol = 1,
+    dimnames = list(
+      c(
+        "LIG_POS_A",
+        "LIG_POS_B",
+        "LIG_POS_C",
+        "LIG_NEG_A",
+        "LIG_NEG_B",
+        "LIG_NEG_C",
+        sprintf("NEG_%s(0)", LETTERS[1:8])
+      ),
+      "S1"
+    )
+  )
+  probes <- data.frame(
+    CodeClass = c(rep("Ligation", 6), rep("Negative", 8)),
+    Name = rownames(counts)
+  )
+  negatives <- counts[7:14, 1]
+  limit <- mean(negatives) + 2 * stats::sd(negatives)
+  out <- NACHO:::ligation_metrics(counts, probes, limit)
+  expect_identical(out$Ligation_order, 1)
+  expect_equal(
+    out$Ligation_R2,
+    stats::cor(log2(c(12807, 1715, 293) + 1), 3:1)^2
+  )
+  expect_equal(out$Ligation_NEG, 11 - limit)
+  expect_null(NACHO:::ligation_metrics(
+    counts[7:14, , drop = FALSE],
+    probes[7:14, ],
+    limit
+  ))
+})
+
+test_that("haemolysis is the log2 ratio of miR-451a to miR-23a-3p", {
+  x <- mirna_fixture()
+  counts <- nacho_counts(x)
+  expect_equal(
+    nacho_samples(x)$Haemolysis,
+    unname(
+      log2(counts["hsa-miR-451a", ] + 1) - log2(counts["hsa-miR-23a-3p", ] + 1)
+    )
+  )
+  expect_true(all(nacho_qc(x)$Haemolysis_status == "pass"))
+  x@thresholds <- nacho_thresholds("sprint", haemolysis = TRUE)
+  expect_identical(
+    nacho_qc(x)$Haemolysis_status == "fail",
+    nacho_samples(x)$Haemolysis > 7
+  )
+  expect_null(NACHO:::haemolysis_metric(
+    counts[1:3, ],
+    data.frame(Name = rownames(counts)[1:3])
+  ))
+})
+
+test_that("GSE270837 passes ligation QC and legacy never flags it", {
+  x <- mirna_fixture()
+  qc <- nacho_qc(x)
+  expect_true(all(qc$Ligation_order_status == "pass"))
+  expect_true(all(qc$Ligation_R2_status == "pass"))
+  expect_true(all(qc$Ligation_NEG_status == "pass"))
+  x@samples$Ligation_R2 <- 0.1
+  x@thresholds <- nacho_thresholds("sprint", preset = "legacy")
+  expect_true(all(nacho_qc(x)$Ligation_R2_status == "pass"))
+})
+
+test_that("mRNA panels get no ligation or haemolysis columns", {
+  x <- NACHO::GSE74821
+  expect_false(any(
+    c("Ligation_order", "Ligation_R2", "Ligation_NEG", "Haemolysis") %in%
+      names(nacho_samples(x))
+  ))
+  expect_false(any(grepl("^(Ligation|Haemolysis)", names(nacho_qc(x)))))
+})

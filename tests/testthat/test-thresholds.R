@@ -103,3 +103,38 @@ test_that("the housekeeping detection threshold is a lower bound", {
   x$Housekeeping_detected <- NULL
   expect_match(NACHO:::validate_thresholds(x), "lacks", all = FALSE)
 })
+
+test_that("ligation and haemolysis thresholds follow the preset", {
+  nsolver <- nacho_thresholds("sprint")
+  expect_identical(nsolver$Ligation_order, 1)
+  expect_identical(nsolver$Ligation_R2, 0.95)
+  expect_identical(nsolver$Ligation_NEG, c(-Inf, 0))
+  expect_identical(nsolver$Haemolysis, c(-Inf, Inf))
+  expect_identical(
+    nacho_thresholds("sprint", haemolysis = TRUE)$Haemolysis,
+    c(-Inf, 7)
+  )
+  legacy <- nacho_thresholds("sprint", preset = "legacy")
+  expect_identical(legacy$Ligation_order, 0)
+  expect_identical(legacy$Ligation_R2, 0)
+  expect_identical(legacy$Ligation_NEG, c(-Inf, Inf))
+  expect_error(
+    nacho_thresholds(haemolysis = NA),
+    class = "nacho_error_bad_argument"
+  )
+  expect_length(validate_thresholds(nsolver), 0)
+  expect_length(validate_thresholds(nacho_thresholds(haemolysis = TRUE)), 0)
+  nsolver$Ligation_R2 <- 2
+  expect_match(validate_thresholds(nsolver), "Ligation_R2")
+})
+
+test_that("thresholds saved before the ligation elements still validate", {
+  saved <- nacho_thresholds()
+  saved[c(
+    "Ligation_order",
+    "Ligation_R2",
+    "Ligation_NEG",
+    "Haemolysis"
+  )] <- NULL
+  expect_length(validate_thresholds(saved), 0)
+})

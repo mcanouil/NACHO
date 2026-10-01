@@ -62,3 +62,48 @@ mirna_reference <- function(
   }
   reference
 }
+
+#' Ligation quality control of each sample
+#'
+#' NACHO's own definitions, since Bruker publishes no threshold: the three
+#' ligation positive controls must be in order, their log2 counts must fall
+#' on a line (R² against their positions, which does not depend on the
+#' concentrations as long as each is the same fold below the previous one),
+#' and the largest ligation negative must stay below the detection limit.
+#'
+#' @noRd
+ligation_metrics <- function(counts, probes, limits) {
+  names <- probes[["Name"]]
+  positive <- match(c("LIG_POS_A", "LIG_POS_B", "LIG_POS_C"), names)
+  negative <- probes[["CodeClass"]] == "Ligation" & grepl("^LIG_NEG", names)
+  if (anyNA(positive) || !any(negative)) {
+    return(NULL)
+  }
+  positives <- counts[positive, , drop = FALSE]
+  data.frame(
+    Ligation_order = as.numeric(
+      positives[1, ] > positives[2, ] & positives[2, ] > positives[3, ]
+    ),
+    Ligation_R2 = unname(apply(log2(positives + 1), 2, function(m) {
+      stats::cor(m, 3:1)^2
+    })),
+    Ligation_NEG = unname(
+      apply(counts[negative, , drop = FALSE], 2, max) - limits
+    )
+  )
+}
+
+#' Haemolysis of plasma and serum samples
+#'
+#' `log2(miR-451a + 1) - log2(miR-23a-3p + 1)`, the count analogue of the
+#' qPCR delta Cq, where above 7 suggests haemolysis (Blondal et al. 2013,
+#' Methods 59, S1).
+#'
+#' @noRd
+haemolysis_metric <- function(counts, probes) {
+  rows <- match(c("hsa-miR-451a", "hsa-miR-23a-3p"), probes[["Name"]])
+  if (anyNA(rows)) {
+    return(NULL)
+  }
+  unname(log2(counts[rows[1], ] + 1) - log2(counts[rows[2], ] + 1))
+}
