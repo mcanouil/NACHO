@@ -14,6 +14,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `load_rcc()` refuses duplicated sample ids for single-sample RCC files; PlexSet files may repeat an id, since `plexset_id` tells the samples apart.
   - feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
   - feat: Duplicated probe names within one RCC sample are now refused with a clear error.
+  - feat: miRNA panels are no longer normalised with housekeeping genes by default, since their housekeeping mRNAs sit at background; pass `housekeeping_norm = TRUE` to keep it.
 - In `R/accessors.R` and `R/normalise.R`,
   - feat: `nacho_qc()` gives a status for each metric, `n_flags`, an overall `status` and a readable `reason`, and replaces `is_outlier`.
     `check_outliers()` is gone, since the status always follows the object's thresholds.
@@ -91,6 +92,9 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/ruv.R`,
   - feat: `normalisation_method = "RUVg"` removes unwanted variation estimated from the housekeeping genes, and gives the factors as `W_1`, `W_2`, ... in `nacho_samples()`.
     `suggest_ruv_k()` suggests how many to remove.
+- In `R/mirna.R`,
+  - feat: NACHO recognises miRNA panels and offers `normalisation_method = "stable_mirna"`, `"total_mirna"`, `"spike_in"` and `"ligation"`.
+  - feat: `nacho_qc()` checks the ligation controls of miRNA panels, and `nacho_thresholds(haemolysis = TRUE)` flags haemolysed plasma and serum samples.
 
 ## Performance
 
