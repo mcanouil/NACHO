@@ -368,7 +368,15 @@ control_concentrations <- function(probe_names) {
 #' Normalisation methods
 #'
 #' @noRd
-nacho_normalisation_methods <- c("GEO", "GLM", "RUVg")
+nacho_normalisation_methods <- c(
+  "GEO",
+  "GLM",
+  "RUVg",
+  "stable_mirna",
+  "total_mirna",
+  "spike_in",
+  "ligation"
+)
 
 #' Positive normalisation factor of each sample
 #'
@@ -405,14 +413,18 @@ control_factors <- function(counts, probes, excluded, method) {
 
 #' Content normalisation of the scaled counts
 #'
+#' @param counts The raw counts, which the miRNA methods use to pick their
+#'   reference probes.
 #' @param call The environment whose call names the function in errors.
 #'
 #' @return A list: `normalised`, `house_factor` (or `NULL`), `extra_columns`
-#'   (a data frame of sample columns, possibly with no column) and `settings`.
+#'   (a data frame of sample columns, possibly with no column), `settings` and
+#'   `content_probes` (the miRNA reference probes, or `NULL`).
 #'
 #' @noRd
 content_normalise <- function(
   scaled,
+  counts,
   probes,
   settings,
   housekeeping_genes,
@@ -449,7 +461,37 @@ content_normalise <- function(
       normalised = normalised,
       house_factor = NULL,
       extra_columns = extra,
-      settings = settings
+      settings = settings,
+      content_probes = NULL
+    ))
+  }
+  if (settings[["normalisation_method"]] %in% mirna_methods) {
+    if (!identical(settings[["panel"]], "mirna")) {
+      nacho_abort(
+        c(
+          "{.code normalisation_method = {.val {settings[['normalisation_method']]}}} is for miRNA panels.",
+          i = "Use {.val GEO}, {.val GLM} or {.val RUVg} for mRNA panels."
+        ),
+        class = "bad_argument",
+        call = call
+      )
+    }
+    reference <- mirna_reference(
+      settings[["normalisation_method"]],
+      counts,
+      probes,
+      call = call
+    )
+    house_factor <- content_factor(
+      scaled[probes[["Name"]] %in% reference, , drop = FALSE]
+    )
+    settings["ruv_k"] <- list(NULL)
+    return(list(
+      normalised = sweep(scaled, 2, house_factor, "*"),
+      house_factor = house_factor,
+      extra_columns = none,
+      settings = settings,
+      content_probes = reference
     ))
   }
   house_factor <- if (!is.null(housekeeping_genes)) {
@@ -469,7 +511,8 @@ content_normalise <- function(
     normalised = normalised,
     house_factor = house_factor,
     extra_columns = none,
-    settings = settings
+    settings = settings,
+    content_probes = NULL
   )
 }
 
@@ -744,6 +787,7 @@ build_nacho <- function(
 
   content <- content_normalise(
     scaled,
+    counts,
     probes,
     settings,
     housekeeping_genes,
@@ -805,6 +849,7 @@ build_nacho <- function(
   probes[["is_housekeeping"]] <- probes[["Name"]] %in% housekeeping_genes
   probes[["is_excluded"]] <- probes[["Name"]] %in% excluded
   provenance[["excluded_negatives"]] <- excluded
+  provenance[["content_probes"]] <- content[["content_probes"]]
   settings[["housekeeping_genes"]] <- housekeeping_genes
 
   nacho(

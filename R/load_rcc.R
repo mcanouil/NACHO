@@ -23,6 +23,10 @@
 #'   positive controls with the geometric mean, then removes `ruv_k` factors
 #'   of unwanted variation estimated from the housekeeping genes, which
 #'   [nacho_samples()] returns as `W_1`, `W_2`, ... for use as covariates.
+#'   For miRNA panels, `"stable_mirna"`, `"total_mirna"`, `"spike_in"` and
+#'   `"ligation"` scale by the five most stable miRNAs, the miRNAs above 50
+#'   counts, the spike-in controls or the ligation positive controls, in the
+#'   order Bruker recommends for plasma and serum.
 #' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes;
 #'   `NULL` uses [suggest_ruv_k()].
 #'   Other methods ignore it.

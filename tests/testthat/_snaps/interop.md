@@ -30,7 +30,7 @@
       as_nacho(se_with_setting("normalisation_method", "foo"))
     Condition
       Error in `as_nacho()`:
-      ! `metadata(x)$nacho$settings$normalisation_method` must be one of "GEO", "GLM", or "RUVg", not "foo".
+      ! `metadata(x)$nacho$settings$normalisation_method` must be one of "GEO", "GLM", "RUVg", "stable_mirna", "total_mirna", "spike_in", or "ligation", not "foo".
 
 # as_nacho() checks the thresholds and RCC type saved in the metadata
 

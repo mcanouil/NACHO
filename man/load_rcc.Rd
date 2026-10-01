@@ -47,7 +47,11 @@ scale samples by their positive controls, with the geometric mean or a
 Poisson model, then by the housekeeping genes; \code{"RUVg"} scales by the
 positive controls with the geometric mean, then removes \code{ruv_k} factors
 of unwanted variation estimated from the housekeeping genes, which
-\code{\link[=nacho_samples]{nacho_samples()}} returns as \code{W_1}, \code{W_2}, ... for use as covariates.}
+\code{\link[=nacho_samples]{nacho_samples()}} returns as \code{W_1}, \code{W_2}, ... for use as covariates.
+For miRNA panels, \code{"stable_mirna"}, \code{"total_mirna"}, \code{"spike_in"} and
+\code{"ligation"} scale by the five most stable miRNAs, the miRNAs above 50
+counts, the spike-in controls or the ligation positive controls, in the
+order Bruker recommends for plasma and serum.}
 
 \item{background}{[\link{character}] How to estimate each sample's background
 from its negative controls: \code{"none"} (the default), \code{"mean"},

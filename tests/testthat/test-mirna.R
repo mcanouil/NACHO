@@ -33,3 +33,39 @@ test_that("mRNA panels keep housekeeping normalisation by default", {
   expect_identical(GSE74821@settings$panel, "mrna")
   expect_true(GSE74821@settings$housekeeping_norm)
 })
+
+test_that("each miRNA method scales by its own reference probes", {
+  x <- mirna_fixture()
+  counts <- nacho_counts(x)
+  probes <- nacho_probes(x)
+  expect_setequal(
+    NACHO:::mirna_reference("spike_in", counts, probes),
+    probes$Name[probes$CodeClass == "SpikeIn"]
+  )
+  expect_setequal(
+    NACHO:::mirna_reference("ligation", counts, probes),
+    c("LIG_POS_A", "LIG_POS_B", "LIG_POS_C")
+  )
+  endogenous <- grepl("Endogenous", probes$CodeClass)
+  expect_setequal(
+    NACHO:::mirna_reference("total_mirna", counts, probes),
+    probes$Name[endogenous & apply(counts > 50, 1, all)]
+  )
+  expect_length(NACHO:::mirna_reference("stable_mirna", counts, probes), 5)
+})
+
+test_that("miRNA methods set the content factor and record the probes", {
+  for (method in c("stable_mirna", "total_mirna", "spike_in", "ligation")) {
+    x <- mirna_fixture(normalisation_method = method)
+    expect_true("House_factor" %in% names(nacho_samples(x)), info = method)
+    expect_gt(length(x@provenance$content_probes), 0)
+  }
+})
+
+test_that("miRNA methods are refused for mRNA panels", {
+  expect_error(
+    normalise(GSE74821, normalisation_method = "spike_in"),
+    regexp = "miRNA",
+    class = "nacho_error_bad_argument"
+  )
+})
