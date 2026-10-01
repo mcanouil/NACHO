@@ -86,7 +86,8 @@ ligation_metrics <- function(counts, probes, limits) {
       log2(positives + 1),
       2,
       function(m) {
-        if (length(unique(m)) == 1) 0 else stats::cor(m, 3:1)^2
+        r <- if (length(unique(m)) == 1) 0 else stats::cor(m, 3:1)
+        if (r < 0) 0 else r^2
       }
     ))
   }

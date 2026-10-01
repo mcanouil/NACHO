@@ -774,7 +774,10 @@ build_nacho <- function(
 
   probes[["detection_rate"]] <- missing_not_nan(rowMeans(hits, na.rm = TRUE))
 
-  if (isTRUE(settings[["housekeeping_predict"]])) {
+  if (
+    isTRUE(settings[["housekeeping_predict"]]) &&
+      !settings[["normalisation_method"]] %in% mirna_methods
+  ) {
     nacho_inform("Searching for the best housekeeping genes.")
     predicted <- predict_housekeeping(counts, probes)
     if (length(predicted) == 0) {

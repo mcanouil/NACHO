@@ -228,3 +228,36 @@ test_that("a partial ligation control set keeps the metrics it can compute", {
   )
   expect_named(negatives_only, "Ligation_NEG")
 })
+
+test_that("a miRNA method without reference probes is refused", {
+  x <- mirna_fixture()
+  probes <- nacho_probes(x)
+  expect_error(
+    NACHO:::mirna_reference(
+      "spike_in",
+      nacho_counts(x),
+      probes[probes$CodeClass != "SpikeIn", ]
+    ),
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("a reversed ligation series gets an R2 of 0", {
+  probes <- data.frame(
+    CodeClass = "Ligation",
+    Name = c("LIG_POS_A", "LIG_POS_B", "LIG_POS_C")
+  )
+  counts <- matrix(c(50, 200, 800), ncol = 1)
+  expect_identical(NACHO:::ligation_metrics(counts, probes, 0)$Ligation_R2, 0)
+})
+
+test_that("a miRNA method ignores housekeeping_predict", {
+  x <- mirna_fixture(
+    normalisation_method = "spike_in",
+    housekeeping_predict = TRUE
+  )
+  expect_false(any(
+    nacho_probes(x)$is_housekeeping &
+      !grepl("Housekeeping", nacho_probes(x)$CodeClass)
+  ))
+})

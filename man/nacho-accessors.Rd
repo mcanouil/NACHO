@@ -32,7 +32,11 @@ sample.
 holds the sample ids, and the PCA scores come last (\code{PC01}, \code{PC02}, ...).
 \code{Detection_rate} (the share of endogenous genes detected) and
 \code{Housekeeping_detected} (the number of housekeeping genes detected) are
-\code{NA} for a sample without a detection limit.
+\code{NA} for a sample without a detection limit, and \code{Housekeeping_detected}
+is also \code{NA} for a miRNA panel that skips housekeeping normalisation.
+miRNA panels add \code{Ligation_order}, \code{Ligation_R2} and \code{Ligation_NEG} (the
+ligation controls), and \code{Haemolysis}, the log2 ratio of \verb{miR-451a} to
+\verb{miR-23a-3p}, when those probes are present.
 \item \code{nacho_probes()}: a data frame with one row per probe: \code{CodeClass},
 \code{Name}, \code{Accession}, \code{detection_rate} (the share of samples with a
 detection limit in which the probe is above it), \code{is_housekeeping} and

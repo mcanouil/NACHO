@@ -37,8 +37,8 @@ nacho_presets <- c("nsolver", "legacy")
 #' @param instrument The nCounter instrument: `"max"`, `"flex"`, `"pro"` or
 #'   `"sprint"`.
 #' @param preset `"nsolver"` or `"legacy"`.
-#' @param haemolysis If `TRUE`, flag samples of a miRNA panel whose miR-451a to
-#'   miR-23a-3p log2 ratio is above 7, a sign of haemolysis in plasma and
+#' @param haemolysis If `TRUE`, flag samples of a miRNA panel whose `miR-451a` to
+#'   `miR-23a-3p` log2 ratio is above 7, a sign of haemolysis in plasma and
 #'   serum.
 #'   [load_rcc()] does not take it, so pass the thresholds to
 #'   `normalise(outliers_thresholds = )`.
