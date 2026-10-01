@@ -56,9 +56,10 @@ genorm_ranking <- function(log_expr, call = rlang::caller_env()) {
   pair <- character(0)
   variation <- numeric(0)
   current <- seq_len(n)
+  totals <- rowSums(spread)
   while (length(current) > 2) {
-    m <- rowSums(spread[current, current, drop = FALSE]) / (length(current) - 1)
-    worst <- current[which.max(m)]
+    worst <- current[which.max(totals[current])]
+    totals <- totals - spread[, worst]
     kept <- setdiff(current, worst)
     ratio <- rowMeans(log_expr[, kept, drop = FALSE]) -
       rowMeans(log_expr[, current, drop = FALSE])
@@ -139,6 +140,8 @@ normfinder_rho <- function(log_expr, group = NULL, call = rlang::caller_env()) {
 #' with no missing count.
 #' Per-sample scaling cancels out of both geNorm and NormFinder, so raw counts
 #' give the same ranking as positive-normalised ones.
+#' Background correction is deliberately skipped, so the ranking does not
+#' depend on the background setting.
 #'
 #' @noRd
 stability_input <- function(counts, detection_rate, min_detection) {
@@ -193,6 +196,15 @@ housekeeping_stability <- function(
   if (length(unknown) > 0) {
     nacho_abort(
       "{.arg genes} has name{?s} that {?is/are} not a probe: {.val {utils::head(unknown, 5)}}.",
+      class = "bad_argument"
+    )
+  }
+  if (length(genes) == 0) {
+    nacho_abort(
+      c(
+        "There are no genes to rank.",
+        i = "Pass {.arg genes}, since the object has no {.val Housekeeping} probe."
+      ),
       class = "bad_argument"
     )
   }

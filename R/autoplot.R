@@ -1027,13 +1027,20 @@ plot_stability <- function(
   outliers_factor,
   outliers_labels
 ) {
+  reason <- NULL
   ranking <- rlang::try_fetch(
     housekeeping_stability(object)[["ranking"]],
-    nacho_error_bad_argument = function(cnd) NULL
+    nacho_error_bad_argument = function(cnd) {
+      reason <<- rlang::cnd_message(cnd)
+      NULL
+    }
   )
   if (is.null(ranking)) {
     nacho_warn(
-      "Stability needs at least three housekeeping genes above background in most samples.",
+      c(
+        "Stability cannot be drawn.",
+        x = "{reason}"
+      ),
       class = "metric_unavailable"
     )
     return(not_available_plot("Housekeeping gene", "geNorm M"))

@@ -221,6 +221,29 @@ test_that("a single sample or no detection limit is a classed error", {
   )
 })
 
+test_that("housekeeping_predict falls back with one sample", {
+  one <- suppressWarnings(GSE74821[, 1])
+  classes <- character(0)
+  withCallingHandlers(
+    suppressMessages(normalise(one, housekeeping_predict = TRUE)),
+    warning = function(w) {
+      classes <<- c(classes, class(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_true("nacho_warning_no_housekeeping" %in% classes)
+})
+
+test_that("an object without housekeeping probes has no genes to rank", {
+  x <- GSE74821
+  x@probes$CodeClass[x@probes$CodeClass == "Housekeeping"] <- "Endogenous"
+  expect_error(
+    housekeeping_stability(x),
+    "no genes to rank",
+    class = "nacho_error_bad_argument"
+  )
+})
+
 test_that("predicted housekeeping genes are the five most stable by geNorm", {
   x <- suppressMessages(normalise(GSE74821, housekeeping_predict = TRUE))
   predicted <- x@settings$housekeeping_genes
