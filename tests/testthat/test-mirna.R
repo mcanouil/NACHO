@@ -100,11 +100,14 @@ test_that("ligation metrics follow the NACHO definitions", {
     stats::cor(log2(c(12807, 1715, 293) + 1), 3:1)^2
   )
   expect_equal(out$Ligation_NEG, 11 - limit)
-  expect_null(NACHO:::ligation_metrics(
-    counts[7:14, , drop = FALSE],
-    probes[7:14, ],
-    limit
-  ))
+  expect_identical(
+    ncol(NACHO:::ligation_metrics(
+      counts[7:14, , drop = FALSE],
+      probes[7:14, ],
+      limit
+    )),
+    0L
+  )
 })
 
 test_that("haemolysis is the log2 ratio of miR-451a to miR-23a-3p", {
@@ -201,4 +204,27 @@ test_that("summary() copes with thresholds that lack the miRNA metrics", {
 test_that("the report lists only the thresholds of metrics the data have", {
   output <- capture.output(NACHO:::report_markdown(GSE74821))
   expect_false(any(grepl("Ligation", output)))
+})
+
+test_that("a partial ligation control set keeps the metrics it can compute", {
+  probes <- data.frame(
+    CodeClass = c("Ligation", "Ligation", "Ligation", "Ligation"),
+    Name = c("LIG_POS_A", "LIG_POS_B", "LIG_POS_C", "LIG_NEG_A")
+  )
+  counts <- matrix(c(800, 200, 50, 5, 700, 180, 40, 1), nrow = 4)
+  both <- NACHO:::ligation_metrics(counts, probes, c(2, 2))
+  expect_named(both, c("Ligation_order", "Ligation_R2", "Ligation_NEG"))
+  expect_identical(both$Ligation_NEG, c(3, -1))
+  positives_only <- NACHO:::ligation_metrics(
+    counts[1:3, ],
+    probes[1:3, ],
+    c(2, 2)
+  )
+  expect_named(positives_only, c("Ligation_order", "Ligation_R2"))
+  negatives_only <- NACHO:::ligation_metrics(
+    counts[c(1, 4), ],
+    probes[c(1, 4), ],
+    c(2, 2)
+  )
+  expect_named(negatives_only, "Ligation_NEG")
 })

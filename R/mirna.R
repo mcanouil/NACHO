@@ -76,21 +76,29 @@ ligation_metrics <- function(counts, probes, limits) {
   names <- probes[["Name"]]
   positive <- match(c("LIG_POS_A", "LIG_POS_B", "LIG_POS_C"), names)
   negative <- probes[["CodeClass"]] == "Ligation" & grepl("^LIG_NEG", names)
-  if (anyNA(positive) || !any(negative)) {
-    return(NULL)
-  }
-  positives <- counts[positive, , drop = FALSE]
-  data.frame(
-    Ligation_order = as.numeric(
+  metrics <- data.frame(row.names = seq_len(ncol(counts)))
+  if (!anyNA(positive)) {
+    positives <- counts[positive, , drop = FALSE]
+    metrics[["Ligation_order"]] <- as.numeric(
       positives[1, ] > positives[2, ] & positives[2, ] > positives[3, ]
-    ),
-    Ligation_R2 = unname(apply(log2(positives + 1), 2, function(m) {
-      if (length(unique(m)) == 1) 0 else stats::cor(m, 3:1)^2
-    })),
-    Ligation_NEG = unname(
-      apply(counts[negative, , drop = FALSE], 2, max) - limits
     )
-  )
+    metrics[["Ligation_R2"]] <- unname(apply(
+      log2(positives + 1),
+      2,
+      function(m) {
+        if (length(unique(m)) == 1) 0 else stats::cor(m, 3:1)^2
+      }
+    ))
+  }
+  if (any(negative)) {
+    metrics[["Ligation_NEG"]] <- unname(
+      apply(counts[negative, , drop = FALSE], 2, function(v) {
+        if (all(is.na(v))) NA_real_ else max(v, na.rm = TRUE)
+      }) -
+        limits
+    )
+  }
+  metrics
 }
 
 #' Haemolysis of plasma and serum samples

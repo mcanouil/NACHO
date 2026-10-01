@@ -842,7 +842,9 @@ build_nacho <- function(
   }
   housekeeping_rows <- probes[["Name"]] %in% housekeeping_genes
   metrics[["Housekeeping_detected"]] <- if (
-    settings[["panel"]] == "mirna" || !any(housekeeping_rows)
+    (settings[["panel"]] == "mirna" &&
+      !isTRUE(settings[["housekeeping_norm"]])) ||
+      !any(housekeeping_rows)
   ) {
     NA_integer_
   } else {
@@ -851,10 +853,7 @@ build_nacho <- function(
     unname(as.integer(found))
   }
   if (settings[["panel"]] == "mirna") {
-    ligation <- ligation_metrics(counts, probes, limits)
-    if (!is.null(ligation)) {
-      metrics <- cbind(metrics, ligation)
-    }
+    metrics <- cbind(metrics, ligation_metrics(counts, probes, limits))
     metrics[["Haemolysis"]] <- haemolysis_metric(counts, probes)
   }
   samples <- cbind(samples, metrics, content[["extra_columns"]])
