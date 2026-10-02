@@ -13,7 +13,7 @@ test_that("a fit that cannot be a positive line gives NA", {
 })
 
 geo_object <- function() {
-  suppressMessages(normalise(GSE74821, normalisation_method = "GEO"))
+  suppressMessages(normalise(NACHO::GSE74821, normalisation_method = "GEO"))
 }
 
 test_that("a failed GLM warns, names the samples and falls back to GEO", {
