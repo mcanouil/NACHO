@@ -77,6 +77,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
     The count is in `Housekeeping_detected`, and the nSolver preset flags a sample below 3, while the legacy preset uses 0 and never flags.
   - feat: A sample without a detection limit, because it has fewer than two negative probes with counts, gets a missing `Detection_rate` and `Housekeeping_detected`.
     `load_rcc()` then gives one `metric_unavailable` warning that names the samples.
+  - feat: GLM normalisation starts from the least squares line, checks convergence, and falls back to the geometric mean with a classed warning when a sample does not fit.
 - In `R/conditions.R`,
   - feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
 - In `R/load_rcc.R`,
