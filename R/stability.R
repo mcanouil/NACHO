@@ -39,6 +39,7 @@ check_enough_genes <- function(log_expr, method, call) {
 #'
 #' @noRd
 genorm_m <- function(log_expr, call = rlang::caller_env()) {
+  check_enough_samples(log_expr, "geNorm", call)
   check_enough_genes(log_expr, "geNorm", call)
   spread <- pairwise_sd(log_expr)
   rowSums(spread) / (ncol(log_expr) - 1)

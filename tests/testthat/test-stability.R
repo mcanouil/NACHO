@@ -45,6 +45,14 @@ test_that("geNorm M refuses fewer than three genes", {
   )
 })
 
+test_that("geNorm M refuses fewer than two samples", {
+  expect_error(
+    NACHO:::genorm_m(hand_expr[1, , drop = FALSE]),
+    "at least two samples",
+    class = "nacho_error_bad_argument"
+  )
+})
+
 test_that("geNorm ranking refuses an input without gene names", {
   unnamed <- unname(hand_expr)
   expect_error(
