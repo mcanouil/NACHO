@@ -37,7 +37,7 @@ test_that("a failed GLM warns, names the samples and falls back to GEO", {
   expect_equal(nacho_samples(y)[["Positive_factor"]], unname(expected))
 })
 
-test_that("a successful GLM matches the NACHO 2 slope on real data", {
+test_that("a successful GLM keeps the method and records no fallback", {
   x <- suppressMessages(normalise(geo_object(), normalisation_method = "GLM"))
   expect_null(x@provenance[["glm_fallback"]])
   expect_identical(x@settings[["normalisation_method"]], "GLM")
@@ -85,6 +85,18 @@ test_that("a sample with fewer than two kept controls gives NA", {
   )
   expect_identical(
     NACHO:::glm_slope(concentration, c(5, rep(NA_real_, 6))),
+    NA_real_
+  )
+})
+
+test_that("a missing concentration cannot abort the GLM fit", {
+  concentration <- c(NA, 0, 0.5, 2, 8, 32, 128)
+  expect_identical(
+    NACHO:::glm_slope(concentration, c(5, rep(NA_real_, 6))),
+    NA_real_
+  )
+  expect_identical(
+    NACHO:::glm_slope(concentration, c(5, 3, rep(NA_real_, 5))),
     NA_real_
   )
 })

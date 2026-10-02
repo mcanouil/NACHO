@@ -92,6 +92,8 @@ with a Poisson GLM and an identity link, and the positive factor is the
 mean slope over the sample's slope.
 When the fit fails for any sample, NACHO warns and uses the geometric
 mean for every sample, so all samples stay on the same scale.
+The recorded \code{normalisation_method} then becomes \code{"GEO"}, and the failed
+samples are listed in \code{provenance$glm_fallback}.
 
 The normalisation runs in this order: raw counts, negative probe
 exclusion, background (\code{background} and \code{background_mode}), positive

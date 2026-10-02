@@ -28,6 +28,8 @@
 #'   mean slope over the sample's slope.
 #'   When the fit fails for any sample, NACHO warns and uses the geometric
 #'   mean for every sample, so all samples stay on the same scale.
+#'   The recorded `normalisation_method` then becomes `"GEO"`, and the failed
+#'   samples are listed in `provenance$glm_fallback`.
 #'
 #'   The normalisation runs in this order: raw counts, negative probe
 #'   exclusion, background (`background` and `background_mode`), positive

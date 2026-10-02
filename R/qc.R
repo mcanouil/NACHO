@@ -424,7 +424,7 @@ control_factors <- function(counts, probes, excluded, method) {
 #'
 #' @noRd
 glm_slope <- function(concentration, counts) {
-  keep <- !is.na(counts)
+  keep <- !is.na(counts) & !is.na(concentration)
   if (sum(keep) < 2) {
     return(NA_real_)
   }
@@ -441,15 +441,14 @@ glm_slope <- function(concentration, counts) {
     )),
     error = function(cnd) NULL
   )
-  if (
-    is.null(fit) ||
-      !fit[["converged"]] ||
-      stats::coef(fit)[[2]] <= 0 ||
-      any(stats::fitted(fit) <= 0)
-  ) {
+  if (is.null(fit) || !fit[["converged"]]) {
     return(NA_real_)
   }
-  unname(stats::coef(fit)[[2]])
+  slope <- unname(stats::coef(fit)[[2]])
+  if (is.na(slope) || slope <= 0 || any(stats::fitted(fit) <= 0)) {
+    return(NA_real_)
+  }
+  slope
 }
 
 #' Content normalisation of the scaled counts
@@ -802,7 +801,14 @@ build_nacho <- function(
           "{length(factors[['glm_failed']])} sample{?s},",
           "so NACHO used the geometric mean ({.val GEO}) instead."
         ),
-        x = "Failed: {.val {utils::head(factors[['glm_failed']], 5)}}.",
+        x = paste0(
+          "Failed: ",
+          paste(utils::head(factors[["glm_failed"]], 5), collapse = ", "),
+          if (length(factors[["glm_failed"]]) > 5) {
+            paste0(" and ", length(factors[["glm_failed"]]) - 5, " more")
+          },
+          "."
+        ),
         i = "Check the positive controls of those samples with {.code autoplot(x, type = \"Positive\")}."
       ),
       class = "glm_convergence",
