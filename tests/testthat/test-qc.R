@@ -33,6 +33,12 @@ test_that("a negative probe with only missing counts is left out of the rule", {
     NACHO:::excluded_negatives(counts, rep("Negative", 4), "nsolver"),
     character(0)
   )
+  padded <- negative_matrix(c(40, 11, 9, 12, 10))
+  padded["NEG_E", ] <- NA
+  expect_identical(
+    NACHO:::excluded_negatives(padded, rep("Negative", 5), "nsolver"),
+    "NEG_A"
+  )
 })
 
 test_that("the legacy rule keeps the NACHO 2 median rule", {
@@ -182,11 +188,7 @@ test_that("a negative probe with all counts missing is never excluded", {
   }
   counts <- negative_matrix(c(40, 11, 9, 12, 10))
   counts["NEG_E", ] <- NA
-  for (preset in c("nsolver", "legacy")) {
-    excluded <- expect_no_error(exclude(counts, preset))
-    expect_false("NEG_E" %in% excluded)
-  }
-  expect_identical(exclude(counts, "nsolver"), "NEG_A")
+  expect_false("NEG_E" %in% expect_no_error(exclude(counts, "legacy")))
 
   few <- negative_matrix(c(40, 11, 9, 12))
   few["NEG_D", ] <- NA

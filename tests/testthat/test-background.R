@@ -148,7 +148,7 @@ test_that("a sample with fewer than two observed negative counts gets an NA mean
   expect_identical(level[2], NA_real_)
 })
 
-test_that("background errors name the calling function", {
+test_that("background_levels() forwards the call it is given to its errors", {
   d <- negatives_counts()
   error <- tryCatch(
     NACHO:::background_levels(
