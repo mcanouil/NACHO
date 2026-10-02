@@ -323,28 +323,23 @@ test_that("a missing background warns once, names the sample, and stays quiet on
   x@settings$background <- "geo"
   counts <- x@counts[, 1:3]
   counts[x@probes$CodeClass == "Negative", 2] <- NA
-  messages <- character(0)
-  withCallingHandlers(
-    rebuild_with_counts(x, counts, x@probes),
-    nacho_warning_metric_unavailable = function(cnd) {
-      messages <<- c(messages, conditionMessage(cnd))
-      invokeRestart("muffleWarning")
-    },
-    warning = function(cnd) invokeRestart("muffleWarning")
-  )
-  background <- grep("background", messages, value = TRUE)
+  collect <- function(warn_missing) {
+    messages <- character(0)
+    withCallingHandlers(
+      rebuild_with_counts(x, counts, x@probes, warn_missing),
+      warning = function(cnd) {
+        if (inherits(cnd, "nacho_warning_metric_unavailable")) {
+          messages <<- c(messages, conditionMessage(cnd))
+        }
+        invokeRestart("muffleWarning")
+      }
+    )
+    messages
+  }
+  background <- grep("background", collect(TRUE), value = TRUE)
   expect_length(background, 1L)
   expect_match(background, rownames(x@samples)[2], fixed = TRUE)
-  quiet <- character(0)
-  withCallingHandlers(
-    rebuild_with_counts(x, counts, x@probes, FALSE),
-    nacho_warning_metric_unavailable = function(cnd) {
-      quiet <<- c(quiet, conditionMessage(cnd))
-      invokeRestart("muffleWarning")
-    },
-    warning = function(cnd) invokeRestart("muffleWarning")
-  )
-  expect_length(quiet, 0L)
+  expect_length(collect(FALSE), 0L)
 })
 
 test_that("build_nacho() errors from background name the caller", {

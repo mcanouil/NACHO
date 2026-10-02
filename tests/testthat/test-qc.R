@@ -175,3 +175,27 @@ test_that("missing probes in some files keep QC working", {
   expect_true(all(is.finite(nacho_qc(x)$MC)))
   expect_true(all(is.finite(nacho_qc(x)$Positive_factor)))
 })
+
+test_that("a negative probe with all counts missing is never excluded", {
+  exclude <- function(counts, preset) {
+    NACHO:::excluded_negatives(counts, rep("Negative", nrow(counts)), preset)
+  }
+  counts <- negative_matrix(c(40, 11, 9, 12, 10))
+  counts["NEG_E", ] <- NA
+  for (preset in c("nsolver", "legacy")) {
+    excluded <- expect_no_error(exclude(counts, preset))
+    expect_false("NEG_E" %in% excluded)
+  }
+  expect_identical(exclude(counts, "nsolver"), "NEG_A")
+
+  few <- negative_matrix(c(40, 11, 9, 12))
+  few["NEG_D", ] <- NA
+  expect_identical(expect_no_error(exclude(few, "nsolver")), character(0))
+  expect_false("NEG_D" %in% expect_no_error(exclude(few, "legacy")))
+
+  none <- negative_matrix(c(40, 11, 9, 12))
+  none[] <- NA
+  for (preset in c("nsolver", "legacy")) {
+    expect_identical(expect_no_error(exclude(none, preset)), character(0))
+  }
+})
