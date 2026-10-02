@@ -5,7 +5,7 @@ NULL
 #'
 #' @noRd
 cramers_v <- function(a, b) {
-  observed <- table(a, b)
+  observed <- table(droplevels(factor(a)), droplevels(factor(b)))
   if (min(dim(observed)) < 2) {
     return(NA_real_)
   }
@@ -56,6 +56,20 @@ bind_or_empty <- function(template, pieces) {
   do.call(rbind, pieces)
 }
 
+#' Rows that carry one observation of a metric
+#'
+#' PlexSet lane metrics repeat across the eight samples of a lane, so only
+#' the first sample of each lane file counts.
+#'
+#' @noRd
+metric_rows <- function(samples, metric, x) {
+  if (x@rcc_type != "n8" || !metric %in% lane_metrics) {
+    return(rep(TRUE, nrow(samples)))
+  }
+  lanes <- strip_plexset_suffix(samples, x@settings[["id_colname"]])
+  !duplicated(lanes[[x@settings[["id_colname"]]]])
+}
+
 #' Batch and confounding diagnostics
 #'
 #' Checks whether the study design, the quality-control metrics and the main
@@ -72,13 +86,13 @@ bind_or_empty <- function(template, pieces) {
 #'   batches.
 #'
 #' @return A list:
-#' * `design`: for each batch variable, its number of levels, Cramér's V with
+#' * `design`: `NULL` without `group`; otherwise, for each batch variable, its number of levels, Cramér's V with
 #'   `group`, the number of levels that hold a single group, and
 #'   `confounded`, `TRUE` when at least one does.
 #'   A level counts as holding a single group only when it has two or more
 #'   samples with a group, so a cartridge with one sample never makes the
 #'   design confounded.
-#' * `crosstabs`: the table of `group` against each batch variable.
+#' * `crosstabs`: `NULL` without `group`; otherwise the table of `group` against each batch variable.
 #' * `metrics`: Kruskal-Wallis tests of each quality-control metric against
 #'   each batch variable.
 #' * `pc_batch`: the share of each principal component's variance explained
@@ -87,7 +101,8 @@ bind_or_empty <- function(template, pieces) {
 #' `metrics` and `pc_batch` are data frames with these columns, and have no
 #' rows when there is nothing to report.
 #' A batch variable with one level gives `NA` in `statistic`, `p_value` and
-#' `r_squared`.
+#' `r_squared`, and a constant metric gives `NA` in `statistic` and `p_value`.
+#' For PlexSet data, `BD` and `FoV` are tested once per lane.
 #' @export
 #' @examples
 #' data(GSE74821)
@@ -147,10 +162,12 @@ batch_diagnostics <- function(
       do.call(
         rbind,
         lapply(metric_names, function(m) {
-          values <- samples[[m]]
-          usable <- !is.na(values) & !is.na(samples[[b]])
+          rows <- metric_rows(samples, m, x)
+          values <- samples[[m]][rows]
+          batch_values <- samples[[b]][rows]
+          usable <- !is.na(values) & !is.na(batch_values)
           if (
-            length(unique(samples[[b]][usable])) < 2 ||
+            length(unique(batch_values[usable])) < 2 ||
               length(unique(values[usable])) < 2
           ) {
             return(data.frame(
@@ -162,7 +179,7 @@ batch_diagnostics <- function(
           }
           test <- stats::kruskal.test(
             values[usable],
-            factor(samples[[b]][usable])
+            factor(batch_values[usable])
           )
           data.frame(
             metric = m,

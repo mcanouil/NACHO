@@ -1,3 +1,26 @@
+test_that("Cramér's V ignores unused factor levels", {
+  expect_equal(
+    NACHO:::cramers_v(
+      factor(c("a", "a", "b", "b"), levels = c("a", "b", "c")),
+      c("x", "x", "y", "y")
+    ),
+    1
+  )
+})
+
+test_that("PlexSet lane metrics are tested once per lane", {
+  samples <- nacho_samples(plexset_nacho)
+  id <- plexset_nacho@settings[["id_colname"]]
+  rows <- NACHO:::metric_rows(samples, "BD", plexset_nacho)
+  expect_identical(
+    sum(rows),
+    length(unique(sub("_S[0-9]*$", "", samples[[id]])))
+  )
+  expect_lt(sum(rows), nrow(samples))
+  expect_true(all(NACHO:::metric_rows(samples, "MC", plexset_nacho)))
+  expect_true(all(NACHO:::metric_rows(nacho_samples(GSE74821), "BD", GSE74821)))
+})
+
 test_that("Cramér's V is 1 for full confounding and 0 for balance", {
   expect_equal(NACHO:::cramers_v(c(1, 1, 2, 2), c("x", "x", "y", "y")), 1)
   expect_equal(NACHO:::cramers_v(c(1, 2, 1, 2), c("x", "x", "y", "y")), 0)
