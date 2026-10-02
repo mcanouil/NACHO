@@ -54,6 +54,10 @@ The dashed line marks M = 1.5, the limit geNorm suggests for
 homogeneous samples.
 This plot ignores \code{colour}, \code{show_legend}, \code{show_outliers} and
 \code{outliers_labels}, and it is not in the Shiny app or the report.
+\item \code{"RLE"}: Relative log expression of the normalised endogenous genes.
+\item \code{"BatchFactors"}: Normalisation factors by cartridge.
+\item \code{"PCBatch"}: Share of each principal component explained by cartridge
+and date; see \code{\link[=batch_diagnostics]{batch_diagnostics()}}.
 }
 \item \code{colour}: The column of \code{nacho_samples(object)} that colours the points.
 \item \code{size}: The point size, and the line width in the \code{"NORM"} plot.

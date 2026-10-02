@@ -91,6 +91,22 @@ test_that("the Stability plot orders the genes by geNorm rank", {
   )
 })
 
+test_that("the RLE plot centres each gene on its median", {
+  plot <- autoplot(GSE74821, type = "RLE")
+  data <- plot$data
+  expect_true(all(c("sample", "rle") %in% names(data)))
+  expect_equal(
+    stats::median(tapply(data$rle, data$Name, stats::median)),
+    0,
+    tolerance = 1e-8
+  )
+})
+
+test_that("PCBatch shows one tile per component and batch variable", {
+  plot <- autoplot(GSE74821, type = "PCBatch")
+  expect_identical(nrow(plot$data), nrow(batch_diagnostics(GSE74821)$pc_batch))
+})
+
 test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable", {
   for (type in c("PCL", "LoD")) {
     expect_not_available(plexset_nacho, type)
@@ -123,7 +139,10 @@ metrics <- c(
   "PFNF",
   "HF",
   "NORM",
-  "Stability"
+  "Stability",
+  "RLE",
+  "BatchFactors",
+  "PCBatch"
 )
 
 for (imetric in metrics) {

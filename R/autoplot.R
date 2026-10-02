@@ -45,6 +45,10 @@ NULL
 #'     homogeneous samples.
 #'     This plot ignores `colour`, `show_legend`, `show_outliers` and
 #'     `outliers_labels`, and it is not in the Shiny app or the report.
+#'   * `"RLE"`: Relative log expression of the normalised endogenous genes.
+#'   * `"BatchFactors"`: Normalisation factors by cartridge.
+#'   * `"PCBatch"`: Share of each principal component explained by cartridge
+#'     and date; see [batch_diagnostics()].
 #' * `colour`: The column of `nacho_samples(object)` that colours the points.
 #' * `size`: The point size, and the line width in the `"NORM"` plot.
 #' * `show_legend`: If `FALSE`, hide the colour legend.
@@ -1060,6 +1064,140 @@ plot_stability <- function(
     )
 }
 
+plot_rle <- function(
+  object,
+  type,
+  colour,
+  size,
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
+) {
+  id <- object@settings[["id_colname"]]
+  rows <- grepl("Endogenous", object@probes[["CodeClass"]])
+  values <- log2(object@normalised[rows, , drop = FALSE] + 1)
+  rle <- values - apply(values, 1, stats::median, na.rm = TRUE)
+  samples <- plot_samples(object, colour)
+  data <- data.frame(
+    Name = rep(rownames(rle), times = ncol(rle)),
+    sample = rep(colnames(rle), each = nrow(rle)),
+    rle = as.vector(rle)
+  )
+  data[[colour]] <- samples[[colour]][match(data[["sample"]], samples[[id]])]
+  data[["sample"]] <- factor(
+    data[["sample"]],
+    levels = samples[[id]][order(samples[[colour]])]
+  )
+  ggplot2::ggplot(data) +
+    ggplot2::aes(
+      x = .data[["sample"]],
+      y = .data[["rle"]],
+      colour = .data[[colour]]
+    ) +
+    ggplot2::geom_hline(
+      yintercept = 0,
+      colour = "#b22222",
+      linetype = "longdash"
+    ) +
+    ggplot2::geom_boxplot(outliers = FALSE, na.rm = TRUE) +
+    ggplot2::scale_colour_viridis_d(
+      option = "plasma",
+      direction = 1,
+      end = 0.85
+    ) +
+    ggplot2::labs(
+      x = "Sample",
+      y = "Relative log expression",
+      colour = colour
+    ) +
+    ggplot2::theme(axis.text.x = ggplot2::element_blank()) +
+    (if (!show_legend) ggplot2::guides(colour = "none"))
+}
+
+plot_batch_factors <- function(
+  object,
+  type,
+  colour,
+  size,
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
+) {
+  samples <- plot_samples(object, colour)
+  factors <- intersect(
+    c("Positive_factor", "Negative_factor", "House_factor"),
+    names(samples)
+  )
+  data <- do.call(
+    rbind,
+    lapply(factors, function(f) {
+      data.frame(
+        CartridgeID = samples[["CartridgeID"]],
+        colour = samples[[colour]],
+        factor = f,
+        value = samples[[f]]
+      )
+    })
+  )
+  ggplot2::ggplot(data) +
+    ggplot2::aes(x = .data[["CartridgeID"]], y = .data[["value"]]) +
+    ggplot2::geom_boxplot(outliers = FALSE, na.rm = TRUE) +
+    ggplot2::geom_point(
+      mapping = ggplot2::aes(colour = .data[["colour"]]),
+      size = size,
+      position = ggplot2::position_jitter(width = 0.25, height = 0),
+      na.rm = TRUE
+    ) +
+    ggplot2::facet_wrap(ggplot2::vars(.data[["factor"]]), scales = "free_y") +
+    ggplot2::scale_colour_viridis_d(
+      option = "plasma",
+      direction = 1,
+      end = 0.85
+    ) +
+    ggplot2::labs(x = "CartridgeID", y = "Factor", colour = colour) +
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(angle = 30, hjust = 1, vjust = 1)
+    ) +
+    (if (!show_legend) ggplot2::guides(colour = "none"))
+}
+
+plot_pc_batch <- function(
+  object,
+  type,
+  colour,
+  size,
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
+) {
+  batch <- intersect(c("CartridgeID", "Date"), names(nacho_samples(object)))
+  data <- batch_diagnostics(object, batch = batch)[["pc_batch"]]
+  if (nrow(data) == 0) {
+    warn_too_few_components(type)
+    return(not_available_plot("Batch", "Principal component"))
+  }
+  ggplot2::ggplot(data) +
+    ggplot2::aes(
+      x = .data[["batch"]],
+      y = .data[["PC"]],
+      fill = .data[["r_squared"]]
+    ) +
+    ggplot2::geom_tile(colour = "white") +
+    ggplot2::geom_text(
+      mapping = ggplot2::aes(label = format(round(.data[["r_squared"]], 2))),
+      na.rm = TRUE
+    ) +
+    ggplot2::scale_fill_viridis_c(
+      option = "plasma",
+      limits = c(0, 1),
+      na.value = "grey90"
+    ) +
+    ggplot2::labs(x = "Batch", y = "Principal component", fill = "R\u00b2")
+}
+
 nacho_plot_registry <- list(
   BD = plot_metrics,
   FoV = plot_metrics,
@@ -1077,7 +1215,10 @@ nacho_plot_registry <- list(
   PFNF = plot_pfnf,
   HF = plot_hf,
   NORM = plot_norm,
-  Stability = plot_stability
+  Stability = plot_stability,
+  RLE = plot_rle,
+  BatchFactors = plot_batch_factors,
+  PCBatch = plot_pc_batch
 )
 
 S7::method(autoplot, nacho) <- autoplot_nacho
