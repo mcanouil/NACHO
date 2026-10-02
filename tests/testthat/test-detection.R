@@ -391,3 +391,30 @@ test_that("filter_detected() keeps every gene with a non-zero count when negativ
   ]
   expect_setequal(kept_genes, expected)
 })
+
+test_that("filter_detected() drops removed genes from the housekeeping setting", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  endogenous <- probes$Name[grepl("Endogenous", probes$CodeClass)]
+  rate <- probes$detection_rate[match(endogenous, probes$Name)]
+  low <- endogenous[which.min(rate)]
+  high <- endogenous[which.max(rate)]
+  x@settings$housekeeping_genes <- c(low, high)
+  min_rate <- mean(range(rate, na.rm = TRUE))
+  kept <- filter_detected(x, min_rate = min_rate)
+  expect_false(low %in% nacho_probes(kept)$Name)
+  expect_identical(kept@settings$housekeeping_genes, high)
+  expect_true(all(
+    kept@settings$housekeeping_genes %in% nacho_probes(kept)$Name
+  ))
+})
+
+test_that("filter_detected() clears the housekeeping setting when no named gene is left", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  endogenous <- probes$Name[grepl("Endogenous", probes$CodeClass)]
+  rate <- probes$detection_rate[match(endogenous, probes$Name)]
+  x@settings$housekeeping_genes <- endogenous[which.min(rate)]
+  kept <- filter_detected(x, min_rate = max(rate, na.rm = TRUE))
+  expect_null(kept@settings$housekeeping_genes)
+})

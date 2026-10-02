@@ -44,7 +44,7 @@ probe_detection_rates <- function(counts, code_class, excluded) {
 #' Control and housekeeping probes are always kept, where housekeeping probes
 #' are the probes of CodeClass Housekeeping.
 #' Endogenous genes chosen as housekeeping genes are filtered like any other
-#' gene.
+#' gene, and the ones that are dropped leave the `housekeeping_genes` setting.
 #' The samples' `Detection_rate` is not recomputed after filtering.
 #' A gene's detection rate is the share of the samples with a detection limit
 #' in which it is detected, so a sample with fewer than two negative probes
@@ -85,5 +85,13 @@ filter_detected <- function(x, min_rate = 0.5) {
     )
   }
   keep <- !endogenous | (!is.na(rate) & rate >= min_rate)
-  x[which(keep), ]
+  filtered <- x[which(keep), ]
+  genes <- filtered@settings[["housekeeping_genes"]]
+  if (!is.null(genes)) {
+    genes <- genes[genes %in% filtered@probes[["Name"]]]
+    filtered@settings["housekeeping_genes"] <- list(
+      if (length(genes) > 0) genes
+    )
+  }
+  filtered
 }

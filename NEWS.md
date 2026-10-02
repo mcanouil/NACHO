@@ -112,6 +112,12 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 
 ## Fixes
 
+- In `R/stability.R`,
+  - fix: The geNorm M calculation refuses fewer than three genes with a classed error, and the geNorm ranking refuses a matrix without column names.
+- In `R/ruv.R`,
+  - fix: `suggest_ruv_k()` no longer tries a `k` that fits the samples exactly, so two samples only get `k = 0`, and one sample gives `NA` for `pc1_variance` instead of `NaN`.
+- In `R/detection.R`,
+  - fix: `filter_detected()` removes the genes it drops from the `housekeeping_genes` setting.
 - In `R/qc.R` and `R/interop.R`,
   - fix: Errors about the background statistic now name `load_rcc()`, `normalise()` or `as_nacho()` instead of `build_nacho()`.
 - In `R/methods.R`,
