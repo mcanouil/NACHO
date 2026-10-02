@@ -98,11 +98,34 @@ test_that("missing counts stay missing", {
     ncol = 2,
     dimnames = list(c("a", "b"), c("S1", "S2"))
   )
-  for (mode in c("threshold", "subtract")) {
-    out <- NACHO:::apply_background(counts, c(10, 9), mode)
-    expect_true(is.na(out[1, 1]), info = mode)
-    expect_false(anyNA(out[-1]), info = mode)
-  }
+  expect_identical(
+    NACHO:::apply_background(counts, c(10, 9), "threshold"),
+    matrix(c(NA, 15, 30, 9), ncol = 2, dimnames = dimnames(counts))
+  )
+  expect_identical(
+    NACHO:::apply_background(counts, c(10, 9), "subtract"),
+    matrix(c(NA, 5, 21, 0), ncol = 2, dimnames = dimnames(counts))
+  )
+})
+
+test_that("a build without negative probes gives an NA Negative_factor", {
+  keep <- GSE74821@probes$CodeClass != "Negative"
+  built <- suppressWarnings(
+    NACHO:::build_nacho(
+      counts = GSE74821@counts[keep, 1:3],
+      probes = GSE74821@probes[keep, ],
+      samples = GSE74821@samples[1:3, , drop = FALSE],
+      settings = GSE74821@settings,
+      thresholds = GSE74821@thresholds,
+      rcc_type = GSE74821@rcc_type,
+      provenance = GSE74821@provenance
+    ),
+    classes = c(
+      "nacho_warning_n_comp_reduced",
+      "nacho_warning_metric_unavailable"
+    )
+  )
+  expect_identical(nacho_samples(built)$Negative_factor, rep(NA_real_, 3))
 })
 
 test_that("a sample without any kept negative count gets an NA background and a warning", {
