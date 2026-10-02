@@ -1094,7 +1094,7 @@ plot_rle <- function(
   data[[colour]] <- samples[[colour]][match(data[["sample"]], samples[[id]])]
   data[["sample"]] <- factor(
     data[["sample"]],
-    levels = samples[[id]][order(samples[[colour]])]
+    levels = samples[[id]][order(nacho_samples(object)[[colour]])]
   )
   ggplot2::ggplot(data) +
     ggplot2::aes(

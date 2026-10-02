@@ -27,6 +27,13 @@ test_that("Cramér's V is 1 for full confounding and 0 for balance", {
   expect_identical(NACHO:::cramers_v(c(1, 2), c("x", "x")), NA_real_)
 })
 
+test_that("Cramér's V ignores levels that have no complete pair", {
+  batch <- c("z", "z", "x", "x", "y", "y")
+  group <- c(NA, NA, "a", "b", "a", "b")
+  expect_equal(NACHO:::cramers_v(group, batch), 0)
+  expect_equal(NACHO:::cramers_v(batch, group), 0)
+})
+
 test_that("group_r2() matches a one-way ANOVA", {
   values <- c(1, 2, 3, 7, 8, 9)
   batch <- c("a", "a", "a", "b", "b", "b")
@@ -115,4 +122,14 @@ test_that("metrics and pc_batch are empty data frames when nothing is reported",
   expect_identical(nrow(result$pc_batch), 0L)
   expect_named(result$metrics, c("metric", "batch", "statistic", "p_value"))
   expect_named(result$pc_batch, c("PC", "batch", "r_squared"))
+})
+
+test_that("crosstabs drop unused group levels", {
+  object <- GSE74821
+  object@samples[["grp"]] <- factor(
+    rep(c("a", "b"), length.out = nrow(object@samples)),
+    levels = c("a", "b", "unused")
+  )
+  tab <- batch_diagnostics(object, group = "grp")$crosstabs$CartridgeID
+  expect_identical(rownames(tab), c("a", "b"))
 })

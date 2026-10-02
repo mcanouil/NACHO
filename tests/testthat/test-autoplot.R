@@ -142,6 +142,16 @@ test_that("PCBatch shows one tile per component and batch variable", {
   expect_identical(nrow(plot$data), ncol(GSE74821@pca$scores) * 2L)
 })
 
+test_that("the RLE plot orders samples by a numeric colour numerically", {
+  object <- GSE74821
+  n <- nrow(object@samples)
+  object@samples[["rank"]] <- rev(seq_len(n)) * 1
+  object@samples[["rank"]][1:2] <- c(10, 2)
+  plot <- autoplot(object, type = "RLE", colour = "rank")
+  ordered <- object@samples[["IDFILE"]][order(object@samples[["rank"]])]
+  expect_identical(levels(plot$data[["sample"]]), ordered)
+})
+
 test_that("RLE and BatchFactors build with one box per sample or cartridge", {
   rle <- ggplot2::ggplot_build(autoplot(GSE74821, type = "RLE"))
   expect_length(

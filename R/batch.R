@@ -5,7 +5,8 @@ NULL
 #'
 #' @noRd
 cramers_v <- function(a, b) {
-  observed <- table(droplevels(factor(a)), droplevels(factor(b)))
+  keep <- !is.na(a) & !is.na(b)
+  observed <- table(droplevels(factor(a[keep])), droplevels(factor(b[keep])))
   if (min(dim(observed)) < 2) {
     return(NA_real_)
   }
@@ -86,13 +87,16 @@ metric_rows <- function(samples, metric, x) {
 #'   batches.
 #'
 #' @return A list:
-#' * `design`: `NULL` without `group`; otherwise, for each batch variable, its number of levels, Cramér's V with
-#'   `group`, the number of levels that hold a single group, and
-#'   `confounded`, `TRUE` when at least one does.
+#' * `design`: `NULL` without `group`; otherwise, for each batch variable,
+#'   its number of levels, Cramér's V with `group`, the number of levels that
+#'   hold a single group, and `confounded`, `TRUE` when at least one does.
 #'   A level counts as holding a single group only when it has two or more
 #'   samples with a group, so a cartridge with one sample never makes the
 #'   design confounded.
-#' * `crosstabs`: `NULL` without `group`; otherwise the table of `group` against each batch variable.
+#'   Cramér's V uses only the samples that have both a group and a batch, and
+#'   is `NA` when the batch or `group` has fewer than two levels among them.
+#' * `crosstabs`: `NULL` without `group`; otherwise the table of `group`
+#'   against each batch variable.
 #' * `metrics`: Kruskal-Wallis tests of each quality-control metric against
 #'   each batch variable.
 #' * `pc_batch`: the share of each principal component's variance explained
@@ -102,6 +106,8 @@ metric_rows <- function(samples, metric, x) {
 #' rows when there is nothing to report.
 #' A batch variable with one level gives `NA` in `statistic`, `p_value` and
 #' `r_squared`, and a constant metric gives `NA` in `statistic` and `p_value`.
+#' A batch variable whose levels each hold one sample with a value also gives
+#' `NA` in `r_squared`.
 #' For PlexSet data, `BD` and `FoV` are tested once per lane.
 #' @export
 #' @examples
@@ -124,7 +130,7 @@ batch_diagnostics <- function(
   }
   design <- crosstabs <- NULL
   if (!is.null(group)) {
-    groups <- samples[[group]]
+    groups <- droplevels(factor(samples[[group]]))
     crosstabs <- stats::setNames(
       lapply(batch, function(b) table(groups, samples[[b]], dnn = c(group, b))),
       batch
