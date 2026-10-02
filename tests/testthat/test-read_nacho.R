@@ -413,3 +413,36 @@ test_that("read_nacho() reads the frozen schema-2 object as is", {
   expect_identical(nacho_qc(x)$status, qc_status_of(saved))
   expect_identical(S7::S7_class(x), NACHO:::nacho)
 })
+
+expect_round_trip <- function(x) {
+  path <- withr::local_tempfile(fileext = ".rds")
+  saveRDS(x, path)
+  expect_no_message(y <- read_nacho(path))
+  expect_identical(y@settings, x@settings)
+  expect_identical(y@provenance$content_probes, x@provenance$content_probes)
+  expect_identical(
+    grep("^W_", names(y@samples), value = TRUE),
+    grep("^W_", names(x@samples), value = TRUE)
+  )
+  expect_identical(y@samples, x@samples)
+  expect_identical(
+    nacho_counts(y, normalised = TRUE),
+    nacho_counts(x, normalised = TRUE)
+  )
+  expect_identical(nacho_qc(y)$status, nacho_qc(x)$status)
+  y
+}
+
+test_that("a RUVg object survives a save and read round trip", {
+  x <- normalise(GSE74821, normalisation_method = "RUVg", ruv_k = 1)
+  expect_true(any(grepl("^W_", names(x@samples))))
+  y <- expect_round_trip(x)
+  expect_identical(y@settings$ruv_k, 1L)
+})
+
+test_that("a miRNA object survives a save and read round trip", {
+  x <- mirna_fixture(normalisation_method = "stable_mirna")
+  expect_identical(x@settings$panel, "mirna")
+  expect_false(is.null(x@provenance$content_probes))
+  expect_round_trip(x)
+})
