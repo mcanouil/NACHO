@@ -22,6 +22,15 @@
 #'   [nacho_qc()] lists the flags, and [exclude_outliers()] drops the flagged
 #'   samples.
 #'
+#'   With `normalisation_method = "GLM"`, each sample's positive and negative
+#'   control counts plus 1 are fitted against their known concentrations
+#'   with a Poisson GLM and an identity link, and the positive factor is the
+#'   mean slope over the sample's slope.
+#'   When the fit fails for any sample, NACHO warns and uses the geometric
+#'   mean for every sample, so all samples stay on the same scale.
+#'   The recorded `normalisation_method` then becomes `"GEO"`, and the failed
+#'   samples are listed in `provenance$glm_fallback`.
+#'
 #'   The normalisation runs in this order: raw counts, negative probe
 #'   exclusion, background (`background` and `background_mode`), positive
 #'   control factor (`normalisation_method`), then content factor

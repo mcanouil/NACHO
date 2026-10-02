@@ -45,7 +45,9 @@ For miRNA panels, \code{"stable_mirna"}, \code{"total_mirna"}, \code{"spike_in"}
 counts, the spike-in controls or the ligation positive controls, in the
 order Bruker recommends for plasma and serum.
 These methods ignore \code{housekeeping_genes}, \code{housekeeping_predict} and
-\code{housekeeping_norm}, and give their scaling factor as \code{House_factor}.}
+\code{housekeeping_norm}, and give their scaling factor as \code{House_factor}.
+When a GLM fit fails, NACHO warns and uses the geometric mean instead, as
+\code{\link[=normalise]{normalise()}} describes.}
 
 \item{background}{[\link{character}] How to estimate each sample's background
 from its negative controls: \code{"none"} (the default), \code{"mean"},
@@ -85,6 +87,15 @@ factors, the normalised counts and the PCA again.
 
 \code{\link[=nacho_qc]{nacho_qc()}} lists the flags, and \code{\link[=exclude_outliers]{exclude_outliers()}} drops the flagged
 samples.
+
+With \code{normalisation_method = "GLM"}, each sample's positive and negative
+control counts plus 1 are fitted against their known concentrations
+with a Poisson GLM and an identity link, and the positive factor is the
+mean slope over the sample's slope.
+When the fit fails for any sample, NACHO warns and uses the geometric
+mean for every sample, so all samples stay on the same scale.
+The recorded \code{normalisation_method} then becomes \code{"GEO"}, and the failed
+samples are listed in \code{provenance$glm_fallback}.
 
 The normalisation runs in this order: raw counts, negative probe
 exclusion, background (\code{background} and \code{background_mode}), positive

@@ -52,6 +52,11 @@ format_nacho <- function(x, ...) {
         "without housekeeping genes"
       }
     ),
+    if (!is.null(x@provenance[["glm_fallback"]])) {
+      cli::format_inline(
+        "GLM fell back to the geometric mean for {length(x@provenance[['glm_fallback']])} sample{?s}"
+      )
+    },
     if (any(x@probes[["is_excluded"]])) {
       cli::format_inline(
         "Excluded negative probes: {.val {x@probes[['Name']][x@probes[['is_excluded']]]}}"
