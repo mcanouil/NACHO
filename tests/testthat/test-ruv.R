@@ -81,9 +81,24 @@ test_that("suggest_ruv_k() caps k at what the data allow", {
   expect_lte(max(suggest_ruv_k(x, max_k = 10)$k), 2L)
 })
 
-test_that("suggest_ruv_k() on two samples caps k at 1", {
+test_that("suggest_ruv_k() on two samples only suggests k = 0", {
   x <- suppressWarnings(GSE74821[, 1:2])
-  expect_identical(max(suggest_ruv_k(x, max_k = 10)$k), 1L)
+  table <- suggest_ruv_k(x, max_k = 10)
+  expect_identical(table$k, 0L)
+  expect_identical(table$suggested, TRUE)
+})
+
+test_that("suggest_ruv_k() keeps k below the number of samples less one", {
+  x <- suppressWarnings(GSE74821[, 1:4])
+  expect_identical(max(suggest_ruv_k(x, max_k = 10)$k), 2L)
+})
+
+test_that("suggest_ruv_k() on one sample gives NA, never NaN", {
+  x <- suppressWarnings(GSE74821[, 1])
+  table <- suggest_ruv_k(x)
+  expect_identical(table$k, 0L)
+  expect_true(is.na(table$pc1_variance))
+  expect_false(any(is.nan(table$pc1_variance)))
 })
 
 test_that("suggest_ruv_k() needs two housekeeping genes, and two are enough", {
