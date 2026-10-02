@@ -1,3 +1,12 @@
+qc_status_of <- function(x) {
+  NACHO:::qc_table(
+    x@samples,
+    x@thresholds,
+    x@rcc_type,
+    x@settings$id_colname
+  )$status
+}
+
 nacho_2 <- function() {
   readRDS(testthat::test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
 }
@@ -390,4 +399,17 @@ test_that("legacy_thresholds() gives Housekeeping_detected 0 to an old list", {
 test_that("upgrade_nacho() carries Housekeeping_detected into the thresholds", {
   x <- suppressMessages(upgrade_subset(nacho_2()))
   expect_identical(x@thresholds$Housekeeping_detected, 0)
+})
+
+test_that("read_nacho() reads the frozen schema-2 object as is", {
+  path <- test_path("fixtures", "nacho-schema-2.rds")
+  saved <- readRDS(path)
+  expect_no_message(x <- read_nacho(path))
+  expect_identical(x@provenance$schema_version, 2L)
+  expect_null(x@provenance$migrated_from_schema)
+  expect_identical(dim(x), c(40L, 4L))
+  expect_identical(nacho_counts(x), saved@counts)
+  expect_identical(nacho_counts(x, normalised = TRUE), saved@normalised)
+  expect_identical(nacho_qc(x)$status, qc_status_of(saved))
+  expect_identical(S7::S7_class(x), NACHO:::nacho)
 })
