@@ -132,3 +132,33 @@ test_that("a sample without any kept negative count gets an NA background and a 
     )
   )
 })
+
+test_that("a sample with fewer than two observed negative counts gets an NA mean_2sd background", {
+  d <- negatives_counts()
+  d$counts[c("NEG_B", "NEG_C"), "S2"] <- NA
+  level <- suppressWarnings(
+    NACHO:::background_levels(d$counts, d$code_class, character(0), "mean_2sd")
+  )
+  expect_equal(level, c(12 + 2 * 2, NA))
+  expect_false(is.nan(level[2]))
+  d$counts[, "S2"] <- NA
+  level <- suppressWarnings(
+    NACHO:::background_levels(d$counts, d$code_class, character(0), "mean_2sd")
+  )
+  expect_identical(level[2], NA_real_)
+})
+
+test_that("background errors name the calling function", {
+  d <- negatives_counts()
+  error <- tryCatch(
+    NACHO:::background_levels(
+      d$counts,
+      d$code_class,
+      c("NEG_B", "NEG_C"),
+      "mean_2sd",
+      call = rlang::call2("load_rcc")
+    ),
+    error = identity
+  )
+  expect_identical(rlang::call_name(error$call), "load_rcc")
+})

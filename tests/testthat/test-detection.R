@@ -317,3 +317,69 @@ test_that("subsetting probes keeps the detection rates of the samples kept", {
     nacho_probes(GSE74821)$detection_rate[1:20]
   )
 })
+
+test_that("a missing background warns once, names the sample, and stays quiet on rebuilds", {
+  x <- GSE74821
+  x@settings$background <- "geo"
+  counts <- x@counts[, 1:3]
+  counts[x@probes$CodeClass == "Negative", 2] <- NA
+  messages <- character(0)
+  withCallingHandlers(
+    rebuild_with_counts(x, counts, x@probes),
+    nacho_warning_metric_unavailable = function(cnd) {
+      messages <<- c(messages, conditionMessage(cnd))
+      invokeRestart("muffleWarning")
+    },
+    warning = function(cnd) invokeRestart("muffleWarning")
+  )
+  background <- grep("background", messages, value = TRUE)
+  expect_length(background, 1L)
+  expect_match(background, rownames(x@samples)[2], fixed = TRUE)
+  quiet <- character(0)
+  withCallingHandlers(
+    rebuild_with_counts(x, counts, x@probes, FALSE),
+    nacho_warning_metric_unavailable = function(cnd) {
+      quiet <<- c(quiet, conditionMessage(cnd))
+      invokeRestart("muffleWarning")
+    },
+    warning = function(cnd) invokeRestart("muffleWarning")
+  )
+  expect_length(quiet, 0L)
+})
+
+test_that("build_nacho() errors from background name the caller", {
+  x <- GSE74821
+  x@settings$background <- "mean_2sd"
+  keep <- x@probes$CodeClass != "Negative"
+  counts <- x@counts[keep, 1:3]
+  error <- tryCatch(
+    NACHO:::build_nacho(
+      counts = counts,
+      probes = x@probes[keep, ],
+      samples = x@samples[1:3, , drop = FALSE],
+      settings = x@settings,
+      thresholds = x@thresholds,
+      rcc_type = x@rcc_type,
+      provenance = x@provenance,
+      call = rlang::call2("normalise")
+    ),
+    error = identity
+  )
+  expect_s3_class(error, "nacho_error_bad_argument")
+  expect_identical(rlang::call_name(error$call), "normalise")
+})
+
+test_that("with all-zero negatives every non-zero count counts as detected", {
+  counts <- matrix(
+    c(0, 0, 0, 0, 1, 5, 0, 3),
+    ncol = 2,
+    byrow = TRUE,
+    dimnames = list(c("NEG_A", "NEG_B", "G1", "G2"), c("S1", "S2"))
+  )
+  code_class <- c("Negative", "Negative", "Endogenous", "Endogenous")
+  limits <- NACHO:::detection_limits(counts, code_class, character(0))
+  expect_equal(limits, c(0, 0))
+  hits <- NACHO:::detected(counts, limits)
+  expect_true(hits["G1", "S1"])
+  expect_false(hits["G2", "S1"])
+})
