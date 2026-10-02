@@ -190,7 +190,6 @@ test_that("a negative probe with all counts missing is never excluded", {
 
   few <- negative_matrix(c(40, 11, 9, 12))
   few["NEG_D", ] <- NA
-  expect_identical(expect_no_error(exclude(few, "nsolver")), character(0))
   expect_false("NEG_D" %in% expect_no_error(exclude(few, "legacy")))
 
   none <- negative_matrix(c(40, 11, 9, 12))

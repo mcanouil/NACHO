@@ -18,9 +18,10 @@ legacy_settings <- function(settings, probes) {
 #' Rebuild a schema 1 object with the definitions that made it
 #'
 #' @param properties The properties of the saved object, from `S7::props()`.
+#' @param call The environment whose call names the function in errors.
 #'
 #' @noRd
-migrate_schema_1 <- function(properties) {
+migrate_schema_1 <- function(properties, call = rlang::caller_env()) {
   provenance <- properties[["provenance"]]
   provenance[["schema_version"]] <- nacho_schema_version
   provenance[["migrated_from_schema"]] <- 1L
@@ -41,7 +42,8 @@ migrate_schema_1 <- function(properties) {
     thresholds = thresholds,
     rcc_type = properties[["rcc_type"]],
     provenance = provenance,
-    warn_missing = FALSE
+    warn_missing = FALSE,
+    call = call
   )
   nacho_inform(c(
     "Read an object saved with schema 1 and rebuilt it with schema {nacho_schema_version}.",
@@ -289,7 +291,7 @@ read_nacho <- function(path) {
   }
   properties <- S7::props(x)
   if (identical(properties[["provenance"]][["schema_version"]], 1L)) {
-    return(migrate_schema_1(properties))
+    return(migrate_schema_1(properties, call = call))
   }
   check_schema(
     properties[["provenance"]][["schema_version"]],
