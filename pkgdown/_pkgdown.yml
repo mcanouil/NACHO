@@ -44,6 +44,7 @@ reference:
       - exclude_outliers
       - housekeeping_stability
       - suggest_ruv_k
+      - batch_diagnostics
   - title: Visualise and report
     desc: Explore quality control interactively, plot a single metric, or write a full report.
     contents:

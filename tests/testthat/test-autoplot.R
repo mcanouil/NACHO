@@ -56,6 +56,41 @@ test_that("flagged samples of a toy object get their own layers", {
   }
 })
 
+test_that("PCBatch leaves tiles without a value unlabelled", {
+  x <- mirna_fixture()
+  plot <- autoplot(x, type = "PCBatch")
+  expect_true(anyNA(plot$data$r_squared))
+  built <- ggplot2::ggplot_build(plot)
+  labels <- built$data[[2]]$label
+  expect_false("NA" %in% labels)
+  expect_identical(
+    labels == "",
+    is.na(built$data[[1]]$fill) | built$data[[1]]$fill == "grey90"
+  )
+})
+
+test_that("PCBatch is not available without principal components", {
+  toy <- toy_nacho(6L)
+  toy@pca[["scores"]] <- toy@pca[["scores"]][, 0, drop = FALSE]
+  expect_not_available(toy, "PCBatch")
+})
+
+test_that("PCBatch is not available without batch columns", {
+  toy <- toy_nacho(6L)
+  toy@samples <- toy@samples[,
+    setdiff(names(toy@samples), c("CartridgeID", "Date")),
+    drop = FALSE
+  ]
+  expect_warning(
+    plot <- autoplot(toy, type = "PCBatch", colour = "IDFILE"),
+    class = "nacho_warning_metric_unavailable"
+  )
+  expect_identical(
+    ggplot2::ggplot_build(plot)$data[[1]]$label,
+    "Not available!"
+  )
+})
+
 test_that("PCL and LoD plots of a PlexSet toy object are not available", {
   toy <- toy_nacho(6L)
   toy@rcc_type <- "n8"
@@ -91,6 +126,51 @@ test_that("the Stability plot orders the genes by geNorm rank", {
   )
 })
 
+test_that("the RLE plot centres each gene on its median", {
+  plot <- autoplot(GSE74821, type = "RLE")
+  data <- plot$data
+  expect_true(all(c("sample", "rle") %in% names(data)))
+  expect_equal(
+    stats::median(tapply(data$rle, data$Name, stats::median)),
+    0,
+    tolerance = 1e-8
+  )
+})
+
+test_that("PCBatch shows one tile per component and batch variable", {
+  plot <- autoplot(GSE74821, type = "PCBatch")
+  expect_identical(nrow(plot$data), ncol(GSE74821@pca$scores) * 2L)
+})
+
+test_that("the RLE plot orders samples by a numeric colour numerically", {
+  object <- GSE74821
+  n <- nrow(object@samples)
+  object@samples[["rank"]] <- rev(seq_len(n)) * 1
+  object@samples[["rank"]][1:2] <- c(10, 2)
+  plot <- autoplot(object, type = "RLE", colour = "rank")
+  ordered <- object@samples[["IDFILE"]][order(object@samples[["rank"]])]
+  expect_identical(levels(plot$data[["sample"]]), ordered)
+})
+
+test_that("RLE and BatchFactors build with one box per sample or cartridge", {
+  rle <- ggplot2::ggplot_build(autoplot(GSE74821, type = "RLE"))
+  expect_length(
+    unique(rle$data[[2]]$x),
+    nrow(nacho_samples(GSE74821))
+  )
+  factors <- ggplot2::ggplot_build(autoplot(GSE74821, type = "BatchFactors"))
+  n_factors <- length(intersect(
+    c("Positive_factor", "Negative_factor", "House_factor"),
+    names(nacho_samples(GSE74821))
+  ))
+  n_cartridges <- length(unique(nacho_samples(GSE74821)$CartridgeID))
+  expect_length(unique(factors$data[[1]]$PANEL), n_factors)
+  expect_identical(
+    nrow(unique(factors$data[[1]][c("PANEL", "x")])),
+    n_factors * n_cartridges
+  )
+})
+
 test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable", {
   for (type in c("PCL", "LoD")) {
     expect_not_available(plexset_nacho, type)
@@ -123,7 +203,10 @@ metrics <- c(
   "PFNF",
   "HF",
   "NORM",
-  "Stability"
+  "Stability",
+  "RLE",
+  "BatchFactors",
+  "PCBatch"
 )
 
 for (imetric in metrics) {
