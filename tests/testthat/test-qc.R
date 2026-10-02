@@ -200,3 +200,32 @@ test_that("a negative probe with all counts missing is never excluded", {
     expect_identical(expect_no_error(exclude(none, preset)), character(0))
   }
 })
+
+test_that("the Bruker rule floors the negative means at 1 before the ratio", {
+  exclude <- function(means) {
+    NACHO:::excluded_negatives(
+      negative_matrix(means),
+      rep("Negative", length(means)),
+      "nsolver"
+    )
+  }
+  expect_identical(exclude(c(1, 0, 0, 0)), character(0))
+  expect_identical(exclude(c(2, 1, 0, 0)), character(0))
+  expect_identical(exclude(c(4, 0, 0, 0)), "NEG_A")
+})
+
+test_that("the legacy rule keeps every negative when it would drop them all", {
+  counts <- matrix(
+    c(10, 10, 100, 100),
+    ncol = 2,
+    byrow = TRUE,
+    dimnames = list(c("A", "B"), 1:2)
+  )
+  overall <- stats::median(counts)
+  medians <- apply(counts, 1, stats::median)
+  expect_true(all(abs(overall - medians) > 0.5 * overall))
+  expect_identical(
+    NACHO:::excluded_negatives(counts, rep("Negative", 2), "legacy"),
+    character(0)
+  )
+})

@@ -130,10 +130,18 @@ test_that("the RLE plot centres each gene on its median", {
   plot <- autoplot(GSE74821, type = "RLE")
   data <- plot$data
   expect_true(all(c("sample", "rle") %in% names(data)))
+  genes <- nacho_probes(GSE74821)$Name[
+    nacho_probes(GSE74821)$CodeClass == "Endogenous"
+  ]
+  expect_setequal(unique(data$Name), genes)
+  medians <- tapply(data$rle, data$Name, stats::median)
+  expect_equal(as.vector(medians), rep(0, length(medians)), tolerance = 1e-8)
+  gene <- genes[3]
+  sample <- as.character(data$sample[data$Name == gene][2])
+  log_gene <- log2(nacho_counts(GSE74821, normalised = TRUE)[gene, ] + 1)
   expect_equal(
-    stats::median(tapply(data$rle, data$Name, stats::median)),
-    0,
-    tolerance = 1e-8
+    data$rle[data$Name == gene & data$sample == sample],
+    unname(log_gene[sample] - stats::median(log_gene))
   )
 })
 
@@ -447,6 +455,32 @@ test_that("the outlier layer of a plot holds only the failing sample", {
   toy@thresholds[["BD"]] <- c(0.1, 0.5)
   toy@samples[["BD"]][-1] <- 0.3
   plot <- autoplot(toy, type = "BD")
-  flagged_layer <- ggplot2::layer_data(plot, 3)
-  expect_identical(nrow(flagged_layer), 1L)
+  layers <- lapply(seq_along(plot$layers), \(i) ggplot2::layer_data(plot, i))
+  is_point <- vapply(
+    plot$layers,
+    \(layer) inherits(layer$geom, "GeomPoint"),
+    logical(1)
+  )
+  is_red <- vapply(
+    layers,
+    \(data) identical(unique(as.character(data[["colour"]])), "#b22222"),
+    logical(1)
+  )
+  expect_identical(sum(is_point & is_red), 1L)
+  expect_identical(nrow(layers[[which(is_point & is_red)]]), 1L)
+  inliers <- layers[is_point & !is_red]
+  expect_length(inliers, 1L)
+  expect_identical(nrow(inliers[[1]]), 5L)
+})
+
+test_that("BatchFactors drops a factor column the samples lack", {
+  toy <- toy_nacho(6L)
+  toy@samples[["Negative_factor"]] <- NULL
+  plot <- autoplot(toy, type = "BatchFactors")
+  expect_setequal(
+    as.character(unique(plot$data[["factor"]])),
+    c("Positive_factor", "House_factor")
+  )
+  built <- ggplot2::ggplot_build(plot)
+  expect_length(unique(built$data[[1]]$PANEL), 2L)
 })
