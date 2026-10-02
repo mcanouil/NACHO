@@ -1,0 +1,165 @@
+#' @include mirna.R
+NULL
+
+#' Cramér's V between two categorical variables
+#'
+#' @noRd
+cramers_v <- function(a, b) {
+  observed <- table(a, b)
+  if (min(dim(observed)) < 2) {
+    return(NA_real_)
+  }
+  n <- sum(observed)
+  expected <- outer(rowSums(observed), colSums(observed)) / n
+  chi_squared <- sum((observed - expected)^2 / expected)
+  sqrt(chi_squared / (n * (min(dim(observed)) - 1)))
+}
+
+#' Share of variance explained by a batch variable
+#'
+#' @noRd
+group_r2 <- function(values, batch) {
+  keep <- !is.na(values) & !is.na(batch)
+  values <- values[keep]
+  batch <- batch[keep]
+  if (length(unique(batch)) < 2) {
+    return(NA_real_)
+  }
+  total <- sum((values - mean(values))^2)
+  if (total == 0) {
+    return(NA_real_)
+  }
+  1 - sum((values - stats::ave(values, batch))^2) / total
+}
+
+#' Batch and confounding diagnostics
+#'
+#' Checks whether the study design, the quality-control metrics and the main
+#' axes of variation follow technical batches such as cartridges and run
+#' dates.
+#'
+#' Start with `design`: when a batch level holds a single group, batch and
+#' biology cannot be told apart, and no normalisation can fix it.
+#'
+#' @param x A `nacho` object from [load_rcc()] or [normalise()].
+#' @param group A column of `nacho_samples(x)` with the biological groups, or
+#'   `NULL` to skip the design check.
+#' @param batch Columns of `nacho_samples(x)` that describe technical
+#'   batches.
+#'
+#' @return A list:
+#' * `design`: for each batch variable, its number of levels, Cramér's V with
+#'   `group`, the number of levels that hold a single group, and
+#'   `confounded`, `TRUE` when at least one does.
+#' * `crosstabs`: the table of `group` against each batch variable.
+#' * `metrics`: Kruskal-Wallis tests of each quality-control metric against
+#'   each batch variable.
+#' * `pc_batch`: the share of each principal component's variance explained
+#'   by each batch variable.
+#' @export
+#' @examples
+#' data(GSE74821)
+#' batch_diagnostics(GSE74821)$pc_batch
+batch_diagnostics <- function(
+  x,
+  group = NULL,
+  batch = c("CartridgeID", "Date")
+) {
+  check_nacho(x)
+  samples <- nacho_samples(x)
+  check_string(group, allow_null = TRUE)
+  if (!is.null(group)) {
+    check_column(group, samples, data_arg = "nacho_samples(x)")
+  }
+  check_character(batch)
+  for (column in batch) {
+    check_column(column, samples, data_arg = "nacho_samples(x)", arg = "batch")
+  }
+  design <- crosstabs <- NULL
+  if (!is.null(group)) {
+    groups <- samples[[group]]
+    crosstabs <- stats::setNames(
+      lapply(batch, function(b) table(groups, samples[[b]], dnn = c(group, b))),
+      batch
+    )
+    design <- do.call(
+      rbind,
+      lapply(batch, function(b) {
+        levels_per_batch <- tapply(groups, samples[[b]], function(g) {
+          length(unique(g))
+        })
+        n_levels <- length(unique(stats::na.omit(samples[[b]])))
+        single <- if (n_levels < 2) {
+          0L
+        } else {
+          as.integer(sum(levels_per_batch == 1))
+        }
+        data.frame(
+          batch = b,
+          n_levels = n_levels,
+          cramers_v = cramers_v(groups, samples[[b]]),
+          single_group_levels = single,
+          confounded = single > 0
+        )
+      })
+    )
+  }
+  metric_names <- intersect(
+    c(qc_metrics, "MC", "MedC", "Negative_factor"),
+    names(samples)
+  )
+  metrics <- do.call(
+    rbind,
+    lapply(batch, function(b) {
+      do.call(
+        rbind,
+        lapply(metric_names, function(m) {
+          values <- samples[[m]]
+          usable <- !is.na(values) & !is.na(samples[[b]])
+          if (
+            length(unique(samples[[b]][usable])) < 2 ||
+              length(unique(values[usable])) < 2
+          ) {
+            return(data.frame(
+              metric = m,
+              batch = b,
+              statistic = NA_real_,
+              p_value = NA_real_
+            ))
+          }
+          test <- stats::kruskal.test(
+            values[usable],
+            factor(samples[[b]][usable])
+          )
+          data.frame(
+            metric = m,
+            batch = b,
+            statistic = unname(test[["statistic"]]),
+            p_value = test[["p.value"]]
+          )
+        })
+      )
+    })
+  )
+  scores <- x@pca[["scores"]]
+  pc_batch <- do.call(
+    rbind,
+    lapply(batch, function(b) {
+      data.frame(
+        PC = colnames(scores),
+        batch = rep(b, ncol(scores)),
+        r_squared = vapply(
+          seq_len(ncol(scores)),
+          function(k) group_r2(scores[, k], samples[[b]]),
+          numeric(1)
+        )
+      )
+    })
+  )
+  list(
+    design = design,
+    crosstabs = crosstabs,
+    metrics = metrics,
+    pc_batch = pc_batch
+  )
+}
