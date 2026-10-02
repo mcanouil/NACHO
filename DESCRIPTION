@@ -60,6 +60,7 @@ Suggests:
     GEOquery,
     limma,
     NanoStringNCTools,
+    NormqPCR,
     S4Vectors,
     SummarizedExperiment
 biocViews:
@@ -92,6 +93,7 @@ Collate:
     'read_rcc.R'
     'render.R'
     'report.R'
+    'stability.R'
     'utils.R'
     'visualise.R'
     'zzz.R'

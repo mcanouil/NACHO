@@ -39,6 +39,12 @@ NULL
 #'   * `"PFNF"`: Positive factor against negative factor.
 #'   * `"HF"`: Housekeeping factor.
 #'   * `"NORM"`: Normalisation factor.
+#'   * `"Stability"`: geNorm stability of the housekeeping genes, see
+#'     [housekeeping_stability()].
+#'     The dashed line marks M = 1.5, the limit geNorm suggests for
+#'     homogeneous samples.
+#'     This plot ignores `colour`, `show_legend`, `show_outliers` and
+#'     `outliers_labels`, and it is not in the Shiny app or the report.
 #' * `colour`: The column of `nacho_samples(object)` that colours the points.
 #' * `size`: The point size, and the line width in the `"NORM"` plot.
 #' * `show_legend`: If `FALSE`, hide the colour legend.
@@ -1013,6 +1019,47 @@ plot_norm <- function(
     })
 }
 
+plot_stability <- function(
+  object,
+  type,
+  colour,
+  size,
+  show_legend,
+  show_outliers,
+  outliers_factor,
+  outliers_labels
+) {
+  explain <- function(cnd) rlang::cnd_message(cnd)
+  ranking <- rlang::try_fetch(
+    housekeeping_stability(object)[["ranking"]],
+    nacho_error_bad_argument = explain,
+    nacho_error_no_detection_rate = explain
+  )
+  if (is.character(ranking)) {
+    nacho_warn(
+      c(
+        "Stability cannot be drawn.",
+        x = "{ranking}"
+      ),
+      class = "metric_unavailable"
+    )
+    return(not_available_plot("Housekeeping gene", "geNorm M"))
+  }
+  ranking[["Name"]] <- factor(ranking[["Name"]], levels = ranking[["Name"]])
+  ggplot2::ggplot(ranking) +
+    ggplot2::aes(x = .data[["Name"]], y = .data[["geNorm_M"]]) +
+    ggplot2::geom_point(size = size * 4) +
+    ggplot2::geom_hline(
+      yintercept = 1.5,
+      colour = "#b22222",
+      linetype = "longdash"
+    ) +
+    ggplot2::labs(x = "Housekeeping gene, most stable first", y = "geNorm M") +
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(angle = 30, hjust = 1, vjust = 1)
+    )
+}
+
 nacho_plot_registry <- list(
   BD = plot_metrics,
   FoV = plot_metrics,
@@ -1029,7 +1076,8 @@ nacho_plot_registry <- list(
   PCA = plot_pca,
   PFNF = plot_pfnf,
   HF = plot_hf,
-  NORM = plot_norm
+  NORM = plot_norm,
+  Stability = plot_stability
 )
 
 S7::method(autoplot, nacho) <- autoplot_nacho
