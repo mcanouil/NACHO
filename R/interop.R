@@ -225,7 +225,8 @@ nacho_from_parts <- function(
         hint = "Change it with {.code normalise(x, outliers_thresholds = nacho_thresholds(instrument = ...))}."
       ),
     rcc_type = metadata[["rcc_type"]] %||% "n1",
-    provenance = provenance
+    provenance = provenance,
+    call = call
   )
 }
 

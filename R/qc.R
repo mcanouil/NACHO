@@ -822,7 +822,8 @@ build_nacho <- function(
     code_class,
     excluded,
     settings[["background"]],
-    warn = warn_missing
+    warn = warn_missing,
+    call = call
   )
   scaled <- scale_counts(
     counts,

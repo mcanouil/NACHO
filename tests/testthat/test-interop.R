@@ -448,3 +448,17 @@ test_that("as_nacho() stays silent without Housekeeping probes and a saved choic
   expect_no_warning(x <- suppressMessages(as_nacho(se[keep, ])))
   expect_false(x@settings$housekeeping_norm)
 })
+
+test_that("as_nacho() errors from the background name as_nacho()", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(GSE74821)
+  negative <- which(SummarizedExperiment::rowData(se)$CodeClass == "Negative")
+  se <- se[-negative[-1], ]
+  S4Vectors::metadata(se)$nacho$settings$background <- "mean_2sd"
+  error <- expect_error(
+    suppressWarnings(as_nacho(se)),
+    class = "nacho_error_bad_argument",
+    regexp = "two negative"
+  )
+  expect_identical(rlang::call_name(error[["call"]]), "as_nacho")
+})

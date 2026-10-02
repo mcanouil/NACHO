@@ -123,3 +123,16 @@ test_that("RUVg errors name normalise(), not the internal builder", {
   )
   expect_identical(rlang::call_name(error[["call"]]), "normalise")
 })
+
+test_that("background errors from normalise() name normalise()", {
+  x <- GSE74821
+  keep <- x@probes$CodeClass != "Negative" |
+    x@probes$Name == x@probes$Name[x@probes$CodeClass == "Negative"][1]
+  x <- x[which(keep), ]
+  error <- expect_error(
+    suppressWarnings(normalise(x, background = "mean_2sd")),
+    class = "nacho_error_bad_argument",
+    regexp = "two negative"
+  )
+  expect_identical(rlang::call_name(error[["call"]]), "normalise")
+})
