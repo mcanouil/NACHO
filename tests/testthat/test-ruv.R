@@ -158,6 +158,7 @@ test_that("normalise() lowers a ruv_k that would saturate, with a classed warnin
     result <- suppressMessages(
       normalise(x, normalisation_method = "RUVg", ruv_k = 1, n_comp = 1)
     ),
+    "that the samples allow",
     class = "nacho_warning_ruv_k_reduced"
   )
   expect_identical(result@settings$ruv_k, 0L)
@@ -176,13 +177,11 @@ test_that("normalise() keeps a ruv_k the samples allow", {
 
 test_that("normalise() lowers a ruv_k above what the control genes allow", {
   x <- GSE74821
-  x@probes$is_housekeeping <- x@probes$Name %in%
-    x@probes$Name[x@probes$is_housekeeping][1:2]
   expect_warning(
     result <- suppressMessages(
       normalise(
         x,
-        housekeeping_genes = x@probes$Name[x@probes$is_housekeeping],
+        housekeeping_genes = x@probes$Name[x@probes$is_housekeeping][1:2],
         normalisation_method = "RUVg",
         ruv_k = 3,
         n_comp = 3

@@ -497,10 +497,8 @@ content_normalise <- function(
     sample_limit <- nrow(input[["log_expr"]]) - 2L
     control_limit <- sum(input[["controls"]]) - 1L
     max_k <- max(min(sample_limit, control_limit), 0L)
-    # nolint start: object_usage_linter.
-    limit <- if (control_limit < sample_limit) "control genes" else "samples"
-    # nolint end
     if (k > max_k) {
+      limit <- if (control_limit < sample_limit) "control genes" else "samples" # nolint: object_usage_linter.
       nacho_warn(
         c(
           "{.arg ruv_k} = {k} is more than the {max_k} that the {limit} allow.",

@@ -164,7 +164,7 @@ ruv_k_table <- function(
         y[, colSums(is.na(y)) == 0, drop = FALSE],
         scale = FALSE
       ))[["d"]]
-      if (sum(d^2) == 0) NA_real_ else d[1]^2 / sum(d^2)
+      if (sum(d^2) < .Machine$double.eps) NA_real_ else d[1]^2 / sum(d^2)
     },
     numeric(1)
   )
