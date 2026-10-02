@@ -240,12 +240,20 @@ subset_nacho <- function(x, i, j, ..., drop = FALSE) {
   }
   probes <- probes[rows, , drop = FALSE]
   rownames(probes) <- NULL
+  settings <- x@settings
+  genes <- settings[["housekeeping_genes"]]
+  if (!is.null(genes)) {
+    genes <- genes[genes %in% probes[["Name"]]]
+    settings["housekeeping_genes"] <- list(
+      if (length(genes) > 0) genes else NULL
+    )
+  }
   nacho(
     counts = counts,
     normalised = x@normalised[rows, columns, drop = FALSE],
     probes = probes,
     samples = samples,
-    settings = x@settings,
+    settings = settings,
     thresholds = x@thresholds,
     pca = compute_pca(counts, x@settings[["n_comp"]]),
     rcc_type = x@rcc_type,

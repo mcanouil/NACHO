@@ -418,3 +418,29 @@ test_that("filter_detected() clears the housekeeping setting when no named gene 
   kept <- filter_detected(x, min_rate = max(rate, na.rm = TRUE))
   expect_null(kept@settings$housekeeping_genes)
 })
+
+test_that("subsetting probes keeps the housekeeping setting to probes still present", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  endogenous <- grepl("Endogenous", probes$CodeClass)
+  kept <- suppressWarnings(x[which(endogenous), ])
+  expect_null(kept@settings$housekeeping_genes)
+  expect_true(all(
+    kept@settings$housekeeping_genes %in% nacho_probes(kept)$Name
+  ))
+})
+
+test_that("normalise() on an object without its housekeeping probes is pinned", {
+  x <- GSE74821
+  endogenous <- grepl("Endogenous", nacho_probes(x)$CodeClass)
+  kept <- suppressWarnings(x[which(endogenous), ])
+  result <- tryCatch(
+    suppressWarnings(suppressMessages(normalise(kept))),
+    error = function(e) e
+  )
+  if (inherits(result, "error")) {
+    expect_s3_class(result, "nacho_error")
+  } else {
+    expect_false(any(is.nan(result@normalised)))
+  }
+})
