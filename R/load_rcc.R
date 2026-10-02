@@ -14,9 +14,15 @@
 #'   should be predicted (`TRUE`) or not (`FALSE`). Default is `FALSE`.
 #' @param housekeeping_norm [[logical]] Boolean to indicate whether the housekeeping normalisation
 #'   should be performed. Default is `TRUE`.
-#' @param normalisation_method [[character]] Either `"GEO"` or `"GLM"`.
-#'   Character string to indicate normalisation using the geometric mean (`"GEO"`)
-#'   or a generalized linear model (`"GLM"`). Default is `"GEO"`.
+#' @param normalisation_method [[character]] `"GEO"` (the default) or `"GLM"`
+#'   scale samples by their positive controls, with the geometric mean or a
+#'   Poisson model, then by the housekeeping genes; `"RUVg"` scales by the
+#'   positive controls with the geometric mean, then removes `ruv_k` factors
+#'   of unwanted variation estimated from the housekeeping genes, which
+#'   [nacho_samples()] returns as `W_1`, `W_2`, ... for use as covariates.
+#' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes;
+#'   `NULL` uses [suggest_ruv_k()].
+#'   Other methods ignore it.
 #' @param background [[character]] How to estimate each sample's background
 #'   from its negative controls: `"none"` (the default), `"mean"`,
 #'   `"mean_2sd"` (mean plus two standard deviations), `"median"`, `"max"` or
@@ -81,6 +87,7 @@ load_rcc <- function(
   normalisation_method = "GEO",
   background = "none",
   background_mode = "threshold",
+  ruv_k = NULL,
   instrument = NULL,
   preset = "nsolver",
   n_comp = 10
@@ -107,7 +114,8 @@ load_rcc <- function(
     normalisation_method,
     n_comp,
     background,
-    background_mode
+    background_mode,
+    ruv_k
   )
   if (!is.null(instrument)) {
     instrument <- check_choice(instrument, nacho_instruments)
@@ -283,6 +291,7 @@ load_rcc <- function(
       housekeeping_predict = housekeeping_predict,
       housekeeping_norm = housekeeping_norm,
       normalisation_method = choices[["normalisation_method"]],
+      ruv_k = if (!is.null(ruv_k)) as.integer(ruv_k),
       background = choices[["background"]],
       background_mode = choices[["background_mode"]],
       n_comp = as.integer(n_comp)

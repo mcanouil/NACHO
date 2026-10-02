@@ -15,6 +15,7 @@ default_settings <- function(probes, id_colname) {
     housekeeping_predict = FALSE,
     housekeeping_norm = any(grepl("Housekeeping", probes[["CodeClass"]])),
     normalisation_method = "GEO",
+    ruv_k = NULL,
     background = "none",
     background_mode = "threshold",
     n_comp = 10L
@@ -363,6 +364,11 @@ control_concentrations <- function(probe_names) {
   unname(c(NEG = 0, POS = 32)[sub("(NEG).*|(POS).*", "\\1\\2", probe_names)])
 }
 
+#' Normalisation methods
+#'
+#' @noRd
+nacho_normalisation_methods <- c("GEO", "GLM", "RUVg")
+
 #' Positive normalisation factor of each sample
 #'
 #' @noRd
@@ -372,7 +378,7 @@ control_factors <- function(counts, probes, excluded, method) {
   used <- code_class %in%
     c("Positive", "Negative") &
     !probe_names %in% c("POS_F(0.125)", excluded)
-  if (method == "GEO") {
+  if (method != "GLM") {
     positive <- geometric_means(
       counts[used & code_class == "Positive", , drop = FALSE]
     )
@@ -394,6 +400,76 @@ control_factors <- function(counts, probes, excluded, method) {
     numeric(1)
   )
   list(positive_factor = mean(slopes) / slopes)
+}
+
+#' Content normalisation of the scaled counts
+#'
+#' @param call The environment whose call names the function in errors.
+#'
+#' @return A list: `normalised`, `house_factor` (or `NULL`), `extra_columns`
+#'   (a data frame of sample columns, possibly with no column) and `settings`.
+#'
+#' @noRd
+content_normalise <- function(
+  scaled,
+  probes,
+  settings,
+  housekeeping_genes,
+  call = rlang::caller_env()
+) {
+  none <- data.frame(row.names = seq_len(ncol(scaled)))
+  if (settings[["normalisation_method"]] == "RUVg") {
+    input <- ruv_input_from_scaled(
+      scaled,
+      probes,
+      housekeeping_genes,
+      call = call
+    )
+    k <- settings[["ruv_k"]]
+    if (is.null(k)) {
+      table <- ruv_k_table(
+        input[["log_expr"]],
+        input[["controls"]],
+        5L,
+        call = call
+      )
+      k <- table[["k"]][table[["suggested"]]]
+      nacho_inform(
+        "Using RUVg with {.code ruv_k = {k}}, as {.fn suggest_ruv_k} suggests."
+      )
+    }
+    fit <- ruvg(input[["log_expr"]], input[["controls"]], k, call = call)
+    normalised <- scaled
+    normalised[input[["rows"]], ] <- pmax(2^t(fit[["corrected"]]) - 1, 0)
+    settings[["ruv_k"]] <- as.integer(ncol(fit[["W"]]))
+    extra <- as.data.frame(fit[["W"]])
+    rownames(extra) <- NULL
+    return(list(
+      normalised = normalised,
+      house_factor = NULL,
+      extra_columns = extra,
+      settings = settings
+    ))
+  }
+  house_factor <- if (!is.null(housekeeping_genes)) {
+    content_factor(
+      scaled[probes[["Name"]] %in% housekeeping_genes, , drop = FALSE]
+    )
+  }
+  normalised <- if (
+    isTRUE(settings[["housekeeping_norm"]]) && !is.null(house_factor)
+  ) {
+    sweep(scaled, 2, house_factor, "*")
+  } else {
+    scaled
+  }
+  settings["ruv_k"] <- list(NULL)
+  list(
+    normalised = normalised,
+    house_factor = house_factor,
+    extra_columns = none,
+    settings = settings
+  )
 }
 
 #' Apply the background, then the positive factor
@@ -586,6 +662,7 @@ sample_metrics <- function(
 #' @param warn_missing Whether to warn about missing lane or sample
 #'   attributes.
 #'   Only a first build warns, so rebuilding an object does not repeat it.
+#' @param call The environment whose call names the function in errors.
 #'
 #' @noRd
 build_nacho <- function(
@@ -596,7 +673,8 @@ build_nacho <- function(
   thresholds,
   rcc_type,
   provenance,
-  warn_missing = TRUE
+  warn_missing = TRUE,
+  call = rlang::caller_env()
 ) {
   probes <- as.data.frame(probes)[, c("CodeClass", "Name", "Accession")]
   samples <- as.data.frame(samples)
@@ -605,7 +683,7 @@ build_nacho <- function(
       names(samples),
       c(
         computed_sample_columns,
-        grep("^PC[0-9]+$", names(samples), value = TRUE)
+        grep("^(PC|W_)[0-9]+$", names(samples), value = TRUE)
       )
     ),
     drop = FALSE
@@ -662,12 +740,16 @@ build_nacho <- function(
     }
   }
 
-  house_factor <- NULL
-  if (!is.null(housekeeping_genes)) {
-    house_factor <- content_factor(
-      scaled[probes[["Name"]] %in% housekeeping_genes, , drop = FALSE]
-    )
-  }
+  content <- content_normalise(
+    scaled,
+    probes,
+    settings,
+    housekeeping_genes,
+    call = call
+  )
+  house_factor <- content[["house_factor"]]
+  normalised <- content[["normalised"]]
+  settings <- content[["settings"]]
 
   metrics <- sample_metrics(counts, probes, samples, preset, warn_missing)
   metrics[["Positive_factor"]] <- unname(factors[["positive_factor"]])
@@ -714,15 +796,7 @@ build_nacho <- function(
     found[no_limit] <- NA
     unname(as.integer(found))
   }
-  samples <- cbind(samples, metrics)
-
-  normalised <- if (
-    isTRUE(settings[["housekeeping_norm"]]) && !is.null(house_factor)
-  ) {
-    sweep(scaled, 2, house_factor, "*")
-  } else {
-    scaled
-  }
+  samples <- cbind(samples, metrics, content[["extra_columns"]])
 
   probes[["is_housekeeping"]] <- probes[["Name"]] %in% housekeeping_genes
   probes[["is_excluded"]] <- probes[["Name"]] %in% excluded

@@ -2,6 +2,10 @@
 #'
 #' @param nacho_object A `nacho` object from [load_rcc()] or [normalise()].
 #' @inheritParams load_rcc
+#' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes.
+#'   `normalise()` reuses the `ruv_k` stored in the object, so pass
+#'   `ruv_k = NULL` to have [suggest_ruv_k()] choose again.
+#'   Other methods ignore it.
 #' @param outliers_thresholds A list of quality-control thresholds, as
 #'   returned by [nacho_thresholds()].
 #' @param ... Must be empty.
@@ -19,7 +23,12 @@
 #'   exclusion, background (`background` and `background_mode`), positive
 #'   control factor (`normalisation_method`), then content factor
 #'   (housekeeping genes when `housekeeping_norm` is `TRUE`).
-#'   Normalised counts are neither rounded nor floored; use
+#'   RUVg works on `log2(count + 1)` after the positive factor and returns
+#'   counts on the count scale, floored at 0.
+#'   It replaces the housekeeping scaling, so `housekeeping_norm` has no effect
+#'   and `House_factor` is not computed, and it corrects only the endogenous
+#'   and housekeeping probes.
+#'   Normalised counts are otherwise neither rounded nor floored; use
 #'   `nacho_counts(x, normalised = TRUE, log2 = TRUE)` for `log2(count + 1)`.
 #'
 #' @return A `nacho` object.
@@ -37,6 +46,7 @@ normalise <- function(
   normalisation_method = nacho_object@settings[["normalisation_method"]],
   background = nacho_object@settings[["background"]],
   background_mode = nacho_object@settings[["background_mode"]],
+  ruv_k = nacho_object@settings[["ruv_k"]],
   n_comp = nacho_object@settings[["n_comp"]],
   outliers_thresholds = nacho_object@thresholds,
   ...
@@ -65,7 +75,8 @@ normalise <- function(
     normalisation_method,
     n_comp,
     background,
-    background_mode
+    background_mode,
+    ruv_k
   )
   check_thresholds(outliers_thresholds)
 
@@ -75,6 +86,7 @@ normalise <- function(
     housekeeping_predict = housekeeping_predict,
     housekeeping_norm = housekeeping_norm,
     normalisation_method = choices[["normalisation_method"]],
+    ruv_k = if (!is.null(ruv_k)) as.integer(ruv_k),
     background = choices[["background"]],
     background_mode = choices[["background_mode"]],
     n_comp = as.integer(n_comp)
@@ -120,7 +132,12 @@ normalise <- function(
 #' @usage NULL
 normalize <- normalise
 
-run_normalisation <- function(x, settings, thresholds) {
+run_normalisation <- function(
+  x,
+  settings,
+  thresholds,
+  call = rlang::caller_env()
+) {
   build_nacho(
     counts = x@counts,
     probes = x@probes,
@@ -129,7 +146,8 @@ run_normalisation <- function(x, settings, thresholds) {
     thresholds = thresholds,
     rcc_type = x@rcc_type,
     provenance = x@provenance,
-    warn_missing = FALSE
+    warn_missing = FALSE,
+    call = call
   )
 }
 

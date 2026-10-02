@@ -13,6 +13,7 @@ normalise(
   normalisation_method = nacho_object@settings[["normalisation_method"]],
   background = nacho_object@settings[["background"]],
   background_mode = nacho_object@settings[["background_mode"]],
+  ruv_k = nacho_object@settings[["ruv_k"]],
   n_comp = nacho_object@settings[["n_comp"]],
   outliers_thresholds = nacho_object@thresholds,
   ...
@@ -30,9 +31,12 @@ should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}
 \item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation
 should be performed. Default is \code{TRUE}.}
 
-\item{normalisation_method}{[\link{character}] Either \code{"GEO"} or \code{"GLM"}.
-Character string to indicate normalisation using the geometric mean (\code{"GEO"})
-or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
+\item{normalisation_method}{[\link{character}] \code{"GEO"} (the default) or \code{"GLM"}
+scale samples by their positive controls, with the geometric mean or a
+Poisson model, then by the housekeeping genes; \code{"RUVg"} scales by the
+positive controls with the geometric mean, then removes \code{ruv_k} factors
+of unwanted variation estimated from the housekeeping genes, which
+\code{\link[=nacho_samples]{nacho_samples()}} returns as \code{W_1}, \code{W_2}, ... for use as covariates.}
 
 \item{background}{[\link{character}] How to estimate each sample's background
 from its negative controls: \code{"none"} (the default), \code{"mean"},
@@ -43,6 +47,11 @@ from its negative controls: \code{"none"} (the default), \code{"mean"},
 \code{"threshold"} (the default) raises lower counts to it, which Bruker
 recommends when fold changes matter, and \code{"subtract"} removes it and
 floors at 0.}
+
+\item{ruv_k}{[\link{numeric}] The number of unwanted factors RUVg removes.
+\code{normalise()} reuses the \code{ruv_k} stored in the object, so pass
+\code{ruv_k = NULL} to have \code{\link[=suggest_ruv_k]{suggest_ruv_k()}} choose again.
+Other methods ignore it.}
 
 \item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
@@ -72,7 +81,12 @@ The normalisation runs in this order: raw counts, negative probe
 exclusion, background (\code{background} and \code{background_mode}), positive
 control factor (\code{normalisation_method}), then content factor
 (housekeeping genes when \code{housekeeping_norm} is \code{TRUE}).
-Normalised counts are neither rounded nor floored; use
+RUVg works on \code{log2(count + 1)} after the positive factor and returns
+counts on the count scale, floored at 0.
+It replaces the housekeeping scaling, so \code{housekeeping_norm} has no effect
+and \code{House_factor} is not computed, and it corrects only the endogenous
+and housekeeping probes.
+Normalised counts are otherwise neither rounded nor floored; use
 \code{nacho_counts(x, normalised = TRUE, log2 = TRUE)} for \code{log2(count + 1)}.
 }
 \examples{

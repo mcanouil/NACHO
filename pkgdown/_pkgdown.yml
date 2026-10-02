@@ -43,6 +43,7 @@ reference:
       - normalise
       - exclude_outliers
       - housekeeping_stability
+      - suggest_ruv_k
   - title: Visualise and report
     desc: Explore quality control interactively, plot a single metric, or write a full report.
     contents:

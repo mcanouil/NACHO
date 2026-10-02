@@ -61,6 +61,7 @@ Suggests:
     limma,
     NanoStringNCTools,
     NormqPCR,
+    RUVSeq,
     S4Vectors,
     SummarizedExperiment
 biocViews:
@@ -94,6 +95,7 @@ Collate:
     'render.R'
     'report.R'
     'stability.R'
+    'ruv.R'
     'utils.R'
     'visualise.R'
     'zzz.R'
