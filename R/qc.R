@@ -395,24 +395,62 @@ control_factors <- function(counts, probes, excluded, method) {
     positive <- geometric_means(
       counts[used & code_class == "Positive", , drop = FALSE]
     )
-    return(list(positive_factor = mean(positive) / positive))
+    return(list(
+      positive_factor = mean(positive) / positive,
+      glm_failed = character(0)
+    ))
   }
   concentration <- control_concentrations(probe_names[used])
   controls <- counts[used, , drop = FALSE]
   slopes <- vapply(
     seq_len(ncol(controls)),
-    function(k) {
-      keep <- !is.na(controls[, k])
-      fit <- stats::glm(
-        y ~ x,
-        family = stats::poisson(link = "identity"),
-        data = data.frame(x = concentration[keep], y = controls[keep, k] + 1)
-      )
-      unname(stats::coef(fit)[[2]])
-    },
+    function(k) glm_slope(concentration, controls[, k]),
     numeric(1)
   )
-  list(positive_factor = mean(slopes) / slopes)
+  if (anyNA(slopes)) {
+    positive <- geometric_means(
+      counts[used & code_class == "Positive", , drop = FALSE]
+    )
+    return(list(
+      positive_factor = mean(positive) / positive,
+      glm_failed = colnames(counts)[is.na(slopes)]
+    ))
+  }
+  list(positive_factor = mean(slopes) / slopes, glm_failed = character(0))
+}
+
+#' Slope of a Poisson GLM with an identity link on the controls
+#'
+#' Counts plus 1 against known concentrations, started from the least
+#' squares line, so the identity link starts inside its valid region.
+#' A fit that does not converge, or whose slope or fitted values are not
+#' positive, gives `NA`.
+#'
+#' @noRd
+glm_slope <- function(concentration, counts) {
+  keep <- !is.na(counts)
+  data <- data.frame(x = concentration[keep], y = counts[keep] + 1)
+  start <- stats::coef(stats::lm(y ~ x, data = data))
+  start <- c(max(start[[1]], 1), max(start[[2]], 1e-6))
+  fit <- tryCatch(
+    suppressWarnings(stats::glm(
+      y ~ x,
+      family = stats::poisson(link = "identity"),
+      data = data,
+      start = start,
+      control = stats::glm.control(maxit = 100)
+    )),
+    error = function(cnd) NULL
+  )
+  if (
+    is.null(fit) ||
+      !fit[["converged"]] ||
+      stats::coef(fit)[[2]] <= 0 ||
+      any(stats::fitted(fit) <= 0)
+  ) {
+    return(NA_real_)
+  }
+  unname(stats::coef(fit)[[2]])
 }
 
 #' Content normalisation of the scaled counts
@@ -756,6 +794,24 @@ build_nacho <- function(
     excluded,
     settings[["normalisation_method"]]
   )
+  provenance[["glm_fallback"]] <- NULL
+  if (length(factors[["glm_failed"]]) > 0) {
+    nacho_warn(
+      c(
+        paste(
+          "The positive control GLM did not fit",
+          "{length(factors[['glm_failed']])} sample{?s},",
+          "so NACHO used the geometric mean ({.val GEO}) instead."
+        ),
+        x = "Failed: {.val {utils::head(factors[['glm_failed']], 5)}}.",
+        i = "Check the positive controls of those samples with {.code autoplot(x, type = \"Positive\")}."
+      ),
+      class = "glm_convergence",
+      call = call
+    )
+    settings[["normalisation_method"]] <- "GEO"
+    provenance[["glm_fallback"]] <- factors[["glm_failed"]]
+  }
   limits <- detection_limits(counts, code_class, excluded)
   hits <- detected(counts, limits)
   background <- background_levels(
