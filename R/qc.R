@@ -797,7 +797,8 @@ build_nacho <- function(
   )
   provenance[["glm_fallback"]] <- NULL
   if (length(factors[["glm_failed"]]) > 0) {
-    failed <- cli::cli_vec(factors[["glm_failed"]], list("vec-trunc" = 5))
+    # Read by the cli message below.
+    failed <- cli::cli_vec(factors[["glm_failed"]], list("vec-trunc" = 5)) # nolint: object_usage_linter.
     nacho_warn(
       c(
         paste(
