@@ -60,6 +60,23 @@ test_that("the fallback record is cleared by the next build", {
   expect_null(refit@provenance[["glm_fallback"]])
 })
 
+test_that("the fallback record survives a save and read round trip", {
+  x <- geo_object()
+  positives <- nacho_probes(x)[["CodeClass"]] == "Positive"
+  x@counts[positives, 1] <- rev(x@counts[positives, 1])
+  fallen <- suppressWarnings(
+    suppressMessages(normalise(x, normalisation_method = "GLM"))
+  )
+  path <- withr::local_tempfile(fileext = ".rds")
+  saveRDS(fallen, path)
+  restored <- suppressMessages(read_nacho(path))
+  expect_identical(
+    restored@provenance[["glm_fallback"]],
+    fallen@provenance[["glm_fallback"]]
+  )
+  expect_false(is.null(restored@provenance[["glm_fallback"]]))
+})
+
 test_that("a sample with fewer than two kept controls gives NA", {
   concentration <- c(0, 0, 0.5, 2, 8, 32, 128)
   expect_identical(
