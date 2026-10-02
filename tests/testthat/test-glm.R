@@ -41,6 +41,21 @@ test_that("a successful GLM keeps the method and records no fallback", {
   x <- suppressMessages(normalise(geo_object(), normalisation_method = "GLM"))
   expect_null(x@provenance[["glm_fallback"]])
   expect_identical(x@settings[["normalisation_method"]], "GLM")
+  probes <- nacho_probes(x)
+  names <- probes[["Name"]]
+  used <- probes[["CodeClass"]] %in%
+    c("Positive", "Negative") &
+    !names %in% c("POS_F(0.125)", names[probes[["is_excluded"]]])
+  concentration <- NACHO:::control_concentrations(names[used])
+  slopes <- apply(
+    NACHO::GSE74821@counts[used, , drop = FALSE],
+    2,
+    function(counts) NACHO:::glm_slope(concentration, counts)
+  )
+  expect_equal(
+    nacho_samples(x)[["Positive_factor"]],
+    unname(mean(slopes) / slopes)
+  )
 })
 
 test_that("the fallback record is cleared by the next build", {

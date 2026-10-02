@@ -797,6 +797,7 @@ build_nacho <- function(
   )
   provenance[["glm_fallback"]] <- NULL
   if (length(factors[["glm_failed"]]) > 0) {
+    failed <- cli::cli_vec(factors[["glm_failed"]], list("vec-trunc" = 5))
     nacho_warn(
       c(
         paste(
@@ -804,10 +805,7 @@ build_nacho <- function(
           "{length(factors[['glm_failed']])} sample{?s},",
           "so NACHO used the geometric mean ({.val GEO}) instead."
         ),
-        x = paste0(
-          "Failed: {.val {cli::cli_vec(factors[['glm_failed']], ",
-          "list('vec-trunc' = 5))}}."
-        ),
+        x = "Failed: {.val {failed}}.",
         i = "Check the positive controls of those samples with {.code autoplot(x, type = \"Positive\")}."
       ),
       class = "glm_convergence",
