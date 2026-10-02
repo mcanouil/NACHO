@@ -28,7 +28,7 @@ mirna_methods <- c("stable_mirna", "total_mirna", "spike_in", "ligation")
 #'
 #' The order follows Bruker's technical note on plasma and serum miRNA:
 #' stable miRNAs (the five most stable by geNorm among miRNAs above
-#' background in 90 % of samples), total miRNA (miRNAs above 50 counts in
+#' background in 90% of samples), total miRNA (miRNAs above 50 counts in
 #' every sample), spike-ins, then ligation positive controls.
 #'
 #' @noRd
