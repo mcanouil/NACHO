@@ -55,7 +55,19 @@ test_that("the fallback record is cleared by the next build", {
     normalise(fallen, housekeeping_norm = FALSE)
   )
   expect_null(again@provenance[["glm_fallback"]])
-  fallen@counts <- GSE74821@counts
+  fallen@counts <- NACHO::GSE74821@counts
   refit <- suppressMessages(normalise(fallen, normalisation_method = "GLM"))
   expect_null(refit@provenance[["glm_fallback"]])
+})
+
+test_that("a sample with fewer than two kept controls gives NA", {
+  concentration <- c(0, 0, 0.5, 2, 8, 32, 128)
+  expect_identical(
+    NACHO:::glm_slope(concentration, rep(NA_real_, 7)),
+    NA_real_
+  )
+  expect_identical(
+    NACHO:::glm_slope(concentration, c(5, rep(NA_real_, 6))),
+    NA_real_
+  )
 })

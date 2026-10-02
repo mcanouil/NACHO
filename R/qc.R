@@ -391,14 +391,15 @@ control_factors <- function(counts, probes, excluded, method) {
   used <- code_class %in%
     c("Positive", "Negative") &
     !probe_names %in% c("POS_F(0.125)", excluded)
+  positive <- geometric_means(
+    counts[used & code_class == "Positive", , drop = FALSE]
+  )
+  geo <- list(
+    positive_factor = mean(positive) / positive,
+    glm_failed = character(0)
+  )
   if (method != "GLM") {
-    positive <- geometric_means(
-      counts[used & code_class == "Positive", , drop = FALSE]
-    )
-    return(list(
-      positive_factor = mean(positive) / positive,
-      glm_failed = character(0)
-    ))
+    return(geo)
   }
   concentration <- control_concentrations(probe_names[used])
   controls <- counts[used, , drop = FALSE]
@@ -408,13 +409,8 @@ control_factors <- function(counts, probes, excluded, method) {
     numeric(1)
   )
   if (anyNA(slopes)) {
-    positive <- geometric_means(
-      counts[used & code_class == "Positive", , drop = FALSE]
-    )
-    return(list(
-      positive_factor = mean(positive) / positive,
-      glm_failed = colnames(counts)[is.na(slopes)]
-    ))
+    geo[["glm_failed"]] <- colnames(counts)[is.na(slopes)]
+    return(geo)
   }
   list(positive_factor = mean(slopes) / slopes, glm_failed = character(0))
 }
@@ -429,6 +425,9 @@ control_factors <- function(counts, probes, excluded, method) {
 #' @noRd
 glm_slope <- function(concentration, counts) {
   keep <- !is.na(counts)
+  if (sum(keep) < 2) {
+    return(NA_real_)
+  }
   data <- data.frame(x = concentration[keep], y = counts[keep] + 1)
   start <- stats::coef(stats::lm(y ~ x, data = data))
   start <- c(max(start[[1]], 1), max(start[[2]], 1e-6))
