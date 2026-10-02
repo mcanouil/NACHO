@@ -430,7 +430,10 @@ glm_slope <- function(concentration, counts) {
   }
   data <- data.frame(x = concentration[keep], y = counts[keep] + 1)
   start <- stats::coef(stats::lm(y ~ x, data = data))
-  start <- c(max(start[[1]], 1), max(start[[2]], 1e-6))
+  if (!is.finite(start[[2]]) || start[[2]] <= 0) {
+    return(NA_real_)
+  }
+  start <- c(max(start[[1]], 1), start[[2]])
   fit <- tryCatch(
     suppressWarnings(stats::glm(
       y ~ x,
@@ -802,12 +805,8 @@ build_nacho <- function(
           "so NACHO used the geometric mean ({.val GEO}) instead."
         ),
         x = paste0(
-          "Failed: ",
-          paste(utils::head(factors[["glm_failed"]], 5), collapse = ", "),
-          if (length(factors[["glm_failed"]]) > 5) {
-            paste0(" and ", length(factors[["glm_failed"]]) - 5, " more")
-          },
-          "."
+          "Failed: {.val {cli::cli_vec(factors[['glm_failed']], ",
+          "list('vec-trunc' = 5))}}."
         ),
         i = "Check the positive controls of those samples with {.code autoplot(x, type = \"Positive\")}."
       ),

@@ -60,7 +60,7 @@ test_that("the fallback record is cleared by the next build", {
   expect_null(refit@provenance[["glm_fallback"]])
 })
 
-test_that("several failed samples are listed with a remaining count", {
+test_that("several failed samples are listed with a truncation", {
   x <- geo_object()
   positives <- nacho_probes(x)[["CodeClass"]] == "Positive"
   for (k in 1:7) {
@@ -68,7 +68,7 @@ test_that("several failed samples are listed with a remaining count", {
   }
   expect_warning(
     y <- suppressMessages(normalise(x, normalisation_method = "GLM")),
-    regexp = "and 2 more",
+    regexp = "\\.\\.\\.",
     class = "nacho_warning_glm_convergence"
   )
   expect_identical(y@provenance[["glm_fallback"]], colnames(x@counts)[1:7])
