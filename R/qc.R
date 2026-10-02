@@ -445,7 +445,7 @@ glm_slope <- function(concentration, counts) {
     return(NA_real_)
   }
   slope <- unname(stats::coef(fit)[[2]])
-  if (is.na(slope) || slope <= 0 || any(stats::fitted(fit) <= 0)) {
+  if (!is.finite(slope) || slope <= 0 || any(stats::fitted(fit) <= 0)) {
     return(NA_real_)
   }
   slope
