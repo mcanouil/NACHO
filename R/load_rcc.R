@@ -34,6 +34,8 @@
 #'   order Bruker recommends for plasma and serum.
 #'   These methods ignore `housekeeping_genes`, `housekeeping_predict` and
 #'   `housekeeping_norm`, and give their scaling factor as `House_factor`.
+#'   When a GLM fit fails, NACHO warns and uses the geometric mean instead, as
+#'   [normalise()] describes.
 #' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes;
 #'   `NULL` uses [suggest_ruv_k()].
 #'   Other methods ignore it.

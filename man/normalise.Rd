@@ -45,7 +45,9 @@ For miRNA panels, \code{"stable_mirna"}, \code{"total_mirna"}, \code{"spike_in"}
 counts, the spike-in controls or the ligation positive controls, in the
 order Bruker recommends for plasma and serum.
 These methods ignore \code{housekeeping_genes}, \code{housekeeping_predict} and
-\code{housekeeping_norm}, and give their scaling factor as \code{House_factor}.}
+\code{housekeeping_norm}, and give their scaling factor as \code{House_factor}.
+When a GLM fit fails, NACHO warns and uses the geometric mean instead, as
+\code{\link[=normalise]{normalise()}} describes.}
 
 \item{background}{[\link{character}] How to estimate each sample's background
 from its negative controls: \code{"none"} (the default), \code{"mean"},

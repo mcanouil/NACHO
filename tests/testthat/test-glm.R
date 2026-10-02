@@ -129,3 +129,18 @@ test_that("a missing concentration cannot abort the GLM fit", {
     NA_real_
   )
 })
+
+test_that("print() says when GLM fell back to the geometric mean", {
+  x <- geo_object()
+  positives <- nacho_probes(x)[["CodeClass"]] == "Positive"
+  x@counts[positives, 1] <- rev(x@counts[positives, 1])
+  fallen <- suppressWarnings(
+    suppressMessages(normalise(x, normalisation_method = "GLM"))
+  )
+  expect_match(
+    format(fallen),
+    "GLM fell back to the geometric mean for 1 sample",
+    all = FALSE
+  )
+  expect_false(any(grepl("GLM fell back", format(x))))
+})
