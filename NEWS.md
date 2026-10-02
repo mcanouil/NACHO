@@ -99,6 +99,9 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/mirna.R`,
   - feat: NACHO recognises miRNA panels and offers `normalisation_method = "stable_mirna"`, `"total_mirna"`, `"spike_in"` and `"ligation"`.
   - feat: `nacho_qc()` checks the ligation controls of miRNA panels, and `nacho_thresholds(haemolysis = TRUE)` flags haemolysed plasma and serum samples.
+- In `R/batch.R` and `R/autoplot.R`,
+  - feat: `batch_diagnostics()` crosses the study groups with cartridges and dates, with Cramér's V and a flag when a batch holds a single group, tests the QC metrics against each batch, and measures how much of each principal component each batch explains.
+    `autoplot()` draws `"RLE"`, `"BatchFactors"` and `"PCBatch"`.
 
 ## Performance
 
