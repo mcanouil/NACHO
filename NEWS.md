@@ -14,6 +14,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `load_rcc()` refuses duplicated sample ids for single-sample RCC files; PlexSet files may repeat an id, since `plexset_id` tells the samples apart.
   - feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
   - feat: Duplicated probe names within one RCC sample are now refused with a clear error.
+  - feat: miRNA panels are no longer normalised with housekeeping genes by default, since their housekeeping mRNAs sit at background.
+    Passing `housekeeping_genes` or `housekeeping_predict = TRUE` turns it back on, and so does `housekeeping_norm = TRUE`.
 - In `R/accessors.R` and `R/normalise.R`,
   - feat: `nacho_qc()` gives a status for each metric, `n_flags`, an overall `status` and a readable `reason`, and replaces `is_outlier`.
     `check_outliers()` is gone, since the status always follows the object's thresholds.
@@ -28,6 +30,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/qc.R`,
   - feat: Negative probes are excluded with Bruker's rule, at most two probes 3-fold above the others; the legacy preset keeps the NACHO 2 rule.
   - feat: Positive control linearity leaves out POS_F and adds 1 to every count in the nSolver preset.
+  - feat: Ligation controls of miRNA panels now flag samples under the default nSolver preset.
   - feat: Normalised counts are no longer rounded or floored at 0.1.
   - feat: There is no background correction by default (`background = "none"`).
     Choose a statistic with `background` and whether to threshold or subtract with `background_mode`.
@@ -36,6 +39,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
     The background applied is in the new `Background` column.
     With `"GLM"`, the normalised counts therefore differ from NACHO 2, which subtracted the model intercept.
   - feat: `housekeeping_predict = TRUE` picks the five most stable genes by geNorm, among genes above background in at least 90% of samples, instead of the five with the smallest spread.
+- In `R/interop.R`,
+  - feat: `as_nacho()` on a miRNA `SummarizedExperiment` without saved settings no longer normalises with housekeeping genes, unless you set `housekeeping_norm = TRUE` or give `housekeeping_genes`.
 - In `R/deploy.R`,
   - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
 - In `DESCRIPTION`,
@@ -91,6 +96,9 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/ruv.R`,
   - feat: `normalisation_method = "RUVg"` removes unwanted variation estimated from the housekeeping genes, and gives the factors as `W_1`, `W_2`, ... in `nacho_samples()`.
     `suggest_ruv_k()` suggests how many to remove.
+- In `R/mirna.R`,
+  - feat: NACHO recognises miRNA panels and offers `normalisation_method = "stable_mirna"`, `"total_mirna"`, `"spike_in"` and `"ligation"`.
+  - feat: `nacho_qc()` checks the ligation controls of miRNA panels, and `nacho_thresholds(haemolysis = TRUE)` flags haemolysed plasma and serum samples.
 
 ## Performance
 

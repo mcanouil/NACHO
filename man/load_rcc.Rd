@@ -10,7 +10,7 @@ load_rcc(
   id_colname = NULL,
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
-  housekeeping_norm = TRUE,
+  housekeeping_norm = NULL,
   normalisation_method = "GEO",
   background = "none",
   background_mode = "threshold",
@@ -34,17 +34,31 @@ the file names in \code{data_directory}.}
 that should be used as housekeeping genes. Default is \code{NULL}.}
 
 \item{housekeeping_predict}{[\link{logical}] Boolean to indicate whether the housekeeping genes
-should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
+should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.
+Prediction picks the five most stable genes by geNorm on the raw counts.
+It is skipped for the miRNA methods of \code{normalisation_method}.}
 
 \item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation
-should be performed. Default is \code{TRUE}.}
+should be performed.
+\code{NULL} (the default) normalises with housekeeping genes for mRNA panels
+that have them.
+On miRNA panels, whose housekeeping mRNAs sit at background, it does so
+only when you pass \code{housekeeping_genes} or set \code{housekeeping_predict = TRUE}.
+Pass \code{TRUE} or \code{FALSE} to override this.
+The miRNA methods of \code{normalisation_method} ignore it.}
 
 \item{normalisation_method}{[\link{character}] \code{"GEO"} (the default) or \code{"GLM"}
 scale samples by their positive controls, with the geometric mean or a
 Poisson model, then by the housekeeping genes; \code{"RUVg"} scales by the
 positive controls with the geometric mean, then removes \code{ruv_k} factors
 of unwanted variation estimated from the housekeeping genes, which
-\code{\link[=nacho_samples]{nacho_samples()}} returns as \code{W_1}, \code{W_2}, ... for use as covariates.}
+\code{\link[=nacho_samples]{nacho_samples()}} returns as \code{W_1}, \code{W_2}, ... for use as covariates.
+For miRNA panels, \code{"stable_mirna"}, \code{"total_mirna"}, \code{"spike_in"} and
+\code{"ligation"} scale by the five most stable miRNAs, the miRNAs above 50
+counts, the spike-in controls or the ligation positive controls, in the
+order Bruker recommends for plasma and serum.
+These methods ignore \code{housekeeping_genes}, \code{housekeeping_predict} and
+\code{housekeeping_norm}, and give their scaling factor as \code{House_factor}.}
 
 \item{background}{[\link{character}] How to estimate each sample's background
 from its negative controls: \code{"none"} (the default), \code{"mean"},

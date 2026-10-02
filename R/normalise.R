@@ -2,6 +2,9 @@
 #'
 #' @param nacho_object A `nacho` object from [load_rcc()] or [normalise()].
 #' @inheritParams load_rcc
+#' @param housekeeping_norm [[logical]] Boolean to indicate whether the housekeeping normalisation
+#'   should be performed.
+#'   The default is the setting stored in `nacho_object`, which is `TRUE` or `FALSE`.
 #' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes.
 #'   `normalise()` reuses the `ruv_k` stored in the object, so pass
 #'   `ruv_k = NULL` to have [suggest_ruv_k()] choose again.
@@ -28,6 +31,12 @@
 #'   It replaces the housekeeping scaling, so `housekeeping_norm` has no effect
 #'   and `House_factor` is not computed, and it corrects only the endogenous
 #'   and housekeeping probes.
+#'   The miRNA methods `"stable_mirna"`, `"total_mirna"`, `"spike_in"` and
+#'   `"ligation"` also ignore `housekeeping_norm`, `housekeeping_genes` and
+#'   `housekeeping_predict`.
+#'   They store their factor in `House_factor`, which is judged against the
+#'   `House_factor` threshold, and the probes they used in
+#'   `provenance$content_probes`.
 #'   Normalised counts are otherwise neither rounded nor floored; use
 #'   `nacho_counts(x, normalised = TRUE, log2 = TRUE)` for `log2(count + 1)`.
 #'

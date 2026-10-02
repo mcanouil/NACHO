@@ -11,7 +11,11 @@ qc_metrics <- c(
   "LoD",
   "Positive_factor",
   "House_factor",
-  "Housekeeping_detected"
+  "Housekeeping_detected",
+  "Ligation_order",
+  "Ligation_R2",
+  "Ligation_NEG",
+  "Haemolysis"
 )
 
 #' Metrics shared by the eight samples of a PlexSet lane

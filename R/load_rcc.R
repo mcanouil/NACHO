@@ -12,14 +12,28 @@
 #'   that should be used as housekeeping genes. Default is `NULL`.
 #' @param housekeeping_predict [[logical]] Boolean to indicate whether the housekeeping genes
 #'   should be predicted (`TRUE`) or not (`FALSE`). Default is `FALSE`.
+#'   Prediction picks the five most stable genes by geNorm on the raw counts.
+#'   It is skipped for the miRNA methods of `normalisation_method`.
 #' @param housekeeping_norm [[logical]] Boolean to indicate whether the housekeeping normalisation
-#'   should be performed. Default is `TRUE`.
+#'   should be performed.
+#'   `NULL` (the default) normalises with housekeeping genes for mRNA panels
+#'   that have them.
+#'   On miRNA panels, whose housekeeping mRNAs sit at background, it does so
+#'   only when you pass `housekeeping_genes` or set `housekeeping_predict = TRUE`.
+#'   Pass `TRUE` or `FALSE` to override this.
+#'   The miRNA methods of `normalisation_method` ignore it.
 #' @param normalisation_method [[character]] `"GEO"` (the default) or `"GLM"`
 #'   scale samples by their positive controls, with the geometric mean or a
 #'   Poisson model, then by the housekeeping genes; `"RUVg"` scales by the
 #'   positive controls with the geometric mean, then removes `ruv_k` factors
 #'   of unwanted variation estimated from the housekeeping genes, which
 #'   [nacho_samples()] returns as `W_1`, `W_2`, ... for use as covariates.
+#'   For miRNA panels, `"stable_mirna"`, `"total_mirna"`, `"spike_in"` and
+#'   `"ligation"` scale by the five most stable miRNAs, the miRNAs above 50
+#'   counts, the spike-in controls or the ligation positive controls, in the
+#'   order Bruker recommends for plasma and serum.
+#'   These methods ignore `housekeeping_genes`, `housekeeping_predict` and
+#'   `housekeeping_norm`, and give their scaling factor as `House_factor`.
 #' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes;
 #'   `NULL` uses [suggest_ruv_k()].
 #'   Other methods ignore it.
@@ -83,7 +97,7 @@ load_rcc <- function(
   id_colname = NULL,
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
-  housekeeping_norm = TRUE,
+  housekeeping_norm = NULL,
   normalisation_method = "GEO",
   background = "none",
   background_mode = "threshold",
@@ -110,7 +124,7 @@ load_rcc <- function(
   choices <- check_settings(
     housekeeping_genes,
     housekeeping_predict,
-    housekeeping_norm,
+    housekeeping_norm %||% TRUE,
     normalisation_method,
     n_comp,
     background,
@@ -277,7 +291,8 @@ load_rcc <- function(
     probes[["CodeClass"]],
     housekeeping_genes,
     housekeeping_predict,
-    housekeeping_norm
+    housekeeping_norm,
+    detect_panel(probes, samples)
   )
 
   nacho_progress_step("Computing quality-control metrics and normalising")
@@ -309,8 +324,13 @@ load_rcc <- function(
 #' Turn housekeeping normalisation off when no housekeeping gene is available
 #'
 #' @param code_class The code class of each probe.
+#' @param panel `"mirna"` or `"mrna"`, from `detect_panel()`.
 #'
-#' @return `housekeeping_norm`, set to `FALSE` with a warning when there are
+#' @return `housekeeping_norm`.
+#'   `NULL` becomes `TRUE` on an mRNA panel, or on a miRNA panel when
+#'   `housekeeping_genes` is given or `housekeeping_predict` is `TRUE`, and
+#'   `FALSE` otherwise.
+#'   It is set to `FALSE` with a warning when there are
 #'   no `Housekeeping` probes, no `housekeeping_genes` and no prediction.
 #'
 #' @noRd
@@ -318,8 +338,14 @@ resolve_housekeeping_norm <- function(
   code_class,
   housekeeping_genes,
   housekeeping_predict,
-  housekeeping_norm
+  housekeeping_norm,
+  panel
 ) {
+  if (is.null(housekeeping_norm)) {
+    housekeeping_norm <- panel == "mrna" ||
+      !is.null(housekeeping_genes) ||
+      isTRUE(housekeeping_predict)
+  }
   if (
     !any(grepl("Housekeeping", code_class)) &&
       is.null(housekeeping_genes) &&

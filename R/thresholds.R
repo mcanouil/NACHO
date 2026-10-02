@@ -24,6 +24,12 @@ nacho_presets <- c("nsolver", "legacy")
 #' The preset also chooses how negative probes are excluded and how the
 #' positive control linearity is computed, so changing it normalises again.
 #'
+#' For miRNA panels, `Ligation_order` (the three ligation positive controls
+#' in decreasing order), `Ligation_R2` (their log2 counts on a line) and
+#' `Ligation_NEG` (the largest ligation negative minus the detection limit)
+#' are NACHO's own definitions, since Bruker publishes no threshold.
+#' `"legacy"` never flags them.
+#'
 #' Each element can be changed afterwards; two numbers are a lower and an
 #' upper bound, and one number is a lower bound. Use `-Inf` or `Inf` for an
 #' open bound.
@@ -31,6 +37,11 @@ nacho_presets <- c("nsolver", "legacy")
 #' @param instrument The nCounter instrument: `"max"`, `"flex"`, `"pro"` or
 #'   `"sprint"`.
 #' @param preset `"nsolver"` or `"legacy"`.
+#' @param haemolysis If `TRUE`, flag samples of a miRNA panel whose `miR-451a` to
+#'   `miR-23a-3p` log2 ratio is above 7, a sign of haemolysis in plasma and
+#'   serum.
+#'   [load_rcc()] does not take it, so pass the thresholds to
+#'   `normalise(outliers_thresholds = )`.
 #'
 #' @return A named list: `preset`, `instrument`, then one element per metric.
 #' @export
@@ -40,10 +51,12 @@ nacho_presets <- c("nsolver", "legacy")
 #' nacho_thresholds(preset = "legacy")
 nacho_thresholds <- function(
   instrument = c("max", "flex", "pro", "sprint"),
-  preset = c("nsolver", "legacy")
+  preset = c("nsolver", "legacy"),
+  haemolysis = FALSE
 ) {
   instrument <- check_choice(instrument, nacho_instruments)
   preset <- check_choice(preset, nacho_presets)
+  haemolysis <- check_bool(haemolysis)
   limits <- if (preset == "legacy") {
     list(
       BD = c(0.1, 2.25),
@@ -52,7 +65,11 @@ nacho_thresholds <- function(
       LoD = 2,
       Positive_factor = c(1 / 4, 4),
       House_factor = c(1 / 11, 11),
-      Housekeeping_detected = 0
+      Housekeeping_detected = 0,
+      Ligation_order = 0,
+      Ligation_R2 = 0,
+      Ligation_NEG = c(-Inf, Inf),
+      Haemolysis = c(-Inf, if (haemolysis) 7 else Inf)
     )
   } else {
     list(
@@ -62,7 +79,11 @@ nacho_thresholds <- function(
       LoD = 2,
       Positive_factor = c(0.3, 3),
       House_factor = c(0.1, 10),
-      Housekeeping_detected = 3
+      Housekeeping_detected = 3,
+      Ligation_order = 1,
+      Ligation_R2 = 0.95,
+      Ligation_NEG = c(-Inf, 0),
+      Haemolysis = c(-Inf, if (haemolysis) 7 else Inf)
     )
   }
   c(list(preset = preset, instrument = instrument), limits)
@@ -104,7 +125,7 @@ thresholds_for_samples <- function(
   nacho_thresholds(instrument, preset)
 }
 
-bounds_problem <- function(name, value) {
+bounds_problem <- function(name, value, signed = FALSE) {
   if (!is.numeric(value) || length(value) != 2 || anyNA(value)) {
     return(sprintf(
       "@thresholds$%s must be two numbers, a lower and an upper bound.",
@@ -113,9 +134,9 @@ bounds_problem <- function(name, value) {
   }
   problem <- if (value[1] == Inf || value[2] == -Inf) {
     "-Inf is only allowed as the lower bound and Inf only as the upper bound."
-  } else if (value[1] < 0 && value[1] != -Inf) {
+  } else if (!signed && value[1] < 0 && value[1] != -Inf) {
     "the lower bound must not be negative; use -Inf for no lower bound."
-  } else if (value[2] < 0) {
+  } else if (!signed && value[2] < 0) {
     "the upper bound must not be negative."
   } else if (value[1] > value[2]) {
     "the bounds must be increasing."
@@ -163,8 +184,20 @@ validate_thresholds <- function(thresholds) {
       "@thresholds$instrument must be one of max, flex, pro, sprint, or NA."
     )
   }
-  for (name in c("BD", "Positive_factor", "House_factor")) {
-    problems <- c(problems, bounds_problem(name, thresholds[[name]]))
+  range_names <- c("BD", "Positive_factor", "House_factor")
+  optional_ranges <- intersect(
+    c("Ligation_NEG", "Haemolysis"),
+    names(thresholds)
+  )
+  for (name in c(range_names, optional_ranges)) {
+    problems <- c(
+      problems,
+      bounds_problem(
+        name,
+        thresholds[[name]],
+        signed = name %in% optional_ranges
+      )
+    )
   }
   lod <- thresholds[["LoD"]]
   if (!is.numeric(lod) || length(lod) != 1 || is.na(lod) || lod == Inf) {
@@ -189,6 +222,11 @@ validate_thresholds <- function(thresholds) {
     )
   }
   limits <- list(FoV = c(0, 100), PCL = c(0, 1))
+  optional_limits <- list(Ligation_order = c(0, 1), Ligation_R2 = c(0, 1))
+  limits <- c(
+    limits,
+    optional_limits[names(optional_limits) %in% names(thresholds)]
+  )
   for (name in names(limits)) {
     value <- thresholds[[name]]
     if (

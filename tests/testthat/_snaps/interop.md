@@ -30,7 +30,7 @@
       as_nacho(se_with_setting("normalisation_method", "foo"))
     Condition
       Error in `as_nacho()`:
-      ! `metadata(x)$nacho$settings$normalisation_method` must be one of "GEO", "GLM", or "RUVg", not "foo".
+      ! `metadata(x)$nacho$settings$normalisation_method` must be one of "GEO", "GLM", "RUVg", "stable_mirna", "total_mirna", "spike_in", or "ligation", not "foo".
 
 # as_nacho() checks the thresholds and RCC type saved in the metadata
 
@@ -82,7 +82,7 @@
     Condition
       Error in `as_nacho()`:
       ! `metadata(x)$nacho$settings` has unknown setting: n_comps.
-      i Known settings: id_colname, housekeeping_genes, housekeeping_predict, housekeeping_norm, normalisation_method, ruv_k, background, background_mode, and n_comp.
+      i Known settings: id_colname, housekeeping_genes, housekeeping_predict, housekeeping_norm, normalisation_method, ruv_k, background, background_mode, n_comp, and panel.
 
 # as_nacho() points a saved id column clash to the metadata
 

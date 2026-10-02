@@ -1,8 +1,8 @@
 #' Settings for data that do not come from NACHO
 #'
-#' The defaults match those of [load_rcc()], which a test checks, except
-#' `housekeeping_norm`, which is on only when the probes include
-#' `Housekeeping` ones.
+#' The defaults match those of [load_rcc()], which a test checks.
+#' `housekeeping_norm` is `NULL`, and `nacho_metadata_settings()` resolves it
+#' from the panel and the probes.
 #'
 #' @param probes The probe table, with a `CodeClass` column.
 #' @param id_colname The name of the sample id column.
@@ -13,12 +13,13 @@ default_settings <- function(probes, id_colname) {
     id_colname = id_colname,
     housekeeping_genes = NULL,
     housekeeping_predict = FALSE,
-    housekeeping_norm = any(grepl("Housekeeping", probes[["CodeClass"]])),
+    housekeeping_norm = NULL,
     normalisation_method = "GEO",
     ruv_k = NULL,
     background = "none",
     background_mode = "threshold",
-    n_comp = 10L
+    n_comp = 10L,
+    panel = NULL
   )
 }
 
@@ -192,6 +193,10 @@ computed_sample_columns <- c(
   "Background",
   "House_factor",
   "Housekeeping_detected",
+  "Ligation_order",
+  "Ligation_R2",
+  "Ligation_NEG",
+  "Haemolysis",
   "is_outlier"
 )
 
@@ -367,7 +372,15 @@ control_concentrations <- function(probe_names) {
 #' Normalisation methods
 #'
 #' @noRd
-nacho_normalisation_methods <- c("GEO", "GLM", "RUVg")
+nacho_normalisation_methods <- c(
+  "GEO",
+  "GLM",
+  "RUVg",
+  "stable_mirna",
+  "total_mirna",
+  "spike_in",
+  "ligation"
+)
 
 #' Positive normalisation factor of each sample
 #'
@@ -404,14 +417,18 @@ control_factors <- function(counts, probes, excluded, method) {
 
 #' Content normalisation of the scaled counts
 #'
+#' @param counts The raw counts, which the miRNA methods use to pick their
+#'   reference probes.
 #' @param call The environment whose call names the function in errors.
 #'
 #' @return A list: `normalised`, `house_factor` (or `NULL`), `extra_columns`
-#'   (a data frame of sample columns, possibly with no column) and `settings`.
+#'   (a data frame of sample columns, possibly with no column), `settings` and
+#'   `content_probes` (the miRNA reference probes, or `NULL`).
 #'
 #' @noRd
 content_normalise <- function(
   scaled,
+  counts,
   probes,
   settings,
   housekeeping_genes,
@@ -448,10 +465,42 @@ content_normalise <- function(
       normalised = normalised,
       house_factor = NULL,
       extra_columns = extra,
-      settings = settings
+      settings = settings,
+      content_probes = NULL
     ))
   }
-  house_factor <- if (!is.null(housekeeping_genes)) {
+  if (settings[["normalisation_method"]] %in% mirna_methods) {
+    if (!identical(settings[["panel"]], "mirna")) {
+      nacho_abort(
+        c(
+          "{.code normalisation_method = {.val {settings[['normalisation_method']]}}} is for miRNA panels.",
+          i = "Use {.val GEO}, {.val GLM} or {.val RUVg} for mRNA panels."
+        ),
+        class = "bad_argument",
+        call = call
+      )
+    }
+    reference <- mirna_reference(
+      settings[["normalisation_method"]],
+      counts,
+      probes,
+      call = call
+    )
+    house_factor <- content_factor(
+      scaled[probes[["Name"]] %in% reference, , drop = FALSE]
+    )
+    settings["ruv_k"] <- list(NULL)
+    return(list(
+      normalised = sweep(scaled, 2, house_factor, "*"),
+      house_factor = house_factor,
+      extra_columns = none,
+      settings = settings,
+      content_probes = reference
+    ))
+  }
+  use_housekeeping <- !identical(settings[["panel"]], "mirna") ||
+    isTRUE(settings[["housekeeping_norm"]])
+  house_factor <- if (!is.null(housekeeping_genes) && use_housekeeping) {
     content_factor(
       scaled[probes[["Name"]] %in% housekeeping_genes, , drop = FALSE]
     )
@@ -468,7 +517,8 @@ content_normalise <- function(
     normalised = normalised,
     house_factor = house_factor,
     extra_columns = none,
-    settings = settings
+    settings = settings,
+    content_probes = NULL
   )
 }
 
@@ -689,6 +739,7 @@ build_nacho <- function(
     drop = FALSE
   ]
   code_class <- probes[["CodeClass"]]
+  settings[["panel"]] <- detect_panel(probes, samples)
 
   housekeeping_genes <- settings[["housekeeping_genes"]]
   if (is.null(housekeeping_genes) && any(grepl("Housekeeping", code_class))) {
@@ -723,7 +774,10 @@ build_nacho <- function(
 
   probes[["detection_rate"]] <- missing_not_nan(rowMeans(hits, na.rm = TRUE))
 
-  if (isTRUE(settings[["housekeeping_predict"]])) {
+  if (
+    isTRUE(settings[["housekeeping_predict"]]) &&
+      !settings[["normalisation_method"]] %in% mirna_methods
+  ) {
     nacho_inform("Searching for the best housekeeping genes.")
     predicted <- predict_housekeeping(counts, probes)
     if (length(predicted) == 0) {
@@ -742,6 +796,7 @@ build_nacho <- function(
 
   content <- content_normalise(
     scaled,
+    counts,
     probes,
     settings,
     housekeeping_genes,
@@ -789,18 +844,27 @@ build_nacho <- function(
     metrics[["House_factor"]] <- unname(house_factor)
   }
   housekeeping_rows <- probes[["Name"]] %in% housekeeping_genes
-  metrics[["Housekeeping_detected"]] <- if (!any(housekeeping_rows)) {
+  skip_housekeeping <- settings[["panel"]] == "mirna" &&
+    !isTRUE(settings[["housekeeping_norm"]])
+  metrics[["Housekeeping_detected"]] <- if (
+    skip_housekeeping || !any(housekeeping_rows)
+  ) {
     NA_integer_
   } else {
     found <- colSums(hits[housekeeping_rows, , drop = FALSE], na.rm = TRUE)
     found[no_limit] <- NA
     unname(as.integer(found))
   }
+  if (settings[["panel"]] == "mirna") {
+    metrics <- cbind(metrics, ligation_metrics(counts, probes, limits))
+    metrics[["Haemolysis"]] <- haemolysis_metric(counts, probes)
+  }
   samples <- cbind(samples, metrics, content[["extra_columns"]])
 
   probes[["is_housekeeping"]] <- probes[["Name"]] %in% housekeeping_genes
   probes[["is_excluded"]] <- probes[["Name"]] %in% excluded
   provenance[["excluded_negatives"]] <- excluded
+  provenance[["content_probes"]] <- content[["content_probes"]]
   settings[["housekeeping_genes"]] <- housekeeping_genes
 
   nacho(

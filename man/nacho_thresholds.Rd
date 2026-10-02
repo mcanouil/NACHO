@@ -6,7 +6,8 @@
 \usage{
 nacho_thresholds(
   instrument = c("max", "flex", "pro", "sprint"),
-  preset = c("nsolver", "legacy")
+  preset = c("nsolver", "legacy"),
+  haemolysis = FALSE
 )
 }
 \arguments{
@@ -14,6 +15,12 @@ nacho_thresholds(
 \code{"sprint"}.}
 
 \item{preset}{\code{"nsolver"} or \code{"legacy"}.}
+
+\item{haemolysis}{If \code{TRUE}, flag samples of a miRNA panel whose \verb{miR-451a} to
+\verb{miR-23a-3p} log2 ratio is above 7, a sign of haemolysis in plasma and
+serum.
+\code{\link[=load_rcc]{load_rcc()}} does not take it, so pass the thresholds to
+\code{normalise(outliers_thresholds = )}.}
 }
 \value{
 A named list: \code{preset}, \code{instrument}, then one element per metric.
@@ -40,6 +47,12 @@ NACHO 2 outlier calls.
 
 The preset also chooses how negative probes are excluded and how the
 positive control linearity is computed, so changing it normalises again.
+
+For miRNA panels, \code{Ligation_order} (the three ligation positive controls
+in decreasing order), \code{Ligation_R2} (their log2 counts on a line) and
+\code{Ligation_NEG} (the largest ligation negative minus the detection limit)
+are NACHO's own definitions, since Bruker publishes no threshold.
+\code{"legacy"} never flags them.
 
 Each element can be changed afterwards; two numbers are a lower and an
 upper bound, and one number is a lower bound. Use \code{-Inf} or \code{Inf} for an

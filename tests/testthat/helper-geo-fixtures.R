@@ -13,3 +13,15 @@ first_fixture_file <- function(series) {
     full.names = TRUE
   )[1]
 }
+
+mirna_fixture <- function(...) {
+  fixture <- geo_fixture("GSE270837")
+  suppressMessages(NACHO::load_rcc(
+    fixture[["dir"]],
+    fixture[["samplesheet"]],
+    "IDFILE",
+    instrument = "sprint",
+    n_comp = 3,
+    ...
+  ))
+}

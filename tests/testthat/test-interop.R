@@ -367,7 +367,7 @@ test_that("default_settings() follows the load_rcc() defaults", {
   defaults$n_comp <- as.integer(defaults$n_comp)
   settings <- NACHO:::default_settings(nacho_probes(GSE74821), "IDFILE")
   expect_identical(settings[names(defaults)], defaults)
-  expect_identical(formals(load_rcc)$housekeeping_norm, TRUE)
+  expect_null(formals(load_rcc)$housekeeping_norm)
 })
 
 test_that("as_nacho() matches a saved normalisation method like load_rcc()", {
@@ -435,4 +435,16 @@ test_that("as_nacho() stores a saved n_comp as an integer", {
     class = "nacho_message"
   )
   expect_identical(same, x)
+})
+
+test_that("as_nacho() stays silent without Housekeeping probes and a saved choice", {
+  skip_if_not_installed("SummarizedExperiment")
+  se <- as_summarized_experiment(GSE74821)
+  keep <- SummarizedExperiment::rowData(se)$CodeClass != "Housekeeping"
+  S4Vectors::metadata(se)$nacho$settings[c(
+    "housekeeping_genes",
+    "housekeeping_norm"
+  )] <- list(NULL, NULL)
+  expect_no_warning(x <- suppressMessages(as_nacho(se[keep, ])))
+  expect_false(x@settings$housekeeping_norm)
 })

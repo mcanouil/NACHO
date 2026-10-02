@@ -1,3 +1,12 @@
+qc_status_of <- function(x) {
+  NACHO:::qc_table(
+    x@samples,
+    x@thresholds,
+    x@rcc_type,
+    x@settings$id_colname
+  )$status
+}
+
 nacho_2 <- function() {
   readRDS(testthat::test_path("fixtures", "nacho-2-GSE74821-subset.rds"))
 }
@@ -390,4 +399,53 @@ test_that("legacy_thresholds() gives Housekeeping_detected 0 to an old list", {
 test_that("upgrade_nacho() carries Housekeeping_detected into the thresholds", {
   x <- suppressMessages(upgrade_subset(nacho_2()))
   expect_identical(x@thresholds$Housekeeping_detected, 0)
+})
+
+test_that("read_nacho() reads the frozen schema-2 object as is", {
+  path <- test_path("fixtures", "nacho-schema-2.rds")
+  saved <- readRDS(path)
+  expect_no_message(x <- read_nacho(path))
+  expect_identical(x@provenance$schema_version, 2L)
+  expect_null(x@provenance$migrated_from_schema)
+  expect_identical(dim(x), c(40L, 4L))
+  expect_identical(nacho_counts(x), saved@counts)
+  expect_identical(nacho_counts(x, normalised = TRUE), saved@normalised)
+  expect_identical(nacho_qc(x)$status, qc_status_of(saved))
+  expect_identical(S7::S7_class(x), NACHO:::nacho)
+})
+
+expect_round_trip <- function(x) {
+  path <- withr::local_tempfile(fileext = ".rds")
+  saveRDS(x, path)
+  testthat::expect_no_message(y <- read_nacho(path))
+  testthat::expect_identical(y@settings, x@settings)
+  testthat::expect_identical(
+    y@provenance$content_probes,
+    x@provenance$content_probes
+  )
+  testthat::expect_identical(
+    grep("^W_", names(y@samples), value = TRUE),
+    grep("^W_", names(x@samples), value = TRUE)
+  )
+  testthat::expect_identical(y@samples, x@samples)
+  testthat::expect_identical(
+    nacho_counts(y, normalised = TRUE),
+    nacho_counts(x, normalised = TRUE)
+  )
+  testthat::expect_identical(nacho_qc(y)$status, nacho_qc(x)$status)
+  y
+}
+
+test_that("a RUVg object survives a save and read round trip", {
+  x <- normalise(GSE74821, normalisation_method = "RUVg", ruv_k = 1)
+  expect_true(any(grepl("^W_", names(x@samples))))
+  y <- expect_round_trip(x)
+  expect_identical(y@settings$ruv_k, 1L)
+})
+
+test_that("a miRNA object survives a save and read round trip", {
+  x <- mirna_fixture(normalisation_method = "stable_mirna")
+  expect_identical(x@settings$panel, "mirna")
+  expect_false(is.null(x@provenance$content_probes))
+  expect_round_trip(x)
 })
