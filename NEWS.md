@@ -119,7 +119,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/methods.R`,
   - fix: Subsetting probes with `[` removes the dropped genes from the `housekeeping_genes` setting, and `filter_detected()` inherits it.
 - In `R/qc.R`,
-  - fix: `normalise()` lowers an explicit `ruv_k` to two less than the number of samples with a `nacho_warning_ruv_k_reduced` warning, since a larger `k` fits the samples exactly.
+  - fix: `normalise()` lowers an explicit `ruv_k` to two less than the number of samples, or one less than the number of control genes, with a `nacho_warning_ruv_k_reduced` warning, since a larger `k` fits the samples exactly.
 - In `R/qc.R` and `R/interop.R`,
   - fix: Errors about the background statistic now name `load_rcc()`, `normalise()` or `as_nacho()` instead of `build_nacho()`.
 - In `R/methods.R`,

@@ -38,6 +38,9 @@
 #'   [normalise()] describes.
 #' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes;
 #'   `NULL` uses [suggest_ruv_k()].
+#'   A `ruv_k` above two less than the number of samples, or one less than the
+#'   number of control genes, is lowered with a `nacho_warning_ruv_k_reduced`
+#'   warning.
 #'   Other methods ignore it.
 #' @param background [[character]] How to estimate each sample's background
 #'   from its negative controls: `"none"` (the default), `"mean"`,

@@ -173,3 +173,23 @@ test_that("normalise() keeps a ruv_k the samples allow", {
   )
   expect_identical(result@settings$ruv_k, 2L)
 })
+
+test_that("normalise() lowers a ruv_k above what the control genes allow", {
+  x <- GSE74821
+  x@probes$is_housekeeping <- x@probes$Name %in%
+    x@probes$Name[x@probes$is_housekeeping][1:2]
+  expect_warning(
+    result <- suppressMessages(
+      normalise(
+        x,
+        housekeeping_genes = x@probes$Name[x@probes$is_housekeeping],
+        normalisation_method = "RUVg",
+        ruv_k = 3,
+        n_comp = 3
+      )
+    ),
+    "control genes",
+    class = "nacho_warning_ruv_k_reduced"
+  )
+  expect_identical(result@settings$ruv_k, 1L)
+})
