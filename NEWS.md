@@ -118,6 +118,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - fix: `suggest_ruv_k()` no longer tries a `k` that fits the samples exactly, so two samples only get `k = 0`, and one sample gives `NA` for `pc1_variance` instead of `NaN`.
 - In `R/methods.R`,
   - fix: Subsetting probes with `[` removes the dropped genes from the `housekeeping_genes` setting, and `filter_detected()` inherits it.
+    When none is left, the object warns that it uses its Housekeeping probes, or turns `housekeeping_norm` off with a warning when there are none.
 - In `R/qc.R`,
   - fix: `normalise()` lowers an explicit `ruv_k` to two less than the number of samples, or one less than the number of control genes, with a `nacho_warning_ruv_k_reduced` warning, since a larger `k` fits the samples exactly.
 - In `R/qc.R` and `R/interop.R`,

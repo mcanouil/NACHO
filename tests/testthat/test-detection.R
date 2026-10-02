@@ -311,7 +311,10 @@ test_that("subsetting samples recomputes the probe detection rates", {
 })
 
 test_that("subsetting probes keeps the detection rates of the samples kept", {
-  x <- GSE74821[1:20, ]
+  expect_warning(
+    x <- GSE74821[1:20, ],
+    class = "nacho_warning_no_housekeeping"
+  )
   expect_equal(
     nacho_probes(x)$detection_rate,
     nacho_probes(GSE74821)$detection_rate[1:20]
@@ -415,7 +418,10 @@ test_that("filter_detected() clears the housekeeping setting when no named gene 
   endogenous <- probes$Name[grepl("Endogenous", probes$CodeClass)]
   rate <- probes$detection_rate[match(endogenous, probes$Name)]
   x@settings$housekeeping_genes <- endogenous[which.min(rate)]
-  kept <- filter_detected(x, min_rate = max(rate, na.rm = TRUE))
+  expect_warning(
+    kept <- filter_detected(x, min_rate = max(rate, na.rm = TRUE)),
+    class = "nacho_warning_housekeeping_fallback"
+  )
   expect_null(kept@settings$housekeeping_genes)
 })
 
@@ -432,13 +438,27 @@ test_that("subsetting probes keeps the housekeeping setting to probes still pres
   )
 })
 
-test_that("normalise() without any housekeeping probe leaves counts finite and adds no House_factor", {
+test_that("emptying the housekeeping setting warns that the Housekeeping probes are used", {
   x <- GSE74821
   probes <- nacho_probes(x)
-  kept <- suppressWarnings(x[which(probes$CodeClass != "Housekeeping"), ])
-  result <- suppressMessages(
-    normalise(kept, normalisation_method = "GEO", n_comp = 3)
+  endogenous <- which(grepl("Endogenous", probes$CodeClass))
+  x@settings$housekeeping_genes <- probes$Name[endogenous[1]]
+  expect_warning(
+    kept <- x[which(probes$Name != probes$Name[endogenous[1]]), ],
+    "Housekeeping",
+    class = "nacho_warning_housekeeping_fallback"
   )
-  expect_false(anyNA(result@normalised))
-  expect_false("House_factor" %in% names(nacho_samples(result)))
+  expect_null(kept@settings$housekeeping_genes)
+  expect_true(kept@settings$housekeeping_norm)
+})
+
+test_that("subsetting away every housekeeping gene and probe turns housekeeping normalisation off", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  expect_warning(
+    kept <- x[which(probes$CodeClass != "Housekeeping"), ],
+    class = "nacho_warning_no_housekeeping"
+  )
+  expect_null(kept@settings$housekeeping_genes)
+  expect_false(kept@settings$housekeeping_norm)
 })

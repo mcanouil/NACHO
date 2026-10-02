@@ -529,3 +529,15 @@ test_that("RUVg corrects only endogenous and housekeeping probes", {
     unname(pmax(2^t(fit$corrected) - 1, 0))
   )
 })
+
+test_that("normalise() without any housekeeping probe leaves counts finite and adds no House_factor", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  kept <- suppressWarnings(x[which(probes$CodeClass != "Housekeeping"), ])
+  result <- suppressMessages(
+    normalise(kept, normalisation_method = "GEO", n_comp = 3)
+  )
+  expect_false(anyNA(result@normalised))
+  expect_false("House_factor" %in% names(nacho_samples(result)))
+  expect_false(result@settings$housekeeping_norm)
+})

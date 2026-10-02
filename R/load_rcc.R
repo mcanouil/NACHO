@@ -372,6 +372,18 @@ resolve_housekeeping_norm <- function(
   housekeeping_norm
 }
 
+#' Keep the housekeeping genes of the settings that are still probes
+#'
+#' The setting is `NULL` when none is left.
+#'
+#' @noRd
+prune_housekeeping <- function(settings, probe_names) {
+  genes <- settings[["housekeeping_genes"]]
+  genes <- genes[genes %in% probe_names]
+  settings["housekeeping_genes"] <- list(if (length(genes) > 0) genes else NULL)
+  settings
+}
+
 #' Build the probe table and the counts matrix from long probe counts
 #'
 #' @param codes A data frame with the columns `CodeClass`, `Name`, `Accession`

@@ -46,6 +46,8 @@ probe_detection_rates <- function(counts, code_class, excluded) {
 #' Endogenous genes chosen as housekeeping genes are filtered like any other
 #' gene, and the dropped ones are removed from the `housekeeping_genes`
 #' setting, which becomes `NULL` when none is left.
+#' Then the object uses its Housekeeping probes and warns, or, with no
+#' Housekeeping probe either, turns `housekeeping_norm` off and warns.
 #' The samples' `Detection_rate` and `Housekeeping_detected` are not
 #' recomputed after filtering.
 #' A gene's detection rate is the share of the samples with a detection limit
