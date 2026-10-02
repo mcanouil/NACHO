@@ -78,7 +78,7 @@ test_that("suggest_ruv_k() picks the smallest k close to the best RLE", {
 
 test_that("suggest_ruv_k() caps k at what the data allow", {
   x <- suppressWarnings(GSE74821[, 1:3])
-  expect_lte(max(suggest_ruv_k(x, max_k = 10)$k), 2L)
+  expect_identical(max(suggest_ruv_k(x, max_k = 10)$k), 1L)
 })
 
 test_that("suggest_ruv_k() on two samples only suggests k = 0", {
@@ -150,4 +150,26 @@ test_that("background errors from normalise() name normalise()", {
     regexp = "two negative"
   )
   expect_identical(rlang::call_name(error[["call"]]), "normalise")
+})
+
+test_that("normalise() lowers a ruv_k that would saturate, with a classed warning", {
+  x <- suppressWarnings(GSE74821[, 1:2])
+  expect_warning(
+    result <- suppressMessages(
+      normalise(x, normalisation_method = "RUVg", ruv_k = 1, n_comp = 1)
+    ),
+    class = "nacho_warning_ruv_k_reduced"
+  )
+  expect_identical(result@settings$ruv_k, 0L)
+  expect_false(anyNA(result@normalised))
+})
+
+test_that("normalise() keeps a ruv_k the samples allow", {
+  x <- suppressWarnings(GSE74821[, 1:4])
+  expect_no_warning(
+    result <- suppressMessages(
+      normalise(x, normalisation_method = "RUVg", ruv_k = 2, n_comp = 3)
+    )
+  )
+  expect_identical(result@settings$ruv_k, 2L)
 })
