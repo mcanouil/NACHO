@@ -422,25 +422,23 @@ test_that("filter_detected() clears the housekeeping setting when no named gene 
 test_that("subsetting probes keeps the housekeeping setting to probes still present", {
   x <- GSE74821
   probes <- nacho_probes(x)
+  housekeeping <- x@settings$housekeeping_genes
+  dropped <- housekeeping[1:2]
+  kept <- suppressWarnings(x[which(!probes$Name %in% dropped), ])
+  expect_identical(kept@settings$housekeeping_genes, housekeeping[-(1:2)])
   endogenous <- grepl("Endogenous", probes$CodeClass)
-  kept <- suppressWarnings(x[which(endogenous), ])
-  expect_null(kept@settings$housekeeping_genes)
-  expect_true(all(
-    kept@settings$housekeeping_genes %in% nacho_probes(kept)$Name
-  ))
+  expect_null(
+    suppressWarnings(x[which(endogenous), ])@settings$housekeeping_genes
+  )
 })
 
-test_that("normalise() on an object without its housekeeping probes is pinned", {
+test_that("normalise() without any housekeeping probe leaves counts finite and adds no House_factor", {
   x <- GSE74821
-  endogenous <- grepl("Endogenous", nacho_probes(x)$CodeClass)
-  kept <- suppressWarnings(x[which(endogenous), ])
-  result <- tryCatch(
-    suppressWarnings(suppressMessages(normalise(kept))),
-    error = function(e) e
+  probes <- nacho_probes(x)
+  kept <- suppressWarnings(x[which(probes$CodeClass != "Housekeeping"), ])
+  result <- suppressMessages(
+    normalise(kept, normalisation_method = "GEO", n_comp = 3)
   )
-  if (inherits(result, "error")) {
-    expect_s3_class(result, "nacho_error")
-  } else {
-    expect_false(any(is.nan(result@normalised)))
-  }
+  expect_false(anyNA(result@normalised))
+  expect_false("House_factor" %in% names(nacho_samples(result)))
 })
