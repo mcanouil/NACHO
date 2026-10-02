@@ -61,3 +61,34 @@ test_that("batch_diagnostics() checks its columns", {
     class = "nacho_error_bad_argument"
   )
 })
+
+test_that("a one-sample cartridge does not make the design confounded", {
+  x <- toy_nacho(6L)
+  x@samples[["CartridgeID"]] <- c("a", "a", "a", "a", "b", "c")
+  x@samples[["status"]] <- c("x", "y", "x", "y", "x", "y")
+  result <- batch_diagnostics(x, group = "status", batch = "CartridgeID")
+  expect_identical(result$design$single_group_levels, 0L)
+  expect_false(result$design$confounded)
+})
+
+test_that("a one-level batch variable gives NA rows", {
+  result <- batch_diagnostics(mirna_fixture(), batch = "Date")
+  expect_gt(nrow(result$metrics), 0L)
+  expect_true(all(is.na(result$metrics$statistic)))
+  expect_true(all(is.na(result$metrics$p_value)))
+  expect_gt(nrow(result$pc_batch), 0L)
+  expect_true(all(is.na(result$pc_batch$r_squared)))
+})
+
+test_that("metrics and pc_batch are empty data frames when nothing is reported", {
+  x <- toy_nacho(6L)
+  x@pca[["scores"]] <- x@pca[["scores"]][, 0, drop = FALSE]
+  x@samples <- x@samples[, c("IDFILE", "CartridgeID"), drop = FALSE]
+  result <- batch_diagnostics(x, batch = "CartridgeID")
+  expect_s3_class(result$metrics, "data.frame")
+  expect_s3_class(result$pc_batch, "data.frame")
+  expect_identical(nrow(result$metrics), 0L)
+  expect_identical(nrow(result$pc_batch), 0L)
+  expect_named(result$metrics, c("metric", "batch", "statistic", "p_value"))
+  expect_named(result$pc_batch, c("PC", "batch", "r_squared"))
+})

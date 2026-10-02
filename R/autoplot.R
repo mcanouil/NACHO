@@ -46,9 +46,16 @@ NULL
 #'     This plot ignores `colour`, `show_legend`, `show_outliers` and
 #'     `outliers_labels`, and it is not in the Shiny app or the report.
 #'   * `"RLE"`: Relative log expression of the normalised endogenous genes.
+#'     This plot ignores `size`, `show_outliers`, `outliers_factor` and
+#'     `outliers_labels`.
 #'   * `"BatchFactors"`: Normalisation factors by cartridge.
+#'     This plot ignores `show_outliers`, `outliers_factor` and
+#'     `outliers_labels`.
 #'   * `"PCBatch"`: Share of each principal component explained by cartridge
 #'     and date; see [batch_diagnostics()].
+#'     Tiles with no value stay grey and unlabelled.
+#'     This plot ignores `colour`, `size`, `show_legend`, `show_outliers`,
+#'     `outliers_factor` and `outliers_labels`.
 #' * `colour`: The column of `nacho_samples(object)` that colours the points.
 #' * `size`: The point size, and the line width in the `"NORM"` plot.
 #' * `show_legend`: If `FALSE`, hide the colour legend.
@@ -1187,8 +1194,13 @@ plot_pc_batch <- function(
     ) +
     ggplot2::geom_tile(colour = "white") +
     ggplot2::geom_text(
-      mapping = ggplot2::aes(label = format(round(.data[["r_squared"]], 2))),
-      na.rm = TRUE
+      mapping = ggplot2::aes(
+        label = ifelse(
+          is.na(.data[["r_squared"]]),
+          "",
+          format(round(.data[["r_squared"]], 2))
+        )
+      )
     ) +
     ggplot2::scale_fill_viridis_c(
       option = "plasma",

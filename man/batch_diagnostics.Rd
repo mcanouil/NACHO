@@ -21,12 +21,20 @@ A list:
 \item \code{design}: for each batch variable, its number of levels, Cramér's V with
 \code{group}, the number of levels that hold a single group, and
 \code{confounded}, \code{TRUE} when at least one does.
+A level counts as holding a single group only when it has two or more
+samples with a group, so a cartridge with one sample never makes the
+design confounded.
 \item \code{crosstabs}: the table of \code{group} against each batch variable.
 \item \code{metrics}: Kruskal-Wallis tests of each quality-control metric against
 each batch variable.
 \item \code{pc_batch}: the share of each principal component's variance explained
 by each batch variable.
 }
+
+\code{metrics} and \code{pc_batch} are data frames with these columns, and have no
+rows when there is nothing to report.
+A batch variable with one level gives \code{NA} in \code{statistic}, \code{p_value} and
+\code{r_squared}.
 }
 \description{
 Checks whether the study design, the quality-control metrics and the main

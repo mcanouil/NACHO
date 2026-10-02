@@ -56,6 +56,25 @@ test_that("flagged samples of a toy object get their own layers", {
   }
 })
 
+test_that("PCBatch leaves tiles without a value unlabelled", {
+  x <- mirna_fixture()
+  plot <- autoplot(x, type = "PCBatch")
+  expect_true(anyNA(plot$data$r_squared))
+  built <- ggplot2::ggplot_build(plot)
+  labels <- built$data[[2]]$label
+  expect_false("NA" %in% labels)
+  expect_identical(
+    labels == "",
+    is.na(built$data[[1]]$fill) | built$data[[1]]$fill == "grey90"
+  )
+})
+
+test_that("PCBatch is not available without principal components", {
+  toy <- toy_nacho(6L)
+  toy@pca[["scores"]] <- toy@pca[["scores"]][, 0, drop = FALSE]
+  expect_not_available(toy, "PCBatch")
+})
+
 test_that("PCL and LoD plots of a PlexSet toy object are not available", {
   toy <- toy_nacho(6L)
   toy@rcc_type <- "n8"

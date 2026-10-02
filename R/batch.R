@@ -32,6 +32,30 @@ group_r2 <- function(values, batch) {
   1 - sum((values - stats::ave(values, batch))^2) / total
 }
 
+metrics_template <- data.frame(
+  metric = character(),
+  batch = character(),
+  statistic = numeric(),
+  p_value = numeric()
+)
+
+pc_batch_template <- data.frame(
+  PC = character(),
+  batch = character(),
+  r_squared = numeric()
+)
+
+#' Row-bind a list of data frames, or give the empty template
+#'
+#' @noRd
+bind_or_empty <- function(template, pieces) {
+  pieces <- Filter(Negate(is.null), pieces)
+  if (length(pieces) == 0) {
+    return(template)
+  }
+  do.call(rbind, pieces)
+}
+
 #' Batch and confounding diagnostics
 #'
 #' Checks whether the study design, the quality-control metrics and the main
@@ -51,11 +75,19 @@ group_r2 <- function(values, batch) {
 #' * `design`: for each batch variable, its number of levels, Cramér's V with
 #'   `group`, the number of levels that hold a single group, and
 #'   `confounded`, `TRUE` when at least one does.
+#'   A level counts as holding a single group only when it has two or more
+#'   samples with a group, so a cartridge with one sample never makes the
+#'   design confounded.
 #' * `crosstabs`: the table of `group` against each batch variable.
 #' * `metrics`: Kruskal-Wallis tests of each quality-control metric against
 #'   each batch variable.
 #' * `pc_batch`: the share of each principal component's variance explained
 #'   by each batch variable.
+#'
+#' `metrics` and `pc_batch` are data frames with these columns, and have no
+#' rows when there is nothing to report.
+#' A batch variable with one level gives `NA` in `statistic`, `p_value` and
+#' `r_squared`.
 #' @export
 #' @examples
 #' data(GSE74821)
@@ -85,14 +117,15 @@ batch_diagnostics <- function(
     design <- do.call(
       rbind,
       lapply(batch, function(b) {
-        levels_per_batch <- tapply(groups, samples[[b]], function(g) {
-          length(unique(g))
+        single_group <- tapply(groups, samples[[b]], function(g) {
+          g <- g[!is.na(g)]
+          length(g) >= 2 && length(unique(g)) == 1
         })
         n_levels <- length(unique(stats::na.omit(samples[[b]])))
         single <- if (n_levels < 2) {
           0L
         } else {
-          as.integer(sum(levels_per_batch == 1))
+          as.integer(sum(single_group, na.rm = TRUE))
         }
         data.frame(
           batch = b,
@@ -108,8 +141,8 @@ batch_diagnostics <- function(
     c(qc_metrics, "MC", "MedC", "Negative_factor"),
     names(samples)
   )
-  metrics <- do.call(
-    rbind,
+  metrics <- bind_or_empty(
+    metrics_template,
     lapply(batch, function(b) {
       do.call(
         rbind,
@@ -142,11 +175,11 @@ batch_diagnostics <- function(
     })
   )
   scores <- x@pca[["scores"]]
-  pc_batch <- do.call(
-    rbind,
+  pc_batch <- bind_or_empty(
+    pc_batch_template,
     lapply(batch, function(b) {
       data.frame(
-        PC = colnames(scores),
+        PC = as.character(colnames(scores)),
         batch = rep(b, ncol(scores)),
         r_squared = vapply(
           seq_len(ncol(scores)),
