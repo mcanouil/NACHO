@@ -414,22 +414,25 @@ test_that("read_nacho() reads the frozen schema-2 object as is", {
   expect_identical(S7::S7_class(x), NACHO:::nacho)
 })
 
-expect_round_trip <- function(x) {
+testthat::expect_round_trip <- function(x) {
   path <- withr::local_tempfile(fileext = ".rds")
   saveRDS(x, path)
-  expect_no_message(y <- read_nacho(path))
-  expect_identical(y@settings, x@settings)
-  expect_identical(y@provenance$content_probes, x@provenance$content_probes)
-  expect_identical(
+  testthat::expect_no_message(y <- read_nacho(path))
+  testthat::expect_identical(y@settings, x@settings)
+  testthat::expect_identical(
+    y@provenance$content_probes,
+    x@provenance$content_probes
+  )
+  testthat::expect_identical(
     grep("^W_", names(y@samples), value = TRUE),
     grep("^W_", names(x@samples), value = TRUE)
   )
-  expect_identical(y@samples, x@samples)
-  expect_identical(
+  testthat::expect_identical(y@samples, x@samples)
+  testthat::expect_identical(
     nacho_counts(y, normalised = TRUE),
     nacho_counts(x, normalised = TRUE)
   )
-  expect_identical(nacho_qc(y)$status, nacho_qc(x)$status)
+  testthat::expect_identical(nacho_qc(y)$status, nacho_qc(x)$status)
   y
 }
 
