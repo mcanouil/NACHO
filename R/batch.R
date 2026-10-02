@@ -22,7 +22,7 @@ group_r2 <- function(values, batch) {
   keep <- !is.na(values) & !is.na(batch)
   values <- values[keep]
   batch <- batch[keep]
-  if (length(unique(batch)) < 2) {
+  if (length(unique(batch)) < 2 || all(table(batch) < 2)) {
     return(NA_real_)
   }
   total <- sum((values - mean(values))^2)

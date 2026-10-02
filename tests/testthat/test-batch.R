@@ -35,6 +35,7 @@ test_that("group_r2() matches a one-way ANOVA", {
     summary(stats::lm(values ~ factor(batch)))$r.squared
   )
   expect_identical(NACHO:::group_r2(values, rep("a", 6)), NA_real_)
+  expect_identical(NACHO:::group_r2(values, letters[1:6]), NA_real_)
 })
 
 test_that("GSE270837 is fully confounded with cartridge", {

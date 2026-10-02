@@ -123,7 +123,17 @@ test_that("the RLE plot centres each gene on its median", {
 
 test_that("PCBatch shows one tile per component and batch variable", {
   plot <- autoplot(GSE74821, type = "PCBatch")
-  expect_identical(nrow(plot$data), nrow(batch_diagnostics(GSE74821)$pc_batch))
+  expect_identical(nrow(plot$data), ncol(GSE74821@pca$scores) * 2L)
+})
+
+test_that("RLE and BatchFactors build with one box per sample or cartridge", {
+  rle <- ggplot2::ggplot_build(autoplot(GSE74821, type = "RLE"))
+  expect_length(
+    unique(rle$data[[2]]$x),
+    nrow(nacho_samples(GSE74821))
+  )
+  factors <- ggplot2::ggplot_build(autoplot(GSE74821, type = "BatchFactors"))
+  expect_gt(length(unique(factors$data[[1]]$PANEL)), 0L)
 })
 
 test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable", {
