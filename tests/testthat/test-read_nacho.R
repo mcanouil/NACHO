@@ -414,7 +414,7 @@ test_that("read_nacho() reads the frozen schema-2 object as is", {
   expect_identical(S7::S7_class(x), NACHO:::nacho)
 })
 
-testthat::expect_round_trip <- function(x) {
+expect_round_trip <- function(x) {
   path <- withr::local_tempfile(fileext = ".rds")
   saveRDS(x, path)
   testthat::expect_no_message(y <- read_nacho(path))
