@@ -102,33 +102,33 @@ test_that("check_proportion() accepts numbers from 0 to 1 only", {
 })
 
 rebuild_with_counts <- function(x, counts, probes, warn_missing = TRUE) {
-  NACHO:::build_nacho(
-    counts = counts,
-    probes = probes,
-    samples = x@samples[seq_len(ncol(counts)), , drop = FALSE],
-    settings = x@settings,
-    thresholds = x@thresholds,
-    rcc_type = x@rcc_type,
-    provenance = x@provenance,
-    warn_missing = warn_missing
+  suppressWarnings(
+    NACHO:::build_nacho(
+      counts = counts,
+      probes = probes,
+      samples = x@samples[seq_len(ncol(counts)), , drop = FALSE],
+      settings = x@settings,
+      thresholds = x@thresholds,
+      rcc_type = x@rcc_type,
+      provenance = x@provenance,
+      warn_missing = warn_missing
+    ),
+    classes = c("nacho_warning_n_comp_reduced", "nacho_warning_missing_counts")
   )
 }
 
 count_unavailable <- function(expr) {
   n <- 0L
+  messages <- character(0)
   value <- withCallingHandlers(
     expr,
     nacho_warning_metric_unavailable = function(cnd) {
       n <<- n + 1L
+      messages <<- c(messages, conditionMessage(cnd))
       invokeRestart("muffleWarning")
-    },
-    warning = function(cnd) {
-      if (!inherits(cnd, "nacho_warning_metric_unavailable")) {
-        invokeRestart("muffleWarning")
-      }
     }
   )
-  list(value = value, n = n)
+  list(value = value, n = n, messages = messages)
 }
 
 test_that("a build without negative probes gives missing detection rates and one warning", {
@@ -323,23 +323,12 @@ test_that("a missing background warns once, names the sample, and stays quiet on
   x@settings$background <- "geo"
   counts <- x@counts[, 1:3]
   counts[x@probes$CodeClass == "Negative", 2] <- NA
-  collect <- function(warn_missing) {
-    messages <- character(0)
-    withCallingHandlers(
-      rebuild_with_counts(x, counts, x@probes, warn_missing),
-      warning = function(cnd) {
-        if (inherits(cnd, "nacho_warning_metric_unavailable")) {
-          messages <<- c(messages, conditionMessage(cnd))
-        }
-        invokeRestart("muffleWarning")
-      }
-    )
-    messages
-  }
-  background <- grep("background", collect(TRUE), value = TRUE)
+  loud <- count_unavailable(rebuild_with_counts(x, counts, x@probes))
+  background <- grep("background", loud$messages, value = TRUE)
   expect_length(background, 1L)
-  expect_match(background, rownames(x@samples)[2], fixed = TRUE)
-  expect_length(collect(FALSE), 0L)
+  expect_match(background, colnames(counts)[2], fixed = TRUE)
+  quiet <- count_unavailable(rebuild_with_counts(x, counts, x@probes, FALSE))
+  expect_identical(quiet$n, 0L)
 })
 
 test_that("build_nacho() errors from background name the caller", {
@@ -377,4 +366,28 @@ test_that("with all-zero negatives every non-zero count counts as detected", {
   hits <- NACHO:::detected(counts, limits)
   expect_true(hits["G1", "S1"])
   expect_false(hits["G2", "S1"])
+})
+
+test_that("filter_detected() keeps every gene with a non-zero count when negatives are all zero", {
+  x <- GSE74821
+  counts <- x@counts[, 1:3]
+  counts[x@probes$CodeClass == "Negative", ] <- 0L
+  zeroed <- which(x@probes$CodeClass == "Endogenous")[1:2]
+  counts[zeroed[1], 1] <- 0L
+  counts[zeroed[2], ] <- 0L
+  built <- count_unavailable(rebuild_with_counts(x, counts, x@probes))$value
+  endogenous <- x@probes$CodeClass == "Endogenous"
+  expected <- x@probes$Name[endogenous][
+    rowSums(counts[endogenous, ] > 0) == 3
+  ]
+  expect_gt(length(expected), 0L)
+  expect_lt(length(expected), sum(endogenous))
+  kept <- suppressWarnings(
+    filter_detected(built, min_rate = 1),
+    classes = "nacho_warning_n_comp_reduced"
+  )
+  kept_genes <- nacho_probes(kept)$Name[
+    nacho_probes(kept)$CodeClass == "Endogenous"
+  ]
+  expect_setequal(kept_genes, expected)
 })
