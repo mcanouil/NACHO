@@ -112,6 +112,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 
 ## Fixes
 
+- In `R/qc.R`,
+  - fix: Errors about the background statistic now name `load_rcc()` or `normalise()` instead of `build_nacho()`.
 - In `R/methods.R`,
   - fix: `print()` and `format()` on a NACHO 2 object now show one line pointing to `upgrade_nacho()`, instead of dumping the list.
     `summary()`, `as.data.frame()` and `[` refuse it with the same classed error as `autoplot()`.
