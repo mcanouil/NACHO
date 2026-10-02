@@ -1181,7 +1181,11 @@ plot_pc_batch <- function(
   outliers_labels
 ) {
   batch <- intersect(c("CartridgeID", "Date"), names(nacho_samples(object)))
-  data <- batch_diagnostics(object, batch = batch)[["pc_batch"]]
+  data <- if (length(batch) > 0) {
+    batch_diagnostics(object, batch = batch)[["pc_batch"]]
+  } else {
+    data.frame(PC = character(), batch = character(), r_squared = numeric())
+  }
   if (nrow(data) == 0) {
     warn_too_few_components(type)
     return(not_available_plot("Batch", "Principal component"))
@@ -1198,7 +1202,7 @@ plot_pc_batch <- function(
         label = ifelse(
           is.na(.data[["r_squared"]]),
           "",
-          format(round(.data[["r_squared"]], 2))
+          sprintf("%.2f", .data[["r_squared"]])
         )
       )
     ) +

@@ -75,6 +75,22 @@ test_that("PCBatch is not available without principal components", {
   expect_not_available(toy, "PCBatch")
 })
 
+test_that("PCBatch is not available without batch columns", {
+  toy <- toy_nacho(6L)
+  toy@samples <- toy@samples[,
+    setdiff(names(toy@samples), c("CartridgeID", "Date")),
+    drop = FALSE
+  ]
+  expect_warning(
+    plot <- autoplot(toy, type = "PCBatch", colour = "IDFILE"),
+    class = "nacho_warning_metric_unavailable"
+  )
+  expect_identical(
+    ggplot2::ggplot_build(plot)$data[[1]]$label,
+    "Not available!"
+  )
+})
+
 test_that("PCL and LoD plots of a PlexSet toy object are not available", {
   toy <- toy_nacho(6L)
   toy@rcc_type <- "n8"
@@ -133,7 +149,16 @@ test_that("RLE and BatchFactors build with one box per sample or cartridge", {
     nrow(nacho_samples(GSE74821))
   )
   factors <- ggplot2::ggplot_build(autoplot(GSE74821, type = "BatchFactors"))
-  expect_gt(length(unique(factors$data[[1]]$PANEL)), 0L)
+  n_factors <- length(intersect(
+    c("Positive_factor", "Negative_factor", "House_factor"),
+    names(nacho_samples(GSE74821))
+  ))
+  n_cartridges <- length(unique(nacho_samples(GSE74821)$CartridgeID))
+  expect_length(unique(factors$data[[1]]$PANEL), n_factors)
+  expect_identical(
+    nrow(unique(factors$data[[1]][c("PANEL", "x")])),
+    n_factors * n_cartridges
+  )
 })
 
 test_that("PCL and LoD plots of PlexSet data warn that the metric is unavailable", {
