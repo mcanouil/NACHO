@@ -3,6 +3,8 @@ NULL
 
 #' The smallest share of samples in which a candidate gene is detected
 #'
+#' It must match the default of `housekeeping_stability()`, which a test checks.
+#'
 #' @noRd
 nacho_min_detection <- 0.9
 
