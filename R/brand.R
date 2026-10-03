@@ -96,3 +96,19 @@ theme_nacho <- function(dark = FALSE, base_size = 11) {
       palette.fill.discrete = palette
     )
 }
+
+#' The NACHO Bootstrap theme
+#'
+#' Bootstrap 5 with the brand colours and fonts, and the dark-mode rules of
+#' `inst/brand/dark.scss`, which `bslib::bs_theme(brand = )` cannot set.
+#'
+#' @noRd
+nacho_theme <- function() {
+  brand <- brand.yml::read_brand_yml(brand_path("_brand.yml"))
+  dark_rules <- paste(
+    readLines(brand_path("dark.scss"), warn = FALSE),
+    collapse = "\n"
+  )
+  bslib::bs_theme(version = 5, brand = brand) |>
+    bslib::bs_add_rules(dark_rules)
+}

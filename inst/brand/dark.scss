@@ -1,0 +1,28 @@
+// Dark-mode colours that bs_theme(brand = ) cannot set, shared by the app and
+// the pkgdown site. Night text on amber is 10.00:1; amber on night is 10.00:1;
+// yellow on night is 12.40:1.
+[data-bs-theme="dark"] {
+  --bs-body-bg: #111821;
+  --bs-body-bg-rgb: 17, 24, 33;
+  --bs-primary: #FCB448;
+  --bs-primary-rgb: 252, 180, 72;
+  --bs-link-color: #FCB448;
+  --bs-link-color-rgb: 252, 180, 72;
+  --bs-link-hover-color: #F0D83C;
+  --bs-link-hover-color-rgb: 240, 216, 60;
+  --bs-heading-color: #F0D83C;
+  --bs-focus-ring-color: rgba(252, 180, 72, 0.5);
+
+  .btn-primary {
+    --bs-btn-color: #111821;
+    --bs-btn-bg: #FCB448;
+    --bs-btn-border-color: #FCB448;
+    --bs-btn-hover-color: #111821;
+    --bs-btn-hover-bg: #F0D83C;
+    --bs-btn-hover-border-color: #F0D83C;
+    --bs-btn-active-color: #111821;
+    --bs-btn-active-bg: #F0D83C;
+    --bs-btn-active-border-color: #F0D83C;
+    --bs-btn-focus-shadow-rgb: 252, 180, 72;
+  }
+}

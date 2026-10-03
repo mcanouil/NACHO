@@ -40,6 +40,8 @@ Imports:
     methods,
     utils,
     grDevices,
+    bslib (>= 0.10.0),
+    brand.yml (>= 0.1.0),
     cli (>= 3.6.0),
     data.table,
     ggplot2 (>= 4.0.0),
@@ -53,7 +55,6 @@ Imports:
     shiny (>= 1.7.4),
     shinyWidgets (>= 0.4.9)
 Suggests:
-    brand.yml,
     colorspace (>= 2.1-3),
     markdown (>= 1.3),
     roxygen2 (>= 8.1.0),

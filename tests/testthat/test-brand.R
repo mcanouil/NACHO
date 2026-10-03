@@ -101,3 +101,23 @@ test_that("theme_nacho() sets paper, ink and the group palette", {
     class = "nacho_error_bad_argument"
   )
 })
+
+test_that("nacho_theme() brands Bootstrap and adds dark-mode rules", {
+  theme <- NACHO:::nacho_theme()
+  expect_true(bslib::is_bs_theme(theme))
+  expect_identical(bslib::theme_version(theme), "5")
+  expect_identical(unname(bslib::bs_get_variables(theme, "primary")), "#B64326")
+  dependencies <- bslib::bs_theme_dependencies(theme)
+  names <- vapply(dependencies, function(d) d$name, character(1))
+  expect_true(any(grepl("Source_Sans_3", names, fixed = TRUE)))
+  bootstrap <- dependencies[[which(names == "bootstrap")]]
+  css <- paste(
+    readLines(
+      file.path(bootstrap$src$file, bootstrap$stylesheet),
+      warn = FALSE
+    ),
+    collapse = "\n"
+  )
+  expect_match(css, "data-bs-theme=.?dark")
+  expect_match(css, "#fcb448", ignore.case = TRUE)
+})
