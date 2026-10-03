@@ -33,10 +33,10 @@ plexset_unassessed <- c("PCL", "LoD")
 #' @noRd
 failure_reason <- function(metric, value, limits) {
   shown <- function(v) format(signif(v, 3))
-  if (length(limits) == 2 && value > limits[2]) {
-    paste(metric, shown(value), "above", shown(limits[2]))
+  if (length(limits) == 2 && value > max(limits)) {
+    paste(metric, shown(value), "above", shown(max(limits)))
   } else {
-    paste(metric, shown(value), "below", shown(limits[1]))
+    paste(metric, shown(value), "below", shown(min(limits)))
   }
 }
 

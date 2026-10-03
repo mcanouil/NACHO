@@ -142,3 +142,14 @@ test_that("exclude_outliers() drops the samples whose status is fail", {
   kept <- suppressMessages(exclude_outliers(x))
   expect_identical(ncol(kept), sum(!failing))
 })
+
+test_that("failure_reason() reads the lower and upper bound by value", {
+  expect_identical(
+    NACHO:::failure_reason("BD", 3, c(2.25, 0.05)),
+    "BD 3 above 2.25"
+  )
+  expect_identical(
+    NACHO:::failure_reason("BD", 0.01, c(2.25, 0.05)),
+    "BD 0.01 below 0.05"
+  )
+})
