@@ -37,25 +37,6 @@ transform_log10_infinite <- function() {
   )
 }
 
-#' Path to the NACHO logo
-#'
-#' The app ships the logo, and `system.file()` finds it both in an installed
-#' package and in a source tree loaded with `pkgload::load_all()`.
-#'
-#' @noRd
-#'
-#' @return A `character` path to `nacho_hex.png`.
-logo_path <- function() {
-  path <- system.file("app", "www", "nacho_hex.png", package = "NACHO")
-  if (!nzchar(path)) {
-    nacho_abort(
-      "The NACHO logo is missing from the installed package.",
-      class = "missing_file"
-    )
-  }
-  path
-}
-
 #' Drop the PlexSet suffix from sample identifiers
 #'
 #' PlexSet samples are named `<file>_S1` to `<file>_S8`. Lane-level plots
