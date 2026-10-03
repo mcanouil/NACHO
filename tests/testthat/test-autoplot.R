@@ -64,34 +64,35 @@ test_that("PCBatch leaves tiles without a value unlabelled", {
   labels <- built$data[[2]]$label
   expect_false("NA" %in% labels)
   expect_identical(
-    labels == "",
-    built$data[[1]]$fill == built$plot$scales$get_scales("fill")$na.value
+    nrow(built$data[[2]]),
+    sum(!is.na(plot$data$r_squared))
   )
 })
 
-test_that("label_colour() picks navy on light tiles and white on dark ones", {
-  ramp <- scales::pal_viridis(option = "plasma")(2)
-  expect_identical(NACHO:::label_colour(ramp), c("#FFFFFF", "#182430"))
+test_that("PCBatch labels sit on a paper box in ink", {
+  for (dark in c(FALSE, TRUE)) {
+    colours <- NACHO:::plot_colours(dark)
+    built <- ggplot2::ggplot_build(autoplot(
+      GSE74821,
+      type = "PCBatch",
+      dark = dark
+    ))
+    labels <- built$data[[2]]
+    expect_gt(nrow(labels), 0L)
+    expect_true(all(labels$label != ""))
+    expect_true(all(labels$fill == colours[["paper"]]))
+    expect_true(all(labels$colour == colours[["ink"]]))
+  }
 })
 
-test_that("PCBatch labels contrast with their tile", {
-  x <- GSE74821
+test_that("ink on paper keeps the plot text readable", {
+  skip_if_not_installed("colorspace")
   for (dark in c(FALSE, TRUE)) {
-    built <- ggplot2::ggplot_build(autoplot(x, type = "PCBatch", dark = dark))
-    tiles <- built$data[[1]]
-    labels <- built$data[[2]]
-    luminance <- function(colour) {
-      rgb <- grDevices::col2rgb(colour) / 255
-      linear <- ifelse(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055)^2.4)
-      colSums(linear * c(0.2126, 0.7152, 0.0722))
-    }
-    ratio <- function(a, b) {
-      pair <- cbind(luminance(a), luminance(b))
-      (apply(pair, 1, max) + 0.05) / (apply(pair, 1, min) + 0.05)
-    }
-    shown <- labels$label != ""
-    expect_true(any(shown))
-    expect_true(all(ratio(labels$colour[shown], tiles$fill[shown]) >= 4.5))
+    colours <- NACHO:::plot_colours(dark)
+    expect_gte(
+      colorspace::contrast_ratio(colours[["ink"]], colours[["paper"]]),
+      4.5
+    )
   }
 })
 
