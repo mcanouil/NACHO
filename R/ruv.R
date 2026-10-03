@@ -1,6 +1,11 @@
 #' @include stability.R
 NULL
 
+#' The largest number of RUVg factors tried by default
+#'
+#' @noRd
+nacho_max_k <- 5
+
 #' Remove unwanted variation with control genes
 #'
 #' RUVg (Risso et al. 2014, Nature Biotechnology 32, 896) on log values.
@@ -72,6 +77,15 @@ ruvg <- function(
   list(W = w, corrected = corrected)
 }
 
+#' Relative log expression of a samples by genes matrix
+#'
+#' Each gene minus its median over samples.
+#'
+#' @noRd
+rle_centre <- function(log_expr) {
+  sweep(log_expr, 2, apply(log_expr, 2, stats::median, na.rm = TRUE))
+}
+
 #' Mean spread of the relative log expression
 #'
 #' Each gene minus its median over samples.
@@ -79,7 +93,7 @@ ruvg <- function(
 #'
 #' @noRd
 rle_iqr <- function(log_expr) {
-  rle <- sweep(log_expr, 2, apply(log_expr, 2, stats::median, na.rm = TRUE))
+  rle <- rle_centre(log_expr)
   mean(apply(rle, 1, stats::IQR, na.rm = TRUE))
 }
 
@@ -192,7 +206,7 @@ ruv_k_table <- function(
 #' @examples
 #' data(GSE74821)
 #' suggest_ruv_k(GSE74821)
-suggest_ruv_k <- function(x, max_k = 5) {
+suggest_ruv_k <- function(x, max_k = nacho_max_k) {
   check_nacho(x)
   check_count(max_k, min = 0)
   input <- ruv_input(

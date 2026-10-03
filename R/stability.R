@@ -1,6 +1,11 @@
 #' @include qc-table.R
 NULL
 
+#' The smallest share of samples in which a candidate gene is detected
+#'
+#' @noRd
+nacho_min_detection <- 0.9
+
 #' Standard deviation of every pairwise log ratio
 #'
 #' @param log_expr Samples by genes, log2 values, no missing values.
@@ -189,7 +194,7 @@ housekeeping_stability <- function(
   x,
   genes = NULL,
   group = NULL,
-  min_detection = 0.9
+  min_detection = nacho_min_detection
 ) {
   check_nacho(x)
   check_character(genes, allow_null = TRUE)
