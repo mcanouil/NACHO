@@ -19,4 +19,4 @@
 ^\.kata\.toml$
 ^\.ruff_cache$
 ^\.roborev$
-^\.DS_Store$
+\.DS_Store$
