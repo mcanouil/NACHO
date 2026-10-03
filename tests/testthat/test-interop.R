@@ -462,3 +462,22 @@ test_that("as_nacho() errors from the background name as_nacho()", {
   )
   expect_identical(rlang::call_name(error[["call"]]), "as_nacho")
 })
+
+test_that("as_nacho() stores the panel it detects", {
+  skip_if_not_installed("SummarizedExperiment")
+  for (panel in c("mirna", "mrna")) {
+    original <- if (panel == "mirna") mirna_fixture() else GSE74821
+    se <- as_summarized_experiment(original)
+    saved <- S4Vectors::metadata(se)[["nacho"]]
+    saved[["settings"]][["panel"]] <- NULL
+    S4Vectors::metadata(se)[["nacho"]] <- saved
+    y <- suppressWarnings(suppressMessages(as_nacho(se)))
+    expect_identical(y@settings$panel, panel)
+  }
+  se <- as_summarized_experiment(mirna_fixture())
+  saved <- S4Vectors::metadata(se)[["nacho"]]
+  saved[["settings"]][["panel"]] <- "mrna"
+  S4Vectors::metadata(se)[["nacho"]] <- saved
+  y <- suppressWarnings(suppressMessages(as_nacho(se)))
+  expect_identical(y@settings$panel, "mirna")
+})

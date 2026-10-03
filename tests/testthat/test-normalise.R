@@ -422,7 +422,7 @@ test_that("normalise() changes the background and keeps it in the settings", {
     unname(colMeans(negatives) + 2 * apply(negatives, 2, stats::sd))
   )
   m <- nacho_counts(x, normalised = TRUE)
-  expect_false(isTRUE(all.equal(m, round(m))))
+  expect_true(any(m != round(m), na.rm = TRUE))
 })
 
 test_that("normalise() refuses an unknown background", {

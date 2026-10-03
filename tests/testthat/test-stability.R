@@ -290,3 +290,29 @@ test_that("predicted housekeeping genes are the five most stable by geNorm", {
   ]
   expect_identical(predicted, expected)
 })
+
+test_that("geNorm breaks ties by dropping the first tied gene", {
+  tied <- cbind(hand_expr, g4 = hand_expr[, "g3"])
+  m <- NACHO:::genorm_m(tied)
+  expect_equal(m[["g1"]], m[["g4"]])
+  expect_identical(
+    NACHO:::genorm_ranking(tied)$ranking,
+    c("g3", "g4", "g2", "g1")
+  )
+  expect_identical(
+    NACHO:::genorm_ranking(tied[, c("g4", "g3", "g2", "g1")])$ranking,
+    c("g2", "g1", "g3", "g4")
+  )
+})
+
+test_that("genes with missing counts do not change the ranking of the others", {
+  x <- GSE74821
+  housekeeping <- nacho_probes(x)$Name[
+    nacho_probes(x)$CodeClass == "Housekeeping"
+  ]
+  x@counts[housekeeping[1], 2] <- NA_integer_
+  expect_identical(
+    housekeeping_stability(x)$ranking,
+    housekeeping_stability(GSE74821, genes = housekeeping[-1])$ranking
+  )
+})

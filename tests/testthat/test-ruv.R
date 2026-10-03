@@ -60,8 +60,29 @@ test_that("ruvg() refuses an empty set of controls", {
 
 test_that("rle_iqr() matches a hand computation", {
   log_expr <- matrix(c(1, 2, 3, 2, 4, 6, 3, 3, 3), nrow = 3, byrow = TRUE)
-  rle <- sweep(log_expr, 2, apply(log_expr, 2, stats::median))
-  expect_equal(NACHO:::rle_iqr(log_expr), mean(apply(rle, 1, stats::IQR)))
+  expect_equal(NACHO:::rle_iqr(log_expr), 5 / 6)
+  log_expr[2, 3] <- NA
+  expect_equal(NACHO:::rle_iqr(log_expr), (0.5 + 0.5 + 0.5) / 3)
+  expect_equal(NACHO:::rle_iqr(log_expr + 10), NACHO:::rle_iqr(log_expr))
+})
+
+test_that("ruvg() clamps k to the rank of the centred controls", {
+  d <- ruv_expr()
+  controls <- which(d$controls)[1:2]
+  d$log_expr[, controls[2]] <- d$log_expr[, controls[1]] + 3
+  flags <- seq_len(ncol(d$log_expr)) %in% controls
+  out <- NACHO:::ruvg(d$log_expr, flags, k = 3)
+  expect_identical(colnames(out$W), "W_1")
+  expect_identical(ncol(out$W), 1L)
+  w <- out$W
+  fit <- stats::lm.fit(w, d$log_expr)
+  expect_equal(
+    out$corrected,
+    d$log_expr - w %*% fit$coefficients,
+    ignore_attr = TRUE
+  )
+  expect_true(any(out$corrected != d$log_expr))
+  expect_identical(out$W, NACHO:::ruvg(d$log_expr, flags, k = 1)$W)
 })
 
 test_that("suggest_ruv_k() picks the smallest k close to the best RLE", {

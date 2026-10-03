@@ -392,3 +392,24 @@ test_that("each miRNA method's House_factor is the content factor of its referen
   )
   expect_gt(length(unique(round(factors, 6))), 1)
 })
+
+test_that("mirna_reference() names the method that found no reference probes", {
+  x <- mirna_fixture()
+  counts <- nacho_counts(x)
+  probes <- nacho_probes(x)
+  cases <- list(
+    spike_in = list(counts, probes[probes$CodeClass != "SpikeIn", ]),
+    ligation = list(counts, probes[probes$CodeClass != "Ligation", ]),
+    total_mirna = list(counts * 0L, probes)
+  )
+  for (method in names(cases)) {
+    case <- cases[[method]]
+    kept <- case[[2]]$Name
+    expect_error(
+      NACHO:::mirna_reference(method, case[[1]][kept, ], case[[2]]),
+      regexp = method,
+      class = "nacho_error_bad_argument",
+      info = method
+    )
+  }
+})

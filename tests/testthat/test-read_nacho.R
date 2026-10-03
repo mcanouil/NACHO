@@ -287,11 +287,32 @@ test_that("migrating a schema 1 object with negatives subtracts the geometric me
   )
   properties$probes <- rbind(properties$probes, negatives)
   properties$counts <- rbind(properties$counts, negative_counts)
-  x <- suppressWarnings(suppressMessages(NACHO:::migrate_schema_1(properties)))
+  withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
+  expect_message(
+    x <- suppressWarnings(
+      NACHO:::migrate_schema_1(properties),
+      classes = "nacho_warning_n_comp_reduced"
+    ),
+    "geometric",
+    class = "nacho_message"
+  )
   expect_identical(x@settings$background, "geo")
+  expect_identical(x@settings$background_mode, "subtract")
   expect_equal(
     nacho_samples(x)$Background,
     unname(exp(colMeans(log(negative_counts))))
+  )
+  expect_identical(x@provenance$migrated_from_schema, 1L)
+  without <- properties
+  without$probes <- without$probes[without$probes$CodeClass != "Negative", ]
+  without$counts <- without$counts[without$probes$Name, ]
+  plain <- suppressWarnings(
+    suppressMessages(NACHO:::migrate_schema_1(without)),
+    classes = "nacho_warning_n_comp_reduced"
+  )
+  expect_identical(
+    nacho_samples(plain)$Background,
+    rep(NA_real_, nrow(nacho_samples(plain)))
   )
 })
 

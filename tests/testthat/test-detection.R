@@ -59,8 +59,36 @@ test_that("no negatives gives missing detection limits", {
 test_that("nacho objects carry sample and probe detection rates", {
   samples <- nacho_samples(GSE74821)
   probes <- nacho_probes(GSE74821)
-  expect_true(all(samples$Detection_rate >= 0 & samples$Detection_rate <= 1))
+  probe_kept <- !probes$is_excluded
+  negatives <- nacho_counts(GSE74821)[
+    probes$CodeClass == "Negative" & probe_kept,
+    ,
+    drop = FALSE
+  ]
+  limit <- colMeans(negatives) + 2 * apply(negatives, 2, stats::sd)
+  genes <- nacho_counts(GSE74821)[
+    grepl("Endogenous", probes$CodeClass),
+    ,
+    drop = FALSE
+  ]
+  expected <- unname(colMeans(
+    genes > matrix(limit, nrow(genes), ncol(genes), byrow = TRUE)
+  ))
+  expect_false(anyNA(samples$Detection_rate))
+  expect_equal(samples$Detection_rate, expected)
+  expect_gt(length(unique(samples$Detection_rate)), 1)
+  expect_false(anyNA(probes$detection_rate))
   expect_true(all(probes$detection_rate >= 0 & probes$detection_rate <= 1))
+  expect_gt(length(unique(probes$detection_rate)), 2)
+})
+
+test_that("filter_detected() currently leaves the sample detection rates of the full object unchanged", {
+  filtered <- filter_detected(GSE74821, min_rate = 1)
+  expect_lt(nrow(filtered), nrow(GSE74821))
+  expect_identical(
+    nacho_samples(filtered)$Detection_rate,
+    nacho_samples(GSE74821)$Detection_rate
+  )
 })
 
 test_that("filter_detected() keeps controls and genes detected often enough", {
