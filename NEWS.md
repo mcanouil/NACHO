@@ -22,7 +22,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
 - In `R/autoplot.R`,
   - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
-  - feat: Plots follow the NACHO brand: groups use the Okabe-Ito colours up to eight levels, then viridis, and flagged samples are rust triangles instead of red points.
+  - feat: Plots follow the NACHO brand: groups use the Okabe-Ito colours up to eight levels on a light background and seven on a dark one, then viridis, and flagged samples are rust triangles instead of red points.
 - In `R/render.R`,
   - feat: `render()`'s `clean` argument is gone; the working files now live in a temporary folder.
 - In `R/thresholds.R`,
