@@ -303,7 +303,10 @@ test_that("migrating a schema 1 object with negatives subtracts the geometric me
   without$probes <- without$probes[without$probes$CodeClass != "Negative", ]
   without$counts <- without$counts[without$probes$Name, ]
   plain <- suppressWarnings(suppressMessages(NACHO:::migrate_schema_1(without)))
-  expect_true(all(is.na(nacho_samples(plain)$Background)))
+  expect_identical(
+    nacho_samples(plain)$Background,
+    rep(NA_real_, nrow(nacho_samples(plain)))
+  )
 })
 
 test_that("upgrade_nacho() keeps the NACHO 2 background", {

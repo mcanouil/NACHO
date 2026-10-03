@@ -160,7 +160,7 @@ test_that("the validator refuses a length-2 preset or instrument", {
 })
 
 test_that("the validator refuses an unknown or non-character instrument", {
-  for (instrument in list("nano", "MAX", "", 1, TRUE, NULL)) {
+  for (instrument in list("nano", "MAX", "", 1, TRUE)) {
     x <- nacho_thresholds()
     x["instrument"] <- list(instrument)
     expect_match(
@@ -170,6 +170,9 @@ test_that("the validator refuses an unknown or non-character instrument", {
       info = deparse(instrument)
     )
   }
+  x <- nacho_thresholds()
+  x$instrument <- NULL
+  expect_match(NACHO:::validate_thresholds(x), "lacks instrument")
   for (instrument in c("max", "flex", "pro", "sprint")) {
     x <- nacho_thresholds()
     x$instrument <- instrument

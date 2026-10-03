@@ -74,7 +74,14 @@ test_that("ruvg() clamps k to the rank of the centred controls", {
   out <- NACHO:::ruvg(d$log_expr, flags, k = 3)
   expect_identical(colnames(out$W), "W_1")
   expect_identical(ncol(out$W), 1L)
-  expect_false(isTRUE(all.equal(out$corrected, d$log_expr)))
+  w <- out$W
+  fit <- stats::lm.fit(w, d$log_expr)
+  expect_equal(
+    out$corrected,
+    d$log_expr - w %*% fit$coefficients,
+    ignore_attr = TRUE
+  )
+  expect_true(any(out$corrected != d$log_expr))
   expect_identical(out$W, NACHO:::ruvg(d$log_expr, flags, k = 1)$W)
 })
 
