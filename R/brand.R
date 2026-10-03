@@ -55,7 +55,8 @@ plot_colours <- function(dark) {
 #' Colours for groups of samples
 #'
 #' Okabe-Ito up to eight groups on a light background and seven on a dark one,
-#' where its black is left out, then viridis without its end that is too close to the background.
+#' where its black is left out, then viridis without its end that is too close
+#' to the background.
 #'
 #' @inheritParams plot_colours
 #'
