@@ -94,6 +94,16 @@ test_that("report options are checked", {
     NACHO:::check_report_options(GSE74821, show_legend = "yes"),
     class = "nacho_error_bad_argument"
   )
+  expect_error(
+    NACHO:::check_report_options(GSE74821, size = -1),
+    "size",
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    NACHO:::check_report_options(GSE74821, outliers_factor = 0),
+    "outliers_factor",
+    class = "nacho_error_bad_argument"
+  )
   options <- NACHO:::check_report_options(GSE74821)
   expect_identical(options$colour, "CartridgeID")
   expect_null(options$group)
@@ -110,6 +120,62 @@ test_that("report_setup() reads and checks what render() saves", {
   expect_s3_class(report$sections, "data.frame")
   saveRDS(list(object = iris, options = list()), path)
   expect_error(NACHO:::report_setup(path), class = "nacho_error_bad_object")
+})
+
+test_that("report_setup() names the file it cannot use", {
+  missing <- file.path(withr::local_tempdir(), "missing.rds")
+  expect_error(
+    NACHO:::report_setup(missing),
+    "missing.rds",
+    class = "nacho_error_bad_object"
+  )
+  path <- withr::local_tempfile(fileext = ".rds")
+  saveRDS("text", path)
+  expect_error(
+    NACHO:::report_setup(path),
+    basename(path),
+    class = "nacho_error_bad_object"
+  )
+  saveRDS(list(options = list()), path)
+  expect_error(
+    NACHO:::report_setup(path),
+    basename(path),
+    class = "nacho_error_bad_object"
+  )
+})
+
+test_that("report_setup() drops option names it does not know", {
+  path <- withr::local_tempfile(fileext = ".rds")
+  options <- c(NACHO:::check_report_options(GSE74821), list(extra = 1))
+  saveRDS(list(object = GSE74821, options = options), path)
+  expect_no_error(report <- NACHO:::report_setup(path))
+  expect_false("extra" %in% names(report$options))
+})
+
+test_that("thresholds never print a bound at the top of the field of view", {
+  x <- toy_nacho(4L)
+  thresholds <- x@thresholds
+  thresholds$FoV <- c(75, 100)
+  S7::prop(x, "thresholds", check = FALSE) <- thresholds
+  lines <- NACHO:::report_thresholds(x)
+  expect_true("- Field of view (`FoV`): at least 75" %in% lines)
+  expect_false(any(grepl("100", lines[grepl("`FoV`", lines)])))
+})
+
+test_that("thresholds with two bounds read as a range", {
+  x <- toy_nacho(4L)
+  thresholds <- x@thresholds
+  thresholds$BD <- c(0.1, 2.25)
+  x@thresholds <- thresholds
+  expect_true(
+    "- Binding density (`BD`): 0.1 to 2.25" %in% NACHO:::report_thresholds(x)
+  )
+})
+
+test_that("only the batch section gets the batch tables", {
+  sections <- NACHO:::report_sections(GSE74821)
+  expect_type(sections$batch, "logical")
+  expect_identical(sections$title[sections$batch], "Batch effects")
 })
 
 test_that("report_body() prints headings, help and plots", {
