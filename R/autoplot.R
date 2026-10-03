@@ -1142,6 +1142,26 @@ plot_batch_factors <- function(
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
+#' Text colour that reads on a tile
+#'
+#' Navy on light tiles and white on dark ones, whichever has the higher
+#' contrast with the fill.
+#'
+#' @param fill Fill colours of the tiles.
+#'
+#' @noRd
+label_colour <- function(fill) {
+  luminance <- function(colour) {
+    rgb <- grDevices::col2rgb(colour) / 255
+    linear <- ifelse(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055)^2.4)
+    colSums(linear * c(0.2126, 0.7152, 0.0722))
+  }
+  navy <- nacho_palette[["navy"]]
+  navy_contrast <- (luminance(fill) + 0.05) / (luminance(navy) + 0.05)
+  white_contrast <- 1.05 / (luminance(fill) + 0.05)
+  ifelse(navy_contrast >= white_contrast, navy, "#FFFFFF")
+}
+
 plot_pc_batch <- function(
   object,
   type,
@@ -1177,7 +1197,8 @@ plot_pc_batch <- function(
           is.na(.data[["r_squared"]]),
           "",
           sprintf("%.2f", .data[["r_squared"]])
-        )
+        ),
+        colour = ggplot2::after_scale(label_colour(.data[["fill"]]))
       )
     ) +
     ggplot2::scale_fill_viridis_c(

@@ -69,6 +69,32 @@ test_that("PCBatch leaves tiles without a value unlabelled", {
   )
 })
 
+test_that("label_colour() picks navy on light tiles and white on dark ones", {
+  ramp <- scales::pal_viridis(option = "plasma")(2)
+  expect_identical(NACHO:::label_colour(ramp), c("#FFFFFF", "#182430"))
+})
+
+test_that("PCBatch labels contrast with their tile", {
+  x <- GSE74821
+  for (dark in c(FALSE, TRUE)) {
+    built <- ggplot2::ggplot_build(autoplot(x, type = "PCBatch", dark = dark))
+    tiles <- built$data[[1]]
+    labels <- built$data[[2]]
+    luminance <- function(colour) {
+      rgb <- grDevices::col2rgb(colour) / 255
+      linear <- ifelse(rgb <= 0.04045, rgb / 12.92, ((rgb + 0.055) / 1.055)^2.4)
+      colSums(linear * c(0.2126, 0.7152, 0.0722))
+    }
+    ratio <- function(a, b) {
+      pair <- cbind(luminance(a), luminance(b))
+      (apply(pair, 1, max) + 0.05) / (apply(pair, 1, min) + 0.05)
+    }
+    shown <- labels$label != ""
+    expect_true(any(shown))
+    expect_true(all(ratio(labels$colour[shown], tiles$fill[shown]) >= 4.5))
+  }
+})
+
 test_that("PCBatch is not available without principal components", {
   toy <- toy_nacho(6L)
   toy@pca[["scores"]] <- toy@pca[["scores"]][, 0, drop = FALSE]
