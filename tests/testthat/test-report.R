@@ -191,3 +191,85 @@ test_that("report_body() prints headings, help and plots", {
   expect_true("# Quality-control metrics" %in% output)
   expect_true("## Binding density" %in% output)
 })
+
+test_that("the batch tables use the batch columns the samples have", {
+  x <- toy_nacho(6)
+  x@samples[["tissue"]] <- rep(c("a", "b", "c"), 2)
+  lines <- NACHO:::report_batch_tables(x, group = "tissue")
+  expect_true(any(grepl("Groups by `CartridgeID`", lines, fixed = TRUE)))
+  expect_false(any(grepl("`Date`", lines, fixed = TRUE)))
+
+  local_mocked_bindings(
+    nacho_samples = function(x) data.frame(IDFILE = "a", tissue = "a")
+  )
+  lines <- NACHO:::report_batch_tables(x, group = "tissue")
+  expect_match(lines[1], "no batch design")
+})
+
+test_that("report_body() explains a plot that cannot be drawn", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  x <- toy_nacho()
+  report <- list(
+    object = x,
+    options = NACHO:::check_report_options(x),
+    sections = data.frame(
+      title = "Stability",
+      level = 2,
+      plot = "Stability",
+      help = NA_character_,
+      batch = FALSE,
+      alt = "Stability"
+    )
+  )
+  expect_no_warning(
+    output <- utils::capture.output(NACHO:::report_body(report))
+  )
+  expect_true(any(grepl("Stability cannot be drawn", output, fixed = TRUE)))
+})
+
+test_that("report_body() passes the report options to the plots", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  x <- flagged_gse()
+  x@samples[["batch \"a\""]] <- rep(c("u", "v"), length.out = nrow(x@samples))
+  options <- NACHO:::check_report_options(
+    x,
+    colour = "batch \"a\"",
+    outliers_labels = "IDFILE"
+  )
+  report <- list(
+    object = x,
+    options = options,
+    sections = data.frame(
+      title = "Binding density",
+      level = 2,
+      plot = "BD",
+      help = NA_character_,
+      batch = FALSE,
+      alt = "BD"
+    )
+  )
+  plots <- list()
+  real_autoplot <- autoplot
+  local_mocked_bindings(
+    autoplot = function(...) {
+      plots[[length(plots) + 1L]] <<- real_autoplot(...)
+      plots[[length(plots)]]
+    }
+  )
+  utils::capture.output(NACHO:::report_body(report))
+  expect_length(plots, 1)
+  mappings <- c(
+    list(plots[[1]]$mapping),
+    lapply(plots[[1]]$layers, function(l) l$mapping)
+  )
+  colours <- vapply(
+    mappings,
+    function(m) if (is.null(m$colour)) "" else rlang::as_label(m$colour),
+    character(1)
+  )
+  expect_true(any(grepl("batch \"a\"", colours, fixed = TRUE)))
+  geoms <- vapply(plots[[1]]$layers, function(l) class(l$geom)[1], character(1))
+  expect_true(any(geoms %in% c("GeomTextRepel", "GeomLabelRepel", "GeomText")))
+})

@@ -4,7 +4,7 @@ NULL
 #' Plot the quality control of a nacho object
 #'
 #' Draws any of the quality-control figures of the Shiny app
-#' ([visualise()]) and of the HTML report ([render()]).
+#' ([visualise()]) and of the HTML or PDF report ([render()]).
 #'
 #' @section Usage:
 #' ```r
@@ -45,7 +45,7 @@ NULL
 #'     The dashed line marks M = 1.5, the limit geNorm suggests for
 #'     homogeneous samples.
 #'     This plot ignores `colour`, `show_legend`, `show_outliers` and
-#'     `outliers_labels`, and it is not in the Shiny app or the report.
+#'     `outliers_labels`.
 #'   * `"RLE"`: Relative log expression of the normalised endogenous genes.
 #'     This plot ignores `size`, `show_outliers`, `outliers_factor` and
 #'     `outliers_labels`.

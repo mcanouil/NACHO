@@ -258,7 +258,14 @@ report_sections <- function(x, group = NULL) {
 #'
 #' @noRd
 report_batch_tables <- function(x, group) {
-  diagnostics <- batch_diagnostics(x, group = group)
+  batch <- intersect(c("CartridgeID", "Date"), names(nacho_samples(x)))
+  if (length(batch) == 0L) {
+    return(c(
+      "The samples have no `CartridgeID` or `Date` column, so there is no batch design to show.",
+      ""
+    ))
+  }
+  diagnostics <- batch_diagnostics(x, group = group, batch = batch)
   design <- diagnostics[["design"]]
   crosstabs <- diagnostics[["crosstabs"]]
   c(
@@ -435,6 +442,7 @@ report_body <- function(report) {
           outliers_labels = options[["outliers_labels"]]
         ),
         nacho_warning_metric_unavailable = function(cnd) {
+          cat(cli::ansi_strip(conditionMessage(cnd)), "\n\n")
           invokeRestart("muffleWarning")
         }
       )

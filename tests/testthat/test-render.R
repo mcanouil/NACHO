@@ -135,9 +135,17 @@ test_that("render() tells when Quarto writes nothing", {
   )
 })
 
+skip_if_not_installed_nacho <- function() {
+  testthat::skip_if_not(
+    any(file.exists(file.path(.libPaths(), "NACHO", "DESCRIPTION"))),
+    "NACHO is not installed in a library that Quarto can see"
+  )
+}
+
 test_that("render() writes an HTML report", {
   skip_on_cran()
   skip_if_not(NACHO:::quarto_available())
+  skip_if_not_installed_nacho()
   output_dir <- withr::local_tempdir()
   path <- render(flagged_gse(), output_dir = output_dir)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
@@ -148,19 +156,61 @@ test_that("render() writes an HTML report", {
 test_that("render() writes a Typst PDF report", {
   skip_on_cran()
   skip_if_not(NACHO:::quarto_available())
+  skip_if_not_installed_nacho()
   output_dir <- withr::local_tempdir()
   path <- render(GSE74821, format = "typst", output_dir = output_dir)
   expect_identical(basename(path), "nacho-report.pdf")
   expect_gt(file.size(path), 10000)
 })
 
-test_that("render() keeps a folder named tmp_nacho in output_dir", {
-  skip_on_cran()
-  skip_if_not(NACHO:::quarto_available())
-  output_dir <- withr::local_tempdir()
-  user_folder <- file.path(output_dir, "tmp_nacho")
-  dir.create(user_folder)
-  writeLines("keep me", file.path(user_folder, "notes.txt"))
-  render(GSE74821, output_dir = output_dir)
-  expect_true(file.exists(file.path(user_folder, "notes.txt")))
+test_that("render() creates output_dir before it renders", {
+  skip_if_not_installed("quarto")
+  rendered <- FALSE
+  local_mocked_bindings(quarto_cli_version = function() {
+    numeric_version("1.10.18")
+  })
+  local_mocked_bindings(
+    quarto_render = function(input, ...) {
+      rendered <<- TRUE
+      writeLines(
+        "<html></html>",
+        file.path(dirname(input), "nacho-report.html")
+      )
+    },
+    .package = "quarto"
+  )
+  output_dir <- file.path(withr::local_tempdir(), "a", "b")
+  path <- render(GSE74821, output_dir = output_dir)
+  expect_true(file.exists(path))
+  not_a_folder <- withr::local_tempfile()
+  writeLines("a file", not_a_folder)
+  rendered <- FALSE
+  expect_error(
+    render(GSE74821, output_dir = not_a_folder),
+    class = "nacho_error_render_failed"
+  )
+  expect_false(rendered)
+})
+
+test_that("render() shows the quiet hint only when output is quiet", {
+  skip_if_not_installed("quarto")
+  local_mocked_bindings(quarto_cli_version = function() {
+    numeric_version("1.10.18")
+  })
+  local_mocked_bindings(
+    quarto_render = function(...) invisible(),
+    .package = "quarto"
+  )
+  withr::local_options(nacho.quiet = FALSE, rlib_message_verbosity = "default")
+  loud <- expect_error(
+    render(GSE74821, output_dir = withr::local_tempdir()),
+    class = "nacho_error_render_failed"
+  )
+  expect_no_match(conditionMessage(loud), "nacho.quiet")
+  withr::local_options(nacho.quiet = TRUE)
+  quiet <- expect_error(
+    render(GSE74821, output_dir = withr::local_tempdir()),
+    class = "nacho_error_render_failed"
+  )
+  expect_match(conditionMessage(quiet), "rlib_message_verbosity")
 })

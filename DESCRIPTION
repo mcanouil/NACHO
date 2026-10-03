@@ -53,8 +53,8 @@ Imports:
     shiny (>= 1.7.4),
     shinyWidgets (>= 0.4.9)
 Suggests:
-    knitr (>= 1.39),
     colorspace (>= 2.1-3),
+    knitr (>= 1.39),
     markdown (>= 1.3),
     quarto (>= 1.5.1),
     rmarkdown (>= 1.16),

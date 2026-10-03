@@ -48,6 +48,20 @@ render <- function(
   check_nacho(x)
   format <- check_choice(format, c("html", "typst"))
   check_string(output_dir)
+  suppressWarnings(dir.create(
+    output_dir,
+    showWarnings = FALSE,
+    recursive = TRUE
+  ))
+  if (!dir.exists(output_dir)) {
+    nacho_abort(
+      c(
+        "Could not create {.path {output_dir}} for the report.",
+        i = "Check that {.arg output_dir} is a folder you can write to."
+      ),
+      class = "render_failed"
+    )
+  }
   options <- check_report_options(
     x,
     colour = colour,
@@ -88,20 +102,21 @@ render <- function(
     nacho_abort(
       c(
         "Quarto finished without writing {.file {basename(output)}}.",
-        i = "Run {.code render()} again with Quarto's messages: {.code options(nacho.quiet = FALSE)}."
+        if (nacho_is_quiet()) {
+          c(
+            i = paste(
+              "Quarto's messages are hidden;",
+              "{.code options(nacho.quiet = FALSE, rlib_message_verbosity = \"default\")}",
+              "shows them."
+            )
+          )
+        }
       ),
       class = "render_failed"
     )
   }
   target <- file.path(output_dir, basename(output))
-  suppressWarnings(dir.create(
-    output_dir,
-    showWarnings = FALSE,
-    recursive = TRUE
-  ))
-  copied <- dir.exists(output_dir) &&
-    suppressWarnings(file.copy(output, target, overwrite = TRUE))
-  if (!copied) {
+  if (!suppressWarnings(file.copy(output, target, overwrite = TRUE))) {
     nacho_abort(
       c(
         "Could not write {.file {basename(output)}} to {.path {output_dir}}.",
