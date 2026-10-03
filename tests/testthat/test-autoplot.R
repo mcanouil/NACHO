@@ -478,3 +478,62 @@ test_that("BatchFactors drops a factor column the samples lack", {
   built <- ggplot2::ggplot_build(plot)
   expect_length(unique(built$data[[1]]$PANEL), 2L)
 })
+
+test_that("flagged samples are triangles in the accent colour", {
+  x <- flagged_gse()
+  light <- flagged_points(autoplot(x, type = "FoV"))
+  dark <- flagged_points(autoplot(x, type = "FoV", dark = TRUE))
+  expect_gt(nrow(light), 0)
+  expect_true(all(light$colour == "#B64326"))
+  expect_true(all(dark$colour == "#FCB448"))
+})
+
+test_that("dark plots draw nothing in black or the old red", {
+  x <- flagged_gse()
+  for (type in names(NACHO:::nacho_plot_registry)) {
+    built <- suppressWarnings(ggplot2::ggplot_build(
+      autoplot(x, type = type, dark = TRUE)
+    ))
+    colours <- toupper(unlist(lapply(built$data, function(d) {
+      c(d$colour, d$fill)
+    })))
+    expect_false(
+      any(colours %in% c("#000000", "BLACK", "#B22222", "FIREBRICK")),
+      info = type
+    )
+    theme <- ggplot2::complete_theme(built$plot$theme)
+    expect_identical(
+      ggplot2::calc_element("plot.background", theme)$fill,
+      "#111821",
+      info = type
+    )
+  }
+})
+
+test_that("numeric and missing colour columns plot without warnings", {
+  x <- GSE74821
+  samples <- x@samples
+  samples[["dose"]] <- seq_len(nrow(samples))
+  samples[["batch"]] <- rep(c("a", NA), length.out = nrow(samples))
+  x@samples <- samples
+  for (column in c("dose", "batch")) {
+    expect_no_warning(ggplot2::ggplot_build(autoplot(
+      x,
+      type = "BD",
+      colour = column
+    )))
+  }
+  built <- ggplot2::ggplot_build(autoplot(x, type = "BD", colour = "dose"))
+  colours <- Filter(
+    function(v) length(v) > 1,
+    lapply(built$data, function(d) unique(d$colour))
+  )[[1]]
+  expect_setequal(colours, scales::pal_viridis(end = 0.85)(nrow(samples)))
+})
+
+test_that("autoplot() checks dark", {
+  expect_error(
+    autoplot(GSE74821, type = "BD", dark = NA),
+    class = "nacho_error_bad_argument"
+  )
+})

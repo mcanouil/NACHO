@@ -16,7 +16,8 @@ NULL
 #'   show_legend = TRUE,
 #'   show_outliers = TRUE,
 #'   outliers_factor = 1,
-#'   outliers_labels = NULL
+#'   outliers_labels = NULL,
+#'   dark = FALSE
 #' )
 #' ```
 #'
@@ -59,11 +60,14 @@ NULL
 #' * `colour`: The column of `nacho_samples(object)` that colours the points.
 #' * `size`: The point size, and the line width in the `"NORM"` plot.
 #' * `show_legend`: If `FALSE`, hide the colour legend.
-#' * `show_outliers`: If `TRUE`, draw the flagged samples in red.
+#' * `show_outliers`: If `TRUE`, draw the flagged samples as triangles in the
+#'   accent colour: rust on a light background, amber on a dark one.
 #' * `outliers_factor`: The size of the flagged samples, relative to `size`.
 #' * `outliers_labels`: The column of `nacho_samples(object)` that labels the
 #'   flagged samples, or `NULL` for no labels.
 #'   Labels imply `show_outliers = TRUE`.
+#' * `dark`: If `TRUE`, draw the plot for a dark background, as the app does
+#'   in dark mode.
 #'
 #' @return A `ggplot` object.
 #'
@@ -91,6 +95,7 @@ autoplot_nacho <- function(
   show_outliers = TRUE,
   outliers_factor = 1,
   outliers_labels = NULL,
+  dark = FALSE,
   ...
 ) {
   check_nacho(object)
@@ -131,6 +136,7 @@ autoplot_nacho <- function(
   }
   check_bool(show_legend)
   check_bool(show_outliers)
+  check_bool(dark)
   nacho_plot_registry[[type]](
     object = object,
     type = type,
@@ -139,7 +145,8 @@ autoplot_nacho <- function(
     show_legend = show_legend,
     show_outliers = show_outliers,
     outliers_factor = outliers_factor,
-    outliers_labels = outliers_labels
+    outliers_labels = outliers_labels,
+    dark = dark
   )
 }
 
@@ -170,7 +177,8 @@ outlier_layers <- function(
   size,
   outliers_factor,
   outliers_labels,
-  jitter
+  jitter,
+  dark
 ) {
   position <- if (jitter) {
     ggplot2::position_jitter(width = 0.25, height = 0)
@@ -187,12 +195,14 @@ outlier_layers <- function(
   if (!show_outliers) {
     return(list(inliers))
   }
+  accent <- plot_colours(dark)[["accent"]]
   list(
     inliers,
     ggplot2::geom_point(
       data = function(d) d[d[["flagged"]] %in% TRUE, ],
       size = size * outliers_factor,
-      colour = "#b22222",
+      shape = 17,
+      colour = accent,
       na.rm = TRUE,
       position = position
     ),
@@ -200,7 +210,7 @@ outlier_layers <- function(
       ggrepel::geom_label_repel(
         data = function(d) d[d[["flagged"]] %in% TRUE, ],
         mapping = ggplot2::aes(label = .data[[outliers_labels]]),
-        colour = "#b22222",
+        colour = accent,
         na.rm = TRUE
       )
     }
@@ -211,7 +221,8 @@ finite_values <- function(x) {
   x[is.finite(x)]
 }
 
-threshold_layers <- function(limits) {
+threshold_layers <- function(limits, dark) {
+  accent <- plot_colours(dark)[["accent"]]
   list(
     ggplot2::geom_rect(
       data = data.frame(
@@ -224,7 +235,7 @@ threshold_layers <- function(limits) {
         ymin = .data[["ymin"]],
         ymax = .data[["ymax"]]
       ),
-      fill = "#b22222",
+      fill = accent,
       alpha = 0.2,
       colour = "transparent",
       inherit.aes = FALSE
@@ -232,14 +243,15 @@ threshold_layers <- function(limits) {
     ggplot2::geom_hline(
       data = data.frame(value = finite_values(limits)),
       mapping = ggplot2::aes(yintercept = .data[["value"]]),
-      colour = "#b22222",
+      colour = accent,
       linetype = "longdash"
     )
   )
 }
 
-not_available_plot <- function(x_label, y_label) {
+not_available_plot <- function(x_label, y_label, dark) {
   ggplot2::ggplot() +
+    theme_nacho(dark) +
     ggplot2::labs(x = x_label, y = y_label) +
     ggplot2::annotate(
       "text",
@@ -248,7 +260,7 @@ not_available_plot <- function(x_label, y_label) {
       label = "Not available!",
       angle = 30,
       size = 24,
-      colour = "#b22222",
+      colour = plot_colours(dark)[["accent"]],
       alpha = 0.25
     ) +
     ggplot2::theme(axis.text = ggplot2::element_blank())
@@ -272,7 +284,8 @@ plot_metrics <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   id <- object@settings[["id_colname"]]
   units <- c(
@@ -296,7 +309,7 @@ plot_metrics <- function(
       "{.val {type}} is not available for PlexSet (n8) RCC files.",
       class = "metric_unavailable"
     )
-    return(not_available_plot("CartridgeID", y_label))
+    return(not_available_plot("CartridgeID", y_label, dark))
   }
 
   ggplot2::ggplot(
@@ -312,14 +325,10 @@ plot_metrics <- function(
       ))
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["CartridgeID"]],
       y = .data[[type]]
-    ) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
     ) +
     ggplot2::geom_boxplot(
       mapping = ggplot2::aes(group = .data[["CartridgeID"]]),
@@ -334,14 +343,15 @@ plot_metrics <- function(
       size,
       outliers_factor,
       outliers_labels,
-      jitter = TRUE
+      jitter = TRUE,
+      dark = dark
     ) +
     ggplot2::labs(
       x = "CartridgeID",
       y = y_label,
       colour = colour
     ) +
-    threshold_layers(object@thresholds[[type]]) +
+    threshold_layers(object@thresholds[[type]], dark) +
     (if (!show_legend) ggplot2::guides(colour = "none")) +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(angle = 30, hjust = 1, vjust = 1)
@@ -356,7 +366,8 @@ plot_cg <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   id <- object@settings[["id_colname"]]
   housekeeping_genes <- object@probes[["Name"]][object@probes[[
@@ -367,7 +378,7 @@ plot_cg <- function(
       "No housekeeping genes are available.",
       class = "metric_unavailable"
     )
-    return(not_available_plot("Gene Name", "Counts + 1"))
+    return(not_available_plot("Gene Name", "Counts + 1", dark))
   }
 
   ggplot2::ggplot(
@@ -391,14 +402,10 @@ plot_cg <- function(
       ))
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["Name"]],
       y = .data[["Count"]] + 1
-    ) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
     ) +
     ggplot2::geom_boxplot(
       mapping = ggplot2::aes(group = .data[["Name"]]),
@@ -413,7 +420,8 @@ plot_cg <- function(
       size,
       outliers_factor,
       outliers_labels,
-      jitter = TRUE
+      jitter = TRUE,
+      dark = dark
     ) +
     ggplot2::scale_y_log10(
       labels = function(x) format(x, big.mark = ",")
@@ -446,7 +454,8 @@ plot_pn <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
@@ -470,16 +479,12 @@ plot_pn <- function(
       ))
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[[id]],
       y = .data[["Count"]] + 1,
       colour = .data[["Name"]],
       group = .data[["Name"]]
-    ) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
     ) +
     ggplot2::geom_line() +
     ggplot2::facet_wrap(facets = "CodeClass", scales = "free_y", ncol = 2) +
@@ -503,7 +508,7 @@ plot_pn <- function(
         linetype = "Loess",
         group = "CodeClass"
       ),
-      colour = "black",
+      colour = plot_colours(dark)[["ink"]],
       se = TRUE,
       method = "loess",
       formula = y ~ x
@@ -520,7 +525,8 @@ plot_acbd <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
@@ -537,15 +543,11 @@ plot_acbd <- function(
       ))
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["MC"]],
       y = .data[["BD"]],
       colour = .data[[colour]]
-    ) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
     ) +
     outlier_layers(
       show_outliers,
@@ -553,7 +555,8 @@ plot_acbd <- function(
       size,
       outliers_factor,
       outliers_labels,
-      jitter = FALSE
+      jitter = FALSE,
+      dark = dark
     ) +
     ggplot2::scale_x_continuous(labels = function(x) {
       format(x, big.mark = ",")
@@ -565,7 +568,7 @@ plot_acbd <- function(
       ),
       colour = colour
     ) +
-    threshold_layers(object@thresholds[["BD"]]) +
+    threshold_layers(object@thresholds[["BD"]], dark) +
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
@@ -577,7 +580,8 @@ plot_acmc <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
@@ -592,15 +596,11 @@ plot_acmc <- function(
       ))
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["MC"]],
       y = .data[["MedC"]],
       colour = .data[[colour]]
-    ) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
     ) +
     ggplot2::geom_point(size = size, na.rm = TRUE) +
     ggplot2::scale_x_continuous(labels = function(x) {
@@ -625,11 +625,12 @@ plot_pca12 <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   if (ncol(object@pca[["scores"]]) < 2) {
     warn_too_few_components(type)
-    return(not_available_plot("PC01", "PC02"))
+    return(not_available_plot("PC01", "PC02", dark))
   }
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
@@ -644,6 +645,7 @@ plot_pca12 <- function(
       ))
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["PC01"]],
       y = .data[["PC02"]],
@@ -651,16 +653,6 @@ plot_pca12 <- function(
     ) +
     ggforce::geom_mark_ellipse(na.rm = TRUE, alpha = 0.1) +
     ggplot2::geom_point(size = size, na.rm = TRUE) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
-    ) +
-    ggplot2::scale_fill_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
-    ) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::labs(x = "PC01", y = "PC02", colour = colour) +
@@ -675,12 +667,13 @@ plot_pca <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   X.PC <- Y.PC <- NULL
   if (ncol(object@pca[["scores"]]) < 2) {
     warn_too_few_components(type)
-    return(not_available_plot(NULL, NULL))
+    return(not_available_plot(NULL, NULL, dark))
   }
   id <- object@settings[["id_colname"]]
   components <- sprintf("PC%02d", seq_len(min(ncol(object@pca[["scores"]]), 5)))
@@ -710,6 +703,7 @@ plot_pca <- function(
       as.numeric(sub("PC", "", X.PC)) < as.numeric(sub("PC", "", Y.PC))
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["X"]],
       y = .data[["Y"]],
@@ -718,16 +712,6 @@ plot_pca <- function(
     ) +
     ggforce::geom_mark_ellipse(na.rm = TRUE, alpha = 0.1) +
     ggplot2::geom_point(size = size, na.rm = TRUE) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
-    ) +
-    ggplot2::scale_fill_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
-    ) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::labs(x = NULL, y = NULL, colour = colour, fill = colour) +
@@ -747,7 +731,8 @@ plot_pcai <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   PoV <- `Proportion of Variance` <- NULL
   ggplot2::ggplot(
@@ -757,12 +742,8 @@ plot_pcai <- function(
       j = PoV := sprintf("%0.2f%%", `Proportion of Variance` * 100)
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(x = .data[["PC"]], y = .data[["Proportion of Variance"]]) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
-    ) +
     ggplot2::geom_bar(stat = "identity") +
     ggplot2::geom_text(
       mapping = ggplot2::aes(label = .data[["PoV"]]),
@@ -784,7 +765,8 @@ plot_pfnf <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
@@ -801,15 +783,11 @@ plot_pfnf <- function(
       ))
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["Negative_factor"]],
       y = .data[["Positive_factor"]],
       colour = .data[[colour]]
-    ) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
     ) +
     outlier_layers(
       show_outliers,
@@ -817,7 +795,8 @@ plot_pfnf <- function(
       size,
       outliers_factor,
       outliers_labels,
-      jitter = FALSE
+      jitter = FALSE,
+      dark = dark
     ) +
     ggplot2::labs(
       x = "Negative Factor",
@@ -825,7 +804,7 @@ plot_pfnf <- function(
       colour = colour
     ) +
     ggplot2::scale_y_continuous(transform = transform_log10_infinite()) +
-    threshold_layers(object@thresholds[["Positive_factor"]]) +
+    threshold_layers(object@thresholds[["Positive_factor"]], dark) +
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
 
@@ -837,7 +816,8 @@ plot_hf <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   id <- object@settings[["id_colname"]]
   if (!"House_factor" %in% names(object@samples)) {
@@ -845,7 +825,7 @@ plot_hf <- function(
       "The housekeeping factor was not computed.",
       class = "metric_unavailable"
     )
-    return(not_available_plot("Positive Factor", "Housekeeping Factor"))
+    return(not_available_plot("Positive Factor", "Housekeeping Factor", dark))
   }
 
   ggplot2::ggplot(
@@ -862,15 +842,11 @@ plot_hf <- function(
       ))
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["Positive_factor"]],
       y = .data[["House_factor"]],
       colour = .data[[colour]]
-    ) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
     ) +
     outlier_layers(
       show_outliers,
@@ -878,7 +854,8 @@ plot_hf <- function(
       size,
       outliers_factor,
       outliers_labels,
-      jitter = FALSE
+      jitter = FALSE,
+      dark = dark
     ) +
     ggplot2::labs(
       x = "Positive Factor",
@@ -900,7 +877,7 @@ plot_hf <- function(
         ymin = .data[["ymin"]],
         ymax = .data[["ymax"]]
       ),
-      fill = "#b22222",
+      fill = plot_colours(dark)[["accent"]],
       alpha = 0.2,
       colour = "transparent",
       inherit.aes = FALSE
@@ -910,7 +887,7 @@ plot_hf <- function(
         value = finite_values(object@thresholds[["House_factor"]])
       ),
       mapping = ggplot2::aes(yintercept = .data[["value"]]),
-      colour = "#b22222",
+      colour = plot_colours(dark)[["accent"]],
       linetype = "longdash"
     ) +
     ggplot2::geom_vline(
@@ -918,7 +895,7 @@ plot_hf <- function(
         value = finite_values(object@thresholds[["Positive_factor"]])
       ),
       mapping = ggplot2::aes(xintercept = .data[["value"]]),
-      colour = "#b22222",
+      colour = plot_colours(dark)[["accent"]],
       linetype = "longdash"
     ) +
     (if (!show_legend) ggplot2::guides(colour = "none"))
@@ -932,7 +909,8 @@ plot_norm <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   Status <- Count <- NULL
   id <- object@settings[["id_colname"]]
@@ -982,6 +960,7 @@ plot_norm <- function(
       )
     ]
   ) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[[id]],
       y = .data[["Count"]]
@@ -992,11 +971,6 @@ plot_norm <- function(
       na.rm = TRUE
     ) +
     ggplot2::facet_grid(cols = ggplot2::vars(.data[["Status"]])) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
-    ) +
     ggplot2::scale_x_discrete(label = NULL) +
     ggplot2::scale_y_log10(
       labels = function(x) format(x, big.mark = ",")
@@ -1020,7 +994,7 @@ plot_norm <- function(
         x = as.numeric(as.factor(.data[[id]])),
         linetype = "Loess"
       ),
-      colour = "black",
+      colour = plot_colours(dark)[["ink"]],
       se = TRUE,
       method = "loess",
       formula = y ~ x
@@ -1038,7 +1012,8 @@ plot_stability <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   explain <- function(cnd) rlang::cnd_message(cnd)
   ranking <- rlang::try_fetch(
@@ -1054,15 +1029,16 @@ plot_stability <- function(
       ),
       class = "metric_unavailable"
     )
-    return(not_available_plot("Housekeeping gene", "geNorm M"))
+    return(not_available_plot("Housekeeping gene", "geNorm M", dark))
   }
   ranking[["Name"]] <- factor(ranking[["Name"]], levels = ranking[["Name"]])
   ggplot2::ggplot(ranking) +
+    theme_nacho(dark) +
     ggplot2::aes(x = .data[["Name"]], y = .data[["geNorm_M"]]) +
     ggplot2::geom_point(size = size * 4) +
     ggplot2::geom_hline(
       yintercept = 1.5,
-      colour = "#b22222",
+      colour = plot_colours(dark)[["accent"]],
       linetype = "longdash"
     ) +
     ggplot2::labs(x = "Housekeeping gene, most stable first", y = "geNorm M") +
@@ -1079,7 +1055,8 @@ plot_rle <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   id <- object@settings[["id_colname"]]
   rows <- grepl("Endogenous", object@probes[["CodeClass"]])
@@ -1097,6 +1074,7 @@ plot_rle <- function(
     levels = samples[[id]][order(nacho_samples(object)[[colour]])]
   )
   ggplot2::ggplot(data) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["sample"]],
       y = .data[["rle"]],
@@ -1104,15 +1082,10 @@ plot_rle <- function(
     ) +
     ggplot2::geom_hline(
       yintercept = 0,
-      colour = "#b22222",
+      colour = plot_colours(dark)[["accent"]],
       linetype = "longdash"
     ) +
     ggplot2::geom_boxplot(outliers = FALSE, na.rm = TRUE) +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
-    ) +
     ggplot2::labs(
       x = "Sample",
       y = "Relative log expression",
@@ -1130,7 +1103,8 @@ plot_batch_factors <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   samples <- plot_samples(object, colour)
   factors <- intersect(
@@ -1149,6 +1123,7 @@ plot_batch_factors <- function(
     })
   )
   ggplot2::ggplot(data) +
+    theme_nacho(dark) +
     ggplot2::aes(x = .data[["CartridgeID"]], y = .data[["value"]]) +
     ggplot2::geom_boxplot(outliers = FALSE, na.rm = TRUE) +
     ggplot2::geom_point(
@@ -1158,11 +1133,6 @@ plot_batch_factors <- function(
       na.rm = TRUE
     ) +
     ggplot2::facet_wrap(ggplot2::vars(.data[["factor"]]), scales = "free_y") +
-    ggplot2::scale_colour_viridis_d(
-      option = "plasma",
-      direction = 1,
-      end = 0.85
-    ) +
     ggplot2::labs(x = "CartridgeID", y = "Factor", colour = colour) +
     ggplot2::theme(
       axis.text.x = ggplot2::element_text(angle = 30, hjust = 1, vjust = 1)
@@ -1178,7 +1148,8 @@ plot_pc_batch <- function(
   show_legend,
   show_outliers,
   outliers_factor,
-  outliers_labels
+  outliers_labels,
+  dark
 ) {
   batch <- intersect(c("CartridgeID", "Date"), names(nacho_samples(object)))
   data <- if (length(batch) > 0) {
@@ -1188,15 +1159,16 @@ plot_pc_batch <- function(
   }
   if (nrow(data) == 0) {
     warn_too_few_components(type)
-    return(not_available_plot("Batch", "Principal component"))
+    return(not_available_plot("Batch", "Principal component", dark))
   }
   ggplot2::ggplot(data) +
+    theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["batch"]],
       y = .data[["PC"]],
       fill = .data[["r_squared"]]
     ) +
-    ggplot2::geom_tile(colour = "white") +
+    ggplot2::geom_tile(colour = plot_colours(dark)[["paper"]]) +
     ggplot2::geom_text(
       mapping = ggplot2::aes(
         label = ifelse(
