@@ -2,7 +2,8 @@ meta:
   name: NACHO
   link: https://m.canouil.dev/NACHO/
 
-logo: nacho_hex.png
+logo:
+  medium: nacho_hex.png
 
 color:
   palette:
