@@ -47,3 +47,57 @@ test_that("only the pairs the spec allows carry text", {
   expect_lt(ratio(palette[["rust"]], palette[["night"]]), 4.5)
   expect_lt(ratio(palette[["navy"]], palette[["rose"]]), 4.5)
 })
+
+test_that("plot colours follow light and dark mode", {
+  light <- NACHO:::plot_colours(FALSE)
+  dark <- NACHO:::plot_colours(TRUE)
+  expect_identical(
+    light,
+    list(ink = "#182430", paper = "#FFFFFF", accent = "#B64326")
+  )
+  expect_identical(
+    dark,
+    list(ink = "#FFFFFF", paper = "#111821", accent = "#FCB448")
+  )
+})
+
+test_that("groups use Okabe-Ito, without black in dark mode", {
+  light <- NACHO:::group_palette(FALSE)
+  dark <- NACHO:::group_palette(TRUE)
+  expect_identical(light(3), c("#000000", "#E69F00", "#56B4E9"))
+  expect_identical(dark(3), c("#E69F00", "#56B4E9", "#009E73"))
+  expect_length(light(8), 8L)
+  expect_false("#000000" %in% dark(7))
+})
+
+test_that("group palette beyond eight levels moves to viridis", {
+  expect_identical(
+    NACHO:::group_palette(FALSE)(9),
+    scales::pal_viridis(end = 0.85)(9)
+  )
+  expect_identical(
+    NACHO:::group_palette(TRUE)(8),
+    scales::pal_viridis(begin = 0.25)(8)
+  )
+})
+
+test_that("theme_nacho() sets paper, ink and the group palette", {
+  data <- data.frame(x = 1:2, y = 1:2, g = c("a", "b"))
+  plot <- ggplot2::ggplot(data, ggplot2::aes(x, y, colour = g)) +
+    ggplot2::geom_point() +
+    NACHO:::theme_nacho(dark = TRUE)
+  expect_identical(
+    unique(ggplot2::layer_data(plot)$colour),
+    c("#E69F00", "#56B4E9")
+  )
+  theme <- ggplot2::complete_theme(plot$theme)
+  expect_identical(
+    ggplot2::calc_element("plot.background", theme)$fill,
+    "#111821"
+  )
+  expect_identical(ggplot2::calc_element("text", theme)$colour, "#FFFFFF")
+  expect_error(
+    NACHO:::theme_nacho(dark = "yes"),
+    class = "nacho_error_bad_argument"
+  )
+})

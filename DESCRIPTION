@@ -39,6 +39,7 @@ Depends:
 Imports:
     methods,
     utils,
+    grDevices,
     cli (>= 3.6.0),
     data.table,
     ggplot2 (>= 4.0.0),
