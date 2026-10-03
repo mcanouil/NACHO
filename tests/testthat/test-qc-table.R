@@ -143,13 +143,15 @@ test_that("exclude_outliers() drops the samples whose status is fail", {
   expect_identical(ncol(kept), sum(!failing))
 })
 
-test_that("failure_reason() reads the lower and upper bound by value", {
+test_that("failure_reason() names the bound that a value crosses", {
+  limits <- nacho_thresholds("max", "nsolver")[["BD"]]
+  expect_identical(limits, c(0.05, 2.25))
   expect_identical(
-    NACHO:::failure_reason("BD", 3, c(2.25, 0.05)),
+    NACHO:::failure_reason("BD", 3, limits),
     "BD 3 above 2.25"
   )
   expect_identical(
-    NACHO:::failure_reason("BD", 0.01, c(2.25, 0.05)),
+    NACHO:::failure_reason("BD", 0.01, limits),
     "BD 0.01 below 0.05"
   )
 })

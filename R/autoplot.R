@@ -1084,7 +1084,7 @@ plot_rle <- function(
   id <- object@settings[["id_colname"]]
   rows <- grepl("Endogenous", object@probes[["CodeClass"]])
   values <- log2(object@normalised[rows, , drop = FALSE] + 1)
-  rle <- t(rle_centre(t(values)))
+  rle <- rle_centre(values, 1)
   samples <- plot_samples(object, colour)
   data <- data.frame(
     Name = rep(rownames(rle), times = ncol(rle)),

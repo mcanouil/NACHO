@@ -261,6 +261,6 @@ test_that("predicted housekeeping genes are the five most stable by geNorm", {
 test_that("the internal detection constant matches the exported default", {
   expect_identical(
     NACHO:::nacho_min_detection,
-    formals(housekeeping_stability)$min_detection
+    eval(formals(housekeeping_stability)$min_detection)
   )
 })
