@@ -167,7 +167,7 @@ test_that("the validator refuses an unknown or non-character instrument", {
       NACHO:::validate_thresholds(x),
       "instrument",
       all = FALSE,
-      info = format(instrument)
+      info = deparse(instrument)
     )
   }
   for (instrument in c("max", "flex", "pro", "sprint")) {

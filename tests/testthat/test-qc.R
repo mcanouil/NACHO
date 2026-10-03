@@ -11,19 +11,23 @@ negative_matrix <- function(means) {
   )
 }
 
+exclude_nsolver <- function(means) {
+  NACHO:::excluded_negatives(
+    negative_matrix(means),
+    rep("Negative", length(means)),
+    "nsolver"
+  )
+}
+
 test_that("the Bruker rule drops at most two negatives 3-fold above the others", {
-  exclude <- function(means) {
-    NACHO:::excluded_negatives(
-      negative_matrix(means),
-      rep("Negative", length(means)),
-      "nsolver"
-    )
-  }
-  expect_identical(exclude(c(10, 11, 9, 12, 8, 10)), character(0))
-  expect_identical(exclude(c(40, 11, 9, 12, 8, 10)), "NEG_A")
-  expect_identical(exclude(c(40, 50, 9, 12, 8, 10)), c("NEG_B", "NEG_A"))
-  expect_identical(exclude(c(40, 50, 60, 12, 8, 10)), character(0))
-  expect_identical(exclude(c(40, 11, 9)), character(0))
+  expect_identical(exclude_nsolver(c(10, 11, 9, 12, 8, 10)), character(0))
+  expect_identical(exclude_nsolver(c(40, 11, 9, 12, 8, 10)), "NEG_A")
+  expect_identical(
+    exclude_nsolver(c(40, 50, 9, 12, 8, 10)),
+    c("NEG_B", "NEG_A")
+  )
+  expect_identical(exclude_nsolver(c(40, 50, 60, 12, 8, 10)), character(0))
+  expect_identical(exclude_nsolver(c(40, 11, 9)), character(0))
 })
 
 test_that("a negative probe with only missing counts is left out of the rule", {
@@ -202,16 +206,9 @@ test_that("a negative probe with all counts missing is never excluded", {
 })
 
 test_that("the Bruker rule floors the negative means at 1 before the ratio", {
-  exclude <- function(means) {
-    NACHO:::excluded_negatives(
-      negative_matrix(means),
-      rep("Negative", length(means)),
-      "nsolver"
-    )
-  }
-  expect_identical(exclude(c(1, 0, 0, 0)), character(0))
-  expect_identical(exclude(c(2, 1, 0, 0)), character(0))
-  expect_identical(exclude(c(4, 0, 0, 0)), "NEG_A")
+  expect_identical(exclude_nsolver(c(1, 0, 0, 0)), character(0))
+  expect_identical(exclude_nsolver(c(2, 1, 0, 0)), character(0))
+  expect_identical(exclude_nsolver(c(4, 0, 0, 0)), "NEG_A")
 })
 
 test_that("the legacy rule keeps every negative when it would drop them all", {

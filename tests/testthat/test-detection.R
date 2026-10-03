@@ -62,9 +62,15 @@ test_that("nacho objects carry sample and probe detection rates", {
   probe_kept <- !probes$is_excluded
   negatives <- nacho_counts(GSE74821)[
     probes$CodeClass == "Negative" & probe_kept,
+    ,
+    drop = FALSE
   ]
   limit <- colMeans(negatives) + 2 * apply(negatives, 2, stats::sd)
-  genes <- nacho_counts(GSE74821)[probes$CodeClass == "Endogenous", ]
+  genes <- nacho_counts(GSE74821)[
+    grepl("Endogenous", probes$CodeClass),
+    ,
+    drop = FALSE
+  ]
   expected <- unname(colMeans(
     genes > matrix(limit, nrow(genes), ncol(genes), byrow = TRUE)
   ))
@@ -76,7 +82,7 @@ test_that("nacho objects carry sample and probe detection rates", {
   expect_gt(length(unique(probes$detection_rate)), 2)
 })
 
-test_that("filter_detected() keeps the sample detection rates of the full object", {
+test_that("filter_detected() currently leaves the sample detection rates of the full object unchanged", {
   filtered <- filter_detected(GSE74821, min_rate = 1)
   expect_lt(nrow(filtered), nrow(GSE74821))
   expect_identical(

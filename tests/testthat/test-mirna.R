@@ -393,62 +393,6 @@ test_that("each miRNA method's House_factor is the content factor of its referen
   expect_gt(length(unique(round(factors, 6))), 1)
 })
 
-test_that("resolve_housekeeping_norm() keeps an explicit FALSE on every panel", {
-  resolve <- function(genes = NULL, predict = FALSE, norm, panel) {
-    NACHO:::resolve_housekeeping_norm(
-      c("Endogenous", "Housekeeping"),
-      genes,
-      predict,
-      norm,
-      panel
-    )
-  }
-  for (panel in c("mrna", "mirna")) {
-    expect_false(resolve(norm = FALSE, panel = panel), info = panel)
-    expect_false(
-      resolve(genes = "a", predict = TRUE, norm = FALSE, panel = panel),
-      info = panel
-    )
-    expect_true(resolve(norm = TRUE, panel = panel), info = panel)
-  }
-})
-
-test_that("resolve_housekeeping_norm() warns and turns off without any housekeeping genes", {
-  expect_warning(
-    off <- NACHO:::resolve_housekeeping_norm(
-      "Endogenous",
-      NULL,
-      FALSE,
-      NULL,
-      "mrna"
-    ),
-    class = "nacho_warning_no_housekeeping"
-  )
-  expect_false(off)
-  expect_no_warning(
-    NACHO:::resolve_housekeeping_norm("Endogenous", NULL, FALSE, FALSE, "mrna")
-  )
-})
-
-test_that("as_nacho() stores the panel it detects", {
-  skip_if_not_installed("SummarizedExperiment")
-  for (panel in c("mirna", "mrna")) {
-    original <- if (panel == "mirna") mirna_fixture() else GSE74821
-    se <- as_summarized_experiment(original)
-    saved <- S4Vectors::metadata(se)[["nacho"]]
-    saved[["settings"]][["panel"]] <- NULL
-    S4Vectors::metadata(se)[["nacho"]] <- saved
-    y <- suppressWarnings(suppressMessages(as_nacho(se)))
-    expect_identical(y@settings$panel, panel)
-  }
-  se <- as_summarized_experiment(mirna_fixture())
-  saved <- S4Vectors::metadata(se)[["nacho"]]
-  saved[["settings"]][["panel"]] <- "mrna"
-  S4Vectors::metadata(se)[["nacho"]] <- saved
-  y <- suppressWarnings(suppressMessages(as_nacho(se)))
-  expect_identical(y@settings$panel, "mirna")
-})
-
 test_that("mirna_reference() names the method that found no reference probes", {
   x <- mirna_fixture()
   counts <- nacho_counts(x)

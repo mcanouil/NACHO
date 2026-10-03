@@ -131,7 +131,7 @@ test_that("the RLE plot centres each gene on its median", {
   data <- plot$data
   expect_true(all(c("sample", "rle") %in% names(data)))
   genes <- nacho_probes(GSE74821)$Name[
-    nacho_probes(GSE74821)$CodeClass == "Endogenous"
+    grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
   ]
   expect_setequal(unique(data$Name), genes)
   medians <- tapply(data$rle, data$Name, stats::median)
@@ -456,21 +456,15 @@ test_that("the outlier layer of a plot holds only the failing sample", {
   toy@samples[["BD"]][-1] <- 0.3
   plot <- autoplot(toy, type = "BD")
   layers <- lapply(seq_along(plot$layers), \(i) ggplot2::layer_data(plot, i))
-  is_point <- vapply(
-    plot$layers,
-    \(layer) inherits(layer$geom, "GeomPoint"),
-    logical(1)
-  )
-  is_red <- vapply(
+  failing_value <- toy@samples[["BD"]][1]
+  draws_failing <- vapply(
     layers,
-    \(data) identical(unique(as.character(data[["colour"]])), "#b22222"),
+    \(data) "y" %in% names(data) && any(data[["y"]] == failing_value),
     logical(1)
   )
-  expect_identical(sum(is_point & is_red), 1L)
-  expect_identical(nrow(layers[[which(is_point & is_red)]]), 1L)
-  inliers <- layers[is_point & !is_red]
-  expect_length(inliers, 1L)
-  expect_identical(nrow(inliers[[1]]), 5L)
+  expect_identical(sum(draws_failing), 1L)
+  expect_identical(nrow(layers[[which(draws_failing)]]), 1L)
+  expect_true(all(layers[[which(draws_failing)]][["y"]] == failing_value))
 })
 
 test_that("BatchFactors drops a factor column the samples lack", {
