@@ -65,7 +65,7 @@ test_that("PCBatch leaves tiles without a value unlabelled", {
   expect_false("NA" %in% labels)
   expect_identical(
     labels == "",
-    is.na(built$data[[1]]$fill) | built$data[[1]]$fill == "grey90"
+    built$data[[1]]$fill == built$plot$scales$get_scales("fill")$na.value
   )
 })
 
@@ -508,6 +508,26 @@ test_that("dark plots draw nothing in black or the old red", {
       info = type
     )
   }
+})
+
+test_that("dark labels of flagged samples take the paper fill", {
+  x <- flagged_gse()
+  built <- ggplot2::ggplot_build(
+    autoplot(x, type = "FoV", dark = TRUE, outliers_labels = "CartridgeID")
+  )
+  labelled <- Filter(function(d) "label" %in% names(d), built$data)
+  expect_length(labelled, 1L)
+  expect_true(all(labelled[[1]]$fill == "#111821"))
+})
+
+test_that("the PCBatch missing-value fill follows light and dark mode", {
+  x <- flagged_gse()
+  na_fill <- function(dark) {
+    built <- ggplot2::ggplot_build(autoplot(x, type = "PCBatch", dark = dark))
+    built$plot$scales$get_scales("fill")$na.value
+  }
+  expect_false(identical(na_fill(TRUE), na_fill(FALSE)))
+  expect_false(identical(na_fill(FALSE), "grey90"))
 })
 
 test_that("numeric and missing colour columns plot without warnings", {

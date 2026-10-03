@@ -195,7 +195,8 @@ outlier_layers <- function(
   if (!show_outliers) {
     return(list(inliers))
   }
-  accent <- plot_colours(dark)[["accent"]]
+  colours <- plot_colours(dark)
+  accent <- colours[["accent"]]
   list(
     inliers,
     ggplot2::geom_point(
@@ -211,6 +212,7 @@ outlier_layers <- function(
         data = function(d) d[d[["flagged"]] %in% TRUE, ],
         mapping = ggplot2::aes(label = .data[[outliers_labels]]),
         colour = accent,
+        fill = colours[["paper"]],
         na.rm = TRUE
       )
     }
@@ -1181,7 +1183,10 @@ plot_pc_batch <- function(
     ggplot2::scale_fill_viridis_c(
       option = "plasma",
       limits = c(0, 1),
-      na.value = "grey90"
+      na.value = grDevices::adjustcolor(
+        plot_colours(dark)[["ink"]],
+        alpha.f = 0.15
+      )
     ) +
     ggplot2::labs(x = "Batch", y = "Principal component", fill = "R\u00b2")
 }
