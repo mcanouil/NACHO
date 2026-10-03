@@ -18,3 +18,5 @@
 ^\.superpowers$
 ^\.kata\.toml$
 ^\.ruff_cache$
+^\.roborev$
+^\.DS_Store$
