@@ -22,13 +22,25 @@ check_enough_samples <- function(log_expr, method, call) {
   }
 }
 
+check_enough_genes <- function(log_expr, method, call) {
+  if (ncol(log_expr) < 3) {
+    nacho_abort(
+      "{method} needs at least three genes, not {ncol(log_expr)}.",
+      class = "bad_argument",
+      call = call
+    )
+  }
+}
+
 #' geNorm stability M of each gene
 #'
 #' The mean standard deviation of its log ratios with every other gene
 #' (Vandesompele et al. 2002, Genome Biology 3, research0034).
 #'
 #' @noRd
-genorm_m <- function(log_expr) {
+genorm_m <- function(log_expr, call = rlang::caller_env()) {
+  check_enough_samples(log_expr, "geNorm", call)
+  check_enough_genes(log_expr, "geNorm", call)
   spread <- pairwise_sd(log_expr)
   rowSums(spread) / (ncol(log_expr) - 1)
 }
@@ -42,9 +54,10 @@ genorm_m <- function(log_expr) {
 #' @noRd
 genorm_ranking <- function(log_expr, call = rlang::caller_env()) {
   check_enough_samples(log_expr, "geNorm", call)
-  if (ncol(log_expr) < 3) {
+  check_enough_genes(log_expr, "geNorm", call)
+  if (is.null(colnames(log_expr))) {
     nacho_abort(
-      "geNorm needs at least three genes, not {ncol(log_expr)}.",
+      "geNorm needs column names to name the genes.",
       class = "bad_argument",
       call = call
     )
@@ -85,14 +98,8 @@ genorm_ranking <- function(log_expr, call = rlang::caller_env()) {
 #' @noRd
 normfinder_rho <- function(log_expr, group = NULL, call = rlang::caller_env()) {
   check_enough_samples(log_expr, "NormFinder", call)
+  check_enough_genes(log_expr, "NormFinder", call)
   k <- ncol(log_expr)
-  if (k < 3) {
-    nacho_abort(
-      "NormFinder needs at least three genes, not {k}.",
-      class = "bad_argument",
-      call = call
-    )
-  }
   residual_variance <- function(x) {
     sample_means <- rowMeans(x)
     gene_means <- colMeans(x)

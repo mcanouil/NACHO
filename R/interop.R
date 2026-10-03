@@ -323,15 +323,7 @@ nacho_metadata_settings <- function(
     merged[["ruv_k"]] <- as.integer(merged[["ruv_k"]])
   }
   panel <- detect_panel(probes, samples)
-  housekeeping_genes <- merged[["housekeeping_genes"]]
-  housekeeping_genes <- housekeeping_genes[
-    housekeeping_genes %in% probes[["Name"]]
-  ]
-  if (length(housekeeping_genes) == 0) {
-    merged["housekeeping_genes"] <- list(NULL)
-  } else {
-    merged[["housekeeping_genes"]] <- housekeeping_genes
-  }
+  merged <- prune_housekeeping(merged, probes[["Name"]])
   housekeeping_norm <- merged[["housekeeping_norm"]]
   if (is.null(housekeeping_norm) && panel == "mrna") {
     housekeeping_norm <- any(grepl("Housekeeping", probes[["CodeClass"]]))

@@ -38,6 +38,9 @@
 #'   [normalise()] describes.
 #' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes;
 #'   `NULL` uses [suggest_ruv_k()].
+#'   A `ruv_k` above two less than the number of samples, or one less than the
+#'   number of control genes, is lowered with a `nacho_warning_ruv_k_reduced`
+#'   warning.
 #'   Other methods ignore it.
 #' @param background [[character]] How to estimate each sample's background
 #'   from its negative controls: `"none"` (the default), `"mean"`,
@@ -367,6 +370,18 @@ resolve_housekeeping_norm <- function(
     return(FALSE)
   }
   housekeeping_norm
+}
+
+#' Keep the housekeeping genes of the settings that are still probes
+#'
+#' The setting is `NULL` when none is left.
+#'
+#' @noRd
+prune_housekeeping <- function(settings, probe_names) {
+  genes <- settings[["housekeeping_genes"]]
+  genes <- genes[genes %in% probe_names]
+  settings["housekeeping_genes"] <- list(if (length(genes) > 0) genes else NULL)
+  settings
 }
 
 #' Build the probe table and the counts matrix from long probe counts

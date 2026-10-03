@@ -21,8 +21,12 @@ two standard deviations of that sample's negative controls.
 Control and housekeeping probes are always kept, where housekeeping probes
 are the probes of CodeClass Housekeeping.
 Endogenous genes chosen as housekeeping genes are filtered like any other
-gene.
-The samples' \code{Detection_rate} is not recomputed after filtering.
+gene, and the dropped ones are removed from the \code{housekeeping_genes}
+setting, which becomes \code{NULL} when none is left.
+Then the object uses its Housekeeping probes and warns, or, with no
+Housekeeping probe either, turns \code{housekeeping_norm} off and warns.
+The samples' \code{Detection_rate} and \code{Housekeeping_detected} are not
+recomputed after filtering.
 A gene's detection rate is the share of the samples with a detection limit
 in which it is detected, so a sample with fewer than two negative probes
 does not count.

@@ -85,9 +85,22 @@ test_that("x[, j] subsets samples and recomputes PCA and flags", {
 
 test_that("x[i, ] subsets probes by name, position or logical", {
   x <- toy_nacho()
-  expect_identical(nrow(x[c("GENE1", "GENE2"), ]), 2L)
-  expect_identical(nrow(x[1:3, ]), 3L)
-  expect_identical(nrow(x[nacho_probes(x)$CodeClass == "Positive", ]), 6L)
+  no_housekeeping <- "nacho_warning_no_housekeeping"
+  expect_identical(
+    nrow(suppressWarnings(x[c("GENE1", "GENE2"), ], classes = no_housekeeping)),
+    2L
+  )
+  expect_identical(
+    nrow(suppressWarnings(x[1:3, ], classes = no_housekeeping)),
+    3L
+  )
+  expect_identical(
+    nrow(suppressWarnings(
+      x[nacho_probes(x)$CodeClass == "Positive", ],
+      classes = no_housekeeping
+    )),
+    6L
+  )
 })
 
 test_that("x[, j] accepts sample ids and logical vectors", {
@@ -139,7 +152,13 @@ test_that("x[i] without a comma is refused", {
 
 test_that("a named single subscript is unambiguous", {
   x <- toy_nacho()
-  expect_identical(dim(x[i = 1:2]), c(2L, 4L))
+  expect_identical(
+    dim(suppressWarnings(
+      x[i = 1:2],
+      classes = "nacho_warning_no_housekeeping"
+    )),
+    c(2L, 4L)
+  )
   expect_warning(
     sub <- x[j = 1:2],
     class = "nacho_warning_n_comp_reduced"
@@ -149,7 +168,10 @@ test_that("a named single subscript is unambiguous", {
 
 test_that("subsetting to one probe keeps a valid object", {
   x <- toy_nacho()
-  expect_warning(sub <- x[1, ], class = "nacho_warning_n_comp_reduced")
+  suppressWarnings(
+    expect_warning(sub <- x[1, ], class = "nacho_warning_n_comp_reduced"),
+    classes = "nacho_warning_no_housekeeping"
+  )
   expect_identical(dim(sub), c(1L, 4L))
   expect_identical(ncol(sub@pca$scores), 1L)
   expect_true(S7::S7_inherits(sub, NACHO:::nacho))

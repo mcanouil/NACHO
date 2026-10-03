@@ -37,6 +37,39 @@ test_that("geNorm refuses fewer than three genes", {
   )
 })
 
+test_that("geNorm M refuses fewer than three genes", {
+  expect_error(
+    NACHO:::genorm_m(hand_expr[, 1:2]),
+    "at least three genes",
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("geNorm M refuses fewer than two samples", {
+  expect_error(
+    NACHO:::genorm_m(hand_expr[1, , drop = FALSE]),
+    "at least two samples",
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("geNorm ranking refuses an input without gene names", {
+  unnamed <- unname(hand_expr)
+  expect_error(
+    NACHO:::genorm_ranking(unnamed),
+    "column names",
+    class = "nacho_error_bad_argument"
+  )
+})
+
+test_that("NormFinder refuses one sample with a classed error, never NaN", {
+  expect_error(
+    NACHO:::normfinder_rho(hand_expr[1, , drop = FALSE]),
+    "at least two samples",
+    class = "nacho_error_bad_argument"
+  )
+})
+
 test_that("geNorm matches NormqPCR", {
   skip_if_not_installed("NormqPCR")
   counts <- nacho_counts(GSE74821)

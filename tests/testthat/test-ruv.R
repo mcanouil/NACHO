@@ -78,12 +78,27 @@ test_that("suggest_ruv_k() picks the smallest k close to the best RLE", {
 
 test_that("suggest_ruv_k() caps k at what the data allow", {
   x <- suppressWarnings(GSE74821[, 1:3])
-  expect_lte(max(suggest_ruv_k(x, max_k = 10)$k), 2L)
+  expect_identical(max(suggest_ruv_k(x, max_k = 10)$k), 1L)
 })
 
-test_that("suggest_ruv_k() on two samples caps k at 1", {
+test_that("suggest_ruv_k() on two samples only suggests k = 0", {
   x <- suppressWarnings(GSE74821[, 1:2])
-  expect_identical(max(suggest_ruv_k(x, max_k = 10)$k), 1L)
+  table <- suggest_ruv_k(x, max_k = 10)
+  expect_identical(table$k, 0L)
+  expect_identical(table$suggested, TRUE)
+})
+
+test_that("suggest_ruv_k() keeps k below the number of samples less one", {
+  x <- suppressWarnings(GSE74821[, 1:4])
+  expect_identical(max(suggest_ruv_k(x, max_k = 10)$k), 2L)
+})
+
+test_that("suggest_ruv_k() on one sample gives NA, never NaN", {
+  x <- suppressWarnings(GSE74821[, 1])
+  table <- suggest_ruv_k(x)
+  expect_identical(table$k, 0L)
+  expect_true(is.na(table$pc1_variance))
+  expect_false(any(is.nan(table$pc1_variance)))
 })
 
 test_that("suggest_ruv_k() needs two housekeeping genes, and two are enough", {
@@ -135,4 +150,45 @@ test_that("background errors from normalise() name normalise()", {
     regexp = "two negative"
   )
   expect_identical(rlang::call_name(error[["call"]]), "normalise")
+})
+
+test_that("normalise() lowers a ruv_k that would saturate, with a classed warning", {
+  x <- suppressWarnings(GSE74821[, 1:2])
+  expect_warning(
+    result <- suppressMessages(
+      normalise(x, normalisation_method = "RUVg", ruv_k = 1, n_comp = 1)
+    ),
+    "that the samples allow",
+    class = "nacho_warning_ruv_k_reduced"
+  )
+  expect_identical(result@settings$ruv_k, 0L)
+  expect_false(anyNA(result@normalised))
+})
+
+test_that("normalise() keeps a ruv_k the samples allow", {
+  x <- suppressWarnings(GSE74821[, 1:4])
+  expect_no_warning(
+    result <- suppressMessages(
+      normalise(x, normalisation_method = "RUVg", ruv_k = 2, n_comp = 3)
+    )
+  )
+  expect_identical(result@settings$ruv_k, 2L)
+})
+
+test_that("normalise() lowers a ruv_k above what the control genes allow", {
+  x <- GSE74821
+  expect_warning(
+    result <- suppressMessages(
+      normalise(
+        x,
+        housekeeping_genes = x@probes$Name[x@probes$is_housekeeping][1:2],
+        normalisation_method = "RUVg",
+        ruv_k = 3,
+        n_comp = 3
+      )
+    ),
+    "control genes",
+    class = "nacho_warning_ruv_k_reduced"
+  )
+  expect_identical(result@settings$ruv_k, 1L)
 })
