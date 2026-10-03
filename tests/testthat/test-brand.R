@@ -119,5 +119,5 @@ test_that("nacho_theme() brands Bootstrap and adds dark-mode rules", {
     collapse = "\n"
   )
   expect_match(css, "data-bs-theme=.?dark")
-  expect_match(css, "#fcb448", ignore.case = TRUE)
+  expect_match(css, "--bs-primary: ?#fcb448", ignore.case = TRUE)
 })
