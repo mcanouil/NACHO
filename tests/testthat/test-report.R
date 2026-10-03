@@ -1,104 +1,127 @@
-grDevices::pdf(NULL)
-null_device <- grDevices::dev.cur()
-
-test_that("default", {
-  expect_output(NACHO:::report_markdown(GSE74821), "RCC Summary")
-  utils::capture.output(
-    res <- withVisible(NACHO:::report_markdown(GSE74821))
+test_that("qc_failures() lists failing samples with their reasons", {
+  x <- flagged_gse()
+  failures <- NACHO:::qc_failures(x)
+  expect_identical(
+    names(failures),
+    c("IDFILE", "lane", "CartridgeID", "n_flags", "reason")
   )
-  expect_false(res[["visible"]])
-  expect_identical(res[["value"]], GSE74821)
+  expect_identical(nrow(failures), sum(NACHO:::flagged_samples(x)))
+  expect_match(failures$reason, "^FoV .* below 99.9$")
+  expect_identical(nrow(NACHO:::qc_failures(GSE74821)), 0L)
 })
 
-test_that("missing object", {
-  expect_error(NACHO:::report_markdown(), class = "nacho_error_bad_object")
+test_that("the overview counts samples, cartridges and flags", {
+  lines <- NACHO:::report_overview(flagged_gse())
+  expect_identical(lines[1], "- Samples: 12")
+  expect_match(lines[3], "^- Flagged samples: [1-9]")
+  expect_match(lines[4], "^- Thresholds: nsolver preset, instrument ")
+  expect_match(lines[5], "^- Normalisation: GLM, background none$")
 })
 
-test_that("show_legend to TRUE", {
-  utils::capture.output(
-    res <- NACHO:::report_markdown(
-      GSE74821,
-      colour = "CartridgeID",
-      size = 0.5,
-      show_legend = TRUE
-    )
+test_that("each failing sample gets one callout", {
+  x <- flagged_gse()
+  lines <- NACHO:::report_callouts(x)
+  expect_identical(
+    sum(lines == "::: {.callout-warning}"),
+    sum(NACHO:::flagged_samples(x))
   )
-  expect_true(S7::S7_inherits(res))
-})
-
-test_that("not a nacho object", {
-  expect_error(
-    NACHO:::report_markdown(list(nacho = data.frame())),
-    class = "nacho_error_bad_object"
-  )
-})
-
-test_that("numeric column for colour", {
-  x <- GSE74821
-  x@thresholds[["FoV"]] <- 95
-  x@samples[["channel_count"]] <- as.numeric(x@samples[["channel_count"]])
-  expect_output(
-    NACHO:::report_markdown(x, colour = "channel_count"),
-    "Outliers"
+  expect_match(lines[2], "^## `GSM")
+  expect_identical(
+    NACHO:::report_callouts(GSE74821),
+    "No sample fails a quality-control threshold."
   )
 })
 
-test_that("the report leaves out open threshold bounds", {
+test_that("thresholds leave out bounds that never flag", {
   x <- toy_nacho(4L)
   thresholds <- x@thresholds
   thresholds$BD <- c(-Inf, 2.25)
   thresholds$House_factor <- c(1 / 11, Inf)
   thresholds$LoD <- -Inf
+  thresholds$PCL <- 0
   x@thresholds <- thresholds
-  output <- utils::capture.output(NACHO:::report_markdown(x))
-  expect_false(any(grepl("Inf", output, fixed = TRUE)))
-  expect_length(grep("Binding Density (BD)", output, fixed = TRUE), 1L)
-  expect_length(grep("Limit of Detection (LoD) <", output, fixed = TRUE), 0L)
-  expect_length(grep("(house_factor) <", output, fixed = TRUE), 1L)
-  expect_length(grep("(house_factor) >", output, fixed = TRUE), 0L)
+  lines <- NACHO:::report_thresholds(x)
+  expect_false(any(grepl("Inf", lines, fixed = TRUE)))
+  expect_true("- Binding density (`BD`): at most 2.25" %in% lines)
+  expect_true(
+    "- Content normalisation factor (`House_factor`): at least 0.0909" %in%
+      lines
+  )
+  expect_false(any(grepl("`LoD`", lines, fixed = TRUE)))
+  expect_false(any(grepl("`PCL`", lines, fixed = TRUE)))
 })
 
-test_that("the report names the preset and instrument behind the flags", {
-  flag_line <- function(instrument) {
-    toy <- toy_nacho(4L)
-    thresholds <- toy@thresholds
-    thresholds$preset <- "legacy"
-    thresholds$instrument <- instrument
-    toy@thresholds <- thresholds
-    output <- utils::capture.output(NACHO:::report_markdown(toy))
-    grep("Thresholds preset", output, value = TRUE)
-  }
-  expect_identical(
-    flag_line("sprint"),
-    "  - Thresholds preset: legacy, instrument: sprint "
-  )
-  expect_identical(
-    flag_line(NA_character_),
-    "  - Thresholds preset: legacy, instrument: unknown "
-  )
+test_that("sections follow the object", {
+  plots <- NACHO:::report_sections(plexset_nacho)$plot
+  expect_false(any(c("PCL", "LoD", "HF", "Stability") %in% plots))
+  expect_true(all(c("BD", "FoV", "NORM") %in% plots))
+
+  gse <- NACHO:::report_sections(GSE74821)
+  expect_true(all(c("PCL", "LoD", "HF", "Stability") %in% gse$plot))
+  expect_false(is.na(gse$alt[gse$plot %in% "BD"]))
+  expect_true(all(!is.na(gse$alt[!is.na(gse$plot)])))
+
+  ruv <- normalise(GSE74821, normalisation_method = "RUVg", ruv_k = 1)
+  expect_false("HF" %in% NACHO:::report_sections(ruv)$plot)
 })
 
-test_that("the settings list the housekeeping genes, or none", {
-  housekeeping_line <- function(is_housekeeping) {
-    toy <- toy_nacho(4L)
-    probes <- toy@probes
-    probes[["is_housekeeping"]] <- is_housekeeping
-    toy@probes <- probes
-    output <- utils::capture.output(NACHO:::report_markdown(toy))
-    grep("Housekeeping genes available", output, value = TRUE)
-  }
-  expect_identical(
-    housekeeping_line(FALSE),
-    "  - Housekeeping genes available: none "
-  )
-  expect_identical(
-    housekeeping_line(c(rep(FALSE, 8), TRUE, FALSE, FALSE)),
-    "  - Housekeeping genes available: HK1 "
-  )
-  expect_identical(
-    housekeeping_line(c(rep(FALSE, 8), TRUE, TRUE, FALSE)),
-    "  - Housekeeping genes available: HK1 and GENE1 "
-  )
+test_that("the batch tables put the design first and flag confounding", {
+  lines <- NACHO:::report_batch_tables(GSE74821, group = "tissue type:ch1")
+  expect_identical(lines[1], "::: {.callout-important}")
+  design <- grep("confounded", lines, fixed = TRUE)[1]
+  crosstab <- grep("Groups by `CartridgeID`", lines, fixed = TRUE)
+  expect_lt(design, crosstab)
 })
 
-grDevices::dev.off(null_device)
+test_that("every plot type has alt text", {
+  expect_setequal(
+    names(NACHO:::plot_alt_texts),
+    names(NACHO:::nacho_plot_registry)
+  )
+  expect_true(all(nzchar(NACHO:::plot_alt_texts)))
+})
+
+test_that("report options are checked", {
+  expect_error(
+    NACHO:::check_report_options(GSE74821, colour = "nope"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    NACHO:::check_report_options(GSE74821, group = "nope"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_error(
+    NACHO:::check_report_options(GSE74821, show_legend = "yes"),
+    class = "nacho_error_bad_argument"
+  )
+  options <- NACHO:::check_report_options(GSE74821)
+  expect_identical(options$colour, "CartridgeID")
+  expect_null(options$group)
+})
+
+test_that("report_setup() reads and checks what render() saves", {
+  path <- withr::local_tempfile(fileext = ".rds")
+  saveRDS(
+    list(object = GSE74821, options = NACHO:::check_report_options(GSE74821)),
+    path
+  )
+  report <- NACHO:::report_setup(path)
+  expect_true(S7::S7_inherits(report$object, NACHO:::nacho))
+  expect_s3_class(report$sections, "data.frame")
+  saveRDS(list(object = iris, options = list()), path)
+  expect_error(NACHO:::report_setup(path), class = "nacho_error_bad_object")
+})
+
+test_that("report_body() prints headings, help and plots", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  path <- withr::local_tempfile(fileext = ".rds")
+  saveRDS(
+    list(object = GSE74821, options = NACHO:::check_report_options(GSE74821)),
+    path
+  )
+  report <- NACHO:::report_setup(path)
+  output <- utils::capture.output(NACHO:::report_body(report))
+  expect_true("# Quality-control metrics" %in% output)
+  expect_true("## Binding density" %in% output)
+})
