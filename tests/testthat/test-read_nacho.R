@@ -289,8 +289,12 @@ test_that("migrating a schema 1 object with negatives subtracts the geometric me
   properties$counts <- rbind(properties$counts, negative_counts)
   withr::local_options(nacho.quiet = NULL, rlib_message_verbosity = NULL)
   expect_message(
-    x <- suppressWarnings(NACHO:::migrate_schema_1(properties)),
-    "geometric mean background subtraction"
+    x <- suppressWarnings(
+      NACHO:::migrate_schema_1(properties),
+      classes = "nacho_warning_n_comp_reduced"
+    ),
+    "geometric",
+    class = "nacho_message"
   )
   expect_identical(x@settings$background, "geo")
   expect_identical(x@settings$background_mode, "subtract")
@@ -302,7 +306,10 @@ test_that("migrating a schema 1 object with negatives subtracts the geometric me
   without <- properties
   without$probes <- without$probes[without$probes$CodeClass != "Negative", ]
   without$counts <- without$counts[without$probes$Name, ]
-  plain <- suppressWarnings(suppressMessages(NACHO:::migrate_schema_1(without)))
+  plain <- suppressWarnings(
+    suppressMessages(NACHO:::migrate_schema_1(without)),
+    classes = "nacho_warning_n_comp_reduced"
+  )
   expect_identical(
     nacho_samples(plain)$Background,
     rep(NA_real_, nrow(nacho_samples(plain)))
