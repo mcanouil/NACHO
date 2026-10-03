@@ -66,6 +66,22 @@ jobs:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
 
+      - name: Check the tarball stays under 5 MB
+        if: runner.os == 'Linux' && matrix.config.r == 'release'
+        run: |
+          set -euo pipefail
+          tarball=$(find check -maxdepth 1 -name 'NACHO_*.tar.gz' -print -quit)
+          if [ -z "$tarball" ]; then
+            echo "::error::No NACHO tarball in check/; the check-r-package step must have changed where it builds."
+            exit 1
+          fi
+          size=$(stat -c %s "$tarball")
+          echo "Tarball size: ${size} bytes"
+          if [ "$size" -ge 5000000 ]; then
+            echo "::error::${tarball} is ${size} bytes, over the 5 MB CRAN guidance."
+            exit 1
+          fi
+
   test-coverage:
     needs: r-cmd-check
     runs-on: ubuntu-latest

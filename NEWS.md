@@ -22,6 +22,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
 - In `R/autoplot.R`,
   - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
+  - feat: Plots follow the NACHO brand: groups use the Okabe-Ito colours up to eight levels, then viridis, and flagged samples are rust triangles instead of red points.
 - In `R/render.R`,
   - feat: `render()`'s `clean` argument is gone; the working files now live in a temporary folder.
 - In `R/thresholds.R`,
@@ -92,6 +93,9 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `normalise()` refuses a thresholds list written for NACHO 2, one without `preset`, and the error points to `nacho_thresholds()`.
 - In `R/autoplot.R`,
   - feat: `autoplot()` checks that `colour` and `outliers_labels` name columns of `nacho_samples()`, and `outliers_labels` must be a column name.
+  - feat: `autoplot()` gains `dark` to draw a plot for a dark background, with amber flags.
+- In `inst/brand/`,
+  - feat: NACHO ships its brand file, with the Source Sans 3 and JetBrains Mono fonts, so the app, the report and the website share one look offline.
 - In `R/stability.R`,
   - feat: `housekeeping_stability()` ranks reference genes with geNorm and NormFinder, gives the geNorm pairwise variation, and tests each gene against a biological group.
     `autoplot(x, type = "Stability")` draws the ranking.
