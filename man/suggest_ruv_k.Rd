@@ -4,7 +4,7 @@
 \alias{suggest_ruv_k}
 \title{Suggest how many unwanted factors RUVg should remove}
 \usage{
-suggest_ruv_k(x, max_k = nacho_max_k)
+suggest_ruv_k(x, max_k = 5)
 }
 \arguments{
 \item{x}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}

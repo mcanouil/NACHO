@@ -4,12 +4,7 @@
 \alias{housekeeping_stability}
 \title{Rank genes by expression stability}
 \usage{
-housekeeping_stability(
-  x,
-  genes = NULL,
-  group = NULL,
-  min_detection = nacho_min_detection
-)
+housekeeping_stability(x, genes = NULL, group = NULL, min_detection = 0.9)
 }
 \arguments{
 \item{x}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}

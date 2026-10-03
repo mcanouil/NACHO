@@ -194,7 +194,7 @@ housekeeping_stability <- function(
   x,
   genes = NULL,
   group = NULL,
-  min_detection = nacho_min_detection
+  min_detection = 0.9
 ) {
   check_nacho(x)
   check_character(genes, allow_null = TRUE)

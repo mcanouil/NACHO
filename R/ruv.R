@@ -1,11 +1,6 @@
 #' @include stability.R
 NULL
 
-#' The largest number of RUVg factors tried by default
-#'
-#' @noRd
-nacho_max_k <- 5
-
 #' Remove unwanted variation with control genes
 #'
 #' RUVg (Risso et al. 2014, Nature Biotechnology 32, 896) on log values.
@@ -206,7 +201,7 @@ ruv_k_table <- function(
 #' @examples
 #' data(GSE74821)
 #' suggest_ruv_k(GSE74821)
-suggest_ruv_k <- function(x, max_k = nacho_max_k) {
+suggest_ruv_k <- function(x, max_k = 5) {
   check_nacho(x)
   check_count(max_k, min = 0)
   input <- ruv_input(
