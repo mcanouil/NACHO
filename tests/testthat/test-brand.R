@@ -121,3 +121,16 @@ test_that("nacho_theme() brands Bootstrap and adds dark-mode rules", {
   expect_match(css, "data-bs-theme=.?dark")
   expect_match(css, "--bs-primary: ?#fcb448", ignore.case = TRUE)
 })
+
+test_that("dark.scss uses only colours of the NACHO palette", {
+  scss <- paste(
+    readLines(NACHO:::brand_path("dark.scss"), warn = FALSE),
+    collapse = "\n"
+  )
+  literals <- toupper(regmatches(
+    scss,
+    gregexpr("#[0-9A-Fa-f]{6}\\b", scss)
+  )[[1]])
+  expect_gt(length(literals), 0L)
+  expect_true(all(literals %in% toupper(NACHO:::nacho_palette)))
+})
