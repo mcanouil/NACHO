@@ -32,7 +32,6 @@ importFrom(ggplot2,
   .data,
   autoplot
 )
-importFrom(knitr,opts_chunk)
 importFrom(rlang,"%||%")
 importFrom(shinyWidgets,
   dropdownButton,

@@ -2,59 +2,63 @@
 % Please edit documentation in R/render.R
 \name{render}
 \alias{render}
-\title{Render an HTML report of a "nacho" object}
+\title{Render the quality-control report of a nacho object}
 \usage{
 render(
-  nacho_object,
-  colour = "CartridgeID",
-  output_file = "NACHO_QC.html",
+  x,
+  format = c("html", "typst"),
   output_dir = ".",
+  colour = "CartridgeID",
+  group = NULL,
   size = 1,
   show_legend = TRUE,
-  show_outliers = TRUE,
   outliers_factor = 1,
   outliers_labels = NULL
 )
 }
 \arguments{
-\item{nacho_object}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
+\item{x}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
-\item{colour}{[\link{character}] Character string of the column in \code{ssheet_csv}
-or more generally in \code{nacho_samples(nacho_object)} to be used as grouping colour.}
+\item{format}{\code{"html"} (the default) for a self-contained HTML file, or
+\code{"typst"} for a PDF.}
 
-\item{output_file}{[\link{character}] The name of the output file.}
+\item{output_dir}{The directory to write \code{nacho-report.html} or
+\code{nacho-report.pdf} to. It is created when it does not exist.}
 
-\item{output_dir}{[\link{character}] The output directory for the rendered output_file.
-This allows for a choice of an alternate directory to which the output file should be written
-(the default output directory is the working directory, \emph{i.e.}, \code{.}).
-If a path is provided with a filename in \code{output_file} the directory specified here will take precedence.
-Please note that any directory path provided will create any necessary directories if they do not exist.}
+\item{colour}{The column of \code{nacho_samples(x)} that colours the samples.}
 
-\item{size}{[\link{numeric}] A numeric controlling point size
-(\code{\link[ggplot2:geom_point]{ggplot2::geom_point()}}
-or line width (\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}).}
+\item{group}{The column of \code{nacho_samples(x)} with the biological groups, or
+\code{NULL}. With a group, the report checks whether batches and groups are
+confounded; see \code{\link[=batch_diagnostics]{batch_diagnostics()}}.}
 
-\item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
-be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
+\item{size}{The point size.}
 
-\item{show_outliers}{[\link{logical}] Boolean to indicate whether the outliers should be highlighted
-in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
+\item{show_legend}{If \code{FALSE}, hide the colour legends.}
 
-\item{outliers_factor}{[\link{numeric}] Size factor for outliers compared to \code{size}. Default is \code{1}.}
+\item{outliers_factor}{The size of flagged samples, relative to \code{size}.}
 
-\item{outliers_labels}{[\link{character}] Character to indicate which column in \code{nacho_samples(nacho_object)}
-should be used to be printed as the labels for outliers or not. Default is \code{NULL}.}
+\item{outliers_labels}{The column of \code{nacho_samples(x)} that labels the
+flagged samples, or \code{NULL} for no labels.}
+}
+\value{
+The path of the report, invisibly.
 }
 \description{
-This function creates an R Markdown script and renders it as an HTML document.
-The HTML document is a quality-control report using all the metrics from \code{\link[=visualise]{visualise()}}
-based on recommendations from NanoString.
+Writes a report with Quarto: the quality-control summary first, one callout
+for each sample that fails a threshold, then each plot of \code{\link[=autoplot]{autoplot()}} with
+a short explanation.
+}
+\details{
+The report needs the Quarto command-line interface 1.9 or newer, and the
+quarto, knitr and rmarkdown packages.
+RStudio and Positron bundle Quarto; elsewhere, install it from
+\url{https://quarto.org/docs/get-started/}.
+The PDF goes through Typst, which Quarto bundles, so no LaTeX is needed.
 }
 \examples{
-
 if (interactive()) {
   data(GSE74821)
-  render(GSE74821)
+  render(GSE74821, output_dir = tempdir())
+  render(GSE74821, format = "typst", output_dir = tempdir())
 }
-
 }

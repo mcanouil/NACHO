@@ -1,148 +1,160 @@
-#' Render an HTML report of a "nacho" object
+#' Render the quality-control report of a nacho object
 #'
-#' This function creates an R Markdown script and renders it as an HTML document.
-#' The HTML document is a quality-control report using all the metrics from [`visualise()`]
-#' based on recommendations from NanoString.
+#' Writes a report with Quarto: the quality-control summary first, one callout
+#' for each sample that fails a threshold, then each plot of [autoplot()] with
+#' a short explanation.
 #'
-#' @inheritParams normalise
-#' @param colour [[character]] Character string of the column in `ssheet_csv`
-#'   or more generally in `nacho_samples(nacho_object)` to be used as grouping colour.
-#' @param output_file [[character]] The name of the output file.
-#' @param output_dir [[character]] The output directory for the rendered output_file.
-#'   This allows for a choice of an alternate directory to which the output file should be written
-#'   (the default output directory is the working directory, *i.e.*, `.`).
-#'   If a path is provided with a filename in `output_file` the directory specified here will take precedence.
-#'   Please note that any directory path provided will create any necessary directories if they do not exist.
-#' @param size [[numeric]] A numeric controlling point size
-#'   ([`ggplot2::geom_point()`]
-#'   or line width ([`ggplot2::geom_line()`]).
-#' @param show_legend [[logical]] Boolean to indicate whether the plot legends should
-#'   be plotted (`TRUE`) or not (`FALSE`). Default is `TRUE`.
-#' @param show_outliers [[logical]] Boolean to indicate whether the outliers should be highlighted
-#'   in red (`TRUE`) or not (`FALSE`). Default is `TRUE`.
-#' @param outliers_factor [[numeric]] Size factor for outliers compared to `size`. Default is `1`.
-#' @param outliers_labels [[character]] Character to indicate which column in `nacho_samples(nacho_object)`
-#'   should be used to be printed as the labels for outliers or not. Default is `NULL`.
+#' The report needs the Quarto command-line interface 1.9 or newer, and the
+#' quarto, knitr and rmarkdown packages.
+#' RStudio and Positron bundle Quarto; elsewhere, install it from
+#' <https://quarto.org/docs/get-started/>.
+#' The PDF goes through Typst, which Quarto bundles, so no LaTeX is needed.
 #'
-#' @return NULL
+#' @param x A `nacho` object from [load_rcc()] or [normalise()].
+#' @param format `"html"` (the default) for a self-contained HTML file, or
+#'   `"typst"` for a PDF.
+#' @param output_dir The directory to write `nacho-report.html` or
+#'   `nacho-report.pdf` to. It is created when it does not exist.
+#' @param colour The column of `nacho_samples(x)` that colours the samples.
+#' @param group The column of `nacho_samples(x)` with the biological groups, or
+#'   `NULL`. With a group, the report checks whether batches and groups are
+#'   confounded; see [batch_diagnostics()].
+#' @param size The point size.
+#' @param show_legend If `FALSE`, hide the colour legends.
+#' @param outliers_factor The size of flagged samples, relative to `size`.
+#' @param outliers_labels The column of `nacho_samples(x)` that labels the
+#'   flagged samples, or `NULL` for no labels.
 #'
-#' @importFrom knitr opts_chunk
+#' @return The path of the report, invisibly.
 #' @export
 #'
 #' @examples
-#'
 #' if (interactive()) {
 #'   data(GSE74821)
-#'   render(GSE74821)
+#'   render(GSE74821, output_dir = tempdir())
+#'   render(GSE74821, format = "typst", output_dir = tempdir())
 #' }
-#'
 render <- function(
-  nacho_object,
-  colour = "CartridgeID",
-  output_file = "NACHO_QC.html",
+  x,
+  format = c("html", "typst"),
   output_dir = ".",
+  colour = "CartridgeID",
+  group = NULL,
   size = 1,
   show_legend = TRUE,
-  show_outliers = TRUE,
   outliers_factor = 1,
   outliers_labels = NULL
 ) {
-  check_nacho(nacho_object)
-  temp_dir <- tempfile("nacho-report-")
-  dir.create(temp_dir)
-  on.exit(unlink(temp_dir, recursive = TRUE), add = TRUE)
-  temp_file <- file.path(temp_dir, sub("\\.[^.]+$", ".Rmd", output_file))
+  check_nacho(x)
+  format <- check_choice(format, c("html", "typst"))
+  check_string(output_dir)
+  options <- check_report_options(
+    x,
+    colour = colour,
+    group = group,
+    size = size,
+    show_legend = show_legend,
+    outliers_factor = outliers_factor,
+    outliers_labels = outliers_labels
+  )
+  check_quarto()
 
-  cat(
-    "---",
-    'title: "NanoString Quality-Control Report"',
-    "params:",
-    "  nacho_object: NULL",
-    "  colour: NULL",
-    "  size: NULL",
-    "  show_legend: NULL",
-    "  show_outliers: NULL",
-    "  outliers_factor: NULL",
-    "  outliers_labels: NULL",
-    "output:",
-    "  html_document:",
-    "    theme: simplex",
-    "    toc: true",
-    "    toc_depth: 2",
-    "    toc_float:",
-    "      collapsed: false",
-    "    fig_width: 6.3",
-    "    fig_height: 4.7",
-    "    number_sections: true",
-    "    self_contained: true",
-    "    mathjax: null",
-    "    df_print: kable",
-    "---",
-    "\n",
-    "```{r}",
-    "#| label: setup",
-    "#| include: false",
-    "knitr::opts_chunk$set(",
-    '  results = "asis",',
-    "  include = TRUE,",
-    "  echo = FALSE,",
-    "  warning = FALSE,",
-    "  message = FALSE,",
-    "  tidy = FALSE,",
-    "  crop = TRUE,",
-    "  autodep = TRUE,",
-    '  fig.align = "center"',
-    ")",
-    "```",
-    "\n",
-    "```{r}",
-    "#| label: logo",
-    "#| out-width: 150px",
-    '#| fig-alt: "NACHO hexagonal logo."',
-    "knitr::include_graphics(",
-    paste0(
-      "  path = ",
-      encodeString(brand_path("nacho_hex.png"), quote = '"'),
-      ","
+  work_dir <- tempfile("nacho-report-")
+  dir.create(work_dir)
+  on.exit(unlink(work_dir, recursive = TRUE), add = TRUE)
+  file.copy(
+    c(
+      system.file("report", "nacho-report.qmd", package = "NACHO"),
+      list.files(brand_path(), full.names = TRUE)
     ),
-    "  rel_path = FALSE",
-    ")",
-    "```",
-    "\n",
-    "```{r}",
-    "#| label: nacho-qc",
-    "NACHO:::report_markdown(",
-    '  x = params[["nacho_object"]],',
-    '  colour = params[["colour"]],',
-    '  size = params[["size"]],',
-    '  show_legend = params[["show_legend"]],',
-    '  show_outliers = params[["show_outliers"]],',
-    '  outliers_factor = params[["outliers_factor"]],',
-    '  outliers_labels = params[["outliers_labels"]]',
-    ")",
-    "```",
-    "\n\n",
-    sep = "\n",
-    file = temp_file,
-    append = FALSE
+    work_dir,
+    recursive = TRUE
   )
+  rds <- file.path(work_dir, "nacho.rds")
+  saveRDS(list(object = x, options = options), rds)
 
-  rmarkdown::render(
-    input = temp_file,
-    output_file = output_file,
-    output_dir = output_dir,
-    encoding = "UTF-8",
-    quiet = TRUE,
-    params = list(
-      nacho_object = nacho_object,
-      colour = colour,
-      size = size,
-      show_legend = show_legend,
-      show_outliers = show_outliers,
-      outliers_factor = outliers_factor,
-      outliers_labels = outliers_labels
+  with_library_paths(quarto::quarto_render(
+    input = file.path(work_dir, "nacho-report.qmd"),
+    output_format = format,
+    execute_params = list(nacho_rds = rds),
+    quiet = TRUE
+  ))
+
+  output <- file.path(
+    work_dir,
+    paste0("nacho-report.", c(html = "html", typst = "pdf")[[format]])
+  )
+  if (!file.exists(output)) {
+    nacho_abort(
+      c(
+        "Quarto finished without writing {.file {basename(output)}}.",
+        i = "Run {.code render()} again with Quarto's messages: {.code options(nacho.quiet = FALSE)}."
+      ),
+      class = "render_failed"
     )
-  )
+  }
+  dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+  target <- file.path(output_dir, basename(output))
+  file.copy(output, target, overwrite = TRUE)
+  invisible(normalizePath(target))
+}
 
-  invisible()
+#' Quarto CLI version, or NULL when Quarto is not found
+#'
+#' @noRd
+quarto_cli_version <- function() {
+  if (is.null(quarto::quarto_path())) {
+    return(NULL)
+  }
+  quarto::quarto_version()
+}
+
+#' Tell whether the report can render
+#'
+#' @noRd
+quarto_available <- function() {
+  all(vapply(c("quarto", "knitr", "rmarkdown"), has_package, logical(1))) &&
+    isTRUE(quarto_cli_version() >= "1.9")
+}
+
+#' Check that the report can render
+#'
+#' @noRd
+check_quarto <- function(call = rlang::caller_env()) {
+  for (package in c("quarto", "knitr", "rmarkdown")) {
+    check_package(package, reason = "to render the report", call = call)
+  }
+  version <- quarto_cli_version()
+  if (is.null(version) || version < "1.9") {
+    nacho_abort(
+      c(
+        if (is.null(version)) {
+          "The Quarto command-line interface is needed to render the report."
+        } else {
+          "Quarto {version} is too old to render the report; it needs 1.9 or newer."
+        },
+        i = "Install Quarto from {.url https://quarto.org/docs/get-started/}.",
+        i = "RStudio and Positron bundle Quarto."
+      ),
+      class = "missing_quarto",
+      call = call
+    )
+  }
+  invisible(TRUE)
+}
+
+#' Evaluate code with R_LIBS set to the current library paths
+#'
+#' The quarto package (1.5.1) does not pass the library paths to the Quarto
+#' process, so a package in a user or renv library would not load there.
+#'
+#' @noRd
+with_library_paths <- function(code) {
+  old <- Sys.getenv("R_LIBS", unset = NA)
+  Sys.setenv(R_LIBS = paste(.libPaths(), collapse = .Platform$path.sep))
+  on.exit(
+    if (is.na(old)) Sys.unsetenv("R_LIBS") else Sys.setenv(R_LIBS = old),
+    add = TRUE
+  )
+  code
 }

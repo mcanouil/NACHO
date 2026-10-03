@@ -3,6 +3,9 @@ title: "NanoString quality-control report"
 brand: _brand.yml
 params:
   nacho_rds: ""
+knitr:
+  opts_chunk:
+    fig.retina: 1
 format:
   html:
     embed-resources: true
@@ -11,6 +14,7 @@ format:
     number-sections: true
     fig-width: 7
     fig-height: 4.5
+    fig-dpi: 96
   typst:
     font-paths: fonts
     fig-format: png
