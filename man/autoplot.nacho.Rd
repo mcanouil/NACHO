@@ -76,8 +76,7 @@ accent colour: rust on a light background, amber on a dark one.
 \item \code{outliers_labels}: The column of \code{nacho_samples(object)} that labels the
 flagged samples, or \code{NULL} for no labels.
 Labels imply \code{show_outliers = TRUE}.
-\item \code{dark}: If \code{TRUE}, draw the plot for a dark background, as the app does
-in dark mode.
+\item \code{dark}: If \code{TRUE}, draw the plot for a dark background.
 }
 }
 

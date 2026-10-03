@@ -66,8 +66,7 @@ NULL
 #' * `outliers_labels`: The column of `nacho_samples(object)` that labels the
 #'   flagged samples, or `NULL` for no labels.
 #'   Labels imply `show_outliers = TRUE`.
-#' * `dark`: If `TRUE`, draw the plot for a dark background, as the app does
-#'   in dark mode.
+#' * `dark`: If `TRUE`, draw the plot for a dark background.
 #'
 #' @return A `ggplot` object.
 #'
