@@ -25,4 +25,39 @@
     --bs-btn-active-border-color: #F0D83C;
     --bs-btn-focus-shadow-rgb: 252, 180, 72;
   }
+
+  .text-primary {
+    color: #FCB448 !important;
+  }
+
+  .form-check-input:checked {
+    background-color: #FCB448;
+    border-color: #FCB448;
+  }
+
+  .nav-pills {
+    --bs-nav-pills-link-active-color: #111821;
+    --bs-nav-pills-link-active-bg: #FCB448;
+  }
+
+  .pagination {
+    --bs-pagination-active-color: #111821;
+    --bs-pagination-active-bg: #FCB448;
+    --bs-pagination-active-border-color: #FCB448;
+  }
+
+  .list-group {
+    --bs-list-group-active-color: #111821;
+    --bs-list-group-active-bg: #FCB448;
+    --bs-list-group-active-border-color: #FCB448;
+  }
+
+  .dropdown-menu {
+    --bs-dropdown-link-active-color: #111821;
+    --bs-dropdown-link-active-bg: #FCB448;
+  }
+
+  .progress {
+    --bs-progress-bar-bg: #FCB448;
+  }
 }
