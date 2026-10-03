@@ -59,8 +59,36 @@ test_that("no negatives gives missing detection limits", {
 test_that("nacho objects carry sample and probe detection rates", {
   samples <- nacho_samples(GSE74821)
   probes <- nacho_probes(GSE74821)
-  expect_true(all(samples$Detection_rate >= 0 & samples$Detection_rate <= 1))
+  probe_kept <- !probes$is_excluded
+  negatives <- nacho_counts(GSE74821)[
+    probes$CodeClass == "Negative" & probe_kept,
+    ,
+    drop = FALSE
+  ]
+  limit <- colMeans(negatives) + 2 * apply(negatives, 2, stats::sd)
+  genes <- nacho_counts(GSE74821)[
+    grepl("Endogenous", probes$CodeClass),
+    ,
+    drop = FALSE
+  ]
+  expected <- unname(colMeans(
+    genes > matrix(limit, nrow(genes), ncol(genes), byrow = TRUE)
+  ))
+  expect_false(anyNA(samples$Detection_rate))
+  expect_equal(samples$Detection_rate, expected)
+  expect_gt(length(unique(samples$Detection_rate)), 1)
+  expect_false(anyNA(probes$detection_rate))
   expect_true(all(probes$detection_rate >= 0 & probes$detection_rate <= 1))
+  expect_gt(length(unique(probes$detection_rate)), 2)
+})
+
+test_that("filter_detected() currently leaves the sample detection rates of the full object unchanged", {
+  filtered <- filter_detected(GSE74821, min_rate = 1)
+  expect_lt(nrow(filtered), nrow(GSE74821))
+  expect_identical(
+    nacho_samples(filtered)$Detection_rate,
+    nacho_samples(GSE74821)$Detection_rate
+  )
 })
 
 test_that("filter_detected() keeps controls and genes detected often enough", {
@@ -311,7 +339,10 @@ test_that("subsetting samples recomputes the probe detection rates", {
 })
 
 test_that("subsetting probes keeps the detection rates of the samples kept", {
-  x <- GSE74821[1:20, ]
+  expect_warning(
+    x <- GSE74821[1:20, ],
+    class = "nacho_warning_no_housekeeping"
+  )
   expect_equal(
     nacho_probes(x)$detection_rate,
     nacho_probes(GSE74821)$detection_rate[1:20]
@@ -390,4 +421,72 @@ test_that("filter_detected() keeps every gene with a non-zero count when negativ
     nacho_probes(kept)$CodeClass == "Endogenous"
   ]
   expect_setequal(kept_genes, expected)
+})
+
+test_that("filter_detected() drops removed genes from the housekeeping setting", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  endogenous <- probes$Name[grepl("Endogenous", probes$CodeClass)]
+  rate <- probes$detection_rate[match(endogenous, probes$Name)]
+  low <- endogenous[which.min(rate)]
+  high <- endogenous[which.max(rate)]
+  x@settings$housekeeping_genes <- c(low, high)
+  min_rate <- mean(range(rate, na.rm = TRUE))
+  kept <- filter_detected(x, min_rate = min_rate)
+  expect_false(low %in% nacho_probes(kept)$Name)
+  expect_identical(kept@settings$housekeeping_genes, high)
+  expect_true(all(
+    kept@settings$housekeeping_genes %in% nacho_probes(kept)$Name
+  ))
+})
+
+test_that("filter_detected() clears the housekeeping setting when no named gene is left", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  endogenous <- probes$Name[grepl("Endogenous", probes$CodeClass)]
+  rate <- probes$detection_rate[match(endogenous, probes$Name)]
+  x@settings$housekeeping_genes <- endogenous[which.min(rate)]
+  expect_warning(
+    kept <- filter_detected(x, min_rate = max(rate, na.rm = TRUE)),
+    class = "nacho_warning_housekeeping_fallback"
+  )
+  expect_null(kept@settings$housekeeping_genes)
+})
+
+test_that("subsetting probes keeps the housekeeping setting to probes still present", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  housekeeping <- x@settings$housekeeping_genes
+  dropped <- housekeeping[1:2]
+  kept <- suppressWarnings(x[which(!probes$Name %in% dropped), ])
+  expect_identical(kept@settings$housekeeping_genes, housekeeping[-(1:2)])
+  endogenous <- grepl("Endogenous", probes$CodeClass)
+  expect_null(
+    suppressWarnings(x[which(endogenous), ])@settings$housekeeping_genes
+  )
+})
+
+test_that("emptying the housekeeping setting warns that the Housekeeping probes are used", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  endogenous <- which(grepl("Endogenous", probes$CodeClass))
+  x@settings$housekeeping_genes <- probes$Name[endogenous[1]]
+  expect_warning(
+    kept <- x[which(probes$Name != probes$Name[endogenous[1]]), ],
+    "Housekeeping",
+    class = "nacho_warning_housekeeping_fallback"
+  )
+  expect_null(kept@settings$housekeeping_genes)
+  expect_true(kept@settings$housekeeping_norm)
+})
+
+test_that("subsetting away every housekeeping gene and probe turns housekeeping normalisation off", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  expect_warning(
+    kept <- x[which(probes$CodeClass != "Housekeeping"), ],
+    class = "nacho_warning_no_housekeeping"
+  )
+  expect_null(kept@settings$housekeeping_genes)
+  expect_false(kept@settings$housekeeping_norm)
 })

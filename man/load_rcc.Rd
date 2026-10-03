@@ -74,6 +74,9 @@ floors at 0.}
 
 \item{ruv_k}{[\link{numeric}] The number of unwanted factors RUVg removes;
 \code{NULL} uses \code{\link[=suggest_ruv_k]{suggest_ruv_k()}}.
+A \code{ruv_k} above two less than the number of samples, or one less than the
+number of control genes, is lowered with a \code{nacho_warning_ruv_k_reduced}
+warning.
 Other methods ignore it.}
 
 \item{instrument}{[\link{character}] The nCounter instrument, \code{"max"},

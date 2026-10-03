@@ -494,6 +494,20 @@ content_normalise <- function(
         "Using RUVg with {.code ruv_k = {k}}, as {.fn suggest_ruv_k} suggests."
       )
     }
+    sample_limit <- nrow(input[["log_expr"]]) - 2L
+    control_limit <- sum(input[["controls"]]) - 1L
+    max_k <- max(min(sample_limit, control_limit), 0L)
+    if (k > max_k) {
+      limit <- if (control_limit < sample_limit) "control genes" else "samples" # nolint: object_usage_linter.
+      nacho_warn(
+        c(
+          "{.arg ruv_k} = {k} is more than the {max_k} that the {limit} allow.",
+          i = "Using {.code ruv_k = {max_k}}."
+        ),
+        class = "ruv_k_reduced"
+      )
+      k <- max_k
+    }
     fit <- ruvg(input[["log_expr"]], input[["controls"]], k, call = call)
     normalised <- scaled
     normalised[input[["rows"]], ] <- pmax(2^t(fit[["corrected"]]) - 1, 0)

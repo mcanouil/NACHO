@@ -147,3 +147,98 @@ test_that("signed miRNA metrics accept negative bounds", {
   x$BD <- c(-1, 2)
   expect_match(NACHO:::validate_thresholds(x), "lower bound", all = FALSE)
 })
+
+test_that("the validator refuses a length-2 preset or instrument", {
+  x <- nacho_thresholds()
+  x$preset <- c("nsolver", "legacy")
+  expect_match(NACHO:::validate_thresholds(x), "preset", all = FALSE)
+  x <- nacho_thresholds()
+  x$instrument <- c("max", "flex")
+  expect_match(NACHO:::validate_thresholds(x), "instrument", all = FALSE)
+  x$instrument <- c("max", NA)
+  expect_match(NACHO:::validate_thresholds(x), "instrument", all = FALSE)
+})
+
+test_that("the validator refuses an unknown or non-character instrument", {
+  for (instrument in list("nano", "MAX", "", 1, TRUE)) {
+    x <- nacho_thresholds()
+    x["instrument"] <- list(instrument)
+    expect_match(
+      NACHO:::validate_thresholds(x),
+      "instrument",
+      all = FALSE,
+      info = deparse(instrument)
+    )
+  }
+  x <- nacho_thresholds()
+  x$instrument <- NULL
+  expect_match(NACHO:::validate_thresholds(x), "lacks instrument")
+  for (instrument in c("max", "flex", "pro", "sprint")) {
+    x <- nacho_thresholds()
+    x$instrument <- instrument
+    expect_length(NACHO:::validate_thresholds(x), 0)
+  }
+})
+
+test_that("the validator checks the ligation and haemolysis bounds", {
+  for (name in c("Ligation_NEG", "Haemolysis")) {
+    for (bad in list(1, c(1, 2, 3), c(NA, 1), "a", c(2, 1), c(Inf, Inf))) {
+      x <- nacho_thresholds()
+      x[[name]] <- bad
+      expect_match(
+        NACHO:::validate_thresholds(x),
+        name,
+        all = FALSE,
+        info = paste(name, format(bad), collapse = " ")
+      )
+    }
+  }
+  for (name in c("Ligation_order", "Ligation_R2")) {
+    for (bad in list(-0.1, 1.1, c(0, 1), NA_real_, "a")) {
+      x <- nacho_thresholds()
+      x[[name]] <- bad
+      expect_match(
+        NACHO:::validate_thresholds(x),
+        name,
+        all = FALSE,
+        info = paste(name, format(bad), collapse = " ")
+      )
+    }
+    for (good in c(0, 0.5, 1)) {
+      x <- nacho_thresholds()
+      x[[name]] <- good
+      expect_length(NACHO:::validate_thresholds(x), 0)
+    }
+  }
+})
+
+test_that("legacy_thresholds() fills a partial NACHO 2 list from the legacy preset", {
+  samples <- data.frame(Header.header_FileVersion = "1.7")
+  filled <- NACHO:::legacy_thresholds(list(BD = c(0.3, 1.5), LoD = 7), samples)
+  legacy <- nacho_thresholds(preset = "legacy")
+  expect_identical(filled$BD, c(0.3, 1.5))
+  expect_identical(filled$LoD, 7)
+  expect_identical(filled$preset, "legacy")
+  expect_identical(filled$instrument, "max")
+  for (name in setdiff(names(legacy), c("BD", "LoD", "instrument"))) {
+    expect_identical(filled[[name]], legacy[[name]], info = name)
+  }
+  expect_length(NACHO:::validate_thresholds(filled), 0)
+})
+
+test_that("legacy_thresholds() passes unnamed or unknown lists on untouched", {
+  samples <- data.frame(Header.header_FileVersion = "1.7")
+  unnamed <- list(c(0.1, 2), 5)
+  expect_identical(NACHO:::legacy_thresholds(unnamed, samples), unnamed)
+  partly_named <- list(BD = c(0.1, 2), 5)
+  expect_identical(
+    NACHO:::legacy_thresholds(partly_named, samples),
+    partly_named
+  )
+  unknown <- list(BD = c(0.1, 2), nope = 1)
+  expect_identical(NACHO:::legacy_thresholds(unknown, samples), unknown)
+  expect_error(
+    NACHO:::check_thresholds(unnamed),
+    class = "nacho_error_bad_argument"
+  )
+})

@@ -240,12 +240,32 @@ subset_nacho <- function(x, i, j, ..., drop = FALSE) {
   }
   probes <- probes[rows, , drop = FALSE]
   rownames(probes) <- NULL
+  settings <- prune_housekeeping(x@settings, probes[["Name"]])
+  if (is.null(settings[["housekeeping_genes"]])) {
+    if (!any(grepl("Housekeeping", probes[["CodeClass"]]))) {
+      settings["housekeeping_norm"] <- list(resolve_housekeeping_norm(
+        probes[["CodeClass"]],
+        NULL,
+        isTRUE(settings[["housekeeping_predict"]]),
+        settings[["housekeeping_norm"]],
+        detect_panel(probes, samples)
+      ))
+    } else if (!is.null(x@settings[["housekeeping_genes"]])) {
+      nacho_warn(
+        c(
+          "No gene named in {.field housekeeping_genes} is left.",
+          i = "The {.val Housekeeping} probes are used instead."
+        ),
+        class = "housekeeping_fallback"
+      )
+    }
+  }
   nacho(
     counts = counts,
     normalised = x@normalised[rows, columns, drop = FALSE],
     probes = probes,
     samples = samples,
-    settings = x@settings,
+    settings = settings,
     thresholds = x@thresholds,
     pca = compute_pca(counts, x@settings[["n_comp"]]),
     rcc_type = x@rcc_type,

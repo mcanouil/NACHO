@@ -9,11 +9,17 @@ suggest_ruv_k(x, max_k = 5)
 \arguments{
 \item{x}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
-\item{max_k}{The largest \code{k} to try; it is lowered to one less than the
-number of housekeeping genes or of samples when those are smaller.}
+\item{max_k}{The largest \code{k} to try.
+It is lowered to one less than the number of housekeeping genes, and to
+two less than the number of samples, when those are smaller.
+A \code{k} above that cap fits the samples exactly and flattens the RLE
+spread, so it is never tried.
+With one or two samples only \code{k = 0} is tried.}
 }
 \value{
 A data frame with \code{k}, \code{rle_iqr}, \code{pc1_variance} and \code{suggested}.
+\code{pc1_variance} is \code{NA} when the corrected values have no variance, as
+with one sample.
 }
 \description{
 For each \code{k} from 0 to \code{max_k}, corrects the log2 positive-normalised

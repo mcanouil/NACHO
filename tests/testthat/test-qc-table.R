@@ -155,3 +155,26 @@ test_that("failure_reason() names the bound that a value crosses", {
     "BD 0.01 below 0.05"
   )
 })
+
+test_that("a sample inheriting more than one lane metric names them all", {
+  samples <- data.frame(
+    IDFILE = sprintf("f_S%d", 1:4),
+    ID = c("1", "1", "2", "2"),
+    CartridgeID = "C1",
+    BD = c(3, 1, 1, 1),
+    FoV = c(60, 90, 90, 90),
+    PCL = 0.1,
+    LoD = 0,
+    MC = 1,
+    MedC = 1,
+    Positive_factor = 1,
+    Negative_factor = 1,
+    Background = NA_real_
+  )
+  qc <- NACHO:::qc_table(samples, nacho_thresholds(), "n8", "IDFILE")
+  expect_identical(qc$reason[1], "BD 3 above 2.25; FoV 60 below 75")
+  expect_identical(qc$reason[2], "lane fails BD, FoV")
+  expect_identical(qc$n_flags, c(2L, 0L, 0L, 0L))
+  expect_identical(qc$status, c("fail", "fail", "pass", "pass"))
+  expect_identical(qc$BD_status, c("fail", "pass", "pass", "pass"))
+})

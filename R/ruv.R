@@ -165,7 +165,7 @@ ruv_k_table <- function(
   max_k,
   call = rlang::caller_env()
 ) {
-  max_k <- min(max_k, sum(controls) - 1L, nrow(log_expr) - 1L)
+  max_k <- min(max_k, sum(controls) - 1L, nrow(log_expr) - 2L)
   table <- data.frame(k = 0:max(max_k, 0L))
   corrected <- lapply(table[["k"]], function(k) {
     ruvg(log_expr, controls, k, call = call)[["corrected"]]
@@ -178,7 +178,7 @@ ruv_k_table <- function(
         y[, colSums(is.na(y)) == 0, drop = FALSE],
         scale = FALSE
       ))[["d"]]
-      d[1]^2 / sum(d^2)
+      if (sum(d^2) < .Machine$double.eps) NA_real_ else d[1]^2 / sum(d^2)
     },
     numeric(1)
   )
@@ -198,10 +198,16 @@ ruv_k_table <- function(
 #' smallest one: removing more factors risks removing biology.
 #'
 #' @param x A `nacho` object from [load_rcc()] or [normalise()].
-#' @param max_k The largest `k` to try; it is lowered to one less than the
-#'   number of housekeeping genes or of samples when those are smaller.
+#' @param max_k The largest `k` to try.
+#'   It is lowered to one less than the number of housekeeping genes, and to
+#'   two less than the number of samples, when those are smaller.
+#'   A `k` above that cap fits the samples exactly and flattens the RLE
+#'   spread, so it is never tried.
+#'   With one or two samples only `k = 0` is tried.
 #'
 #' @return A data frame with `k`, `rle_iqr`, `pc1_variance` and `suggested`.
+#'   `pc1_variance` is `NA` when the corrected values have no variance, as
+#'   with one sample.
 #' @export
 #' @examples
 #' data(GSE74821)

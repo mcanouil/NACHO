@@ -612,3 +612,40 @@ test_that("load_rcc() warns for SPRINT files unless instrument is given", {
   ))
   expect_identical(x@thresholds$BD, c(0.1, 1.8))
 })
+
+test_that("resolve_housekeeping_norm() keeps an explicit FALSE on every panel", {
+  resolve <- function(genes = NULL, predict = FALSE, norm, panel) {
+    NACHO:::resolve_housekeeping_norm(
+      c("Endogenous", "Housekeeping"),
+      genes,
+      predict,
+      norm,
+      panel
+    )
+  }
+  for (panel in c("mrna", "mirna")) {
+    expect_false(resolve(norm = FALSE, panel = panel), info = panel)
+    expect_false(
+      resolve(genes = "a", predict = TRUE, norm = FALSE, panel = panel),
+      info = panel
+    )
+    expect_true(resolve(norm = TRUE, panel = panel), info = panel)
+  }
+})
+
+test_that("resolve_housekeeping_norm() warns and turns off without any housekeeping genes", {
+  expect_warning(
+    off <- NACHO:::resolve_housekeeping_norm(
+      "Endogenous",
+      NULL,
+      FALSE,
+      NULL,
+      "mrna"
+    ),
+    class = "nacho_warning_no_housekeeping"
+  )
+  expect_false(off)
+  expect_false(expect_no_warning(
+    NACHO:::resolve_housekeeping_norm("Endogenous", NULL, FALSE, FALSE, "mrna")
+  ))
+})
