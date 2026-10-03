@@ -77,7 +77,7 @@ render <- function(
     input = file.path(work_dir, "nacho-report.qmd"),
     output_format = format,
     execute_params = list(nacho_rds = rds),
-    quiet = TRUE
+    quiet = nacho_is_quiet()
   ))
 
   output <- file.path(
@@ -93,9 +93,23 @@ render <- function(
       class = "render_failed"
     )
   }
-  dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
   target <- file.path(output_dir, basename(output))
-  file.copy(output, target, overwrite = TRUE)
+  suppressWarnings(dir.create(
+    output_dir,
+    showWarnings = FALSE,
+    recursive = TRUE
+  ))
+  copied <- dir.exists(output_dir) &&
+    suppressWarnings(file.copy(output, target, overwrite = TRUE))
+  if (!copied) {
+    nacho_abort(
+      c(
+        "Could not write {.file {basename(output)}} to {.path {output_dir}}.",
+        i = "Check that {.arg output_dir} is a folder you can write to."
+      ),
+      class = "render_failed"
+    )
+  }
   invisible(normalizePath(target))
 }
 

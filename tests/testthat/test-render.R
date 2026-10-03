@@ -48,7 +48,7 @@ test_that("render() passes the library paths to Quarto and cleans up", {
     },
     .package = "quarto"
   )
-  before <- Sys.getenv("R_LIBS", unset = NA)
+  withr::local_envvar(R_LIBS = "sentinel")
   output_dir <- withr::local_tempdir()
   path <- render(GSE74821, output_dir = output_dir)
   expect_identical(
@@ -60,7 +60,7 @@ test_that("render() passes the library paths to Quarto and cleans up", {
     strsplit(seen$r_libs, .Platform$path.sep, fixed = TRUE)[[1]],
     .libPaths()
   )
-  expect_identical(Sys.getenv("R_LIBS", unset = NA), before)
+  expect_identical(Sys.getenv("R_LIBS"), "sentinel")
   expect_true(all(
     c(
       "nacho-report.qmd",
@@ -72,6 +72,52 @@ test_that("render() passes the library paths to Quarto and cleans up", {
   ))
   expect_identical(basename(seen$params$nacho_rds), "nacho.rds")
   expect_length(list.files(tempdir(), pattern = "^nacho-report-"), 0)
+})
+
+test_that("render() lets Quarto talk only when nacho.quiet is off", {
+  skip_if_not_installed("quarto")
+  seen <- NULL
+  local_mocked_bindings(quarto_cli_version = function() {
+    numeric_version("1.10.18")
+  })
+  local_mocked_bindings(
+    quarto_render = function(input, quiet, ...) {
+      seen <<- quiet
+      writeLines(
+        "<html></html>",
+        file.path(dirname(input), "nacho-report.html")
+      )
+    },
+    .package = "quarto"
+  )
+  withr::local_options(nacho.quiet = FALSE)
+  render(GSE74821, output_dir = withr::local_tempdir())
+  expect_false(seen)
+  withr::local_options(nacho.quiet = TRUE)
+  render(GSE74821, output_dir = withr::local_tempdir())
+  expect_true(seen)
+})
+
+test_that("render() tells when it cannot write to output_dir", {
+  skip_if_not_installed("quarto")
+  local_mocked_bindings(quarto_cli_version = function() {
+    numeric_version("1.10.18")
+  })
+  local_mocked_bindings(
+    quarto_render = function(input, ...) {
+      writeLines(
+        "<html></html>",
+        file.path(dirname(input), "nacho-report.html")
+      )
+    },
+    .package = "quarto"
+  )
+  not_a_folder <- withr::local_tempfile()
+  writeLines("a file", not_a_folder)
+  expect_error(
+    render(GSE74821, output_dir = not_a_folder),
+    class = "nacho_error_render_failed"
+  )
 })
 
 test_that("render() tells when Quarto writes nothing", {
