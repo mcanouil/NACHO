@@ -1,6 +1,13 @@
 #' @include qc-table.R
 NULL
 
+#' The smallest share of samples in which a candidate gene is detected
+#'
+#' It must match the default of `housekeeping_stability()`, which a test checks.
+#'
+#' @noRd
+nacho_min_detection <- 0.9
+
 #' Standard deviation of every pairwise log ratio
 #'
 #' @param log_expr Samples by genes, log2 values, no missing values.

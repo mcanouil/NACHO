@@ -144,6 +144,18 @@ bounds_problem <- function(name, value, signed = FALSE) {
   if (!is.null(problem)) sprintf("@thresholds$%s: %s", name, problem)
 }
 
+lower_bound_problem <- function(name, value, noun) {
+  if (
+    !is.numeric(value) || length(value) != 1 || is.na(value) || value == Inf
+  ) {
+    sprintf(
+      "@thresholds$%s must be one number; Inf flags every sample, so set a finite %s, or -Inf for no bound.",
+      name,
+      noun
+    )
+  }
+}
+
 validate_thresholds <- function(thresholds) {
   required <- c(
     "preset",
@@ -199,28 +211,15 @@ validate_thresholds <- function(thresholds) {
       )
     )
   }
-  lod <- thresholds[["LoD"]]
-  if (!is.numeric(lod) || length(lod) != 1 || is.na(lod) || lod == Inf) {
-    problems <- c(
-      problems,
-      "@thresholds$LoD must be one number; Inf flags every sample, so set a finite LoD, or -Inf for no bound."
+  problems <- c(
+    problems,
+    lower_bound_problem("LoD", thresholds[["LoD"]], "LoD"),
+    lower_bound_problem(
+      "Housekeeping_detected",
+      thresholds[["Housekeeping_detected"]],
+      "count"
     )
-  }
-  detected_genes <- thresholds[["Housekeeping_detected"]]
-  if (
-    !is.numeric(detected_genes) ||
-      length(detected_genes) != 1 ||
-      is.na(detected_genes) ||
-      detected_genes == Inf
-  ) {
-    problems <- c(
-      problems,
-      paste(
-        "@thresholds$Housekeeping_detected must be one number;",
-        "Inf flags every sample, so set a finite count, or -Inf for no bound."
-      )
-    )
-  }
+  )
   limits <- list(FoV = c(0, 100), PCL = c(0, 1))
   optional_limits <- list(Ligation_order = c(0, 1), Ligation_R2 = c(0, 1))
   limits <- c(

@@ -291,6 +291,13 @@ test_that("predicted housekeeping genes are the five most stable by geNorm", {
   expect_identical(predicted, expected)
 })
 
+test_that("the internal detection constant matches the exported default", {
+  expect_identical(
+    NACHO:::nacho_min_detection,
+    eval(formals(housekeeping_stability)$min_detection)
+  )
+})
+
 test_that("geNorm breaks ties by dropping the first tied gene", {
   tied <- cbind(hand_expr, g4 = hand_expr[, "g3"])
   m <- NACHO:::genorm_m(tied)

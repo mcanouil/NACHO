@@ -606,7 +606,7 @@ predict_housekeeping <- function(counts, probes) {
   log_expr <- stability_input(
     counts[rows, , drop = FALSE],
     probes[["detection_rate"]][rows],
-    min_detection = 0.9
+    min_detection = nacho_min_detection
   )
   if (ncol(log_expr) < 3 || nrow(log_expr) < 2) {
     return(character(0))
@@ -811,8 +811,6 @@ build_nacho <- function(
   )
   provenance[["glm_fallback"]] <- NULL
   if (length(factors[["glm_failed"]]) > 0) {
-    # Read by the cli message below.
-    failed <- cli::cli_vec(factors[["glm_failed"]], list("vec-trunc" = 5)) # nolint: object_usage_linter.
     nacho_warn(
       c(
         paste(
@@ -820,7 +818,7 @@ build_nacho <- function(
           "{length(factors[['glm_failed']])} sample{?s},",
           "so NACHO used the geometric mean ({.val GEO}) instead."
         ),
-        x = "Failed: {.val {failed}}.",
+        x = "Failed: {.val {cli::cli_vec(factors[['glm_failed']], list('vec-trunc' = 5))}}.",
         i = "Check the positive controls of those samples with {.code autoplot(x, type = \"Positive\")}."
       ),
       class = "glm_convergence",

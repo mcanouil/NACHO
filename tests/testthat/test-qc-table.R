@@ -143,6 +143,19 @@ test_that("exclude_outliers() drops the samples whose status is fail", {
   expect_identical(ncol(kept), sum(!failing))
 })
 
+test_that("failure_reason() names the bound that a value crosses", {
+  limits <- nacho_thresholds("max", "nsolver")[["BD"]]
+  expect_identical(limits, c(0.05, 2.25))
+  expect_identical(
+    NACHO:::failure_reason("BD", 3, limits),
+    "BD 3 above 2.25"
+  )
+  expect_identical(
+    NACHO:::failure_reason("BD", 0.01, limits),
+    "BD 0.01 below 0.05"
+  )
+})
+
 test_that("a sample inheriting more than one lane metric names them all", {
   samples <- data.frame(
     IDFILE = sprintf("f_S%d", 1:4),

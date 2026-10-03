@@ -72,14 +72,28 @@ ruvg <- function(
   list(W = w, corrected = corrected)
 }
 
-#' Mean spread of the relative log expression
+#' Relative log expression of a log expression matrix
 #'
 #' Each gene minus its median over samples.
-#' The interquartile range of each sample is then averaged.
+#' `margin` is 2 when genes are the columns and 1 when they are the rows.
+#'
+#' @noRd
+rle_centre <- function(log_expr, margin) {
+  sweep(
+    log_expr,
+    margin,
+    apply(log_expr, margin, stats::median, na.rm = TRUE)
+  )
+}
+
+#' Mean spread of the relative log expression
+#'
+#' The interquartile range of each sample of the centred values, averaged.
+#' `rle_centre()` does the centring.
 #'
 #' @noRd
 rle_iqr <- function(log_expr) {
-  rle <- sweep(log_expr, 2, apply(log_expr, 2, stats::median, na.rm = TRUE))
+  rle <- rle_centre(log_expr, 2)
   mean(apply(rle, 1, stats::IQR, na.rm = TRUE))
 }
 
