@@ -117,19 +117,36 @@ app_server <- function(x, done = FALSE) {
   function(input, output, session) {
     data <- mod_data_server("data", initial = x)
     settings <- mod_thresholds_server("thresholds", data = data)
+    # The value must stay logical: text such as "FALSE" is truthy in JavaScript.
     output$has_data <- shiny::markRenderFunction(
       uiFunc = shiny::textOutput,
       renderFunc = function(shinysession, name, ...) !is.null(data())
     )
     shiny::outputOptions(output, "has_data", suspendWhenHidden = FALSE)
     dark <- shiny::reactive(identical(input$dark_mode, "dark"))
-    tuned <- shiny::reactive(
-      tune_object(
-        shiny::req(data()),
-        settings$settings(),
-        settings$thresholds()
+    announced <- new.env()
+    tuned <- shiny::reactive({
+      object <- shiny::req(data())
+      chosen <- settings$settings()
+      if (!identical(announced$key, list(object, chosen))) {
+        announced$key <- list(object, chosen)
+        announced$messages <- character()
+      }
+      withCallingHandlers(
+        tune_object(object, chosen, settings$thresholds()),
+        nacho_warning_metric_unavailable = function(cnd) {
+          invokeRestart("muffleWarning")
+        },
+        nacho_warning = function(cnd) {
+          message <- cli::ansi_strip(rlang::cnd_message(cnd))
+          if (!message %in% announced$messages) {
+            announced$messages <- c(announced$messages, message)
+            notify_user(message, "warning")
+          }
+          invokeRestart("muffleWarning")
+        }
       )
-    )
+    })
     qc <- shiny::reactive(nacho_qc(tuned()))
     mod_overview_server("overview", tuned, qc)
     mod_outliers_server("outliers", tuned, qc)

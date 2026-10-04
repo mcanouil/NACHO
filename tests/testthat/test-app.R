@@ -45,6 +45,7 @@ test_that("Done returns the tuned object", {
     .package = "shiny"
   )
   shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
     session$setInputs(`thresholds-FoV` = 99.9)
     session$elapse(600)
     session$setInputs(done = 1)
@@ -114,7 +115,6 @@ test_that("Done uses the thresholds as they stand, before the debounce", {
   )
   shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
     session$flushReact()
-    session$elapse(600)
     session$setInputs(`thresholds-FoV` = 99.9)
     session$setInputs(done = 1)
   })
@@ -201,7 +201,11 @@ test_that("pages without data explain what to do", {
   html <- as.character(NACHO:::app_ui(done = FALSE))
   expect_match(html, "Load the example data", fixed = TRUE)
   expect_match(html, "output.has_data", fixed = TRUE)
-  expect_match(html, "shiny-busy-indicators|busy", perl = TRUE)
+  expect_match(html, "shinyBusySpinners", fixed = TRUE)
+  expect_equal(
+    lengths(regmatches(html, gregexpr("No data yet.", html, fixed = TRUE))),
+    6L
+  )
 })
 
 test_that("the overview shows only when data is loaded", {
@@ -221,4 +225,27 @@ test_that("the app reports whether it has data", {
   shiny::testServer(NACHO:::app_server(GSE74821), {
     expect_true(output$has_data)
   })
+})
+
+test_that("normalisation warnings reach the user once as toasts", {
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message)
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$flushReact()
+    session$setInputs(
+      `thresholds-method` = "RUVg",
+      `thresholds-ruv_k` = 50,
+      `thresholds-background` = "none",
+      `thresholds-background_mode` = "threshold"
+    )
+    session$elapse(600)
+    tuned()
+    session$setInputs(`thresholds-FoV` = 90)
+    session$elapse(600)
+    tuned()
+  })
+  expect_length(messages, 1L)
+  expect_match(messages, "ruv_k")
 })
