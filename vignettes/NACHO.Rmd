@@ -67,7 +67,7 @@ library(NACHO)
 ```{r}
 #| echo: false
 #| results: asis
-cat(readLines(system.file("app", "www", "about-nacho.md", package = "NACHO"))[-c(1, 2)], sep = "\n")
+cat(readLines(system.file("about", "about-nacho.md", package = "NACHO"))[-c(1, 2)], sep = "\n")
 ```
 
 ```{r}

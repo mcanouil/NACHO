@@ -58,3 +58,22 @@ test_that("help pages render with shiny::markdown()", {
     expect_s3_class(NACHO:::help_page(name), "html")
   }
 })
+
+test_that("Done warns instead of closing when the settings fail", {
+  stopped <- FALSE
+  warned <- NULL
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) stopped <<- TRUE,
+    .package = "shiny"
+  )
+  local_mocked_bindings(
+    notify_user = function(message, type) warned <<- type
+  )
+  shiny::testServer(NACHO:::app_server(toy_nacho(6L)), {
+    session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
+    session$elapse(600)
+    session$setInputs(done = 1)
+  })
+  expect_false(stopped)
+  expect_identical(warned, "warning")
+})

@@ -11,7 +11,10 @@ test_that("app_overview() counts samples, cartridges and reasons", {
 test_that("the overview module shows the counts", {
   shiny::testServer(
     NACHO:::mod_overview_server,
-    args = list(object = shiny::reactiveVal(flagged_gse())),
+    args = list(
+      object = shiny::reactiveVal(flagged_gse()),
+      qc = shiny::reactive(nacho_qc(flagged_gse()))
+    ),
     {
       expect_identical(output$samples, "12")
       expect_match(output$flagged, "^[1-9]")
@@ -39,7 +42,10 @@ test_that("app_overview() ignores metrics without failures on PlexSet data", {
 test_that("the overview module formats every field", {
   shiny::testServer(
     NACHO:::mod_overview_server,
-    args = list(object = shiny::reactiveVal(flagged_gse())),
+    args = list(
+      object = shiny::reactiveVal(flagged_gse()),
+      qc = shiny::reactive(nacho_qc(flagged_gse()))
+    ),
     {
       expect_identical(output$cartridges, "1")
       expect_identical(output$method, "GLM, nsolver preset")
@@ -51,7 +57,10 @@ test_that("the overview module formats every field", {
 test_that("the overview module shows no brackets without failures", {
   shiny::testServer(
     NACHO:::mod_overview_server,
-    args = list(object = shiny::reactiveVal(GSE74821)),
+    args = list(
+      object = shiny::reactiveVal(GSE74821),
+      qc = shiny::reactive(nacho_qc(GSE74821))
+    ),
     {
       expect_identical(output$flagged, "0")
     }

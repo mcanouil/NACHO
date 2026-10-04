@@ -39,11 +39,7 @@ mod_overview_ui <- function(id) {
   )
 }
 
-mod_overview_server <- function(
-  id,
-  object,
-  qc = shiny::reactive(nacho_qc(shiny::req(object())))
-) {
+mod_overview_server <- function(id, object, qc) {
   shiny::moduleServer(id, function(input, output, session) {
     overview <- shiny::reactive(
       app_overview(shiny::req(object()), shiny::req(qc()))

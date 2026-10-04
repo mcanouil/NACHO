@@ -94,7 +94,18 @@ app_server <- function(x) {
       mod_qc_plot_server(type, object = tuned, type = type, dark = dark)
     }
     shiny::observeEvent(input$done, {
-      shiny::stopApp(if (is.null(data())) NULL else tuned())
+      if (is.null(data())) {
+        return(shiny::stopApp(NULL))
+      }
+      result <- tryCatch(tuned(), shiny.silent.error = function(cnd) NULL)
+      if (is.null(result)) {
+        notify_user(
+          "Choose a normalisation method these data support before clicking Done.",
+          "warning"
+        )
+      } else {
+        shiny::stopApp(result)
+      }
     })
   }
 }

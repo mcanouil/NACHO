@@ -9,11 +9,7 @@ mod_outliers_ui <- function(id) {
   )
 }
 
-mod_outliers_server <- function(
-  id,
-  object,
-  qc = shiny::reactive(nacho_qc(shiny::req(object())))
-) {
+mod_outliers_server <- function(id, object, qc) {
   shiny::moduleServer(id, function(input, output, session) {
     failures <- shiny::reactive(
       qc_failures(shiny::req(object()), shiny::req(qc()))

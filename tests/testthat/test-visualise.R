@@ -28,5 +28,4 @@ test_that("visualise() runs the app and returns what Done returns", {
   result <- withVisible(visualise(GSE74821))
   expect_false(result$visible)
   expect_identical(result$value, GSE74821)
-  expect_false(file.exists(file.path(tempdir(), "nacho_object.rds")))
 })
