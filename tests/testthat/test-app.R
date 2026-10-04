@@ -289,3 +289,14 @@ test_that("Done sends normalisation warnings to the user", {
   })
   expect_match(messages, "ruv_k")
 })
+
+test_that("plots follow the dark-mode toggle", {
+  html <- as.character(NACHO:::app_ui(done = FALSE))
+  expect_match(html, 'id="dark_mode"', fixed = TRUE)
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$setInputs(dark_mode = "dark")
+    expect_true(dark())
+    session$setInputs(dark_mode = "light")
+    expect_false(dark())
+  })
+})
