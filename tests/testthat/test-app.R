@@ -114,6 +114,7 @@ test_that("Done uses the thresholds as they stand, before the debounce", {
   )
   shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
     session$flushReact()
+    session$elapse(600)
     session$setInputs(`thresholds-FoV` = 99.9)
     session$setInputs(done = 1)
   })
@@ -195,4 +196,29 @@ test_that("closing the page after Done keeps the tuned object", {
   })
   expect_length(values, 1L)
   expect_false(is.null(values[[1]]))
+
+test_that("pages without data explain what to do", {
+  html <- as.character(NACHO:::app_ui(done = FALSE))
+  expect_match(html, "Load the example data", fixed = TRUE)
+  expect_match(html, "output.has_data", fixed = TRUE)
+  expect_match(html, "shiny-busy-indicators|busy", perl = TRUE)
+})
+
+test_that("the overview shows only when data is loaded", {
+  html <- as.character(NACHO:::app_ui(done = FALSE))
+  expect_match(
+    html,
+    "data-display-if=\"output.has_data\"[^>]*>\\s*<div[^>]*bslib-grid",
+    perl = TRUE
+  )
+  expect_match(html, "Flagged samples", fixed = TRUE)
+})
+
+test_that("the app reports whether it has data", {
+  shiny::testServer(NACHO:::app_server(NULL), {
+    expect_false(output$has_data)
+  })
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    expect_true(output$has_data)
+  })
 })

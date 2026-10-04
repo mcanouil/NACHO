@@ -36,6 +36,25 @@ help_page <- function(name) {
   shiny::markdown(help_text(name))
 }
 
+empty_state <- function() {
+  bslib::card(
+    bslib::card_body(
+      class = "text-center",
+      shiny::tags$p("No data yet."),
+      shiny::tags$p(
+        "Load RCC files on the Data page, or load the example data to explore the app."
+      )
+    )
+  )
+}
+
+with_data <- function(...) {
+  shiny::tagList(
+    shiny::conditionalPanel("output.has_data", ...),
+    shiny::conditionalPanel("!output.has_data", empty_state())
+  )
+}
+
 plot_page <- function(page) {
   bslib::layout_columns(
     col_widths = bslib::breakpoints(sm = 12, lg = 6),
@@ -51,7 +70,10 @@ app_ui <- function(done = FALSE) {
     ),
     window_title = "NACHO",
     id = "page",
-    header = mod_overview_ui("overview"),
+    header = shiny::tagList(
+      shiny::useBusyIndicators(),
+      shiny::conditionalPanel("output.has_data", mod_overview_ui("overview"))
+    ),
     theme = nacho_theme(),
     sidebar = bslib::sidebar(
       title = "Thresholds",
@@ -60,12 +82,12 @@ app_ui <- function(done = FALSE) {
       if (done) shiny::actionButton("done", "Done", class = "btn-primary")
     ),
     bslib::nav_panel("Data", mod_data_ui("data")),
-    bslib::nav_panel("QC metrics", plot_page("qc_metrics")),
-    bslib::nav_panel("Controls", plot_page("controls")),
-    bslib::nav_panel("Counts", plot_page("counts")),
-    bslib::nav_panel("Normalisation", plot_page("normalisation")),
-    bslib::nav_panel("Batch", mod_batch_ui("batch")),
-    bslib::nav_panel("Flagged samples", mod_outliers_ui("outliers")),
+    bslib::nav_panel("QC metrics", with_data(plot_page("qc_metrics"))),
+    bslib::nav_panel("Controls", with_data(plot_page("controls"))),
+    bslib::nav_panel("Counts", with_data(plot_page("counts"))),
+    bslib::nav_panel("Normalisation", with_data(plot_page("normalisation"))),
+    bslib::nav_panel("Batch", with_data(mod_batch_ui("batch"))),
+    bslib::nav_panel("Flagged samples", with_data(mod_outliers_ui("outliers"))),
     bslib::nav_panel("About", help_page("nacho"))
   )
 }
@@ -95,6 +117,11 @@ app_server <- function(x, done = FALSE) {
   function(input, output, session) {
     data <- mod_data_server("data", initial = x)
     settings <- mod_thresholds_server("thresholds", data = data)
+    output$has_data <- shiny::markRenderFunction(
+      uiFunc = shiny::textOutput,
+      renderFunc = function(shinysession, name, ...) !is.null(data())
+    )
+    shiny::outputOptions(output, "has_data", suspendWhenHidden = FALSE)
     dark <- shiny::reactive(identical(input$dark_mode, "dark"))
     tuned <- shiny::reactive(
       tune_object(
