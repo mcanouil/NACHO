@@ -17,3 +17,22 @@ test_that("the design needs a group and flags confounding", {
     }
   )
 })
+
+test_that("the design card works when the samples have no Date", {
+  x <- GSE74821
+  x@samples[["Date"]] <- NULL
+  shiny::testServer(
+    NACHO:::mod_batch_server,
+    args = list(object = shiny::reactiveVal(x)),
+    {
+      session$setInputs(group = "tissue type:ch1")
+      expect_identical(design()$batch, "CartridgeID")
+      expect_match(output$table_CartridgeID, "<table", fixed = TRUE)
+      expect_match(
+        as.character(output$crosstab_Date$html),
+        "Date is not in these data.",
+        fixed = TRUE
+      )
+    }
+  )
+})

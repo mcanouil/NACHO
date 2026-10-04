@@ -124,10 +124,11 @@ mod_qc_plot_ui <- function(id, type = id) {
   )
 }
 
-plot_summary <- function(x, type) {
+plot_summary <- function(x) {
   qc <- nacho_qc(x)
   ids <- qc[[x@settings[["id_colname"]]]][qc[["status"]] %in% "fail"]
   cartridges <- length(unique(qc[["CartridgeID"]]))
+  shown <- utils::head(ids, 3)
   paste0(
     nrow(qc),
     " samples on ",
@@ -138,9 +139,21 @@ plot_summary <- function(x, type) {
     if (length(ids) == 0) {
       "none flagged."
     } else {
-      paste0(length(ids), " flagged: ", paste(ids, collapse = ", "), ".")
+      paste0(
+        length(ids),
+        " flagged: ",
+        paste(shown, collapse = ", "),
+        if (length(ids) > length(shown)) {
+          paste0(" and ", length(ids) - length(shown), " more")
+        },
+        "."
+      )
     }
   )
+}
+
+download_size <- function(value, default) {
+  if (length(value) == 1 && is.finite(value) && value > 0) value else default
 }
 
 mod_qc_plot_server <- function(id, object, type = id, dark) {
@@ -179,15 +192,15 @@ mod_qc_plot_server <- function(id, object, type = id, dark) {
     })
     output$plot <- shiny::renderPlot(plot(), alt = plot_alt_texts[[type]]) |>
       shiny::bindCache(object(), type, options(), dark())
-    output$summary <- shiny::renderText(plot_summary(object(), type))
+    output$summary <- shiny::renderText(plot_summary(object()))
     output$download <- shiny::downloadHandler(
       filename = function() paste0("nacho-", type, ".png"),
       content = function(file) {
         ggplot2::ggsave(
           file,
           plot(),
-          width = input$width %||% 16,
-          height = input$height %||% 12,
+          width = download_size(input$width, 16),
+          height = download_size(input$height, 12),
           units = "cm",
           dpi = 150,
           bg = plot_colours(dark())[["paper"]]
