@@ -103,6 +103,8 @@ Collate:
     'methods.R'
     'mod_data.R'
     'report.R'
+    'mod_outliers.R'
+    'mod_overview.R'
     'mod_qc_plot.R'
     'mod_thresholds.R'
     'normalise.R'
