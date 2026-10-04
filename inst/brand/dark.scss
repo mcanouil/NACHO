@@ -60,4 +60,36 @@
   .progress {
     --bs-progress-bar-bg: #FCB448;
   }
+
+  .irs--shiny {
+    .irs-bar {
+      background: #FCB448;
+      border-color: #FCB448;
+    }
+
+    .irs-handle {
+      background-color: #FCB448;
+      border-color: #111821;
+    }
+
+    .irs-single,
+    .irs-from,
+    .irs-to {
+      color: #111821;
+      background: #FCB448;
+    }
+  }
+
+  .btn-outline-secondary {
+    --bs-btn-color: var(--bs-body-color);
+    --bs-btn-border-color: var(--bs-body-color);
+    --bs-btn-hover-color: #111821;
+    --bs-btn-hover-bg: var(--bs-body-color);
+    --bs-btn-hover-border-color: var(--bs-body-color);
+    --bs-btn-active-color: #111821;
+    --bs-btn-active-bg: var(--bs-body-color);
+    --bs-btn-active-border-color: var(--bs-body-color);
+    --bs-btn-disabled-color: var(--bs-body-color);
+    --bs-btn-disabled-border-color: var(--bs-body-color);
+  }
 }

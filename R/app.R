@@ -72,9 +72,14 @@ app_ui <- function(done = FALSE) {
     id = "page",
     header = shiny::tagList(
       shiny::useBusyIndicators(),
+      brand_font_dependency(),
       shiny::conditionalPanel("output.has_data", mod_overview_ui("overview"))
     ),
     theme = nacho_theme(),
+    navbar_options = bslib::navbar_options(
+      bg = nacho_palette[["navy"]],
+      theme = "dark"
+    ),
     sidebar = bslib::sidebar(
       title = "Thresholds",
       width = 320,

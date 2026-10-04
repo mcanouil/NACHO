@@ -142,3 +142,30 @@ test_that("dark.scss uses only colours of the NACHO palette", {
   expect_gt(length(literals), 0L)
   expect_true(all(literals %in% toupper(NACHO:::nacho_palette)))
 })
+
+test_that("the theme sets quoted font families that the browser can parse", {
+  deps <- bslib::bs_theme_dependencies(NACHO:::nacho_theme())
+  bootstrap <- Filter(function(d) d$name == "bootstrap", deps)[[1]]
+  css <- paste(
+    readLines(file.path(bootstrap$src$file, bootstrap$stylesheet[[1]])),
+    collapse = "\n"
+  )
+  expect_match(
+    css,
+    '--bs-body-font-family: "Source Sans 3", system-ui, sans-serif;',
+    fixed = TRUE
+  )
+  expect_match(css, '--bs-font-monospace: "JetBrains Mono"', fixed = TRUE)
+})
+
+test_that("the brand font faces point at files in the dependency", {
+  dep <- NACHO:::brand_font_dependency()
+  css <- readLines(file.path(dep$src$file, dep$stylesheet))
+  files <- sub(
+    ".*url\\('([^']+)'\\).*",
+    "\\1",
+    grep("url\\(", css, value = TRUE)
+  )
+  expect_length(files, 3L)
+  expect_true(all(file.exists(file.path(dep$src$file, files))))
+})

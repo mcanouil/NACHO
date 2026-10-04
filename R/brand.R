@@ -98,6 +98,33 @@ theme_nacho <- function(dark = FALSE, base_size = 11) {
     )
 }
 
+#' Bold and italic faces of the brand font
+#'
+#' `bslib::bs_theme(brand = )` embeds only the first file of each font family,
+#' so the other faces of Source Sans 3 come from `inst/brand/fonts/fonts.css`.
+#'
+#' @noRd
+brand_font_dependency <- function() {
+  htmltools::htmlDependency(
+    name = "nacho-fonts",
+    version = as.character(utils::packageVersion("NACHO")),
+    src = c(file = brand_path("fonts")),
+    stylesheet = "fonts.css"
+  )
+}
+
+value_box_rules <- paste(
+  ".bslib-value-box.default .value-box-showcase > i {",
+  "  background: none !important;",
+  "  -webkit-text-fill-color: currentcolor !important;",
+  "  color: var(--bs-primary);",
+  "}",
+  ".bslib-value-box.default .value-box-showcase > svg {",
+  "  fill: var(--bs-primary) !important;",
+  "}",
+  sep = "\n"
+)
+
 #' The NACHO Bootstrap theme
 #'
 #' Bootstrap 5 with the brand colours and fonts, and the dark-mode rules of
@@ -111,5 +138,10 @@ nacho_theme <- function() {
     collapse = "\n"
   )
   bslib::bs_theme(version = 5, brand = brand) |>
-    bslib::bs_add_rules(dark_rules)
+    bslib::bs_theme_update(
+      "font-family-base" = "'Source Sans 3', system-ui, sans-serif",
+      "headings-font-family" = "'Source Sans 3', system-ui, sans-serif",
+      "font-family-monospace" = "'JetBrains Mono', ui-monospace, monospace"
+    ) |>
+    bslib::bs_add_rules(c(value_box_rules, dark_rules))
 }
