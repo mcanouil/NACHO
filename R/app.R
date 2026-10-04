@@ -53,6 +53,8 @@ app_ui <- function(done = FALSE) {
     id = "page",
     theme = nacho_theme(),
     sidebar = bslib::sidebar(
+      title = "Thresholds",
+      width = 320,
       mod_thresholds_ui("thresholds"),
       if (done) shiny::actionButton("done", "Done", class = "btn-primary")
     ),

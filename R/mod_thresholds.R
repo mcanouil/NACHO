@@ -103,39 +103,78 @@ normalisation_choices <- function(x) {
   )
 }
 
+threshold_groups <- list(
+  Imaging = c("BD", "FoV"),
+  Controls = c("PCL", "LoD", "Positive_factor"),
+  Content = c("House_factor", "Housekeeping_detected"),
+  miRNA = c("Ligation_order", "Ligation_R2", "Ligation_NEG", "Haemolysis")
+)
+
+threshold_group_body <- function(x, limits, ns, group) {
+  metrics <- intersect(threshold_metrics(x), threshold_groups[[group]])
+  if (length(metrics) == 0) {
+    return(shiny::helpText("Not measured for these data."))
+  }
+  threshold_inputs(x, limits, ns, metrics)
+}
+
 mod_thresholds_ui <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::selectInput(
-      ns("preset"),
-      "Threshold preset",
-      c(nSolver = "nsolver", "NACHO 2" = "legacy")
+  group_panel <- function(group) {
+    bslib::accordion_panel(group, shiny::uiOutput(ns(paste0("group_", group))))
+  }
+  bslib::accordion(
+    id = ns("sections"),
+    multiple = TRUE,
+    open = c("Preset", "Imaging"),
+    bslib::accordion_panel(
+      "Preset",
+      shiny::selectInput(
+        ns("preset"),
+        "Threshold preset",
+        c(nSolver = "nsolver", "NACHO 2" = "legacy")
+      ),
+      shiny::selectInput(
+        ns("instrument"),
+        "Instrument",
+        c(MAX = "max", FLEX = "flex", PRO = "pro", SPRINT = "sprint")
+      ),
+      shiny::actionButton(
+        ns("reset"),
+        "Reset",
+        icon = shiny::icon("rotate-left", `aria-hidden` = "true"),
+        `aria-label` = "Reset the thresholds to the preset",
+        class = "btn-outline-secondary btn-sm"
+      )
     ),
-    shiny::selectInput(
-      ns("instrument"),
-      "Instrument",
-      c(MAX = "max", FLEX = "flex", PRO = "pro", SPRINT = "sprint")
+    bslib::accordion_panel(
+      "Normalisation",
+      shiny::selectInput(ns("method"), "Method", "GEO"),
+      shiny::conditionalPanel(
+        "input.method == 'RUVg'",
+        ns = ns,
+        shiny::numericInput(
+          ns("ruv_k"),
+          "Unwanted factors",
+          value = 1,
+          min = 1,
+          max = 10,
+          step = 1
+        ),
+        shiny::helpText("Use suggest_ruv_k() in R to choose this number.")
+      ),
+      shiny::selectInput(
+        ns("background"),
+        "Background",
+        c("none", "mean", "mean_2sd", "median", "max", "geo")
+      ),
+      shiny::selectInput(
+        ns("background_mode"),
+        "Background mode",
+        c("threshold", "subtract")
+      )
     ),
-    shiny::selectInput(ns("method"), "Normalisation method", "GEO"),
-    shiny::numericInput(
-      ns("ruv_k"),
-      "Unwanted factors (RUVg)",
-      value = 1,
-      min = 1,
-      max = 10,
-      step = 1
-    ),
-    shiny::selectInput(
-      ns("background"),
-      "Background",
-      c("none", "mean", "mean_2sd", "median", "max", "geo")
-    ),
-    shiny::selectInput(
-      ns("background_mode"),
-      "Background mode",
-      c("threshold", "subtract")
-    ),
-    shiny::uiOutput(ns("sliders"))
+    !!!lapply(names(threshold_groups), group_panel)
   )
 }
 
@@ -199,9 +238,21 @@ mod_thresholds_server <- function(id, data) {
       ignoreInit = TRUE
     )
 
-    output$sliders <- shiny::renderUI({
-      threshold_inputs(shiny::req(data()), shiny::req(current()), session$ns)
-    })
+    for (group in names(threshold_groups)) {
+      local({
+        group <- group
+        output[[paste0("group_", group)]] <- shiny::renderUI(
+          threshold_group_body(
+            shiny::req(data()),
+            shiny::req(current()),
+            session$ns,
+            group
+          )
+        )
+      })
+    }
+
+    shiny::observeEvent(input$reset, reset())
 
     current_thresholds <- shiny::reactive({
       x <- shiny::req(data())

@@ -172,3 +172,53 @@ test_that("slider steps put the current limits on the grid", {
   expect_identical(NACHO:::slider_step("FoV", c(0, 100), 75), 1)
   expect_gt(NACHO:::slider_step("LoD", c(0, 10), c(-Inf, Inf)), 0)
 })
+
+test_that("the sidebar groups every threshold in an accordion", {
+  expect_setequal(
+    unlist(NACHO:::threshold_groups, use.names = FALSE),
+    NACHO:::qc_metrics
+  )
+  ui <- htmltools::renderTags(NACHO:::mod_thresholds_ui("thresholds"))$html
+  for (panel in c(
+    "Preset",
+    "Normalisation",
+    "Imaging",
+    "Controls",
+    "Content",
+    "miRNA"
+  )) {
+    expect_match(ui, panel, fixed = TRUE)
+  }
+  expect_match(
+    ui,
+    '<button aria-label="Reset the thresholds to the preset"[^>]*id="thresholds-reset"'
+  )
+})
+
+test_that("reset brings back the preset limits", {
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(GSE74821)),
+    {
+      session$setInputs(preset = "nsolver", instrument = "max", FoV = 99.9)
+      session$elapse(600)
+      current(replace(current(), "FoV", 50))
+      expect_identical(current()$FoV, 50)
+      session$setInputs(reset = 1)
+      session$elapse(600)
+      expect_identical(current()$FoV, nacho_thresholds()$FoV)
+    }
+  )
+})
+
+test_that("a group the data does not have says so", {
+  html <- htmltools::renderTags(
+    NACHO:::threshold_group_body(
+      GSE74821,
+      GSE74821@thresholds,
+      shiny::NS("t"),
+      "miRNA"
+    )
+  )$html
+  expect_match(html, "Not measured for these data.", fixed = TRUE)
+})
