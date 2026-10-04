@@ -190,10 +190,7 @@ test_that("using GEO GSE74821", {
     silent = TRUE
   )
   skip_if(inherits(geo_files, "try-error"), "GEO is unavailable.")
-  utils::untar(
-    file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),
-    exdir = file.path(tempdir(), "GSE74821")
-  )
+  extract_geo_archive_or_skip("GSE74821", file.path(tempdir(), "GSE74821"))
   targets$IDFILE <- list.files(
     path = file.path(tempdir(), "GSE74821"),
     pattern = ".RCC.gz$"
@@ -254,10 +251,7 @@ test_that("using GEO GSE70970", {
     silent = TRUE
   )
   skip_if(inherits(geo_files, "try-error"), "GEO is unavailable.")
-  utils::untar(
-    file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"),
-    exdir = file.path(tempdir(), "GSE70970")
-  )
+  extract_geo_archive_or_skip("GSE70970", file.path(tempdir(), "GSE70970"))
   targets$IDFILE <- list.files(
     path = file.path(tempdir(), "GSE70970"),
     pattern = ".RCC.gz$"
@@ -648,4 +642,14 @@ test_that("resolve_housekeeping_norm() warns and turns off without any housekeep
   expect_false(expect_no_warning(
     NACHO:::resolve_housekeeping_norm("Endogenous", NULL, FALSE, FALSE, "mrna")
   ))
+})
+
+test_that("load_rcc() names the folder when the sample sheet lists no file", {
+  empty <- withr::local_tempdir()
+  error <- expect_error(
+    load_rcc(empty, data.frame(IDFILE = character()), "IDFILE"),
+    class = "nacho_error_missing_file"
+  )
+  expect_match(conditionMessage(error), basename(empty), fixed = TRUE)
+  expect_match(conditionMessage(error), "ssheet_csv", fixed = TRUE)
 })
