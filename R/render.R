@@ -48,20 +48,6 @@ render <- function(
   check_nacho(x)
   format <- check_choice(format, c("html", "typst"))
   check_string(output_dir)
-  suppressWarnings(dir.create(
-    output_dir,
-    showWarnings = FALSE,
-    recursive = TRUE
-  ))
-  if (!dir.exists(output_dir)) {
-    nacho_abort(
-      c(
-        "Could not create {.path {output_dir}} for the report.",
-        i = "Check that {.arg output_dir} is a folder you can write to."
-      ),
-      class = "render_failed"
-    )
-  }
   options <- check_report_options(
     x,
     colour = colour,
@@ -73,17 +59,31 @@ render <- function(
   )
   check_quarto()
 
+  dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+  if (!dir.exists(output_dir)) {
+    nacho_abort(
+      c(
+        "Could not create {.path {output_dir}} for the report.",
+        i = "Check that {.arg output_dir} is a folder you can write to."
+      ),
+      class = "render_failed"
+    )
+  }
+
   work_dir <- tempfile("nacho-report-")
   dir.create(work_dir)
   on.exit(unlink(work_dir, recursive = TRUE), add = TRUE)
-  file.copy(
-    c(
-      system.file("report", "nacho-report.qmd", package = "NACHO"),
-      list.files(brand_path(), full.names = TRUE)
-    ),
+  staged <- file.copy(
+    c(report_template_path(), list.files(brand_path(), full.names = TRUE)),
     work_dir,
     recursive = TRUE
   )
+  if (!all(staged)) {
+    nacho_abort(
+      "Could not copy the report files to {.path {work_dir}}.",
+      class = "render_failed"
+    )
+  }
   rds <- file.path(work_dir, "nacho.rds")
   saveRDS(list(object = x, options = options), rds)
 
@@ -126,6 +126,22 @@ render <- function(
     )
   }
   invisible(normalizePath(target))
+}
+
+#' Path of a file of the report in the installed package
+#'
+#' @param file The file name in `inst/report`.
+#'
+#' @noRd
+report_template_path <- function(file = "nacho-report.qmd") {
+  path <- system.file("report", file, package = "NACHO")
+  if (!nzchar(path)) {
+    nacho_abort(
+      "The report file {.file {file.path('report', file)}} is missing from the installed package.",
+      class = "missing_file"
+    )
+  }
+  path
 }
 
 #' Quarto CLI version, or NULL when Quarto is not found

@@ -273,3 +273,30 @@ test_that("report_body() passes the report options to the plots", {
   geoms <- vapply(plots[[1]]$layers, function(l) class(l$geom)[1], character(1))
   expect_true(any(geoms %in% c("GeomTextRepel", "GeomLabelRepel", "GeomText")))
 })
+
+test_that("report_body() puts the confounding callout before the design table", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  path <- withr::local_tempfile(fileext = ".rds")
+  options <- NACHO:::check_report_options(
+    GSE74821,
+    group = "tissue type:ch1"
+  )
+  saveRDS(list(object = GSE74821, options = options), path)
+  output <- utils::capture.output(
+    NACHO:::report_body(NACHO:::report_setup(path))
+  )
+  batch <- which(output == "# Batch effects")
+  callout <- grep("Batch and biology are confounded", output, fixed = TRUE)
+  table <- grep("Groups by `CartridgeID`", output, fixed = TRUE)
+  expect_length(batch, 1)
+  expect_true(batch < callout[1] && callout[1] < table[1])
+})
+
+test_that("the report template is found, or the error says it is missing", {
+  expect_true(file.exists(NACHO:::report_template_path()))
+  expect_error(
+    NACHO:::report_template_path("no-such-file.qmd"),
+    class = "nacho_error_missing_file"
+  )
+})

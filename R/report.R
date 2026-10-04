@@ -182,11 +182,8 @@ report_thresholds <- function(x) {
 
 #' The sections of the report that apply to the object
 #'
-#' @param group A column of `nacho_samples(x)` with the biological groups, or
-#'   `NULL`.
-#'
 #' @noRd
-report_sections <- function(x, group = NULL) {
+report_sections <- function(x) {
   section <- function(
     title,
     level,
@@ -281,11 +278,11 @@ report_batch_tables <- function(x, group) {
     },
     knitr::kable(design, digits = 2),
     "",
-    unlist(lapply(names(crosstabs), function(batch) {
+    unlist(lapply(names(crosstabs), function(column) {
       c(
-        paste0("Groups by `", batch, "`:"),
+        paste0("Groups by `", column, "`:"),
         "",
-        knitr::kable(as.data.frame.matrix(crosstabs[[batch]])),
+        knitr::kable(as.data.frame.matrix(crosstabs[[column]])),
         ""
       )
     }))
@@ -402,7 +399,7 @@ report_setup <- function(path) {
   list(
     object = saved[["object"]],
     options = options,
-    sections = report_sections(saved[["object"]], options[["group"]])
+    sections = report_sections(saved[["object"]])
   )
 }
 

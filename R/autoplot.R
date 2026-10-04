@@ -45,7 +45,7 @@ NULL
 #'     The dashed line marks M = 1.5, the limit geNorm suggests for
 #'     homogeneous samples.
 #'     This plot ignores `colour`, `show_legend`, `show_outliers` and
-#'     `outliers_labels`.
+#'     `outliers_labels`, and it is not in the Shiny app.
 #'   * `"RLE"`: Relative log expression of the normalised endogenous genes.
 #'     This plot ignores `size`, `show_outliers`, `outliers_factor` and
 #'     `outliers_labels`.

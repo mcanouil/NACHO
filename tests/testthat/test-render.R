@@ -214,3 +214,12 @@ test_that("render() shows the quiet hint only when output is quiet", {
   )
   expect_match(conditionMessage(quiet), "rlib_message_verbosity")
 })
+
+test_that("render() does not create output_dir when the options are wrong", {
+  output_dir <- file.path(withr::local_tempdir(), "report")
+  expect_error(
+    render(GSE74821, colour = "nope", output_dir = output_dir),
+    class = "nacho_error_bad_argument"
+  )
+  expect_false(dir.exists(output_dir))
+})
