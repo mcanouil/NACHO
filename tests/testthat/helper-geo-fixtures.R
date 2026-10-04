@@ -37,7 +37,7 @@ skip_if_geo_archive_unusable <- function(series, series_dir) {
   tryCatch(
     {
       status <- utils::untar(tarfile = tarfile, exdir = series_dir)
-      if (!identical(as.integer(status), 0L)) {
+      if (!isTRUE(status == 0L)) {
         skip_series(paste0("untar exited with status ", status, "."))
       }
     },

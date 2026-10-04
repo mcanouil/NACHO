@@ -646,16 +646,20 @@ test_that("resolve_housekeeping_norm() warns and turns off without any housekeep
 
 test_that("load_rcc() names the folder when no RCC file can be read", {
   empty <- withr::local_tempdir()
-  expect_error(
+  error <- expect_error(
     load_rcc(empty, data.frame(IDFILE = character()), "IDFILE"),
     class = "nacho_error_missing_file"
   )
+  expect_match(conditionMessage(error), basename(empty), fixed = TRUE)
 
-  other <- withr::local_tempdir()
-  writeLines("not an RCC file", file.path(other, "notes.txt"))
+  with_rcc <- withr::local_tempdir()
+  file.copy(
+    list.files(test_path("plexset_data"), full.names = TRUE)[1],
+    with_rcc
+  )
   error <- expect_error(
-    load_rcc(other, data.frame(IDFILE = character()), "IDFILE"),
+    load_rcc(with_rcc, data.frame(IDFILE = character()), "IDFILE"),
     class = "nacho_error_missing_file"
   )
-  expect_match(conditionMessage(error), "RCC", fixed = TRUE)
+  expect_match(conditionMessage(error), basename(with_rcc), fixed = TRUE)
 })
