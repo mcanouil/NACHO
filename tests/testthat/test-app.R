@@ -77,3 +77,12 @@ test_that("Done warns instead of closing when the settings fail", {
   expect_false(stopped)
   expect_identical(warned, "warning")
 })
+
+test_that("each plot module draws its own plot type", {
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$flushReact()
+    session$elapse(600)
+    expect_identical(output$`BD-plot`$alt, plot_alt_texts[["BD"]])
+    expect_identical(output$`PCBatch-plot`$alt, plot_alt_texts[["PCBatch"]])
+  })
+})

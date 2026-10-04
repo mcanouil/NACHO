@@ -90,9 +90,9 @@ app_server <- function(x) {
     qc <- shiny::reactive(nacho_qc(tuned()))
     mod_overview_server("overview", tuned, qc)
     mod_outliers_server("outliers", tuned, qc)
-    for (type in unlist(app_plot_types, use.names = FALSE)) {
+    lapply(unlist(app_plot_types, use.names = FALSE), function(type) {
       mod_qc_plot_server(type, object = tuned, type = type, dark = dark)
-    }
+    })
     shiny::observeEvent(input$done, {
       if (is.null(data())) {
         return(shiny::stopApp(NULL))

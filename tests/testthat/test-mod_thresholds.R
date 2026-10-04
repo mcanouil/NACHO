@@ -162,3 +162,13 @@ test_that("open bounds survive the module", {
     }
   )
 })
+
+test_that("slider steps put the current limits on the grid", {
+  step <- NACHO:::slider_step("BD", c(0, 2.5), c(0.05, 2.25))
+  expect_equal(0.05 / step, round(0.05 / step))
+  expect_equal(2.25 / step, round(2.25 / step))
+  expect_identical(NACHO:::slider_step("Housekeeping_detected", c(0, 12), 3), 1)
+  expect_identical(NACHO:::slider_step("Ligation_order", c(0, 1), 1), 1)
+  expect_identical(NACHO:::slider_step("FoV", c(0, 100), 75), 1)
+  expect_gt(NACHO:::slider_step("LoD", c(0, 10), c(-Inf, Inf)), 0)
+})

@@ -48,6 +48,12 @@ read_uploads <- function(files) {
       by = "IDFILE"
     )
   }
+  if (nrow(sheets) > 1) {
+    nacho_warn(
+      "Only the first sample sheet is used, so {.file {sheets[['name']][-1]}} {?was/were} ignored.",
+      class = "sample_sheet_discarded"
+    )
+  }
   if (nrow(sheets) > 0) {
     sheet <- data.table::fread(sheets[["datapath"]][1], data.table = FALSE)
     merge_by <- if (plexset) c("IDFILE", "plexset_id") else "IDFILE"
@@ -89,7 +95,7 @@ expand_upload <- function(name, datapath, type) {
       sub("\\.zip$", "", name, ignore.case = TRUE)
     )
     utils::unzip(datapath, exdir = extract_directory)
-    files <- list.files(extract_directory)
+    files <- list.files(extract_directory, recursive = TRUE)
     extracted <- file.path(basename(extract_directory), files)
     return(data.frame(
       name = extracted,
@@ -167,8 +173,12 @@ mod_data_server <- function(id, initial = NULL) {
       loaded <- withCallingHandlers(
         tryCatch(
           rlang::with_options(read_uploads(files), nacho.quiet = TRUE),
-          nacho_error = function(cnd) {
-            notify_user(cli::ansi_strip(rlang::cnd_message(cnd)), "error")
+          error = function(cnd) {
+            message <- cli::ansi_strip(rlang::cnd_message(cnd))
+            if (!inherits(cnd, "nacho_error")) {
+              message <- paste("The upload could not be read:", message)
+            }
+            notify_user(message, "error")
             NULL
           }
         ),

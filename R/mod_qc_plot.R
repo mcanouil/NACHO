@@ -75,6 +75,8 @@ mod_qc_plot_ui <- function(id, type = id) {
 }
 
 mod_qc_plot_server <- function(id, object, type = id, dark) {
+  force(type)
+  force(dark)
   shiny::moduleServer(id, function(input, output, session) {
     shiny::observeEvent(object(), {
       columns <- names(nacho_samples(object()))

@@ -58,6 +58,23 @@ slider_to_limits <- function(value, range, original) {
   c(lower, upper)
 }
 
+count_metrics <- c("Housekeeping_detected", "Ligation_order")
+
+slider_step <- function(metric, range, limits) {
+  if (metric %in% count_metrics) {
+    return(1)
+  }
+  finite <- limits[is.finite(limits)]
+  exponent <- floor(log10(diff(range) / 100))
+  for (candidate in 10^seq(exponent, exponent - 3)) {
+    ratio <- finite / candidate
+    if (all(abs(ratio - round(ratio)) < 1e-8)) {
+      return(candidate)
+    }
+  }
+  10^exponent
+}
+
 threshold_inputs <- function(x, limits, ns, metrics = threshold_metrics(x)) {
   shiny::tagList(lapply(metrics, function(metric) {
     range <- threshold_range(x@samples[[metric]], limits[[metric]])
@@ -68,7 +85,7 @@ threshold_inputs <- function(x, limits, ns, metrics = threshold_metrics(x)) {
         min = range[1],
         max = range[2],
         value = limits_to_slider(limits[[metric]], range),
-        step = signif(diff(range) / 100, 1)
+        step = slider_step(metric, range, limits[[metric]])
       ),
       shiny::helpText(threshold_help[[metric]])
     )

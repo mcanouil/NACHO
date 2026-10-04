@@ -255,3 +255,90 @@ test_that("the module loads an upload", {
     expect_true(S7::S7_inherits(session$returned(), NACHO:::nacho))
   })
 })
+
+test_that("a corrupt zip shows an error and keeps the previous data", {
+  types <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) types <<- c(types, type)
+  )
+  directory <- withr::local_tempdir()
+  path <- file.path(directory, "0")
+  writeLines("this is not a zip", path)
+  bad <- data.frame(
+    name = "broken.zip",
+    size = file.size(path),
+    type = "application/zip",
+    datapath = path
+  )
+  shiny::testServer(
+    NACHO:::mod_data_server,
+    args = list(initial = GSE74821),
+    {
+      suppressWarnings(session$setInputs(files = bad, import = 1))
+      expect_identical(session$returned(), GSE74821)
+    }
+  )
+  expect_identical(types, "error")
+})
+
+test_that("a zip made from a folder is read", {
+  source_files <- list.files(
+    test_path("salmon_data"),
+    pattern = "\\.rcc$",
+    ignore.case = TRUE,
+    full.names = TRUE
+  )
+  skip_if(length(source_files) == 0)
+  staging <- withr::local_tempdir()
+  dir.create(file.path(staging, "run1"))
+  file.copy(source_files, file.path(staging, "run1"))
+  archive <- file.path(withr::local_tempdir(), "0")
+  withr::with_dir(
+    staging,
+    utils::zip(archive, "run1", flags = "-rq")
+  )
+  archive <- paste0(archive, ".zip")
+  zipped <- data.frame(
+    name = "run1.zip",
+    size = file.size(archive),
+    type = "application/zip",
+    datapath = archive
+  )
+  expect_nacho(
+    withCallingHandlers(
+      NACHO:::read_uploads(zipped),
+      nacho_warning_metric_unavailable = function(cnd) {
+        invokeRestart("muffleWarning")
+      }
+    )
+  )
+})
+
+test_that("extra sample sheets are announced", {
+  sample_sheet <- data.frame(
+    IDFILE = "salmon_01_01.RCC",
+    plexset_id = "S1",
+    group = "case"
+  )
+  uploads <- upload_table("salmon_data", sample_sheet)
+  second <- uploads[uploads$name == "samplesheet.csv", ]
+  second$name <- "second.csv"
+  second$datapath <- file.path(dirname(second$datapath), "second_sheet")
+  file.copy(
+    uploads$datapath[uploads$name == "samplesheet.csv"],
+    second$datapath
+  )
+  expect_warning(
+    withCallingHandlers(
+      NACHO:::read_uploads(rbind(uploads, second)),
+      nacho_warning_metric_unavailable = function(cnd) {
+        invokeRestart("muffleWarning")
+      },
+      nacho_warning_n_comp_reduced = function(cnd) {
+        invokeRestart("muffleWarning")
+      }
+    ),
+    "second.csv",
+    class = "nacho_warning_sample_sheet_discarded"
+  )
+})
