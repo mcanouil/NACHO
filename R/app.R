@@ -50,8 +50,8 @@ empty_state <- function() {
 
 with_data <- function(...) {
   shiny::tagList(
-    shiny::conditionalPanel("output.has_data", ...),
-    shiny::conditionalPanel("!output.has_data", empty_state())
+    shiny::conditionalPanel("output.has_data === true", ...),
+    shiny::conditionalPanel("output.has_data === false", empty_state())
   )
 }
 
@@ -73,7 +73,10 @@ app_ui <- function(done = FALSE) {
     header = shiny::tagList(
       shiny::useBusyIndicators(),
       brand_font_dependency(),
-      shiny::conditionalPanel("output.has_data", mod_overview_ui("overview"))
+      shiny::conditionalPanel(
+        "output.has_data === true",
+        mod_overview_ui("overview")
+      )
     ),
     theme = nacho_theme(),
     navbar_options = bslib::navbar_options(
@@ -121,8 +124,9 @@ tune_object <- function(object, chosen, thresholds) {
 }
 
 tune_with_toasts <- function(object, chosen, thresholds, announced) {
-  if (!identical(announced$key, list(object, chosen))) {
-    announced$key <- list(object, chosen)
+  key <- list(object@provenance, dim(object@counts), chosen)
+  if (!identical(announced$key, key)) {
+    announced$key <- key
     announced$messages <- character()
   }
   withCallingHandlers(
@@ -166,7 +170,13 @@ app_server <- function(x, done = FALSE) {
     mod_outliers_server("outliers", tuned, qc)
     mod_batch_server("batch", tuned)
     lapply(unlist(app_plot_types, use.names = FALSE), function(type) {
-      mod_qc_plot_server(type, object = tuned, type = type, dark = dark)
+      mod_qc_plot_server(
+        type,
+        object = tuned,
+        qc = qc,
+        type = type,
+        dark = dark
+      )
     })
     if (done) {
       finished <- new.env()

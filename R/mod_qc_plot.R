@@ -14,6 +14,10 @@ app_plot_types <- list(
 
 app_colourless <- c("Stability", "PCBatch")
 
+app_flag_metrics <- c("BD", "FoV", "PCL", "LoD")
+
+download_bounds <- c(min = 5, max = 50)
+
 app_plot_titles <- c(
   BD = "Binding density",
   FoV = "Field of view",
@@ -106,15 +110,15 @@ mod_qc_plot_ui <- function(id, type = id) {
           ns("width"),
           "Download width (cm)",
           value = 16,
-          min = 5,
-          max = 50
+          min = download_bounds[["min"]],
+          max = download_bounds[["max"]]
         ),
         shiny::numericInput(
           ns("height"),
           "Download height (cm)",
           value = 12,
-          min = 5,
-          max = 50
+          min = download_bounds[["min"]],
+          max = download_bounds[["max"]]
         ),
         shiny::downloadButton(ns("download"), "Download PNG")
       )
@@ -124,12 +128,11 @@ mod_qc_plot_ui <- function(id, type = id) {
   )
 }
 
-plot_summary <- function(x) {
-  qc <- nacho_qc(x)
+plot_summary <- function(x, qc, type = NULL) {
   ids <- qc[[x@settings[["id_colname"]]]][qc[["status"]] %in% "fail"]
   cartridges <- length(unique(qc[["CartridgeID"]]))
   shown <- utils::head(ids, 3)
-  paste0(
+  overall <- paste0(
     nrow(qc),
     " samples on ",
     cartridges,
@@ -150,13 +153,29 @@ plot_summary <- function(x) {
       )
     }
   )
+  if (!isTRUE(type %in% app_flag_metrics)) {
+    return(overall)
+  }
+  on_metric <- sum(qc[[paste0(type, "_status")]] %in% "fail")
+  paste0(
+    overall,
+    " ",
+    if (on_metric == 0) "None" else on_metric,
+    " flagged on ",
+    type,
+    "."
+  )
 }
 
 download_size <- function(value, default) {
-  if (length(value) == 1 && is.finite(value) && value > 0) value else default
+  if (length(value) == 1 && is.finite(value)) {
+    min(max(value, download_bounds[["min"]]), download_bounds[["max"]])
+  } else {
+    default
+  }
 }
 
-mod_qc_plot_server <- function(id, object, type = id, dark) {
+mod_qc_plot_server <- function(id, object, qc, type = id, dark) {
   force(type)
   force(dark)
   shiny::moduleServer(id, function(input, output, session) {
@@ -192,7 +211,9 @@ mod_qc_plot_server <- function(id, object, type = id, dark) {
     })
     output$plot <- shiny::renderPlot(plot(), alt = plot_alt_texts[[type]]) |>
       shiny::bindCache(object(), type, options(), dark())
-    output$summary <- shiny::renderText(plot_summary(object()))
+    output$summary <- shiny::renderText(
+      plot_summary(shiny::req(object()), shiny::req(qc()), type)
+    )
     output$download <- shiny::downloadHandler(
       filename = function() paste0("nacho-", type, ".png"),
       content = function(file) {

@@ -156,10 +156,17 @@ test_that("the theme sets quoted font families that the browser can parse", {
     fixed = TRUE
   )
   expect_match(css, '--bs-font-monospace: "JetBrains Mono"', fixed = TRUE)
-  expect_match(
-    css,
-    'h1,.h1{margin-top:0;margin-bottom:.5rem;font-family:"Source Sans 3",system-ui,sans-serif;',
-    fixed = TRUE
+  fonts <- unname(bslib::bs_get_variables(
+    NACHO:::nacho_theme(),
+    c("font-family-base", "headings-font-family", "font-family-monospace")
+  ))
+  expect_identical(
+    fonts,
+    c(
+      '"Source Sans 3", system-ui, sans-serif',
+      '"Source Sans 3", system-ui, sans-serif',
+      '"JetBrains Mono", ui-monospace, monospace'
+    )
   )
 })
 

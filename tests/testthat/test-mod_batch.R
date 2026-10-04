@@ -5,27 +5,43 @@ test_that("the batch page shows the design before the plots", {
   expect_lt(design, plot)
 })
 
+with_groups <- function(x) {
+  x@samples[["biology"]] <- rep(c("a", "b"), length.out = nrow(x@samples))
+  x@samples[["by cartridge"]] <- x@samples[["CartridgeID"]]
+  x
+}
+
+test_that("only text columns with a few levels are offered as groups", {
+  samples <- nacho_samples(with_groups(GSE74821))
+  choices <- NACHO:::group_choices(samples)
+  expect_true(all(c("biology", "by cartridge") %in% choices))
+  expect_false(any(c("BD", "PC01", "title") %in% choices))
+  expect_false("tissue type:ch1" %in% choices)
+})
+
 test_that("the design needs a group and flags confounding", {
   shiny::testServer(
     NACHO:::mod_batch_server,
-    args = list(object = shiny::reactiveVal(GSE74821)),
+    args = list(object = shiny::reactiveVal(with_groups(GSE74821))),
     {
       session$setInputs(group = "")
       expect_match(output$design_note, "Choose the column")
-      session$setInputs(group = "tissue type:ch1")
-      expect_true(all(design()$confounded))
+      session$setInputs(group = "by cartridge")
+      expect_true(any(design()$confounded))
+      session$setInputs(group = "biology")
+      expect_false(any(design()$confounded))
     }
   )
 })
 
 test_that("the design card works when the samples have no Date", {
-  x <- GSE74821
+  x <- with_groups(GSE74821)
   x@samples[["Date"]] <- NULL
   shiny::testServer(
     NACHO:::mod_batch_server,
     args = list(object = shiny::reactiveVal(x)),
     {
-      session$setInputs(group = "tissue type:ch1")
+      session$setInputs(group = "biology")
       expect_identical(design()$batch, "CartridgeID")
       expect_match(output$table_CartridgeID, "<table", fixed = TRUE)
       expect_match(
@@ -33,6 +49,20 @@ test_that("the design card works when the samples have no Date", {
         "Date is not in these data.",
         fixed = TRUE
       )
+    }
+  )
+})
+
+test_that("the design note says when there is no batch column", {
+  x <- with_groups(GSE74821)
+  x@samples[["CartridgeID"]] <- NULL
+  x@samples[["Date"]] <- NULL
+  shiny::testServer(
+    NACHO:::mod_batch_server,
+    args = list(object = shiny::reactiveVal(x)),
+    {
+      session$setInputs(group = "biology")
+      expect_match(output$design_note, "no CartridgeID or Date column")
     }
   )
 })

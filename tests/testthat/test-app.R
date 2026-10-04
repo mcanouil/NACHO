@@ -202,11 +202,22 @@ test_that("closing the page after Done keeps the tuned object", {
 test_that("pages without data explain what to do", {
   html <- as.character(NACHO:::app_ui(done = FALSE))
   expect_match(html, "Load the example data", fixed = TRUE)
-  expect_match(html, "output.has_data", fixed = TRUE)
-  expect_match(html, "shinyBusySpinners", fixed = TRUE)
+  expect_match(html, "output.has_data === true", fixed = TRUE)
+  expect_match(html, "output.has_data === false", fixed = TRUE)
+  expect_match(html, as.character(shiny::useBusyIndicators()), fixed = TRUE)
+  pages <- unique(regmatches(
+    html,
+    gregexpr(
+      '(?<=data-toggle="tab" data-bs-toggle="tab" data-value=")[^"]+',
+      html,
+      perl = TRUE
+    )
+  )[[1]])
+  with_data <- setdiff(pages, c("Data", "About"))
+  expect_gt(length(with_data), 0L)
   expect_equal(
     lengths(regmatches(html, gregexpr("No data yet.", html, fixed = TRUE))),
-    6L
+    length(with_data)
   )
 })
 
@@ -214,7 +225,7 @@ test_that("the overview shows only when data is loaded", {
   html <- as.character(NACHO:::app_ui(done = FALSE))
   expect_match(
     html,
-    "data-display-if=\"output.has_data\"[^>]*>\\s*<div[^>]*bslib-grid",
+    "data-display-if=\"output.has_data === true\"[^>]*>\\s*<div[^>]*bslib-grid",
     perl = TRUE
   )
   expect_match(html, "Flagged samples", fixed = TRUE)
@@ -249,6 +260,29 @@ test_that("normalisation warnings reach the user once as toasts", {
     tuned()
   })
   expect_length(messages, 1L)
+  expect_match(messages, "ruv_k")
+})
+
+test_that("changing the normalisation settings announces the warning again", {
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message)
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$flushReact()
+    session$setInputs(
+      `thresholds-method` = "RUVg",
+      `thresholds-ruv_k` = 50,
+      `thresholds-background` = "none",
+      `thresholds-background_mode` = "threshold"
+    )
+    session$elapse(600)
+    tuned()
+    session$setInputs(`thresholds-ruv_k` = 60)
+    session$elapse(600)
+    tuned()
+  })
+  expect_length(messages, 2L)
   expect_match(messages, "ruv_k")
 })
 

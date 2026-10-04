@@ -3,6 +3,20 @@ NULL
 
 app_batch_variables <- c("CartridgeID", "Date")
 
+#' Columns that can hold biological groups
+#'
+#' Text or factor columns with at least two levels, and at most one level for
+#' every two samples, so identifiers and free text are left out.
+#'
+#' @noRd
+group_choices <- function(samples) {
+  levels <- vapply(samples, function(v) length(unique(v)), integer(1))
+  keep <- !vapply(samples, is.numeric, logical(1)) &
+    levels >= 2 &
+    levels <= nrow(samples) / 2
+  names(samples)[keep]
+}
+
 mod_batch_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -28,17 +42,18 @@ mod_batch_server <- function(id, object) {
   shiny::moduleServer(id, function(input, output, session) {
     columns <- shiny::reactive(names(nacho_samples(shiny::req(object()))))
     batches <- shiny::reactive(intersect(app_batch_variables, columns()))
+    groups <- shiny::reactive(group_choices(nacho_samples(shiny::req(object()))))
     shiny::observeEvent(object(), {
       shiny::updateSelectInput(
         session,
         "group",
-        choices = c(None = "", columns()),
-        selected = if (isTRUE(input$group %in% columns())) input$group else ""
+        choices = c(None = "", groups()),
+        selected = if (isTRUE(input$group %in% groups())) input$group else ""
       )
     })
     diagnostics <- shiny::reactive({
       group <- input$group
-      shiny::req(nzchar(group %||% ""), group %in% columns(), batches())
+      shiny::req(nzchar(group %||% ""), group %in% groups(), batches())
       batch_diagnostics(
         shiny::req(object()),
         group = group,
@@ -49,6 +64,8 @@ mod_batch_server <- function(id, object) {
     output$design_note <- shiny::renderText({
       if (!nzchar(input$group %||% "")) {
         "Choose the column that holds the biological groups to check whether batches and groups are confounded."
+      } else if (length(batches()) == 0) {
+        "These data have no CartridgeID or Date column, so there is no batch to compare with the groups."
       } else if (any(design()$confounded)) {
         paste(
           "At least one batch level holds a single group:",

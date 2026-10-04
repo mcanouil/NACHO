@@ -125,6 +125,10 @@ value_box_rules <- paste(
   sep = "\n"
 )
 
+css_font_family <- function(family, fallback) {
+  paste0('"', family, '", ', fallback)
+}
+
 #' The NACHO Bootstrap theme
 #'
 #' Bootstrap 5 with the brand colours and fonts, and the dark-mode rules of
@@ -137,11 +141,21 @@ nacho_theme <- function() {
     readLines(brand_path("dark.scss"), warn = FALSE),
     collapse = "\n"
   )
+  typography <- brand$typography
   bslib::bs_theme(version = 5, brand = brand) |>
     bslib::bs_theme_update(
-      "font-family-base" = "'Source Sans 3', system-ui, sans-serif",
-      "headings-font-family" = "'Source Sans 3', system-ui, sans-serif",
-      "font-family-monospace" = "'JetBrains Mono', ui-monospace, monospace"
+      "font-family-base" = css_font_family(
+        typography$base$family,
+        "system-ui, sans-serif"
+      ),
+      "headings-font-family" = css_font_family(
+        typography$headings$family,
+        "system-ui, sans-serif"
+      ),
+      "font-family-monospace" = css_font_family(
+        typography$monospace$family,
+        "ui-monospace, monospace"
+      )
     ) |>
     bslib::bs_add_rules(c(value_box_rules, dark_rules))
 }
