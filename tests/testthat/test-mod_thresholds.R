@@ -87,6 +87,7 @@ test_that("changing the preset resets the limits", {
     NACHO:::mod_thresholds_server,
     args = list(data = shiny::reactiveVal(GSE74821)),
     {
+      session$setInputs(preset = "nsolver", instrument = "max")
       session$setInputs(preset = "legacy", instrument = "max")
       session$elapse(600)
       expect_identical(
@@ -111,6 +112,53 @@ test_that("settings carry ruv_k only for RUVg", {
       expect_null(session$returned$settings()$ruv_k)
       session$setInputs(method = "RUVg")
       expect_identical(session$returned$settings()$ruv_k, 2L)
+    }
+  )
+})
+
+test_that("start-up inputs do not reset the object's own thresholds", {
+  x <- GSE74821
+  x@thresholds <- utils::modifyList(
+    nacho_thresholds("flex", "legacy"),
+    list(FoV = 80)
+  )
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(x)),
+    {
+      session$setInputs(preset = "nsolver", instrument = "max")
+      session$elapse(600)
+      session$setInputs(preset = "legacy", instrument = "flex")
+      session$elapse(600)
+      expect_identical(session$returned$thresholds(), x@thresholds)
+    }
+  )
+})
+
+test_that("open bounds survive the module", {
+  x <- suppressWarnings(mirna_fixture())
+  neg_range <- NACHO:::threshold_range(
+    x@samples$Ligation_NEG,
+    x@thresholds$Ligation_NEG
+  )
+  haem_range <- NACHO:::threshold_range(
+    x@samples$Haemolysis,
+    x@thresholds$Haemolysis
+  )
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(x)),
+    {
+      session$setInputs(
+        Ligation_NEG = c(neg_range[1], -1),
+        Haemolysis = c(haem_range[1], 5),
+        FoV = 90
+      )
+      session$elapse(600)
+      limits <- session$returned$thresholds()
+      expect_identical(limits$Ligation_NEG, c(-Inf, -1))
+      expect_identical(limits$Haemolysis, c(-Inf, 5))
+      expect_identical(limits$FoV, 90)
     }
   )
 })

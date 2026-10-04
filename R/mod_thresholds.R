@@ -178,7 +178,8 @@ mod_thresholds_server <- function(id, data) {
         moved <- !identical(input$preset, limits[["preset"]]) ||
           !identical(input$instrument, instrument)
         if (moved) reset()
-      }
+      },
+      ignoreInit = TRUE
     )
 
     output$sliders <- shiny::renderUI({
