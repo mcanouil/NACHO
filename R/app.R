@@ -1,4 +1,4 @@
-#' @include mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R
+#' @include mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R mod_batch.R
 NULL
 
 #' Run the NACHO app
@@ -38,7 +38,7 @@ help_page <- function(name) {
 
 plot_page <- function(page) {
   bslib::layout_columns(
-    col_widths = 6,
+    col_widths = bslib::breakpoints(sm = 12, lg = 6),
     !!!lapply(app_plot_types[[page]], mod_qc_plot_ui)
   )
 }
@@ -64,7 +64,7 @@ app_ui <- function(done = FALSE) {
     bslib::nav_panel("Controls", plot_page("controls")),
     bslib::nav_panel("Counts", plot_page("counts")),
     bslib::nav_panel("Normalisation", plot_page("normalisation")),
-    bslib::nav_panel("Batch", plot_page("batch")),
+    bslib::nav_panel("Batch", mod_batch_ui("batch")),
     bslib::nav_panel("Flagged samples", mod_outliers_ui("outliers")),
     bslib::nav_panel("About", help_page("nacho"))
   )
@@ -106,6 +106,7 @@ app_server <- function(x, done = FALSE) {
     qc <- shiny::reactive(nacho_qc(tuned()))
     mod_overview_server("overview", tuned, qc)
     mod_outliers_server("outliers", tuned, qc)
+    mod_batch_server("batch", tuned)
     lapply(unlist(app_plot_types, use.names = FALSE), function(type) {
       mod_qc_plot_server(type, object = tuned, type = type, dark = dark)
     })

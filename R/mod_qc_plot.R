@@ -67,13 +67,78 @@ app_plot <- function(x, type, options, dark) {
 
 mod_qc_plot_ui <- function(id, type = id) {
   ns <- shiny::NS(id)
+  title <- app_plot_titles[[type]]
   bslib::card(
-    bslib::card_header(app_plot_titles[[type]]),
-    shiny::plotOutput(ns("plot"), height = "350px"),
-    if (!type %in% app_colourless) {
-      bslib::card_footer(
-        shiny::selectInput(ns("colour"), "Colour by", choices = "CartridgeID")
+    full_screen = TRUE,
+    bslib::card_header(
+      class = "d-flex justify-content-between align-items-center",
+      title,
+      bslib::popover(
+        shiny::tags$button(
+          type = "button",
+          class = "btn btn-sm btn-outline-secondary",
+          `aria-label` = paste("Display options for", title),
+          shiny::icon("sliders", `aria-hidden` = "true")
+        ),
+        title = "Display options",
+        if (!type %in% app_colourless) {
+          shiny::selectInput(ns("colour"), "Colour by", choices = "CartridgeID")
+        },
+        shiny::checkboxInput(
+          ns("show_legend"),
+          "Show the legend",
+          value = TRUE
+        ),
+        shiny::selectInput(
+          ns("labels"),
+          "Label flagged samples with",
+          choices = c(None = "")
+        ),
+        shiny::sliderInput(
+          ns("size"),
+          "Point size",
+          min = 0.5,
+          max = 4,
+          value = 1,
+          step = 0.5
+        ),
+        shiny::numericInput(
+          ns("width"),
+          "Download width (cm)",
+          value = 16,
+          min = 5,
+          max = 50
+        ),
+        shiny::numericInput(
+          ns("height"),
+          "Download height (cm)",
+          value = 12,
+          min = 5,
+          max = 50
+        ),
+        shiny::downloadButton(ns("download"), "Download PNG")
       )
+    ),
+    bslib::card_body(shiny::plotOutput(ns("plot"), height = "350px")),
+    bslib::card_footer(shiny::textOutput(ns("summary")))
+  )
+}
+
+plot_summary <- function(x, type) {
+  qc <- nacho_qc(x)
+  ids <- qc[[x@settings[["id_colname"]]]][qc[["status"]] %in% "fail"]
+  cartridges <- length(unique(qc[["CartridgeID"]]))
+  paste0(
+    nrow(qc),
+    " samples on ",
+    cartridges,
+    " cartridge",
+    if (cartridges != 1) "s",
+    "; ",
+    if (length(ids) == 0) {
+      "none flagged."
+    } else {
+      paste0(length(ids), " flagged: ", paste(ids, collapse = ", "), ".")
     }
   )
 }
@@ -94,12 +159,41 @@ mod_qc_plot_server <- function(id, object, type = id, dark) {
           "CartridgeID"
         }
       )
+      shiny::updateSelectInput(
+        session,
+        "labels",
+        choices = c(None = "", columns),
+        selected = if (isTRUE(input$labels %in% columns)) input$labels else ""
+      )
     })
+    options <- shiny::reactive(
+      list(
+        colour = input$colour,
+        show_legend = input$show_legend,
+        size = input$size,
+        outliers_labels = if (nzchar(input$labels %||% "")) input$labels
+      )
+    )
     plot <- shiny::reactive({
-      app_plot(shiny::req(object()), type, list(colour = input$colour), dark())
+      app_plot(shiny::req(object()), type, options(), dark())
     })
     output$plot <- shiny::renderPlot(plot(), alt = plot_alt_texts[[type]]) |>
-      shiny::bindCache(object(), type, input$colour, dark())
+      shiny::bindCache(object(), type, options(), dark())
+    output$summary <- shiny::renderText(plot_summary(object(), type))
+    output$download <- shiny::downloadHandler(
+      filename = function() paste0("nacho-", type, ".png"),
+      content = function(file) {
+        ggplot2::ggsave(
+          file,
+          plot(),
+          width = input$width %||% 16,
+          height = input$height %||% 12,
+          units = "cm",
+          dpi = 150,
+          bg = plot_colours(dark())[["paper"]]
+        )
+      }
+    )
     plot
   })
 }
