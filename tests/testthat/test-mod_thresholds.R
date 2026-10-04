@@ -251,7 +251,7 @@ test_that("a group the data does not have says so", {
   expect_match(html, "Not measured for these data.", fixed = TRUE)
 })
 
-test_that("new data starts from its own thresholds, not the previous debounce", {
+test_that("new data keeps its own thresholds after the debounce window", {
   other <- GSE74821
   other@thresholds$FoV <- 80
   data <- shiny::reactiveVal(GSE74821)
@@ -267,6 +267,49 @@ test_that("new data starts from its own thresholds, not the previous debounce", 
       data(other)
       session$flushReact()
       expect_identical(session$returned$thresholds()$FoV, 80)
+      session$elapse(1500)
+      expect_identical(session$returned$thresholds()$FoV, 80)
+      expect_identical(session$returned$current_thresholds()$FoV, 80)
+    }
+  )
+})
+
+test_that("a slider move after a data change is applied", {
+  other <- GSE74821
+  other@thresholds$FoV <- 80
+  data <- shiny::reactiveVal(GSE74821)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = data),
+    {
+      session$flushReact()
+      session$setInputs(FoV = 99.9)
+      data(other)
+      session$flushReact()
+      session$elapse(1500)
+      session$setInputs(FoV = 85)
+      session$elapse(600)
+      expect_identical(session$returned$thresholds()$FoV, 85)
+    }
+  )
+})
+
+test_that("a metric whose slider never re-sends keeps the new object's value", {
+  other <- GSE74821
+  other@thresholds$PCL <- 0.9
+  data <- shiny::reactiveVal(GSE74821)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = data),
+    {
+      session$flushReact()
+      session$setInputs(PCL = 0.5)
+      session$elapse(600)
+      expect_identical(session$returned$thresholds()$PCL, 0.5)
+      data(other)
+      session$flushReact()
+      session$elapse(1500)
+      expect_identical(session$returned$thresholds()$PCL, 0.9)
     }
   )
 })
@@ -286,7 +329,11 @@ test_that("the sliders link to the help page of their metric", {
     "Positive_factor",
     "House_factor"
   )) {
-    expect_match(html, paste0("More about ", metric), fixed = TRUE)
+    expect_match(
+      html,
+      paste0("More about ", NACHO:::qc_metric_labels[[metric]]),
+      fixed = TRUE
+    )
   }
   expect_match(html, "bslib-popover", fixed = TRUE)
 })

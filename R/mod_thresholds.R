@@ -34,7 +34,7 @@ threshold_help_block <- function(metric) {
       shiny::tags$button(
         type = "button",
         class = "btn btn-link btn-sm p-0 ms-1 align-baseline",
-        `aria-label` = paste("More about", metric),
+        `aria-label` = paste("More about", qc_metric_labels[[metric]]),
         shiny::icon("circle-question", `aria-hidden` = "true")
       ),
       help_page(page),
@@ -207,12 +207,17 @@ mod_thresholds_ui <- function(id) {
 mod_thresholds_server <- function(id, data) {
   shiny::moduleServer(id, function(input, output, session) {
     current <- shiny::reactiveVal()
-    fresh <- shiny::reactiveVal(FALSE)
+    base <- shiny::reactiveVal()
+    pending <- shiny::reactiveVal(FALSE)
+    start <- function(limits) {
+      base(limits)
+      current(limits)
+    }
 
     shiny::observeEvent(data(), {
       x <- data()
-      fresh(TRUE)
-      current(x@thresholds)
+      pending(TRUE)
+      start(x@thresholds)
       instrument <- x@thresholds[["instrument"]]
       shiny::updateSelectInput(
         session,
@@ -244,7 +249,7 @@ mod_thresholds_server <- function(id, data) {
 
     reset <- function() {
       limits <- shiny::req(current())
-      current(nacho_thresholds(
+      start(nacho_thresholds(
         instrument = input$instrument,
         preset = input$preset,
         haemolysis = any(is.finite(limits[["Haemolysis"]]))
@@ -272,35 +277,52 @@ mod_thresholds_server <- function(id, data) {
         output[[paste0("group_", group)]] <- shiny::renderUI(
           threshold_group_body(
             shiny::req(data()),
-            shiny::req(current()),
+            shiny::req(base()),
             session$ns,
             group
           )
+        )
+        shiny::outputOptions(
+          output,
+          paste0("group_", group),
+          suspendWhenHidden = FALSE
         )
       })
     }
 
     shiny::observeEvent(input$reset, reset())
 
-    current_thresholds <- shiny::reactive({
-      x <- shiny::req(data())
-      limits <- shiny::req(current())
-      if (fresh()) {
-        return(limits)
-      }
-      for (metric in threshold_metrics(x)) {
-        value <- input[[metric]]
-        if (!is.null(value)) {
-          range <- threshold_range(x@samples[[metric]], limits[[metric]])
-          limits[[metric]] <- slider_to_limits(value, range, limits[[metric]])
-        }
-      }
-      limits
-    })
+    for (metric in qc_metrics) {
+      local({
+        metric <- metric
+        shiny::observeEvent(
+          input[[metric]],
+          {
+            x <- shiny::req(data())
+            original <- shiny::req(base())
+            shiny::req(metric %in% threshold_metrics(x))
+            range <- threshold_range(x@samples[[metric]], original[[metric]])
+            limits <- current()
+            updated <- slider_to_limits(
+              input[[metric]],
+              range,
+              original[[metric]]
+            )
+            if (!identical(limits[[metric]], updated)) {
+              limits[[metric]] <- updated
+              current(limits)
+            }
+          },
+          ignoreInit = TRUE
+        )
+      })
+    }
+
+    current_thresholds <- shiny::reactive(shiny::req(current()))
     settled <- shiny::debounce(current_thresholds, 500)
-    shiny::observeEvent(settled(), fresh(FALSE))
+    shiny::observeEvent(settled(), pending(FALSE))
     thresholds <- shiny::reactive(
-      if (fresh()) current_thresholds() else settled()
+      if (pending()) current_thresholds() else settled()
     )
 
     settings <- shiny::reactive({
