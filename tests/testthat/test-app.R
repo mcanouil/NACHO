@@ -300,3 +300,17 @@ test_that("plots follow the dark-mode toggle", {
     expect_false(dark())
   })
 })
+
+test_that("the page loads the bold and italic faces of the brand font", {
+  deps <- htmltools::resolveDependencies(
+    htmltools::findDependencies(NACHO:::app_ui(done = FALSE))
+  )
+  fonts <- Filter(function(d) d$name == "nacho-fonts", deps)
+  expect_length(fonts, 1L)
+  css <- paste(
+    readLines(file.path(fonts[[1]]$src$file, fonts[[1]]$stylesheet)),
+    collapse = "\n"
+  )
+  expect_match(css, "font-weight: 700", fixed = TRUE)
+  expect_match(css, "font-style: italic", fixed = TRUE)
+})
