@@ -202,8 +202,11 @@ test_that("summary() copes with thresholds that lack the miRNA metrics", {
 })
 
 test_that("the report lists only the thresholds of metrics the data have", {
-  output <- capture.output(NACHO:::report_markdown(GSE74821))
-  expect_false(any(grepl("Ligation", output)))
+  expect_false(any(grepl("Ligation", NACHO:::report_thresholds(GSE74821))))
+  expect_false(any(grepl("Ligation", NACHO:::report_sections(GSE74821)$title)))
+  x <- mirna_fixture()
+  expect_true(any(grepl("Ligation", NACHO:::report_thresholds(x))))
+  expect_false("HF" %in% NACHO:::report_sections(x)$plot)
 })
 
 test_that("a partial ligation control set keeps the metrics it can compute", {

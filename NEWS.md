@@ -24,7 +24,9 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
   - feat: Plots follow the NACHO brand: groups use the Okabe-Ito colours up to eight levels on a light background and seven on a dark one, then viridis, and flagged samples are rust triangles instead of red points.
 - In `R/render.R`,
-  - feat: `render()`'s `clean` argument is gone; the working files now live in a temporary folder.
+  - feat: `render()` builds the report with Quarto instead of R Markdown, as a self-contained HTML file or a Typst PDF with `format = "typst"`.
+    It needs the Quarto command-line interface 1.9 or newer, which RStudio and Positron bundle.
+  - feat: `render()` takes the object as `x`, writes `nacho-report.html` or `nacho-report.pdf` to `output_dir` and returns the path; `output_file`, `show_outliers` and `clean` are gone.
 - In `R/thresholds.R`,
   - feat: Samples are flagged against the nSolver thresholds by default.
     `nacho_thresholds(preset = "legacy")` keeps the NACHO 2 limits, and with `background = "geo", background_mode = "subtract"` it gives back NACHO 2 outlier calls.
@@ -46,9 +48,13 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
 - In `DESCRIPTION`,
   - build: NACHO now requires R 4.3 or newer.
+  - build: knitr and rmarkdown move to Suggests, and quarto joins them.
 
 ## New features
 
+- In `R/render.R`,
+  - feat: The report opens with the quality-control summary and one callout for each flagged sample, and gives every figure alt text.
+  - feat: `render()` gains `group`, which adds the batch design and cross-tables, with a warning when batch and biology are confounded.
 - In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
   - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.
 - In `R/read_nacho.R`,

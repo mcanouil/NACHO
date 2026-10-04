@@ -1,0 +1,69 @@
+---
+title: "NanoString quality-control report"
+brand:
+  light: _brand.yml
+params:
+  nacho_rds: ""
+knitr:
+  opts_chunk:
+    fig.retina: 1
+format:
+  html:
+    format-links: false
+    embed-resources: true
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    fig-width: 7
+    fig-height: 4.5
+    fig-dpi: 96
+  typst:
+    font-paths: fonts
+    fig-format: png
+    logo:
+      width: 0.5in
+      inset: 0.3in
+    toc: true
+    section-numbering: "1.1"
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+report <- NACHO:::report_setup(params$nacho_rds)
+x <- report$object
+```
+
+::: {.content-visible when-format="html"}
+![](nacho_hex.png){fig-alt="NACHO logo" width=1.2in}
+:::
+
+# Summary
+
+```{r}
+#| label: summary
+#| output: asis
+cat(NACHO:::report_overview(x), sep = "\n")
+cat("\n\n")
+cat(NACHO:::report_callouts(x), sep = "\n")
+```
+
+# Settings and thresholds
+
+```{r}
+#| label: thresholds
+#| output: asis
+cat(NACHO:::report_settings(x), sep = "\n")
+cat("\n\nLimits that flag a sample:\n\n")
+cat(NACHO:::report_thresholds(x), sep = "\n")
+```
+
+```{r}
+#| label: body
+#| output: asis
+#| fig-alt: !expr report$sections$alt[!is.na(report$sections$plot)]
+NACHO:::report_body(report)
+```

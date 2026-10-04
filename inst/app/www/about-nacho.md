@@ -19,7 +19,7 @@ With the use of two functions, RCC files are summarised and visualised, namely: 
 
 In addition (since v0.6.0) *NACHO* includes two (three) additional functions:
 
-* The `render()` function renders a full quality-control report (HTML) based on the results of a call to `load_rcc()` or `normalise()` (using `print()` in an R Markdown chunk).
+* The `render()` function writes a full quality-control report with Quarto, as an HTML or PDF file, from the results of a call to `load_rcc()` or `normalise()`.
 * The `autoplot()` function draws any quality-control metrics from `visualise()` and `render()`.
 
 For more `vignette("NACHO")` and `vignette("NACHO-analysis")`.

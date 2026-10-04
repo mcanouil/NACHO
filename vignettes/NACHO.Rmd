@@ -380,17 +380,12 @@ knitr::include_graphics(path = "README-app.png")
 
 ## The `render()` function
 
-The `render()` function renders a comprehensive HTML report, which includes all quality-control metrics and a description of each.
+The `render()` function builds a report with Quarto, which includes all quality-control metrics and a description of each.
+It writes a self-contained HTML file, or a Typst PDF with `format = "typst"`, and returns the path.
 
 ```{r}
 #| eval: false
-render(
-  nacho_object = GSE74821,
-  colour = "CartridgeID",
-  output_dir = ".",
-  size = 0.5,
-  show_legend = TRUE
-)
+render(GSE74821, format = "html", output_dir = ".")
 ```
 
 `print()` shows a short summary of the object.
