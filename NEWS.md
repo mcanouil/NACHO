@@ -154,6 +154,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - fix: `as_nacho()` on a `NanoStringRccSet` now gives the same probe names as `load_rcc()` on the same RCC files.
 - In `R/load_rcc.R`,
   - fix: `load_rcc()` now checks a supplied `plexset_id` column: values outside `S1` to `S8` and duplicated id/`plexset_id` pairs raise a classed error before any file is read into a matrix.
+  - fix: `load_rcc()` says which folder holds no readable RCC file, instead of failing with an internal error.
 - In `R/qc.R`,
   - fix: Housekeeping prediction no longer returns missing gene names when fewer than five candidates exist.
   - fix: Predicting housekeeping genes no longer misaligns probes when some RCC files lack a probe.

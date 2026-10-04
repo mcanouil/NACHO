@@ -643,6 +643,22 @@ test_that("resolve_housekeeping_norm() warns and turns off without any housekeep
       "mrna"
     ),
     class = "nacho_warning_no_housekeeping"
+
+test_that("load_rcc() names the folder when no RCC file can be read", {
+  empty <- withr::local_tempdir()
+  expect_error(
+    load_rcc(empty, data.frame(IDFILE = character()), "IDFILE"),
+    class = "nacho_error_missing_file"
+  )
+
+  other <- withr::local_tempdir()
+  writeLines("not an RCC file", file.path(other, "notes.txt"))
+  error <- expect_error(
+    load_rcc(other, data.frame(IDFILE = character()), "IDFILE"),
+    class = "nacho_error_missing_file"
+  )
+  expect_match(conditionMessage(error), "RCC", fixed = TRUE)
+})
   )
   expect_false(off)
   expect_false(expect_no_warning(

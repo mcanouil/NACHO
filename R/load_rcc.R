@@ -188,6 +188,15 @@ load_rcc <- function(
     )
   }
   files <- unique(nacho_df[["file_path"]])
+  if (length(files) == 0) {
+    nacho_abort(
+      c(
+        "No RCC file was read from {.path {data_directory}}.",
+        i = "{.arg ssheet_csv} must list at least one {.val .RCC} or {.val .RCC.gz} file in that folder."
+      ),
+      class = "missing_file"
+    )
+  }
   nacho_progress_step("Reading {length(files)} RCC files")
   parsed <- lapply(files, read_rcc)
   is_plexset <- vapply(
