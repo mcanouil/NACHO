@@ -20,6 +20,9 @@ format:
   typst:
     font-paths: fonts
     fig-format: png
+    logo:
+      width: 0.7in
+      inset: 0.3in
     toc: true
     section-numbering: "1.1"
 execute:
@@ -34,7 +37,9 @@ report <- NACHO:::report_setup(params$nacho_rds)
 x <- report$object
 ```
 
+::: {.content-visible when-format="html"}
 ![](nacho_hex.png){fig-alt="NACHO logo" width=1.2in}
+:::
 
 # Summary
 
