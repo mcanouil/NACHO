@@ -190,10 +190,7 @@ test_that("using GEO GSE74821", {
     silent = TRUE
   )
   skip_if(inherits(geo_files, "try-error"), "GEO is unavailable.")
-  utils::untar(
-    file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),
-    exdir = file.path(tempdir(), "GSE74821")
-  )
+  skip_if_geo_archive_unusable("GSE74821", file.path(tempdir(), "GSE74821"))
   targets$IDFILE <- list.files(
     path = file.path(tempdir(), "GSE74821"),
     pattern = ".RCC.gz$"
@@ -254,10 +251,7 @@ test_that("using GEO GSE70970", {
     silent = TRUE
   )
   skip_if(inherits(geo_files, "try-error"), "GEO is unavailable.")
-  utils::untar(
-    file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"),
-    exdir = file.path(tempdir(), "GSE70970")
-  )
+  skip_if_geo_archive_unusable("GSE70970", file.path(tempdir(), "GSE70970"))
   targets$IDFILE <- list.files(
     path = file.path(tempdir(), "GSE70970"),
     pattern = ".RCC.gz$"
@@ -643,6 +637,12 @@ test_that("resolve_housekeeping_norm() warns and turns off without any housekeep
       "mrna"
     ),
     class = "nacho_warning_no_housekeeping"
+  )
+  expect_false(off)
+  expect_false(expect_no_warning(
+    NACHO:::resolve_housekeeping_norm("Endogenous", NULL, FALSE, FALSE, "mrna")
+  ))
+})
 
 test_that("load_rcc() names the folder when no RCC file can be read", {
   empty <- withr::local_tempdir()
@@ -658,10 +658,4 @@ test_that("load_rcc() names the folder when no RCC file can be read", {
     class = "nacho_error_missing_file"
   )
   expect_match(conditionMessage(error), "RCC", fixed = TRUE)
-})
-  )
-  expect_false(off)
-  expect_false(expect_no_warning(
-    NACHO:::resolve_housekeeping_norm("Endogenous", NULL, FALSE, FALSE, "mrna")
-  ))
 })

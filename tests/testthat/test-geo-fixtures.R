@@ -32,29 +32,6 @@ test_that("the fixtures are single-sample RCC files, not PlexSet", {
   }
 })
 
-load_full_series <- function(series, instrument = NULL) {
-  download_dir <- withr::local_tempdir(.local_envir = parent.frame())
-  suppressMessages(GEOquery::getGEOSuppFiles(
-    GEO = series,
-    baseDir = download_dir
-  ))
-  utils::untar(
-    tarfile = file.path(download_dir, series, paste0(series, "_RAW.tar")),
-    exdir = file.path(download_dir, series)
-  )
-  files <- list.files(
-    file.path(download_dir, series),
-    pattern = "\\.RCC(\\.gz)?$",
-    ignore.case = TRUE
-  )
-  suppressMessages(NACHO::load_rcc(
-    data_directory = file.path(download_dir, series),
-    ssheet_csv = data.frame(IDFILE = files),
-    id_colname = "IDFILE",
-    instrument = instrument
-  ))
-}
-
 test_that("the full GSE270837 series loads from GEO", {
   skip_on_cran()
   skip_if_offline()
