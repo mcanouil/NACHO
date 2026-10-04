@@ -203,7 +203,7 @@ mod_thresholds_server <- function(id, data) {
       threshold_inputs(shiny::req(data()), shiny::req(current()), session$ns)
     })
 
-    thresholds <- shiny::reactive({
+    current_thresholds <- shiny::reactive({
       x <- shiny::req(data())
       limits <- shiny::req(current())
       for (metric in threshold_metrics(x)) {
@@ -214,8 +214,8 @@ mod_thresholds_server <- function(id, data) {
         }
       }
       limits
-    }) |>
-      shiny::debounce(500)
+    })
+    thresholds <- shiny::debounce(current_thresholds, 500)
 
     settings <- shiny::reactive({
       x <- shiny::req(data())
@@ -229,6 +229,11 @@ mod_thresholds_server <- function(id, data) {
       )
     })
 
-    list(thresholds = thresholds, settings = settings, reset = reset)
+    list(
+      thresholds = thresholds,
+      current_thresholds = current_thresholds,
+      settings = settings,
+      reset = reset
+    )
   })
 }

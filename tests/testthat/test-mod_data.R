@@ -342,3 +342,120 @@ test_that("extra sample sheets are announced", {
     class = "nacho_warning_sample_sheet_discarded"
   )
 })
+
+zip_upload <- function(files, folder = NULL, name = "run.zip") {
+  staging <- withr::local_tempdir(.local_envir = parent.frame())
+  target <- if (is.null(folder)) staging else file.path(staging, folder)
+  dir.create(target, showWarnings = FALSE)
+  file.copy(files, target)
+  archive <- file.path(withr::local_tempdir(.local_envir = parent.frame()), "0")
+  withr::with_dir(
+    staging,
+    utils::zip(archive, list.files(staging), flags = "-rq")
+  )
+  data.frame(
+    name = name,
+    size = file.size(paste0(archive, ".zip")),
+    type = "application/zip",
+    datapath = paste0(archive, ".zip")
+  )
+}
+
+test_that("an empty zip is refused as an upload without RCC files", {
+  staging <- withr::local_tempdir()
+  dir.create(file.path(staging, "empty"))
+  archive <- file.path(withr::local_tempdir(), "0")
+  withr::with_dir(staging, utils::zip(archive, "empty", flags = "-rq"))
+  empty <- data.frame(
+    name = "empty.zip",
+    size = 1,
+    type = "application/zip",
+    datapath = paste0(archive, ".zip")
+  )
+  expect_error(
+    NACHO:::read_uploads(empty),
+    "holds no RCC file",
+    class = "nacho_error_bad_upload"
+  )
+})
+
+test_that("a corrupt zip names the problem", {
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message)
+  )
+  path <- file.path(withr::local_tempdir(), "0")
+  writeLines("this is not a zip", path)
+  bad <- data.frame(
+    name = "broken.zip",
+    size = file.size(path),
+    type = "application/zip",
+    datapath = path
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    suppressWarnings(session$setInputs(files = bad, import = 1))
+  })
+  expect_match(messages, "not a valid zip archive")
+})
+
+test_that("a sample sheet with bare file names matches files in a zip", {
+  rcc <- list.files(
+    test_path("salmon_data"),
+    pattern = "\\.rcc$",
+    ignore.case = TRUE,
+    full.names = TRUE
+  )
+  sheet <- data.frame(
+    IDFILE = rep(basename(rcc), each = 8),
+    plexset_id = paste0("S", 1:8),
+    group = "case"
+  )
+  sheet_path <- file.path(withr::local_tempdir(), "sheet")
+  utils::write.csv(sheet, sheet_path, row.names = FALSE)
+  sheet_row <- data.frame(
+    name = "sheet.csv",
+    size = file.size(sheet_path),
+    type = "text/csv",
+    datapath = sheet_path
+  )
+  for (folder in list(NULL, "run1")) {
+    fresh <- tempfile()
+    file.copy(sheet_path, fresh)
+    sheet_row$datapath <- fresh
+    nacho <- withCallingHandlers(
+      NACHO:::read_uploads(rbind(zip_upload(rcc, folder), sheet_row)),
+      nacho_warning_metric_unavailable = function(cnd) {
+        invokeRestart("muffleWarning")
+      }
+    )
+    expect_true("group" %in% names(nacho_samples(nacho)))
+  }
+})
+
+test_that("a sample sheet that matches no file is announced", {
+  rcc <- list.files(
+    test_path("salmon_data"),
+    pattern = "\\.rcc$",
+    ignore.case = TRUE,
+    full.names = TRUE
+  )
+  sheet <- data.frame(IDFILE = "other.RCC", plexset_id = "S1", group = "case")
+  sheet_path <- file.path(withr::local_tempdir(), "sheet")
+  utils::write.csv(sheet, sheet_path, row.names = FALSE)
+  sheet_row <- data.frame(
+    name = "sheet.csv",
+    size = file.size(sheet_path),
+    type = "text/csv",
+    datapath = sheet_path
+  )
+  expect_warning(
+    withCallingHandlers(
+      NACHO:::read_uploads(rbind(zip_upload(rcc), sheet_row)),
+      nacho_warning_metric_unavailable = function(cnd) {
+        invokeRestart("muffleWarning")
+      }
+    ),
+    "matches no",
+    class = "nacho_warning_sample_sheet_discarded"
+  )
+})

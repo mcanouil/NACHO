@@ -64,7 +64,15 @@ read_uploads <- function(files) {
         class = "sample_sheet_discarded"
       )
     } else {
-      targets <- merge(targets, sheet, by = merge_by)
+      matched <- merge_sample_sheet(targets, sheet, merge_by)
+      if (nrow(matched) == 0) {
+        nacho_warn(
+          "The sample sheet was discarded, because it matches no uploaded RCC file.",
+          class = "sample_sheet_discarded"
+        )
+      } else {
+        targets <- matched
+      }
     }
   }
   load_rcc(
@@ -76,6 +84,27 @@ read_uploads <- function(files) {
     ssheet_csv = targets,
     id_colname = "IDFILE"
   )
+}
+
+#' Join a sample sheet to the uploaded files
+#'
+#' Files from a zip archive carry the archive name in `IDFILE`, so the sheet
+#' is matched on the bare file name and the upload keeps its own `IDFILE`.
+#'
+#' @noRd
+merge_sample_sheet <- function(targets, sheet, merge_by) {
+  key <- function(data) {
+    data[["IDFILE"]] <- basename(data[["IDFILE"]])
+    data[, merge_by, drop = FALSE]
+  }
+  sheet_keys <- key(sheet)
+  sheet_keys[["row"]] <- seq_len(nrow(sheet))
+  target_keys <- key(targets)
+  target_keys[["position"]] <- seq_len(nrow(targets))
+  links <- merge(target_keys, sheet_keys, by = merge_by)
+  links <- links[order(links[["position"]]), ]
+  extra <- sheet[links[["row"]], setdiff(names(sheet), merge_by), drop = FALSE]
+  cbind(targets[links[["position"]], , drop = FALSE], extra)
 }
 
 #' List the files of one upload
@@ -94,8 +123,27 @@ expand_upload <- function(name, datapath, type) {
       dirname(datapath),
       sub("\\.zip$", "", name, ignore.case = TRUE)
     )
-    utils::unzip(datapath, exdir = extract_directory)
+    tryCatch(
+      utils::unzip(datapath, exdir = extract_directory),
+      warning = function(cnd) {
+        nacho_abort(
+          c(
+            "{.file {name}} is not a valid zip archive.",
+            i = "Upload the RCC files themselves, or zip them again."
+          ),
+          class = "bad_upload"
+        )
+      }
+    )
     files <- list.files(extract_directory, recursive = TRUE)
+    if (length(files) == 0) {
+      return(data.frame(
+        name = character(),
+        datapath = character(),
+        type = character(),
+        IDFILE = character()
+      ))
+    }
     extracted <- file.path(basename(extract_directory), files)
     return(data.frame(
       name = extracted,

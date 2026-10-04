@@ -86,3 +86,34 @@ test_that("each plot module draws its own plot type", {
     expect_identical(output$`PCBatch-plot`$alt, plot_alt_texts[["PCBatch"]])
   })
 })
+
+test_that("the page holds every navigation panel and plot card", {
+  html <- as.character(NACHO:::app_ui(NULL))
+  panels <- c(
+    "Data",
+    "QC metrics",
+    "Controls",
+    "Counts",
+    "Normalisation",
+    "Batch",
+    "Flagged samples",
+    "About"
+  )
+  for (title in c(panels, NACHO:::app_plot_titles)) {
+    expect_match(html, title, fixed = TRUE)
+  }
+})
+
+test_that("Done uses the thresholds as they stand, before the debounce", {
+  returned <- NULL
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) returned <<- returnValue,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$flushReact()
+    session$setInputs(`thresholds-FoV` = 99.9)
+    session$setInputs(done = 1)
+  })
+  expect_identical(returned@thresholds$FoV, 99.9)
+})

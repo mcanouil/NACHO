@@ -60,33 +60,39 @@ app_ui <- function(request) {
   )
 }
 
+tune_object <- function(object, chosen, thresholds) {
+  tryCatch(
+    rlang::with_options(
+      normalise(
+        object,
+        normalisation_method = chosen$normalisation_method,
+        ruv_k = chosen$ruv_k,
+        background = chosen$background,
+        background_mode = chosen$background_mode,
+        outliers_thresholds = thresholds
+      ),
+      nacho.quiet = TRUE
+    ),
+    nacho_error = function(cnd) {
+      shiny::validate(
+        shiny::need(FALSE, cli::ansi_strip(rlang::cnd_message(cnd)))
+      )
+    }
+  )
+}
+
 app_server <- function(x) {
   function(input, output, session) {
     data <- mod_data_server("data", initial = x)
     settings <- mod_thresholds_server("thresholds", data = data)
     dark <- shiny::reactive(identical(input$dark_mode, "dark"))
-    tuned <- shiny::reactive({
-      object <- shiny::req(data())
-      chosen <- settings$settings()
-      tryCatch(
-        rlang::with_options(
-          normalise(
-            object,
-            normalisation_method = chosen$normalisation_method,
-            ruv_k = chosen$ruv_k,
-            background = chosen$background,
-            background_mode = chosen$background_mode,
-            outliers_thresholds = settings$thresholds()
-          ),
-          nacho.quiet = TRUE
-        ),
-        nacho_error = function(cnd) {
-          shiny::validate(
-            shiny::need(FALSE, cli::ansi_strip(rlang::cnd_message(cnd)))
-          )
-        }
+    tuned <- shiny::reactive(
+      tune_object(
+        shiny::req(data()),
+        settings$settings(),
+        settings$thresholds()
       )
-    })
+    )
     qc <- shiny::reactive(nacho_qc(tuned()))
     mod_overview_server("overview", tuned, qc)
     mod_outliers_server("outliers", tuned, qc)
@@ -97,7 +103,14 @@ app_server <- function(x) {
       if (is.null(data())) {
         return(shiny::stopApp(NULL))
       }
-      result <- tryCatch(tuned(), shiny.silent.error = function(cnd) NULL)
+      result <- tryCatch(
+        tune_object(
+          data(),
+          settings$settings(),
+          settings$current_thresholds()
+        ),
+        shiny.silent.error = function(cnd) NULL
+      )
       if (is.null(result)) {
         notify_user(
           "Choose a normalisation method these data support before clicking Done.",
