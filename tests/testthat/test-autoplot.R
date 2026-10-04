@@ -64,9 +64,36 @@ test_that("PCBatch leaves tiles without a value unlabelled", {
   labels <- built$data[[2]]$label
   expect_false("NA" %in% labels)
   expect_identical(
-    labels == "",
-    is.na(built$data[[1]]$fill) | built$data[[1]]$fill == "grey90"
+    nrow(built$data[[2]]),
+    sum(!is.na(plot$data$r_squared))
   )
+})
+
+test_that("PCBatch labels sit on a paper box in ink", {
+  for (dark in c(FALSE, TRUE)) {
+    colours <- NACHO:::plot_colours(dark)
+    built <- ggplot2::ggplot_build(autoplot(
+      GSE74821,
+      type = "PCBatch",
+      dark = dark
+    ))
+    labels <- built$data[[2]]
+    expect_gt(nrow(labels), 0L)
+    expect_true(all(labels$label != ""))
+    expect_true(all(labels$fill == colours[["paper"]]))
+    expect_true(all(labels$colour == colours[["ink"]]))
+  }
+})
+
+test_that("ink on paper keeps the plot text readable", {
+  skip_if_not_installed("colorspace")
+  for (dark in c(FALSE, TRUE)) {
+    colours <- NACHO:::plot_colours(dark)
+    expect_gte(
+      colorspace::contrast_ratio(colours[["ink"]], colours[["paper"]]),
+      4.5
+    )
+  }
 })
 
 test_that("PCBatch is not available without principal components", {
@@ -477,4 +504,83 @@ test_that("BatchFactors drops a factor column the samples lack", {
   )
   built <- ggplot2::ggplot_build(plot)
   expect_length(unique(built$data[[1]]$PANEL), 2L)
+})
+
+test_that("flagged samples are triangles in the accent colour", {
+  x <- flagged_gse()
+  light <- flagged_points(autoplot(x, type = "FoV"))
+  dark <- flagged_points(autoplot(x, type = "FoV", dark = TRUE))
+  expect_gt(nrow(light), 0)
+  expect_true(all(light$colour == "#B64326"))
+  expect_true(all(dark$colour == "#FCB448"))
+})
+
+test_that("dark plots draw nothing in black or the old red", {
+  x <- flagged_gse()
+  for (type in names(NACHO:::nacho_plot_registry)) {
+    built <- suppressWarnings(ggplot2::ggplot_build(
+      autoplot(x, type = type, dark = TRUE)
+    ))
+    colours <- toupper(unlist(lapply(built$data, function(d) {
+      c(d$colour, d$fill)
+    })))
+    expect_false(
+      any(colours %in% c("#000000", "BLACK", "#B22222", "FIREBRICK")),
+      info = type
+    )
+    theme <- ggplot2::complete_theme(built$plot$theme)
+    expect_identical(
+      ggplot2::calc_element("plot.background", theme)$fill,
+      "#111821",
+      info = type
+    )
+  }
+})
+
+test_that("dark labels of flagged samples take the paper fill", {
+  x <- flagged_gse()
+  built <- ggplot2::ggplot_build(
+    autoplot(x, type = "FoV", dark = TRUE, outliers_labels = "CartridgeID")
+  )
+  labelled <- Filter(function(d) "label" %in% names(d), built$data)
+  expect_length(labelled, 1L)
+  expect_true(all(labelled[[1]]$fill == "#111821"))
+})
+
+test_that("the PCBatch missing-value fill follows light and dark mode", {
+  x <- flagged_gse()
+  na_fill <- function(dark) {
+    built <- ggplot2::ggplot_build(autoplot(x, type = "PCBatch", dark = dark))
+    built$plot$scales$get_scales("fill")$na.value
+  }
+  expect_false(identical(na_fill(TRUE), na_fill(FALSE)))
+  expect_false(identical(na_fill(FALSE), "grey90"))
+})
+
+test_that("numeric and missing colour columns plot without warnings", {
+  x <- GSE74821
+  samples <- x@samples
+  samples[["dose"]] <- seq_len(nrow(samples))
+  samples[["batch"]] <- rep(c("a", NA), length.out = nrow(samples))
+  x@samples <- samples
+  for (column in c("dose", "batch")) {
+    expect_no_warning(ggplot2::ggplot_build(autoplot(
+      x,
+      type = "BD",
+      colour = column
+    )))
+  }
+  built <- ggplot2::ggplot_build(autoplot(x, type = "BD", colour = "dose"))
+  colours <- Filter(
+    function(v) length(v) > 1,
+    lapply(built$data, function(d) unique(d$colour))
+  )[[1]]
+  expect_setequal(colours, scales::pal_viridis(end = 0.85)(nrow(samples)))
+})
+
+test_that("autoplot() checks dark", {
+  expect_error(
+    autoplot(GSE74821, type = "BD", dark = NA),
+    class = "nacho_error_bad_argument"
+  )
 })

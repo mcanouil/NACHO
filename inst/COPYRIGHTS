@@ -1,0 +1,11 @@
+NACHO is licensed under GPL-3.
+
+The fonts in inst/brand/fonts/ are distributed under the SIL Open Font
+License 1.1, whose text ships next to them:
+
+* Source Sans 3 (SourceSans3-*.ttf), copyright 2010-2022 Adobe
+  (http://www.adobe.com/), with Reserved Font Name 'Source'.
+  Licence: inst/brand/fonts/LICENSE-SourceSans3.md.
+* JetBrains Mono (JetBrainsMono-Regular.ttf), copyright 2020 The JetBrains
+  Mono Project Authors (https://github.com/JetBrains/JetBrainsMono).
+  Licence: inst/brand/fonts/OFL-JetBrainsMono.txt.

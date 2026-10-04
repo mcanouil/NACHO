@@ -21,7 +21,8 @@ Draws any of the quality-control figures of the Shiny app
   show_legend = TRUE,
   show_outliers = TRUE,
   outliers_factor = 1,
-  outliers_labels = NULL
+  outliers_labels = NULL,
+  dark = FALSE
 )
 }\if{html}{\out{</div>}}
 }
@@ -69,11 +70,13 @@ This plot ignores \code{colour}, \code{size}, \code{show_legend}, \code{show_out
 \item \code{colour}: The column of \code{nacho_samples(object)} that colours the points.
 \item \code{size}: The point size, and the line width in the \code{"NORM"} plot.
 \item \code{show_legend}: If \code{FALSE}, hide the colour legend.
-\item \code{show_outliers}: If \code{TRUE}, draw the flagged samples in red.
+\item \code{show_outliers}: If \code{TRUE}, draw the flagged samples as triangles in the
+accent colour: rust on a light background, amber on a dark one.
 \item \code{outliers_factor}: The size of the flagged samples, relative to \code{size}.
 \item \code{outliers_labels}: The column of \code{nacho_samples(object)} that labels the
 flagged samples, or \code{NULL} for no labels.
 Labels imply \code{show_outliers = TRUE}.
+\item \code{dark}: If \code{TRUE}, draw the plot for a dark background.
 }
 }
 

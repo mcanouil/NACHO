@@ -35,8 +35,8 @@ test_that("not a nacho object", {
   )
 })
 
-test_that("report logo resolves in installed and source packages", {
-  expect_true(file.exists(NACHO:::logo_path()))
+test_that("the brand logo resolves in installed and source packages", {
+  expect_true(file.exists(NACHO:::brand_path("nacho_hex.png")))
 })
 
 test_that("render() accepts a column name for outliers_labels", {

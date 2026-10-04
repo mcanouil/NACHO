@@ -1,0 +1,52 @@
+meta:
+  name: NACHO
+  link: https://m.canouil.dev/NACHO/
+
+logo:
+  medium: nacho_hex.png
+
+color:
+  palette:
+    navy: "#182430"
+    night: "#111821"
+    rust: "#B64326"
+    amber: "#FCB448"
+    yellow: "#F0D83C"
+    orange: "#E45430"
+    rose: "#D85460"
+  foreground: navy
+  background: "#FFFFFF"
+  primary: rust
+  warning: amber
+
+typography:
+  fonts:
+    - family: Source Sans 3
+      source: file
+      files:
+        - path: fonts/SourceSans3-Regular.ttf
+          weight: 400
+          style: normal
+        - path: fonts/SourceSans3-It.ttf
+          weight: 400
+          style: italic
+        - path: fonts/SourceSans3-Bold.ttf
+          weight: 700
+          style: normal
+        - path: fonts/SourceSans3-BoldIt.ttf
+          weight: 700
+          style: italic
+    - family: JetBrains Mono
+      source: file
+      files:
+        - path: fonts/JetBrainsMono-Regular.ttf
+          weight: 400
+          style: normal
+  base: Source Sans 3
+  headings:
+    family: Source Sans 3
+    weight: 700
+    color: navy
+  monospace: JetBrains Mono
+  link:
+    color: rust

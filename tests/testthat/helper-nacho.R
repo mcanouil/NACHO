@@ -85,3 +85,20 @@ expect_not_available <- function(object, type) {
     info = type
   )
 }
+
+flagged_gse <- function() {
+  x <- NACHO::GSE74821[, 1:12]
+  thresholds <- x@thresholds
+  thresholds[["FoV"]] <- 99.9
+  x <- NACHO::normalise(x, outliers_thresholds = thresholds)
+  stopifnot(any(NACHO:::flagged_samples(x)))
+  x
+}
+
+flagged_points <- function(plot) {
+  built <- ggplot2::ggplot_build(plot)
+  triangles <- lapply(built$data, function(d) {
+    if ("shape" %in% names(d)) d[d$shape %in% 17, c("colour", "shape")]
+  })
+  do.call(rbind, triangles)
+}

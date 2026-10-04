@@ -9,6 +9,7 @@ suppressPackageStartupMessages(invisible(
 ))
 
 source("utils.R")
+shiny::addResourcePath("nacho-brand", NACHO:::brand_path())
 
 nacho_object <- shiny::getShinyOption("nacho_object", NULL)
 
@@ -19,7 +20,7 @@ ui <- shiny::tagList(
   shiny::navbarPage(
     theme = "united-bootstrap.min.css",
     title = shiny::tags$span(
-      shiny::tags$img(src = "nacho_hex.png", height = 18),
+      shiny::tags$img(src = "nacho-brand/nacho_hex.png", height = 18),
       "NACHO"
     ),
     windowTitle = "NACHO",

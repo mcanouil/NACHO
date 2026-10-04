@@ -15,3 +15,8 @@
 ^man/figures/README-nacho_app\.gif$
 ^LICENSE\.md$
 ^data-raw$
+^\.superpowers$
+^\.kata\.toml$
+^\.ruff_cache$
+^\.roborev$
+\.DS_Store$

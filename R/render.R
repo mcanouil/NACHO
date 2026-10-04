@@ -100,7 +100,11 @@ render <- function(
     "#| out-width: 150px",
     '#| fig-alt: "NACHO hexagonal logo."',
     "knitr::include_graphics(",
-    paste0("  path = ", encodeString(logo_path(), quote = '"'), ","),
+    paste0(
+      "  path = ",
+      encodeString(brand_path("nacho_hex.png"), quote = '"'),
+      ","
+    ),
     "  rel_path = FALSE",
     ")",
     "```",
