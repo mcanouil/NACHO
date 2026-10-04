@@ -189,10 +189,18 @@ test_that("the sidebar groups every threshold in an accordion", {
   )) {
     expect_match(ui, panel, fixed = TRUE)
   }
-  expect_match(
+  button <- regmatches(
     ui,
-    '<button aria-label="Reset the thresholds to the preset"[^>]*id="thresholds-reset"'
+    regexpr('<button[^>]*id="thresholds-reset"[^>]*>', ui)
   )
+  expect_length(button, 1)
+  expect_match(
+    button,
+    'aria-label="Reset the thresholds to the preset"',
+    fixed = TRUE
+  )
+  expect_match(ui, '<i[^>]*aria-hidden="true"')
+  expect_match(ui, 'data-display-if="[^"]*RUVg[^"]*"')
 })
 
 test_that("reset brings back the preset limits", {
@@ -200,13 +208,31 @@ test_that("reset brings back the preset limits", {
     NACHO:::mod_thresholds_server,
     args = list(data = shiny::reactiveVal(GSE74821)),
     {
-      session$setInputs(preset = "nsolver", instrument = "max", FoV = 99.9)
+      session$setInputs(preset = "nsolver", instrument = "max")
       session$elapse(600)
       current(replace(current(), "FoV", 50))
       expect_identical(current()$FoV, 50)
       session$setInputs(reset = 1)
       session$elapse(600)
       expect_identical(current()$FoV, nacho_thresholds()$FoV)
+    }
+  )
+})
+
+test_that("each group renders its own sliders", {
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(GSE74821)),
+    {
+      imaging <- as.character(output$group_Imaging$html)
+      expect_match(imaging, "-BD\"", fixed = TRUE)
+      expect_match(imaging, "-FoV\"", fixed = TRUE)
+      expect_no_match(imaging, "Not measured")
+      expect_match(
+        as.character(output$group_miRNA$html),
+        "Not measured for these data.",
+        fixed = TRUE
+      )
     }
   )
 })
