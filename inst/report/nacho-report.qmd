@@ -1,6 +1,7 @@
 ---
 title: "NanoString quality-control report"
-brand: _brand.yml
+brand:
+  light: _brand.yml
 params:
   nacho_rds: ""
 knitr:
@@ -8,6 +9,7 @@ knitr:
     fig.retina: 1
 format:
   html:
+    format-links: false
     embed-resources: true
     toc: true
     toc-depth: 2
@@ -32,7 +34,7 @@ report <- NACHO:::report_setup(params$nacho_rds)
 x <- report$object
 ```
 
-![NACHO logo](nacho_hex.png){fig-alt="NACHO logo" width=1.2in}
+![](nacho_hex.png){fig-alt="NACHO logo" width=1.2in}
 
 # Summary
 
@@ -50,7 +52,7 @@ cat(NACHO:::report_callouts(x), sep = "\n")
 #| label: thresholds
 #| output: asis
 cat(NACHO:::report_settings(x), sep = "\n")
-cat("\n\n")
+cat("\n\nLimits that flag a sample:\n\n")
 cat(NACHO:::report_thresholds(x), sep = "\n")
 ```
 

@@ -351,3 +351,32 @@ test_that("report_settings() lists the settings that shape the data", {
   x@settings[["ruv_k"]] <- 2L
   expect_true(any(grepl("RUV factors: 2", NACHO:::report_settings(x))))
 })
+
+test_that("report_sections() leaves out plots that cannot be drawn", {
+  expect_false("Stability" %in% NACHO:::report_sections(mirna_fixture())$plot)
+  expect_true("Stability" %in% NACHO:::report_sections(GSE74821)$plot)
+
+  local_mocked_bindings(
+    nacho_samples = function(x) data.frame(IDFILE = "a")
+  )
+  expect_false("PCBatch" %in% NACHO:::report_sections(GSE74821)$plot)
+})
+
+test_that("report_sections() leaves out component plots with one component", {
+  x <- toy_nacho(4L)
+  pca <- x@pca
+  pca[["scores"]] <- pca[["scores"]][, 1, drop = FALSE]
+  S7::prop(x, "pca", check = FALSE) <- pca
+  plots <- NACHO:::report_sections(x)$plot
+  expect_false(any(c("PCA12", "PCA", "PCBatch") %in% plots))
+})
+
+test_that("the report names House_factor the same way everywhere", {
+  expect_match(NACHO:::plot_alt_texts[["HF"]], "Content normalisation factor")
+  sections <- NACHO:::report_sections(GSE74821)
+  expect_true("Content normalisation factor" %in% sections$title)
+  expect_false(any(grepl(
+    "Housekeeping factor",
+    c(sections$title, NACHO:::plot_alt_texts)
+  )))
+})

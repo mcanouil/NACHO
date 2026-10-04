@@ -47,9 +47,9 @@ plot_alt_texts <- c(
   PCAi = "Share of variance explained by each principal component.",
   PCA = "Samples on each pair of the first principal components.",
   PFNF = "Positive normalisation factor against the negative factor, one point per sample, with the thresholds shaded.",
-  HF = "Housekeeping factor against the positive factor, one point per sample, with the thresholds shaded.",
-  NORM = "Housekeeping gene counts before and after normalisation, one line per gene.",
-  Stability = "geNorm stability of each housekeeping gene, from the least to the most stable.",
+  HF = "Content normalisation factor against the positive factor, one point per sample, with the thresholds shaded.",
+  NORM = "Control or housekeeping gene counts before and after normalisation, one line per probe.",
+  Stability = "geNorm stability of each housekeeping gene, from the most to the least stable.",
   RLE = "Relative log expression of each sample after normalisation.",
   BatchFactors = "Normalisation factors of each sample, grouped by cartridge.",
   PCBatch = "Share of each principal component explained by cartridge and date."
@@ -243,6 +243,17 @@ report_sections <- function(x) {
   } else {
     c("BD", "FoV", "PCL", "LoD")
   }
+  has_batch <- length(intersect(
+    c("CartridgeID", "Date"),
+    names(nacho_samples(x))
+  )) >
+    0
+  has_components <- ncol(x@pca[["scores"]]) >= 2
+  has_stability <- n_housekeeping >= 3 &&
+    !is.null(tryCatch(
+      housekeeping_stability(x),
+      nacho_error = function(cnd) NULL
+    ))
   rows <- c(
     list(section("Quality-control metrics", 1)),
     lapply(metrics, function(metric) {
@@ -262,24 +273,28 @@ report_sections <- function(x) {
       section("Average count against binding density", 2, "ACBD"),
       section("Average count against median count", 2, "ACMC"),
       section("Principal components", 1),
-      section("First two components", 2, "PCA12"),
-      section("Planes of the first components", 2, "PCA"),
+      if (has_components) section("First two components", 2, "PCA12"),
+      if (has_components) section("Planes of the first components", 2, "PCA"),
       section("Variance explained", 2, "PCAi"),
       section("Normalisation", 1),
       section("Positive against negative factor", 2, "PFNF", "pf")
     ),
-    if (has_house_factor) list(section("Housekeeping factor", 2, "HF", "hgf")),
+    if (has_house_factor) {
+      list(section("Content normalisation factor", 2, "HF", "hgf"))
+    },
     list(
       section("Normalisation result", 2, "NORM"),
       section("Relative log expression", 2, "RLE")
     ),
-    if (n_housekeeping >= 3) {
+    if (has_stability) {
       list(section("Housekeeping gene stability", 2, "Stability"))
     },
     list(
       section("Batch effects", 1, batch = TRUE),
       section("Normalisation factors by cartridge", 2, "BatchFactors"),
-      section("Principal components and batches", 2, "PCBatch")
+      if (has_batch && has_components) {
+        section("Principal components and batches", 2, "PCBatch")
+      }
     )
   )
   do.call(rbind, rows)

@@ -87,12 +87,32 @@ render <- function(
   rds <- file.path(work_dir, "nacho.rds")
   saveRDS(list(object = x, options = options), rds)
 
-  with_library_paths(quarto::quarto_render(
-    input = file.path(work_dir, "nacho-report.qmd"),
-    output_format = format,
-    execute_params = list(nacho_rds = rds),
-    quiet = nacho_is_quiet()
-  ))
+  rlang::try_fetch(
+    with_library_paths(quarto::quarto_render(
+      input = file.path(work_dir, "nacho-report.qmd"),
+      output_format = format,
+      execute_params = list(nacho_rds = rds),
+      quiet = nacho_is_quiet()
+    )),
+    error = function(cnd) {
+      nacho_abort(
+        c(
+          "Quarto could not render the report.",
+          if (nacho_is_quiet()) {
+            c(
+              i = paste(
+                "Quarto's messages are hidden;",
+                "{.code options(nacho.quiet = FALSE, rlib_message_verbosity = \"default\")}",
+                "shows them."
+              )
+            )
+          }
+        ),
+        class = "render_failed",
+        parent = cnd
+      )
+    }
+  )
 
   output <- file.path(
     work_dir,
@@ -188,17 +208,27 @@ check_quarto <- function(call = rlang::caller_env()) {
   invisible(TRUE)
 }
 
-#' Evaluate code with R_LIBS set to the current library paths
+#' Evaluate code with R_LIBS and QUARTO_R pointing at the current R
 #'
 #' The quarto package (1.5.1) does not pass the library paths to the Quarto
 #' process, so a package in a user or renv library would not load there.
+#' QUARTO_R makes Quarto run the R that is running now.
 #'
 #' @noRd
 with_library_paths <- function(code) {
-  old <- Sys.getenv("R_LIBS", unset = NA)
-  Sys.setenv(R_LIBS = paste(.libPaths(), collapse = .Platform$path.sep))
+  old <- Sys.getenv(c("R_LIBS", "QUARTO_R"), unset = NA)
+  Sys.setenv(
+    R_LIBS = paste(.libPaths(), collapse = .Platform$path.sep),
+    QUARTO_R = R.home("bin")
+  )
   on.exit(
-    if (is.na(old)) Sys.unsetenv("R_LIBS") else Sys.setenv(R_LIBS = old),
+    for (name in names(old)) {
+      if (is.na(old[[name]])) {
+        Sys.unsetenv(name)
+      } else {
+        do.call(Sys.setenv, stats::setNames(list(old[[name]]), name))
+      }
+    },
     add = TRUE
   )
   code

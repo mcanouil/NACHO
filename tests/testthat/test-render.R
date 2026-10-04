@@ -38,6 +38,7 @@ test_that("render() passes the library paths to Quarto and cleans up", {
     quarto_render = function(input, output_format, execute_params, ...) {
       seen <<- list(
         r_libs = Sys.getenv("R_LIBS"),
+        quarto_r = Sys.getenv("QUARTO_R"),
         files = list.files(dirname(input), recursive = TRUE),
         params = execute_params
       )
@@ -48,7 +49,7 @@ test_that("render() passes the library paths to Quarto and cleans up", {
     },
     .package = "quarto"
   )
-  withr::local_envvar(R_LIBS = "sentinel")
+  withr::local_envvar(R_LIBS = "sentinel", QUARTO_R = "sentinel-r")
   output_dir <- withr::local_tempdir()
   path <- render(GSE74821, output_dir = output_dir)
   expect_identical(
@@ -61,6 +62,8 @@ test_that("render() passes the library paths to Quarto and cleans up", {
     .libPaths()
   )
   expect_identical(Sys.getenv("R_LIBS"), "sentinel")
+  expect_identical(seen$quarto_r, R.home("bin"))
+  expect_identical(Sys.getenv("QUARTO_R"), "sentinel-r")
   expect_true(all(
     c(
       "nacho-report.qmd",
@@ -226,4 +229,23 @@ test_that("render() does not create output_dir when the options are wrong", {
     class = "nacho_error_bad_argument"
   )
   expect_false(dir.exists(output_dir))
+})
+
+test_that("render() turns a Quarto failure into render_failed and cleans up", {
+  skip_if_not_installed("quarto")
+  local_mocked_bindings(quarto_cli_version = function() {
+    numeric_version("1.10.18")
+  })
+  local_mocked_bindings(
+    quarto_render = function(...) stop("boom"),
+    .package = "quarto"
+  )
+  withr::local_options(nacho.quiet = TRUE)
+  error <- expect_error(
+    render(GSE74821, output_dir = withr::local_tempdir()),
+    class = "nacho_error_render_failed"
+  )
+  expect_match(conditionMessage(error), "rlib_message_verbosity")
+  expect_s3_class(error$parent, "error")
+  expect_length(list.files(tempdir(), pattern = "^nacho-report-"), 0)
 })
