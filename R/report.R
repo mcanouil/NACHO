@@ -25,7 +25,8 @@ qc_metric_domains <- list(
   FoV = c(0, 100),
   PCL = c(0, 1),
   Ligation_order = c(0, 1),
-  Ligation_R2 = c(0, 1)
+  Ligation_R2 = c(0, 1),
+  Housekeeping_detected = c(0, Inf)
 )
 
 #' Short description of each plot, for screen readers
@@ -154,12 +155,15 @@ report_thresholds <- function(x) {
   metrics <- qc_metrics[
     qc_metrics %in% intersect(names(x@samples), names(thresholds))
   ]
+  if (x@rcc_type == "n8") {
+    metrics <- setdiff(metrics, c("PCL", "LoD"))
+  }
   lines <- vapply(
     metrics,
     function(metric) {
       limits <- thresholds[[metric]]
-      lower <- limits[1]
-      upper <- if (length(limits) == 2) limits[2] else Inf
+      lower <- min(limits)
+      upper <- if (length(limits) == 2) max(limits) else Inf
       domain <- qc_metric_domains[[metric]] %||% c(-Inf, Inf)
       has_lower <- is.finite(lower) && lower > domain[1]
       has_upper <- is.finite(upper) && upper < domain[2]
@@ -178,6 +182,36 @@ report_thresholds <- function(x) {
     character(1)
   )
   unname(lines[!is.na(lines)])
+}
+
+#' Markdown lines for the settings that shape the data
+#'
+#' @noRd
+report_settings <- function(x) {
+  settings <- x@settings
+  housekeeping <- settings[["housekeeping_genes"]]
+  c(
+    paste0(
+      "- Housekeeping genes: ",
+      if (length(housekeeping) == 0) {
+        "none"
+      } else {
+        paste(housekeeping, collapse = ", ")
+      }
+    ),
+    paste0(
+      "- Housekeeping genes predicted: ",
+      if (isTRUE(settings[["housekeeping_predict"]])) "yes" else "no"
+    ),
+    paste0(
+      "- Normalised with housekeeping genes: ",
+      if (isTRUE(settings[["housekeeping_norm"]])) "yes" else "no"
+    ),
+    paste0("- Principal components: ", settings[["n_comp"]]),
+    if (identical(settings[["normalisation_method"]], "RUVg")) {
+      paste0("- RUV factors: ", settings[["ruv_k"]])
+    }
+  )
 }
 
 #' The sections of the report that apply to the object

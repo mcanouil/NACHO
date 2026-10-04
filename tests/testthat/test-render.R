@@ -135,17 +135,22 @@ test_that("render() tells when Quarto writes nothing", {
   )
 })
 
-skip_if_not_installed_nacho <- function() {
-  testthat::skip_if_not(
-    any(file.exists(file.path(.libPaths(), "NACHO", "DESCRIPTION"))),
-    "NACHO is not installed in a library that Quarto can see"
-  )
+skip_unless_real_render <- function() {
+  ready <- NACHO:::quarto_available() &&
+    any(file.exists(file.path(.libPaths(), "NACHO", "DESCRIPTION")))
+  if (ready) {
+    return(invisible())
+  }
+  reason <- "Quarto or an installed NACHO is missing for the real render"
+  if (identical(Sys.getenv("NACHO_REQUIRE_QUARTO"), "true")) {
+    stop(reason, call. = FALSE)
+  }
+  testthat::skip(reason)
 }
 
 test_that("render() writes an HTML report", {
   skip_on_cran()
-  skip_if_not(NACHO:::quarto_available())
-  skip_if_not_installed_nacho()
+  skip_unless_real_render()
   output_dir <- withr::local_tempdir()
   path <- render(flagged_gse(), output_dir = output_dir)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
@@ -155,8 +160,7 @@ test_that("render() writes an HTML report", {
 
 test_that("render() writes a Typst PDF report", {
   skip_on_cran()
-  skip_if_not(NACHO:::quarto_available())
-  skip_if_not_installed_nacho()
+  skip_unless_real_render()
   output_dir <- withr::local_tempdir()
   path <- render(GSE74821, format = "typst", output_dir = output_dir)
   expect_identical(basename(path), "nacho-report.pdf")

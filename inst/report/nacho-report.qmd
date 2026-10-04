@@ -32,6 +32,8 @@ report <- NACHO:::report_setup(params$nacho_rds)
 x <- report$object
 ```
 
+![NACHO logo](nacho_hex.png){fig-alt="NACHO logo" width=1.2in}
+
 # Summary
 
 ```{r}
@@ -47,6 +49,8 @@ cat(NACHO:::report_callouts(x), sep = "\n")
 ```{r}
 #| label: thresholds
 #| output: asis
+cat(NACHO:::report_settings(x), sep = "\n")
+cat("\n\n")
 cat(NACHO:::report_thresholds(x), sep = "\n")
 ```
 

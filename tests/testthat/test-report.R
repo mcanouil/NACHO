@@ -66,6 +66,7 @@ test_that("sections follow the object", {
 })
 
 test_that("the batch tables put the design first and flag confounding", {
+  skip_if_not_installed("knitr")
   lines <- NACHO:::report_batch_tables(GSE74821, group = "tissue type:ch1")
   expect_identical(lines[1], "::: {.callout-important}")
   design <- grep("confounded", lines, fixed = TRUE)[1]
@@ -193,6 +194,7 @@ test_that("report_body() prints headings, help and plots", {
 })
 
 test_that("the batch tables use the batch columns the samples have", {
+  skip_if_not_installed("knitr")
   x <- toy_nacho(6)
   x@samples[["tissue"]] <- rep(c("a", "b", "c"), 2)
   lines <- NACHO:::report_batch_tables(x, group = "tissue")
@@ -275,6 +277,7 @@ test_that("report_body() passes the report options to the plots", {
 })
 
 test_that("report_body() puts the confounding callout before the design table", {
+  skip_if_not_installed("knitr")
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   path <- withr::local_tempfile(fileext = ".rds")
@@ -299,4 +302,52 @@ test_that("the report template is found, or the error says it is missing", {
     NACHO:::report_template_path("no-such-file.qmd"),
     class = "nacho_error_missing_file"
   )
+})
+
+test_that("thresholds leave out PCL and LoD for PlexSet data", {
+  lines <- NACHO:::report_thresholds(plexset_nacho)
+  expect_false(any(grepl("`PCL`|`LoD`", lines)))
+  expect_true(any(grepl("`BD`", lines)))
+})
+
+test_that("thresholds name the lower bound first whatever the order", {
+  x <- toy_nacho(4L)
+  thresholds <- x@thresholds
+  thresholds$BD <- c(2.25, 0.1)
+  S7::prop(x, "thresholds", check = FALSE) <- thresholds
+  expect_true(
+    "- Binding density (`BD`): 0.1 to 2.25" %in% NACHO:::report_thresholds(x)
+  )
+})
+
+test_that("a threshold of 0 on the housekeeping count is not printed", {
+  x <- toy_nacho(4L)
+  x@samples[["Housekeeping_detected"]] <- 1L
+  thresholds <- x@thresholds
+  thresholds[["Housekeeping_detected"]] <- 0
+  x@thresholds <- thresholds
+  expect_false(any(grepl(
+    "Housekeeping_detected",
+    NACHO:::report_thresholds(x),
+    fixed = TRUE
+  )))
+})
+
+test_that("report_settings() lists the settings that shape the data", {
+  x <- toy_nacho(4L)
+  lines <- NACHO:::report_settings(x)
+  expect_true(any(grepl("Housekeeping genes: HK1", lines, fixed = TRUE)))
+  expect_true(any(grepl("Principal components: 2", lines, fixed = TRUE)))
+  expect_false(any(grepl("RUV", lines)))
+
+  x@settings[["housekeeping_genes"]] <- NULL
+  expect_true(any(grepl(
+    "Housekeeping genes: none",
+    NACHO:::report_settings(x),
+    fixed = TRUE
+  )))
+
+  x@settings[["normalisation_method"]] <- "RUVg"
+  x@settings[["ruv_k"]] <- 2L
+  expect_true(any(grepl("RUV factors: 2", NACHO:::report_settings(x))))
 })
