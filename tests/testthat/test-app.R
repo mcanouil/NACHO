@@ -115,6 +115,7 @@ test_that("Done uses the thresholds as they stand, before the debounce", {
   )
   shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
     session$flushReact()
+    session$elapse(600)
     session$setInputs(`thresholds-FoV` = 99.9)
     session$setInputs(done = 1)
   })
@@ -196,6 +197,7 @@ test_that("closing the page after Done keeps the tuned object", {
   })
   expect_length(values, 1L)
   expect_false(is.null(values[[1]]))
+})
 
 test_that("pages without data explain what to do", {
   html <- as.character(NACHO:::app_ui(done = FALSE))
@@ -247,5 +249,43 @@ test_that("normalisation warnings reach the user once as toasts", {
     tuned()
   })
   expect_length(messages, 1L)
+  expect_match(messages, "ruv_k")
+})
+
+test_that("an unavailable metric is muffled without a toast", {
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message),
+    tune_object = function(object, chosen, thresholds) {
+      NACHO:::nacho_warn("No such metric.", class = "metric_unavailable")
+      object
+    }
+  )
+  expect_no_warning(
+    NACHO:::tune_with_toasts(GSE74821, list(), NULL, new.env())
+  )
+  expect_length(messages, 0L)
+})
+
+test_that("Done sends normalisation warnings to the user", {
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message),
+    .package = "NACHO"
+  )
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) NULL,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$setInputs(
+      `thresholds-method` = "RUVg",
+      `thresholds-ruv_k` = 50,
+      `thresholds-background` = "none",
+      `thresholds-background_mode` = "threshold"
+    )
+    session$setInputs(done = 1)
+  })
   expect_match(messages, "ruv_k")
 })

@@ -208,7 +208,7 @@ mod_thresholds_server <- function(id, data) {
   shiny::moduleServer(id, function(input, output, session) {
     current <- shiny::reactiveVal()
     base <- shiny::reactiveVal()
-    pending <- shiny::reactiveVal(FALSE)
+    published <- shiny::reactiveVal()
     start <- function(limits) {
       base(limits)
       current(limits)
@@ -216,8 +216,8 @@ mod_thresholds_server <- function(id, data) {
 
     shiny::observeEvent(data(), {
       x <- data()
-      pending(TRUE)
       start(x@thresholds)
+      published(x@thresholds)
       instrument <- x@thresholds[["instrument"]]
       shiny::updateSelectInput(
         session,
@@ -320,10 +320,8 @@ mod_thresholds_server <- function(id, data) {
 
     current_thresholds <- shiny::reactive(shiny::req(current()))
     settled <- shiny::debounce(current_thresholds, 500)
-    shiny::observeEvent(settled(), pending(FALSE))
-    thresholds <- shiny::reactive(
-      if (pending()) current_thresholds() else settled()
-    )
+    shiny::observeEvent(settled(), published(current()))
+    thresholds <- shiny::reactive(shiny::req(published()))
 
     settings <- shiny::reactive({
       x <- shiny::req(data())

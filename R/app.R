@@ -113,6 +113,27 @@ tune_object <- function(object, chosen, thresholds) {
   )
 }
 
+tune_with_toasts <- function(object, chosen, thresholds, announced) {
+  if (!identical(announced$key, list(object, chosen))) {
+    announced$key <- list(object, chosen)
+    announced$messages <- character()
+  }
+  withCallingHandlers(
+    tune_object(object, chosen, thresholds),
+    nacho_warning_metric_unavailable = function(cnd) {
+      invokeRestart("muffleWarning")
+    },
+    nacho_warning = function(cnd) {
+      message <- cli::ansi_strip(rlang::cnd_message(cnd))
+      if (!message %in% announced$messages) {
+        announced$messages <- c(announced$messages, message)
+        notify_user(message, "warning")
+      }
+      invokeRestart("muffleWarning")
+    }
+  )
+}
+
 app_server <- function(x, done = FALSE) {
   function(input, output, session) {
     data <- mod_data_server("data", initial = x)
@@ -125,28 +146,14 @@ app_server <- function(x, done = FALSE) {
     shiny::outputOptions(output, "has_data", suspendWhenHidden = FALSE)
     dark <- shiny::reactive(identical(input$dark_mode, "dark"))
     announced <- new.env()
-    tuned <- shiny::reactive({
-      object <- shiny::req(data())
-      chosen <- settings$settings()
-      if (!identical(announced$key, list(object, chosen))) {
-        announced$key <- list(object, chosen)
-        announced$messages <- character()
-      }
-      withCallingHandlers(
-        tune_object(object, chosen, settings$thresholds()),
-        nacho_warning_metric_unavailable = function(cnd) {
-          invokeRestart("muffleWarning")
-        },
-        nacho_warning = function(cnd) {
-          message <- cli::ansi_strip(rlang::cnd_message(cnd))
-          if (!message %in% announced$messages) {
-            announced$messages <- c(announced$messages, message)
-            notify_user(message, "warning")
-          }
-          invokeRestart("muffleWarning")
-        }
+    tuned <- shiny::reactive(
+      tune_with_toasts(
+        shiny::req(data()),
+        settings$settings(),
+        settings$thresholds(),
+        announced
       )
-    })
+    )
     qc <- shiny::reactive(nacho_qc(tuned()))
     mod_overview_server("overview", tuned, qc)
     mod_outliers_server("outliers", tuned, qc)
@@ -156,7 +163,7 @@ app_server <- function(x, done = FALSE) {
     })
     if (done) {
       finished <- new.env()
-      observe_done(input, data, settings, finished)
+      observe_done(input, data, settings, announced, finished)
       session$onSessionEnded(function() {
         if (!isTRUE(finished$done)) shiny::stopApp(NULL)
       })
@@ -164,7 +171,13 @@ app_server <- function(x, done = FALSE) {
   }
 }
 
-observe_done <- function(input, data, settings, finished = new.env()) {
+observe_done <- function(
+  input,
+  data,
+  settings,
+  announced = new.env(),
+  finished = new.env()
+) {
   shiny::observeEvent(input$done, {
     if (is.null(data())) {
       finished$done <- TRUE
@@ -172,10 +185,11 @@ observe_done <- function(input, data, settings, finished = new.env()) {
     }
     problem <- NULL
     result <- tryCatch(
-      tune_object(
+      tune_with_toasts(
         data(),
         settings$settings(),
-        settings$current_thresholds()
+        settings$current_thresholds(),
+        announced
       ),
       shiny.silent.error = function(cnd) {
         problem <<- conditionMessage(cnd)
