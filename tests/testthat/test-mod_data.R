@@ -1,3 +1,7 @@
+skip_without_zip <- function() {
+  testthat::skip_if(!nzchar(Sys.which("zip")), "zip is not available.")
+}
+
 expect_nacho <- function(object) {
   testthat::expect_true(S7::S7_inherits(object, NACHO:::nacho))
 }
@@ -282,6 +286,7 @@ test_that("a corrupt zip shows an error and keeps the previous data", {
 })
 
 test_that("a zip made from a folder is read", {
+  skip_without_zip()
   source_files <- list.files(
     test_path("salmon_data"),
     pattern = "\\.rcc$",
@@ -344,6 +349,7 @@ test_that("extra sample sheets are announced", {
 })
 
 zip_upload <- function(files, folder = NULL, name = "run.zip") {
+  skip_without_zip()
   staging <- withr::local_tempdir(.local_envir = parent.frame())
   target <- if (is.null(folder)) staging else file.path(staging, folder)
   dir.create(target, showWarnings = FALSE)
@@ -362,6 +368,7 @@ zip_upload <- function(files, folder = NULL, name = "run.zip") {
 }
 
 test_that("an empty zip is refused as an upload without RCC files", {
+  skip_without_zip()
   staging <- withr::local_tempdir()
   dir.create(file.path(staging, "empty"))
   archive <- file.path(withr::local_tempdir(), "0")
@@ -458,4 +465,21 @@ test_that("a sample sheet that matches no file is announced", {
     "matches no",
     class = "nacho_warning_sample_sheet_discarded"
   )
+})
+
+test_that("only sample information reaches the samples table", {
+  nacho <- read_upload("salmon_data")
+  expect_false(any(
+    c("datapath", "type", "name") %in% names(nacho_samples(nacho))
+  ))
+  sample_sheet <- data.frame(
+    IDFILE = rep(list.files("salmon_data", pattern = "\\.RCC$"), each = 8),
+    plexset_id = paste0("S", 1:8),
+    group = "case"
+  )
+  with_sheet <- read_upload("salmon_data", sample_sheet)
+  expect_true("group" %in% names(nacho_samples(with_sheet)))
+  expect_false(any(
+    c("datapath", "type", "name") %in% names(nacho_samples(with_sheet))
+  ))
 })

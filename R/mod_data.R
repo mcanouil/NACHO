@@ -54,6 +54,7 @@ read_uploads <- function(files) {
       class = "sample_sheet_discarded"
     )
   }
+  sheet_columns <- character()
   if (nrow(sheets) > 0) {
     sheet <- data.table::fread(sheets[["datapath"]][1], data.table = FALSE)
     merge_by <- if (plexset) c("IDFILE", "plexset_id") else "IDFILE"
@@ -72,16 +73,22 @@ read_uploads <- function(files) {
         )
       } else {
         targets <- matched
+        sheet_columns <- names(sheet)
       }
     }
   }
+  sample_columns <- c(
+    "IDFILE",
+    if (plexset) "plexset_id",
+    setdiff(sheet_columns, c("IDFILE", "plexset_id"))
+  )
   load_rcc(
     data_directory = unique(mapply(
       function(id, path) sub(id, "", path, fixed = TRUE),
       targets[["IDFILE"]],
       targets[["datapath"]]
     )),
-    ssheet_csv = targets,
+    ssheet_csv = targets[, sample_columns, drop = FALSE],
     id_colname = "IDFILE"
   )
 }

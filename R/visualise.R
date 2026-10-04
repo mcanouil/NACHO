@@ -57,7 +57,7 @@
 visualise <- function(nacho_object) {
   check_nacho(nacho_object)
   check_interactive("visualise")
-  invisible(shiny::runApp(nacho_app(nacho_object)))
+  invisible(shiny::runApp(nacho_app(nacho_object, done = TRUE)))
 }
 
 

@@ -4,11 +4,16 @@
 \alias{nacho_app}
 \title{Run the NACHO app}
 \usage{
-nacho_app(x = NULL)
+nacho_app(x = NULL, done = FALSE)
 }
 \arguments{
 \item{x}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}, or \code{NULL} to
 start by uploading RCC files.}
+
+\item{done}{If \code{TRUE}, the app shows a "Done" button that closes it and
+returns the tuned object.
+Keep \code{FALSE} for a deployed app, because closing it would stop the
+server for every user.}
 }
 \value{
 A Shiny app object; print it or pass it to \code{\link[shiny:runApp]{shiny::runApp()}}.

@@ -9,6 +9,10 @@ NULL
 #'
 #' @param x A `nacho` object from [load_rcc()] or [normalise()], or `NULL` to
 #'   start by uploading RCC files.
+#' @param done If `TRUE`, the app shows a "Done" button that closes it and
+#'   returns the tuned object.
+#'   Keep `FALSE` for a deployed app, because closing it would stop the
+#'   server for every user.
 #'
 #' @return A Shiny app object; print it or pass it to [shiny::runApp()].
 #' @export
@@ -17,12 +21,15 @@ NULL
 #' if (interactive()) {
 #'   shiny::runApp(nacho_app(GSE74821))
 #' }
-nacho_app <- function(x = NULL) {
+nacho_app <- function(x = NULL, done = FALSE) {
   if (!is.null(x)) {
     check_nacho(x)
   }
   shiny::addResourcePath("nacho-brand", brand_path())
-  shiny::shinyApp(ui = app_ui, server = app_server(x))
+  shiny::shinyApp(
+    ui = function(request) app_ui(done),
+    server = app_server(x, done)
+  )
 }
 
 help_page <- function(name) {
@@ -36,7 +43,7 @@ plot_page <- function(page) {
   )
 }
 
-app_ui <- function(request) {
+app_ui <- function(done = FALSE) {
   bslib::page_navbar(
     title = shiny::tags$span(
       shiny::tags$img(src = "nacho-brand/nacho_hex.png", height = 24, alt = ""),
@@ -47,7 +54,7 @@ app_ui <- function(request) {
     theme = nacho_theme(),
     sidebar = bslib::sidebar(
       mod_thresholds_ui("thresholds"),
-      shiny::actionButton("done", "Done", class = "btn-primary")
+      if (done) shiny::actionButton("done", "Done", class = "btn-primary")
     ),
     bslib::nav_panel("Data", mod_data_ui("data"), mod_overview_ui("overview")),
     bslib::nav_panel("QC metrics", plot_page("qc_metrics")),
@@ -81,7 +88,7 @@ tune_object <- function(object, chosen, thresholds) {
   )
 }
 
-app_server <- function(x) {
+app_server <- function(x, done = FALSE) {
   function(input, output, session) {
     data <- mod_data_server("data", initial = x)
     settings <- mod_thresholds_server("thresholds", data = data)
@@ -99,26 +106,39 @@ app_server <- function(x) {
     lapply(unlist(app_plot_types, use.names = FALSE), function(type) {
       mod_qc_plot_server(type, object = tuned, type = type, dark = dark)
     })
-    shiny::observeEvent(input$done, {
-      if (is.null(data())) {
-        return(shiny::stopApp(NULL))
-      }
-      result <- tryCatch(
-        tune_object(
-          data(),
-          settings$settings(),
-          settings$current_thresholds()
-        ),
-        shiny.silent.error = function(cnd) NULL
-      )
-      if (is.null(result)) {
-        notify_user(
-          "Choose a normalisation method these data support before clicking Done.",
-          "warning"
-        )
-      } else {
-        shiny::stopApp(result)
-      }
-    })
+    if (done) {
+      observe_done(input, data, settings)
+    }
   }
+}
+
+observe_done <- function(input, data, settings) {
+  shiny::observeEvent(input$done, {
+    if (is.null(data())) {
+      return(shiny::stopApp(NULL))
+    }
+    problem <- NULL
+    result <- tryCatch(
+      tune_object(
+        data(),
+        settings$settings(),
+        settings$current_thresholds()
+      ),
+      shiny.silent.error = function(cnd) {
+        problem <<- conditionMessage(cnd)
+        NULL
+      }
+    )
+    if (is.null(result)) {
+      notify_user(
+        paste(
+          problem,
+          "Choose a normalisation method these data support before clicking Done."
+        ),
+        "warning"
+      )
+    } else {
+      shiny::stopApp(result)
+    }
+  })
 }

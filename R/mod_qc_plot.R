@@ -12,6 +12,8 @@ app_plot_types <- list(
   batch = c("BatchFactors", "PCBatch")
 )
 
+app_colourless <- c("Stability", "PCBatch")
+
 app_plot_titles <- c(
   BD = "Binding density",
   FoV = "Field of view",
@@ -68,9 +70,11 @@ mod_qc_plot_ui <- function(id, type = id) {
   bslib::card(
     bslib::card_header(app_plot_titles[[type]]),
     shiny::plotOutput(ns("plot"), height = "350px"),
-    bslib::card_footer(
-      shiny::selectInput(ns("colour"), "Colour by", choices = "CartridgeID")
-    )
+    if (!type %in% app_colourless) {
+      bslib::card_footer(
+        shiny::selectInput(ns("colour"), "Colour by", choices = "CartridgeID")
+      )
+    }
   )
 }
 

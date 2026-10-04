@@ -63,3 +63,18 @@ test_that("an unknown colour column falls back to CartridgeID", {
     }
   )
 })
+
+test_that("plots that ignore colour have no colour control", {
+  expect_match(
+    as.character(NACHO:::mod_qc_plot_ui("BD")),
+    "Colour by",
+    fixed = TRUE
+  )
+  for (type in c("Stability", "PCBatch")) {
+    expect_no_match(
+      as.character(NACHO:::mod_qc_plot_ui(type)),
+      "Colour by",
+      fixed = TRUE
+    )
+  }
+})
