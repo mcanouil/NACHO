@@ -21,7 +21,7 @@ format:
     font-paths: fonts
     fig-format: png
     logo:
-      width: 0.7in
+      width: 0.5in
       inset: 0.3in
     toc: true
     section-numbering: "1.1"
