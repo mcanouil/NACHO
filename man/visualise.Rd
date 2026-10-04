@@ -3,24 +3,26 @@
 \name{visualise}
 \alias{visualise}
 \alias{visualize}
-\title{Visualise quality-control metrics of a "nacho" object}
+\title{Explore and tune quality control in the NACHO app}
 \usage{
 visualise(nacho_object)
 }
 \arguments{
 \item{nacho_object}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 }
+\value{
+The tuned \code{nacho} object, invisibly, once you click "Done".
+}
 \description{
-This function visualises results from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}
-several quality-control metrics in an interactive Shiny application,
-in which thresholds can be customised and exported.
+Opens \code{\link[=nacho_app]{nacho_app()}} on \code{nacho_object}.
+Change thresholds and normalisation settings in the sidebar, then click
+"Done" to close the app and get the tuned object back.
 }
 \examples{
-
 if (interactive()) {
   data(GSE74821)
-  # Must be run in an interactive R session!
-  visualise(GSE74821)
+  tuned <- visualise(GSE74821)
+  nacho_qc(tuned)
 }
 
 if (interactive()) {

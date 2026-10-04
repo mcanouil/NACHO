@@ -1,8 +1,7 @@
 #' @include report.R
 NULL
 
-app_overview <- function(x) {
-  qc <- nacho_qc(x)
+app_overview <- function(x, qc = nacho_qc(x)) {
   metrics <- intersect(qc_metrics, names(qc))
   reasons <- vapply(
     metrics,
@@ -40,9 +39,15 @@ mod_overview_ui <- function(id) {
   )
 }
 
-mod_overview_server <- function(id, object) {
+mod_overview_server <- function(
+  id,
+  object,
+  qc = shiny::reactive(nacho_qc(shiny::req(object())))
+) {
   shiny::moduleServer(id, function(input, output, session) {
-    overview <- shiny::reactive(app_overview(shiny::req(object())))
+    overview <- shiny::reactive(
+      app_overview(shiny::req(object()), shiny::req(qc()))
+    )
     output$samples <- shiny::renderText(overview()$samples)
     output$cartridges <- shiny::renderText(overview()$cartridges)
     output$flagged <- shiny::renderText({

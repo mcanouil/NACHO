@@ -50,12 +50,10 @@ Imports:
     rlang (>= 1.1.0),
     S7 (>= 0.2.2),
     scales (>= 1.4.0),
-    shiny (>= 1.7.4),
-    shinyWidgets (>= 0.4.9)
+    shiny (>= 1.11.0)
 Suggests:
     colorspace (>= 2.1-3),
     knitr (>= 1.39),
-    markdown (>= 1.3),
     quarto (>= 1.5.1),
     rmarkdown (>= 1.16),
     roxygen2 (>= 8.1.0),
@@ -88,8 +86,16 @@ Collate:
     'qc.R'
     'nacho-class.R'
     'accessors.R'
-    'autoplot.R'
     'qc-table.R'
+    'report.R'
+    'mod_outliers.R'
+    'mod_overview.R'
+    'mod_qc_plot.R'
+    'mod_thresholds.R'
+    'load_rcc.R'
+    'mod_data.R'
+    'app.R'
+    'autoplot.R'
     'stability.R'
     'ruv.R'
     'mirna.R'
@@ -99,14 +105,7 @@ Collate:
     'deploy.R'
     'detection.R'
     'interop.R'
-    'load_rcc.R'
     'methods.R'
-    'mod_data.R'
-    'report.R'
-    'mod_outliers.R'
-    'mod_overview.R'
-    'mod_qc_plot.R'
-    'mod_thresholds.R'
     'normalise.R'
     'read_nacho.R'
     'read_rcc.R'

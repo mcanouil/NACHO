@@ -56,6 +56,7 @@ reference:
       - render
   - title: Shiny application
     contents:
+      - nacho_app
       - deploy
   - title: Data
     contents:

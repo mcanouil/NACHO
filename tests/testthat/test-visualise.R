@@ -16,18 +16,17 @@ test_that("visualise() refuses a NACHO 2 list", {
   expect_error(visualise(old), class = "nacho_error_bad_object")
 })
 
-test_that("visualise() hands the nacho object to the app", {
-  skip_if_not_installed("markdown")
+test_that("visualise() runs the app and returns what Done returns", {
   withr::local_options(rlang_interactive = TRUE)
-  shared <- NULL
   local_mocked_bindings(
-    runApp = function(...) {
-      shared <<- shiny::getShinyOption("nacho_object")
+    runApp = function(appDir, ...) {
+      expect_s3_class(appDir, "shiny.appobj")
+      GSE74821
     },
     .package = "shiny"
   )
-  visualise(GSE74821)
-  expect_true(S7::S7_inherits(shared, NACHO:::nacho))
-  expect_identical(nacho_qc(shared), nacho_qc(GSE74821))
-  expect_null(shiny::getShinyOption("nacho_object"))
+  result <- withVisible(visualise(GSE74821))
+  expect_false(result$visible)
+  expect_identical(result$value, GSE74821)
+  expect_false(file.exists(file.path(tempdir(), "nacho_object.rds")))
 })

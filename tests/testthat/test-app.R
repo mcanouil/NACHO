@@ -1,57 +1,60 @@
-test_that("instrument presets give a full binding density range", {
-  app_utils <- new.env()
-  sys.source(
-    system.file("app", "utils.R", package = "NACHO"),
-    envir = app_utils
-  )
-  expect_identical(app_utils[["bd_range"]]("MAX/FLEX"), c(0.1, 2.25))
-  expect_identical(app_utils[["bd_range"]]("SPRINT"), c(0.1, 1.8))
+test_that("nacho_app() builds a Shiny app", {
+  expect_s3_class(nacho_app(), "shiny.appobj")
+  expect_s3_class(nacho_app(GSE74821), "shiny.appobj")
+  expect_error(nacho_app(iris), class = "nacho_error_bad_object")
 })
 
-test_that("app help pages render without writing under R CMD check", {
-  skip_if_not_installed("markdown")
-  app_directory <- withr::local_tempdir()
-  expect_true(file.copy(
-    system.file("app", package = "NACHO"),
-    app_directory,
-    recursive = TRUE
-  ))
-  app_directory <- file.path(app_directory, "app")
-  markdown_files <- list.files(
-    file.path(app_directory, "www"),
-    pattern = "\\.md$",
-    full.names = TRUE
-  )
-  expect_gt(length(markdown_files), 0)
-  checksums <- tools::md5sum(markdown_files)
-  app_utils <- new.env()
-  sys.source(file.path(app_directory, "utils.R"), envir = app_utils)
-  withr::local_envvar(`_R_CHECK_PACKAGE_NAME_` = "NACHO")
-  withr::local_dir(app_directory)
-  for (about in c("nacho", app_utils[["about_pages"]])) {
-    expect_s3_class(app_utils[["include_about"]](about), "html")
-  }
-  expect_identical(tools::md5sum(markdown_files), checksums)
+test_that("the app flags samples when a threshold moves", {
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$flushReact()
+    session$elapse(600)
+    expect_identical(sum(qc()$status == "fail"), 0L)
+    session$setInputs(`thresholds-FoV` = 99.9)
+    session$elapse(600)
+    expect_gt(sum(qc()$status == "fail"), 0L)
+  })
 })
 
-test_that("app help links match the help page lookup", {
-  skip_if_not_installed("markdown")
-  app_directory <- system.file("app", package = "NACHO")
-  app_utils <- new.env()
-  sys.source(file.path(app_directory, "utils.R"), envir = app_utils)
-  request <- new.env()
-  request[["REQUEST_METHOD"]] <- "GET"
-  request[["PATH_INFO"]] <- "/"
-  request[["QUERY_STRING"]] <- ""
-  request[["HTTP_HOST"]] <- "localhost"
-  response <- shiny::shinyAppDir(app_directory)[["httpHandler"]](request)
-  page <- response[["content"]]
-  if (is.raw(page)) {
-    page <- rawToChar(page)
-  }
-  link_ids <- regmatches(page, gregexpr("id=\"about_[a-z]+\"", page))[[1]]
-  expect_setequal(
-    gsub("^id=\"about_|\"$", "", link_ids),
-    unname(app_utils[["about_pages"]])
+test_that("the app normalises again when the method changes", {
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$setInputs(
+      `thresholds-method` = "RUVg",
+      `thresholds-ruv_k` = 1,
+      `thresholds-background` = "none",
+      `thresholds-background_mode` = "threshold"
+    )
+    session$elapse(600)
+    expect_identical(tuned()@settings$normalisation_method, "RUVg")
+    expect_true("W_1" %in% names(nacho_samples(tuned())))
+  })
+})
+
+test_that("a method the data cannot support shows a message, not a crash", {
+  toy <- toy_nacho(6L)
+  shiny::testServer(NACHO:::app_server(toy), {
+    session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
+    session$elapse(600)
+    expect_error(tuned(), class = "shiny.silent.error")
+  })
+})
+
+test_that("Done returns the tuned object", {
+  returned <- NULL
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) returned <<- returnValue,
+    .package = "shiny"
   )
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$setInputs(`thresholds-FoV` = 99.9)
+    session$elapse(600)
+    session$setInputs(done = 1)
+  })
+  expect_true(S7::S7_inherits(returned, NACHO:::nacho))
+  expect_identical(returned@thresholds$FoV, 99.9)
+})
+
+test_that("help pages render with shiny::markdown()", {
+  for (name in c("nacho", "bd", "fov", "pcl", "lod", "pf", "hgf")) {
+    expect_s3_class(NACHO:::help_page(name), "html")
+  }
 })
