@@ -51,6 +51,7 @@ app_ui <- function(done = FALSE) {
     ),
     window_title = "NACHO",
     id = "page",
+    header = mod_overview_ui("overview"),
     theme = nacho_theme(),
     sidebar = bslib::sidebar(
       title = "Thresholds",
@@ -58,7 +59,7 @@ app_ui <- function(done = FALSE) {
       mod_thresholds_ui("thresholds"),
       if (done) shiny::actionButton("done", "Done", class = "btn-primary")
     ),
-    bslib::nav_panel("Data", mod_data_ui("data"), mod_overview_ui("overview")),
+    bslib::nav_panel("Data", mod_data_ui("data")),
     bslib::nav_panel("QC metrics", plot_page("qc_metrics")),
     bslib::nav_panel("Controls", plot_page("controls")),
     bslib::nav_panel("Counts", plot_page("counts")),

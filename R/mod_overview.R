@@ -24,17 +24,31 @@ app_overview <- function(x, qc = nacho_qc(x)) {
 
 mod_overview_ui <- function(id) {
   ns <- shiny::NS(id)
-  bslib::card(
-    bslib::card_header("Overview"),
-    shiny::tags$dl(
-      shiny::tags$dt("Samples"),
-      shiny::tags$dd(shiny::textOutput(ns("samples"), inline = TRUE)),
-      shiny::tags$dt("Cartridges"),
-      shiny::tags$dd(shiny::textOutput(ns("cartridges"), inline = TRUE)),
-      shiny::tags$dt("Flagged samples"),
-      shiny::tags$dd(shiny::textOutput(ns("flagged"), inline = TRUE)),
-      shiny::tags$dt("Method"),
-      shiny::tags$dd(shiny::textOutput(ns("method"), inline = TRUE))
+  icon <- function(name) shiny::icon(name, `aria-hidden` = "true")
+  bslib::layout_column_wrap(
+    width = "220px",
+    fill = FALSE,
+    bslib::value_box(
+      "Samples",
+      shiny::textOutput(ns("samples")),
+      showcase = icon("vial")
+    ),
+    bslib::value_box(
+      "Cartridges",
+      shiny::textOutput(ns("cartridges")),
+      showcase = icon("layer-group")
+    ),
+    bslib::value_box(
+      "Flagged samples",
+      shiny::textOutput(ns("flagged_count")),
+      shiny::textOutput(ns("reasons")),
+      showcase = icon("triangle-exclamation")
+    ),
+    bslib::value_box(
+      "Method",
+      shiny::textOutput(ns("method")),
+      shiny::textOutput(ns("preset")),
+      showcase = icon("scale-balanced")
     )
   )
 }
@@ -46,22 +60,17 @@ mod_overview_server <- function(id, object, qc) {
     )
     output$samples <- shiny::renderText(overview()$samples)
     output$cartridges <- shiny::renderText(overview()$cartridges)
-    output$flagged <- shiny::renderText({
+    output$flagged_count <- shiny::renderText(overview()$flagged)
+    output$reasons <- shiny::renderText({
       reasons <- overview()$reasons
-      paste0(
-        overview()$flagged,
-        if (length(reasons) > 0) {
-          paste0(
-            " (",
-            paste(names(reasons), reasons, sep = ": ", collapse = ", "),
-            ")"
-          )
-        }
-      )
+      if (length(reasons) == 0) {
+        "None"
+      } else {
+        paste(names(reasons), reasons, sep = ": ", collapse = ", ")
+      }
     })
-    output$method <- shiny::renderText(
-      paste0(overview()$method, ", ", overview()$preset, " preset")
-    )
+    output$method <- shiny::renderText(overview()$method)
+    output$preset <- shiny::renderText(paste(overview()$preset, "preset"))
     overview
   })
 }
