@@ -18,6 +18,32 @@ threshold_help <- c(
   Haemolysis = "log2 of miR-451a over miR-23a-3p; above 7 suggests haemolysis."
 )
 
+threshold_pages <- c(
+  BD = "bd",
+  FoV = "fov",
+  PCL = "pcl",
+  LoD = "lod",
+  Positive_factor = "pf",
+  House_factor = "hgf"
+)
+
+threshold_help_block <- function(metric) {
+  page <- threshold_pages[metric]
+  more <- if (!is.na(page)) {
+    bslib::popover(
+      shiny::tags$button(
+        type = "button",
+        class = "btn btn-link btn-sm p-0 ms-1 align-baseline",
+        `aria-label` = paste("More about", metric),
+        shiny::icon("circle-question", `aria-hidden` = "true")
+      ),
+      help_page(page),
+      title = qc_metric_labels[[metric]]
+    )
+  }
+  shiny::helpText(threshold_help[[metric]], more)
+}
+
 threshold_metrics <- function(x) {
   known <- qc_metrics[
     qc_metrics %in% intersect(names(x@samples), names(x@thresholds))
@@ -87,7 +113,7 @@ threshold_inputs <- function(x, limits, ns, metrics = threshold_metrics(x)) {
         value = limits_to_slider(limits[[metric]], range),
         step = slider_step(metric, range, limits[[metric]])
       ),
-      shiny::helpText(threshold_help[[metric]])
+      threshold_help_block(metric)
     )
   }))
 }
@@ -181,9 +207,11 @@ mod_thresholds_ui <- function(id) {
 mod_thresholds_server <- function(id, data) {
   shiny::moduleServer(id, function(input, output, session) {
     current <- shiny::reactiveVal()
+    fresh <- shiny::reactiveVal(FALSE)
 
     shiny::observeEvent(data(), {
       x <- data()
+      fresh(TRUE)
       current(x@thresholds)
       instrument <- x@thresholds[["instrument"]]
       shiny::updateSelectInput(
@@ -257,6 +285,9 @@ mod_thresholds_server <- function(id, data) {
     current_thresholds <- shiny::reactive({
       x <- shiny::req(data())
       limits <- shiny::req(current())
+      if (fresh()) {
+        return(limits)
+      }
       for (metric in threshold_metrics(x)) {
         value <- input[[metric]]
         if (!is.null(value)) {
@@ -266,7 +297,11 @@ mod_thresholds_server <- function(id, data) {
       }
       limits
     })
-    thresholds <- shiny::debounce(current_thresholds, 500)
+    settled <- shiny::debounce(current_thresholds, 500)
+    shiny::observeEvent(settled(), fresh(FALSE))
+    thresholds <- shiny::reactive(
+      if (fresh()) current_thresholds() else settled()
+    )
 
     settings <- shiny::reactive({
       x <- shiny::req(data())

@@ -149,6 +149,8 @@ test_that("open bounds survive the module", {
     NACHO:::mod_thresholds_server,
     args = list(data = shiny::reactiveVal(x)),
     {
+      session$flushReact()
+      session$elapse(600)
       session$setInputs(
         Ligation_NEG = c(neg_range[1], -1),
         Haemolysis = c(haem_range[1], 5),
@@ -247,4 +249,44 @@ test_that("a group the data does not have says so", {
     )
   )$html
   expect_match(html, "Not measured for these data.", fixed = TRUE)
+})
+
+test_that("new data starts from its own thresholds, not the previous debounce", {
+  other <- GSE74821
+  other@thresholds$FoV <- 80
+  data <- shiny::reactiveVal(GSE74821)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = data),
+    {
+      session$flushReact()
+      session$elapse(600)
+      session$setInputs(FoV = 99.9)
+      session$elapse(600)
+      expect_identical(session$returned$thresholds()$FoV, 99.9)
+      data(other)
+      session$flushReact()
+      expect_identical(session$returned$thresholds()$FoV, 80)
+    }
+  )
+})
+
+test_that("the sliders link to the help page of their metric", {
+  html <- as.character(NACHO:::threshold_inputs(
+    GSE74821,
+    GSE74821@thresholds,
+    shiny::NS("t"),
+    c("BD", "FoV", "PCL", "LoD", "Positive_factor", "House_factor")
+  ))
+  for (metric in c(
+    "BD",
+    "FoV",
+    "PCL",
+    "LoD",
+    "Positive_factor",
+    "House_factor"
+  )) {
+    expect_match(html, paste0("More about ", metric), fixed = TRUE)
+  }
+  expect_match(html, "bslib-popover", fixed = TRUE)
 })
