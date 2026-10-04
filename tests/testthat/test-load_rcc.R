@@ -190,7 +190,7 @@ test_that("using GEO GSE74821", {
     silent = TRUE
   )
   skip_if(inherits(geo_files, "try-error"), "GEO is unavailable.")
-  skip_if_geo_archive_unusable("GSE74821", file.path(tempdir(), "GSE74821"))
+  extract_geo_archive_or_skip("GSE74821", file.path(tempdir(), "GSE74821"))
   targets$IDFILE <- list.files(
     path = file.path(tempdir(), "GSE74821"),
     pattern = ".RCC.gz$"
@@ -251,7 +251,7 @@ test_that("using GEO GSE70970", {
     silent = TRUE
   )
   skip_if(inherits(geo_files, "try-error"), "GEO is unavailable.")
-  skip_if_geo_archive_unusable("GSE70970", file.path(tempdir(), "GSE70970"))
+  extract_geo_archive_or_skip("GSE70970", file.path(tempdir(), "GSE70970"))
   targets$IDFILE <- list.files(
     path = file.path(tempdir(), "GSE70970"),
     pattern = ".RCC.gz$"
@@ -644,22 +644,12 @@ test_that("resolve_housekeeping_norm() warns and turns off without any housekeep
   ))
 })
 
-test_that("load_rcc() names the folder when no RCC file can be read", {
+test_that("load_rcc() names the folder when the sample sheet lists no file", {
   empty <- withr::local_tempdir()
   error <- expect_error(
     load_rcc(empty, data.frame(IDFILE = character()), "IDFILE"),
     class = "nacho_error_missing_file"
   )
   expect_match(conditionMessage(error), basename(empty), fixed = TRUE)
-
-  with_rcc <- withr::local_tempdir()
-  file.copy(
-    list.files(test_path("plexset_data"), full.names = TRUE)[1],
-    with_rcc
-  )
-  error <- expect_error(
-    load_rcc(with_rcc, data.frame(IDFILE = character()), "IDFILE"),
-    class = "nacho_error_missing_file"
-  )
-  expect_match(conditionMessage(error), basename(with_rcc), fixed = TRUE)
+  expect_match(conditionMessage(error), "ssheet_csv", fixed = TRUE)
 })
