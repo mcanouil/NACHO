@@ -147,7 +147,7 @@ mod_data_ui <- function(id) {
       accept = c(".RCC", ".rcc", ".gz", ".zip", ".csv")
     ),
     shiny::helpText(
-      "The sample sheet is a CSV file with an IDFILE column holding the RCC file names,",
+      "The sample sheet is a CSV file with an IDFILE column holding the RCC file names, ",
       "and plexset_id (S1 to S8) for PlexSet files."
     ),
     shiny::actionButton(ns("import"), "Import", class = "btn-primary")
