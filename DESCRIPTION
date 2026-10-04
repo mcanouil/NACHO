@@ -101,6 +101,7 @@ Collate:
     'interop.R'
     'load_rcc.R'
     'methods.R'
+    'mod_data.R'
     'normalise.R'
     'read_nacho.R'
     'read_rcc.R'
