@@ -15,6 +15,7 @@ export(exclude_outliers)
 export(filter_detected)
 export(housekeeping_stability)
 export(load_rcc)
+export(nacho_app)
 export(nacho_counts)
 export(nacho_probes)
 export(nacho_qc)
@@ -33,7 +34,3 @@ importFrom(ggplot2,
   autoplot
 )
 importFrom(rlang,"%||%")
-importFrom(shinyWidgets,
-  dropdownButton,
-  tooltipOptions
-)

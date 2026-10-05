@@ -71,7 +71,7 @@ pak::pak("mcanouil/NACHO")
 ```{r}
 #| echo: false
 #| results: asis
-cat(readLines(file.path("inst", "app", "www", "about-nacho.md"))[-c(1, 2)], sep = "\n")
+cat(readLines(file.path("inst", "about", "about-nacho.md"))[-c(1, 2)], sep = "\n")
 ```
 
 ### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))

@@ -1,276 +1,198 @@
-expect_nacho <- function(object) {
-  testthat::expect_true(S7::S7_inherits(object, NACHO:::nacho))
-}
+test_that("nacho_app() builds a Shiny app", {
+  expect_s3_class(nacho_app(), "shiny.appobj")
+  expect_s3_class(nacho_app(GSE74821), "shiny.appobj")
+  expect_error(nacho_app(iris), class = "nacho_error_bad_object")
+})
 
-upload_to_app <- function(
-  data_directory,
-  sample_sheet = NULL,
-  rcc_type = ""
-) {
-  testthat::skip_on_cran()
-  testthat::skip_if_not_installed("markdown")
-  rcc_files <- list.files(
-    data_directory,
-    pattern = "\\.(rcc|rcc\\.gz|zip)$",
-    ignore.case = TRUE,
-    full.names = TRUE
-  )
-  upload_directory <- tempfile("upload")
-  dir.create(upload_directory)
-  on.exit(unlink(upload_directory, recursive = TRUE))
-  upload_paths <- file.path(upload_directory, seq_along(rcc_files))
-  file.copy(rcc_files, upload_paths)
-  uploaded <- data.frame(
-    name = basename(rcc_files),
-    size = file.size(rcc_files),
-    type = rcc_type,
-    datapath = upload_paths
-  )
-  if (!is.null(sample_sheet)) {
-    sheet_path <- file.path(upload_directory, "sheet")
-    utils::write.csv(sample_sheet, sheet_path, row.names = FALSE)
-    uploaded <- rbind(
-      uploaded,
-      data.frame(
-        name = "samplesheet.csv",
-        size = file.size(sheet_path),
-        type = "text/csv",
-        datapath = sheet_path
-      )
+test_that("the app flags samples when a threshold moves", {
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$elapse(600)
+    expect_identical(sum(qc()$status == "fail"), 0L)
+    session$setInputs(`thresholds-FoV` = 99.9)
+    session$elapse(600)
+    expect_gt(sum(qc()$status == "fail"), 0L)
+  })
+})
+
+test_that("the app normalises again when the method changes", {
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$setInputs(
+      `thresholds-method` = "RUVg",
+      `thresholds-ruv_k` = 1,
+      `thresholds-background` = "none",
+      `thresholds-background_mode` = "threshold"
     )
-  }
-
-  app <- suppressPackageStartupMessages(
-    shiny::shinyAppDir(system.file("app", package = "NACHO"))
-  )
-  nacho <- NULL
-  # nolint start: object_usage_linter. testServer() provides session and the app reactives.
-  withCallingHandlers(
-    shiny::testServer(
-      app,
-      {
-        session$setInputs(norm_method = "GEO", rcc_files = uploaded)
-        nacho <<- nacho_react()
-      }
-    ),
-    nacho_warning_metric_unavailable = function(cnd) {
-      invokeRestart("muffleWarning")
-    }
-  )
-  # nolint end
-  nacho
-}
-
-test_that("app loads uploaded RCC files without a sample sheet", {
-  expect_nacho(upload_to_app("salmon_data"))
+    session$elapse(600)
+    expect_identical(tuned()@settings$normalisation_method, "RUVg")
+    expect_true("W_1" %in% names(nacho_samples(tuned())))
+  })
 })
 
-test_that("app treats single-sample files that mention Endogenous8s as single-sample", {
-  source_files <- list.files(
-    geo_fixture("GSE178516")[["dir"]],
-    pattern = "\\.RCC\\.gz$",
-    full.names = TRUE
-  )
-  directory <- withr::local_tempdir()
-  for (source_file in source_files) {
-    lines <- readLines(source_file)
-    endogenous <- grep("^Endogenous,", lines)[1]
-    lines[endogenous] <- sub(
-      "^Endogenous,[^,]*,",
-      "Endogenous,Endogenous8s_like,",
-      lines[endogenous]
-    )
-    writeLines(
-      lines,
-      file.path(directory, sub("\\.gz$", "", basename(source_file)))
-    )
-  }
-  expect_warning(
-    nacho <- upload_to_app(directory),
-    class = "nacho_warning_n_comp_reduced"
-  )
-  expect_identical(nacho@rcc_type, "n1")
+test_that("a method the data cannot support shows a message, not a crash", {
+  toy <- toy_nacho(6L)
+  shiny::testServer(NACHO:::app_server(toy, done = TRUE), {
+    session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
+    session$elapse(600)
+    expect_error(tuned(), class = "shiny.silent.error")
+  })
 })
 
-test_that("app loads uploaded PlexSet RCC files", {
-  expect_warning(
-    nacho <- upload_to_app("plexset_data"),
-    class = "nacho_warning_no_housekeeping"
-  )
-  expect_nacho(nacho)
-  expect_false(nacho@settings[["housekeeping_norm"]])
-  expect_type(nacho_samples(nacho)[["plexset_id"]], "character")
-})
-
-test_that("app merges an uploaded sample sheet", {
-  sample_sheet <- expand.grid(
-    IDFILE = basename(list.files("salmon_data", pattern = "\\.RCC$")),
-    plexset_id = paste0("S", seq_len(8)),
-    stringsAsFactors = FALSE
-  )
-  sample_sheet[["group"]] <- "case"
-  nacho <- upload_to_app("salmon_data", sample_sheet)
-  expect_true("group" %in% names(nacho_samples(nacho)))
-})
-
-test_that("app discards a sample sheet without IDFILE", {
-  sample_sheet <- data.frame(file = "salmon_01_01.RCC", group = "case")
-  nacho <- upload_to_app("salmon_data", sample_sheet)
-  expect_nacho(nacho)
-  expect_false("group" %in% names(nacho_samples(nacho)))
-})
-
-test_that("app merges a sample sheet by IDFILE for single-sample RCC files", {
-  single_directory <- geo_fixture("GSE178516")[["dir"]]
-  rcc_files <- list.files(single_directory, pattern = "\\.RCC\\.gz$")
-
-  expect_warning(
-    merged <- upload_to_app(
-      single_directory,
-      data.frame(IDFILE = rcc_files, group = "case")
-    ),
-    class = "nacho_warning_n_comp_reduced"
-  )
-  expect_true("group" %in% names(nacho_samples(merged)))
-
-  expect_warning(
-    discarded <- upload_to_app(
-      single_directory,
-      data.frame(file = rcc_files, group = "case")
-    ),
-    class = "nacho_warning_n_comp_reduced"
-  )
-  expect_nacho(discarded)
-  expect_false("group" %in% names(nacho_samples(discarded)))
-})
-
-test_that("app discards a PlexSet sample sheet without plexset_id", {
-  sample_sheet <- data.frame(
-    IDFILE = basename(list.files("salmon_data", pattern = "\\.RCC$")),
-    group = "case"
-  )
-  nacho <- upload_to_app("salmon_data", sample_sheet)
-  expect_nacho(nacho)
-  expect_false("group" %in% names(nacho_samples(nacho)))
-})
-
-test_that("instrument presets give a full binding density range", {
-  app_utils <- new.env()
-  sys.source(
-    system.file("app", "utils.R", package = "NACHO"),
-    envir = app_utils
-  )
-  expect_identical(app_utils[["bd_range"]]("MAX/FLEX"), c(0.1, 2.25))
-  expect_identical(app_utils[["bd_range"]]("SPRINT"), c(0.1, 1.8))
-})
-
-test_that("app loads a zip archive whatever MIME type the browser sends", {
-  skip_if(!nzchar(Sys.which("zip")), "zip is not available.")
-  archive_directory <- withr::local_tempdir()
-  withr::with_dir(
-    test_path("salmon_data"),
-    utils::zip(
-      file.path(archive_directory, "salmon.zip"),
-      list.files(pattern = "\\.RCC$"),
-      flags = "-q"
-    )
-  )
-  for (mime_type in c("application/zip", "application/x-zip-compressed")) {
-    expect_nacho(upload_to_app(archive_directory, rcc_type = mime_type))
-  }
-})
-
-test_that("app matches file extensions regardless of case", {
-  lower_directory <- withr::local_tempdir()
-  rcc_files <- list.files("salmon_data", pattern = "\\.RCC$")
-  file.copy(
-    file.path("salmon_data", rcc_files),
-    file.path(lower_directory, sub("\\.RCC$", ".rcc", rcc_files))
-  )
-  sample_sheet <- expand.grid(
-    IDFILE = sub("\\.RCC$", ".rcc", rcc_files),
-    plexset_id = paste0("S", seq_len(8)),
-    stringsAsFactors = FALSE
-  )
-  sample_sheet[["group"]] <- "case"
-  nacho <- upload_to_app(lower_directory, sample_sheet)
-  expect_true("group" %in% names(nacho_samples(nacho)))
-})
-
-test_that("app keeps gzipped RCC files next to a sample sheet", {
-  gz_directory <- withr::local_tempdir()
-  for (rcc in list.files("salmon_data", pattern = "\\.RCC$")) {
-    connection <- gzfile(file.path(gz_directory, paste0(rcc, ".gz")), "w")
-    writeLines(readLines(file.path("salmon_data", rcc)), connection)
-    close(connection)
-  }
-  sample_sheet <- expand.grid(
-    IDFILE = list.files(gz_directory),
-    plexset_id = paste0("S", seq_len(8)),
-    stringsAsFactors = FALSE
-  )
-  sample_sheet[["group"]] <- "case"
-  nacho <- upload_to_app(gz_directory, sample_sheet)
-  expect_true("group" %in% names(nacho_samples(nacho)))
-})
-
-test_that("app tells the user when it discards a sample sheet", {
-  notified <- NULL
+test_that("Done returns the tuned object", {
+  returned <- NULL
   local_mocked_bindings(
-    showNotification = function(ui, ...) {
-      notified <<- ui
+    stopApp = function(returnValue = NULL) returned <<- returnValue,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$setInputs(`thresholds-FoV` = 99.9)
+    session$elapse(600)
+    session$setInputs(done = 1)
+  })
+  expect_true(S7::S7_inherits(returned, NACHO:::nacho))
+  expect_identical(returned@thresholds$FoV, 99.9)
+})
+
+test_that("help pages render with shiny::markdown()", {
+  for (name in c("nacho", "bd", "fov", "pcl", "lod", "pf", "hgf")) {
+    expect_s3_class(NACHO:::help_page(name), "html")
+  }
+})
+
+test_that("Done warns instead of closing when the settings fail", {
+  stopped <- FALSE
+  warned <- NULL
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) {
+      if (!is.null(returnValue)) stopped <<- TRUE
     },
     .package = "shiny"
   )
-  sample_sheet <- data.frame(file = "salmon_01_01.RCC", group = "case")
-  upload_to_app("salmon_data", sample_sheet)
-  expect_match(notified, "IDFILE")
+  local_mocked_bindings(
+    notify_user = function(message, type) warned <<- type
+  )
+  shiny::testServer(NACHO:::app_server(toy_nacho(6L), done = TRUE), {
+    session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
+    session$elapse(600)
+    session$setInputs(done = 1)
+  })
+  expect_false(stopped)
+  expect_identical(warned, "warning")
 })
 
-test_that("app help pages render without writing under R CMD check", {
-  skip_if_not_installed("markdown")
-  app_directory <- withr::local_tempdir()
-  expect_true(file.copy(
-    system.file("app", package = "NACHO"),
-    app_directory,
-    recursive = TRUE
-  ))
-  app_directory <- file.path(app_directory, "app")
-  markdown_files <- list.files(
-    file.path(app_directory, "www"),
-    pattern = "\\.md$",
-    full.names = TRUE
-  )
-  expect_gt(length(markdown_files), 0)
-  checksums <- tools::md5sum(markdown_files)
-  app_utils <- new.env()
-  sys.source(file.path(app_directory, "utils.R"), envir = app_utils)
-  withr::local_envvar(`_R_CHECK_PACKAGE_NAME_` = "NACHO")
-  withr::local_dir(app_directory)
-  for (about in c("nacho", app_utils[["about_pages"]])) {
-    expect_s3_class(app_utils[["include_about"]](about), "html")
-  }
-  expect_identical(tools::md5sum(markdown_files), checksums)
+test_that("each plot module draws its own plot type", {
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$elapse(600)
+    expect_identical(output$`BD-plot`$alt, plot_alt_texts[["BD"]])
+    expect_identical(output$`PCBatch-plot`$alt, plot_alt_texts[["PCBatch"]])
+  })
 })
 
-test_that("app help links match the help page lookup", {
-  skip_if_not_installed("markdown")
-  app_directory <- system.file("app", package = "NACHO")
-  app_utils <- new.env()
-  sys.source(file.path(app_directory, "utils.R"), envir = app_utils)
-  request <- new.env()
-  request[["REQUEST_METHOD"]] <- "GET"
-  request[["PATH_INFO"]] <- "/"
-  request[["QUERY_STRING"]] <- ""
-  request[["HTTP_HOST"]] <- "localhost"
-  response <- shiny::shinyAppDir(app_directory)[["httpHandler"]](request)
-  page <- response[["content"]]
-  if (is.raw(page)) {
-    page <- rawToChar(page)
-  }
-  link_ids <- regmatches(page, gregexpr("id=\"about_[a-z]+\"", page))[[1]]
-  expect_setequal(
-    gsub("^id=\"about_|\"$", "", link_ids),
-    unname(app_utils[["about_pages"]])
+test_that("the page holds every navigation panel and plot card", {
+  html <- as.character(NACHO:::app_ui(done = TRUE))
+  panels <- c(
+    "Data",
+    "QC metrics",
+    "Controls",
+    "Counts",
+    "Normalisation",
+    "Batch",
+    "Flagged samples",
+    "About"
   )
+  for (title in c(panels, NACHO:::app_plot_titles)) {
+    expect_match(html, title, fixed = TRUE)
+  }
+})
+
+test_that("Done uses the thresholds as they stand, before the debounce", {
+  returned <- NULL
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) returned <<- returnValue,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$setInputs(`thresholds-FoV` = 99.9)
+    session$setInputs(done = 1)
+  })
+  expect_identical(returned@thresholds$FoV, 99.9)
+})
+
+test_that("the Done button only exists when the app is allowed to stop", {
+  expect_no_match(
+    as.character(NACHO:::app_ui(done = FALSE)),
+    "Done",
+    fixed = TRUE
+  )
+  expect_match(
+    as.character(NACHO:::app_ui(done = TRUE)),
+    "Done",
+    fixed = TRUE
+  )
+})
+
+test_that("a deployed app never stops on Done", {
+  stopped <- FALSE
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) stopped <<- TRUE,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = FALSE), {
+    session$flushReact()
+    session$setInputs(done = 1)
+  })
+  expect_false(stopped)
+})
+
+test_that("Done explains why the object cannot be returned", {
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message)
+  )
+  shiny::testServer(NACHO:::app_server(toy_nacho(6L), done = TRUE), {
+    session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
+    session$setInputs(done = 1)
+  })
+  expect_match(messages, "before clicking Done")
+  expect_gt(
+    nchar(messages),
+    nchar(
+      "Choose a normalisation method these data support before clicking Done."
+    )
+  )
+})
+
+test_that("closing the page ends visualise() but not a deployed app", {
+  stopped <- 0L
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) stopped <<- stopped + 1L,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = FALSE), {
+    session$close()
+  })
+  expect_identical(stopped, 0L)
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$close()
+  })
+  expect_identical(stopped, 1L)
+})
+
+test_that("closing the page after Done keeps the tuned object", {
+  values <- list()
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) {
+      values[[length(values) + 1L]] <<- returnValue
+    },
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$setInputs(done = 1)
+    session$close()
+  })
+  expect_length(values, 1L)
+  expect_false(is.null(values[[1]]))
 })

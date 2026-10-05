@@ -54,7 +54,7 @@ Draws any of the quality-control figures of the Shiny app
 The dashed line marks M = 1.5, the limit geNorm suggests for
 homogeneous samples.
 This plot ignores \code{colour}, \code{show_legend}, \code{show_outliers} and
-\code{outliers_labels}, and it is not in the Shiny app.
+\code{outliers_labels}.
 \item \code{"RLE"}: Relative log expression of the normalised endogenous genes.
 This plot ignores \code{size}, \code{show_outliers}, \code{outliers_factor} and
 \code{outliers_labels}.

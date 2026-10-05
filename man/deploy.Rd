@@ -18,7 +18,8 @@ deploy(directory, app_name = "NACHO")
 Deploy (copy) the Shiny application to the specified directory
 }
 \details{
-The app needs the markdown package on the server to show its help pages.
+The deployed app is one line, \code{NACHO::nacho_app()}, so the server
+needs NACHO installed.
 }
 \examples{
 

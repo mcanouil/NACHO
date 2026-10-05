@@ -49,6 +49,9 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `DESCRIPTION`,
   - build: NACHO now requires R 4.3 or newer.
   - build: knitr and rmarkdown move to Suggests, and quarto joins them.
+  - build: The app no longer needs shinyWidgets or markdown, and needs shiny 1.11.0 or newer.
+- In `R/visualise.R`,
+  - feat: `visualise()` returns the tuned object when you click "Done", and no longer writes `nacho_object.rds` to `tempdir()`.
 
 ## New features
 
@@ -114,6 +117,9 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/batch.R` and `R/autoplot.R`,
   - feat: `batch_diagnostics()` crosses the study groups with cartridges and dates, with Cramér's V and a flag when a batch holds a single group, tests the QC metrics against each batch, and measures how much of each principal component each batch explains.
     `autoplot()` draws `"RLE"`, `"BatchFactors"` and `"PCBatch"`.
+- In `R/app.R`,
+  - feat: `nacho_app()` returns the app as a Shiny app object, so it can run from any R session or be deployed; `deploy()` copies a one-line `app.R` that calls it, and the "Done" button only appears with `nacho_app(done = TRUE)`, which `visualise()` uses.
+  - feat: The app starts from the object's own thresholds, keeps its preset and instrument, and offers RUVg, the miRNA methods and the background settings.
 
 ## Performance
 

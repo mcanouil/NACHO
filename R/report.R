@@ -61,12 +61,7 @@ plot_alt_texts <- c(
 #'
 #' @noRd
 help_text <- function(name) {
-  path <- system.file(
-    "app",
-    "www",
-    paste0("about-", name, ".md"),
-    package = "NACHO"
-  )
+  path <- system.file("about", paste0("about-", name, ".md"), package = "NACHO")
   if (!nzchar(path)) {
     nacho_abort(
       "The help page {.val {name}} is missing from the installed package.",
@@ -79,10 +74,10 @@ help_text <- function(name) {
 #' Samples that fail quality control, with their reasons
 #'
 #' @param x A `nacho` object.
+#' @param qc The quality-control table of `x`.
 #'
 #' @noRd
-qc_failures <- function(x) {
-  qc <- nacho_qc(x)
+qc_failures <- function(x, qc = nacho_qc(x)) {
   columns <- intersect(
     c(
       x@settings[["id_colname"]],

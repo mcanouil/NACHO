@@ -1,20 +1,19 @@
-#' Visualise quality-control metrics of a "nacho" object
+#' Explore and tune quality control in the NACHO app
 #'
-#' This function visualises results from [`load_rcc()`] or [`normalise()`]
-#' several quality-control metrics in an interactive Shiny application,
-#' in which thresholds can be customised and exported.
+#' Opens [nacho_app()] on `nacho_object`.
+#' Change thresholds and normalisation settings in the sidebar, then click
+#' "Done" to close the app and get the tuned object back.
 #'
 #' @inheritParams normalise
 #'
-#' @importFrom shinyWidgets dropdownButton tooltipOptions
+#' @return The tuned `nacho` object, invisibly, once you click "Done".
 #' @export
 #'
 #' @examples
-#'
 #' if (interactive()) {
 #'   data(GSE74821)
-#'   # Must be run in an interactive R session!
-#'   visualise(GSE74821)
+#'   tuned <- visualise(GSE74821)
+#'   nacho_qc(tuned)
 #' }
 #'
 #' if (interactive()) {
@@ -58,12 +57,7 @@
 visualise <- function(nacho_object) {
   check_nacho(nacho_object)
   check_interactive("visualise")
-  check_package("markdown", reason = "to show the help pages of the app")
-
-  shiny::shinyOptions(nacho_object = nacho_object)
-  on.exit(shiny::shinyOptions(nacho_object = NULL))
-
-  shiny::runApp(system.file("app", package = "NACHO"))
+  invisible(shiny::runApp(nacho_app(nacho_object, done = TRUE)))
 }
 
 
