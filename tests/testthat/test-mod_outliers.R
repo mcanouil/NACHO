@@ -41,6 +41,27 @@ test_that("the outliers module returns zero rows without failures", {
     ),
     {
       expect_identical(nrow(failures()), 0L)
+      expect_match(
+        as.character(output$body$html),
+        "No sample is flagged.",
+        fixed = TRUE
+      )
+    }
+  )
+})
+
+test_that("the outliers module shows the table when samples are flagged", {
+  x <- flagged_gse()
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = shiny::reactiveVal(x),
+      qc = shiny::reactive(nacho_qc(x))
+    ),
+    {
+      body <- as.character(output$body$html)
+      expect_no_match(body, "No sample is flagged.", fixed = TRUE)
+      expect_match(body, "failures", fixed = TRUE)
     }
   )
 })
