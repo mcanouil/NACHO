@@ -181,3 +181,27 @@ test_that("the brand font faces point at files in the dependency", {
   expect_length(files, 3L)
   expect_true(all(file.exists(file.path(dep$src$file, files))))
 })
+
+test_that("popover headers are readable in dark mode", {
+  deps <- bslib::bs_theme_dependencies(NACHO:::nacho_theme())
+  bootstrap <- Filter(function(d) d$name == "bootstrap", deps)[[1]]
+  css <- paste(
+    readLines(file.path(bootstrap$src$file, bootstrap$stylesheet[[1]])),
+    collapse = "\n"
+  )
+  rule <- regmatches(
+    css,
+    regexpr('\\[data-bs-theme="?dark"?\\] \\.popover\\{[^}]*\\}', css)
+  )
+  expect_length(rule, 1L)
+  expect_match(
+    rule,
+    paste0("header-color: *", NACHO:::nacho_palette[["yellow"]]),
+    ignore.case = TRUE
+  )
+  expect_match(
+    rule,
+    paste0("header-bg: *", NACHO:::nacho_palette[["night"]]),
+    ignore.case = TRUE
+  )
+})
