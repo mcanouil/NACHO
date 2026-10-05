@@ -92,6 +92,8 @@ app_plot <- function(x, type, options, dark, interactive = FALSE) {
   )
 }
 
+selection_css <- "stroke:currentColor;stroke-width:3px;r:6px;"
+
 app_girafe <- function(plot) {
   ggiraph::girafe(
     ggobj = plot,
@@ -101,7 +103,7 @@ app_girafe <- function(plot) {
       ggiraph::opts_selection(
         type = "single",
         only_shiny = TRUE,
-        css = "stroke:currentColor;stroke-width:3px;r:6px;"
+        css = selection_css
       ),
       ggiraph::opts_hover(css = "stroke:currentColor;stroke-width:2px;"),
       ggiraph::opts_tooltip(use_fill = FALSE),
@@ -304,7 +306,7 @@ mod_qc_plot_server <- function(
     if (interactive) {
       shiny::observeEvent(
         input$girafe_selected,
-        selected(input$girafe_selected %||% character()),
+        selected(as.character(input$girafe_selected %||% character())),
         ignoreNULL = FALSE
       )
       shiny::observeEvent(
@@ -313,8 +315,19 @@ mod_qc_plot_server <- function(
         ignoreNULL = FALSE,
         ignoreInit = TRUE
       )
-      output$girafe <- ggiraph::renderGirafe(app_girafe(plot())) |>
+      widget <- shiny::reactive(app_girafe(plot())) |>
         shiny::bindCache(object(), type, options(), dark())
+      output$girafe <- ggiraph::renderGirafe(
+        ggiraph::girafe_options(
+          widget(),
+          ggiraph::opts_selection(
+            type = "single",
+            only_shiny = TRUE,
+            css = selection_css,
+            selected = if (length(selected()) > 0) shiny::isolate(selected())
+          )
+        )
+      )
     } else {
       output$plot <- shiny::renderPlot(plot(), alt = plot_alt_texts[[type]]) |>
         shiny::bindCache(object(), type, options(), dark())

@@ -104,12 +104,14 @@ test_that("the page holds every navigation panel and plot card", {
     "Counts",
     "Normalisation",
     "Batch",
-    "Flagged samples",
+    "Samples",
     "About"
   )
   for (title in c(panels, NACHO:::app_plot_titles)) {
     expect_match(html, title, fixed = TRUE)
   }
+  expect_match(html, "data-value=\"Samples\"", fixed = TRUE)
+  expect_no_match(html, "data-value=\"Flagged samples\"", fixed = TRUE)
 })
 
 test_that("Done uses the thresholds as they stand, before the debounce", {

@@ -356,3 +356,46 @@ test_that("a click selects the sample in every plot", {
     }
   )
 })
+
+test_that("a plot rendered after a selection shows it", {
+  skip_if_not_installed("ggiraph")
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      session$setInputs(colour = "CartridgeID")
+      id <- colnames(GSE74821@counts)[4]
+      selected(id)
+      session$flushReact()
+      widget <- jsonlite::fromJSON(output$girafe, simplifyVector = FALSE)
+      expect_identical(unlist(widget$x$settings$select$selected), id)
+      selected(character())
+      session$flushReact()
+      widget <- jsonlite::fromJSON(output$girafe, simplifyVector = FALSE)
+      expect_length(widget$x$settings$select$selected, 0)
+    }
+  )
+})
+
+test_that("deselecting clears the selection, including an empty array", {
+  skip_if_not_installed("ggiraph")
+  selected <- shiny::reactiveVal("a")
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      session$setInputs(girafe_selected = list())
+      expect_identical(selected(), character())
+      selected("a")
+      session$setInputs(girafe_selected = NULL)
+      expect_identical(selected(), character())
+    }
+  )
+})

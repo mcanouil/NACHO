@@ -1,17 +1,26 @@
 #' @include report.R
 NULL
 
-mod_outliers_ui <- function(id) {
+mod_outliers_ui <- function(id, interactive = FALSE) {
   ns <- shiny::NS(id)
+  hint_id <- ns("highlight-hint")
+  select <- shiny::selectInput(
+    ns("highlight"),
+    "Highlight a sample",
+    choices = c(None = ""),
+    selectize = FALSE
+  )
+  select <- htmltools::tagQuery(select)$find("select")$addAttrs(
+    `aria-describedby` = hint_id
+  )$allTags()
   bslib::card(
     bslib::card_header("Samples"),
-    shiny::selectInput(
-      ns("highlight"),
-      "Highlight a sample",
-      choices = c(None = ""),
-      selectize = FALSE
+    select,
+    shiny::helpText(
+      id = hint_id,
+      "The chosen sample is marked in the table below.",
+      if (interactive) "It is also outlined in every plot."
     ),
-    shiny::helpText("The chosen sample is outlined in every plot."),
     shiny::uiOutput(ns("body"))
   )
 }
@@ -27,10 +36,14 @@ mod_outliers_server <- function(
       qc_failures(shiny::req(object()), shiny::req(qc()))
     )
     shiny::observeEvent(object(), {
+      ids <- colnames(object()@counts)
+      if (!all(selected() %in% ids)) {
+        selected(character())
+      }
       shiny::updateSelectInput(
         session,
         "highlight",
-        choices = c(None = "", colnames(object()@counts)),
+        choices = c(None = "", ids),
         selected = selected()
       )
     })
@@ -58,11 +71,14 @@ mod_outliers_server <- function(
           "n_flags",
           "reason"
         )]
-        id_column <- names(table)[[1]]
-        table[[id_column]] <- ifelse(
-          table[[id_column]] %in% selected(),
-          paste0("<strong>", table[[id_column]], "</strong>"),
-          table[[id_column]]
+        chosen <- table[[1]] %in% selected()
+        table[] <- lapply(table, function(column) {
+          htmltools::htmlEscape(as.character(column))
+        })
+        table[[1]] <- ifelse(
+          chosen,
+          paste0("<strong>", table[[1]], "</strong>"),
+          table[[1]]
         )
         table
       },

@@ -97,3 +97,60 @@ test_that("the keyboard route highlights a sample", {
     perl = TRUE
   )
 })
+
+test_that("the samples table escapes cell text", {
+  x <- flagged_gse()
+  selected <- shiny::reactiveVal(character())
+  qc <- nacho_qc(x)
+  qc[[x@settings[["id_colname"]]]][2] <- "a<b>&"
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = shiny::reactiveVal(x),
+      qc = shiny::reactive(qc),
+      selected = selected
+    ),
+    {
+      session$flushReact()
+      selected("a<b>&")
+      session$flushReact()
+      expect_match(
+        output$samples,
+        "<strong>a&lt;b&gt;&amp;</strong>",
+        fixed = TRUE
+      )
+      expect_no_match(output$samples, "a<b>", fixed = TRUE)
+    }
+  )
+})
+
+test_that("the select follows the selection and the object", {
+  x <- flagged_gse()
+  object <- shiny::reactiveVal(x)
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = object,
+      qc = shiny::reactive(nacho_qc(object())),
+      selected = selected
+    ),
+    {
+      id <- colnames(x@counts)[2]
+      selected(id)
+      session$flushReact()
+      expect_identical(selected(), id)
+      object(plexset_nacho)
+      session$flushReact()
+      expect_identical(selected(), character())
+    }
+  )
+})
+
+test_that("the hint is tied to the select and static apps omit the plot claim", {
+  html <- htmltools::renderTags(NACHO:::mod_outliers_ui("o"))$html
+  expect_match(html, "aria-describedby=\"o-highlight-hint\"", fixed = TRUE)
+  expect_no_match(html, "every plot", fixed = TRUE)
+  html <- htmltools::renderTags(NACHO:::mod_outliers_ui("o", TRUE))$html
+  expect_match(html, "outlined in every plot", fixed = TRUE)
+})
