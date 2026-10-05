@@ -230,7 +230,11 @@ mod_data_server <- function(id, initial = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
     current <- shiny::reactiveVal(initial)
     shiny::observeEvent(input$import, {
-      files <- shiny::req(input$files)
+      if (is.null(input$files)) {
+        notify_user("Choose the RCC files to import first.", "warning")
+        return()
+      }
+      files <- input$files
       loaded <- withCallingHandlers(
         tryCatch(
           rlang::with_options(read_uploads(files), nacho.quiet = TRUE),

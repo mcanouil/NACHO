@@ -545,3 +545,15 @@ test_that("any load warning of the package is shown as a warning toast", {
   })
   expect_identical(messages, "Too few genes.")
 })
+
+test_that("importing without a file asks the user to choose files", {
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message)
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(import = 1)
+    expect_null(session$returned())
+  })
+  expect_match(messages, "Choose the RCC files")
+})
