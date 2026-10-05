@@ -327,3 +327,32 @@ test_that("the fallback tells the user, and ggiraph is detected when present", {
   withr::local_options(nacho.quiet = FALSE, rlib_message_verbosity = "default")
   expect_message(NACHO:::plots_interactive(), "ggiraph is not installed")
 })
+
+test_that("a click selects the sample in every plot", {
+  skip_if_not_installed("ggiraph")
+  selected <- shiny::reactiveVal(character())
+  sent <- list()
+  testthat::local_mocked_bindings(
+    send_selection = function(session, output_id, value) {
+      sent[[session$ns(output_id)]] <<- value
+    }
+  )
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      id <- colnames(GSE74821@counts)[3]
+      session$setInputs(girafe_selected = id)
+      expect_identical(selected(), id)
+      selected(colnames(GSE74821@counts)[5])
+      session$flushReact()
+      expect_identical(
+        sent[[session$ns("girafe")]],
+        colnames(GSE74821@counts)[5]
+      )
+    }
+  )
+})

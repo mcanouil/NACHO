@@ -255,12 +255,17 @@ download_size <- function(value, default) {
   }
 }
 
+send_selection <- function(session, output_id, value) {
+  session$sendCustomMessage(paste0(session$ns(output_id), "_set"), value)
+}
+
 mod_qc_plot_server <- function(
   id,
   object,
   qc,
   type = id,
   dark,
+  selected = shiny::reactiveVal(character()),
   interactive = FALSE
 ) {
   force(type)
@@ -297,6 +302,17 @@ mod_qc_plot_server <- function(
       app_plot(shiny::req(object()), type, options(), dark(), interactive)
     })
     if (interactive) {
+      shiny::observeEvent(
+        input$girafe_selected,
+        selected(input$girafe_selected %||% character()),
+        ignoreNULL = FALSE
+      )
+      shiny::observeEvent(
+        selected(),
+        send_selection(session, "girafe", selected()),
+        ignoreNULL = FALSE,
+        ignoreInit = TRUE
+      )
       output$girafe <- ggiraph::renderGirafe(app_girafe(plot())) |>
         shiny::bindCache(object(), type, options(), dark())
     } else {

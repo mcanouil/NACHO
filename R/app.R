@@ -111,7 +111,7 @@ app_ui <- function(done = FALSE, interactive = FALSE) {
       with_data(plot_page("normalisation", interactive))
     ),
     bslib::nav_panel("Batch", with_data(mod_batch_ui("batch", interactive))),
-    bslib::nav_panel("Flagged samples", with_data(mod_outliers_ui("outliers"))),
+    bslib::nav_panel("Samples", with_data(mod_outliers_ui("outliers"))),
     bslib::nav_panel("About", help_page("nacho")),
     bslib::nav_spacer(),
     bslib::nav_item(bslib::input_dark_mode(id = "dark_mode"))
@@ -191,7 +191,8 @@ app_server <- function(x, done = FALSE, interactive = FALSE) {
     )
     shiny::outputOptions(output, "applicable", suspendWhenHidden = FALSE)
     mod_overview_server("overview", tuned, qc)
-    mod_outliers_server("outliers", tuned, qc)
+    selected <- shiny::reactiveVal(character())
+    mod_outliers_server("outliers", tuned, qc, selected)
     mod_batch_server("batch", tuned)
     lapply(unlist(app_plot_types, use.names = FALSE), function(type) {
       mod_qc_plot_server(
@@ -200,6 +201,7 @@ app_server <- function(x, done = FALSE, interactive = FALSE) {
         qc = qc,
         type = type,
         dark = dark,
+        selected = selected,
         interactive = interactive
       )
     })

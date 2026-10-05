@@ -65,3 +65,35 @@ test_that("the outliers module shows the table when samples are flagged", {
     }
   )
 })
+
+test_that("the keyboard route highlights a sample", {
+  selected <- shiny::reactiveVal(character())
+  x <- flagged_gse()
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = shiny::reactiveVal(x),
+      qc = shiny::reactive(nacho_qc(x)),
+      selected = selected
+    ),
+    {
+      id <- colnames(x@counts)[2]
+      session$setInputs(highlight = id)
+      expect_identical(selected(), id)
+      expect_match(
+        output$samples,
+        paste0("<strong>", id, "</strong>"),
+        fixed = TRUE
+      )
+      session$setInputs(highlight = "")
+      expect_identical(selected(), character())
+    }
+  )
+  html <- htmltools::renderTags(NACHO:::mod_outliers_ui("outliers"))$html
+  expect_match(html, "<select[^>]*id=\"outliers-highlight\"")
+  expect_match(
+    html,
+    "<label[^>]*for=\"outliers-highlight\"[^>]*>Highlight a sample",
+    perl = TRUE
+  )
+})
