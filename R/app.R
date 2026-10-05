@@ -107,14 +107,19 @@ app_server <- function(x, done = FALSE) {
       mod_qc_plot_server(type, object = tuned, type = type, dark = dark)
     })
     if (done) {
-      observe_done(input, data, settings)
+      finished <- new.env()
+      observe_done(input, data, settings, finished)
+      session$onSessionEnded(function() {
+        if (!isTRUE(finished$done)) shiny::stopApp(NULL)
+      })
     }
   }
 }
 
-observe_done <- function(input, data, settings) {
+observe_done <- function(input, data, settings, finished = new.env()) {
   shiny::observeEvent(input$done, {
     if (is.null(data())) {
+      finished$done <- TRUE
       return(shiny::stopApp(NULL))
     }
     problem <- NULL
@@ -138,6 +143,7 @@ observe_done <- function(input, data, settings) {
         "warning"
       )
     } else {
+      finished$done <- TRUE
       shiny::stopApp(result)
     }
   })

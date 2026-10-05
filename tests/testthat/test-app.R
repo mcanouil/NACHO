@@ -63,7 +63,9 @@ test_that("Done warns instead of closing when the settings fail", {
   stopped <- FALSE
   warned <- NULL
   local_mocked_bindings(
-    stopApp = function(returnValue = NULL) stopped <<- TRUE,
+    stopApp = function(returnValue = NULL) {
+      if (!is.null(returnValue)) stopped <<- TRUE
+    },
     .package = "shiny"
   )
   local_mocked_bindings(
@@ -160,4 +162,37 @@ test_that("Done explains why the object cannot be returned", {
       "Choose a normalisation method these data support before clicking Done."
     )
   )
+})
+
+test_that("closing the page ends visualise() but not a deployed app", {
+  stopped <- 0L
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) stopped <<- stopped + 1L,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = FALSE), {
+    session$close()
+  })
+  expect_identical(stopped, 0L)
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$close()
+  })
+  expect_identical(stopped, 1L)
+})
+
+test_that("closing the page after Done keeps the tuned object", {
+  values <- list()
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) {
+      values[[length(values) + 1L]] <<- returnValue
+    },
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$setInputs(done = 1)
+    session$close()
+  })
+  expect_length(values, 1L)
+  expect_false(is.null(values[[1]]))
 })
