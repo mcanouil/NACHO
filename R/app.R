@@ -58,7 +58,15 @@ with_data <- function(...) {
 plot_page <- function(page) {
   bslib::layout_columns(
     col_widths = bslib::breakpoints(sm = 12, lg = 6),
-    !!!lapply(app_plot_types[[page]], mod_qc_plot_ui)
+    !!!lapply(app_plot_types[[page]], function(type) {
+      shiny::conditionalPanel(
+        sprintf(
+          "output.applicable && output.applicable.indexOf(',%s,') >= 0",
+          type
+        ),
+        mod_qc_plot_ui(type)
+      )
+    })
   )
 }
 
@@ -166,6 +174,14 @@ app_server <- function(x, done = FALSE) {
       )
     )
     qc <- shiny::reactive(nacho_qc(tuned()))
+    output$applicable <- shiny::renderText(
+      paste0(
+        ",",
+        paste(applicable_plots(shiny::req(tuned())), collapse = ","),
+        ","
+      )
+    )
+    shiny::outputOptions(output, "applicable", suspendWhenHidden = FALSE)
     mod_overview_server("overview", tuned, qc)
     mod_outliers_server("outliers", tuned, qc)
     mod_batch_server("batch", tuned)

@@ -209,10 +209,54 @@ report_settings <- function(x) {
   )
 }
 
+#' The plot types that make sense for the object
+#'
+#' Shared by the report and the app, so both leave out the same plots.
+#'
+#' @noRd
+applicable_plots <- function(x) {
+  has_house_factor <- "House_factor" %in%
+    names(x@samples) &&
+    any(!is.na(x@samples[["House_factor"]]))
+  has_batch <- length(intersect(
+    c("CartridgeID", "Date"),
+    names(nacho_samples(x))
+  )) >
+    0
+  has_components <- ncol(x@pca[["scores"]]) >= 2
+  n_housekeeping <- sum(x@probes[["is_housekeeping"]])
+  has_stability <- n_housekeeping >= 3 &&
+    !is.null(tryCatch(
+      housekeeping_stability(x),
+      nacho_error = function(cnd) NULL
+    ))
+  c(
+    "BD",
+    "FoV",
+    if (x@rcc_type != "n8") c("PCL", "LoD"),
+    "Positive",
+    "Negative",
+    if (n_housekeeping > 0) "Housekeeping",
+    "PN",
+    "ACBD",
+    "ACMC",
+    if (has_components) c("PCA12", "PCA"),
+    "PCAi",
+    "PFNF",
+    if (has_house_factor) "HF",
+    "NORM",
+    "RLE",
+    if (has_stability) "Stability",
+    "BatchFactors",
+    if (has_batch && has_components) "PCBatch"
+  )
+}
+
 #' The sections of the report that apply to the object
 #'
 #' @noRd
 report_sections <- function(x) {
+  plots <- applicable_plots(x)
   section <- function(
     title,
     level,
@@ -229,67 +273,36 @@ report_sections <- function(x) {
       alt = if (is.na(plot)) NA_character_ else plot_alt_texts[[plot]]
     )
   }
-  n_housekeeping <- sum(x@probes[["is_housekeeping"]])
-  has_house_factor <- "House_factor" %in%
-    names(x@samples) &&
-    any(!is.na(x@samples[["House_factor"]]))
-  metrics <- if (x@rcc_type == "n8") {
-    c("BD", "FoV")
-  } else {
-    c("BD", "FoV", "PCL", "LoD")
+  plot_section <- function(plot, title, level = 2, help = NA_character_) {
+    if (plot %in% plots) section(title, level, plot, help)
   }
-  has_batch <- length(intersect(
-    c("CartridgeID", "Date"),
-    names(nacho_samples(x))
-  )) >
-    0
-  has_components <- ncol(x@pca[["scores"]]) >= 2
-  has_stability <- n_housekeeping >= 3 &&
-    !is.null(tryCatch(
-      housekeeping_stability(x),
-      nacho_error = function(cnd) NULL
-    ))
   rows <- c(
     list(section("Quality-control metrics", 1)),
-    lapply(metrics, function(metric) {
+    lapply(intersect(c("BD", "FoV", "PCL", "LoD"), plots), function(metric) {
       section(qc_metric_labels[[metric]], 2, metric, tolower(metric))
     }),
     list(
       section("Control probes", 1),
-      section("Positive controls", 2, "Positive"),
-      section("Negative controls", 2, "Negative")
-    ),
-    if (n_housekeeping > 0) {
-      list(section("Housekeeping genes", 2, "Housekeeping"))
-    },
-    list(
-      section("Positive against negative controls", 2, "PN"),
+      plot_section("Positive", "Positive controls"),
+      plot_section("Negative", "Negative controls"),
+      plot_section("Housekeeping", "Housekeeping genes"),
+      plot_section("PN", "Positive against negative controls"),
       section("Counts", 1),
-      section("Average count against binding density", 2, "ACBD"),
-      section("Average count against median count", 2, "ACMC"),
+      plot_section("ACBD", "Average count against binding density"),
+      plot_section("ACMC", "Average count against median count"),
       section("Principal components", 1),
-      if (has_components) section("First two components", 2, "PCA12"),
-      if (has_components) section("Planes of the first components", 2, "PCA"),
-      section("Variance explained", 2, "PCAi"),
+      plot_section("PCA12", "First two components"),
+      plot_section("PCA", "Planes of the first components"),
+      plot_section("PCAi", "Variance explained"),
       section("Normalisation", 1),
-      section("Positive against negative factor", 2, "PFNF", "pf")
-    ),
-    if (has_house_factor) {
-      list(section("Content normalisation factor", 2, "HF", "hgf"))
-    },
-    list(
-      section("Normalisation result", 2, "NORM"),
-      section("Relative log expression", 2, "RLE")
-    ),
-    if (has_stability) {
-      list(section("Housekeeping gene stability", 2, "Stability"))
-    },
-    list(
+      plot_section("PFNF", "Positive against negative factor", help = "pf"),
+      plot_section("HF", "Content normalisation factor", help = "hgf"),
+      plot_section("NORM", "Normalisation result"),
+      plot_section("RLE", "Relative log expression"),
+      plot_section("Stability", "Housekeeping gene stability"),
       section("Batch effects", 1, batch = TRUE),
-      section("Normalisation factors by cartridge", 2, "BatchFactors"),
-      if (has_batch && has_components) {
-        section("Principal components and batches", 2, "PCBatch")
-      }
+      plot_section("BatchFactors", "Normalisation factors by cartridge"),
+      plot_section("PCBatch", "Principal components and batches")
     )
   )
   do.call(rbind, rows)

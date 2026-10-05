@@ -348,3 +348,19 @@ test_that("the page loads the bold and italic faces of the brand font", {
   expect_match(css, "font-weight: 700", fixed = TRUE)
   expect_match(css, "font-style: italic", fixed = TRUE)
 })
+
+test_that("cards for plots that do not apply are hidden", {
+  shiny::testServer(NACHO:::app_server(plexset_nacho), {
+    session$flushReact()
+    types <- strsplit(output$applicable, ",", fixed = TRUE)[[1]]
+    expect_false(any(c("PCL", "LoD") %in% types))
+    expect_true("BD" %in% types)
+  })
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$flushReact()
+    types <- strsplit(output$applicable, ",", fixed = TRUE)[[1]]
+    expect_true(all(c("PCL", "LoD", "HF") %in% types))
+  })
+  html <- as.character(NACHO:::app_ui(done = FALSE))
+  expect_match(html, "output.applicable.indexOf(&#39;,PCL,&#39;)", fixed = TRUE)
+})
