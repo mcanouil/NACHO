@@ -7,7 +7,8 @@ app_batch_variables <- c("CartridgeID", "Date")
 #'
 #' Text or factor columns with at least two levels, and at most one level for
 #' every two samples, so identifiers and free text are left out.
-#' The batch columns and any column that splits the samples the same way are left out too, since the page crosses groups with them.
+#' The batch columns, and any column that splits the samples the same way,
+#' are left out, since the page crosses groups with them.
 #'
 #' @noRd
 group_choices <- function(samples) {
