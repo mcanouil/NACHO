@@ -14,6 +14,11 @@ $nacho-rose: #D85460;
   filter: none;
 }
 
-.card {
-  border-radius: var(--bs-border-radius);
+:root {
+  --bs-body-font-family: "Source Sans 3", system-ui, sans-serif;
+  --bs-font-monospace: "JetBrains Mono", ui-monospace, monospace;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--bs-body-font-family);
 }

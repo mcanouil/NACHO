@@ -4,7 +4,8 @@ template:
   bootstrap: 5
   light-switch: true
   bslib:
-    brand: inst/brand/_brand.yml
+    # bslib resolves the brand path from the working directory: build the site from the package root, as CI does.
+    brand: pkgdown/_brand.yml
     navbar-bg: "#182430"
     # pkgdown default of 56px plus the 4px strip in extra.scss.
     pkgdown-nav-height: 60px
