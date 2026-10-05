@@ -270,3 +270,13 @@ test_that("the cartridge count ignores missing cartridges", {
   qc[["CartridgeID"]] <- NA_character_
   expect_match(NACHO:::plot_summary(x, qc), "^48 samples; none flagged\\.")
 })
+
+test_that("without ggiraph the app falls back to static plots", {
+  local_mocked_bindings(
+    check_installed = function(...) {
+      rlang::abort("no", class = "rlib_error_package_not_found")
+    },
+    .package = "rlang"
+  )
+  expect_false(NACHO:::plots_interactive())
+})

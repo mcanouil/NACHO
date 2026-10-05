@@ -584,3 +584,22 @@ test_that("autoplot() checks dark", {
     class = "nacho_error_bad_argument"
   )
 })
+
+test_that("interactive plots carry the sample id and the metric", {
+  skip_if_not_installed("ggiraph")
+  x <- flagged_gse()
+  plot <- NACHO:::app_plot(x, "FoV", list(), dark = FALSE, interactive = TRUE)
+  built <- ggplot2::ggplot_build(plot)
+  points <- Filter(function(d) "data_id" %in% names(d), built$data)
+  expect_gt(length(points), 0)
+  ids <- unlist(lapply(points, function(d) d$data_id))
+  expect_setequal(ids, colnames(x@counts))
+  tooltips <- unlist(lapply(points, function(d) d$tooltip))
+  expect_match(tooltips[1], "^GSM[^\n]+\nFoV: ")
+})
+
+test_that("autoplot() stays static", {
+  plot <- autoplot(GSE74821, type = "FoV")
+  layers <- vapply(plot$layers, function(l) class(l$geom)[1], character(1))
+  expect_false(any(grepl("Interactive", layers)))
+})

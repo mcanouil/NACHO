@@ -54,6 +54,7 @@ Imports:
     shiny (>= 1.11.0)
 Suggests:
     colorspace (>= 2.1-3),
+    ggiraph (>= 0.9.6),
     knitr (>= 1.39),
     png (>= 0.1-9),
     quarto (>= 1.5.1),
