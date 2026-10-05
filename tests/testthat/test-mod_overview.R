@@ -78,3 +78,9 @@ test_that("the overview is four value boxes with decorative icons", {
   expect_length(icons, 4L)
   expect_true(all(grepl('aria-hidden="true"', icons, fixed = TRUE)))
 })
+
+test_that("app_overview() does not count a missing cartridge", {
+  x <- GSE74821
+  x@samples[["CartridgeID"]][1:2] <- NA
+  expect_identical(NACHO:::app_overview(x)$cartridges, 4L)
+})

@@ -337,3 +337,50 @@ test_that("the sliders link to the help page of their metric", {
   }
   expect_match(html, "bslib-popover", fixed = TRUE)
 })
+
+test_that("reset moves the sliders back to the preset", {
+  renders <- 0L
+  body <- NACHO:::threshold_group_body
+  local_mocked_bindings(
+    threshold_group_body = function(...) {
+      renders <<- renders + 1L
+      body(...)
+    },
+    .package = "NACHO"
+  )
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(GSE74821)),
+    {
+      preset <- GSE74821@thresholds[["FoV"]]
+      session$setInputs(preset = "nsolver", instrument = "max")
+      output$group_Imaging
+      before <- renders
+      session$setInputs(FoV = c(10, 20))
+      expect_false(identical(current()[["FoV"]], preset))
+      session$setInputs(reset = 1)
+      output$group_Imaging
+      expect_gt(renders, before)
+      expect_identical(current()[["FoV"]], preset)
+      session$setInputs(FoV = NACHO:::limits_to_slider(preset, c(0, 100)))
+      expect_identical(current()[["FoV"]], preset)
+    }
+  )
+})
+
+test_that("reset keeps haemolysis from the starting thresholds", {
+  x <- GSE74821
+  x@thresholds <- nacho_thresholds(haemolysis = TRUE)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(x)),
+    {
+      session$setInputs(preset = x@thresholds[["preset"]], instrument = "max")
+      limits <- current()
+      limits[["Haemolysis"]] <- c(-Inf, Inf)
+      current(limits)
+      session$setInputs(reset = 1)
+      expect_true(any(is.finite(current()[["Haemolysis"]])))
+    }
+  )
+})

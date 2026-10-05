@@ -14,7 +14,7 @@ app_overview <- function(x, qc = nacho_qc(x)) {
   }
   list(
     samples = nrow(qc),
-    cartridges = length(unique(qc[["CartridgeID"]])),
+    cartridges = length(unique(stats::na.omit(qc[["CartridgeID"]]))),
     flagged = sum(qc[["status"]] %in% "fail"),
     method = x@settings[["normalisation_method"]],
     preset = x@thresholds[["preset"]],

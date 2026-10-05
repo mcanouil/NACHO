@@ -209,9 +209,11 @@ mod_thresholds_server <- function(id, data) {
     current <- shiny::reactiveVal()
     base <- shiny::reactiveVal()
     published <- shiny::reactiveVal()
+    revision <- shiny::reactiveVal(0L)
     start <- function(limits) {
       base(limits)
       current(limits)
+      revision(shiny::isolate(revision()) + 1L)
     }
 
     shiny::observeEvent(data(), {
@@ -248,7 +250,7 @@ mod_thresholds_server <- function(id, data) {
     })
 
     reset <- function() {
-      limits <- shiny::req(current())
+      limits <- shiny::req(base())
       start(nacho_thresholds(
         instrument = input$instrument,
         preset = input$preset,
@@ -274,14 +276,15 @@ mod_thresholds_server <- function(id, data) {
     for (group in names(threshold_groups)) {
       local({
         group <- group
-        output[[paste0("group_", group)]] <- shiny::renderUI(
+        output[[paste0("group_", group)]] <- shiny::renderUI({
+          revision()
           threshold_group_body(
             shiny::req(data()),
             shiny::req(base()),
             session$ns,
             group
           )
-        )
+        })
         shiny::outputOptions(
           output,
           paste0("group_", group),
