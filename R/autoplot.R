@@ -170,18 +170,57 @@ plot_probes <- function(object, rows, colour) {
   long
 }
 
-hover_mapping <- function(id, y) {
-  ggplot2::aes(
-    data_id = .data[[id]],
-    tooltip = paste0(.data[[id]], "\n", y, ": ", format(signif(.data[[y]], 3)))
-  )
+tooltip_labels <- c(
+  qc_metric_labels,
+  MC = "Average counts",
+  MedC = "Median counts",
+  Count = "Count",
+  Negative_factor = "Negative normalisation factor"
+)
+
+hover_mapping <- function(id, y, label_column = NULL) {
+  label <- unname(tooltip_labels[y])
+  if (is.na(label)) {
+    label <- y
+  }
+  value <- function(d) format(signif(d, 3))
+  if (is.null(label_column)) {
+    ggplot2::aes(
+      data_id = .data[[!!id]],
+      tooltip = paste0(
+        .data[[!!id]],
+        "\n",
+        !!label,
+        ": ",
+        value(.data[[!!y]])
+      )
+    )
+  } else {
+    ggplot2::aes(
+      data_id = .data[[!!id]],
+      tooltip = paste0(
+        .data[[!!id]],
+        "\n",
+        .data[[!!label_column]],
+        ": ",
+        value(.data[[!!y]])
+      )
+    )
+  }
 }
 
-point_layer <- function(mapping = NULL, interactive = FALSE, id, y, ...) {
+point_layer <- function(
+  mapping = NULL,
+  interactive = FALSE,
+  id,
+  y,
+  label_column = NULL,
+  ...
+) {
   if (!interactive) {
     return(ggplot2::geom_point(mapping = mapping, ...))
   }
-  hover <- hover_mapping(id, y)
+  hover <- hover_mapping(id, y, label_column)
   ggiraph::geom_point_interactive(
     mapping = if (is.null(mapping)) {
       hover
@@ -775,6 +814,7 @@ plot_pca <- function(
       interactive = interactive,
       id = id,
       y = "Y",
+      label_column = "Y.PC",
       size = size,
       na.rm = TRUE
     ) +

@@ -280,3 +280,50 @@ test_that("without ggiraph the app falls back to static plots", {
   )
   expect_false(NACHO:::plots_interactive())
 })
+
+test_that("the interactive card holds a girafe output labelled for readers", {
+  html <- htmltools::renderTags(
+    NACHO:::mod_qc_plot_ui("FoV", interactive = TRUE)
+  )$html
+  expect_match(html, 'role="img"', fixed = TRUE)
+  expect_match(html, "class=\"girafe ", fixed = TRUE)
+  expect_match(html, NACHO:::plot_alt_texts[["FoV"]], fixed = TRUE)
+  static <- htmltools::renderTags(NACHO:::mod_qc_plot_ui("FoV"))$html
+  expect_no_match(static, "class=\"girafe ")
+})
+
+test_that("nacho_app() threads the interactive choice to the UI and server", {
+  seen <- list()
+  local_mocked_bindings(
+    plots_interactive = function() TRUE,
+    app_ui = function(done = FALSE, interactive = FALSE) {
+      seen$ui <<- interactive
+    },
+    app_server = function(x, done = FALSE, interactive = FALSE) {
+      seen$server <<- interactive
+    }
+  )
+  local_mocked_bindings(
+    shinyApp = function(ui, server) {
+      force(server)
+      list(ui = ui)
+    },
+    .package = "shiny"
+  )
+  app <- nacho_app()
+  app$ui(NULL)
+  expect_identical(seen, list(server = TRUE, ui = TRUE))
+})
+
+test_that("the fallback tells the user, and ggiraph is detected when present", {
+  skip_if_not_installed("ggiraph")
+  expect_true(NACHO:::plots_interactive())
+  local_mocked_bindings(
+    check_installed = function(...) {
+      rlang::abort("no", class = "rlib_error_package_not_found")
+    },
+    .package = "rlang"
+  )
+  withr::local_options(nacho.quiet = FALSE, rlib_message_verbosity = "default")
+  expect_message(NACHO:::plots_interactive(), "ggiraph is not installed")
+})

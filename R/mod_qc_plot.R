@@ -43,7 +43,8 @@ app_plot_titles <- c(
 
 #' Draw one plot for the app
 #'
-#' Unknown colour columns fall back to `CartridgeID`.
+#' Unknown colour columns fall back to `CartridgeID`, and unknown label
+#' columns to no labels.
 #' Warnings about unavailable metrics are muffled, because the app shows an
 #' empty plot for them.
 #' Interactive plots add tooltips and selection with ggiraph, and only the app
@@ -56,6 +57,10 @@ app_plot <- function(x, type, options, dark, interactive = FALSE) {
     colour <- "CartridgeID"
   }
   outliers_labels <- options[["outliers_labels"]]
+  if (!isTRUE(outliers_labels %in% names(nacho_samples(x)))) {
+    outliers_labels <- NULL
+  }
+  show_legend <- !isFALSE(options[["show_legend"]])
   withCallingHandlers(
     if (interactive) {
       nacho_plot_registry[[type]](
@@ -63,7 +68,7 @@ app_plot <- function(x, type, options, dark, interactive = FALSE) {
         type = type,
         colour = colour,
         size = options[["size"]] %||% 1,
-        show_legend = options[["show_legend"]] %||% TRUE,
+        show_legend = show_legend,
         show_outliers = TRUE,
         outliers_factor = 1,
         outliers_labels = outliers_labels,
@@ -76,7 +81,7 @@ app_plot <- function(x, type, options, dark, interactive = FALSE) {
         type = type,
         colour = colour,
         size = options[["size"]] %||% 1,
-        show_legend = options[["show_legend"]] %||% TRUE,
+        show_legend = show_legend,
         outliers_labels = outliers_labels,
         dark = dark
       )

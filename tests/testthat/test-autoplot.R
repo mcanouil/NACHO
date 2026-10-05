@@ -595,11 +595,104 @@ test_that("interactive plots carry the sample id and the metric", {
   ids <- unlist(lapply(points, function(d) d$data_id))
   expect_setequal(ids, colnames(x@counts))
   tooltips <- unlist(lapply(points, function(d) d$tooltip))
-  expect_match(tooltips[1], "^GSM[^\n]+\nFoV: ")
+  expect_match(tooltips[1], "^GSM[^\n]+\nField of view: ")
 })
 
 test_that("autoplot() stays static", {
   plot <- autoplot(GSE74821, type = "FoV")
   layers <- vapply(plot$layers, function(l) class(l$geom)[1], character(1))
   expect_false(any(grepl("Interactive", layers)))
+})
+
+interactive_points <- function(plot) {
+  built <- ggplot2::ggplot_build(plot)
+  Filter(function(d) "data_id" %in% names(d), built$data)
+}
+
+test_that("every plot type draws interactively", {
+  skip_if_not_installed("ggiraph")
+  x <- flagged_gse()
+  for (type in names(NACHO:::nacho_plot_registry)) {
+    plot <- NACHO:::app_plot(x, type, list(), dark = FALSE, interactive = TRUE)
+    expect_no_error(ggplot2::ggplot_build(plot))
+  }
+})
+
+test_that("per-sample points carry the id and a readable metric", {
+  skip_if_not_installed("ggiraph")
+  x <- flagged_gse()
+  expected <- c(
+    BD = "Binding density",
+    FoV = "Field of view",
+    PCL = "Positive control linearity",
+    LoD = "Limit of detection",
+    Positive = "Count",
+    Negative = "Count",
+    ACBD = "Binding density",
+    ACMC = "Median counts",
+    PCA12 = "PC02",
+    PFNF = "Positive normalisation factor",
+    HF = "Content normalisation factor"
+  )
+  for (type in names(expected)) {
+    plot <- NACHO:::app_plot(x, type, list(), dark = FALSE, interactive = TRUE)
+    points <- interactive_points(plot)
+    expect_gt(length(points), 0)
+    ids <- unlist(lapply(points, function(d) d$data_id))
+    expect_true(all(ids %in% colnames(x@counts)), info = type)
+    tooltips <- unlist(lapply(points, function(d) d$tooltip))
+    expect_true(
+      all(startsWith(tooltips, paste0(ids, "\n", expected[[type]], ": "))),
+      info = type
+    )
+  }
+})
+
+test_that("PCA tooltips name the plotted component", {
+  skip_if_not_installed("ggiraph")
+  plot <- NACHO:::app_plot(
+    flagged_gse(),
+    "PCA",
+    list(),
+    dark = FALSE,
+    interactive = TRUE
+  )
+  tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
+  expect_match(tooltips, "\nPC0[2-5]: ")
+})
+
+test_that("PlexSet metric plots use the lane file as the id", {
+  skip_if_not_installed("ggiraph")
+  plot <- NACHO:::app_plot(
+    plexset_nacho,
+    "BD",
+    list(),
+    dark = FALSE,
+    interactive = TRUE
+  )
+  ids <- unlist(lapply(interactive_points(plot), function(d) d$data_id))
+  expect_false(any(grepl("_S[0-9]*$", ids)))
+  expect_gt(length(ids), 0)
+})
+
+test_that("interactive plots ignore unknown label columns", {
+  skip_if_not_installed("ggiraph")
+  plot <- NACHO:::app_plot(
+    flagged_gse(),
+    "BD",
+    list(outliers_labels = "nope", show_legend = NULL),
+    dark = FALSE,
+    interactive = TRUE
+  )
+  expect_no_error(ggplot2::ggplot_build(plot))
+})
+
+test_that("a sample column named id or y does not shadow the hover", {
+  skip_if_not_installed("ggiraph")
+  x <- flagged_gse()
+  x@samples[["id"]] <- "shadow"
+  x@samples[["y"]] <- "shadow"
+  plot <- NACHO:::app_plot(x, "FoV", list(), dark = FALSE, interactive = TRUE)
+  tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
+  expect_match(tooltips[1], "^GSM[^\n]+\nField of view: ")
 })
