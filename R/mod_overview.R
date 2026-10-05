@@ -70,7 +70,10 @@ mod_overview_server <- function(id, object, qc) {
       }
     })
     output$method <- shiny::renderText(overview()$method)
-    output$preset <- shiny::renderText(paste(overview()$preset, "preset"))
+    output$preset <- shiny::renderText(paste(
+      preset_label(overview()$preset),
+      "preset"
+    ))
     overview
   })
 }

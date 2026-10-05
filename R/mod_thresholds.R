@@ -144,6 +144,12 @@ threshold_group_body <- function(x, limits, ns, group) {
   threshold_inputs(x, limits, ns, metrics)
 }
 
+preset_choices <- c(nSolver = "nsolver", "NACHO 2" = "legacy")
+
+preset_label <- function(preset) {
+  names(preset_choices)[match(preset, preset_choices)]
+}
+
 mod_thresholds_ui <- function(id) {
   ns <- shiny::NS(id)
   group_panel <- function(group) {
@@ -158,7 +164,7 @@ mod_thresholds_ui <- function(id) {
       shiny::selectInput(
         ns("preset"),
         "Threshold preset",
-        c(nSolver = "nsolver", "NACHO 2" = "legacy")
+        preset_choices
       ),
       shiny::selectInput(
         ns("instrument"),

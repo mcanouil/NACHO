@@ -49,7 +49,7 @@ test_that("the overview module formats every field", {
     {
       expect_identical(output$cartridges, "1")
       expect_identical(output$method, "GLM")
-      expect_identical(output$preset, "nsolver preset")
+      expect_identical(output$preset, "nSolver preset")
       expect_identical(output$flagged_count, "2")
       expect_identical(output$reasons, "FoV: 2")
     }
@@ -83,4 +83,9 @@ test_that("app_overview() does not count a missing cartridge", {
   x <- GSE74821
   x@samples[["CartridgeID"]][1:2] <- NA
   expect_identical(NACHO:::app_overview(x)$cartridges, 4L)
+})
+
+test_that("the overview names presets as the sidebar does", {
+  expect_identical(NACHO:::preset_label("nsolver"), "nSolver")
+  expect_identical(NACHO:::preset_label("legacy"), "NACHO 2")
 })
