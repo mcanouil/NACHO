@@ -13,12 +13,3 @@ $nacho-rose: #D85460;
 [data-bs-theme="dark"] img.r-plt:is([src$="nacho_hex.png"], [src$="README-app.png"], [src$="README-visualise.png"]) {
   filter: none;
 }
-
-:root {
-  --bs-body-font-family: "Source Sans 3", system-ui, sans-serif;
-  --bs-font-monospace: "JetBrains Mono", ui-monospace, monospace;
-}
-
-h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
-  font-family: var(--bs-body-font-family);
-}

@@ -205,3 +205,13 @@ test_that("popover headers are readable in dark mode", {
     ignore.case = TRUE
   )
 })
+
+test_that("the pkgdown brand file keeps the meta and colours of the brand file", {
+  skip_if_not_installed("yaml")
+  site_file <- test_path("..", "..", "pkgdown", "_brand.yml")
+  skip_if_not(file.exists(site_file), "pkgdown/_brand.yml is not in the build")
+  brand <- yaml::read_yaml(NACHO:::brand_path("_brand.yml"))
+  site <- yaml::read_yaml(site_file)
+  expect_identical(site$meta, brand$meta)
+  expect_identical(site$color, brand$color)
+})

@@ -1,6 +1,7 @@
-# Write pkgdown/_brand.yml from the meta and color sections of the brand file.
+# Write pkgdown/_brand.yml from the brand file without its fonts.
 # pkgdown reads this file instead of inst/brand/_brand.yml, because the font
 # files in the brand file would be embedded in every page of the website.
+# The website loads its fonts from Google Fonts in pkgdown/_pkgdown.yml.
 # Run it from the package root after each change to inst/brand/_brand.yml.
 brand <- yaml::read_yaml("inst/brand/_brand.yml")
 header <- c(
@@ -8,7 +9,11 @@ header <- c(
   "# Do not edit by hand. Regenerate with:",
   "#   Rscript data-raw/brand-to-pkgdown.R"
 )
+typography <- brand$typography
+typography[c("fonts", "base", "monospace")] <- NULL
+typography$headings$family <- NULL
+brand$typography <- typography
 writeLines(
-  c(header, yaml::as.yaml(brand[c("meta", "color")])),
+  c(header, yaml::as.yaml(brand[c("meta", "color", "typography")])),
   "pkgdown/_brand.yml"
 )

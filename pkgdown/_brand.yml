@@ -17,4 +17,10 @@ color:
   background: '#FFFFFF'
   primary: rust
   warning: amber
+typography:
+  headings:
+    weight: 700
+    color: navy
+  link:
+    color: rust
 
