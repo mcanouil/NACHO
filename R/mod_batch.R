@@ -34,6 +34,7 @@ mod_batch_ui <- function(id) {
   shiny::tagList(
     bslib::card(
       id = ns("batch-design"),
+      fill = FALSE,
       bslib::card_header("Batches and biological groups"),
       shiny::selectInput(
         ns("group"),

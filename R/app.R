@@ -77,6 +77,7 @@ app_ui <- function(done = FALSE) {
       "NACHO"
     ),
     window_title = "NACHO",
+    fillable = FALSE,
     id = "page",
     header = shiny::tagList(
       shiny::useBusyIndicators(),

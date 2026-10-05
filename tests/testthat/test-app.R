@@ -394,3 +394,10 @@ test_that("a new object is normalised once, with its own settings", {
   })
   expect_identical(methods, c("GEO", "GLM"))
 })
+
+test_that("pages grow with their content instead of squeezing it", {
+  html <- as.character(NACHO:::app_ui(done = FALSE))
+  panes <- regmatches(html, gregexpr('<div class="tab-pane[^"]*"', html))[[1]]
+  expect_gt(length(panes), 0L)
+  expect_no_match(panes, "html-fill-container")
+})
