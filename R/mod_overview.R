@@ -26,29 +26,34 @@ mod_overview_ui <- function(id) {
   ns <- shiny::NS(id)
   icon <- function(name) shiny::icon(name, `aria-hidden` = "true")
   bslib::layout_column_wrap(
-    width = "220px",
+    width = "200px",
     fill = FALSE,
+    class = "mb-3",
     bslib::value_box(
       "Samples",
       shiny::textOutput(ns("samples")),
-      showcase = icon("vial")
+      showcase = icon("vial"),
+      showcase_layout = bslib::showcase_top_right(max_height = "52px")
     ),
     bslib::value_box(
       "Cartridges",
       shiny::textOutput(ns("cartridges")),
-      showcase = icon("layer-group")
+      showcase = icon("layer-group"),
+      showcase_layout = bslib::showcase_top_right(max_height = "52px")
     ),
     bslib::value_box(
       "Flagged samples",
       shiny::textOutput(ns("flagged_count")),
       shiny::textOutput(ns("reasons")),
-      showcase = icon("triangle-exclamation")
+      showcase = icon("triangle-exclamation"),
+      showcase_layout = bslib::showcase_top_right(max_height = "52px")
     ),
     bslib::value_box(
       "Method",
       shiny::textOutput(ns("method")),
       shiny::textOutput(ns("preset")),
-      showcase = icon("scale-balanced")
+      showcase = icon("scale-balanced"),
+      showcase_layout = bslib::showcase_top_right(max_height = "52px")
     )
   )
 }
