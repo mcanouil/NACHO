@@ -405,3 +405,35 @@ test_that("settings follow a new object", {
     }
   )
 })
+
+test_that("a slider echo of an untouched object changes nothing", {
+  x <- GSE74821
+  x@thresholds[["Housekeeping_detected"]] <- as.integer(
+    x@thresholds[["Housekeeping_detected"]]
+  )
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(x)),
+    {
+      session$flushReact()
+      for (metric in NACHO:::threshold_metrics(x)) {
+        limits <- x@thresholds[[metric]]
+        range <- NACHO:::threshold_range(x@samples[[metric]], limits)
+        value <- list(NACHO:::limits_to_slider(limits, range))
+        names(value) <- metric
+        do.call(session$setInputs, value)
+      }
+      expect_identical(current(), x@thresholds)
+      session$elapse(600)
+      expect_identical(session$returned$thresholds(), x@thresholds)
+    }
+  )
+})
+
+test_that("integer limits stay integer after the slider", {
+  expect_identical(
+    NACHO:::slider_to_limits(c(3, 10), c(0, 10), c(3L, 10L)),
+    c(3L, 10L)
+  )
+  expect_identical(NACHO:::slider_to_limits(2, c(0, 10), 3L), 2L)
+})

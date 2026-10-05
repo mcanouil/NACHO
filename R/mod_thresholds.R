@@ -68,6 +68,11 @@ limits_to_slider <- function(limits, range) {
 }
 
 slider_to_limits <- function(value, range, original) {
+  limits <- slider_limits(value, range, original)
+  if (is.integer(original)) as.integer(limits) else limits
+}
+
+slider_limits <- function(value, range, original) {
   lower <- if (is.infinite(original[1]) && value[1] <= range[1]) {
     original[1]
   } else {
