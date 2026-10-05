@@ -66,3 +66,10 @@ test_that("the design note says when there is no batch column", {
     }
   )
 })
+
+test_that("the batch columns are not offered as groups", {
+  samples <- nacho_samples(with_groups(GSE74821))
+  expect_true(all(c("CartridgeID", "Date") %in% names(samples)))
+  choices <- NACHO:::group_choices(samples)
+  expect_false(any(c("CartridgeID", "Date") %in% choices))
+})

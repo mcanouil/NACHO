@@ -130,14 +130,14 @@ mod_qc_plot_ui <- function(id, type = id) {
 
 plot_summary <- function(x, qc, type = NULL) {
   ids <- qc[[x@settings[["id_colname"]]]][qc[["status"]] %in% "fail"]
-  cartridges <- length(unique(qc[["CartridgeID"]]))
+  cartridges <- length(unique(stats::na.omit(qc[["CartridgeID"]])))
   shown <- utils::head(ids, 3)
   overall <- paste0(
     nrow(qc),
-    " samples on ",
-    cartridges,
-    " cartridge",
-    if (cartridges != 1) "s",
+    " samples",
+    if (cartridges > 0) {
+      paste0(" on ", cartridges, " cartridge", if (cartridges != 1) "s")
+    },
     "; ",
     if (length(ids) == 0) {
       "none flagged."
@@ -156,7 +156,11 @@ plot_summary <- function(x, qc, type = NULL) {
   if (!isTRUE(type %in% app_flag_metrics)) {
     return(overall)
   }
-  on_metric <- sum(qc[[paste0(type, "_status")]] %in% "fail")
+  statuses <- qc[[paste0(type, "_status")]]
+  if (all(is.na(statuses))) {
+    return(paste0(overall, " ", type, " is not assessed for these data."))
+  }
+  on_metric <- sum(statuses %in% "fail")
   paste0(
     overall,
     " ",

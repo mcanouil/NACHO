@@ -244,3 +244,26 @@ test_that("download sizes are clamped to the input bounds", {
   expect_identical(NACHO:::download_size(NA, 16), 16)
   expect_identical(NACHO:::download_size(NULL, 12), 12)
 })
+
+test_that("a metric the data cannot assess is not reported as clean", {
+  qc <- nacho_qc(plexset_nacho)
+  expect_true(all(is.na(qc[["PCL_status"]])))
+  expect_match(
+    NACHO:::plot_summary(plexset_nacho, qc, "PCL"),
+    " PCL is not assessed for these data\\.$"
+  )
+  qc[["FoV_status"]] <- NULL
+  expect_match(
+    NACHO:::plot_summary(plexset_nacho, qc, "FoV"),
+    " FoV is not assessed for these data\\.$"
+  )
+})
+
+test_that("the cartridge count ignores missing cartridges", {
+  x <- GSE74821
+  qc <- nacho_qc(x)
+  qc[["CartridgeID"]][1:2] <- NA
+  expect_match(NACHO:::plot_summary(x, qc), "^48 samples on 4 cartridges;")
+  qc[["CartridgeID"]] <- NA_character_
+  expect_match(NACHO:::plot_summary(x, qc), "^48 samples; none flagged\\.")
+})

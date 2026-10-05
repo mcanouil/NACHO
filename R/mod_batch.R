@@ -7,13 +7,15 @@ app_batch_variables <- c("CartridgeID", "Date")
 #'
 #' Text or factor columns with at least two levels, and at most one level for
 #' every two samples, so identifiers and free text are left out.
+#' The batch columns are left out too, since the page crosses groups with them.
 #'
 #' @noRd
 group_choices <- function(samples) {
   levels <- vapply(samples, function(v) length(unique(v)), integer(1))
   keep <- !vapply(samples, is.numeric, logical(1)) &
     levels >= 2 &
-    levels <= nrow(samples) / 2
+    levels <= nrow(samples) / 2 &
+    !names(samples) %in% app_batch_variables
   names(samples)[keep]
 }
 
