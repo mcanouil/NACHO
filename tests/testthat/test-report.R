@@ -380,3 +380,22 @@ test_that("the report names House_factor the same way everywhere", {
     c(sections$title, NACHO:::plot_alt_texts)
   )))
 })
+
+test_that("applicable_plots() drops the plots the data cannot support", {
+  everything <- unlist(NACHO:::app_plot_types, use.names = FALSE)
+  gse <- NACHO:::applicable_plots(GSE74821)
+  expect_true(all(c("PCL", "LoD", "HF") %in% gse))
+  expect_true(all(gse %in% everything))
+  plexset <- NACHO:::applicable_plots(plexset_nacho)
+  expect_false(any(c("PCL", "LoD") %in% plexset))
+  ruv <- normalise(GSE74821, normalisation_method = "RUVg", ruv_k = 1)
+  expect_false("HF" %in% NACHO:::applicable_plots(ruv))
+  expect_true("BD" %in% NACHO:::applicable_plots(ruv))
+})
+
+test_that("the report shows exactly the applicable plots", {
+  for (x in list(GSE74821, plexset_nacho)) {
+    shown <- stats::na.omit(NACHO:::report_sections(x)[["plot"]])
+    expect_setequal(shown, NACHO:::applicable_plots(x))
+  }
+})

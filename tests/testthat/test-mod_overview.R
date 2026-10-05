@@ -17,7 +17,7 @@ test_that("the overview module shows the counts", {
     ),
     {
       expect_identical(output$samples, "12")
-      expect_match(output$flagged, "^[1-9]")
+      expect_match(output$flagged_count, "^[1-9]")
     }
   )
 })
@@ -48,13 +48,15 @@ test_that("the overview module formats every field", {
     ),
     {
       expect_identical(output$cartridges, "1")
-      expect_identical(output$method, "GLM, nsolver preset")
-      expect_match(output$flagged, "^2 \\(FoV: 2\\)$")
+      expect_identical(output$method, "GLM")
+      expect_identical(output$preset, "nSolver preset")
+      expect_identical(output$flagged_count, "2")
+      expect_identical(output$reasons, "FoV: 2")
     }
   )
 })
 
-test_that("the overview module shows no brackets without failures", {
+test_that("the overview module shows no reasons without failures", {
   shiny::testServer(
     NACHO:::mod_overview_server,
     args = list(
@@ -62,7 +64,28 @@ test_that("the overview module shows no brackets without failures", {
       qc = shiny::reactive(nacho_qc(GSE74821))
     ),
     {
-      expect_identical(output$flagged, "0")
+      expect_identical(output$flagged_count, "0")
+      expect_identical(output$reasons, "None")
     }
   )
+})
+
+test_that("the overview is four value boxes with decorative icons", {
+  html <- htmltools::renderTags(NACHO:::mod_overview_ui("overview"))$html
+  boxes <- gregexpr('class="[^"]*\\bbslib-value-box( |")', html)
+  expect_length(regmatches(html, boxes)[[1]], 4L)
+  icons <- regmatches(html, gregexpr("<i [^>]*>", html))[[1]]
+  expect_length(icons, 4L)
+  expect_true(all(grepl('aria-hidden="true"', icons, fixed = TRUE)))
+})
+
+test_that("app_overview() does not count a missing cartridge", {
+  x <- GSE74821
+  x@samples[["CartridgeID"]][1:2] <- NA
+  expect_identical(NACHO:::app_overview(x)$cartridges, 4L)
+})
+
+test_that("the overview names presets as the sidebar does", {
+  expect_identical(NACHO:::preset_label("nsolver"), "nSolver")
+  expect_identical(NACHO:::preset_label("legacy"), "NACHO 2")
 })

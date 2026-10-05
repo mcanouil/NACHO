@@ -142,3 +142,66 @@ test_that("dark.scss uses only colours of the NACHO palette", {
   expect_gt(length(literals), 0L)
   expect_true(all(literals %in% toupper(NACHO:::nacho_palette)))
 })
+
+test_that("the theme sets quoted font families that the browser can parse", {
+  deps <- bslib::bs_theme_dependencies(NACHO:::nacho_theme())
+  bootstrap <- Filter(function(d) d$name == "bootstrap", deps)[[1]]
+  css <- paste(
+    readLines(file.path(bootstrap$src$file, bootstrap$stylesheet[[1]])),
+    collapse = "\n"
+  )
+  expect_match(
+    css,
+    '--bs-body-font-family: "Source Sans 3", system-ui, sans-serif;',
+    fixed = TRUE
+  )
+  expect_match(css, '--bs-font-monospace: "JetBrains Mono"', fixed = TRUE)
+  fonts <- unname(bslib::bs_get_variables(
+    NACHO:::nacho_theme(),
+    c("font-family-base", "headings-font-family", "font-family-monospace")
+  ))
+  expect_identical(
+    fonts,
+    c(
+      '"Source Sans 3", system-ui, sans-serif',
+      '"Source Sans 3", system-ui, sans-serif',
+      '"JetBrains Mono", ui-monospace, monospace'
+    )
+  )
+})
+
+test_that("the brand font faces point at files in the dependency", {
+  dep <- NACHO:::brand_font_dependency()
+  css <- readLines(file.path(dep$src$file, dep$stylesheet))
+  files <- sub(
+    ".*url\\('([^']+)'\\).*",
+    "\\1",
+    grep("url\\(", css, value = TRUE)
+  )
+  expect_length(files, 3L)
+  expect_true(all(file.exists(file.path(dep$src$file, files))))
+})
+
+test_that("popover headers are readable in dark mode", {
+  deps <- bslib::bs_theme_dependencies(NACHO:::nacho_theme())
+  bootstrap <- Filter(function(d) d$name == "bootstrap", deps)[[1]]
+  css <- paste(
+    readLines(file.path(bootstrap$src$file, bootstrap$stylesheet[[1]])),
+    collapse = "\n"
+  )
+  rule <- regmatches(
+    css,
+    regexpr('\\[data-bs-theme="?dark"?\\] \\.popover\\{[^}]*\\}', css)
+  )
+  expect_length(rule, 1L)
+  expect_match(
+    rule,
+    paste0("header-color: *", NACHO:::nacho_palette[["yellow"]]),
+    ignore.case = TRUE
+  )
+  expect_match(
+    rule,
+    paste0("header-bg: *", NACHO:::nacho_palette[["night"]]),
+    ignore.case = TRUE
+  )
+})

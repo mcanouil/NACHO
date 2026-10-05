@@ -1,4 +1,4 @@
-#' @include mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R
+#' @include mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R mod_batch.R
 NULL
 
 #' Run the NACHO app
@@ -36,10 +36,37 @@ help_page <- function(name) {
   shiny::markdown(help_text(name))
 }
 
+empty_state <- function() {
+  bslib::card(
+    bslib::card_body(
+      class = "text-center",
+      shiny::tags$p("No data yet."),
+      shiny::tags$p(
+        "Load RCC files on the Data page, or load the example data to explore the app."
+      )
+    )
+  )
+}
+
+with_data <- function(...) {
+  shiny::tagList(
+    shiny::conditionalPanel("output.has_data === true", ...),
+    shiny::conditionalPanel("output.has_data === false", empty_state())
+  )
+}
+
 plot_page <- function(page) {
   bslib::layout_columns(
-    col_widths = 6,
-    !!!lapply(app_plot_types[[page]], mod_qc_plot_ui)
+    col_widths = bslib::breakpoints(sm = 12, lg = 6),
+    !!!lapply(app_plot_types[[page]], function(type) {
+      shiny::conditionalPanel(
+        sprintf(
+          "output.applicable && output.applicable.indexOf(',%s,') >= 0",
+          type
+        ),
+        mod_qc_plot_ui(type)
+      )
+    })
   )
 }
 
@@ -50,20 +77,37 @@ app_ui <- function(done = FALSE) {
       "NACHO"
     ),
     window_title = "NACHO",
+    fillable = FALSE,
     id = "page",
+    header = shiny::tagList(
+      shiny::useBusyIndicators(),
+      brand_font_dependency(),
+      shiny::conditionalPanel(
+        "output.has_data === true",
+        mod_overview_ui("overview")
+      )
+    ),
     theme = nacho_theme(),
+    navbar_options = bslib::navbar_options(
+      bg = nacho_palette[["navy"]],
+      theme = "dark"
+    ),
     sidebar = bslib::sidebar(
+      title = "Thresholds",
+      width = 320,
       mod_thresholds_ui("thresholds"),
       if (done) shiny::actionButton("done", "Done", class = "btn-primary")
     ),
-    bslib::nav_panel("Data", mod_data_ui("data"), mod_overview_ui("overview")),
-    bslib::nav_panel("QC metrics", plot_page("qc_metrics")),
-    bslib::nav_panel("Controls", plot_page("controls")),
-    bslib::nav_panel("Counts", plot_page("counts")),
-    bslib::nav_panel("Normalisation", plot_page("normalisation")),
-    bslib::nav_panel("Batch", plot_page("batch")),
-    bslib::nav_panel("Flagged samples", mod_outliers_ui("outliers")),
-    bslib::nav_panel("About", help_page("nacho"))
+    bslib::nav_panel("Data", mod_data_ui("data")),
+    bslib::nav_panel("QC metrics", with_data(plot_page("qc_metrics"))),
+    bslib::nav_panel("Controls", with_data(plot_page("controls"))),
+    bslib::nav_panel("Counts", with_data(plot_page("counts"))),
+    bslib::nav_panel("Normalisation", with_data(plot_page("normalisation"))),
+    bslib::nav_panel("Batch", with_data(mod_batch_ui("batch"))),
+    bslib::nav_panel("Flagged samples", with_data(mod_outliers_ui("outliers"))),
+    bslib::nav_panel("About", help_page("nacho")),
+    bslib::nav_spacer(),
+    bslib::nav_item(bslib::input_dark_mode(id = "dark_mode"))
   )
 }
 
@@ -88,27 +132,72 @@ tune_object <- function(object, chosen, thresholds) {
   )
 }
 
+tune_with_toasts <- function(object, chosen, thresholds, announced) {
+  key <- list(object@provenance, dim(object@counts), chosen)
+  if (!identical(announced$key, key)) {
+    announced$key <- key
+    announced$messages <- character()
+  }
+  withCallingHandlers(
+    tune_object(object, chosen, thresholds),
+    nacho_warning_metric_unavailable = function(cnd) {
+      invokeRestart("muffleWarning")
+    },
+    nacho_warning = function(cnd) {
+      message <- cli::ansi_strip(rlang::cnd_message(cnd))
+      if (!message %in% announced$messages) {
+        announced$messages <- c(announced$messages, message)
+        notify_user(message, "warning")
+      }
+      invokeRestart("muffleWarning")
+    }
+  )
+}
+
 app_server <- function(x, done = FALSE) {
   function(input, output, session) {
     data <- mod_data_server("data", initial = x)
     settings <- mod_thresholds_server("thresholds", data = data)
+    # The value must stay logical: text such as "FALSE" is truthy in JavaScript.
+    output$has_data <- shiny::markRenderFunction(
+      uiFunc = shiny::textOutput,
+      renderFunc = function(shinysession, name, ...) !is.null(data())
+    )
+    shiny::outputOptions(output, "has_data", suspendWhenHidden = FALSE)
     dark <- shiny::reactive(identical(input$dark_mode, "dark"))
+    announced <- new.env()
     tuned <- shiny::reactive(
-      tune_object(
+      tune_with_toasts(
         shiny::req(data()),
         settings$settings(),
-        settings$thresholds()
+        settings$thresholds(),
+        announced
       )
     )
     qc <- shiny::reactive(nacho_qc(tuned()))
+    output$applicable <- shiny::renderText(
+      paste0(
+        ",",
+        paste(applicable_plots(shiny::req(tuned())), collapse = ","),
+        ","
+      )
+    )
+    shiny::outputOptions(output, "applicable", suspendWhenHidden = FALSE)
     mod_overview_server("overview", tuned, qc)
     mod_outliers_server("outliers", tuned, qc)
+    mod_batch_server("batch", tuned)
     lapply(unlist(app_plot_types, use.names = FALSE), function(type) {
-      mod_qc_plot_server(type, object = tuned, type = type, dark = dark)
+      mod_qc_plot_server(
+        type,
+        object = tuned,
+        qc = qc,
+        type = type,
+        dark = dark
+      )
     })
     if (done) {
       finished <- new.env()
-      observe_done(input, data, settings, finished)
+      observe_done(input, data, settings, announced, finished)
       session$onSessionEnded(function() {
         if (!isTRUE(finished$done)) shiny::stopApp(NULL)
       })
@@ -116,7 +205,13 @@ app_server <- function(x, done = FALSE) {
   }
 }
 
-observe_done <- function(input, data, settings, finished = new.env()) {
+observe_done <- function(
+  input,
+  data,
+  settings,
+  announced = new.env(),
+  finished = new.env()
+) {
   shiny::observeEvent(input$done, {
     if (is.null(data())) {
       finished$done <- TRUE
@@ -124,10 +219,11 @@ observe_done <- function(input, data, settings, finished = new.env()) {
     }
     problem <- NULL
     result <- tryCatch(
-      tune_object(
+      tune_with_toasts(
         data(),
         settings$settings(),
-        settings$current_thresholds()
+        settings$current_thresholds(),
+        announced
       ),
       shiny.silent.error = function(cnd) {
         problem <<- conditionMessage(cnd)

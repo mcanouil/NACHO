@@ -187,11 +187,12 @@ example_data <- function() {
 #' @noRd
 notify_user <- function(message, type = c("message", "warning", "error")) {
   type <- match.arg(type)
-  shiny::showNotification(
+  bslib::show_toast(bslib::toast(
     message,
-    type = type,
-    duration = if (type == "error") NULL else 8
-  )
+    header = c(message = "NACHO", warning = "Warning", error = "Error")[[type]],
+    type = c(message = "info", warning = "warning", error = "danger")[[type]],
+    duration_s = if (type == "error") 0 else 8
+  ))
 }
 
 #' The upload panel of the app
@@ -211,7 +212,12 @@ mod_data_ui <- function(id) {
       "The sample sheet is a CSV file with an IDFILE column holding the RCC file names, ",
       "and plexset_id (S1 to S8) for PlexSet files."
     ),
-    shiny::actionButton(ns("import"), "Import", class = "btn-primary")
+    bslib::input_task_button(ns("import"), "Import"),
+    shiny::actionButton(
+      ns("example"),
+      "Load the example data (GSE74821)",
+      class = "btn-outline-secondary mt-2"
+    )
   )
 }
 
@@ -224,7 +230,11 @@ mod_data_server <- function(id, initial = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
     current <- shiny::reactiveVal(initial)
     shiny::observeEvent(input$import, {
-      files <- shiny::req(input$files)
+      if (is.null(input$files)) {
+        notify_user("Choose the RCC files to import first.", "warning")
+        return()
+      }
+      files <- input$files
       loaded <- withCallingHandlers(
         tryCatch(
           rlang::with_options(read_uploads(files), nacho.quiet = TRUE),
@@ -237,7 +247,10 @@ mod_data_server <- function(id, initial = NULL) {
             NULL
           }
         ),
-        nacho_warning_sample_sheet_discarded = function(cnd) {
+        nacho_warning_metric_unavailable = function(cnd) {
+          invokeRestart("muffleWarning")
+        },
+        nacho_warning = function(cnd) {
           notify_user(cli::ansi_strip(rlang::cnd_message(cnd)), "warning")
           invokeRestart("muffleWarning")
         }
@@ -246,6 +259,7 @@ mod_data_server <- function(id, initial = NULL) {
         current(loaded)
       }
     })
+    shiny::observeEvent(input$example, current(example_data()))
     current
   })
 }

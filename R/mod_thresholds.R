@@ -18,6 +18,32 @@ threshold_help <- c(
   Haemolysis = "log2 of miR-451a over miR-23a-3p; above 7 suggests haemolysis."
 )
 
+threshold_pages <- c(
+  BD = "bd",
+  FoV = "fov",
+  PCL = "pcl",
+  LoD = "lod",
+  Positive_factor = "pf",
+  House_factor = "hgf"
+)
+
+threshold_help_block <- function(metric) {
+  page <- threshold_pages[metric]
+  more <- if (!is.na(page)) {
+    bslib::popover(
+      shiny::tags$button(
+        type = "button",
+        class = "btn btn-link btn-sm p-0 ms-1 align-baseline",
+        `aria-label` = paste("More about", qc_metric_labels[[metric]]),
+        shiny::icon("circle-question", `aria-hidden` = "true")
+      ),
+      help_page(page),
+      title = qc_metric_labels[[metric]]
+    )
+  }
+  shiny::helpText(threshold_help[[metric]], more)
+}
+
 threshold_metrics <- function(x) {
   known <- qc_metrics[
     qc_metrics %in% intersect(names(x@samples), names(x@thresholds))
@@ -42,6 +68,11 @@ limits_to_slider <- function(limits, range) {
 }
 
 slider_to_limits <- function(value, range, original) {
+  limits <- slider_limits(value, range, original)
+  if (is.integer(original)) as.integer(limits) else limits
+}
+
+slider_limits <- function(value, range, original) {
   lower <- if (is.infinite(original[1]) && value[1] <= range[1]) {
     original[1]
   } else {
@@ -87,7 +118,7 @@ threshold_inputs <- function(x, limits, ns, metrics = threshold_metrics(x)) {
         value = limits_to_slider(limits[[metric]], range),
         step = slider_step(metric, range, limits[[metric]])
       ),
-      shiny::helpText(threshold_help[[metric]])
+      threshold_help_block(metric)
     )
   }))
 }
@@ -103,49 +134,115 @@ normalisation_choices <- function(x) {
   )
 }
 
+threshold_groups <- list(
+  Imaging = c("BD", "FoV"),
+  Controls = c("PCL", "LoD", "Positive_factor"),
+  Content = c("House_factor", "Housekeeping_detected"),
+  miRNA = c("Ligation_order", "Ligation_R2", "Ligation_NEG", "Haemolysis")
+)
+
+threshold_group_body <- function(x, limits, ns, group) {
+  metrics <- intersect(threshold_metrics(x), threshold_groups[[group]])
+  if (length(metrics) == 0) {
+    return(shiny::helpText("Not measured for these data."))
+  }
+  threshold_inputs(x, limits, ns, metrics)
+}
+
+preset_choices <- c(nSolver = "nsolver", "NACHO 2" = "legacy")
+
+preset_label <- function(preset) {
+  names(preset_choices)[match(preset, preset_choices)]
+}
+
 mod_thresholds_ui <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::selectInput(
-      ns("preset"),
-      "Threshold preset",
-      c(nSolver = "nsolver", "NACHO 2" = "legacy")
+  group_panel <- function(group) {
+    bslib::accordion_panel(group, shiny::uiOutput(ns(paste0("group_", group))))
+  }
+  bslib::accordion(
+    id = ns("sections"),
+    multiple = TRUE,
+    open = c("Preset", "Imaging"),
+    bslib::accordion_panel(
+      "Preset",
+      shiny::selectInput(
+        ns("preset"),
+        "Threshold preset",
+        preset_choices
+      ),
+      shiny::selectInput(
+        ns("instrument"),
+        "Instrument",
+        c(MAX = "max", FLEX = "flex", PRO = "pro", SPRINT = "sprint")
+      ),
+      shiny::actionButton(
+        ns("reset"),
+        "Reset",
+        icon = shiny::icon("rotate-left", `aria-hidden` = "true"),
+        `aria-label` = "Reset the thresholds to the preset",
+        class = "btn-outline-secondary btn-sm"
+      )
     ),
-    shiny::selectInput(
-      ns("instrument"),
-      "Instrument",
-      c(MAX = "max", FLEX = "flex", PRO = "pro", SPRINT = "sprint")
+    bslib::accordion_panel(
+      "Normalisation",
+      shiny::selectInput(ns("method"), "Method", "GEO"),
+      shiny::conditionalPanel(
+        "input.method == 'RUVg'",
+        ns = ns,
+        shiny::numericInput(
+          ns("ruv_k"),
+          "Unwanted factors",
+          value = 1,
+          min = 1,
+          max = 10,
+          step = 1
+        ),
+        shiny::helpText("Use suggest_ruv_k() in R to choose this number.")
+      ),
+      shiny::selectInput(
+        ns("background"),
+        "Background",
+        c("none", "mean", "mean_2sd", "median", "max", "geo")
+      ),
+      shiny::selectInput(
+        ns("background_mode"),
+        "Background mode",
+        c("threshold", "subtract")
+      )
     ),
-    shiny::selectInput(ns("method"), "Normalisation method", "GEO"),
-    shiny::numericInput(
-      ns("ruv_k"),
-      "Unwanted factors (RUVg)",
-      value = 1,
-      min = 1,
-      max = 10,
-      step = 1
-    ),
-    shiny::selectInput(
-      ns("background"),
-      "Background",
-      c("none", "mean", "mean_2sd", "median", "max", "geo")
-    ),
-    shiny::selectInput(
-      ns("background_mode"),
-      "Background mode",
-      c("threshold", "subtract")
-    ),
-    shiny::uiOutput(ns("sliders"))
+    !!!lapply(names(threshold_groups), group_panel)
+  )
+}
+
+settings_of <- function(x) {
+  method <- x@settings[["normalisation_method"]]
+  list(
+    normalisation_method = method,
+    ruv_k = if (method == "RUVg") as.integer(x@settings[["ruv_k"]] %||% 1L),
+    background = x@settings[["background"]],
+    background_mode = x@settings[["background_mode"]]
   )
 }
 
 mod_thresholds_server <- function(id, data) {
   shiny::moduleServer(id, function(input, output, session) {
     current <- shiny::reactiveVal()
+    base <- shiny::reactiveVal()
+    published <- shiny::reactiveVal()
+    chosen <- shiny::reactiveVal()
+    revision <- shiny::reactiveVal(0L)
+    start <- function(limits) {
+      base(limits)
+      current(limits)
+      revision(shiny::isolate(revision()) + 1L)
+    }
 
     shiny::observeEvent(data(), {
       x <- data()
-      current(x@thresholds)
+      start(x@thresholds)
+      published(x@thresholds)
+      chosen(settings_of(x))
       instrument <- x@thresholds[["instrument"]]
       shiny::updateSelectInput(
         session,
@@ -163,6 +260,9 @@ mod_thresholds_server <- function(id, data) {
         choices = normalisation_choices(x),
         selected = x@settings[["normalisation_method"]]
       )
+      if (!is.null(chosen()$ruv_k)) {
+        shiny::updateNumericInput(session, "ruv_k", value = chosen()$ruv_k)
+      }
       shiny::updateSelectInput(
         session,
         "background",
@@ -176,8 +276,8 @@ mod_thresholds_server <- function(id, data) {
     })
 
     reset <- function() {
-      limits <- shiny::req(current())
-      current(nacho_thresholds(
+      limits <- shiny::req(base())
+      start(nacho_thresholds(
         instrument = input$instrument,
         preset = input$preset,
         haemolysis = any(is.finite(limits[["Haemolysis"]]))
@@ -199,35 +299,79 @@ mod_thresholds_server <- function(id, data) {
       ignoreInit = TRUE
     )
 
-    output$sliders <- shiny::renderUI({
-      threshold_inputs(shiny::req(data()), shiny::req(current()), session$ns)
-    })
+    for (group in names(threshold_groups)) {
+      local({
+        group <- group
+        output[[paste0("group_", group)]] <- shiny::renderUI({
+          revision()
+          threshold_group_body(
+            shiny::req(data()),
+            shiny::req(base()),
+            session$ns,
+            group
+          )
+        })
+        shiny::outputOptions(
+          output,
+          paste0("group_", group),
+          suspendWhenHidden = FALSE
+        )
+      })
+    }
 
-    current_thresholds <- shiny::reactive({
-      x <- shiny::req(data())
-      limits <- shiny::req(current())
-      for (metric in threshold_metrics(x)) {
-        value <- input[[metric]]
-        if (!is.null(value)) {
-          range <- threshold_range(x@samples[[metric]], limits[[metric]])
-          limits[[metric]] <- slider_to_limits(value, range, limits[[metric]])
-        }
-      }
-      limits
-    })
-    thresholds <- shiny::debounce(current_thresholds, 500)
+    shiny::observeEvent(input$reset, reset())
 
-    settings <- shiny::reactive({
-      x <- shiny::req(data())
-      method <- input$method %||% x@settings[["normalisation_method"]]
+    for (metric in qc_metrics) {
+      local({
+        metric <- metric
+        shiny::observeEvent(
+          input[[metric]],
+          {
+            x <- shiny::req(data())
+            original <- shiny::req(base())
+            shiny::req(metric %in% threshold_metrics(x))
+            range <- threshold_range(x@samples[[metric]], original[[metric]])
+            limits <- current()
+            updated <- slider_to_limits(
+              input[[metric]],
+              range,
+              original[[metric]]
+            )
+            if (!identical(limits[[metric]], updated)) {
+              limits[[metric]] <- updated
+              current(limits)
+            }
+          },
+          ignoreInit = TRUE
+        )
+      })
+    }
+
+    current_thresholds <- shiny::reactive(shiny::req(current()))
+    settled <- shiny::debounce(current_thresholds, 500)
+    shiny::observeEvent(settled(), published(current()))
+    thresholds <- shiny::reactive(shiny::req(published()))
+
+    shiny::observeEvent(
       list(
-        normalisation_method = method,
-        ruv_k = if (method == "RUVg") as.integer(input$ruv_k %||% 1L),
-        background = input$background %||% x@settings[["background"]],
-        background_mode = input$background_mode %||%
-          x@settings[["background_mode"]]
-      )
-    })
+        input$method,
+        input$ruv_k,
+        input$background,
+        input$background_mode
+      ),
+      {
+        previous <- shiny::req(chosen())
+        method <- input$method %||% previous$normalisation_method
+        chosen(list(
+          normalisation_method = method,
+          ruv_k = if (method == "RUVg") as.integer(input$ruv_k %||% 1L),
+          background = input$background %||% previous$background,
+          background_mode = input$background_mode %||% previous$background_mode
+        ))
+      },
+      ignoreInit = TRUE
+    )
+    settings <- shiny::reactive(shiny::req(chosen()))
 
     list(
       thresholds = thresholds,

@@ -1,3 +1,12 @@
+plot_args <- function(x, type, dark = shiny::reactive(FALSE)) {
+  list(
+    object = shiny::reactiveVal(x),
+    qc = shiny::reactive(nacho_qc(x)),
+    type = type,
+    dark = dark
+  )
+}
+
 test_that("every app plot type is a known plot type", {
   types <- unlist(NACHO:::app_plot_types, use.names = FALSE)
   expect_true(all(types %in% names(NACHO:::nacho_plot_registry)))
@@ -20,11 +29,7 @@ test_that("the module draws its plot and follows dark mode", {
   dark <- shiny::reactiveVal(FALSE)
   shiny::testServer(
     NACHO:::mod_qc_plot_server,
-    args = list(
-      object = shiny::reactiveVal(GSE74821),
-      type = "BD",
-      dark = dark
-    ),
+    args = plot_args(GSE74821, "BD", dark),
     {
       session$setInputs(colour = "CartridgeID")
       expect_s3_class(session$returned(), "ggplot")
@@ -43,11 +48,7 @@ test_that("the module draws its plot and follows dark mode", {
 test_that("an unknown colour column falls back to CartridgeID", {
   shiny::testServer(
     NACHO:::mod_qc_plot_server,
-    args = list(
-      object = shiny::reactiveVal(GSE74821),
-      type = "BD",
-      dark = shiny::reactive(FALSE)
-    ),
+    args = plot_args(GSE74821, "BD", shiny::reactive(FALSE)),
     {
       session$setInputs(colour = "nope")
       plot <- session$returned()
@@ -77,4 +78,195 @@ test_that("plots that ignore colour have no colour control", {
       fixed = TRUE
     )
   }
+})
+
+test_that("each card has a labelled options button and a summary", {
+  html <- htmltools::renderTags(NACHO:::mod_qc_plot_ui("BD", "BD"))$html
+  expect_match(
+    html,
+    'aria-label="Display options for Binding density"',
+    fixed = TRUE
+  )
+  expect_match(html, "full-screen", fixed = TRUE)
+  expect_match(html, 'id="BD-summary"', fixed = TRUE)
+})
+
+test_that("plot_summary() gives counts in one sentence", {
+  x <- flagged_gse()
+  expect_match(
+    NACHO:::plot_summary(x, nacho_qc(x)),
+    "^12 samples on 1 cartridges?; [1-9] flagged: GSM"
+  )
+  expect_identical(
+    NACHO:::plot_summary(GSE74821, nacho_qc(GSE74821)),
+    "48 samples on 4 cartridges; none flagged."
+  )
+})
+
+test_that("the plot downloads as PNG at the chosen size", {
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(GSE74821, "BD", shiny::reactive(FALSE)),
+    {
+      session$setInputs(colour = "CartridgeID", width = 10, height = 8)
+      path <- output$download
+      expect_identical(unname(tools::file_ext(path)), "png")
+      expect_gt(file.size(path), 1000)
+    }
+  )
+})
+
+test_that("plot_summary() lists at most three flagged samples", {
+  x <- NACHO::GSE74821
+  thresholds <- x@thresholds
+  thresholds[["FoV"]] <- 99.9
+  x <- NACHO::normalise(x, outliers_thresholds = thresholds)
+  flagged <- sum(nacho_qc(x)[["status"]] %in% "fail")
+  expect_gt(flagged, 4)
+  summary <- NACHO:::plot_summary(x, nacho_qc(x))
+  expect_match(summary, sprintf("; %d flagged: ", flagged), fixed = TRUE)
+  expect_match(summary, sprintf(" and %d more\\.$", flagged - 3))
+  expect_equal(lengths(regmatches(summary, gregexpr("GSM", summary))), 3)
+})
+
+test_that("the summary counts flagged samples exactly", {
+  x <- flagged_gse()
+  flagged <- sum(nacho_qc(x)[["status"]] %in% "fail")
+  expect_match(
+    NACHO:::plot_summary(x, nacho_qc(x)),
+    sprintf("; %d flagged: ", flagged),
+    fixed = TRUE
+  )
+})
+
+test_that("a cleared download size falls back to 16 by 12 cm", {
+  skip_if_not_installed("png")
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(GSE74821, "BD", shiny::reactive(FALSE)),
+    {
+      session$setInputs(colour = "CartridgeID", width = NA, height = NA)
+      path <- output$download
+      dims <- dim(png::readPNG(path))
+      expect_equal(dims[2] / dims[1], 16 / 12, tolerance = 0.01)
+    }
+  )
+})
+
+test_that("the download background is the paper colour", {
+  skip_if_not_installed("png")
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(GSE74821, "BD", shiny::reactive(FALSE)),
+    {
+      session$setInputs(colour = "CartridgeID", width = 10, height = 8)
+      image <- png::readPNG(output$download)
+      corner <- grDevices::rgb(image[1, 1, 1], image[1, 1, 2], image[1, 1, 3])
+      expect_identical(
+        toupper(corner),
+        toupper(NACHO:::plot_colours(FALSE)[["paper"]])
+      )
+    }
+  )
+})
+
+test_that("the display options reach the plot", {
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(flagged_gse(), "FoV", shiny::reactive(FALSE)),
+    {
+      session$setInputs(
+        colour = "CartridgeID",
+        show_legend = FALSE,
+        size = 3,
+        labels = "CartridgeID"
+      )
+      built <- ggplot2::ggplot_build(session$returned())
+      sizes <- unlist(lapply(built$data, function(d) d$size))
+      expect_true(3 %in% sizes)
+      expect_true(any(vapply(
+        built$data,
+        function(d) "label" %in% names(d),
+        logical(1)
+      )))
+      expect_identical(
+        session$returned()$guides$guides[["colour"]],
+        "none"
+      )
+    }
+  )
+})
+
+test_that("Stability and PCBatch keep only the options autoplot() honours", {
+  for (type in c("Stability", "PCBatch")) {
+    html <- as.character(NACHO:::mod_qc_plot_ui(type))
+    for (label in c("Colour by", "Show the legend", "Label flagged samples")) {
+      expect_no_match(html, label, fixed = TRUE)
+    }
+    for (label in c("Point size", "Download PNG")) {
+      expect_match(html, label, fixed = TRUE)
+    }
+  }
+  html <- as.character(NACHO:::mod_qc_plot_ui("BD"))
+  for (label in c("Show the legend", "Label flagged samples")) {
+    expect_match(html, label, fixed = TRUE)
+  }
+})
+
+test_that("a metric plot names how many samples that metric flags", {
+  x <- flagged_gse()
+  qc <- nacho_qc(x)
+  fov <- sum(qc[["FoV_status"]] %in% "fail")
+  expect_gt(fov, 0)
+  expect_match(
+    NACHO:::plot_summary(x, qc, "FoV"),
+    sprintf(" %d flagged on FoV\\.$", fov)
+  )
+  expect_match(
+    NACHO:::plot_summary(GSE74821, nacho_qc(GSE74821), "BD"),
+    " None flagged on BD\\.$"
+  )
+  expect_no_match(NACHO:::plot_summary(x, qc, "PCA"), "flagged on")
+})
+
+test_that("the card summary uses the shared quality-control table", {
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(flagged_gse(), "FoV"),
+    {
+      session$setInputs(colour = "CartridgeID")
+      expect_match(output$summary, "flagged on FoV\\.$")
+    }
+  )
+})
+
+test_that("download sizes are clamped to the input bounds", {
+  expect_identical(NACHO:::download_size(5000, 16), 50)
+  expect_identical(NACHO:::download_size(1, 16), 5)
+  expect_identical(NACHO:::download_size(10, 16), 10)
+  expect_identical(NACHO:::download_size(NA, 16), 16)
+  expect_identical(NACHO:::download_size(NULL, 12), 12)
+})
+
+test_that("a metric the data cannot assess is not reported as clean", {
+  qc <- nacho_qc(plexset_nacho)
+  expect_true(all(is.na(qc[["PCL_status"]])))
+  expect_match(
+    NACHO:::plot_summary(plexset_nacho, qc, "PCL"),
+    " PCL is not assessed for these data\\.$"
+  )
+  qc[["FoV_status"]] <- NULL
+  expect_match(
+    NACHO:::plot_summary(plexset_nacho, qc, "FoV"),
+    " FoV is not assessed for these data\\.$"
+  )
+})
+
+test_that("the cartridge count ignores missing cartridges", {
+  x <- GSE74821
+  qc <- nacho_qc(x)
+  qc[["CartridgeID"]][1:2] <- NA
+  expect_match(NACHO:::plot_summary(x, qc), "^48 samples on 4 cartridges;")
+  qc[["CartridgeID"]] <- NA_character_
+  expect_match(NACHO:::plot_summary(x, qc), "^48 samples; none flagged\\.")
 })

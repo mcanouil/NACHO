@@ -483,3 +483,77 @@ test_that("only sample information reaches the samples table", {
     c("datapath", "type", "name") %in% names(nacho_samples(with_sheet))
   ))
 })
+
+test_that("the example button loads GSE74821", {
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(example = 1)
+    expect_identical(session$returned(), GSE74821)
+  })
+})
+
+test_that("messages reach the user as toasts", {
+  shown <- NULL
+  local_mocked_bindings(
+    show_toast = function(toast, ...) shown <<- toast,
+    .package = "bslib"
+  )
+  NACHO:::notify_user("Hello", "warning")
+  expect_s3_class(shown, "bslib_toast")
+})
+
+test_that("an error toast stays open until it is closed", {
+  shown <- list()
+  local_mocked_bindings(
+    show_toast = function(toast, ...) shown[[length(shown) + 1]] <<- toast,
+    .package = "bslib"
+  )
+  NACHO:::notify_user("Broken", "error")
+  NACHO:::notify_user("Fine", "message")
+  expect_false(unclass(shown[[1]])$autohide)
+  expect_true(unclass(shown[[2]])$autohide)
+})
+
+test_that("a discarded sample sheet and other load warnings become warning toasts", {
+  types <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) types <<- c(types, type)
+  )
+  sheet <- data.frame(file = "salmon_01_01.RCC", group = "case")
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(files = upload_table("salmon_data", sheet), import = 1)
+    expect_true(S7::S7_inherits(session$returned(), NACHO:::nacho))
+  })
+  expect_true("warning" %in% types)
+  expect_false("error" %in% types)
+})
+
+test_that("any load warning of the package is shown as a warning toast", {
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message),
+    read_uploads = function(files) {
+      NACHO:::nacho_warn("Too few genes.", class = "n_comp_reduced")
+      GSE74821
+    }
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(
+      files = data.frame(name = "a", size = 1, type = "x", datapath = "a"),
+      import = 1
+    )
+    expect_identical(session$returned(), GSE74821)
+  })
+  expect_identical(messages, "Too few genes.")
+})
+
+test_that("importing without a file asks the user to choose files", {
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message)
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(import = 1)
+    expect_null(session$returned())
+  })
+  expect_match(messages, "Choose the RCC files")
+})
