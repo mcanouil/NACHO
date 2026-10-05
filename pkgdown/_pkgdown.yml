@@ -4,11 +4,11 @@ template:
   bootstrap: 5
   light-switch: true
   bslib:
-    primary: "#B64326"
-    link-color-dark: "#FCB448"
-    body-bg-dark: "#111821"
-    headings-color: "#182430"
-    headings-color-dark: "#F0D83C"
+    brand: inst/brand/_brand.yml
+    # bslib writes the brand families unquoted, which browsers reject for names ending in a digit.
+    font-family-base: '"Source Sans 3", system-ui, sans-serif'
+    headings-font-family: '"Source Sans 3", system-ui, sans-serif'
+    font-family-monospace: '"JetBrains Mono", ui-monospace, monospace'
     navbar-bg: "#182430"
     # pkgdown default of 56px plus the 4px strip in extra.scss.
     pkgdown-nav-height: 60px
@@ -18,10 +18,6 @@ template:
     navbar-dark-color: "#FFFFFF"
     navbar-dark-hover-color: "#FCB448"
     navbar-dark-active-color: "#FCB448"
-    base_font:
-      google: "Source Sans 3"
-    code_font:
-      google: "JetBrains Mono"
 
 development:
   mode: auto
