@@ -210,11 +210,22 @@ mod_thresholds_ui <- function(id) {
   )
 }
 
+settings_of <- function(x) {
+  method <- x@settings[["normalisation_method"]]
+  list(
+    normalisation_method = method,
+    ruv_k = if (method == "RUVg") as.integer(x@settings[["ruv_k"]] %||% 1L),
+    background = x@settings[["background"]],
+    background_mode = x@settings[["background_mode"]]
+  )
+}
+
 mod_thresholds_server <- function(id, data) {
   shiny::moduleServer(id, function(input, output, session) {
     current <- shiny::reactiveVal()
     base <- shiny::reactiveVal()
     published <- shiny::reactiveVal()
+    chosen <- shiny::reactiveVal()
     revision <- shiny::reactiveVal(0L)
     start <- function(limits) {
       base(limits)
@@ -226,6 +237,7 @@ mod_thresholds_server <- function(id, data) {
       x <- data()
       start(x@thresholds)
       published(x@thresholds)
+      chosen(settings_of(x))
       instrument <- x@thresholds[["instrument"]]
       shiny::updateSelectInput(
         session,
@@ -243,6 +255,9 @@ mod_thresholds_server <- function(id, data) {
         choices = normalisation_choices(x),
         selected = x@settings[["normalisation_method"]]
       )
+      if (!is.null(chosen()$ruv_k)) {
+        shiny::updateNumericInput(session, "ruv_k", value = chosen()$ruv_k)
+      }
       shiny::updateSelectInput(
         session,
         "background",
@@ -332,17 +347,26 @@ mod_thresholds_server <- function(id, data) {
     shiny::observeEvent(settled(), published(current()))
     thresholds <- shiny::reactive(shiny::req(published()))
 
-    settings <- shiny::reactive({
-      x <- shiny::req(data())
-      method <- input$method %||% x@settings[["normalisation_method"]]
+    shiny::observeEvent(
       list(
-        normalisation_method = method,
-        ruv_k = if (method == "RUVg") as.integer(input$ruv_k %||% 1L),
-        background = input$background %||% x@settings[["background"]],
-        background_mode = input$background_mode %||%
-          x@settings[["background_mode"]]
-      )
-    })
+        input$method,
+        input$ruv_k,
+        input$background,
+        input$background_mode
+      ),
+      {
+        previous <- shiny::req(chosen())
+        method <- input$method %||% previous$normalisation_method
+        chosen(list(
+          normalisation_method = method,
+          ruv_k = if (method == "RUVg") as.integer(input$ruv_k %||% 1L),
+          background = input$background %||% previous$background,
+          background_mode = input$background_mode %||% previous$background_mode
+        ))
+      },
+      ignoreInit = TRUE
+    )
+    settings <- shiny::reactive(shiny::req(chosen()))
 
     list(
       thresholds = thresholds,

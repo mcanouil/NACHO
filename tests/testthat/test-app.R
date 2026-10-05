@@ -17,6 +17,7 @@ test_that("the app flags samples when a threshold moves", {
 
 test_that("the app normalises again when the method changes", {
   shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
     session$setInputs(
       `thresholds-method` = "RUVg",
       `thresholds-ruv_k` = 1,
@@ -32,6 +33,8 @@ test_that("the app normalises again when the method changes", {
 test_that("a method the data cannot support shows a message, not a crash", {
   toy <- toy_nacho(6L)
   shiny::testServer(NACHO:::app_server(toy, done = TRUE), {
+    # The 6-sample toy data makes ggplot2 warn about an empty density layer.
+    suppressWarnings(session$flushReact())
     session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
     session$elapse(600)
     expect_error(tuned(), class = "shiny.silent.error")
@@ -73,6 +76,8 @@ test_that("Done warns instead of closing when the settings fail", {
     notify_user = function(message, type) warned <<- type
   )
   shiny::testServer(NACHO:::app_server(toy_nacho(6L), done = TRUE), {
+    # The 6-sample toy data makes ggplot2 warn about an empty density layer.
+    suppressWarnings(session$flushReact())
     session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
     session$elapse(600)
     session$setInputs(done = 1)
@@ -154,6 +159,8 @@ test_that("Done explains why the object cannot be returned", {
     notify_user = function(message, type) messages <<- c(messages, message)
   )
   shiny::testServer(NACHO:::app_server(toy_nacho(6L), done = TRUE), {
+    # The 6-sample toy data makes ggplot2 warn about an empty density layer.
+    suppressWarnings(session$flushReact())
     session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
     session$setInputs(done = 1)
   })
@@ -363,4 +370,27 @@ test_that("cards for plots that do not apply are hidden", {
   })
   html <- as.character(NACHO:::app_ui(done = FALSE))
   expect_match(html, "output.applicable.indexOf(&#39;,PCL,&#39;)", fixed = TRUE)
+})
+
+test_that("a new object is normalised once, with its own settings", {
+  geo <- suppressMessages(
+    normalise(GSE74821, normalisation_method = "GEO")
+  )
+  methods <- character()
+  tune <- NACHO:::tune_object
+  local_mocked_bindings(
+    tune_object = function(object, chosen, thresholds) {
+      methods <<- c(methods, chosen$normalisation_method)
+      tune(object, chosen, thresholds)
+    },
+    .package = "NACHO"
+  )
+  shiny::testServer(NACHO:::app_server(geo), {
+    session$flushReact()
+    tuned()
+    session$setInputs(`data-example` = 1)
+    session$flushReact()
+    tuned()
+  })
+  expect_identical(methods, c("GEO", "GLM"))
 })

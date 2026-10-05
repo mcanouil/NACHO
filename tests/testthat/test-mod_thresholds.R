@@ -384,3 +384,24 @@ test_that("reset keeps haemolysis from the starting thresholds", {
     }
   )
 })
+
+test_that("settings follow a new object", {
+  geo <- suppressMessages(
+    normalise(GSE74821, normalisation_method = "GEO")
+  )
+  data <- shiny::reactiveVal(geo)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = data),
+    {
+      session$flushReact()
+      expect_identical(session$returned$settings()$normalisation_method, "GEO")
+      data(GSE74821)
+      session$flushReact()
+      expect_identical(session$returned$settings()$normalisation_method, "GLM")
+      session$setInputs(method = "RUVg", ruv_k = 2)
+      expect_identical(session$returned$settings()$normalisation_method, "RUVg")
+      expect_identical(session$returned$settings()$ruv_k, 2L)
+    }
+  )
+})
