@@ -221,8 +221,8 @@ When the summarisation is done, the summarised (or normalised) data can be visua
 visualise(GSE70970_sum)
 ```
 
-The sidebar includes widgets to control quality-control thresholds.
-These widgets differ according to the selected tab.
+The app has one sidebar, which holds the quality-control thresholds and the normalisation settings for every page.
+When you click Done, `visualise()` returns the tuned object to your R session.
 Each sample in the plots can be coloured based on either technical specifications which are included in the RCC files or based on specifications of your own choosing, though these specifications need to be included in the samplesheet.
 
 ## The `normalise()` function
