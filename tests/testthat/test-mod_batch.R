@@ -7,7 +7,10 @@ test_that("the batch page shows the design before the plots", {
 
 with_groups <- function(x) {
   x@samples[["biology"]] <- rep(c("a", "b"), length.out = nrow(x@samples))
-  x@samples[["by cartridge"]] <- x@samples[["CartridgeID"]]
+  x@samples[["by cartridge"]] <- paste0(
+    "g",
+    match(x@samples[["CartridgeID"]], unique(x@samples[["CartridgeID"]])) %% 2
+  )
   x
 }
 
@@ -72,4 +75,13 @@ test_that("the batch columns are not offered as groups", {
   expect_true(all(c("CartridgeID", "Date") %in% names(samples)))
   choices <- NACHO:::group_choices(samples)
   expect_false(any(c("CartridgeID", "Date") %in% choices))
+})
+
+test_that("renamed copies of a batch column are not offered as groups", {
+  x <- with_groups(GSE74821)
+  x@samples[["scanner copy"]] <- paste0("c", x@samples[["CartridgeID"]])
+  x@samples[["day copy"]] <- paste0("d", x@samples[["Date"]])
+  choices <- NACHO:::group_choices(nacho_samples(x))
+  expect_false(any(c("scanner copy", "day copy") %in% choices))
+  expect_true("biology" %in% choices)
 })
