@@ -197,15 +197,18 @@ test_that("the display options reach the plot", {
   )
 })
 
-test_that("Stability keeps every option except colour", {
-  html <- as.character(NACHO:::mod_qc_plot_ui("Stability"))
-  expect_no_match(html, "Colour by", fixed = TRUE)
-  for (label in c(
-    "Show the legend",
-    "Label flagged samples with",
-    "Point size",
-    "Download PNG"
-  )) {
+test_that("Stability and PCBatch keep only the options autoplot() honours", {
+  for (type in c("Stability", "PCBatch")) {
+    html <- as.character(NACHO:::mod_qc_plot_ui(type))
+    for (label in c("Colour by", "Show the legend", "Label flagged samples")) {
+      expect_no_match(html, label, fixed = TRUE)
+    }
+    for (label in c("Point size", "Download PNG")) {
+      expect_match(html, label, fixed = TRUE)
+    }
+  }
+  html <- as.character(NACHO:::mod_qc_plot_ui("BD"))
+  for (label in c("Show the legend", "Label flagged samples")) {
     expect_match(html, label, fixed = TRUE)
   }
 })

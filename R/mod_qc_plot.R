@@ -86,18 +86,24 @@ mod_qc_plot_ui <- function(id, type = id) {
         ),
         title = "Display options",
         if (!type %in% app_colourless) {
-          shiny::selectInput(ns("colour"), "Colour by", choices = "CartridgeID")
+          shiny::tagList(
+            shiny::selectInput(
+              ns("colour"),
+              "Colour by",
+              choices = "CartridgeID"
+            ),
+            shiny::checkboxInput(
+              ns("show_legend"),
+              "Show the legend",
+              value = TRUE
+            ),
+            shiny::selectInput(
+              ns("labels"),
+              "Label flagged samples with",
+              choices = c(None = "")
+            )
+          )
         },
-        shiny::checkboxInput(
-          ns("show_legend"),
-          "Show the legend",
-          value = TRUE
-        ),
-        shiny::selectInput(
-          ns("labels"),
-          "Label flagged samples with",
-          choices = c(None = "")
-        ),
         shiny::sliderInput(
           ns("size"),
           "Point size",
