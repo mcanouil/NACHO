@@ -9,9 +9,22 @@ header <- c(
   "# Do not edit by hand. Regenerate with:",
   "#   Rscript data-raw/brand-to-pkgdown.R"
 )
+# The logo is dropped because its path would not resolve from pkgdown/.
 typography <- brand$typography
-typography[c("fonts", "base", "monospace")] <- NULL
-typography$headings$family <- NULL
+typography$fonts <- NULL
+for (name in c(
+  "base",
+  "headings",
+  "monospace",
+  "monospace-inline",
+  "monospace-block"
+)) {
+  if (!is.list(typography[[name]])) {
+    typography[[name]] <- NULL
+  } else {
+    typography[[name]]$family <- NULL
+  }
+}
 brand$typography <- typography
 writeLines(
   c(header, yaml::as.yaml(brand[c("meta", "color", "typography")])),
