@@ -10,6 +10,8 @@ on:
       - "man/**"
       - "vignettes/**"
       - "pkgdown/**"
+      - "inst/brand/**"
+      - "data-raw/brand-to-pkgdown.R"
       - "inst/CITATION"
       - "DESCRIPTION"
       - "NEWS.md"
@@ -24,6 +26,8 @@ on:
       - "man/**"
       - "vignettes/**"
       - "pkgdown/**"
+      - "inst/brand/**"
+      - "data-raw/brand-to-pkgdown.R"
       - "inst/CITATION"
       - "DESCRIPTION"
       - "NEWS.md"
@@ -65,6 +69,14 @@ jobs:
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
+
+      - name: Check the website brand file
+        run: |
+          Rscript data-raw/brand-to-pkgdown.R
+          git diff --exit-code pkgdown/_brand.yml || {
+            echo "::error file=pkgdown/_brand.yml::pkgdown/_brand.yml is out of date. Run Rscript data-raw/brand-to-pkgdown.R and commit the result."
+            exit 1
+          }
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)

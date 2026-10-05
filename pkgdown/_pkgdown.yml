@@ -4,11 +4,8 @@ template:
   bootstrap: 5
   light-switch: true
   bslib:
-    primary: "#B64326"
-    link-color-dark: "#FCB448"
-    body-bg-dark: "#111821"
-    headings-color: "#182430"
-    headings-color-dark: "#F0D83C"
+    # bslib resolves the brand path from the working directory: build the site from the package root, as CI does.
+    brand: pkgdown/_brand.yml
     navbar-bg: "#182430"
     # pkgdown default of 56px plus the 4px strip in extra.scss.
     pkgdown-nav-height: 60px
@@ -19,9 +16,19 @@ template:
     navbar-dark-hover-color: "#FCB448"
     navbar-dark-active-color: "#FCB448"
     base_font:
-      google: "Source Sans 3"
+      google:
+        family: Source Sans 3
+        wght: [400, 700]
+        ital: [0, 1]
+    heading_font:
+      google:
+        family: Source Sans 3
+        wght: [400, 700]
+        ital: [0, 1]
     code_font:
-      google: "JetBrains Mono"
+      google:
+        family: JetBrains Mono
+        wght: [400, 700]
 
 development:
   mode: auto
