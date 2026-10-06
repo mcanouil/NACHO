@@ -46,18 +46,24 @@ button_tags <- function(html) {
   )[[1]]
 }
 
-test_that("every button has an accessible name", {
-  for (interactive in c(FALSE, TRUE)) {
-    html <- app_html(interactive, done = TRUE)
-    buttons <- regmatches(
-      html,
-      gregexpr("(?s)<button[^>]*>.*?</button>", html, perl = TRUE)
-    )[[1]]
-    expect_gt(length(buttons), 5)
-    named <- vapply(buttons, accessible_name, logical(1))
-    expect_true(all(named), info = paste(buttons[!named], collapse = "\n"))
-    expect_true(any(grepl(">Done<", buttons, fixed = TRUE)))
-  }
+expect_named_buttons <- function(interactive) {
+  buttons <- button_tags(app_html(interactive, done = TRUE))
+  testthat::expect_gt(length(buttons), 5)
+  named <- vapply(buttons, accessible_name, logical(1))
+  testthat::expect_true(
+    all(named),
+    info = paste(buttons[!named], collapse = "\n")
+  )
+  testthat::expect_true(any(grepl(">Done<", buttons, fixed = TRUE)))
+}
+
+test_that("every button in the static app has an accessible name", {
+  expect_named_buttons(interactive = FALSE)
+})
+
+test_that("every button in the interactive app has an accessible name", {
+  skip_if_not_installed("ggiraph")
+  expect_named_buttons(interactive = TRUE)
 })
 
 test_that("every button in the threshold inputs has an accessible name", {
@@ -108,6 +114,7 @@ test_that("help popovers scroll and carry the class that scopes the rule", {
 })
 
 test_that("every interactive plot has a label and a text summary", {
+  skip_if_not_installed("ggiraph")
   html <- app_html(TRUE)
   for (type in plot_types()) {
     expect_match(

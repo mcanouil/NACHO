@@ -3,7 +3,7 @@ skip_if_no_browser <- function() {
   testthat::skip_if_not_installed("shinytest2")
   testthat::skip_if_not_installed("chromote")
   testthat::skip_if(
-    is.null(chromote::find_chrome()),
+    is.null(suppressMessages(chromote::find_chrome())),
     "Chrome is not available."
   )
 }
@@ -36,7 +36,7 @@ test_that("the app flags samples when a threshold moves", {
   expect_false(identical(flagged, "0"))
   logs <- app$get_logs()
   errors <- logs[logs$location == "shiny" & logs$level == "stderr", ]
-  expect_false(any(grepl("^Error|Warning:", errors$message)))
+  expect_false(any(grepl("^(Error|Warning)|Unhandled promise", errors$message)))
 })
 
 test_that("the app loads the example data from an empty start", {
@@ -44,7 +44,8 @@ test_that("the app loads the example data from an empty start", {
   app <- shinytest2::AppDriver$new(
     nacho_app(),
     name = "empty",
-    load_timeout = 60000
+    load_timeout = 60000,
+    timeout = 20000
   )
   on.exit(app$stop(), add = TRUE)
   app$click("data-example")
