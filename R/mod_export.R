@@ -3,11 +3,16 @@ NULL
 
 render_in_background <- function(object, format, output_dir) {
   if (has_package("mirai")) {
+    libs <- .libPaths()
     return(mirai::mirai(
-      NACHO::render(object, format = format, output_dir = output_dir),
+      {
+        .libPaths(libs)
+        NACHO::render(object, format = format, output_dir = output_dir)
+      },
       object = object,
       format = format,
-      output_dir = output_dir
+      output_dir = output_dir,
+      libs = libs
     ))
   }
   render(object, format = format, output_dir = output_dir)
@@ -67,30 +72,42 @@ mod_export_server <- function(id, object, quarto) {
     if (!quarto) {
       return(invisible(NULL))
     }
+    report_dir <- tempfile("nacho-report-")
+    session$onSessionEnded(function() unlink(report_dir, recursive = TRUE))
+    report_path <- shiny::reactiveVal(NULL)
+    requested <- NULL
     task <- shiny::ExtendedTask$new(render_in_background) |>
       bslib::bind_task_button("render")
     shiny::observeEvent(input$render, {
-      task$invoke(object(), input$format, tempfile("nacho-report-"))
+      unlink(report_path())
+      report_path(NULL)
+      requested <<- object()
+      task$invoke(requested, input$format, report_dir)
     })
+    shiny::observeEvent(object(), report_path(NULL), ignoreInit = TRUE)
     shiny::observeEvent(task$status(), {
-      if (task$status() == "error") {
-        message <- tryCatch(
+      if (task$status() == "success") {
+        if (identical(object(), requested)) {
+          report_path(task$result())
+        }
+      } else if (task$status() == "error") {
+        reason <- tryCatch(
           task$result(),
           error = function(cnd) cli::ansi_strip(rlang::cnd_message(cnd))
         )
-        notify_user(message, "error")
+        notify_user(reason, "error")
       }
     })
     output$report_ready <- shiny::renderUI({
-      shiny::req(task$status() == "success")
+      shiny::req(report_path())
       shiny::downloadButton(
         session$ns("report"),
-        paste("Download", basename(task$result()))
+        paste("Download", basename(report_path()))
       )
     })
     output$report <- shiny::downloadHandler(
-      filename = function() basename(task$result()),
-      content = function(file) file.copy(task$result(), file)
+      filename = function() basename(shiny::req(report_path())),
+      content = function(file) file.copy(shiny::req(report_path()), file)
     )
   })
 }
