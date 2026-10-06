@@ -134,8 +134,11 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
     The "Highlight a sample" list on the Samples page does the same from the keyboard.
   - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS and the report.
     The report can be HTML or PDF, and it renders in the background when mirai is installed.
+    If you close the app page during a render, the render stops.
+  - feat: The "Flagged samples" page is now the "Samples" page.
+    It still lists the flagged samples first, and then lists every sample.
 - In `DESCRIPTION`,
-  - build: ggiraph, mirai, later and jsonlite join Suggests, and yaml joins Imports.
+  - build: ggiraph, jsonlite, later and mirai join Suggests, and promises and yaml join Imports.
 
 ## Performance
 
