@@ -125,6 +125,14 @@ value_box_rules <- paste(
   sep = "\n"
 )
 
+popover_rules <- paste(
+  ".popover.nacho-help .popover-body {",
+  "  max-height: 60vh;",
+  "  overflow-y: auto;",
+  "}",
+  sep = "\n"
+)
+
 css_font_family <- function(family, fallback) {
   paste0('"', family, '", ', fallback)
 }
@@ -157,5 +165,5 @@ nacho_theme <- function() {
         "ui-monospace, monospace"
       )
     ) |>
-    bslib::bs_add_rules(c(value_box_rules, dark_rules))
+    bslib::bs_add_rules(c(value_box_rules, popover_rules, dark_rules))
 }

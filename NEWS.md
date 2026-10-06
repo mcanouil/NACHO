@@ -138,7 +138,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: The "Flagged samples" page is now the "Samples" page.
     It still lists the flagged samples first, and then lists every sample.
 - In `DESCRIPTION`,
-  - build: ggiraph, jsonlite, later and mirai join Suggests, and promises and yaml join Imports.
+  - build: chromote, ggiraph, jsonlite, later, mirai and shinytest2 join Suggests, and promises and yaml join Imports.
 
 ## Performance
 
@@ -167,6 +167,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`.
 - In `inst/app/`,
   - fix: The app detects PlexSet files from their exact code classes.
+- In `R/brand.R` and `R/mod_thresholds.R`,
+  - fix: Long help popovers in the app now scroll instead of running off the screen.
 - In `R/read_rcc.R`,
   - fix: Empty RCC attributes, such as a blank owner or comment, are now read as empty text instead of repeating the attribute name.
   - fix: A probe named like an RCC section, such as `Messages`, no longer breaks parsing.
