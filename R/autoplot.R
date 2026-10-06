@@ -183,15 +183,22 @@ tooltip_labels <- c(
 )
 
 hover_mapping <- function(id, y, label_column = NULL, selectable = TRUE) {
-  label <- if (is.null(label_column)) {
-    tooltip_label <- unname(tooltip_labels[y])
-    if (is.na(tooltip_label)) y else tooltip_label
-  } else {
-    rlang::expr(.data[[!!label_column]])
-  }
+  esc <- htmltools::htmlEscape
   value <- function(d) format(signif(d, 3), trim = TRUE)
+  parts <- unlist(
+    lapply(y, function(column) {
+      label <- if (is.null(label_column)) {
+        tooltip_label <- unname(tooltip_labels[column])
+        esc(if (is.na(tooltip_label)) column else tooltip_label)
+      } else {
+        rlang::expr(esc(.data[[!!label_column]]))
+      }
+      list("\n", label, ": ", rlang::expr(value(.data[[!!column]])))
+    }),
+    recursive = FALSE
+  )
   mapping <- ggplot2::aes(
-    tooltip = paste0(.data[[!!id]], "\n", !!label, ": ", value(.data[[!!y]]))
+    tooltip = paste0(esc(.data[[!!id]]), !!!parts)
   )
   if (selectable) {
     mapping <- utils::modifyList(mapping, ggplot2::aes(data_id = .data[[!!id]]))
@@ -745,7 +752,7 @@ plot_pca12 <- function(
     point_layer(
       interactive = interactive,
       id = id,
-      y = "PC02",
+      y = c("PC01", "PC02"),
       size = size,
       na.rm = TRUE
     ) +

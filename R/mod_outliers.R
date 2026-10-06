@@ -19,7 +19,9 @@ mod_outliers_ui <- function(id, interactive = FALSE) {
     shiny::helpText(
       id = hint_id,
       "The chosen sample is marked in the table below.",
-      if (interactive) "It is also outlined in every plot."
+      if (interactive) {
+        "It is also outlined in the plots that show one point per sample."
+      }
     ),
     shiny::uiOutput(ns("body"))
   )
@@ -44,7 +46,7 @@ mod_outliers_server <- function(
         session,
         "highlight",
         choices = c(None = "", ids),
-        selected = selected()
+        selected = if (length(selected()) == 1) selected() else ""
       )
     })
     shiny::observeEvent(

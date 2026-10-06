@@ -630,7 +630,7 @@ test_that("per-sample points carry the id and a readable metric", {
     Negative = "Count",
     ACBD = "Binding density",
     ACMC = "Median counts",
-    PCA12 = "PC02",
+    PCA12 = "PC01",
     PFNF = "Positive normalisation factor",
     HF = "Content normalisation factor"
   )
@@ -692,6 +692,32 @@ test_that("PlexSet sample-level plots select the full sample id", {
   ids <- unlist(lapply(interactive_points(plot), function(d) d$data_id))
   expect_gt(length(ids), 0)
   expect_true(all(ids %in% colnames(plexset_nacho@counts)))
+})
+
+test_that("tooltips escape sample ids and label columns", {
+  data <- data.frame(id = "<b>x</b>", BD = 1.234, lab = "<i>l</i>")
+  tooltip <- function(mapping) rlang::eval_tidy(mapping$tooltip, data)
+  expect_identical(
+    tooltip(NACHO:::hover_mapping("id", "BD")),
+    "&lt;b&gt;x&lt;/b&gt;\nBinding density: 1.23"
+  )
+  expect_identical(
+    tooltip(NACHO:::hover_mapping("id", "BD", label_column = "lab")),
+    "&lt;b&gt;x&lt;/b&gt;\n&lt;i&gt;l&lt;/i&gt;: 1.23"
+  )
+})
+
+test_that("the PCA12 tooltip shows both components", {
+  skip_if_not_installed("ggiraph")
+  plot <- NACHO:::app_plot(
+    flagged_gse(),
+    "PCA12",
+    list(),
+    dark = FALSE,
+    interactive = TRUE
+  )
+  tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
+  expect_match(tooltips, "\nPC01: [^\n]+\nPC02: ")
 })
 
 test_that("tooltip values carry no padding", {

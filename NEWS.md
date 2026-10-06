@@ -130,7 +130,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: The batch page shows the design and cross-tables of batches against biological groups before the batch plots.
   - feat: Pages without data explain what to do, and "Load the example data" opens GSE74821.
   - feat: The app wears the NACHO look, with a navy navbar and the brand fonts in light and dark mode.
-  - feat: With ggiraph installed, hovering a point shows the sample and its value, and clicking it outlines that sample in every plot.
+  - feat: With ggiraph installed, hovering a point shows the sample and its value, and clicking it outlines that sample in the plots that show one point per sample.
     The "Highlight a sample" list on the Samples page does the same from the keyboard.
   - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS and the report.
     The report can be HTML or PDF, and it renders in the background when mirai is installed.

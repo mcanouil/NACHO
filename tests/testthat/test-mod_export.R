@@ -206,3 +206,53 @@ test_that("the background render hands the library paths to the daemon", {
   )
   expect_identical(captured$args$libs, .libPaths())
 })
+
+test_that("the CSV export defuses spreadsheet formulas", {
+  x <- flagged_gse()
+  id <- x@settings[["id_colname"]]
+  qc <- nacho_qc(x)
+  qc[[id]][1:4] <- c("=1+1", "+a", "-b", "@c")
+  safe <- NACHO:::spreadsheet_safe(qc)
+  expect_identical(safe[[id]][1:4], c("'=1+1", "'+a", "'-b", "'@c"))
+  expect_identical(safe[[id]][5:12], qc[[id]][5:12])
+  expect_identical(safe$FoV, qc$FoV)
+})
+
+test_that("the background render uses an installed NACHO with the new render", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  libs <- .libPaths()
+  daemon <- mirai::mirai(
+    {
+      .libPaths(libs)
+      names(formals(NACHO::render))
+    },
+    libs = libs
+  )
+  expect_true("format" %in% daemon[])
+})
+
+test_that("ending the session stops a running background render", {
+  skip_if_not_installed("mirai")
+  stopped <- 0L
+  local_mocked_bindings(
+    has_package = function(package) TRUE,
+    render_in_background = function(object, format, output_dir) {
+      mirai::mirai(Sys.sleep(30))
+    }
+  )
+  local_mocked_bindings(
+    stop_mirai = function(...) stopped <<- stopped + 1L,
+    .package = "mirai"
+  )
+  shiny::testServer(
+    NACHO:::mod_export_server,
+    args = list(object = shiny::reactiveVal(GSE74821), quarto = TRUE),
+    {
+      session$setInputs(format = "html", render = 1)
+      session$flushReact()
+      session$close()
+    }
+  )
+  expect_identical(stopped, 1L)
+})

@@ -171,5 +171,27 @@ test_that("the hint is tied to the select and static apps omit the plot claim", 
   expect_match(html, "aria-describedby=\"o-highlight-hint\"", fixed = TRUE)
   expect_no_match(html, "every plot", fixed = TRUE)
   html <- htmltools::renderTags(NACHO:::mod_outliers_ui("o", TRUE))$html
-  expect_match(html, "outlined in every plot", fixed = TRUE)
+  expect_match(html, "plots that show one point per sample", fixed = TRUE)
+})
+
+test_that("an empty selection sends an empty string to the select", {
+  x <- flagged_gse()
+  sent <- list()
+  local_mocked_bindings(
+    updateSelectInput = function(session, inputId, ..., selected = NULL) {
+      sent[[length(sent) + 1L]] <<- selected
+    },
+    .package = "shiny"
+  )
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = shiny::reactiveVal(x),
+      qc = shiny::reactive(nacho_qc(x))
+    ),
+    {
+      session$flushReact()
+      expect_identical(sent[[1]], "")
+    }
+  )
 })

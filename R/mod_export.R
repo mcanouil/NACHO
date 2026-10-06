@@ -1,6 +1,12 @@
 #' @include render.R
 NULL
 
+#' Render the report, in a mirai daemon when mirai is installed
+#'
+#' The background render uses the installed NACHO package, not the loaded
+#' one, so reinstall NACHO after you change `render()`.
+#'
+#' @noRd
 render_in_background <- function(object, format, output_dir) {
   if (has_package("mirai")) {
     libs <- .libPaths()
@@ -16,6 +22,18 @@ render_in_background <- function(object, format, output_dir) {
     ))
   }
   render(object, format = format, output_dir = output_dir)
+}
+
+spreadsheet_safe <- function(data) {
+  data[] <- lapply(data, function(column) {
+    if (is.character(column) || is.factor(column)) {
+      column <- as.character(column)
+      risky <- grepl("^[=+@\\t\\r-]", column)
+      column[risky %in% TRUE] <- paste0("'", column[risky %in% TRUE])
+    }
+    column
+  })
+  data
 }
 
 mod_export_ui <- function(id, quarto) {
@@ -64,7 +82,11 @@ mod_export_server <- function(id, object, quarto) {
     output$qc_csv <- shiny::downloadHandler(
       filename = "nacho-qc.csv",
       content = function(file) {
-        utils::write.csv(nacho_qc(object()), file, row.names = FALSE)
+        utils::write.csv(
+          spreadsheet_safe(nacho_qc(object())),
+          file,
+          row.names = FALSE
+        )
       }
     )
     output$thresholds_yaml <- shiny::downloadHandler(
@@ -82,7 +104,19 @@ mod_export_server <- function(id, object, quarto) {
     session$onSessionEnded(function() unlink(report_dir, recursive = TRUE))
     report_path <- shiny::reactiveVal(NULL)
     requested <- NULL
-    task <- shiny::ExtendedTask$new(render_in_background) |>
+    running <- NULL
+    ended <- FALSE
+    session$onSessionEnded(function() {
+      ended <<- TRUE
+      if (inherits(running, "mirai")) {
+        mirai::stop_mirai(running)
+      }
+    })
+    start_render <- function(object, format, output_dir) {
+      running <<- render_in_background(object, format, output_dir)
+      running
+    }
+    task <- shiny::ExtendedTask$new(start_render) |>
       bslib::bind_task_button("render")
     drop_report <- function() {
       unlink(report_path())
@@ -95,6 +129,9 @@ mod_export_server <- function(id, object, quarto) {
     })
     shiny::observeEvent(object(), drop_report(), ignoreInit = TRUE)
     shiny::observeEvent(task$status(), {
+      if (ended) {
+        return(invisible(NULL))
+      }
       if (task$status() == "success") {
         if (identical(object(), requested)) {
           report_path(task$result())
