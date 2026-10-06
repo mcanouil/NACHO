@@ -43,33 +43,106 @@ app_plot_titles <- c(
 
 #' Draw one plot for the app
 #'
-#' Unknown colour columns fall back to `CartridgeID`.
+#' Unknown colour columns fall back to `CartridgeID`, and unknown label
+#' columns to no labels.
 #' Warnings about unavailable metrics are muffled, because the app shows an
 #' empty plot for them.
+#' Interactive plots add tooltips and selection with ggiraph, and only the app
+#' asks for them: [autoplot()] always returns static plots.
 #'
 #' @noRd
-app_plot <- function(x, type, options, dark) {
+app_plot <- function(x, type, options, dark, interactive = FALSE) {
   colour <- options[["colour"]]
   if (is.null(colour) || !colour %in% names(nacho_samples(x))) {
     colour <- "CartridgeID"
   }
+  outliers_labels <- options[["outliers_labels"]]
+  if (!isTRUE(outliers_labels %in% names(nacho_samples(x)))) {
+    outliers_labels <- NULL
+  }
+  show_legend <- !isFALSE(options[["show_legend"]])
   withCallingHandlers(
-    autoplot(
-      x,
-      type = type,
-      colour = colour,
-      size = options[["size"]] %||% 1,
-      show_legend = options[["show_legend"]] %||% TRUE,
-      outliers_labels = options[["outliers_labels"]],
-      dark = dark
-    ),
+    if (interactive) {
+      nacho_plot_registry[[type]](
+        object = x,
+        type = type,
+        colour = colour,
+        size = options[["size"]] %||% 1,
+        show_legend = show_legend,
+        show_outliers = TRUE,
+        outliers_factor = 1,
+        outliers_labels = outliers_labels,
+        dark = dark,
+        interactive = TRUE
+      )
+    } else {
+      autoplot(
+        x,
+        type = type,
+        colour = colour,
+        size = options[["size"]] %||% 1,
+        show_legend = show_legend,
+        outliers_labels = outliers_labels,
+        dark = dark
+      )
+    },
     nacho_warning_metric_unavailable = function(cnd) {
       invokeRestart("muffleWarning")
     }
   )
 }
 
-mod_qc_plot_ui <- function(id, type = id) {
+girafe_selection <- function(selected = NULL) {
+  ggiraph::opts_selection(
+    type = "single",
+    only_shiny = TRUE,
+    css = "stroke:currentColor;stroke-width:3px;r:6px;",
+    selected = selected
+  )
+}
+
+app_girafe <- function(plot) {
+  ggiraph::girafe(
+    ggobj = plot,
+    width_svg = 7,
+    height_svg = 4.5,
+    options = list(
+      ggiraph::opts_hover(css = "stroke:currentColor;stroke-width:2px;"),
+      ggiraph::opts_tooltip(use_fill = FALSE),
+      ggiraph::opts_toolbar(
+        hidden = c(
+          "lasso_select",
+          "lasso_deselect",
+          "zoom_onoff",
+          "zoom_rect",
+          "zoom_reset",
+          "saveaspng"
+        )
+      )
+    )
+  )
+}
+
+#' Decide once whether the app draws interactive plots
+#'
+#' @noRd
+plots_interactive <- function() {
+  tryCatch(
+    {
+      rlang::check_installed(
+        "ggiraph",
+        reason = "for interactive plots in the NACHO app."
+      )
+      TRUE
+    },
+    rlib_error_package_not_found = function(cnd) {
+      nacho_inform("ggiraph is not installed, so the app shows static plots.")
+      FALSE
+    }
+  )
+}
+
+mod_qc_plot_ui <- function(id, type = id, interactive = FALSE) {
   ns <- shiny::NS(id)
   title <- app_plot_titles[[type]]
   bslib::card(
@@ -129,7 +202,17 @@ mod_qc_plot_ui <- function(id, type = id) {
         shiny::downloadButton(ns("download"), "Download PNG")
       )
     ),
-    bslib::card_body(shiny::plotOutput(ns("plot"), height = "350px")),
+    bslib::card_body(
+      if (interactive) {
+        shiny::tags$div(
+          role = "img",
+          `aria-label` = plot_alt_texts[[type]],
+          ggiraph::girafeOutput(ns("girafe"), height = "350px")
+        )
+      } else {
+        shiny::plotOutput(ns("plot"), height = "350px")
+      }
+    ),
     bslib::card_footer(shiny::textOutput(ns("summary")))
   )
 }
@@ -185,7 +268,19 @@ download_size <- function(value, default) {
   }
 }
 
-mod_qc_plot_server <- function(id, object, qc, type = id, dark) {
+send_selection <- function(session, output_id, value) {
+  session$sendCustomMessage(paste0(session$ns(output_id), "_set"), value)
+}
+
+mod_qc_plot_server <- function(
+  id,
+  object,
+  qc,
+  type = id,
+  dark,
+  selected = shiny::reactiveVal(character()),
+  interactive = FALSE
+) {
   force(type)
   force(dark)
   shiny::moduleServer(id, function(input, output, session) {
@@ -217,10 +312,34 @@ mod_qc_plot_server <- function(id, object, qc, type = id, dark) {
       )
     )
     plot <- shiny::reactive({
-      app_plot(shiny::req(object()), type, options(), dark())
+      app_plot(shiny::req(object()), type, options(), dark(), interactive)
     })
-    output$plot <- shiny::renderPlot(plot(), alt = plot_alt_texts[[type]]) |>
-      shiny::bindCache(object(), type, options(), dark())
+    if (interactive) {
+      shiny::observeEvent(
+        input$girafe_selected,
+        selected(as.character(input$girafe_selected %||% character())),
+        ignoreNULL = FALSE
+      )
+      shiny::observeEvent(
+        selected(),
+        send_selection(session, "girafe", selected()),
+        ignoreNULL = FALSE,
+        ignoreInit = TRUE
+      )
+      widget <- shiny::reactive(app_girafe(plot())) |>
+        shiny::bindCache(object(), type, options(), dark())
+      output$girafe <- ggiraph::renderGirafe(
+        ggiraph::girafe_options(
+          widget(),
+          girafe_selection(
+            shiny::isolate(if (length(selected()) > 0) selected())
+          )
+        )
+      )
+    } else {
+      output$plot <- shiny::renderPlot(plot(), alt = plot_alt_texts[[type]]) |>
+        shiny::bindCache(object(), type, options(), dark())
+    }
     output$summary <- shiny::renderText(
       plot_summary(shiny::req(object()), shiny::req(qc()), type)
     )

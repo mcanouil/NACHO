@@ -270,3 +270,176 @@ test_that("the cartridge count ignores missing cartridges", {
   qc[["CartridgeID"]] <- NA_character_
   expect_match(NACHO:::plot_summary(x, qc), "^48 samples; none flagged\\.")
 })
+
+test_that("without ggiraph the app falls back to static plots", {
+  local_mocked_bindings(
+    check_installed = function(...) {
+      rlang::abort("no", class = "rlib_error_package_not_found")
+    },
+    .package = "rlang"
+  )
+  expect_false(NACHO:::plots_interactive())
+})
+
+test_that("the interactive card holds a girafe output labelled for readers", {
+  skip_if_not_installed("ggiraph")
+  html <- htmltools::renderTags(
+    NACHO:::mod_qc_plot_ui("FoV", interactive = TRUE)
+  )$html
+  expect_match(html, 'role="img"', fixed = TRUE)
+  expect_match(html, "class=\"girafe ", fixed = TRUE)
+  expect_match(html, NACHO:::plot_alt_texts[["FoV"]], fixed = TRUE)
+  static <- htmltools::renderTags(NACHO:::mod_qc_plot_ui("FoV"))$html
+  expect_no_match(static, "class=\"girafe ")
+})
+
+test_that("nacho_app() threads the interactive choice to the UI and server", {
+  seen <- list()
+  local_mocked_bindings(
+    plots_interactive = function() TRUE,
+    app_ui = function(done = FALSE, interactive = FALSE, quarto = FALSE) {
+      seen$ui <<- interactive
+    },
+    app_server = function(
+      x,
+      done = FALSE,
+      interactive = FALSE,
+      quarto = FALSE
+    ) {
+      seen$server <<- interactive
+    }
+  )
+  local_mocked_bindings(
+    shinyApp = function(ui, server) {
+      force(server)
+      list(ui = ui)
+    },
+    .package = "shiny"
+  )
+  app <- nacho_app()
+  app$ui(NULL)
+  expect_identical(seen, list(server = TRUE, ui = TRUE))
+})
+
+test_that("the fallback tells the user, and ggiraph is detected when present", {
+  skip_if_not_installed("ggiraph")
+  expect_true(NACHO:::plots_interactive())
+  local_mocked_bindings(
+    check_installed = function(...) {
+      rlang::abort("no", class = "rlib_error_package_not_found")
+    },
+    .package = "rlang"
+  )
+  withr::local_options(nacho.quiet = FALSE, rlib_message_verbosity = "default")
+  expect_message(NACHO:::plots_interactive(), "ggiraph is not installed")
+})
+
+test_that("a click selects the sample in every plot", {
+  skip_if_not_installed("ggiraph")
+  selected <- shiny::reactiveVal(character())
+  sent <- list()
+  testthat::local_mocked_bindings(
+    send_selection = function(session, output_id, value) {
+      sent[[session$ns(output_id)]] <<- value
+    }
+  )
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      id <- colnames(GSE74821@counts)[3]
+      session$setInputs(girafe_selected = id)
+      expect_identical(selected(), id)
+      selected(colnames(GSE74821@counts)[5])
+      session$flushReact()
+      expect_identical(
+        sent[[session$ns("girafe")]],
+        colnames(GSE74821@counts)[5]
+      )
+    }
+  )
+})
+
+test_that("a plot rendered after a selection shows it", {
+  skip_if_not_installed("ggiraph")
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      session$setInputs(colour = "CartridgeID", size = 1)
+      id <- colnames(GSE74821@counts)[4]
+      selected(id)
+      session$flushReact()
+      session$setInputs(size = 2)
+      widget <- jsonlite::fromJSON(output$girafe, simplifyVector = FALSE)
+      expect_identical(unlist(widget$x$settings$select$selected), id)
+      expect_identical(widget$x$settings$select$type, "single")
+    }
+  )
+})
+
+test_that("a selection change does not render the plot again", {
+  skip_if_not_installed("ggiraph")
+  renders <- 0L
+  original <- ggiraph::girafe_options
+  testthat::local_mocked_bindings(
+    girafe_options = function(...) {
+      renders <<- renders + 1L
+      original(...)
+    },
+    .package = "ggiraph"
+  )
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      session$setInputs(colour = "CartridgeID")
+      output$girafe
+      before <- renders
+      expect_gt(before, 0L)
+      selected(colnames(GSE74821@counts)[2])
+      session$flushReact()
+      output$girafe
+      expect_identical(renders, before)
+    }
+  )
+})
+
+test_that("the girafe toolbar is hidden from every reader", {
+  skip_if_not_installed("ggiraph")
+  widget <- NACHO:::app_girafe(ggplot2::ggplot())
+  hidden <- widget$x$settings$toolbar$hidden
+  expect_true(all(
+    c("saveaspng", "zoom_onoff", "lasso_select") %in% hidden
+  ))
+})
+
+test_that("deselecting clears the selection, including an empty array", {
+  skip_if_not_installed("ggiraph")
+  selected <- shiny::reactiveVal("a")
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      session$setInputs(girafe_selected = list())
+      expect_identical(selected(), character())
+      selected("a")
+      session$setInputs(girafe_selected = NULL)
+      expect_identical(selected(), character())
+    }
+  )
+})

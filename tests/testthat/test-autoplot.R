@@ -584,3 +584,199 @@ test_that("autoplot() checks dark", {
     class = "nacho_error_bad_argument"
   )
 })
+
+test_that("interactive plots carry the sample id and the metric", {
+  skip_if_not_installed("ggiraph")
+  x <- flagged_gse()
+  plot <- NACHO:::app_plot(x, "FoV", list(), dark = FALSE, interactive = TRUE)
+  built <- ggplot2::ggplot_build(plot)
+  points <- Filter(function(d) "data_id" %in% names(d), built$data)
+  expect_gt(length(points), 0)
+  ids <- unlist(lapply(points, function(d) d$data_id))
+  expect_setequal(ids, colnames(x@counts))
+  tooltips <- unlist(lapply(points, function(d) d$tooltip))
+  expect_match(tooltips[1], "^GSM[^\n]+\nField of view: ")
+})
+
+test_that("autoplot() stays static", {
+  plot <- autoplot(GSE74821, type = "FoV")
+  layers <- vapply(plot$layers, function(l) class(l$geom)[1], character(1))
+  expect_false(any(grepl("Interactive", layers)))
+})
+
+interactive_points <- function(plot) {
+  built <- ggplot2::ggplot_build(plot)
+  Filter(function(d) "data_id" %in% names(d), built$data)
+}
+
+test_that("every plot type draws interactively", {
+  skip_if_not_installed("ggiraph")
+  x <- flagged_gse()
+  for (type in names(NACHO:::nacho_plot_registry)) {
+    plot <- NACHO:::app_plot(x, type, list(), dark = FALSE, interactive = TRUE)
+    expect_no_error(ggplot2::ggplot_build(plot))
+  }
+})
+
+test_that("per-sample points carry the id and a readable metric", {
+  skip_if_not_installed("ggiraph")
+  x <- flagged_gse()
+  expected <- c(
+    BD = "Binding density",
+    FoV = "Field of view",
+    PCL = "Positive control linearity",
+    LoD = "Limit of detection",
+    Positive = "Count",
+    Negative = "Count",
+    ACBD = "Average counts",
+    ACMC = "Average counts",
+    PCA12 = "PC01",
+    PFNF = "Negative Factor",
+    HF = "Positive Factor"
+  )
+  second <- c(
+    ACBD = "Binding density",
+    ACMC = "Median counts",
+    PCA12 = "PC02",
+    PFNF = "Positive Factor",
+    HF = "Housekeeping Factor"
+  )
+  for (type in names(expected)) {
+    plot <- NACHO:::app_plot(x, type, list(), dark = FALSE, interactive = TRUE)
+    points <- interactive_points(plot)
+    expect_gt(length(points), 0)
+    ids <- unlist(lapply(points, function(d) d$data_id))
+    expect_true(all(ids %in% colnames(x@counts)), info = type)
+    tooltips <- unlist(lapply(points, function(d) d$tooltip))
+    expect_true(
+      all(startsWith(tooltips, paste0(ids, "\n", expected[[type]], ": "))),
+      info = type
+    )
+    if (type %in% names(second)) {
+      expect_true(
+        all(grepl(paste0("\n", second[[type]], ": "), tooltips, fixed = TRUE)),
+        info = type
+      )
+    }
+  }
+})
+
+test_that("PCA tooltips name the plotted component", {
+  skip_if_not_installed("ggiraph")
+  plot <- NACHO:::app_plot(
+    flagged_gse(),
+    "PCA",
+    list(),
+    dark = FALSE,
+    interactive = TRUE
+  )
+  tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
+  expect_match(tooltips, "\nPC0[2-5]: ")
+})
+
+test_that("PlexSet lane-level plots show the lane file and select nothing", {
+  skip_if_not_installed("ggiraph")
+  for (type in c("BD", "Positive")) {
+    plot <- NACHO:::app_plot(
+      plexset_nacho,
+      type,
+      list(),
+      dark = FALSE,
+      interactive = TRUE
+    )
+    built <- ggplot2::ggplot_build(plot)
+    layers <- Filter(function(d) "tooltip" %in% names(d), built$data)
+    expect_gt(length(layers), 0)
+    expect_false(any(vapply(layers, function(d) "data_id" %in% names(d), NA)))
+    tooltips <- unlist(lapply(layers, function(d) d$tooltip))
+    expect_false(any(grepl("_S[0-9]+\n", tooltips)), info = type)
+  }
+})
+
+test_that("PlexSet sample-level plots select the full sample id", {
+  skip_if_not_installed("ggiraph")
+  plot <- NACHO:::app_plot(
+    plexset_nacho,
+    "ACBD",
+    list(),
+    dark = FALSE,
+    interactive = TRUE
+  )
+  ids <- unlist(lapply(interactive_points(plot), function(d) d$data_id))
+  expect_gt(length(ids), 0)
+  expect_true(all(ids %in% colnames(plexset_nacho@counts)))
+})
+
+test_that("tooltips escape sample ids and label columns", {
+  data <- data.frame(id = "<b>x</b>", BD = 1.234, lab = "<i>l</i>")
+  tooltip <- function(mapping) rlang::eval_tidy(mapping$tooltip, data)
+  expect_identical(
+    tooltip(NACHO:::hover_mapping("id", "BD")),
+    "&lt;b&gt;x&lt;/b&gt;\nBinding density: 1.234"
+  )
+  expect_identical(
+    tooltip(NACHO:::hover_mapping("id", "BD", label_column = "lab")),
+    "&lt;b&gt;x&lt;/b&gt;\n&lt;i&gt;l&lt;/i&gt;: 1.234"
+  )
+})
+
+test_that("the PCA12 tooltip shows both components", {
+  skip_if_not_installed("ggiraph")
+  plot <- NACHO:::app_plot(
+    flagged_gse(),
+    "PCA12",
+    list(),
+    dark = FALSE,
+    interactive = TRUE
+  )
+  tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
+  expect_match(tooltips, "\nPC01: [^\n]+\nPC02: ")
+})
+
+test_that("tooltip values are formatted one by one", {
+  tooltip <- function(value) {
+    rlang::eval_tidy(
+      NACHO:::hover_mapping("id", "BD")$tooltip,
+      data.frame(id = "a", BD = value)
+    )
+  }
+  expect_identical(tooltip(0.3), "a\nBinding density: 0.3")
+  expect_identical(tooltip(100), "a\nBinding density: 100")
+  expect_identical(tooltip(99.86), "a\nBinding density: 99.86")
+})
+
+test_that("tooltip values carry no padding", {
+  skip_if_not_installed("ggiraph")
+  plot <- NACHO:::app_plot(
+    flagged_gse(),
+    "BD",
+    list(),
+    dark = FALSE,
+    interactive = TRUE
+  )
+  tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
+  expect_false(any(grepl(": +\\s", tooltips)))
+  expect_false(any(grepl("\\s$", tooltips)))
+})
+
+test_that("interactive plots ignore unknown label columns", {
+  skip_if_not_installed("ggiraph")
+  plot <- NACHO:::app_plot(
+    flagged_gse(),
+    "BD",
+    list(outliers_labels = "nope", show_legend = NULL),
+    dark = FALSE,
+    interactive = TRUE
+  )
+  expect_no_error(ggplot2::ggplot_build(plot))
+})
+
+test_that("a sample column named id or y does not shadow the hover", {
+  skip_if_not_installed("ggiraph")
+  x <- flagged_gse()
+  x@samples[["id"]] <- "shadow"
+  x@samples[["y"]] <- "shadow"
+  plot <- NACHO:::app_plot(x, "FoV", list(), dark = FALSE, interactive = TRUE)
+  tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
+  expect_match(tooltips[1], "^GSM[^\n]+\nField of view: ")
+})

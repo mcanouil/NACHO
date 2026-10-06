@@ -30,7 +30,7 @@ group_choices <- function(samples) {
   names(samples)[keep]
 }
 
-mod_batch_ui <- function(id) {
+mod_batch_ui <- function(id, interactive = FALSE) {
   ns <- shiny::NS(id)
   shiny::tagList(
     bslib::card(
@@ -48,7 +48,7 @@ mod_batch_ui <- function(id) {
         shiny::uiOutput(ns(paste0("crosstab_", batch)))
       })
     ),
-    plot_page("batch")
+    plot_page("batch", interactive)
   )
 }
 

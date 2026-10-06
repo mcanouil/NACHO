@@ -170,6 +170,69 @@ plot_probes <- function(object, rows, colour) {
   long
 }
 
+lane_samples <- function(object, data, id) {
+  if (object@rcc_type == "n8") strip_plexset_suffix(data, id) else data
+}
+
+tooltip_labels <- c(
+  qc_metric_labels,
+  MC = "Average counts",
+  MedC = "Median counts",
+  Count = "Count",
+  Negative_factor = "Negative Factor"
+)
+tooltip_labels[c("Positive_factor", "House_factor")] <- c(
+  "Positive Factor",
+  "Housekeeping Factor"
+)
+
+hover_mapping <- function(id, y, label_column = NULL, selectable = TRUE) {
+  esc <- htmltools::htmlEscape
+  value <- function(d) trimws(formatC(d, digits = 4, format = "fg"))
+  parts <- unlist(
+    lapply(y, function(column) {
+      label <- if (is.null(label_column)) {
+        tooltip_label <- unname(tooltip_labels[column])
+        esc(if (is.na(tooltip_label)) column else tooltip_label)
+      } else {
+        rlang::expr(esc(.data[[!!label_column]]))
+      }
+      list("\n", label, ": ", rlang::expr(value(.data[[!!column]])))
+    }),
+    recursive = FALSE
+  )
+  mapping <- ggplot2::aes(
+    tooltip = paste0(esc(.data[[!!id]]), !!!parts)
+  )
+  if (selectable) {
+    mapping <- utils::modifyList(mapping, ggplot2::aes(data_id = .data[[!!id]]))
+  }
+  mapping
+}
+
+point_layer <- function(
+  mapping = NULL,
+  interactive = FALSE,
+  id,
+  y,
+  label_column = NULL,
+  selectable = TRUE,
+  ...
+) {
+  if (!interactive) {
+    return(ggplot2::geom_point(mapping = mapping, ...))
+  }
+  hover <- hover_mapping(id, y, label_column, selectable)
+  ggiraph::geom_point_interactive(
+    mapping = if (is.null(mapping)) {
+      hover
+    } else {
+      utils::modifyList(mapping, hover)
+    },
+    ...
+  )
+}
+
 outlier_layers <- function(
   show_outliers,
   colour,
@@ -177,16 +240,24 @@ outlier_layers <- function(
   outliers_factor,
   outliers_labels,
   jitter,
-  dark
+  dark,
+  interactive = FALSE,
+  id = NULL,
+  y = NULL,
+  selectable = TRUE
 ) {
   position <- if (jitter) {
     ggplot2::position_jitter(width = 0.25, height = 0)
   } else {
     "identity"
   }
-  inliers <- ggplot2::geom_point(
+  inliers <- point_layer(
     data = if (show_outliers) function(d) d[!d[["flagged"]] %in% TRUE, ],
     mapping = ggplot2::aes(colour = .data[[colour]]),
+    interactive = interactive,
+    id = id,
+    y = y,
+    selectable = selectable,
     size = size,
     na.rm = TRUE,
     position = position
@@ -198,8 +269,12 @@ outlier_layers <- function(
   accent <- colours[["accent"]]
   list(
     inliers,
-    ggplot2::geom_point(
+    point_layer(
       data = function(d) d[d[["flagged"]] %in% TRUE, ],
+      interactive = interactive,
+      id = id,
+      y = y,
+      selectable = selectable,
       size = size * outliers_factor,
       shape = 17,
       colour = accent,
@@ -286,7 +361,8 @@ plot_metrics <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   id <- object@settings[["id_colname"]]
   units <- c(
@@ -314,7 +390,7 @@ plot_metrics <- function(
   }
 
   ggplot2::ggplot(
-    data = strip_plexset_suffix(plot_samples(object, colour), id)[
+    data = lane_samples(object, plot_samples(object, colour), id)[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
@@ -345,7 +421,11 @@ plot_metrics <- function(
       outliers_factor,
       outliers_labels,
       jitter = TRUE,
-      dark = dark
+      dark = dark,
+      interactive = interactive,
+      id = id,
+      y = type,
+      selectable = object@rcc_type != "n8"
     ) +
     ggplot2::labs(
       x = "CartridgeID",
@@ -368,7 +448,8 @@ plot_cg <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   id <- object@settings[["id_colname"]]
   housekeeping_genes <- object@probes[["Name"]][object@probes[[
@@ -383,7 +464,8 @@ plot_cg <- function(
   }
 
   ggplot2::ggplot(
-    data = strip_plexset_suffix(
+    data = lane_samples(
+      object,
       plot_probes(
         object,
         which(object@probes[["CodeClass"]] %in% type),
@@ -422,7 +504,11 @@ plot_cg <- function(
       outliers_factor,
       outliers_labels,
       jitter = TRUE,
-      dark = dark
+      dark = dark,
+      interactive = interactive,
+      id = id,
+      y = "Count",
+      selectable = object@rcc_type != "n8"
     ) +
     ggplot2::scale_y_log10(
       labels = function(x) format(x, big.mark = ",")
@@ -456,11 +542,13 @@ plot_pn <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
-    data = strip_plexset_suffix(
+    data = lane_samples(
+      object,
       plot_probes(
         object,
         which(object@probes[["CodeClass"]] %in% c("Positive", "Negative")),
@@ -527,7 +615,8 @@ plot_acbd <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
@@ -557,7 +646,10 @@ plot_acbd <- function(
       outliers_factor,
       outliers_labels,
       jitter = FALSE,
-      dark = dark
+      dark = dark,
+      interactive = interactive,
+      id = id,
+      y = c("MC", "BD")
     ) +
     ggplot2::scale_x_continuous(labels = function(x) {
       format(x, big.mark = ",")
@@ -582,7 +674,8 @@ plot_acmc <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
@@ -603,7 +696,13 @@ plot_acmc <- function(
       y = .data[["MedC"]],
       colour = .data[[colour]]
     ) +
-    ggplot2::geom_point(size = size, na.rm = TRUE) +
+    point_layer(
+      interactive = interactive,
+      id = id,
+      y = c("MC", "MedC"),
+      size = size,
+      na.rm = TRUE
+    ) +
     ggplot2::scale_x_continuous(labels = function(x) {
       format(x, big.mark = ",")
     }) +
@@ -627,7 +726,8 @@ plot_pca12 <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   if (ncol(object@pca[["scores"]]) < 2) {
     warn_too_few_components(type)
@@ -653,7 +753,13 @@ plot_pca12 <- function(
       colour = .data[[colour]]
     ) +
     ggforce::geom_mark_ellipse(na.rm = TRUE, alpha = 0.1) +
-    ggplot2::geom_point(size = size, na.rm = TRUE) +
+    point_layer(
+      interactive = interactive,
+      id = id,
+      y = c("PC01", "PC02"),
+      size = size,
+      na.rm = TRUE
+    ) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::labs(x = "PC01", y = "PC02", colour = colour) +
@@ -669,7 +775,8 @@ plot_pca <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   X.PC <- Y.PC <- NULL
   if (ncol(object@pca[["scores"]]) < 2) {
@@ -712,7 +819,14 @@ plot_pca <- function(
       fill = .data[[colour]]
     ) +
     ggforce::geom_mark_ellipse(na.rm = TRUE, alpha = 0.1) +
-    ggplot2::geom_point(size = size, na.rm = TRUE) +
+    point_layer(
+      interactive = interactive,
+      id = id,
+      y = "Y",
+      label_column = "Y.PC",
+      size = size,
+      na.rm = TRUE
+    ) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(0.25)) +
     ggplot2::labs(x = NULL, y = NULL, colour = colour, fill = colour) +
@@ -733,7 +847,8 @@ plot_pcai <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   PoV <- `Proportion of Variance` <- NULL
   ggplot2::ggplot(
@@ -767,7 +882,8 @@ plot_pfnf <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
@@ -797,11 +913,14 @@ plot_pfnf <- function(
       outliers_factor,
       outliers_labels,
       jitter = FALSE,
-      dark = dark
+      dark = dark,
+      interactive = interactive,
+      id = id,
+      y = c("Negative_factor", "Positive_factor")
     ) +
     ggplot2::labs(
-      x = "Negative Factor",
-      y = "Positive Factor",
+      x = tooltip_labels[["Negative_factor"]],
+      y = tooltip_labels[["Positive_factor"]],
       colour = colour
     ) +
     ggplot2::scale_y_continuous(transform = transform_log10_infinite()) +
@@ -818,7 +937,8 @@ plot_hf <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   id <- object@settings[["id_colname"]]
   if (!"House_factor" %in% names(object@samples)) {
@@ -826,7 +946,11 @@ plot_hf <- function(
       "The housekeeping factor was not computed.",
       class = "metric_unavailable"
     )
-    return(not_available_plot("Positive Factor", "Housekeeping Factor", dark))
+    return(not_available_plot(
+      tooltip_labels[["Positive_factor"]],
+      tooltip_labels[["House_factor"]],
+      dark
+    ))
   }
 
   ggplot2::ggplot(
@@ -856,11 +980,14 @@ plot_hf <- function(
       outliers_factor,
       outliers_labels,
       jitter = FALSE,
-      dark = dark
+      dark = dark,
+      interactive = interactive,
+      id = id,
+      y = c("Positive_factor", "House_factor")
     ) +
     ggplot2::labs(
-      x = "Positive Factor",
-      y = "Housekeeping Factor",
+      x = tooltip_labels[["Positive_factor"]],
+      y = tooltip_labels[["House_factor"]],
       colour = colour
     ) +
     ggplot2::scale_x_continuous(transform = transform_log10_infinite()) +
@@ -911,7 +1038,8 @@ plot_norm <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   Status <- Count <- NULL
   id <- object@settings[["id_colname"]]
@@ -1014,7 +1142,8 @@ plot_stability <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   explain <- function(cnd) rlang::cnd_message(cnd)
   ranking <- rlang::try_fetch(
@@ -1057,7 +1186,8 @@ plot_rle <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   id <- object@settings[["id_colname"]]
   rows <- grepl("Endogenous", object@probes[["CodeClass"]])
@@ -1105,7 +1235,8 @@ plot_batch_factors <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   samples <- plot_samples(object, colour)
   factors <- intersect(
@@ -1150,7 +1281,8 @@ plot_pc_batch <- function(
   show_outliers,
   outliers_factor,
   outliers_labels,
-  dark
+  dark,
+  interactive = FALSE
 ) {
   batch <- intersect(c("CartridgeID", "Date"), names(nacho_samples(object)))
   data <- if (length(batch) > 0) {
