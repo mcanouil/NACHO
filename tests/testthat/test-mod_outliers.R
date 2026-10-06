@@ -169,9 +169,9 @@ test_that("the select follows the selection and the object", {
 test_that("the hint is tied to the select and static apps omit the plot claim", {
   html <- htmltools::renderTags(NACHO:::mod_outliers_ui("o"))$html
   expect_match(html, "aria-describedby=\"o-highlight-hint\"", fixed = TRUE)
-  expect_no_match(html, "every plot", fixed = TRUE)
+  expect_no_match(html, "outlined in the plots", fixed = TRUE)
   html <- htmltools::renderTags(NACHO:::mod_outliers_ui("o", TRUE))$html
-  expect_match(html, "plots that show one point per sample", fixed = TRUE)
+  expect_match(html, "outlined in the plots", fixed = TRUE)
 })
 
 test_that("an empty selection sends an empty string to the select", {

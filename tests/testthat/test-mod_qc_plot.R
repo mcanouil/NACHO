@@ -282,6 +282,7 @@ test_that("without ggiraph the app falls back to static plots", {
 })
 
 test_that("the interactive card holds a girafe output labelled for readers", {
+  skip_if_not_installed("ggiraph")
   html <- htmltools::renderTags(
     NACHO:::mod_qc_plot_ui("FoV", interactive = TRUE)
   )$html
