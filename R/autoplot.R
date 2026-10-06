@@ -179,12 +179,16 @@ tooltip_labels <- c(
   MC = "Average counts",
   MedC = "Median counts",
   Count = "Count",
-  Negative_factor = "Negative normalisation factor"
+  Negative_factor = "Negative Factor"
+)
+tooltip_labels[c("Positive_factor", "House_factor")] <- c(
+  "Positive Factor",
+  "Housekeeping Factor"
 )
 
 hover_mapping <- function(id, y, label_column = NULL, selectable = TRUE) {
   esc <- htmltools::htmlEscape
-  value <- function(d) format(signif(d, 3), trim = TRUE)
+  value <- function(d) trimws(formatC(d, digits = 4, format = "fg"))
   parts <- unlist(
     lapply(y, function(column) {
       label <- if (is.null(label_column)) {
@@ -645,7 +649,7 @@ plot_acbd <- function(
       dark = dark,
       interactive = interactive,
       id = id,
-      y = "BD"
+      y = c("MC", "BD")
     ) +
     ggplot2::scale_x_continuous(labels = function(x) {
       format(x, big.mark = ",")
@@ -695,7 +699,7 @@ plot_acmc <- function(
     point_layer(
       interactive = interactive,
       id = id,
-      y = "MedC",
+      y = c("MC", "MedC"),
       size = size,
       na.rm = TRUE
     ) +
@@ -912,11 +916,11 @@ plot_pfnf <- function(
       dark = dark,
       interactive = interactive,
       id = id,
-      y = "Positive_factor"
+      y = c("Negative_factor", "Positive_factor")
     ) +
     ggplot2::labs(
-      x = "Negative Factor",
-      y = "Positive Factor",
+      x = tooltip_labels[["Negative_factor"]],
+      y = tooltip_labels[["Positive_factor"]],
       colour = colour
     ) +
     ggplot2::scale_y_continuous(transform = transform_log10_infinite()) +
@@ -942,7 +946,11 @@ plot_hf <- function(
       "The housekeeping factor was not computed.",
       class = "metric_unavailable"
     )
-    return(not_available_plot("Positive Factor", "Housekeeping Factor", dark))
+    return(not_available_plot(
+      tooltip_labels[["Positive_factor"]],
+      tooltip_labels[["House_factor"]],
+      dark
+    ))
   }
 
   ggplot2::ggplot(
@@ -975,11 +983,11 @@ plot_hf <- function(
       dark = dark,
       interactive = interactive,
       id = id,
-      y = "House_factor"
+      y = c("Positive_factor", "House_factor")
     ) +
     ggplot2::labs(
-      x = "Positive Factor",
-      y = "Housekeeping Factor",
+      x = tooltip_labels[["Positive_factor"]],
+      y = tooltip_labels[["House_factor"]],
       colour = colour
     ) +
     ggplot2::scale_x_continuous(transform = transform_log10_infinite()) +

@@ -628,11 +628,18 @@ test_that("per-sample points carry the id and a readable metric", {
     LoD = "Limit of detection",
     Positive = "Count",
     Negative = "Count",
+    ACBD = "Average counts",
+    ACMC = "Average counts",
+    PCA12 = "PC01",
+    PFNF = "Negative Factor",
+    HF = "Positive Factor"
+  )
+  second <- c(
     ACBD = "Binding density",
     ACMC = "Median counts",
-    PCA12 = "PC01",
-    PFNF = "Positive normalisation factor",
-    HF = "Content normalisation factor"
+    PCA12 = "PC02",
+    PFNF = "Positive Factor",
+    HF = "Housekeeping Factor"
   )
   for (type in names(expected)) {
     plot <- NACHO:::app_plot(x, type, list(), dark = FALSE, interactive = TRUE)
@@ -645,6 +652,12 @@ test_that("per-sample points carry the id and a readable metric", {
       all(startsWith(tooltips, paste0(ids, "\n", expected[[type]], ": "))),
       info = type
     )
+    if (type %in% names(second)) {
+      expect_true(
+        all(grepl(paste0("\n", second[[type]], ": "), tooltips, fixed = TRUE)),
+        info = type
+      )
+    }
   }
 })
 
@@ -699,11 +712,11 @@ test_that("tooltips escape sample ids and label columns", {
   tooltip <- function(mapping) rlang::eval_tidy(mapping$tooltip, data)
   expect_identical(
     tooltip(NACHO:::hover_mapping("id", "BD")),
-    "&lt;b&gt;x&lt;/b&gt;\nBinding density: 1.23"
+    "&lt;b&gt;x&lt;/b&gt;\nBinding density: 1.234"
   )
   expect_identical(
     tooltip(NACHO:::hover_mapping("id", "BD", label_column = "lab")),
-    "&lt;b&gt;x&lt;/b&gt;\n&lt;i&gt;l&lt;/i&gt;: 1.23"
+    "&lt;b&gt;x&lt;/b&gt;\n&lt;i&gt;l&lt;/i&gt;: 1.234"
   )
 })
 
@@ -718,6 +731,18 @@ test_that("the PCA12 tooltip shows both components", {
   )
   tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
   expect_match(tooltips, "\nPC01: [^\n]+\nPC02: ")
+})
+
+test_that("tooltip values are formatted one by one", {
+  tooltip <- function(value) {
+    rlang::eval_tidy(
+      NACHO:::hover_mapping("id", "BD")$tooltip,
+      data.frame(id = "a", BD = value)
+    )
+  }
+  expect_identical(tooltip(0.3), "a\nBinding density: 0.3")
+  expect_identical(tooltip(100), "a\nBinding density: 100")
+  expect_identical(tooltip(99.86), "a\nBinding density: 99.86")
 })
 
 test_that("tooltip values carry no padding", {
