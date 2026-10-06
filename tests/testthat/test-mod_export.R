@@ -185,19 +185,21 @@ test_that("the background render hands the library paths to the daemon", {
   captured <- NULL
   local_mocked_bindings(has_package = function(package) TRUE)
   local_mocked_bindings(
-    mirai = function(.expression, ...) {
+    mirai = function(.expression, ..., .compute = NULL) {
       captured <<- list(
         expression = paste(deparse(substitute(.expression)), collapse = " "),
-        args = list(...)
+        args = list(...),
+        compute = .compute
       )
       "task"
     },
     .package = "mirai"
   )
   expect_identical(
-    NACHO:::render_in_background(GSE74821, "html", "folder"),
+    NACHO:::render_in_background(GSE74821, "html", "folder", "profile"),
     "task"
   )
+  expect_identical(captured$compute, "profile")
   expect_match(captured$expression, ".libPaths(libs)", fixed = TRUE)
   expect_match(captured$expression, "NACHO::render", fixed = TRUE)
   expect_setequal(
@@ -218,6 +220,13 @@ test_that("the CSV export defuses spreadsheet formulas", {
   expect_identical(safe$FoV, qc$FoV)
 })
 
+test_that("the CSV export defuses tab and carriage return but not letters", {
+  plain <- c("tumour_01", "t1", "r", "\\x")
+  risky <- c("=1", "+1", "-1", "@x", "\tfoo", "\rbar")
+  safe <- NACHO:::spreadsheet_safe(data.frame(id = c(plain, risky)))
+  expect_identical(safe$id, c(plain, paste0("'", risky)))
+})
+
 test_that("the background render uses an installed NACHO with the new render", {
   skip_on_cran()
   skip_if_not_installed("mirai")
@@ -233,26 +242,70 @@ test_that("the background render uses an installed NACHO with the new render", {
 })
 
 test_that("ending the session stops a running background render", {
+  skip_on_cran()
+  skip_on_os("windows")
   skip_if_not_installed("mirai")
-  stopped <- 0L
+  pid_file <- withr::local_tempfile()
   local_mocked_bindings(
     has_package = function(package) TRUE,
-    render_in_background = function(object, format, output_dir) {
-      mirai::mirai(Sys.sleep(30))
+    render_in_background = function(object, format, output_dir, compute) {
+      mirai::mirai(
+        {
+          writeLines(as.character(Sys.getpid()), pid_file)
+          Sys.sleep(30)
+        },
+        pid_file = pid_file,
+        .compute = compute
+      )
     }
   )
-  local_mocked_bindings(
-    stop_mirai = function(...) stopped <<- stopped + 1L,
-    .package = "mirai"
-  )
+  started <- Sys.time()
   shiny::testServer(
     NACHO:::mod_export_server,
     args = list(object = shiny::reactiveVal(GSE74821), quarto = TRUE),
     {
       session$setInputs(format = "html", render = 1)
-      session$flushReact()
+      for (i in 1:100) {
+        if (file.exists(pid_file) && length(readLines(pid_file)) == 1) {
+          break
+        }
+        later::run_now(0.1)
+      }
+      pid <- as.integer(readLines(pid_file))
+      expect_true(tools::pskill(pid, 0L))
       session$close()
+      for (i in 1:50) {
+        if (!tools::pskill(pid, 0L)) {
+          break
+        }
+        later::run_now(0.1)
+      }
+      expect_false(tools::pskill(pid, 0L))
+      expect_no_condition(later::run_now(0.5))
     }
   )
-  expect_identical(stopped, 1L)
+  expect_lt(as.numeric(Sys.time() - started, units = "secs"), 20)
+})
+
+test_that("a render stopped after the session ends never settles", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  mirai::daemons(1, dispatcher = TRUE, .compute = "nacho-settle")
+  withr::defer(mirai::daemons(0, .compute = "nacho-settle"))
+  outcome <- function(ended) {
+    settled <- "pending"
+    running <- mirai::mirai(Sys.sleep(30), .compute = "nacho-settle")
+    promises::then(
+      NACHO:::settle_while_open(running, function() ended),
+      onFulfilled = function(value) settled <<- "resolved",
+      onRejected = function(error) settled <<- "rejected"
+    )
+    mirai::stop_mirai(running)
+    for (i in 1:20) {
+      later::run_now(0.1)
+    }
+    settled
+  }
+  expect_identical(outcome(ended = FALSE), "rejected")
+  expect_identical(outcome(ended = TRUE), "pending")
 })

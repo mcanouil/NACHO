@@ -6,8 +6,10 @@ NULL
 #' The background render uses the installed NACHO package, not the loaded
 #' one, so reinstall NACHO after you change `render()`.
 #'
+#' @param compute The mirai compute profile that runs the render.
+#'
 #' @noRd
-render_in_background <- function(object, format, output_dir) {
+render_in_background <- function(object, format, output_dir, compute = NULL) {
   if (has_package("mirai")) {
     libs <- .libPaths()
     return(mirai::mirai(
@@ -18,17 +20,40 @@ render_in_background <- function(object, format, output_dir) {
       object = object,
       format = format,
       output_dir = output_dir,
-      libs = libs
+      libs = libs,
+      .compute = compute
     ))
   }
   render(object, format = format, output_dir = output_dir)
+}
+
+#' Hand a background render to an ExtendedTask
+#'
+#' After the session ends, the promise never settles, so the task does not
+#' write to the reactive values of a session that no longer exists.
+#'
+#' @param running A mirai, or the result of a render that is already done.
+#' @param ended A function that returns `TRUE` after the session ends.
+#'
+#' @noRd
+settle_while_open <- function(running, ended) {
+  if (!inherits(running, "mirai")) {
+    return(running)
+  }
+  promises::promise(function(resolve, reject) {
+    promises::then(
+      running,
+      onFulfilled = function(value) if (!ended()) resolve(value),
+      onRejected = function(error) if (!ended()) reject(error)
+    )
+  })
 }
 
 spreadsheet_safe <- function(data) {
   data[] <- lapply(data, function(column) {
     if (is.character(column) || is.factor(column)) {
       column <- as.character(column)
-      risky <- grepl("^[=+@\\t\\r-]", column)
+      risky <- grepl("^[-=+@\t\r]", column)
       column[risky %in% TRUE] <- paste0("'", column[risky %in% TRUE])
     }
     column
@@ -68,9 +93,9 @@ mod_export_ui <- function(id, quarto) {
         )
       } else {
         shiny::helpText(
-          "To render the report from the app, install the Quarto",
-          "command-line interface 1.9 or newer and the quarto R package,",
-          "then restart the app."
+          "This app cannot render the report, because the Quarto",
+          "command-line interface 1.9 or newer and the quarto R package",
+          "are not installed where the app runs."
         )
       }
     )
@@ -101,20 +126,29 @@ mod_export_server <- function(id, object, quarto) {
       return(invisible(NULL))
     }
     report_dir <- tempfile("nacho-report-")
-    session$onSessionEnded(function() unlink(report_dir, recursive = TRUE))
+    profile <- basename(report_dir)
     report_path <- shiny::reactiveVal(NULL)
     requested <- NULL
     running <- NULL
+    daemons_on <- FALSE
     ended <- FALSE
     session$onSessionEnded(function() {
       ended <<- TRUE
       if (inherits(running, "mirai")) {
         mirai::stop_mirai(running)
       }
+      if (daemons_on) {
+        mirai::daemons(0, .compute = profile)
+      }
+      unlink(report_dir, recursive = TRUE)
     })
     start_render <- function(object, format, output_dir) {
-      running <<- render_in_background(object, format, output_dir)
-      running
+      if (has_package("mirai") && !daemons_on) {
+        mirai::daemons(1, dispatcher = TRUE, .compute = profile)
+        daemons_on <<- TRUE
+      }
+      running <<- render_in_background(object, format, output_dir, profile)
+      settle_while_open(running, function() ended)
     }
     task <- shiny::ExtendedTask$new(start_render) |>
       bslib::bind_task_button("render")
