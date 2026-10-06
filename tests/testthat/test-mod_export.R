@@ -36,6 +36,16 @@ test_that("the report button hides without Quarto", {
   expect_match(html, "Quarto", fixed = TRUE)
 })
 
+test_that("the report card says when rendering blocks the app", {
+  ui <- function() {
+    htmltools::renderTags(NACHO:::mod_export_ui("export", quarto = TRUE))$html
+  }
+  local_mocked_bindings(has_package = function(package) FALSE)
+  expect_match(ui(), "install mirai to render in the background", fixed = TRUE)
+  local_mocked_bindings(has_package = function(package) TRUE)
+  expect_no_match(ui(), "install mirai", fixed = TRUE)
+})
+
 stub_render <- function(x, format, output_dir) {
   dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
   path <- file.path(output_dir, "nacho-report.html")
@@ -82,9 +92,11 @@ test_that("changing the object withdraws the report", {
       session$setInputs(format = "html", render = 1)
       wait_for_task(task, session)
       expect_false(is.null(report_path()))
+      withdrawn <- report_path()
       object(flagged_gse())
       session$flushReact()
       expect_null(report_path())
+      expect_false(file.exists(withdrawn))
       expect_error(output$report)
       session$setInputs(render = 2)
       wait_for_task(task, session)
@@ -114,6 +126,30 @@ test_that("one report folder per session holds one report and goes away", {
     }
   )
   expect_false(dir.exists(folder))
+})
+
+test_that("a report finished for an old object is deleted", {
+  object <- shiny::reactiveVal(GSE74821)
+  finished <- NULL
+  local_mocked_bindings(
+    has_package = function(package) package != "mirai",
+    render = function(x, format, output_dir) {
+      object(flagged_gse())
+      finished <<- stub_render(x, format, output_dir)
+    }
+  )
+  shiny::testServer(
+    NACHO:::mod_export_server,
+    args = list(object = object, quarto = TRUE),
+    {
+      session$setInputs(format = "html", render = 1)
+      wait_for_task(task, session)
+      session$flushReact()
+      expect_false(is.null(finished))
+      expect_false(file.exists(finished))
+      expect_null(report_path())
+    }
+  )
 })
 
 test_that("a failed render reaches the user as an error toast", {

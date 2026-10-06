@@ -124,6 +124,25 @@ test_that("the samples table escapes cell text", {
   )
 })
 
+test_that("the samples table escapes the id column name", {
+  x <- flagged_gse()
+  samples <- x@samples
+  names(samples)[names(samples) == x@settings[["id_colname"]]] <- "a<b"
+  settings <- x@settings
+  settings[["id_colname"]] <- "a<b"
+  x <- S7::set_props(x, samples = samples, settings = settings)
+  qc <- nacho_qc(x)
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(object = shiny::reactiveVal(x), qc = shiny::reactive(qc)),
+    {
+      session$flushReact()
+      expect_match(output$samples, "a&lt;b", fixed = TRUE)
+      expect_no_match(output$samples, "<th>a<b", fixed = TRUE)
+    }
+  )
+})
+
 test_that("the select follows the selection and the object", {
   x <- flagged_gse()
   object <- shiny::reactiveVal(x)

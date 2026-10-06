@@ -170,6 +170,10 @@ plot_probes <- function(object, rows, colour) {
   long
 }
 
+lane_samples <- function(object, data, id) {
+  if (object@rcc_type == "n8") strip_plexset_suffix(data, id) else data
+}
+
 tooltip_labels <- c(
   qc_metric_labels,
   MC = "Average counts",
@@ -178,18 +182,21 @@ tooltip_labels <- c(
   Negative_factor = "Negative normalisation factor"
 )
 
-hover_mapping <- function(id, y, label_column = NULL) {
+hover_mapping <- function(id, y, label_column = NULL, selectable = TRUE) {
   label <- if (is.null(label_column)) {
     tooltip_label <- unname(tooltip_labels[y])
     if (is.na(tooltip_label)) y else tooltip_label
   } else {
     rlang::expr(.data[[!!label_column]])
   }
-  value <- function(d) format(signif(d, 3))
-  ggplot2::aes(
-    data_id = .data[[!!id]],
+  value <- function(d) format(signif(d, 3), trim = TRUE)
+  mapping <- ggplot2::aes(
     tooltip = paste0(.data[[!!id]], "\n", !!label, ": ", value(.data[[!!y]]))
   )
+  if (selectable) {
+    mapping <- utils::modifyList(mapping, ggplot2::aes(data_id = .data[[!!id]]))
+  }
+  mapping
 }
 
 point_layer <- function(
@@ -198,12 +205,13 @@ point_layer <- function(
   id,
   y,
   label_column = NULL,
+  selectable = TRUE,
   ...
 ) {
   if (!interactive) {
     return(ggplot2::geom_point(mapping = mapping, ...))
   }
-  hover <- hover_mapping(id, y, label_column)
+  hover <- hover_mapping(id, y, label_column, selectable)
   ggiraph::geom_point_interactive(
     mapping = if (is.null(mapping)) {
       hover
@@ -224,7 +232,8 @@ outlier_layers <- function(
   dark,
   interactive = FALSE,
   id = NULL,
-  y = NULL
+  y = NULL,
+  selectable = TRUE
 ) {
   position <- if (jitter) {
     ggplot2::position_jitter(width = 0.25, height = 0)
@@ -237,6 +246,7 @@ outlier_layers <- function(
     interactive = interactive,
     id = id,
     y = y,
+    selectable = selectable,
     size = size,
     na.rm = TRUE,
     position = position
@@ -253,6 +263,7 @@ outlier_layers <- function(
       interactive = interactive,
       id = id,
       y = y,
+      selectable = selectable,
       size = size * outliers_factor,
       shape = 17,
       colour = accent,
@@ -368,7 +379,7 @@ plot_metrics <- function(
   }
 
   ggplot2::ggplot(
-    data = strip_plexset_suffix(plot_samples(object, colour), id)[
+    data = lane_samples(object, plot_samples(object, colour), id)[
       j = unique(.SD),
       .SDcols = unique(c(
         "CartridgeID",
@@ -402,7 +413,8 @@ plot_metrics <- function(
       dark = dark,
       interactive = interactive,
       id = id,
-      y = type
+      y = type,
+      selectable = object@rcc_type != "n8"
     ) +
     ggplot2::labs(
       x = "CartridgeID",
@@ -441,7 +453,8 @@ plot_cg <- function(
   }
 
   ggplot2::ggplot(
-    data = strip_plexset_suffix(
+    data = lane_samples(
+      object,
       plot_probes(
         object,
         which(object@probes[["CodeClass"]] %in% type),
@@ -483,7 +496,8 @@ plot_cg <- function(
       dark = dark,
       interactive = interactive,
       id = id,
-      y = "Count"
+      y = "Count",
+      selectable = object@rcc_type != "n8"
     ) +
     ggplot2::scale_y_log10(
       labels = function(x) format(x, big.mark = ",")
@@ -522,7 +536,8 @@ plot_pn <- function(
 ) {
   id <- object@settings[["id_colname"]]
   ggplot2::ggplot(
-    data = strip_plexset_suffix(
+    data = lane_samples(
+      object,
       plot_probes(
         object,
         which(object@probes[["CodeClass"]] %in% c("Positive", "Negative")),

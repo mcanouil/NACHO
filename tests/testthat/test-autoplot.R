@@ -661,18 +661,51 @@ test_that("PCA tooltips name the plotted component", {
   expect_match(tooltips, "\nPC0[2-5]: ")
 })
 
-test_that("PlexSet metric plots use the lane file as the id", {
+test_that("PlexSet lane-level plots show the lane file and select nothing", {
+  skip_if_not_installed("ggiraph")
+  for (type in c("BD", "Positive")) {
+    plot <- NACHO:::app_plot(
+      plexset_nacho,
+      type,
+      list(),
+      dark = FALSE,
+      interactive = TRUE
+    )
+    built <- ggplot2::ggplot_build(plot)
+    layers <- Filter(function(d) "tooltip" %in% names(d), built$data)
+    expect_gt(length(layers), 0)
+    expect_false(any(vapply(layers, function(d) "data_id" %in% names(d), NA)))
+    tooltips <- unlist(lapply(layers, function(d) d$tooltip))
+    expect_false(any(grepl("_S[0-9]+\n", tooltips)), info = type)
+  }
+})
+
+test_that("PlexSet sample-level plots select the full sample id", {
   skip_if_not_installed("ggiraph")
   plot <- NACHO:::app_plot(
     plexset_nacho,
-    "BD",
+    "ACBD",
     list(),
     dark = FALSE,
     interactive = TRUE
   )
   ids <- unlist(lapply(interactive_points(plot), function(d) d$data_id))
-  expect_false(any(grepl("_S[0-9]*$", ids)))
   expect_gt(length(ids), 0)
+  expect_true(all(ids %in% colnames(plexset_nacho@counts)))
+})
+
+test_that("tooltip values carry no padding", {
+  skip_if_not_installed("ggiraph")
+  plot <- NACHO:::app_plot(
+    flagged_gse(),
+    "BD",
+    list(),
+    dark = FALSE,
+    interactive = TRUE
+  )
+  tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
+  expect_false(any(grepl(": +\\s", tooltips)))
+  expect_false(any(grepl("\\s$", tooltips)))
 })
 
 test_that("interactive plots ignore unknown label columns", {

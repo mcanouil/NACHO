@@ -82,7 +82,8 @@ mod_outliers_server <- function(
         )
         table
       },
-      sanitize.text.function = function(x) x
+      sanitize.text.function = function(x) x,
+      sanitize.colnames.function = htmltools::htmlEscape
     )
     output$body <- shiny::renderUI({
       shiny::tagList(

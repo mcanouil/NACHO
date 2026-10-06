@@ -107,7 +107,16 @@ app_girafe <- function(plot) {
       ),
       ggiraph::opts_hover(css = "stroke:currentColor;stroke-width:2px;"),
       ggiraph::opts_tooltip(use_fill = FALSE),
-      ggiraph::opts_toolbar(saveaspng = FALSE)
+      ggiraph::opts_toolbar(
+        hidden = c(
+          "lasso_select",
+          "lasso_deselect",
+          "zoom_onoff",
+          "zoom_rect",
+          "zoom_reset",
+          "saveaspng"
+        )
+      )
     )
   )
 }
@@ -324,7 +333,7 @@ mod_qc_plot_server <- function(
             type = "single",
             only_shiny = TRUE,
             css = selection_css,
-            selected = if (length(selected()) > 0) shiny::isolate(selected())
+            selected = shiny::isolate(if (length(selected()) > 0) selected())
           )
         )
       )

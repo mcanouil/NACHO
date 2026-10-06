@@ -39,6 +39,12 @@ mod_export_ui <- function(id, quarto) {
             c(HTML = "html", "PDF (Typst)" = "typst"),
             inline = TRUE
           ),
+          if (!has_package("mirai")) {
+            shiny::helpText(
+              "Rendering blocks the app until it finishes;",
+              "install mirai to render in the background."
+            )
+          },
           bslib::input_task_button(ns("render"), "Render the report"),
           shiny::uiOutput(ns("report_ready"))
         )
@@ -78,17 +84,22 @@ mod_export_server <- function(id, object, quarto) {
     requested <- NULL
     task <- shiny::ExtendedTask$new(render_in_background) |>
       bslib::bind_task_button("render")
-    shiny::observeEvent(input$render, {
+    drop_report <- function() {
       unlink(report_path())
       report_path(NULL)
+    }
+    shiny::observeEvent(input$render, {
+      drop_report()
       requested <<- object()
       task$invoke(requested, input$format, report_dir)
     })
-    shiny::observeEvent(object(), report_path(NULL), ignoreInit = TRUE)
+    shiny::observeEvent(object(), drop_report(), ignoreInit = TRUE)
     shiny::observeEvent(task$status(), {
       if (task$status() == "success") {
         if (identical(object(), requested)) {
           report_path(task$result())
+        } else {
+          unlink(task$result())
         }
       } else if (task$status() == "error") {
         reason <- tryCatch(

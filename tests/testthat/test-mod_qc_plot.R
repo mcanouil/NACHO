@@ -372,18 +372,55 @@ test_that("a plot rendered after a selection shows it", {
       list(selected = selected, interactive = TRUE)
     ),
     {
-      session$setInputs(colour = "CartridgeID")
+      session$setInputs(colour = "CartridgeID", size = 1)
       id <- colnames(GSE74821@counts)[4]
       selected(id)
       session$flushReact()
+      session$setInputs(size = 2)
       widget <- jsonlite::fromJSON(output$girafe, simplifyVector = FALSE)
       expect_identical(unlist(widget$x$settings$select$selected), id)
-      selected(character())
-      session$flushReact()
-      widget <- jsonlite::fromJSON(output$girafe, simplifyVector = FALSE)
-      expect_length(widget$x$settings$select$selected, 0)
     }
   )
+})
+
+test_that("a selection change does not render the plot again", {
+  skip_if_not_installed("ggiraph")
+  renders <- 0L
+  original <- ggiraph::girafe_options
+  testthat::local_mocked_bindings(
+    girafe_options = function(...) {
+      renders <<- renders + 1L
+      original(...)
+    },
+    .package = "ggiraph"
+  )
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      session$setInputs(colour = "CartridgeID")
+      output$girafe
+      before <- renders
+      expect_gt(before, 0L)
+      selected(colnames(GSE74821@counts)[2])
+      session$flushReact()
+      output$girafe
+      expect_identical(renders, before)
+    }
+  )
+})
+
+test_that("the girafe toolbar is hidden from every reader", {
+  skip_if_not_installed("ggiraph")
+  widget <- NACHO:::app_girafe(ggplot2::ggplot())
+  hidden <- widget$x$settings$toolbar$hidden
+  expect_true(all(
+    c("saveaspng", "zoom_onoff", "lasso_select") %in% hidden
+  ))
 })
 
 test_that("deselecting clears the selection, including an empty array", {
