@@ -179,34 +179,17 @@ tooltip_labels <- c(
 )
 
 hover_mapping <- function(id, y, label_column = NULL) {
-  label <- unname(tooltip_labels[y])
-  if (is.na(label)) {
-    label <- y
+  label <- if (is.null(label_column)) {
+    tooltip_label <- unname(tooltip_labels[y])
+    if (is.na(tooltip_label)) y else tooltip_label
+  } else {
+    rlang::expr(.data[[!!label_column]])
   }
   value <- function(d) format(signif(d, 3))
-  if (is.null(label_column)) {
-    ggplot2::aes(
-      data_id = .data[[!!id]],
-      tooltip = paste0(
-        .data[[!!id]],
-        "\n",
-        !!label,
-        ": ",
-        value(.data[[!!y]])
-      )
-    )
-  } else {
-    ggplot2::aes(
-      data_id = .data[[!!id]],
-      tooltip = paste0(
-        .data[[!!id]],
-        "\n",
-        .data[[!!label_column]],
-        ": ",
-        value(.data[[!!y]])
-      )
-    )
-  }
+  ggplot2::aes(
+    data_id = .data[[!!id]],
+    tooltip = paste0(.data[[!!id]], "\n", !!label, ": ", value(.data[[!!y]]))
+  )
 }
 
 point_layer <- function(
