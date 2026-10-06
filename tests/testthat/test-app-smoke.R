@@ -17,11 +17,26 @@ test_that("the app flags samples when a threshold moves", {
     timeout = 20000
   )
   on.exit(app$stop(), add = TRUE)
-  expect_identical(app$get_value(output = "overview-samples"), "48")
-  expect_identical(app$get_value(output = "overview-flagged_count"), "0")
+  expect_identical(
+    app$wait_for_value(output = "overview-samples", ignore = list(NULL, "")),
+    "48"
+  )
+  expect_identical(
+    app$wait_for_value(
+      output = "overview-flagged_count",
+      ignore = list(NULL, "")
+    ),
+    "0"
+  )
   app$set_inputs(`thresholds-FoV` = 99.9)
-  app$wait_for_idle(duration = 1000)
-  expect_false(identical(app$get_value(output = "overview-flagged_count"), "0"))
+  flagged <- app$wait_for_value(
+    output = "overview-flagged_count",
+    ignore = list(NULL, "", "0")
+  )
+  expect_false(identical(flagged, "0"))
+  logs <- app$get_logs()
+  errors <- logs[logs$location == "shiny" & logs$level == "stderr", ]
+  expect_false(any(grepl("^Error|Warning:", errors$message)))
 })
 
 test_that("the app loads the example data from an empty start", {
@@ -33,6 +48,8 @@ test_that("the app loads the example data from an empty start", {
   )
   on.exit(app$stop(), add = TRUE)
   app$click("data-example")
-  app$wait_for_idle(duration = 1000)
-  expect_identical(app$get_value(output = "overview-samples"), "48")
+  expect_identical(
+    app$wait_for_value(output = "overview-samples", ignore = list(NULL, "")),
+    "48"
+  )
 })
