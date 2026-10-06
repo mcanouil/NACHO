@@ -126,7 +126,7 @@ value_box_rules <- paste(
 )
 
 popover_rules <- paste(
-  ".popover-body {",
+  ".popover.nacho-help .popover-body {",
   "  max-height: 60vh;",
   "  overflow-y: auto;",
   "}",

@@ -7,7 +7,13 @@ app_html <- function(interactive, done = FALSE) {
 
 accessible_name <- function(tag_html) {
   opening_tag <- sub("(?s)^(<button[^>]*>).*$", "\\1", tag_html, perl = TRUE)
-  if (grepl('(aria-label|title)="[^"]+"', opening_tag)) {
+  if (grepl('\\saria-label="[^"]+"', opening_tag)) {
+    return(TRUE)
+  }
+  if (
+    grepl('class="[^"]*collapse-toggle', opening_tag) &&
+      grepl('\\stitle="[^"]+"', opening_tag)
+  ) {
     return(TRUE)
   }
   text <- gsub(
@@ -17,6 +23,27 @@ accessible_name <- function(tag_html) {
     perl = TRUE
   )
   nzchar(text)
+}
+
+plot_types <- function() {
+  types <- unlist(NACHO:::app_plot_types, use.names = FALSE)
+  testthat::expect_gt(length(types), 0)
+  types
+}
+
+threshold_html <- function() {
+  htmltools::renderTags(NACHO:::threshold_inputs(
+    NACHO::GSE74821,
+    NACHO::GSE74821@thresholds,
+    shiny::NS("thresholds")
+  ))$html
+}
+
+button_tags <- function(html) {
+  regmatches(
+    html,
+    gregexpr("(?s)<button[^>]*>.*?</button>", html, perl = TRUE)
+  )[[1]]
 }
 
 test_that("every button has an accessible name", {
@@ -31,6 +58,14 @@ test_that("every button has an accessible name", {
     expect_true(all(named), info = paste(buttons[!named], collapse = "\n"))
     expect_true(any(grepl(">Done<", buttons, fixed = TRUE)))
   }
+})
+
+test_that("every button in the threshold inputs has an accessible name", {
+  buttons <- button_tags(threshold_html())
+  expect_gt(length(buttons), 0)
+  named <- vapply(buttons, accessible_name, logical(1))
+  expect_true(all(named), info = paste(buttons[!named], collapse = "\n"))
+  expect_true(all(grepl('aria-label="More about ', buttons, fixed = TRUE)))
 })
 
 test_that("every help popover trigger has an accessible name", {
@@ -50,7 +85,7 @@ test_that("every help popover trigger has an accessible name", {
   }
 })
 
-test_that("popover bodies scroll instead of overflowing the viewport", {
+test_that("help popovers scroll and carry the class that scopes the rule", {
   dependencies <- bslib::bs_theme_dependencies(NACHO:::nacho_theme())
   bootstrap <- Filter(function(x) x$name == "bootstrap", dependencies)[[1]]
   css <- paste(
@@ -60,17 +95,21 @@ test_that("popover bodies scroll instead of overflowing the viewport", {
     ),
     collapse = ""
   )
-  expect_match(css, "\\.popover-body\\s*\\{[^}]*max-height", perl = TRUE)
-  expect_match(
+  rule <- "\\.popover\\.nacho-help \\.popover-body\\s*\\{[^}]*"
+  expect_match(css, paste0(rule, "max-height:\\s*60vh"), perl = TRUE)
+  expect_match(css, paste0(rule, "overflow-y:\\s*auto"), perl = TRUE)
+  expect_false(grepl(
+    "(?<!nacho-help )\\.popover-body\\s*\\{[^}]*max-height",
     css,
-    "\\.popover-body\\s*\\{[^}]*overflow-y:\\s*auto",
     perl = TRUE
-  )
+  ))
+  expect_match(threshold_html(), "customClass", fixed = TRUE)
+  expect_match(threshold_html(), "nacho-help", fixed = TRUE)
 })
 
 test_that("every interactive plot has a label and a text summary", {
   html <- app_html(TRUE)
-  for (type in unlist(NACHO:::app_plot_types, use.names = FALSE)) {
+  for (type in plot_types()) {
     expect_match(
       html,
       paste0('role="img" aria-label="', NACHO:::plot_alt_texts[[type]]),
@@ -82,22 +121,24 @@ test_that("every interactive plot has a label and a text summary", {
 
 test_that("every static plot card has a text summary", {
   html <- app_html(FALSE)
-  for (type in unlist(NACHO:::app_plot_types, use.names = FALSE)) {
+  for (type in plot_types()) {
     expect_match(html, paste0('id="', type, '-summary"'), fixed = TRUE)
   }
 })
 
 test_that("help text sits outside labels", {
-  html <- app_html(FALSE)
-  labels <- regmatches(
-    html,
-    gregexpr("<label[^>]*>.*?</label>", html, perl = TRUE)
-  )[[1]]
-  expect_false(any(grepl("help-block|form-text", labels)))
+  for (html in list(app_html(FALSE), threshold_html())) {
+    labels <- regmatches(
+      html,
+      gregexpr("(?s)<label[^>]*>.*?</label>", html, perl = TRUE)
+    )[[1]]
+    expect_gt(length(labels), 0)
+    expect_false(any(grepl("help-block|form-text", labels)))
+  }
 })
 
 test_that("every static plot has alt text", {
-  for (type in unlist(NACHO:::app_plot_types, use.names = FALSE)) {
+  for (type in plot_types()) {
     shiny::testServer(
       NACHO:::mod_qc_plot_server,
       args = list(

@@ -38,7 +38,8 @@ threshold_help_block <- function(metric) {
         shiny::icon("circle-question", `aria-hidden` = "true")
       ),
       help_page(page),
-      title = qc_metric_labels[[metric]]
+      title = qc_metric_labels[[metric]],
+      options = list(customClass = "nacho-help")
     )
   }
   shiny::helpText(threshold_help[[metric]], more)
