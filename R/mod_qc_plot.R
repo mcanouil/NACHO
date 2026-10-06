@@ -92,7 +92,14 @@ app_plot <- function(x, type, options, dark, interactive = FALSE) {
   )
 }
 
-selection_css <- "stroke:currentColor;stroke-width:3px;r:6px;"
+girafe_selection <- function(selected = NULL) {
+  ggiraph::opts_selection(
+    type = "single",
+    only_shiny = TRUE,
+    css = "stroke:currentColor;stroke-width:3px;r:6px;",
+    selected = selected
+  )
+}
 
 app_girafe <- function(plot) {
   ggiraph::girafe(
@@ -100,11 +107,6 @@ app_girafe <- function(plot) {
     width_svg = 7,
     height_svg = 4.5,
     options = list(
-      ggiraph::opts_selection(
-        type = "single",
-        only_shiny = TRUE,
-        css = selection_css
-      ),
       ggiraph::opts_hover(css = "stroke:currentColor;stroke-width:2px;"),
       ggiraph::opts_tooltip(use_fill = FALSE),
       ggiraph::opts_toolbar(
@@ -329,11 +331,8 @@ mod_qc_plot_server <- function(
       output$girafe <- ggiraph::renderGirafe(
         ggiraph::girafe_options(
           widget(),
-          ggiraph::opts_selection(
-            type = "single",
-            only_shiny = TRUE,
-            css = selection_css,
-            selected = shiny::isolate(if (length(selected()) > 0) selected())
+          girafe_selection(
+            shiny::isolate(if (length(selected()) > 0) selected())
           )
         )
       )

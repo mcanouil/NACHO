@@ -380,6 +380,7 @@ test_that("a plot rendered after a selection shows it", {
       session$setInputs(size = 2)
       widget <- jsonlite::fromJSON(output$girafe, simplifyVector = FALSE)
       expect_identical(unlist(widget$x$settings$select$selected), id)
+      expect_identical(widget$x$settings$select$type, "single")
     }
   )
 })
