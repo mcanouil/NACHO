@@ -51,12 +51,15 @@ Imports:
     rlang (>= 1.1.0),
     S7 (>= 0.2.2),
     scales (>= 1.4.0),
-    shiny (>= 1.11.0)
+    shiny (>= 1.11.0),
+    yaml (>= 2.3.12)
 Suggests:
     colorspace (>= 2.1-3),
     ggiraph (>= 0.9.6),
     jsonlite (>= 2.0.0),
     knitr (>= 1.39),
+    later,
+    mirai (>= 2.7.3),
     png (>= 0.1-9),
     quarto (>= 1.5.1),
     rmarkdown (>= 1.16),
@@ -90,6 +93,8 @@ Collate:
     'qc.R'
     'nacho-class.R'
     'accessors.R'
+    'render.R'
+    'mod_export.R'
     'qc-table.R'
     'report.R'
     'mod_qc_plot.R'
@@ -114,7 +119,6 @@ Collate:
     'normalise.R'
     'read_nacho.R'
     'read_rcc.R'
-    'render.R'
     'utils.R'
     'visualise.R'
     'zzz.R'

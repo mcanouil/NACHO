@@ -1,4 +1,4 @@
-#' @include mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R mod_batch.R
+#' @include mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R mod_batch.R mod_export.R
 NULL
 
 #' Run the NACHO app
@@ -27,9 +27,10 @@ nacho_app <- function(x = NULL, done = FALSE) {
   }
   shiny::addResourcePath("nacho-brand", brand_path())
   interactive <- plots_interactive()
+  quarto <- quarto_available()
   shiny::shinyApp(
-    ui = function(request) app_ui(done, interactive),
-    server = app_server(x, done, interactive)
+    ui = function(request) app_ui(done, interactive, quarto),
+    server = app_server(x, done, interactive, quarto)
   )
 }
 
@@ -71,7 +72,7 @@ plot_page <- function(page, interactive = FALSE) {
   )
 }
 
-app_ui <- function(done = FALSE, interactive = FALSE) {
+app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
   bslib::page_navbar(
     title = shiny::tags$span(
       shiny::tags$img(src = "nacho-brand/nacho_hex.png", height = 24, alt = ""),
@@ -115,6 +116,7 @@ app_ui <- function(done = FALSE, interactive = FALSE) {
       "Samples",
       with_data(mod_outliers_ui("outliers", interactive))
     ),
+    bslib::nav_panel("Export", with_data(mod_export_ui("export", quarto))),
     bslib::nav_panel("About", help_page("nacho")),
     bslib::nav_spacer(),
     bslib::nav_item(bslib::input_dark_mode(id = "dark_mode"))
@@ -164,7 +166,12 @@ tune_with_toasts <- function(object, chosen, thresholds, announced) {
   )
 }
 
-app_server <- function(x, done = FALSE, interactive = FALSE) {
+app_server <- function(
+  x,
+  done = FALSE,
+  interactive = FALSE,
+  quarto = FALSE
+) {
   function(input, output, session) {
     data <- mod_data_server("data", initial = x)
     settings <- mod_thresholds_server("thresholds", data = data)
@@ -197,6 +204,7 @@ app_server <- function(x, done = FALSE, interactive = FALSE) {
     selected <- shiny::reactiveVal(character())
     mod_outliers_server("outliers", tuned, qc, selected)
     mod_batch_server("batch", tuned)
+    mod_export_server("export", tuned, quarto)
     lapply(unlist(app_plot_types, use.names = FALSE), function(type) {
       mod_qc_plot_server(
         type,

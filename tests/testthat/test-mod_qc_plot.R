@@ -296,10 +296,15 @@ test_that("nacho_app() threads the interactive choice to the UI and server", {
   seen <- list()
   local_mocked_bindings(
     plots_interactive = function() TRUE,
-    app_ui = function(done = FALSE, interactive = FALSE) {
+    app_ui = function(done = FALSE, interactive = FALSE, quarto = FALSE) {
       seen$ui <<- interactive
     },
-    app_server = function(x, done = FALSE, interactive = FALSE) {
+    app_server = function(
+      x,
+      done = FALSE,
+      interactive = FALSE,
+      quarto = FALSE
+    ) {
       seen$server <<- interactive
     }
   )
