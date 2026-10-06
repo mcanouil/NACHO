@@ -234,10 +234,10 @@ test_that("the overview shows only when data is loaded", {
   html <- as.character(NACHO:::app_ui(done = FALSE))
   expect_match(
     html,
-    "data-display-if=\"output.has_data === true\"[^>]*>\\s*<div[^>]*bslib-grid",
+    "data-display-if=\"output.has_data === true\"[^>]*>\\s*<div[^>]*nacho-summary",
     perl = TRUE
   )
-  expect_match(html, "Flagged samples", fixed = TRUE)
+  expect_match(html, "Summary of the data", fixed = TRUE)
 })
 
 test_that("the app reports whether it has data", {

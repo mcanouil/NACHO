@@ -70,13 +70,47 @@ test_that("the overview module shows no reasons without failures", {
   )
 })
 
-test_that("the overview is four value boxes with decorative icons", {
+test_that("the overview is one summary strip with labelled items", {
   html <- htmltools::renderTags(NACHO:::mod_overview_ui("overview"))$html
-  boxes <- gregexpr('class="[^"]*\\bbslib-value-box( |")', html)
-  expect_length(regmatches(html, boxes)[[1]], 4L)
+  expect_match(html, 'class="nacho-summary"', fixed = TRUE)
+  expect_match(html, 'role="group"', fixed = TRUE)
+  expect_match(html, 'aria-label="Summary of the data"', fixed = TRUE)
+  for (id in c(
+    "samples",
+    "units",
+    "flagged_count",
+    "reasons",
+    "method",
+    "preset"
+  )) {
+    expect_match(html, paste0('id="overview-', id, '"'), fixed = TRUE)
+  }
+  expect_false(grepl("bslib-value-box", html, fixed = TRUE))
   icons <- regmatches(html, gregexpr("<i [^>]*>", html))[[1]]
-  expect_length(icons, 4L)
+  expect_gt(length(icons), 3)
   expect_true(all(grepl('aria-hidden="true"', icons, fixed = TRUE)))
+})
+
+test_that("the flagged reasons have a named trigger and hidden text", {
+  html <- htmltools::renderTags(NACHO:::mod_overview_ui("overview"))$html
+  expect_match(html, 'aria-label="Why samples are flagged"', fixed = TRUE)
+  expect_match(html, 'class="visually-hidden"', fixed = TRUE)
+})
+
+test_that("app_overview() counts lanes on PlexSet data", {
+  qc <- nacho_qc(plexset_nacho)
+  qc[["lane"]] <- rep(1:12, length.out = nrow(qc))
+  overview <- NACHO:::app_overview(plexset_nacho, qc)
+  expect_identical(overview$unit, "Lanes")
+  expect_identical(
+    overview$units,
+    nrow(unique(qc[c("CartridgeID", "lane")]))
+  )
+  expect_identical(NACHO:::app_overview(GSE74821)$unit, "Cartridges")
+})
+
+test_that("the strip wraps on a narrow screen", {
+  expect_match(NACHO:::summary_rules, "flex-wrap: wrap", fixed = TRUE)
 })
 
 test_that("app_overview() does not count a missing cartridge", {
