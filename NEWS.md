@@ -122,7 +122,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: The app starts from the object's own thresholds, keeps its preset and instrument, and offers RUVg, the miRNA methods and the background settings.
   - feat: The app has one sidebar with every threshold and the instrument presets.
     A reset button puts the thresholds back to the preset.
-  - feat: A one-line summary at the top of every page shows the samples, the cartridges (lanes for PlexSet), the flagged samples with their reasons, and the method.
+  - feat: A summary strip at the top of every page shows the samples, the cartridges (lanes for PlexSet), the flagged samples with their reasons, and the method.
   - feat: Each plot sits in a card that opens full screen, and interactive plots redraw to fill the card.
     Its display options set the colour, legend, point size and labels, and the plot downloads as a PNG at the size you choose.
   - feat: A dark mode toggle in the navbar switches the app and its plots.
@@ -135,7 +135,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS and the report.
     The report can be HTML or PDF, and it renders in the background when mirai is installed.
     If you close the app page during a render, the render stops.
-  - feat: A Help menu in the navbar opens the About page, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.
+  - feat: A Help menu in the navbar opens About NACHO, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.
   - feat: The "Flagged samples" page is now the "Samples" page.
     It still lists the flagged samples first, and then lists every sample.
 - In `DESCRIPTION`,
