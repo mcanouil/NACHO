@@ -126,7 +126,12 @@ summary_rules <- paste(
   "  background: var(--bs-body-bg);",
   "}",
   ".nacho-summary-item { display: flex; align-items: center; gap: 0.4rem; }",
-  ".nacho-summary-item > .fa, .nacho-summary-item > svg { color: var(--bs-primary); }",
+  ".nacho-summary-item > i, .nacho-summary-item > svg { color: var(--bs-primary); }",
+  ".nacho-summary-info { color: var(--bs-primary); }",
+  ".nacho-summary-info:focus-visible {",
+  "  outline: 2px solid var(--bs-focus-ring-color, var(--bs-primary));",
+  "  outline-offset: 2px;",
+  "}",
   ".nacho-summary-label { color: var(--bs-secondary-color); }",
   ".nacho-summary-value { font-weight: 700; }",
   sep = "\n"

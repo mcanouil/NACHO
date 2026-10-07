@@ -34,6 +34,12 @@ test_that("the app flags samples when a threshold moves", {
     ignore = list(NULL, "", "0")
   )
   expect_false(identical(flagged, "0"))
+  app$run_js("document.querySelector('.nacho-summary-info').focus()")
+  app$wait_for_js("document.querySelector('.tooltip') !== null")
+  expect_match(
+    app$get_js("document.querySelector('.tooltip').textContent"),
+    "FoV"
+  )
   logs <- app$get_logs()
   errors <- logs[logs$location == "shiny" & logs$level == "stderr", ]
   expect_false(any(grepl("^(Error|Warning)|Unhandled promise", errors$message)))

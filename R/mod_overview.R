@@ -40,6 +40,14 @@ reasons_text <- function(reasons) {
   }
 }
 
+reasons_description <- function(reasons) {
+  if (length(reasons) == 0) {
+    "No sample is flagged."
+  } else {
+    paste("Flagged because:", reasons_text(reasons))
+  }
+}
+
 mod_overview_ui <- function(id) {
   ns <- shiny::NS(id)
   icon <- function(name) shiny::icon(name, `aria-hidden` = "true")
@@ -72,11 +80,14 @@ mod_overview_ui <- function(id) {
             type = "button",
             class = "btn btn-link btn-sm p-0 nacho-summary-info",
             `aria-label` = "Why samples are flagged",
+            `aria-describedby` = ns("reasons_description"),
             icon("circle-info")
           ),
-          shiny::textOutput(ns("reasons_tip"), inline = TRUE)
+          id = ns("reasons_tip"),
+          "None"
         ),
         shiny::tags$span(
+          id = ns("reasons_description"),
           class = "visually-hidden",
           shiny::textOutput(ns("reasons"), inline = TRUE)
         )
@@ -100,12 +111,16 @@ mod_overview_server <- function(id, object, qc) {
       app_overview(shiny::req(object()), shiny::req(qc()))
     )
     output$samples <- shiny::renderText(overview()$samples)
-    output$cartridges <- shiny::renderText(overview()$cartridges)
     output$flagged_count <- shiny::renderText(overview()$flagged)
     output$unit <- shiny::renderText(overview()$unit)
     output$units <- shiny::renderText(overview()$units)
-    output$reasons <- shiny::renderText(reasons_text(overview()$reasons))
-    output$reasons_tip <- shiny::renderText(reasons_text(overview()$reasons))
+    reasons <- shiny::reactive(overview()$reasons)
+    output$reasons <- shiny::renderText(reasons_description(reasons()))
+    shiny::observeEvent(
+      reasons(),
+      bslib::update_tooltip("reasons_tip", reasons_text(reasons())),
+      ignoreNULL = FALSE
+    )
     output$method <- shiny::renderText(overview()$method)
     output$preset <- shiny::renderText(paste(
       preset_label(overview()$preset),

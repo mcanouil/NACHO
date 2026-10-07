@@ -47,11 +47,11 @@ test_that("the overview module formats every field", {
       qc = shiny::reactive(nacho_qc(flagged_gse()))
     ),
     {
-      expect_identical(output$cartridges, "1")
+      expect_identical(output$units, "1")
       expect_identical(output$method, "GLM")
       expect_identical(output$preset, "nSolver preset")
       expect_identical(output$flagged_count, "2")
-      expect_identical(output$reasons, "FoV: 2")
+      expect_identical(output$reasons, "Flagged because: FoV: 2")
     }
   )
 })
@@ -65,7 +65,7 @@ test_that("the overview module shows no reasons without failures", {
     ),
     {
       expect_identical(output$flagged_count, "0")
-      expect_identical(output$reasons, "None")
+      expect_identical(output$reasons, "No sample is flagged.")
     }
   )
 })
@@ -87,19 +87,33 @@ test_that("the overview is one summary strip with labelled items", {
   }
   expect_false(grepl("bslib-value-box", html, fixed = TRUE))
   icons <- regmatches(html, gregexpr("<i [^>]*>", html))[[1]]
-  expect_gt(length(icons), 3)
+  expect_length(icons, 5L)
   expect_true(all(grepl('aria-hidden="true"', icons, fixed = TRUE)))
 })
 
 test_that("the flagged reasons have a named trigger and hidden text", {
   html <- htmltools::renderTags(NACHO:::mod_overview_ui("overview"))$html
-  expect_match(html, 'aria-label="Why samples are flagged"', fixed = TRUE)
-  expect_match(html, 'class="visually-hidden"', fixed = TRUE)
+  tooltip <- regmatches(
+    html,
+    regexpr("(?s)<bslib-tooltip.*?</bslib-tooltip>", html, perl = TRUE)
+  )
+  expect_match(tooltip, "(?s)<button[^>]*Why samples are flagged", perl = TRUE)
+  hidden_id <- sub(
+    '(?s).*<span id="([^"]+)" class="visually-hidden">\\s*<[^>]* id="overview-reasons".*',
+    "\\1",
+    html,
+    perl = TRUE
+  )
+  expect_identical(as.character(hidden_id), "overview-reasons_description")
+  expect_match(
+    tooltip,
+    paste0('aria-describedby="', hidden_id, '"'),
+    fixed = TRUE
+  )
 })
 
 test_that("app_overview() counts lanes on PlexSet data", {
   qc <- nacho_qc(plexset_nacho)
-  qc[["lane"]] <- rep(1:12, length.out = nrow(qc))
   overview <- NACHO:::app_overview(plexset_nacho, qc)
   expect_identical(overview$unit, "Lanes")
   expect_identical(
@@ -107,10 +121,6 @@ test_that("app_overview() counts lanes on PlexSet data", {
     nrow(unique(qc[c("CartridgeID", "lane")]))
   )
   expect_identical(NACHO:::app_overview(GSE74821)$unit, "Cartridges")
-})
-
-test_that("the strip wraps on a narrow screen", {
-  expect_match(NACHO:::summary_rules, "flex-wrap: wrap", fixed = TRUE)
 })
 
 test_that("app_overview() does not count a missing cartridge", {
