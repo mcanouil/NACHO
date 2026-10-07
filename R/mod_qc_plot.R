@@ -298,6 +298,44 @@ download_size <- function(value, default) {
   }
 }
 
+# The server sets a selection on the plots and on the highlight menu.
+# Each of them answers with an input event that repeats the value it just got.
+# When two selections are in flight, the stale answers bounce between the
+# server, the plots and the menu without end.
+# The guard drops an answer that only repeats a value the server just sent.
+selection_echo_guard <- shiny::tags$script(shiny::HTML(
+  "(function() {
+    var pending = {};
+    var normalise = function(value) {
+      return JSON.stringify([].concat(value === null || value === '' ? [] : value));
+    };
+    var expect = function(name, value) {
+      pending[name] = (pending[name] || []).concat(normalise(value));
+    };
+    $(document).on('shiny:message', function(e) {
+      var message = e.message || {};
+      Object.keys(message.custom || {}).forEach(function(key) {
+        if (/-girafe_set$/.test(key)) {
+          expect(key.replace(/_set$/, '_selected'), message.custom[key]);
+        }
+      });
+      (message.inputMessages || []).forEach(function(input) {
+        if (/-highlight$/.test(input.id) && 'value' in input.message) {
+          expect(input.id, input.message.value);
+        }
+      });
+    });
+    $(document).on('shiny:inputchanged', function(e) {
+      var queue = pending[e.name];
+      if (!queue) return;
+      var at = queue.indexOf(normalise(e.value));
+      if (at < 0) return;
+      queue.splice(at, 1);
+      e.preventDefault();
+    });
+  })();"
+))
+
 send_selection <- function(session, output_id, value) {
   session$sendCustomMessage(paste0(session$ns(output_id), "_set"), value)
 }

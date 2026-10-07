@@ -85,6 +85,7 @@ app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
       shiny::useBusyIndicators(),
       brand_font_dependency(),
       restore_help_focus,
+      if (interactive) selection_echo_guard,
       shiny::conditionalPanel(
         "output.has_data === true",
         mod_overview_ui("overview")

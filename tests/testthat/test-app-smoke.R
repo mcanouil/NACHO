@@ -97,6 +97,26 @@ test_that("the app flags samples when a threshold moves", {
     nudged <- expect_resize_renders(narrow, 1290)
     wide <- expect_resize_renders(nudged, 1700)
     expect_gt(wide[[1]][[1]], narrow[[1]][[1]])
+    app$run_js(
+      "window.selectionEvents = 0;
+      $(document).on('shiny:inputchanged', function(e) {
+        if (/-girafe_selected$/.test(e.name)) window.selectionEvents++;
+      });
+      var ids = Array.from(new Set(Array.from(
+        document.querySelectorAll('#BD-girafe svg [data-id]')
+      ).map(function(e) { return e.getAttribute('data-id'); })));
+      var click = function(id) {
+        document.querySelector('#BD-girafe svg [data-id=\"' + id + '\"]')
+          .dispatchEvent(new MouseEvent('click', {bubbles: true}));
+      };
+      click(ids[2]);
+      setTimeout(function() { click(ids[3]); }, 20);"
+    )
+    Sys.sleep(2)
+    settled <- app$get_js("window.selectionEvents")
+    Sys.sleep(2)
+    expect_identical(app$get_js("window.selectionEvents"), settled)
+    expect_lt(settled, 20)
   }
   app$run_js("document.querySelector('#cite').click()")
   app$wait_for_js("document.querySelector('.modal.show') !== null")
