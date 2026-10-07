@@ -166,3 +166,14 @@ test_that("every static plot has alt text", {
     )
   }
 })
+
+test_that("the cite action is a named, keyboard reachable link", {
+  html <- app_html(interactive = FALSE, done = TRUE)
+  link <- regmatches(
+    html,
+    regexpr('(?s)<a [^>]*id="cite"[^>]*>.*?</a>', html, perl = TRUE)
+  )
+  expect_length(link, 1)
+  expect_match(link, 'href="#"', fixed = TRUE)
+  expect_match(link, ">Cite NACHO</span>", fixed = TRUE)
+})

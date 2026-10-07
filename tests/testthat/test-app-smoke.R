@@ -60,3 +60,21 @@ test_that("the app loads the example data from an empty start", {
     "48"
   )
 })
+
+test_that("Cite NACHO opens the citation", {
+  skip_if_no_browser()
+  app <- shinytest2::AppDriver$new(
+    nacho_app(GSE74821),
+    name = "cite",
+    load_timeout = 60000,
+    timeout = 20000
+  )
+  on.exit(app$stop(), add = TRUE)
+  app$run_js("document.querySelector('#cite').click()")
+  app$wait_for_js("document.querySelector('.modal.show') !== null")
+  expect_match(
+    app$get_js("document.querySelector('.modal.show').textContent"),
+    "NACHO: an R package for quality control",
+    fixed = TRUE
+  )
+})

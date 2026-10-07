@@ -105,7 +105,7 @@ test_that("the page holds every navigation panel and plot card", {
     "Normalisation",
     "Batch",
     "Samples",
-    "About"
+    "About NACHO"
   )
   for (title in c(panels, NACHO:::app_plot_titles)) {
     expect_match(html, title, fixed = TRUE)
@@ -222,7 +222,7 @@ test_that("pages without data explain what to do", {
       perl = TRUE
     )
   )[[1]])
-  with_data <- setdiff(pages, c("Data", "About"))
+  with_data <- setdiff(pages, c("Data", "About NACHO"))
   expect_gt(length(with_data), 0L)
   expect_equal(
     lengths(regmatches(html, gregexpr("No data yet.", html, fixed = TRUE))),
@@ -402,4 +402,55 @@ test_that("pages grow with their content instead of squeezing it", {
   panes <- regmatches(html, gregexpr('<div class="tab-pane[^"]*"', html))[[1]]
   expect_gt(length(panes), 0L)
   expect_no_match(panes, "html-fill-container")
+})
+
+test_that("help popovers are wider than the Bootstrap default", {
+  expect_match(
+    NACHO:::popover_rules,
+    "\\.popover\\.nacho-help \\{[^}]*--bs-popover-max-width: min\\(32rem, 90vw\\)"
+  )
+  expect_match(NACHO:::popover_rules, "max-height: 60vh", fixed = TRUE)
+})
+
+test_that("help_links() reads the links from DESCRIPTION", {
+  links <- NACHO:::help_links()
+  expect_identical(links[["documentation"]], "https://m.canouil.dev/NACHO/")
+  expect_identical(
+    links[["discussions"]],
+    "https://github.com/mcanouil/NACHO/discussions"
+  )
+  expect_identical(
+    links[["issues"]],
+    "https://github.com/mcanouil/NACHO/issues"
+  )
+})
+
+test_that("the Help menu holds five items and safe external links", {
+  html <- as.character(NACHO:::app_ui())
+  expect_match(html, 'data-value="Help"', fixed = TRUE)
+  labels <- c(
+    "About NACHO",
+    "Documentation",
+    "Ask a question",
+    "Report a problem",
+    "Cite NACHO"
+  )
+  for (label in labels) {
+    expect_match(html, label, fixed = TRUE)
+  }
+  links <- regmatches(
+    html,
+    gregexpr('<a [^>]*href="https://[^"]*"[^>]*>', html)
+  )[[1]]
+  links <- links[grepl("github.com/mcanouil/NACHO|m.canouil.dev/NACHO", links)]
+  expect_length(links, 3)
+  expect_true(all(grepl('target="_blank"', links, fixed = TRUE)))
+  expect_true(all(grepl('rel="noopener"', links, fixed = TRUE)))
+  expect_match(html, "(opens in a new tab)", fixed = TRUE)
+})
+
+test_that("Cite NACHO shows the citation", {
+  expect_match(NACHO:::citation_text(), "NACHO", fixed = TRUE)
+  expect_match(NACHO:::citation_text(), "Bioinformatics", fixed = TRUE)
+  expect_match(NACHO:::citation_text(bibtex = TRUE), "@Article", fixed = TRUE)
 })
