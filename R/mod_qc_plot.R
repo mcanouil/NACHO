@@ -356,10 +356,13 @@ mod_qc_plot_server <- function(
       )
       girafe_size <- shiny::reactive({
         output_id <- paste0("output_", session$ns("girafe"))
-        card_size(
-          session$clientData[[paste0(output_id, "_width")]],
-          session$clientData[[paste0(output_id, "_height")]]
+        width <- session$clientData[[paste0(output_id, "_width")]]
+        height <- session$clientData[[paste0(output_id, "_height")]]
+        shiny::req(
+          is.numeric(width) && length(width) == 1 && isTRUE(width > 0),
+          is.numeric(height) && length(height) == 1 && isTRUE(height > 0)
         )
+        card_size(width, height)
       }) |>
         shiny::debounce(250)
       widget <- shiny::reactive({

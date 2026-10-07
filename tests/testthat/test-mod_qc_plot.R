@@ -467,3 +467,41 @@ test_that("the interactive card body fills the card", {
   expect_match(html, "height: 100%; min-height: 350px;", fixed = TRUE)
   expect_match(html, "card-body[^\"]*html-fill-container")
 })
+
+test_that("the girafe follows the card size", {
+  skip_if_not_installed("ggiraph")
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(plot_args(GSE74821, "BD"), list(interactive = TRUE)),
+    {
+      session$setInputs(colour = "CartridgeID")
+      session$elapse(300)
+      expect_identical(girafe_size(), NACHO:::card_size(600, 400))
+    }
+  )
+})
+
+test_that("the plot is built once for a repeated size", {
+  skip_if_not_installed("ggiraph")
+  builds <- 0L
+  original <- NACHO:::app_plot
+  testthat::local_mocked_bindings(
+    app_plot = function(...) {
+      builds <<- builds + 1L
+      original(...)
+    }
+  )
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(plot_args(GSE74821, "BD"), list(interactive = TRUE)),
+    {
+      session$setInputs(colour = "CartridgeID", size = 1)
+      session$elapse(300)
+      output$girafe
+      session$setInputs(size = 1)
+      session$elapse(300)
+      output$girafe
+      expect_identical(builds, 1L)
+    }
+  )
+})
