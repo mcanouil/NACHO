@@ -40,6 +40,22 @@ test_that("the app flags samples when a threshold moves", {
     app$get_js("document.querySelector('.tooltip').textContent"),
     "FoV"
   )
+  app$run_js("document.querySelector('#cite').click()")
+  app$wait_for_js("document.querySelector('.modal.show') !== null")
+  expect_match(
+    app$get_js("document.querySelector('.modal.show').textContent"),
+    "NACHO: an R package for quality control",
+    fixed = TRUE
+  )
+  app$wait_for_js(
+    "getComputedStyle(document.querySelector('.modal.show')).opacity === '1'"
+  )
+  app$wait_for_idle(duration = 500)
+  app$run_js("document.querySelector('.modal.show .btn').click()")
+  app$wait_for_js("document.querySelector('.modal.show') === null")
+  app$wait_for_js(
+    "document.activeElement.getAttribute('data-value') === 'Help'"
+  )
   logs <- app$get_logs()
   errors <- logs[logs$location == "shiny" & logs$level == "stderr", ]
   expect_false(any(grepl("^(Error|Warning)|Unhandled promise", errors$message)))
@@ -58,23 +74,5 @@ test_that("the app loads the example data from an empty start", {
   expect_identical(
     app$wait_for_value(output = "overview-samples", ignore = list(NULL, "")),
     "48"
-  )
-})
-
-test_that("Cite NACHO opens the citation", {
-  skip_if_no_browser()
-  app <- shinytest2::AppDriver$new(
-    nacho_app(GSE74821),
-    name = "cite",
-    load_timeout = 60000,
-    timeout = 20000
-  )
-  on.exit(app$stop(), add = TRUE)
-  app$run_js("document.querySelector('#cite').click()")
-  app$wait_for_js("document.querySelector('.modal.show') !== null")
-  expect_match(
-    app$get_js("document.querySelector('.modal.show').textContent"),
-    "NACHO: an R package for quality control",
-    fixed = TRUE
   )
 })

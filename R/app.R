@@ -84,6 +84,7 @@ app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
     header = shiny::tagList(
       shiny::useBusyIndicators(),
       brand_font_dependency(),
+      restore_help_focus,
       shiny::conditionalPanel(
         "output.has_data === true",
         mod_overview_ui("overview")
@@ -123,16 +124,41 @@ app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
   )
 }
 
+package_description <- function() {
+  utils::packageDescription("NACHO")
+}
+
 help_links <- function() {
-  description <- utils::packageDescription("NACHO")
-  urls <- trimws(strsplit(description[["URL"]], ",")[[1]])
+  description <- package_description()
+  urls <- trimws(strsplit(description[["URL"]] %||% "", ",")[[1]])
   github <- urls[grepl("^https://github.com/", urls)][1]
-  site <- urls[!grepl("^https://github.com/", urls)][1]
+  site <- urls[nzchar(urls) & !grepl("^https://github.com/", urls)][1]
+  issues <- description[["BugReports"]]
+  missing <- c(
+    "a GitHub URL in the URL field" = is.na(github),
+    "a documentation site URL in the URL field" = is.na(site),
+    "the BugReports field" = is.null(issues) || !nzchar(issues)
+  )
+  if (any(missing)) {
+    nacho_abort(
+      c(
+        "The DESCRIPTION file of NACHO lacks {names(missing)[missing]}.",
+        i = "Reinstall NACHO so the Help menu can link to its pages."
+      ),
+      class = "bad_description"
+    )
+  }
   c(
     documentation = site,
     discussions = paste0(sub("/$", "", github), "/discussions"),
-    issues = description[["BugReports"]]
+    issues = issues
   )
+}
+
+unnamed_icon <- function(name) {
+  icon <- shiny::icon(name, `aria-hidden` = "true")
+  icon$attribs[["aria-label"]] <- NULL
+  icon
 }
 
 external_link <- function(label, href) {
@@ -142,10 +168,18 @@ external_link <- function(label, href) {
     target = "_blank",
     rel = "noopener",
     label,
-    shiny::icon("arrow-up-right-from-square", `aria-hidden` = "true"),
+    unnamed_icon("arrow-up-right-from-square"),
     shiny::tags$span(class = "visually-hidden", "(opens in a new tab)")
   )
 }
+
+restore_help_focus <- shiny::tags$script(shiny::HTML(
+  "$(document).on('hidden.bs.modal', function() {
+    $('a.dropdown-toggle').filter(function() {
+      return $(this).text().trim() === 'Help';
+    }).first().trigger('focus');
+  });"
+))
 
 help_menu <- function() {
   links <- help_links()
@@ -157,7 +191,12 @@ help_menu <- function() {
     bslib::nav_item(external_link("Ask a question", links[["discussions"]])),
     bslib::nav_item(external_link("Report a problem", links[["issues"]])),
     bslib::nav_item(
-      shiny::actionLink("cite", "Cite NACHO", class = "dropdown-item")
+      shiny::tags$button(
+        id = "cite",
+        type = "button",
+        class = "dropdown-item action-button",
+        "Cite NACHO"
+      )
     )
   )
 }

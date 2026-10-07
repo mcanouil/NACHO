@@ -425,6 +425,32 @@ test_that("help_links() reads the links from DESCRIPTION", {
   )
 })
 
+test_that("help_links() names what DESCRIPTION lacks", {
+  complete <- list(
+    URL = "https://github.com/mcanouil/NACHO/, https://m.canouil.dev/NACHO/",
+    BugReports = "https://github.com/mcanouil/NACHO/issues"
+  )
+  cases <- list(
+    no_url = list(BugReports = complete$BugReports),
+    no_github = list(
+      URL = "https://m.canouil.dev/NACHO/",
+      BugReports = complete$BugReports
+    ),
+    no_site = list(
+      URL = "https://github.com/mcanouil/NACHO/",
+      BugReports = complete$BugReports
+    ),
+    no_bugreports = list(URL = complete$URL)
+  )
+  for (case in names(cases)) {
+    testthat::local_mocked_bindings(
+      package_description = function() cases[[case]],
+      .package = "NACHO"
+    )
+    expect_error(NACHO:::help_links(), class = "nacho_error_bad_description")
+  }
+})
+
 test_that("the Help menu holds five items and safe external links", {
   html <- as.character(NACHO:::app_ui())
   expect_match(html, 'data-value="Help"', fixed = TRUE)

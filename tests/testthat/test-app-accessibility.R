@@ -167,13 +167,16 @@ test_that("every static plot has alt text", {
   }
 })
 
-test_that("the cite action is a named, keyboard reachable link", {
+test_that("the cite action is a named button the audit sees", {
+  buttons <- button_tags(app_html(interactive = FALSE, done = TRUE))
+  cite <- buttons[grepl('id="cite"', buttons, fixed = TRUE)]
+  expect_length(cite, 1)
+  expect_match(cite, 'type="button"', fixed = TRUE)
+  expect_match(cite, "action-button", fixed = TRUE)
+  expect_true(accessible_name(cite))
+})
+
+test_that("the external link icons add no second name", {
   html <- app_html(interactive = FALSE, done = TRUE)
-  link <- regmatches(
-    html,
-    regexpr('(?s)<a [^>]*id="cite"[^>]*>.*?</a>', html, perl = TRUE)
-  )
-  expect_length(link, 1)
-  expect_match(link, 'href="#"', fixed = TRUE)
-  expect_match(link, ">Cite NACHO</span>", fixed = TRUE)
+  expect_no_match(html, "arrow-up-right-from-square icon", fixed = TRUE)
 })
