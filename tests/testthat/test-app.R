@@ -407,9 +407,9 @@ test_that("pages grow with their content instead of squeezing it", {
 test_that("help popovers are wider than the Bootstrap default", {
   expect_match(
     NACHO:::popover_rules,
-    "\\.popover\\.nacho-help \\{[^}]*--bs-popover-max-width: min\\(32rem, 90vw\\)"
+    "\\.popover\\.nacho-help \\{[^}]*--bs-popover-max-width: min\\(40rem, 90vw\\)"
   )
-  expect_match(NACHO:::popover_rules, "max-height: 60vh", fixed = TRUE)
+  expect_match(NACHO:::popover_rules, "max-height: 70vh", fixed = TRUE)
 })
 
 test_that("help_links() reads the links from DESCRIPTION", {
@@ -450,7 +450,10 @@ test_that("the Help menu holds five items and safe external links", {
 })
 
 test_that("Cite NACHO shows the citation", {
-  expect_match(NACHO:::citation_text(), "NACHO", fixed = TRUE)
-  expect_match(NACHO:::citation_text(), "Bioinformatics", fixed = TRUE)
-  expect_match(NACHO:::citation_text(bibtex = TRUE), "@Article", fixed = TRUE)
+  expect_match(
+    as.character(NACHO:::citation_html()),
+    "<em>Bioinformatics</em>",
+    fixed = TRUE
+  )
+  expect_match(NACHO:::citation_bibtex(), "@Article{Canouil2020,", fixed = TRUE)
 })

@@ -162,13 +162,15 @@ help_menu <- function() {
   )
 }
 
-citation_text <- function(bibtex = FALSE) {
-  entry <- utils::citation("NACHO")
-  if (bibtex) {
-    paste(format(entry, style = "bibtex"), collapse = "\n")
-  } else {
-    paste(format(entry, style = "text"), collapse = "\n\n")
-  }
+citation_html <- function() {
+  shiny::HTML(paste(
+    format(utils::citation("NACHO"), style = "html"),
+    collapse = "\n"
+  ))
+}
+
+citation_bibtex <- function() {
+  paste(format(utils::citation("NACHO"), style = "bibtex"), collapse = "\n")
 }
 
 tune_object <- function(object, chosen, thresholds) {
@@ -256,8 +258,11 @@ app_server <- function(
     shiny::observeEvent(input$cite, {
       shiny::showModal(shiny::modalDialog(
         title = "Cite NACHO",
-        shiny::p(citation_text()),
-        shiny::tags$pre(citation_text(bibtex = TRUE)),
+        citation_html(),
+        shiny::tags$pre(
+          style = "white-space: pre-wrap; word-break: break-word;",
+          citation_bibtex()
+        ),
         easyClose = TRUE,
         footer = shiny::modalButton("Close")
       ))

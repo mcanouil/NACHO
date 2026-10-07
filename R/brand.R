@@ -139,10 +139,10 @@ summary_rules <- paste(
 
 popover_rules <- paste(
   ".popover.nacho-help {",
-  "  --bs-popover-max-width: min(32rem, 90vw);",
+  "  --bs-popover-max-width: min(40rem, 90vw);",
   "}",
   ".popover.nacho-help .popover-body {",
-  "  max-height: 60vh;",
+  "  max-height: 70vh;",
   "  overflow-y: auto;",
   "}",
   sep = "\n"

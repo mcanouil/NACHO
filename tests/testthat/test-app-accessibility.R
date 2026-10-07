@@ -102,7 +102,7 @@ test_that("help popovers scroll and carry the class that scopes the rule", {
     collapse = ""
   )
   rule <- "\\.popover\\.nacho-help \\.popover-body\\s*\\{[^}]*"
-  expect_match(css, paste0(rule, "max-height:\\s*60vh"), perl = TRUE)
+  expect_match(css, paste0(rule, "max-height:\\s*70vh"), perl = TRUE)
   expect_match(css, paste0(rule, "overflow-y:\\s*auto"), perl = TRUE)
   expect_false(grepl(
     "(?<!nacho-help )\\.popover-body\\s*\\{[^}]*max-height",
