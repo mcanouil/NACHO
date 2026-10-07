@@ -443,3 +443,27 @@ test_that("deselecting clears the selection, including an empty array", {
     }
   )
 })
+
+test_that("card_size() rounds pixels to 50 and converts to inches", {
+  expect_identical(
+    NACHO:::card_size(612, 349),
+    c(width = 600 / 96, height = 350 / 96)
+  )
+  expect_identical(NACHO:::card_size(NULL, NULL), c(width = 7, height = 4.5))
+  expect_identical(NACHO:::card_size(0, 0), c(width = 7, height = 4.5))
+})
+
+test_that("app_girafe() draws at the given size", {
+  skip_if_not_installed("ggiraph")
+  widget <- NACHO:::app_girafe(ggplot2::ggplot(), width = 10, height = 6)
+  expect_match(widget$x$html, "viewBox='0 0 720 432'", fixed = TRUE)
+})
+
+test_that("the interactive card body fills the card", {
+  skip_if_not_installed("ggiraph")
+  html <- htmltools::renderTags(
+    NACHO:::mod_qc_plot_ui("BD", interactive = TRUE)
+  )$html
+  expect_match(html, "height: 100%; min-height: 350px;", fixed = TRUE)
+  expect_match(html, "card-body[^\"]*html-fill-container")
+})
