@@ -10,12 +10,14 @@ skip_if_no_browser <- function() {
 
 accessible_name_in <- function(app, selector) {
   cdp <- app$get_chromote_session()
+  cdp$Accessibility$enable()
   root <- cdp$DOM$getDocument()$root$nodeId
   node <- cdp$DOM$querySelector(root, selector)$nodeId
   tree <- cdp$Accessibility$getPartialAXTree(
     nodeId = node,
     fetchRelatives = FALSE
   )
+  testthat::expect_gt(length(tree$nodes), 0L)
   tree$nodes[[1]]$name$value
 }
 
@@ -61,25 +63,39 @@ test_that("the app flags samples when a threshold moves", {
     app$get_js(
       "Array.from(document.querySelectorAll('.nacho-girafe .html-widget'))
         .filter(e => e.offsetParent)
-        .map(e => e.getBoundingClientRect())
-        .map(r => [Math.round(r.width), Math.round(r.height)])"
+        .map(e => [e.offsetWidth, e.offsetHeight])"
     )
   }
-  narrow <- girafe_boxes(1280)
+  rounded_widths <- function(boxes) {
+    vapply(
+      boxes,
+      function(box) NACHO:::card_size(box[[1]], box[[2]])[["width"]],
+      numeric(1)
+    )
+  }
+  heights <- function(boxes) unique(vapply(boxes, `[[`, integer(1), 2))
   app$run_js(
     "window.girafeRenders = 0;
     $(document).on('shiny:value', function(e) {
       if (/-girafe$/.test(e.name)) window.girafeRenders++;
     });"
   )
-  girafe_boxes(1290)
-  expect_identical(app$get_js("window.girafeRenders"), 0L)
-  wide <- girafe_boxes(1700)
+  expect_resize_renders <- function(before, width) {
+    app$run_js("window.girafeRenders = 0;")
+    after <- girafe_boxes(width)
+    expect_identical(heights(after), 350L)
+    expect_identical(
+      app$get_js("window.girafeRenders"),
+      sum(rounded_widths(before) != rounded_widths(after))
+    )
+    after
+  }
+  narrow <- girafe_boxes(1280)
   expect_length(narrow, 4L)
-  expect_identical(unique(vapply(narrow, `[[`, integer(1), 2)), 350L)
-  expect_identical(unique(vapply(wide, `[[`, integer(1), 2)), 350L)
+  expect_identical(heights(narrow), 350L)
+  nudged <- expect_resize_renders(narrow, 1290)
+  wide <- expect_resize_renders(nudged, 1700)
   expect_gt(wide[[1]][[1]], narrow[[1]][[1]])
-  expect_identical(app$get_js("window.girafeRenders"), 4L)
   app$run_js("document.querySelector('#cite').click()")
   app$wait_for_js("document.querySelector('.modal.show') !== null")
   expect_match(

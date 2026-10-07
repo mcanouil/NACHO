@@ -149,7 +149,12 @@ popover_rules <- paste(
 )
 
 girafe_rules <- paste(
-  ".nacho-girafe { height: 350px; overflow: hidden; }",
+  ".nacho-girafe {",
+  "  height: 350px;",
+  "  overflow: hidden;",
+  "  overflow: clip;",
+  "  overflow-clip-margin: 4px;",
+  "}",
   ".nacho-girafe .girafe_container_std { height: 100%; }",
   ".bslib-card[data-full-screen='true'] .nacho-girafe {",
   "  height: 100%;",
