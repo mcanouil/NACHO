@@ -1,4 +1,4 @@
-test_that("app_overview() counts samples, cartridges and reasons", {
+test_that("app_overview() counts samples, units and reasons", {
   x <- flagged_gse()
   overview <- NACHO:::app_overview(x)
   expect_identical(overview$samples, 12L)
@@ -25,7 +25,8 @@ test_that("the overview module shows the counts", {
 test_that("app_overview() reports exact counts for a flagged object", {
   x <- flagged_gse()
   overview <- NACHO:::app_overview(x)
-  expect_identical(overview$cartridges, 1L)
+  expect_identical(overview$unit, "Cartridges")
+  expect_identical(overview$units, 1L)
   expect_identical(overview$preset, "nsolver")
   expect_identical(overview$flagged, 2L)
   expect_identical(overview$reasons, c(FoV = overview$flagged))
@@ -34,7 +35,7 @@ test_that("app_overview() reports exact counts for a flagged object", {
 test_that("app_overview() ignores metrics without failures on PlexSet data", {
   overview <- NACHO:::app_overview(plexset_nacho)
   expect_identical(overview$samples, 96L)
-  expect_identical(overview$cartridges, 1L)
+  expect_identical(overview$units, 12L)
   expect_identical(overview$flagged, 0L)
   expect_identical(overview$reasons, integer())
 })
@@ -89,26 +90,24 @@ test_that("the overview is one summary strip with labelled items", {
   icons <- regmatches(html, gregexpr("<i [^>]*>", html))[[1]]
   expect_length(icons, 5L)
   expect_true(all(grepl('aria-hidden="true"', icons, fixed = TRUE)))
+  expect_false(any(grepl("aria-label", icons, fixed = TRUE)))
 })
 
-test_that("the flagged reasons have a named trigger and hidden text", {
+test_that("the flagged reasons are part of the trigger's name", {
   html <- htmltools::renderTags(NACHO:::mod_overview_ui("overview"))$html
-  tooltip <- regmatches(
+  button <- regmatches(
     html,
-    regexpr("(?s)<bslib-tooltip.*?</bslib-tooltip>", html, perl = TRUE)
+    regexpr("(?s)<button[^>]*nacho-summary-info.*?</button>", html, perl = TRUE)
   )
-  expect_match(tooltip, "(?s)<button[^>]*Why samples are flagged", perl = TRUE)
-  hidden_id <- sub(
-    '(?s).*<span id="([^"]+)" class="visually-hidden">\\s*<[^>]* id="overview-reasons".*',
-    "\\1",
-    html,
-    perl = TRUE
-  )
-  expect_identical(as.character(hidden_id), "overview-reasons_description")
+  expect_length(button, 1L)
+  expect_no_match(button, "aria-label|aria-describedby", perl = TRUE)
   expect_match(
-    tooltip,
-    paste0('aria-describedby="', hidden_id, '"'),
-    fixed = TRUE
+    button,
+    paste0(
+      '(?s)<span class="visually-hidden">\\s*Why samples are flagged\\.',
+      '\\s*<[^>]* id="overview-reasons"'
+    ),
+    perl = TRUE
   )
 })
 
@@ -126,7 +125,7 @@ test_that("app_overview() counts lanes on PlexSet data", {
 test_that("app_overview() does not count a missing cartridge", {
   x <- GSE74821
   x@samples[["CartridgeID"]][1:2] <- NA
-  expect_identical(NACHO:::app_overview(x)$cartridges, 4L)
+  expect_identical(NACHO:::app_overview(x)$units, 4L)
 })
 
 test_that("the overview names presets as the sidebar does", {

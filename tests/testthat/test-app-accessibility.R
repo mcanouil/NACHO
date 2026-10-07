@@ -176,7 +176,19 @@ test_that("the cite action is a named button the audit sees", {
   expect_true(accessible_name(cite))
 })
 
-test_that("the external link icons add no second name", {
+test_that("the external link and summary icons add no second name", {
   html <- app_html(interactive = FALSE, done = TRUE)
   expect_no_match(html, "arrow-up-right-from-square icon", fixed = TRUE)
+  strip <- regmatches(
+    html,
+    regexpr(
+      '(?s)<div class="nacho-summary".*?id="overview-preset"',
+      html,
+      perl = TRUE
+    )
+  )
+  expect_length(strip, 1L)
+  icons <- regmatches(strip, gregexpr("<i [^>]*>", strip))[[1]]
+  expect_length(icons, 5L)
+  expect_false(any(grepl("aria-label", icons, fixed = TRUE)))
 })

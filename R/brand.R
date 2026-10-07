@@ -148,6 +148,17 @@ popover_rules <- paste(
   sep = "\n"
 )
 
+girafe_rules <- paste(
+  ".nacho-girafe { height: 350px; overflow: hidden; }",
+  ".nacho-girafe .girafe_container_std { height: 100%; }",
+  ".bslib-card[data-full-screen='true'] .nacho-girafe {",
+  "  height: 100%;",
+  "  flex: 1 1 auto;",
+  "  min-height: 0;",
+  "}",
+  sep = "\n"
+)
+
 css_font_family <- function(family, fallback) {
   paste0('"', family, '", ', fallback)
 }
@@ -180,5 +191,10 @@ nacho_theme <- function() {
         "ui-monospace, monospace"
       )
     ) |>
-    bslib::bs_add_rules(c(summary_rules, popover_rules, dark_rules))
+    bslib::bs_add_rules(c(
+      summary_rules,
+      popover_rules,
+      girafe_rules,
+      dark_rules
+    ))
 }

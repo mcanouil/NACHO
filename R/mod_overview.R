@@ -12,17 +12,15 @@ app_overview <- function(x, qc = nacho_qc(x)) {
   if (length(reasons) == 0) {
     reasons <- integer()
   }
-  cartridges <- length(unique(stats::na.omit(qc[["CartridgeID"]])))
   lanes <- x@rcc_type == "n8" && "lane" %in% names(qc)
   unit <- if (lanes) "Lanes" else "Cartridges"
   units <- if (lanes) {
     nrow(unique(stats::na.omit(qc[c("CartridgeID", "lane")])))
   } else {
-    cartridges
+    length(unique(stats::na.omit(qc[["CartridgeID"]])))
   }
   list(
     samples = nrow(qc),
-    cartridges = cartridges,
     unit = unit,
     units = units,
     flagged = sum(qc[["status"]] %in% "fail"),
@@ -50,11 +48,10 @@ reasons_description <- function(reasons) {
 
 mod_overview_ui <- function(id) {
   ns <- shiny::NS(id)
-  icon <- function(name) shiny::icon(name, `aria-hidden` = "true")
   item <- function(icon_name, label, value, extra = NULL) {
     shiny::tags$div(
       class = "nacho-summary-item",
-      icon(icon_name),
+      unnamed_icon(icon_name),
       shiny::tags$span(class = "nacho-summary-label", label),
       shiny::tags$span(class = "nacho-summary-value", value),
       extra
@@ -74,23 +71,19 @@ mod_overview_ui <- function(id) {
       "triangle-exclamation",
       "Flagged",
       shiny::textOutput(ns("flagged_count"), inline = TRUE),
-      shiny::tagList(
-        bslib::tooltip(
-          shiny::tags$button(
-            type = "button",
-            class = "btn btn-link btn-sm p-0 nacho-summary-info",
-            `aria-label` = "Why samples are flagged",
-            `aria-describedby` = ns("reasons_description"),
-            icon("circle-info")
-          ),
-          id = ns("reasons_tip"),
-          "None"
+      bslib::tooltip(
+        shiny::tags$button(
+          type = "button",
+          class = "btn btn-link btn-sm p-0 nacho-summary-info",
+          unnamed_icon("circle-info"),
+          shiny::tags$span(
+            class = "visually-hidden",
+            "Why samples are flagged.",
+            shiny::textOutput(ns("reasons"), inline = TRUE)
+          )
         ),
-        shiny::tags$span(
-          id = ns("reasons_description"),
-          class = "visually-hidden",
-          shiny::textOutput(ns("reasons"), inline = TRUE)
-        )
+        id = ns("reasons_tip"),
+        "None"
       )
     ),
     item(

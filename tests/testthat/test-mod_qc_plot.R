@@ -464,7 +464,12 @@ test_that("the interactive card body fills the card", {
   html <- htmltools::renderTags(
     NACHO:::mod_qc_plot_ui("BD", interactive = TRUE)
   )$html
-  expect_match(html, "height: 100%; min-height: 350px;", fixed = TRUE)
+  expect_match(
+    html,
+    '(?s)<div class="nacho-girafe" role="img"[^>]*>\\s*<div[^>]*height:100%;',
+    perl = TRUE
+  )
+  expect_no_match(html, "min-height: 350px", fixed = TRUE)
   expect_match(html, "card-body[^\"]*html-fill-container")
 })
 
@@ -481,27 +486,53 @@ test_that("the girafe follows the card size", {
   )
 })
 
-test_that("the plot is built once for a repeated size", {
+test_that("the girafe is built once per rounded card size", {
   skip_if_not_installed("ggiraph")
   builds <- 0L
-  original <- NACHO:::app_plot
+  original <- NACHO:::app_girafe
   testthat::local_mocked_bindings(
-    app_plot = function(...) {
+    app_girafe = function(...) {
       builds <<- builds + 1L
       original(...)
     }
   )
+  root <- shiny::MockShinySession$new()
+  root$clientData <- shiny::reactiveValues(
+    `output_BD-girafe_width` = 600,
+    `output_BD-girafe_height` = 350
+  )
+  resize <- function(width) {
+    root$clientData[["output_BD-girafe_width"]] <- width
+    root$flushReact()
+    root$elapse(300)
+  }
   shiny::testServer(
     NACHO:::mod_qc_plot_server,
-    args = c(plot_args(GSE74821, "BD"), list(interactive = TRUE)),
+    args = c(
+      list(id = "BD"),
+      plot_args(GSE74821, "BD"),
+      list(interactive = TRUE)
+    ),
+    session = root,
     {
-      session$setInputs(colour = "CartridgeID", size = 1)
+      sizes <- 0L
+      shiny::observe({
+        girafe_size()
+        sizes <<- sizes + 1L
+      })
+      session$setInputs(colour = "CartridgeID")
       session$elapse(300)
       output$girafe
-      session$setInputs(size = 1)
-      session$elapse(300)
+      expect_identical(c(builds, sizes), c(1L, 1L))
+      resize(610)
       output$girafe
-      expect_identical(builds, 1L)
+      expect_identical(c(builds, sizes), c(1L, 1L))
+      resize(900)
+      output$girafe
+      expect_identical(c(builds, sizes), c(2L, 2L))
+      resize(600)
+      output$girafe
+      expect_identical(c(builds, sizes), c(2L, 3L))
     }
   )
 })
