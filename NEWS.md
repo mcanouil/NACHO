@@ -56,7 +56,9 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 ## New features
 
 - In `R/render.R`,
-  - feat: The report opens with the quality-control summary and one callout for each flagged sample, and gives every figure alt text.
+  - feat: The report reads as a quality-control record: a cover with the study details, a decision summary with the flagged samples and notes on how the data were processed, a table of every setting and limit with its meaning and source, a short "How to read this" under each figure and table, and a methods appendix with the citation and package versions.
+  - feat: `render()` gains `title` and `author` for the report cover, and the app's Export page has matching fields.
+  - feat: The HTML and PDF reports share the NACHO look and the same content, and the PDF is a tagged PDF/UA document; the HTML report has landmarks, a skip link and labelled tables.
   - feat: `render()` gains `group`, which adds the batch design and cross-tables, with a warning when batch and biology are confounded.
 - In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
   - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.
@@ -132,7 +134,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: The app wears the NACHO look, with a navy navbar and the brand fonts in light and dark mode.
   - feat: With ggiraph installed, hovering a point shows the sample and its value, and clicking it outlines that sample in the plots that show one point per sample.
     The "Highlight a sample" list on the Samples page does the same from the keyboard.
-  - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS and the report.
+  - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS and the report, with an optional title and author.
     The report can be HTML or PDF, and it renders in the background when mirai is installed.
     If you close the app page during a render, the render stops.
   - feat: A Help menu in the navbar opens About NACHO, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.
