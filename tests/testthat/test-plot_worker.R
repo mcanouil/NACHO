@@ -104,8 +104,8 @@ test_that("without mirai the app starts no workers", {
 card_args <- function(active, workers) {
   list(
     id = "BD",
-    object = shiny::reactiveVal(GSE74821),
-    qc = shiny::reactive(nacho_qc(GSE74821)),
+    object = shiny::reactiveVal(NACHO::GSE74821),
+    qc = shiny::reactive(nacho_qc(NACHO::GSE74821)),
     type = "BD",
     dark = shiny::reactive(FALSE),
     interactive = TRUE,
