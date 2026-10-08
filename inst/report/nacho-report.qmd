@@ -29,12 +29,17 @@ format:
     fig-height: 4.5
     fig-dpi: 96
   typst:
+    lang: en-US
+    papersize: a4
+    pdf-standard: ua-1
     font-paths: fonts
     fig-format: png
-    logo:
-      width: 0.5in
-      inset: 0.3in
+    template-partials:
+      - partials/typst-template.typ
+      - partials/typst-show.typ
     toc: true
+    toc-title: Contents
+    toc-depth: 1
     section-numbering: "1.1"
 execute:
   echo: false

@@ -447,6 +447,10 @@ test_that("report_metadata() fills the cover from the object", {
     meta$nacho$prepared,
     "^Prepared on [A-Z][a-z]+ [0-9]{1,2}, [0-9]{4}$"
   )
+  expect_identical(
+    meta$nacho$prepared,
+    paste("Prepared on", meta$nacho$date)
+  )
 })
 
 test_that("report_metadata() takes the title and author as typed", {

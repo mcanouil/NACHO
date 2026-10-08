@@ -1690,8 +1690,10 @@ report_body <- function(report) {
 #' @param title The report title, or `NULL` or empty for the default.
 #' @param author Who prepared the report, or `NULL` or blank for nobody.
 #'
-#' The date is not a field: the cover reads it from `nacho$prepared`, because
-#' Quarto would reformat a `date` field in the PDF.
+#' The date is not a top-level field, because Quarto would reformat a `date`
+#' field in the PDF.
+#' The cover reads it from `nacho$prepared` and the Typst footer from
+#' `nacho$date`.
 #'
 #' @noRd
 report_metadata <- function(x, title = NULL, author = NULL) {
@@ -1726,7 +1728,8 @@ report_metadata <- function(x, title = NULL, author = NULL) {
       method = overview$method,
       rcc_version = rcc_version,
       nacho_version = as.character(utils::packageVersion("NACHO")),
-      r_version = paste(R.version$major, R.version$minor, sep = ".")
+      r_version = paste(R.version$major, R.version$minor, sep = "."),
+      date = date
     )
   )
   metadata[lengths(metadata) > 0]
