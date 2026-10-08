@@ -91,11 +91,32 @@ plot_workers_start <- function() {
       mirai::launch_local(count, .compute = profile)
     })
     plot_pool$profile <- profile
-    plot_pool$ready <- FALSE
     shiny::onStop(plot_workers_stop, session = NULL)
+    plot_workers_probe(profile)
     plot_workers_warm(profile, count, .libPaths())
   }
   plot_pool$profile
+}
+
+#' Check that the daemons start
+#'
+#' The probe is a small task with a time limit, sent before any build, so it
+#' does not wait behind builds.
+#' When no daemon answers within the limit (30 seconds), the pool fails and the
+#' plots build in the app process.
+#' Builds have no time limit, because a large page can wait in the queue of a
+#' healthy pool for longer than that.
+#'
+#' @noRd
+plot_workers_probe <- function(profile) {
+  probe <- mirai::mirai(TRUE, .timeout = plot_pool$timeout, .compute = profile)
+  promises::then(
+    probe,
+    onRejected = function(error) {
+      if (identical(plot_pool$profile, profile)) plot_workers_fail()
+    }
+  )
+  invisible(NULL)
 }
 
 #' Load NACHO and the font set in each daemon once all have connected
@@ -137,26 +158,26 @@ plot_workers_stop <- function() {
     mirai::daemons(0, .compute = plot_pool$profile)
   }
   plot_pool$profile <- NULL
-  plot_pool$ready <- NULL
   plot_pool$failed <- NULL
   invisible(NULL)
 }
 
 #' Give up on daemons that did not answer in time
 #'
-#' Until a first build comes back from a daemon, builds have a time limit.
-#' A build that passes the limit means the daemons did not start, so the pool
-#' stops and the plots build in the app process until the app stops.
+#' The pool stops, and the plots build in the app process until the app
+#' stops.
+#' The flag is set first, so builds that the stop rejects build in the app
+#' process.
 #'
 #' @noRd
 plot_workers_fail <- function() {
   if (isTRUE(plot_pool$failed)) {
     return(invisible(NULL))
   }
+  plot_pool$failed <- TRUE
   if (!is.null(plot_pool$profile)) {
     mirai::daemons(0, .compute = plot_pool$profile)
   }
-  plot_pool$failed <- TRUE
   nacho_inform(
     "The plot workers did not start, so the app builds the plots itself."
   )
@@ -195,8 +216,7 @@ build_in_process <- function(build, key, args, cache) {
 #' After the session ends, the task does not settle, so it does not write to the
 #' reactive values of a session that no longer exists.
 #'
-#' Until the daemons have returned a first build, a build has a time limit; when
-#' it passes, the pool stops and the card builds in the app process.
+#' When the pool fails, a build that it rejects builds in the app process.
 #'
 #' @noRd
 card_task <- function(session, profile, jobs, cache) {
@@ -215,7 +235,6 @@ card_task <- function(session, profile, jobs, cache) {
       },
       libs = libs,
       args = args,
-      .timeout = if (!isTRUE(plot_pool$ready)) plot_pool$timeout,
       .compute = profile
     )
     jobs$running <- running
@@ -223,7 +242,6 @@ card_task <- function(session, profile, jobs, cache) {
       promises::then(
         running,
         onFulfilled = function(value) {
-          plot_pool$ready <- TRUE
           cache$set(key, value)
           if (!session$isClosed()) {
             resolve(list(build = build, key = key, value = value))
@@ -236,9 +254,6 @@ card_task <- function(session, profile, jobs, cache) {
           code <- running$data
           build_error <- inherits(code, "miraiError") ||
             !inherits(code, "errorValue")
-          if (!build_error && as.integer(code) == 5L) {
-            plot_workers_fail()
-          }
           result <- if (build_error) {
             list(build = build, key = key, error = error)
           } else if (as.integer(code) == 20L) {
@@ -309,6 +324,7 @@ card_widget <- function(session, inputs, workers, active) {
       mirai::stop_mirai(jobs$running)
     }
   }
+  session$onSessionEnded(stop_running)
   drop_build <- function() {
     jobs$wanted <- NULL
     stop_running()

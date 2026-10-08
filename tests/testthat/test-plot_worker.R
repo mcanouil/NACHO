@@ -214,3 +214,52 @@ test_that("a card builds in the app process when the workers do not start", {
     }
   )
 })
+
+test_that("a busy pool that answers is not taken as failed", {
+  skip_if_not_installed("ggiraph")
+  skip_if_not_installed("mirai")
+  skip_if_not_installed("later")
+  withr::defer(NACHO:::plot_workers_stop())
+  timeout <- NACHO:::plot_pool$timeout
+  withr::defer(assign("timeout", timeout, envir = NACHO:::plot_pool))
+  assign("timeout", 3000, envir = NACHO:::plot_pool)
+  withr::local_options(nacho.plot_workers = 1)
+  profile <- NACHO:::plot_workers_start()
+  session <- shiny::MockShinySession$new()
+  on.exit(session$close(), add = TRUE)
+  cache <- session$cache
+  results <- list()
+  shiny::isolate(
+    for (i in 1:6) {
+      jobs <- new.env(parent = emptyenv())
+      jobs$build <- 1L
+      task <- NACHO:::card_task(session, profile, jobs, cache)
+      args <- list(
+        object = NACHO::GSE74821,
+        type = "BD",
+        options = list(size = i),
+        dark = FALSE,
+        interactive = TRUE,
+        size = c(width = 5, height = 3.5)
+      )
+      task$invoke(1L, paste0("key", i), args)
+      results[[i]] <- task
+    }
+  )
+  deadline <- Sys.time() + 120
+  done <- function() {
+    all(vapply(
+      results,
+      function(task) shiny::isolate(task$status()) == "success",
+      logical(1)
+    ))
+  }
+  started <- Sys.time()
+  while (!done() && Sys.time() < deadline) {
+    later::run_now(0.1)
+  }
+  expect_true(done())
+  expect_gt(as.numeric(difftime(Sys.time(), started, units = "secs")), 3)
+  expect_false(isTRUE(NACHO:::plot_pool$failed))
+  expect_length(cache$keys(), 6L)
+})
