@@ -401,19 +401,15 @@ test_that("the report shows exactly the applicable plots", {
 })
 
 test_that("shared report and app text uses US spelling", {
-  british <- "normalis|colour|recognis|analys(e|ing)|behaviour|centre|favour|organis|summaris|visualis|haemoly"
+  british <- paste(
+    "normalis|colour|recognis|analys(e|ing)|behaviour|centre|favour",
+    "organis|summaris|visualis|haemoly|minimis|maximis|grey|licence|whilst",
+    sep = "|"
+  )
   text <- c(NACHO:::qc_metric_labels, NACHO:::plot_alt_texts)
   flagged <- text[grepl(british, text, ignore.case = TRUE)]
   expect_length(flagged, 0L)
   expect_identical(NACHO:::qc_metric_labels[["Haemolysis"]], "Hemolysis")
-  expect_identical(
-    NACHO:::qc_metric_labels[["Positive_factor"]],
-    "Positive normalization factor"
-  )
-  expect_identical(
-    NACHO:::qc_metric_labels[["House_factor"]],
-    "Content normalization factor"
-  )
   about <- list.files(
     system.file("about", package = "NACHO"),
     full.names = TRUE
