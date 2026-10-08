@@ -97,6 +97,93 @@ test_that("the app flags samples when a threshold moves", {
     nudged <- expect_resize_renders(narrow, 1290)
     wide <- expect_resize_renders(nudged, 1700)
     expect_gt(wide[[1]][[1]], narrow[[1]][[1]])
+    app$run_js(
+      "window.selectionEvents = 0;
+      $(document).on('shiny:inputchanged', function(e) {
+        if (/-girafe_selected$/.test(e.name)) window.selectionEvents++;
+      });
+      window.sampleIds = Array.from(new Set(Array.from(
+        document.querySelectorAll('#BD-girafe svg [data-id]')
+      ).map(function(e) { return e.getAttribute('data-id'); })));
+      window.clickSample = function(id) {
+        document.querySelector('#BD-girafe svg [data-id=\"' + id + '\"]')
+          .dispatchEvent(new MouseEvent('click', {bubbles: true}));
+      };
+      window.pickSample = function(id) {
+        $('#outliers-highlight').val(id).trigger('change');
+      };
+      window.shownSample = function(plot) {
+        var nodes = document.querySelectorAll('#' + plot + '-girafe svg [data-id]');
+        var ids = Array.from(nodes).filter(function(e) {
+          return Array.from(e.classList).some(function(c) {
+            return /^select_data_/.test(c);
+          });
+        }).map(function(e) { return e.getAttribute('data-id'); });
+        return Array.from(new Set(ids)).join(',');
+      };"
+    )
+    sample_ids <- unlist(app$get_js("window.sampleIds"))
+    first <- sample_ids[[3]]
+    second <- sample_ids[[4]]
+    shown_selection <- function() {
+      list(
+        BD = app$get_js("window.shownSample('BD')"),
+        FoV = app$get_js("window.shownSample('FoV')"),
+        menu = app$get_js("$('#outliers-highlight').val()")
+      )
+    }
+    expect_selection <- function(id, input) {
+      want <- list(BD = id, FoV = id, menu = id)
+      deadline <- Sys.time() + 10
+      while (!identical(shown_selection(), want) && Sys.time() < deadline) {
+        Sys.sleep(0.25)
+      }
+      expect_identical(shown_selection(), want)
+      server <- app$get_values(input = input)$input[[input]]
+      expect_identical(paste(server, collapse = ","), id)
+    }
+    app$run_js(
+      sprintf(
+        "clickSample('%s');
+        setTimeout(function() { clickSample('%s'); }, 0);",
+        first,
+        second
+      )
+    )
+    Sys.sleep(2)
+    settled <- app$get_js("window.selectionEvents")
+    Sys.sleep(2)
+    expect_identical(app$get_js("window.selectionEvents"), settled)
+    expect_lt(settled, 20)
+    expect_selection(second, "BD-girafe_selected")
+    click_sample <- function(id) {
+      app$run_js(sprintf("clickSample('%s')", id))
+      expect_selection(id, "BD-girafe_selected")
+    }
+    pick_sample <- function(id) {
+      app$run_js(sprintf("pickSample('%s')", id))
+      expect_selection(id, "outliers-highlight")
+    }
+    click_sample(first)
+    click_sample(second)
+    click_sample(first)
+    pick_sample(second)
+    click_sample(first)
+    pick_sample("")
+    click_sample(first)
+    pick_sample(second)
+    app$run_js(
+      sprintf(
+        "$(document).on('shiny:recalculating.redraw', function(e) {
+          if (!/-girafe$/.test(e.target.id)) return;
+          $(document).off('.redraw');
+          setTimeout(function() { clickSample('%s'); }, 0);
+        });",
+        first
+      )
+    )
+    app$set_window_size(1280, 1000)
+    expect_selection(first, "BD-girafe_selected")
   }
   app$run_js("document.querySelector('#cite').click()")
   app$wait_for_js("document.querySelector('.modal.show') !== null")

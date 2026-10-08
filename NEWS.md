@@ -168,6 +168,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`.
 - In `inst/app/`,
   - fix: The app detects PlexSet files from their exact code classes.
+- In `R/mod_qc_plot.R`,
+  - fix: Two quick clicks on an interactive plot no longer start a selection loop that kept the app busy.
 - In `R/brand.R` and `R/mod_thresholds.R`,
   - fix: Help popovers in the app are wider, so most help fits without scrolling, and very long help scrolls instead of running off the screen.
 - In `R/read_rcc.R`,

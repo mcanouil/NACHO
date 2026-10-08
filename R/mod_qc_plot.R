@@ -298,6 +298,66 @@ download_size <- function(value, default) {
   }
 }
 
+# The server sets a selection on the plots and on the highlight menu.
+# Each of them answers with an input event that repeats the value it just got.
+# A plot that the server draws again also sends the selection it was built
+# with, which can be older than the selection of the user.
+# When two selections are in flight, the stale answers bounce between the
+# server, the plots and the menu without end.
+# Shiny handles one server message at a time, and a plot or the menu answers
+# while Shiny handles the message that sets it.
+# The guard keeps the values of the current message only, and drops an input
+# event that repeats one of them.
+# A drawn plot counts as a message that sets the selection it was built with.
+# The server then sends the current selection to that plot again, in case the
+# selection changed while the plot was built.
+# The next message removes the values that got no answer, because a plot that
+# is not drawn, or that already shows the value, does not answer.
+# After a drop, Shiny forgets the last value it sent for that input, so the
+# next user action with that value still reaches the server.
+selection_echo_guard <- shiny::tags$script(shiny::HTML(
+  "(function() {
+    var expected = {};
+    var normalise = function(value) {
+      var empty = value === null || value === undefined || value === '';
+      return JSON.stringify([].concat(empty ? [] : value).sort());
+    };
+    var expect = function(name, value) {
+      expected[name] = (expected[name] || []).concat(normalise(value));
+    };
+    $(document).on('shiny:message', function(e) {
+      var message = e.message || {};
+      expected = {};
+      Object.keys(message.values || {}).forEach(function(key) {
+        var widget = message.values[key];
+        var select = widget && widget.x && widget.x.settings &&
+          widget.x.settings.select;
+        if (/-girafe$/.test(key) && select && select.selected) {
+          expect(key + '_selected', select.selected);
+        }
+      });
+      Object.keys(message.custom || {}).forEach(function(key) {
+        if (/-girafe_set$/.test(key)) {
+          expect(key.replace(/_set$/, '_selected'), message.custom[key]);
+        }
+      });
+      (message.inputMessages || []).forEach(function(input) {
+        if (input.id === 'outliers-highlight' && 'value' in input.message) {
+          expect(input.id, input.message.value);
+        }
+      });
+    });
+    $(document).on('shiny:inputchanged', function(e) {
+      var values = expected[e.name];
+      var at = values ? values.indexOf(normalise(e.value)) : -1;
+      if (at < 0) return;
+      values.splice(at, 1);
+      e.preventDefault();
+      Shiny.forgetLastInputValue(e.name);
+    });
+  })();"
+))
+
 send_selection <- function(session, output_id, value) {
   session$sendCustomMessage(paste0(session$ns(output_id), "_set"), value)
 }
@@ -386,14 +446,17 @@ mod_qc_plot_server <- function(
           dark(),
           shiny::req(girafe_size())
         )
-      output$girafe <- ggiraph::renderGirafe(
+      output$girafe <- ggiraph::renderGirafe({
+        session$onFlushed(function() {
+          send_selection(session, "girafe", shiny::isolate(selected()))
+        })
         ggiraph::girafe_options(
           widget(),
           girafe_selection(
             shiny::isolate(if (length(selected()) > 0) selected())
           )
         )
-      )
+      })
     } else {
       output$plot <- shiny::renderPlot(plot(), alt = plot_alt_texts[[type]]) |>
         shiny::bindCache(object(), type, options(), dark())
