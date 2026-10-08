@@ -166,21 +166,48 @@ skip_unless_real_render <- function() {
   testthat::skip(reason)
 }
 
+shared_report <- local({
+  paths <- list()
+  function(format) {
+    if (is.null(paths[[format]])) {
+      paths[[format]] <<- render(
+        tuned_gse(FoV = 95),
+        format = format,
+        group = "tissue type:ch1",
+        title = "GSE74821",
+        author = "Jane Doe",
+        output_dir = withr::local_tempdir(.local_envir = teardown_env())
+      )
+    }
+    paths[[format]]
+  }
+})
+
 test_that("render() writes an HTML report", {
   skip_on_cran()
   skip_unless_real_render()
-  output_dir <- withr::local_tempdir()
-  path <- render(flagged_gse(), output_dir = output_dir)
+  path <- shared_report("html")
+  expect_identical(basename(path), "nacho-report.html")
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
   expect_match(html, '<span class="n flag">[1-9]')
   expect_match(html, "Flagged samples", fixed = TRUE)
+  expect_match(html, '<span class="num">93.94%</span>', fixed = TRUE)
+  expect_match(
+    html,
+    "<strong>Figure\u00a01.</strong> Binding density",
+    fixed = TRUE
+  )
+  expect_match(
+    html,
+    "<strong>Table\u00a01.</strong> Flagged samples",
+    fixed = TRUE
+  )
 })
 
 test_that("render() writes a Typst PDF report", {
   skip_on_cran()
   skip_unless_real_render()
-  output_dir <- withr::local_tempdir()
-  path <- render(GSE74821, format = "typst", output_dir = output_dir)
+  path <- shared_report("typst")
   expect_identical(basename(path), "nacho-report.pdf")
   expect_gt(file.size(path), 10000)
 })
@@ -321,23 +348,6 @@ test_that("a real HTML render shows the title and author as typed", {
   expect_match(html, "Micka\u00ebl Canouil, Lab &amp; Co", fixed = TRUE)
 })
 
-shared_report <- local({
-  paths <- list()
-  function(format) {
-    if (is.null(paths[[format]])) {
-      paths[[format]] <<- render(
-        tuned_gse(FoV = 95),
-        format = format,
-        group = "tissue type:ch1",
-        title = "GSE74821",
-        author = "Jane Doe",
-        output_dir = withr::local_tempdir(.local_envir = teardown_env())
-      )
-    }
-    paths[[format]]
-  }
-})
-
 test_that("the HTML report has the cover, landmarks and accessible tables", {
   skip_on_cran()
   skip_unless_real_render()
@@ -373,26 +383,6 @@ test_that("the HTML report has the cover, landmarks and accessible tables", {
   imgs <- regmatches(html, gregexpr("<img [^>]*>", html))[[1]]
   expect_true(all(grepl('alt="[^"]+"|aria-hidden="true"|alt=""', imgs)))
   expect_match(html, '<img [^>]*alt="NACHO logo"')
-})
-
-test_that("a real Typst render shows the title and author as typed", {
-  skip_on_cran()
-  skip_unless_real_render()
-  skip_if(!nzchar(Sys.which("pdftotext")), "pdftotext is missing")
-  path <- render(
-    GSE74821,
-    format = "typst",
-    title = cover_title,
-    author = cover_author,
-    output_dir = withr::local_tempdir()
-  )
-  text <- paste(
-    system2("pdftotext", c(path, "-"), stdout = TRUE),
-    collapse = " "
-  )
-  text <- gsub("\\s+", " ", text)
-  expect_match(text, cover_title, fixed = TRUE)
-  expect_match(text, cover_author, fixed = TRUE)
 })
 
 pdf_text_pages <- function(path) {
@@ -592,8 +582,16 @@ test_that("HTML and Typst reports have the same sections, captions and help", {
   guides <- function(text) {
     lengths(regmatches(text, gregexpr("How to read this", text, fixed = TRUE)))
   }
-  expect_identical(guides(html), nrow(plots) + 2L)
+  expect_identical(guides(html), nrow(plots) + 3L)
   expect_identical(guides(pdf), guides(html))
+
+  for (text in c(html, pdf)) {
+    british <- regmatches(
+      text,
+      gregexpr(british_stems, text, ignore.case = TRUE)
+    )[[1]]
+    expect_length(british, 0L)
+  }
 
   expect_match(html, "47 samples pass every check", fixed = TRUE)
   expect_match(pdf, "47\nsamples pass every check", fixed = TRUE)
@@ -614,8 +612,8 @@ test_that("a Typst render keeps a title and an author with special characters", 
   skip_unless_real_render()
   skip_if(!nzchar(Sys.which("pdftotext")), "pdftotext is missing")
   skip_if(!nzchar(Sys.which("pdfinfo")), "pdfinfo is missing")
-  title <- 'Q "x" *b* #h $m$ \\ \u00e9'
-  author <- 'Zo\u00eb "O\'B" *a* #1 $x$ \\ \u00d1'
+  title <- 'Q "x": *b* <b>y</b> #h $m$ \\ \u00e9'
+  author <- 'Zo\u00eb "O\'B" *a* #1 $x$ \\ \u00d1, Lab & Co'
   path <- render(
     GSE74821,
     format = "typst",

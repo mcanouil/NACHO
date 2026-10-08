@@ -41,11 +41,48 @@ test_that("sections follow the object", {
 
 test_that("the batch tables put the design first and flag confounding", {
   skip_if_not_installed("knitr")
-  lines <- NACHO:::report_batch_tables(GSE74821, group = "tissue type:ch1")
-  expect_identical(lines[1], "::: {.callout-important}")
-  design <- grep("confounded", lines, fixed = TRUE)[1]
+  x <- GSE74821
+  x@samples[["grp"]] <- x@samples[["CartridgeID"]]
+  lines <- NACHO:::report_batch_tables(x, group = "grp")
+  expect_identical(
+    lines[1:2],
+    c("::: {.callout-important}", "## Batch and biology are confounded")
+  )
+  expect_false(any(grepl("normalis", lines, fixed = TRUE)))
+  design <- grep(": Batch design", lines, fixed = TRUE)
   crosstab <- grep("Groups by `CartridgeID`", lines, fixed = TRUE)
   expect_lt(design, crosstab)
+  expect_identical(
+    utils::tail(lines[nzchar(lines)], 4)[1:2],
+    c("::: {.callout-note}", "## How to read this")
+  )
+  expect_identical(sum(lines == "## How to read this"), 1L)
+})
+
+test_that("the batch design table reads in plain words", {
+  skip_if_not_installed("knitr")
+  lines <- NACHO:::report_batch_tables(GSE74821, group = "tissue type:ch1")
+  expect_true(
+    "|Batch       |    Levels|   Cram\u00e9r's V| Levels with one group|Confounded |" %in%
+      lines
+  )
+  rows <- lines[startsWith(lines, "|CartridgeID") | startsWith(lines, "|Date")]
+  expect_length(rows, 2L)
+  expect_true(all(grepl("not computed", rows, fixed = TRUE)))
+  expect_true(all(grepl("|yes", rows, fixed = TRUE)))
+  expect_false(any(grepl("NA|TRUE|FALSE|n_levels|cramers_v", lines)))
+  expect_true(any(grepl("[4]{.num}", rows, fixed = TRUE)))
+})
+
+test_that("a grouping with one level says batch cannot be checked", {
+  skip_if_not_installed("knitr")
+  lines <- NACHO:::report_batch_tables(GSE74821, group = "tissue type:ch1")
+  expect_identical(
+    lines[1:2],
+    c("::: {.callout-note}", "## Batch cannot be checked against biology")
+  )
+  expect_match(lines[4], "`tissue type:ch1` has one level", fixed = TRUE)
+  expect_false(any(grepl("are confounded", lines, fixed = TRUE)))
 })
 
 test_that("every plot type has alt text", {
@@ -260,7 +297,11 @@ test_that("report_body() puts the confounding callout before the design table", 
     NACHO:::report_body(NACHO:::report_setup(path))
   )
   batch <- which(output == "# Batch effects")
-  callout <- grep("Batch and biology are confounded", output, fixed = TRUE)
+  callout <- grep(
+    "Batch cannot be checked against biology",
+    output,
+    fixed = TRUE
+  )
   table <- grep("Groups by `CartridgeID`", output, fixed = TRUE)
   expect_length(batch, 1)
   expect_true(batch < callout[1] && callout[1] < table[1])
@@ -346,11 +387,7 @@ test_that("the report shows exactly the applicable plots", {
 })
 
 test_that("shared report and app text uses US spelling", {
-  british <- paste(
-    "normalis|colour|recognis|analys(e|ing)|behaviour|centre|favour",
-    "organis|summaris|visualis|haemoly|minimis|maximis|grey|licence|whilst",
-    sep = "|"
-  )
+  british <- british_stems
   text <- c(
     NACHO:::qc_metric_labels,
     NACHO:::plot_alt_texts,
@@ -448,14 +485,18 @@ test_that("report_decisions() counts and lists the flagged samples", {
     "| Sample | Cartridge | Metric | Value | Limit |",
     fixed = TRUE
   )
-  expect_match(text, "| Field of view | 93.94% | at least 95% |", fixed = TRUE)
+  expect_match(
+    text,
+    "| Field of view | [93.94%]{.num} | [at least 95%]{.num} |",
+    fixed = TRUE
+  )
   expect_match(text, "The other 47 samples pass every check.", fixed = TRUE)
 })
 
 test_that("the decision summary puts the table, its help, then the method callouts", {
   lines <- NACHO:::report_decisions(tuned_gse(FoV = 95))
   table <- which(startsWith(lines, "| Sample |"))
-  caption <- which(lines == ": Flagged samples {#tbl-flagged}")
+  caption <- which(startsWith(lines, ": Flagged samples {#tbl-flagged "))
   guide <- which(lines == "## How to read this")
   method <- which(lines == "## Instrument not in the RCC files")
   expect_length(caption, 1L)
@@ -473,7 +514,7 @@ test_that("the decision summary puts the table, its help, then the method callou
 
 test_that("the parameter table has a caption and its help", {
   lines <- NACHO:::report_parameters(GSE74821)
-  caption <- which(lines == ": Limits and settings {#tbl-parameters}")
+  caption <- which(startsWith(lines, ": Limits and settings {#tbl-parameters "))
   expect_length(caption, 1L)
   expect_gt(caption, max(which(startsWith(lines, "| "))))
   expect_identical(
@@ -544,7 +585,7 @@ test_that("md_escape() shows sample ids literally in tables", {
   text <- paste(NACHO:::report_decisions(odd_ids_nacho()), collapse = "\n")
   expect_match(
     text,
-    "| a\\*b\\_c&lt;d&gt;\\|e\\[1\\] | C\\_2 | Field of view | 50% | at least 75% |",
+    "| a\\*b\\_c&lt;d&gt;\\|e\\[1\\] | C\\_2 | Field of view | [50%]{.num} | [at least 75%]{.num} |",
     fixed = TRUE
   )
 })
@@ -561,7 +602,7 @@ test_that("report_decisions() names the lane on PlexSet data", {
   expect_match(text, "| Sample | Lane | Metric | Value | Limit |", fixed = TRUE)
   expect_match(
     text,
-    "| All 8 samples of the lane | plexset\\_20191218, lane 1 | Binding density | 1.07 | 0.05 to 0.5 |",
+    "| All 8 samples of the lane | plexset\\_20191218, lane 1 | Binding density | [1.07]{.num} | [0.05 to 0.5]{.num} |",
     fixed = TRUE
   )
   expect_identical(
@@ -583,7 +624,7 @@ test_that("report_parameters() gives meaning and source for each limit", {
     "| Parameter | Value | What it means | Source |",
     fixed = TRUE
   )
-  expect_match(text, "| Field of view | at least 75% |", fixed = TRUE)
+  expect_match(text, "| Field of view | [at least 75%]{.num} |", fixed = TRUE)
   expect_match(text, "Field of view[^\n]*\\[nSolver\\]\\{\\.tag\\}")
   expect_match(
     text,
@@ -595,7 +636,11 @@ test_that("report_parameters() gives meaning and source for each limit", {
   expect_false(any(grepl("your choice", limits, fixed = TRUE)))
   tuned <- tuned_gse(FoV = 95)
   tuned_text <- paste(NACHO:::report_parameters(tuned), collapse = "\n")
-  expect_match(tuned_text, "| Field of view | at least 95% |", fixed = TRUE)
+  expect_match(
+    tuned_text,
+    "| Field of view | [at least 95%]{.num} |",
+    fixed = TRUE
+  )
   expect_match(
     tuned_text,
     "Field of view[^\n]*\\[your choice\\]\\{\\.tag \\.user\\}"
@@ -619,13 +664,13 @@ test_that("report_parameters() credits NACHO 2 for the legacy preset", {
 
 test_that("report_parameters() covers every setting with its source", {
   text <- paste(NACHO:::report_parameters(GSE74821), collapse = "\n")
-  expect_match(text, "| Normalization method | GLM |", fixed = TRUE)
+  expect_match(text, "| Normalization method | [GLM]{.num} |", fixed = TRUE)
   expect_row(text, "| Normalization method |", "[your choice]")
-  expect_row(text, "| Background | none |", "[default]")
-  expect_row(text, "| Housekeeping genes | ACTB, GUSB,", "[default]")
-  expect_row(text, "| Housekeeping prediction | no |", "[default]")
-  expect_row(text, "| Housekeeping normalization | yes |", "[default]")
-  expect_row(text, "| Principal components | 10 |", "[default]")
+  expect_row(text, "| Background | [none]{.num} |", "[default]")
+  expect_row(text, "| Housekeeping genes | [ACTB, GUSB,", "[default]")
+  expect_row(text, "| Housekeeping prediction | [no]{.num} |", "[default]")
+  expect_row(text, "| Housekeeping normalization | [yes]{.num} |", "[default]")
+  expect_row(text, "| Principal components | [10]{.num} |", "[default]")
   expect_false(grepl("RUV", text, fixed = TRUE))
 
   x <- toy_nacho(4L)
@@ -637,10 +682,10 @@ test_that("report_parameters() covers every setting with its source", {
   settings$housekeeping_genes <- "GENE1"
   S7::prop(x, "settings", check = FALSE) <- settings
   text <- paste(NACHO:::report_parameters(x), collapse = "\n")
-  expect_match(text, "| RUV factors | 2 |", fixed = TRUE)
-  expect_match(text, "| Normalization method | RUVg |", fixed = TRUE)
-  expect_row(text, "| Background | geo\\, subtract |", "[your choice]")
-  expect_row(text, "| Housekeeping genes | GENE1 |", "[your choice]")
+  expect_match(text, "| RUV factors | [2]{.num} |", fixed = TRUE)
+  expect_match(text, "| Normalization method | [RUVg]{.num} |", fixed = TRUE)
+  expect_row(text, "| Background | [geo\\, subtract]{.num} |", "[your choice]")
+  expect_row(text, "| Housekeeping genes | [GENE1]{.num} |", "[your choice]")
 })
 
 test_that("report_parameters() says when RUVg uses the suggested count", {
@@ -655,7 +700,7 @@ test_that("report_parameters() says when RUVg uses the suggested count", {
   text <- paste(NACHO:::report_parameters(suggested), collapse = "\n")
   expect_row(
     text,
-    paste0("| RUV factors | ", k, " |"),
+    paste0("| RUV factors | [", k, "]{.num} |"),
     "[NACHO suggestion]"
   )
   chosen <- suppressMessages(NACHO::normalise(
@@ -670,8 +715,8 @@ test_that("report_parameters() says when RUVg uses the suggested count", {
 test_that("report_parameters() leaves out PCL and LoD on PlexSet data", {
   text <- paste(NACHO:::report_parameters(plexset_nacho), collapse = "\n")
   expect_false(grepl("Positive control linearity|Limit of detection", text))
-  expect_match(text, "| Binding density | 0.05 to 2.25 |", fixed = TRUE)
-  expect_match(text, "| Housekeeping genes | none |", fixed = TRUE)
+  expect_match(text, "| Binding density | [0.05 to 2.25]{.num} |", fixed = TRUE)
+  expect_match(text, "| Housekeeping genes | [none]{.num} |", fixed = TRUE)
 })
 
 test_that("report_decisions() leaves out a missing cartridge on PlexSet data", {
@@ -782,7 +827,7 @@ test_that("a GLM fallback shows in the method row and in a callout", {
   text <- paste(NACHO:::report_parameters(y), collapse = "\n")
   expect_row(
     text,
-    "| Normalization method | GLM \\(GEO used\\) |",
+    "| Normalization method | [GLM \\(GEO used\\)]{.num} |",
     "[your choice]"
   )
   callouts <- paste(NACHO:::report_method_callouts(y), collapse = "\n")
@@ -810,7 +855,7 @@ test_that("predicted housekeeping genes are credited to NACHO", {
   ))
   text <- paste(NACHO:::report_parameters(x), collapse = "\n")
   expect_row(text, "| Housekeeping genes | ", "[NACHO prediction]")
-  expect_row(text, "| Housekeeping prediction | yes |", "[your choice]")
+  expect_row(text, "| Housekeeping prediction | [yes]{.num} |", "[your choice]")
   callouts <- paste(NACHO:::report_method_callouts(x), collapse = "\n")
   expect_match(
     callouts,
@@ -826,7 +871,11 @@ test_that("housekeeping normalization off gets a callout", {
     housekeeping_norm = FALSE
   ))
   text <- paste(NACHO:::report_parameters(off), collapse = "\n")
-  expect_row(text, "| Housekeeping normalization | no |", "[your choice]")
+  expect_row(
+    text,
+    "| Housekeeping normalization | [no]{.num} |",
+    "[your choice]"
+  )
   expect_match(
     paste(NACHO:::report_method_callouts(off), collapse = "\n"),
     "::: {.callout-note}\n## Housekeeping normalization off",
@@ -876,7 +925,7 @@ test_that("a migrated object credits NACHO 2 and says so", {
     class = "nacho_warning_n_comp_reduced"
   ))
   text <- paste(NACHO:::report_parameters(x), collapse = "\n")
-  expect_row(text, "| Background | none |", "[NACHO 2]")
+  expect_row(text, "| Background | [none]{.num} |", "[NACHO 2]")
   expect_match(
     paste(NACHO:::report_method_callouts(x), collapse = "\n"),
     "::: {.callout-note}\n## Migrated from NACHO 2",
@@ -890,7 +939,7 @@ test_that("the background mode does not count when there is no background", {
   settings$background_mode <- "subtract"
   S7::prop(x, "settings", check = FALSE) <- settings
   text <- paste(NACHO:::report_parameters(x), collapse = "\n")
-  expect_row(text, "| Background | none |", "[default]")
+  expect_row(text, "| Background | [none]{.num} |", "[default]")
 })
 
 test_that("report_method_callouts() gives nothing when nothing applies", {
@@ -914,7 +963,7 @@ test_that("every plot and table has reading help", {
   guide <- NACHO:::report_reading_guide
   expect_setequal(
     names(guide),
-    c(names(NACHO:::plot_alt_texts), "decisions", "parameters")
+    c(names(NACHO:::plot_alt_texts), "decisions", "parameters", "batch")
   )
   sentences <- lengths(regmatches(guide, gregexpr("[.!?](\\s|$)", guide)))
   expect_true(all(sentences >= 2 & sentences <= 4))
@@ -1102,4 +1151,57 @@ test_that("the methods appendix gives the load version only when it differs", {
   S7::prop(x, "provenance", check = FALSE) <- provenance
   text <- paste(NACHO:::report_methods(x), collapse = "\n")
   expect_match(text, "The data were loaded with NACHO 1.0.0.", fixed = TRUE)
+})
+
+test_that("report_figure() prints the plot outside knitr", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  withr::local_options(knitr.in.progress = NULL)
+  local_mocked_bindings(
+    knitr_chunk_options = function() stop("not in a chunk")
+  )
+  output <- utils::capture.output(
+    result <- NACHO:::report_figure(ggplot2::ggplot(), "BD", "Caption", "Alt")
+  )
+  expect_null(result)
+  expect_false(any(grepl("![", output, fixed = TRUE)))
+})
+
+test_that("report_figure() writes a numbered figure in a knitr chunk", {
+  dir <- withr::local_tempdir()
+  withr::local_options(knitr.in.progress = TRUE)
+  local_mocked_bindings(
+    knitr_chunk_options = function() {
+      list(
+        fig.path = file.path(dir, "figures", ""),
+        fig.width = 4,
+        fig.height = 3,
+        dpi = 50,
+        fig.retina = 2
+      )
+    }
+  )
+  output <- utils::capture.output(NACHO:::report_figure(
+    ggplot2::ggplot(),
+    "PCA12",
+    "First [two] *components*",
+    'Samples on the "first" components.'
+  ))
+  path <- file.path(dir, "figures", "fig-pca12.png")
+  expect_true(file.exists(path))
+  expect_identical(
+    paste(output[nzchar(output)], collapse = "\n"),
+    paste0(
+      "![First \\[two\\] \\*components\\*](",
+      path,
+      '){#fig-pca12 fig-alt="Samples on the \\"first\\" components." width="4in"}'
+    )
+  )
+  con <- file(path, "rb")
+  on.exit(close(con), add = TRUE)
+  readBin(con, "raw", 16L)
+  expect_identical(
+    readBin(con, "integer", 2L, size = 4L, endian = "big"),
+    c(400L, 300L)
+  )
 })

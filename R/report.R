@@ -59,8 +59,8 @@ plot_alt_texts <- c(
 #'
 #' Two to four sentences each: what a good result looks like, what a flag
 #' looks like, and what to do next.
-#' Keyed like [plot_alt_texts], plus `decisions` and `parameters` for the two
-#' tables.
+#' Keyed like [plot_alt_texts], plus `decisions`, `parameters` and `batch` for
+#' the tables.
 #'
 #' @noRd
 report_reading_guide <- c(
@@ -195,6 +195,13 @@ report_reading_guide <- c(
     "The three boxes count the samples that pass, the flagged samples, and the metrics behind the flags.",
     "Each row of the table is one flagged sample and one metric it fails, with its value and its limit.",
     "Check a flagged sample in the plots below before you drop it, since one failed metric may not spoil it."
+  ),
+  batch = paste(
+    "The design table gives, for each batch column, its number of levels,",
+    "Cram\u00e9r's V between batch and group from 0 to 1, and the levels that hold a single group.",
+    "The cross-tables count the samples of each group in each batch level.",
+    "A batch is confounded when one of its levels holds a single group, and then no normalization can tell batch from biology.",
+    "Spread the groups across cartridges and dates in the next run, or add the batch to the model of the downstream analysis."
   ),
   parameters = paste(
     "Each row is one limit or setting that NACHO used, with its value and what it means.",
@@ -462,7 +469,7 @@ report_decisions <- function(x) {
       if (lanes) "Lane" else "Cartridge",
       " | Metric | Value | Limit |"
     ),
-    "|------|----|----|---:|----|",
+    "|---|---|---|---:|---|",
     paste0(
       "| ",
       sample,
@@ -471,13 +478,13 @@ report_decisions <- function(x) {
       " | ",
       rows[["metric_label"]],
       " | ",
-      rows[["value"]],
+      num_span(rows[["value"]]),
       " | ",
-      rows[["limit"]],
+      num_span(rows[["limit"]]),
       " |"
     ),
     "",
-    ": Flagged samples {#tbl-flagged}",
+    ": Flagged samples {#tbl-flagged tbl-colwidths=\"[34,20,20,12,14]\"}",
     "",
     if (any(lane_rows)) {
       c(
@@ -945,15 +952,15 @@ report_parameters <- function(x) {
   )
   c(
     "These are the values NACHO used for this report.",
-    "Anyone can rerun the analysis with the same settings and get the same result.",
+    "With the same RCC files and these settings, anyone can rerun the analysis and get the same result.",
     "",
     "| Parameter | Value | What it means | Source |",
-    "|-----|----|--------|----|",
+    "|---|---|---|---|",
     paste0(
       "| ",
       parameter,
       " | ",
-      value,
+      num_span(value),
       " | ",
       meaning,
       " | ",
@@ -961,7 +968,7 @@ report_parameters <- function(x) {
       " |"
     ),
     "",
-    ": Limits and settings {#tbl-parameters}",
+    ": Limits and settings {#tbl-parameters tbl-colwidths=\"[24,20,38,18]\"}",
     "",
     reading_guide_callout("parameters")
   )
@@ -1399,11 +1406,14 @@ report_sections <- function(x) {
 #' Design and cross-tables of the batch diagnostics
 #'
 #' Each table gets a caption and a `tbl-` id, so Quarto numbers the tables the
-#' same way in HTML and Typst.
+#' same way in HTML and Typst, and one "How to read this" follows the tables.
+#' With a grouping of one level, batch cannot be checked against biology, so
+#' a note says so instead of the confounding callout.
 #'
 #' @noRd
 report_batch_tables <- function(x, group) {
-  batch <- intersect(c("CartridgeID", "Date"), names(nacho_samples(x)))
+  samples <- nacho_samples(x)
+  batch <- intersect(c("CartridgeID", "Date"), names(samples))
   if (length(batch) == 0L) {
     return(c(
       "The samples have no `CartridgeID` or `Date` column, so there is no batch design to show.",
@@ -1413,26 +1423,65 @@ report_batch_tables <- function(x, group) {
   diagnostics <- batch_diagnostics(x, group = group, batch = batch)
   design <- diagnostics[["design"]]
   crosstabs <- diagnostics[["crosstabs"]]
+  one_level <- length(unique(stats::na.omit(samples[[group]]))) < 2L
+  cramers_v <- design[["cramers_v"]]
+  shown <- data.frame(
+    batch = md_escape(design[["batch"]]),
+    levels = num_span(design[["n_levels"]]),
+    cramers_v = ifelse(
+      is.na(cramers_v),
+      "not computed",
+      num_span(formatC(cramers_v, digits = 2, format = "f"))
+    ),
+    single = num_span(design[["single_group_levels"]]),
+    confounded = ifelse(design[["confounded"]], "yes", "no")
+  )
   c(
-    if (any(design[["confounded"]])) {
-      c(
-        "::: {.callout-important}",
-        "## Batch and biology are confounded",
-        "",
-        "At least one batch level holds a single group, so no normalisation can tell batch from biology.",
-        ":::",
-        ""
+    if (one_level) {
+      callout_lines(
+        "note",
+        "Batch cannot be checked against biology",
+        paste0(
+          "The grouping column `",
+          group,
+          "` has one level, so batch cannot be checked against biology."
+        )
+      )
+    } else if (any(design[["confounded"]])) {
+      callout_lines(
+        "important",
+        "Batch and biology are confounded",
+        "At least one batch level holds a single group, so no normalization can tell batch from biology."
       )
     },
-    knitr::kable(design, format = "pipe", digits = 2),
+    knitr::kable(
+      shown,
+      format = "pipe",
+      col.names = c(
+        "Batch",
+        "Levels",
+        "Cram\u00e9r's V",
+        "Levels with one group",
+        "Confounded"
+      ),
+      align = c("l", "r", "r", "r", "l")
+    ),
     "",
     ": Batch design {#tbl-batch-design}",
     "",
     unlist(lapply(names(crosstabs), function(column) {
+      counts <- as.data.frame.matrix(crosstabs[[column]])
+      cells <- data.frame(
+        md_escape(rownames(counts)),
+        lapply(counts, num_span)
+      )
       c(
         knitr::kable(
-          as.data.frame.matrix(crosstabs[[column]]),
-          format = "pipe"
+          cells,
+          format = "pipe",
+          col.names = md_escape(c(group, colnames(counts))),
+          align = c("l", rep("r", ncol(counts))),
+          row.names = FALSE
         ),
         "",
         paste0(
@@ -1444,8 +1493,16 @@ report_batch_tables <- function(x, group) {
         ),
         ""
       )
-    }))
+    })),
+    reading_guide_callout("batch")
   )
+}
+
+#' A value for a report table, set in the monospaced font of values
+#'
+#' @noRd
+num_span <- function(value) {
+  paste0("[", value, "]{.num}")
 }
 
 #' Check that a report option is a single positive number
@@ -1566,15 +1623,23 @@ report_setup <- function(path) {
   )
 }
 
+#' Options of the current knitr chunk
+#'
+#' @noRd
+knitr_chunk_options <- function() {
+  knitr::opts_current$get()
+}
+
 #' Show a plot of the report as a numbered figure
 #'
 #' In a knitr chunk, the plot goes to a PNG file in the figure folder of the
-#' chunk, at the size and resolution of the chunk.
+#' chunk, at the size of the chunk and at its resolution times `fig.retina`.
 #' A Markdown image then points to it, with a `fig-` id, the section title as
-#' caption and the alt text, so Quarto numbers the figures the same way in
-#' HTML and Typst.
+#' caption, the alt text and the width of the chunk, so Quarto numbers the
+#' figures the same way in HTML and Typst.
 #' A `fig-` chunk label cannot do this, because Quarto then holds all the
 #' plots of the chunk until its end.
+#' The file is always a PNG, whatever the `dev` of the chunk.
 #' Outside knitr, the plot is printed.
 #'
 #' @param plot A ggplot.
@@ -1588,7 +1653,7 @@ report_figure <- function(plot, type, caption, alt) {
     print(plot)
     return(invisible())
   }
-  chunk <- knitr::opts_current$get()
+  chunk <- knitr_chunk_options()
   id <- paste0("fig-", tolower(type))
   path <- paste0(chunk[["fig.path"]], id, ".png")
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
@@ -1598,18 +1663,20 @@ report_figure <- function(plot, type, caption, alt) {
     width = chunk[["fig.width"]],
     height = chunk[["fig.height"]],
     units = "in",
-    dpi = chunk[["dpi"]]
+    dpi = chunk[["dpi"]] * (chunk[["fig.retina"]] %||% 1)
   )
   cat(
     "\n\n![",
-    caption,
+    md_escape(caption),
     "](",
     path,
     "){#",
     id,
     " fig-alt=\"",
     gsub("\"", "\\\"", alt, fixed = TRUE),
-    "\"}\n\n",
+    "\" width=\"",
+    chunk[["fig.width"]],
+    "in\"}\n\n",
     sep = ""
   )
   invisible()

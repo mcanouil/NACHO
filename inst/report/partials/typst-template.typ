@@ -193,6 +193,7 @@
   show heading.where(level: 2): set text(size: 13pt)
 
   show table: set align(left)
+  show figure.where(kind: "quarto-float-tbl"): set block(breakable: true)
   set table(
     stroke: (x, y) => (
       bottom: if y == 0 { 1.2pt + nacho-navy } else { 0.5pt + nacho-line },

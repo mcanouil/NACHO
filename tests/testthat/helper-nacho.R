@@ -124,3 +124,9 @@ odd_ids_nacho <- function() {
   S7::prop(x, "samples", check = FALSE) <- samples
   x
 }
+
+british_stems <- paste(
+  "normalis|colour|recognis|analys(e|ing)|behaviour|centre|favour",
+  "organis|summaris|visualis|haemoly|minimis|maximis|grey|licence|whilst",
+  sep = "|"
+)

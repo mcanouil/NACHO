@@ -8,6 +8,8 @@
 --- its label is the table caption, or "Table" and the table number.
 --- Quarto moves the caption of a cross-referenced table to the float around
 --- it, so a first pass copies that caption to the table.
+--- The filter runs after Quarto's own filters (`at: post-quarto`), because
+--- Quarto rebuilds a table that has `tbl-colwidths` and drops the scopes.
 
 local count = 0
 
