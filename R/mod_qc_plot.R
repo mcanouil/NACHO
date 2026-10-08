@@ -302,36 +302,45 @@ download_size <- function(value, default) {
 # Each of them answers with an input event that repeats the value it just got.
 # When two selections are in flight, the stale answers bounce between the
 # server, the plots and the menu without end.
-# The guard drops an answer that only repeats a value the server just sent.
+# Shiny handles one server message at a time, and a plot or the menu answers
+# while Shiny handles the message that sets it.
+# The guard keeps the values of the current message only, and drops an input
+# event that repeats one of them.
+# The next message removes the values that got no answer, because a plot that
+# is not drawn, or that already shows the value, does not answer.
+# After a drop, Shiny forgets the last value it sent for that input, so the
+# next user action with that value still reaches the server.
 selection_echo_guard <- shiny::tags$script(shiny::HTML(
   "(function() {
-    var pending = {};
+    var expected = {};
     var normalise = function(value) {
-      return JSON.stringify([].concat(value === null || value === '' ? [] : value));
+      var empty = value === null || value === undefined || value === '';
+      return JSON.stringify([].concat(empty ? [] : value).sort());
     };
     var expect = function(name, value) {
-      pending[name] = (pending[name] || []).concat(normalise(value));
+      expected[name] = (expected[name] || []).concat(normalise(value));
     };
     $(document).on('shiny:message', function(e) {
       var message = e.message || {};
+      expected = {};
       Object.keys(message.custom || {}).forEach(function(key) {
         if (/-girafe_set$/.test(key)) {
           expect(key.replace(/_set$/, '_selected'), message.custom[key]);
         }
       });
       (message.inputMessages || []).forEach(function(input) {
-        if (/-highlight$/.test(input.id) && 'value' in input.message) {
+        if (input.id === 'outliers-highlight' && 'value' in input.message) {
           expect(input.id, input.message.value);
         }
       });
     });
     $(document).on('shiny:inputchanged', function(e) {
-      var queue = pending[e.name];
-      if (!queue) return;
-      var at = queue.indexOf(normalise(e.value));
+      var values = expected[e.name];
+      var at = values ? values.indexOf(normalise(e.value)) : -1;
       if (at < 0) return;
-      queue.splice(at, 1);
+      values.splice(at, 1);
       e.preventDefault();
+      Shiny.forgetLastInputValue(e.name);
     });
   })();"
 ))
