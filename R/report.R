@@ -55,6 +55,146 @@ plot_alt_texts <- c(
   PCBatch = "Share of each principal component explained by cartridge and date."
 )
 
+#' "How to read this" help for each plot and table of the report
+#'
+#' Two to four sentences each: what a good result looks like, what a flag
+#' looks like, and what to do next.
+#' Keyed like [plot_alt_texts], plus `decisions` and `parameters` for the two
+#' tables.
+#'
+#' @noRd
+report_reading_guide <- c(
+  BD = paste(
+    "Each point is one sample, or one lane on PlexSet files, and each box covers one cartridge.",
+    "Points between the dashed lines are fine, and the shaded bands above and below are outside the limits.",
+    "A point in the upper band means that codes overlapped, so the instrument may have dropped some of them.",
+    "Triangles mark samples flagged by any check: find each one in the decision summary and check its input."
+  ),
+  FoV = paste(
+    "Each point is one sample, or one lane on PlexSet files, and each box covers one cartridge.",
+    "Points above the dashed line are fine.",
+    "A point in the shaded area below means that the scanner couldn't count many fields, often due to debris.",
+    "If several samples from the same cartridge sit low, check that cartridge first."
+  ),
+  PCL = paste(
+    "Each point is one sample, and each box covers one cartridge.",
+    "Points above the dashed line are fine: their positive controls rise in step with their concentrations.",
+    "A point in the shaded area below means that the counts don't follow the dilution series.",
+    "This can point to a hybridization problem, so treat the counts of such a sample with care or run it again."
+  ),
+  LoD = paste(
+    "Each point is one sample, and each box covers one cartridge.",
+    "Points above the dashed line are fine: the 0.5 fM positive control stands clear of the background.",
+    "A point in the shaded area below means that weakly expressed genes can get lost in the noise.",
+    "Check the negative controls and the input amount of that sample before you trust its low counts."
+  ),
+  Positive = paste(
+    "Each box shows the counts of one positive control probe on a log scale, and each point is one sample.",
+    "The boxes should step down evenly from POS_A to POS_F, and each box should be tight.",
+    "A sample apart from the others on several probes had a weaker or stronger hybridization.",
+    "Triangles mark samples flagged by any check, and the positive factor plot shows how much each was scaled."
+  ),
+  Negative = paste(
+    "Each box shows the counts of one negative control probe on a log scale, and each point is one sample.",
+    "Good negative controls sit low and close together, because they only measure background.",
+    "A probe well above the others may cross-hybridize, and a sample high on every probe has more background.",
+    "If many samples sit high, look at the background setting in the settings table."
+  ),
+  Housekeeping = paste(
+    "Each box shows the counts of one housekeeping gene on a log scale, and each point is one sample.",
+    "Good housekeeping genes have high counts and tight boxes.",
+    "A gene with a wide box or with counts near background is a poor choice for normalization.",
+    "A sample low on every gene may have had less RNA input, and triangles mark samples flagged by any check."
+  ),
+  PN = paste(
+    "Each line follows one control probe across the samples on a log scale: negative controls left, positive right.",
+    "Good lines run flat and parallel, and the dark smooth curve stays level.",
+    "A dip or a jump that many lines share points to a sample, or a run of samples, that behaved differently.",
+    "Find those samples in the plots above to see which check they fail."
+  ),
+  ACBD = paste(
+    "Each point is one sample, with its average count across and its binding density up.",
+    "The points should rise together along a rough line and stay out of the shaded out-of-limit bands.",
+    "A point far from the others had an unusual signal for its density; triangles mark flagged samples.",
+    "Look up such a sample in the binding density plot."
+  ),
+  ACMC = paste(
+    "Each point is one sample, with its average count across and its median count up.",
+    "The samples usually line up along a rough line.",
+    "A point far from that line has skewed counts, often from a few very high genes or from a failed sample.",
+    "Check the control plots of such a sample before you keep it."
+  ),
+  PCA12 = paste(
+    "Each point is one sample on the first two principal components, with an ellipse around each color group.",
+    "Samples should group by biology, not by cartridge or date.",
+    "A sample far from all the others may be an outlier, and groups that split by cartridge point to a batch effect.",
+    "If the groups follow cartridges or dates, read the batch effects section."
+  ),
+  PCAi = paste(
+    "Each bar is the share of the variance that one principal component explains.",
+    "The first few bars usually carry most of the variance, and the rest fall off slowly.",
+    "If one component carries a very large share, check whether it follows a batch or a single sample."
+  ),
+  PCA = paste(
+    "Each panel shows the samples on one pair of the first principal components, with an ellipse per color group.",
+    "Read each panel like the plot of the first two components.",
+    "A sample that sits apart in several panels is a likely outlier.",
+    "Groups that split by cartridge or date in any panel point to a batch effect."
+  ),
+  PFNF = paste(
+    "Each point is one sample, with its negative factor across and its positive factor up on a log scale.",
+    "Points between the dashed lines are fine, and the shaded bands mark positive factors outside the limits.",
+    "A point in a band needed a large correction, often after a poor hybridization or a pipetting error.",
+    "Triangles mark flagged samples, so check them in the positive control plot before you keep them."
+  ),
+  HF = paste(
+    "Each point is one sample, with its positive factor across and its content factor up, both on a log scale.",
+    "Points in the clear area between the dashed lines are fine.",
+    "A point in a shaded area needed a large correction, often because of too much or too little RNA input.",
+    "Triangles mark samples flagged by any check, so look at those first."
+  ),
+  NORM = paste(
+    "Each line follows one housekeeping gene across the samples on a log scale: raw left, normalized right.",
+    "Without housekeeping genes, the lines show the positive controls.",
+    "After normalization, the lines should be flatter and closer to the dark smooth curve.",
+    "A line that stays uneven points to a gene or a sample that the method couldn't correct."
+  ),
+  Stability = paste(
+    "Each point is one housekeeping gene, from the most stable on the left to the least stable on the right.",
+    "Genes below the dashed line at M = 1.5 are stable enough for samples of one kind.",
+    "A gene above the line varies more than the others across the samples.",
+    "Think about leaving it out of the housekeeping genes and normalizing again."
+  ),
+  RLE = paste(
+    "Each box shows how far the normalized genes of one sample sit from the median of each gene.",
+    "Good boxes are narrow and centered on the dashed line at zero.",
+    "A box shifted away from zero, or much wider than the others, marks a sample that normalization missed.",
+    "Check the metrics of that sample, and if boxes of one color shift together, look for a batch effect."
+  ),
+  BatchFactors = paste(
+    "Each panel shows one normalization factor, with one box per cartridge and one point per sample.",
+    "The boxes should sit at about the same level across cartridges.",
+    "A cartridge whose box sits higher or lower than the others needed a different correction.",
+    "That hints at a batch effect, and the next plot shows how much the batches shape the data."
+  ),
+  PCBatch = paste(
+    "Each tile shows the share of one principal component that cartridge or date explains, from 0 to 1.",
+    "Low values in dark tiles are good, and gray tiles have no value.",
+    "A bright tile with a high value on one of the first components means that the batch shapes the data.",
+    "Then think about a batch correction, and check that batch and biology are not confounded."
+  ),
+  decisions = paste(
+    "The three boxes count the samples that pass, the flagged samples, and the metrics behind the flags.",
+    "Each row of the table is one flagged sample and one metric it fails, with its value and its limit.",
+    "Check a flagged sample in the plots below before you drop it, since one failed metric may not spoil it."
+  ),
+  parameters = paste(
+    "Each row is one limit or setting that NACHO used, with its value and what it means.",
+    "The source says where the value comes from, such as nSolver, the instrument, NACHO, or a default.",
+    "Rows tagged as your choice differ from the defaults, so mention them when you share the results."
+  )
+)
+
 #' Help page of a metric or of the app
 #'
 #' @param name The page name, such as `"bd"` or `"nacho"`.
@@ -771,12 +911,11 @@ setting_rows <- function(x) {
 #'
 #' @noRd
 report_parameters <- function(x) {
-  metrics <- report_metrics(x)
-  bounds <- vapply(metrics, threshold_bounds, character(1), x = x)
-  metrics <- metrics[!is.na(bounds)]
+  bounds <- report_limits(x)
+  metrics <- names(bounds)
   settings <- setting_rows(x)
   parameter <- c(unname(qc_metric_labels[metrics]), settings[["parameter"]])
-  value <- c(unname(bounds[metrics]), settings[["value"]])
+  value <- c(unname(bounds), settings[["value"]])
   meaning <- c(unname(parameter_meanings[metrics]), settings[["meaning"]])
   source <- c(
     vapply(metrics, threshold_source, character(1), x = x, USE.NAMES = FALSE),
@@ -799,6 +938,242 @@ report_parameters <- function(x) {
       source_tag(source),
       " |"
     )
+  )
+}
+
+#' Join items for a sentence, with "and" before the last
+#'
+#' @noRd
+and_list <- function(items) {
+  if (length(items) <= 1) {
+    return(paste(items, collapse = ""))
+  }
+  paste(
+    paste(utils::head(items, -1), collapse = ", "),
+    "and",
+    utils::tail(items, 1)
+  )
+}
+
+#' Lower-case labels of metrics, joined for a sentence
+#'
+#' @noRd
+metric_phrase <- function(metrics) {
+  and_list(tolower(unname(qc_metric_labels[metrics])))
+}
+
+#' Sentences on the quality-control limits for the methods appendix
+#'
+#' The sources come from [threshold_source()], as in the parameter table.
+#'
+#' @noRd
+methods_limits <- function(x) {
+  bounds <- report_limits(x)
+  metrics <- names(bounds)
+  sources <- vapply(metrics, threshold_source, character(1), x = x)
+  legacy <- identical(x@thresholds[["preset"]], "legacy")
+  guidelines <- paste(
+    "the nCounter Gene Expression Data Analysis Guidelines",
+    "from NanoString, now part of Bruker"
+  )
+  bd_sentence <- if ("BD" %in% metrics && !legacy) {
+    switch(
+      sources[["BD"]],
+      `MAX/FLEX/PRO (not in the RCC files)` = paste(
+        "The RCC files do not name the nCounter instrument,",
+        "so binding density uses the MAX/FLEX/PRO limits."
+      ),
+      SPRINT = "Binding density uses the SPRINT limits.",
+      `MAX/FLEX/PRO` = "Binding density uses the MAX/FLEX/PRO limits."
+    )
+  }
+  own <- metrics[sources == "NACHO"]
+  chosen <- metrics[sources == "your choice"]
+  c(
+    paste0(
+      "NACHO checked each sample against ",
+      length(metrics),
+      " quality-control ",
+      count_words(length(metrics), "limit", "limits"),
+      ": ",
+      and_list(paste0(
+        tolower(unname(qc_metric_labels[metrics])),
+        " (",
+        unname(bounds),
+        ")"
+      )),
+      "."
+    ),
+    "A sample outside any limit is flagged, and the decision summary lists each one.",
+    if (legacy) {
+      paste0(
+        "These limits come from the legacy preset, which gives back the limits of NACHO 2, ",
+        "rather than from the nSolver preset, which follows ",
+        guidelines,
+        "."
+      )
+    } else {
+      paste0(
+        "These limits come from the nSolver preset, which follows ",
+        guidelines,
+        "."
+      )
+    },
+    bd_sentence,
+    if ("PCL" %in% metrics) {
+      paste0(
+        "Positive control linearity uses POS_A to ",
+        if (legacy) "POS_F" else "POS_E",
+        "."
+      )
+    },
+    if (length(own) > 0) {
+      paste0(
+        "NACHO sets the limits for ",
+        metric_phrase(own),
+        " itself, since Bruker publishes none."
+      )
+    },
+    if (length(chosen) > 0) {
+      paste0("You changed the limits for ", metric_phrase(chosen), ".")
+    }
+  )
+}
+
+#' Sentences on the normalization for the methods appendix
+#'
+#' The method and the background come from [setting_rows()], so the text
+#' matches the parameter table, a GLM that fell back to GEO included.
+#'
+#' @noRd
+methods_normalisation <- function(x) {
+  settings <- x@settings
+  rows <- setting_rows(x)
+  row <- function(name) rows[rows[["parameter"]] == name, ]
+  method <- row("Normalization method")
+  genes <- settings[["housekeeping_genes"]]
+  uses_housekeeping <- settings[["normalisation_method"]] %in%
+    c("GEO", "GLM", "RUVg")
+  c(
+    paste0(
+      "NACHO normalized the counts with the ",
+      method[["value"]],
+      " method."
+    ),
+    method[["meaning"]],
+    row("Background")[["meaning"]],
+    if (uses_housekeeping) {
+      if (isTRUE(settings[["housekeeping_norm"]]) && length(genes) > 0) {
+        paste0(
+          "It used ",
+          length(genes),
+          " housekeeping ",
+          count_words(length(genes), "gene", "genes"),
+          if (isTRUE(settings[["housekeeping_predict"]])) {
+            ", picked by geNorm,"
+          },
+          " to scale each sample: ",
+          name_list(genes, max = 10),
+          "."
+        )
+      } else {
+        "Housekeeping normalization was off, so only the positive controls scaled the samples."
+      }
+    },
+    if (
+      identical(settings[["normalisation_method"]], "RUVg") &&
+        !is.null(settings[["ruv_k"]])
+    ) {
+      paste0(
+        "RUVg then removed ",
+        settings[["ruv_k"]],
+        " ",
+        count_words(settings[["ruv_k"]], "factor", "factors"),
+        " of unwanted variation."
+      )
+    }
+  )
+}
+
+#' Sentences on the software that made the report
+#'
+#' @noRd
+methods_software <- function(x) {
+  provenance <- x@provenance
+  built_with <- provenance[["nacho_version"]]
+  file_version <- provenance[["file_version"]]
+  known <- function(value) length(value) == 1 && !is.na(value)
+  c(
+    paste0(
+      "NACHO ",
+      utils::packageVersion("NACHO"),
+      " wrote this report with R ",
+      paste(R.version$major, R.version$minor, sep = "."),
+      "."
+    ),
+    if (known(built_with)) {
+      paste0(
+        "The data were loaded with NACHO ",
+        built_with,
+        if (known(file_version)) {
+          paste0(" from RCC files of version ", file_version)
+        },
+        "."
+      )
+    },
+    if (!is.null(provenance[["migrated_from_schema"]])) {
+      "They were saved with NACHO 2 and rebuilt with NACHO 3."
+    },
+    "The settings and thresholds section lists every value, so anyone can run the same analysis again."
+  )
+}
+
+#' The NACHO citation as plain text
+#'
+#' The `"text"` style marks the journal and the volume with `_` and `*`, so
+#' these marks are removed; the DOI link stays in angle brackets, which both
+#' HTML and Typst show as a link.
+#' Pandoc writes an apostrophe to Typst as a straight one, and Typst reads it
+#' before a word, as in "'t Hart", as an opening quote.
+#' A backslash keeps each apostrophe straight in both formats.
+#'
+#' @noRd
+nacho_citation <- function() {
+  text <- format(utils::citation("NACHO"), style = "text")
+  text <- paste(gsub("\\s+", " ", text), collapse = " ")
+  text <- gsub("(^|\\W)_([^_]+)_(\\W)", "\\1\\2\\3", text, perl = TRUE)
+  text <- gsub("(^|\\W)\\*([^*]+)\\*(\\W)", "\\1\\2\\3", text, perl = TRUE)
+  gsub("['\u2019]", "\\\\'", text)
+}
+
+#' Markdown lines for the methods appendix of the report
+#'
+#' A level-1 "Methods" section: the quality-control limits, the
+#' normalization, the software, the NACHO citation, and the session
+#' information in a code block.
+#'
+#' @param x A `nacho` object.
+#'
+#' @noRd
+report_methods <- function(x) {
+  c(
+    "# Methods",
+    "",
+    methods_limits(x),
+    "",
+    methods_normalisation(x),
+    "",
+    methods_software(x),
+    "",
+    "To cite NACHO in publications, use:",
+    "",
+    nacho_citation(),
+    "",
+    "## Session information",
+    "",
+    "```",
+    utils::capture.output(print(utils::sessionInfo())),
+    "```"
   )
 }
 
@@ -897,17 +1272,27 @@ threshold_bounds <- function(x, metric) {
 #'
 #' @noRd
 report_thresholds <- function(x) {
-  metrics <- report_metrics(x)
-  bounds <- vapply(metrics, threshold_bounds, character(1), x = x)
-  keep <- !is.na(bounds)
+  bounds <- report_limits(x)
   paste0(
     "- ",
-    qc_metric_labels[metrics[keep]],
+    qc_metric_labels[names(bounds)],
     " (`",
-    metrics[keep],
+    names(bounds),
     "`): ",
-    bounds[keep]
+    bounds
   )
+}
+
+#' The limits that can flag a sample, in words
+#'
+#' @return A character vector named by metric, without the bounds that
+#'   [threshold_bounds()] cannot put in words.
+#'
+#' @noRd
+report_limits <- function(x) {
+  metrics <- report_metrics(x)
+  bounds <- vapply(metrics, threshold_bounds, character(1), x = x)
+  bounds[!is.na(bounds)]
 }
 
 #' Markdown lines for the settings that shape the data
@@ -1001,7 +1386,8 @@ report_sections <- function(x) {
       plot = plot,
       help = help,
       batch = batch,
-      alt = if (is.na(plot)) NA_character_ else plot_alt_texts[[plot]]
+      alt = if (is.na(plot)) NA_character_ else plot_alt_texts[[plot]],
+      guide = if (is.na(plot)) NA_character_ else report_reading_guide[[plot]]
     )
   }
   plot_section <- function(plot, title, level = 2, help = NA_character_) {
@@ -1025,14 +1411,14 @@ report_sections <- function(x) {
       plot_section("PCA12", "First two components"),
       plot_section("PCA", "Planes of the first components"),
       plot_section("PCAi", "Variance explained"),
-      section("Normalisation", 1),
+      section("Normalization", 1),
       plot_section("PFNF", "Positive against negative factor", help = "pf"),
       plot_section("HF", "Content normalization factor", help = "hgf"),
-      plot_section("NORM", "Normalisation result"),
+      plot_section("NORM", "Normalization result"),
       plot_section("RLE", "Relative log expression"),
       plot_section("Stability", "Housekeeping gene stability"),
       section("Batch effects", 1, batch = TRUE),
-      plot_section("BatchFactors", "Normalisation factors by cartridge"),
+      plot_section("BatchFactors", "Normalization factors by cartridge"),
       plot_section("PCBatch", "Principal components and batches")
     )
   )
@@ -1236,7 +1622,12 @@ report_body <- function(report) {
         }
       )
       print(plot)
-      cat("\n\n")
+      cat(
+        "\n\n::: {.callout-note title=\"How to read this\"}\n",
+        report_reading_guide[[sections[["plot"]][i]]],
+        "\n:::\n\n",
+        sep = ""
+      )
     }
   }
   invisible(report)

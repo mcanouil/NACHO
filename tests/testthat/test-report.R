@@ -914,3 +914,138 @@ test_that("md_escape() keeps three dots as typed in both formats", {
   )
   expect_identical(NACHO:::md_escape("a.b"), "a\\.b")
 })
+
+test_that("every plot and table has reading help", {
+  guide <- NACHO:::report_reading_guide
+  expect_setequal(
+    names(guide),
+    c(names(NACHO:::plot_alt_texts), "decisions", "parameters")
+  )
+  sentences <- lengths(regmatches(guide, gregexpr("[.!?](\\s|$)", guide)))
+  expect_true(all(sentences >= 2 & sentences <= 4))
+})
+
+test_that("a decimal in the reading help does not end a sentence", {
+  text <- "Points above 0.95 are fine. Points below 0.95 are flagged."
+  expect_identical(
+    lengths(regmatches(text, gregexpr("[.!?](\\s|$)", text))),
+    2L
+  )
+})
+
+test_that("report_sections() carries the reading help of each plot", {
+  sections <- NACHO:::report_sections(GSE74821)
+  plots <- !is.na(sections$plot)
+  expect_identical(
+    sections$guide[plots],
+    unname(NACHO:::report_reading_guide[sections$plot[plots]])
+  )
+  expect_true(all(is.na(sections$guide[!plots])))
+})
+
+test_that("report_sections() titles use US spelling", {
+  titles <- NACHO:::report_sections(GSE74821)$title
+  expect_false(any(grepl("isation", titles, fixed = TRUE)))
+  expect_true("Normalization" %in% titles)
+})
+
+test_that("report_body() prints a How to read this callout under each plot", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  report <- list(
+    object = GSE74821,
+    options = NACHO:::check_report_options(GSE74821),
+    sections = NACHO:::report_sections(GSE74821)
+  )
+  out <- paste(
+    utils::capture.output(NACHO:::report_body(report)),
+    collapse = "\n"
+  )
+  expect_identical(
+    lengths(regmatches(
+      out,
+      gregexpr(
+        "::: {.callout-note title=\"How to read this\"}",
+        out,
+        fixed = TRUE
+      )
+    )),
+    sum(!is.na(report$sections$plot))
+  )
+  expect_match(out, NACHO:::report_reading_guide[["FoV"]], fixed = TRUE)
+})
+
+test_that("the methods appendix cites NACHO and the nSolver guidelines", {
+  lines <- NACHO:::report_methods(GSE74821)
+  text <- paste(lines, collapse = "\n")
+  expect_identical(lines[1], "# Methods")
+  expect_match(text, "Canouil", fixed = TRUE)
+  expect_match(text, "nSolver", fixed = TRUE)
+  expect_match(
+    text,
+    "nCounter Gene Expression Data Analysis Guidelines",
+    fixed = TRUE
+  )
+  expect_false(grepl("_Bioinformatics_", text, fixed = TRUE))
+  expect_match(text, "\\'t Hart", fixed = TRUE)
+  expect_match(text, "## Session information\n\n```\nR version", fixed = TRUE)
+  expect_identical(sum(lines == "```"), 2L)
+})
+
+test_that("the methods appendix describes the object", {
+  text <- paste(NACHO:::report_methods(GSE74821), collapse = "\n")
+  expect_match(text, "binding density (0.05 to 2.25)", fixed = TRUE)
+  expect_match(text, "field of view (at least 75%)", fixed = TRUE)
+  expect_match(text, "do not name the nCounter instrument", fixed = TRUE)
+  expect_match(text, "with the GLM method", fixed = TRUE)
+  expect_match(text, "8 housekeeping genes", fixed = TRUE)
+  expect_match(text, "POS_A to POS_E", fixed = TRUE)
+
+  sprint <- NACHO::normalise(
+    GSE74821,
+    outliers_thresholds = NACHO::nacho_thresholds("sprint")
+  )
+  text <- paste(NACHO:::report_methods(sprint), collapse = "\n")
+  expect_match(text, "Binding density uses the SPRINT limits.", fixed = TRUE)
+  expect_false(grepl("do not name", text, fixed = TRUE))
+
+  legacy <- NACHO::normalise(
+    GSE74821,
+    outliers_thresholds = NACHO::nacho_thresholds(preset = "legacy")
+  )
+  text <- paste(NACHO:::report_methods(legacy), collapse = "\n")
+  expect_match(text, "legacy preset", fixed = TRUE)
+  expect_match(text, "POS_A to POS_F", fixed = TRUE)
+  expect_false(grepl("do not name", text, fixed = TRUE))
+})
+
+test_that("the methods appendix names the method NACHO actually used", {
+  x <- GSE74821
+  provenance <- x@provenance
+  provenance$glm_fallback <- colnames(x@counts)[1]
+  S7::prop(x, "provenance", check = FALSE) <- provenance
+  text <- paste(NACHO:::report_methods(x), collapse = "\n")
+  expect_match(text, "GLM \\(GEO used\\)", fixed = TRUE)
+  expect_match(text, "geometric mean scaled them all", fixed = TRUE)
+})
+
+test_that("the methods appendix credits limits the user changed", {
+  x <- GSE74821
+  thresholds <- x@thresholds
+  thresholds$FoV <- 80
+  x <- NACHO::normalise(x, outliers_thresholds = thresholds)
+  text <- paste(NACHO:::report_methods(x), collapse = "\n")
+  expect_match(text, "field of view (at least 80%)", fixed = TRUE)
+  expect_match(text, "You changed the limits for field of view.", fixed = TRUE)
+})
+
+test_that("the methods appendix names the RUVg factors", {
+  ruv <- NACHO::normalise(GSE74821, normalisation_method = "RUVg", ruv_k = 1)
+  text <- paste(NACHO:::report_methods(ruv), collapse = "\n")
+  expect_match(text, "with the RUVg method.", fixed = TRUE)
+  expect_match(
+    text,
+    "RUVg then removed 1 factor of unwanted variation.",
+    fixed = TRUE
+  )
+})
