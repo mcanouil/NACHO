@@ -184,6 +184,19 @@ test_that("the app flags samples when a threshold moves", {
     )
     app$set_window_size(1280, 1000)
     expect_selection(first, "BD-girafe_selected")
+    started <- Sys.time()
+    app$run_js("document.querySelector('a[data-value=\"Counts\"]').click()")
+    app$wait_for_js(
+      "document.querySelectorAll('.nacho-girafe .html-widget svg').length >= 2",
+      timeout = 60000
+    )
+    expect_lt(as.numeric(difftime(Sys.time(), started, units = "secs")), 30)
+    app$run_js(
+      "document.querySelector('a[data-value=\"Normalisation\"]').click()"
+    )
+    app$run_js("document.querySelector('a[data-value=\"Data\"]').click()")
+    app$wait_for_idle(duration = 500, timeout = 30000)
+    expect_identical(app$get_value(output = "overview-samples"), "48")
   }
   app$run_js("document.querySelector('#cite').click()")
   app$wait_for_js("document.querySelector('.modal.show') !== null")

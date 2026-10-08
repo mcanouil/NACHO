@@ -57,6 +57,17 @@ with_data <- function(...) {
   )
 }
 
+#' Titles of the plot pages, which are also the values of `input$page`
+#'
+#' @noRd
+app_page_titles <- c(
+  qc_metrics = "QC metrics",
+  controls = "Controls",
+  counts = "Counts",
+  normalisation = "Normalisation",
+  batch = "Batch"
+)
+
 plot_page <- function(page, interactive = FALSE) {
   bslib::layout_columns(
     col_widths = bslib::breakpoints(sm = 12, lg = 6),
@@ -104,16 +115,25 @@ app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
     ),
     bslib::nav_panel("Data", mod_data_ui("data")),
     bslib::nav_panel(
-      "QC metrics",
+      app_page_titles[["qc_metrics"]],
       with_data(plot_page("qc_metrics", interactive))
     ),
-    bslib::nav_panel("Controls", with_data(plot_page("controls", interactive))),
-    bslib::nav_panel("Counts", with_data(plot_page("counts", interactive))),
     bslib::nav_panel(
-      "Normalisation",
+      app_page_titles[["controls"]],
+      with_data(plot_page("controls", interactive))
+    ),
+    bslib::nav_panel(
+      app_page_titles[["counts"]],
+      with_data(plot_page("counts", interactive))
+    ),
+    bslib::nav_panel(
+      app_page_titles[["normalisation"]],
       with_data(plot_page("normalisation", interactive))
     ),
-    bslib::nav_panel("Batch", with_data(mod_batch_ui("batch", interactive))),
+    bslib::nav_panel(
+      app_page_titles[["batch"]],
+      with_data(mod_batch_ui("batch", interactive))
+    ),
     bslib::nav_panel(
       "Samples",
       with_data(mod_outliers_ui("outliers", interactive))
@@ -307,17 +327,26 @@ app_server <- function(
         footer = shiny::modalButton("Close")
       ))
     })
-    lapply(unlist(app_plot_types, use.names = FALSE), function(type) {
-      mod_qc_plot_server(
-        type,
-        object = tuned,
-        qc = qc,
-        type = type,
-        dark = dark,
-        selected = selected,
-        interactive = interactive
-      )
-    })
+    workers <- if (interactive) plot_workers_start(session)
+    for (page in names(app_plot_types)) {
+      local({
+        title <- app_page_titles[[page]]
+        active <- shiny::reactive(identical(input$page, title))
+        lapply(app_plot_types[[page]], function(type) {
+          mod_qc_plot_server(
+            type,
+            object = tuned,
+            qc = qc,
+            type = type,
+            dark = dark,
+            selected = selected,
+            interactive = interactive,
+            active = active,
+            workers = workers
+          )
+        })
+      })
+    }
     if (done) {
       finished <- new.env()
       observe_done(input, data, settings, announced, finished)
