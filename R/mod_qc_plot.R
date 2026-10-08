@@ -135,11 +135,10 @@ font_cache <- new.env(parent = emptyenv())
 #' This is the call `ggiraph::girafe()` makes when `font_set` is `NULL`.
 #' gdtools is a hard dependency of ggiraph, so it is installed whenever the
 #' interactive plots are.
-#' It is read with `getExportedValue()` because NACHO does not import it.
 #'
 #' @noRd
 build_font_set <- function() {
-  getExportedValue("gdtools", "font_set_liberation")()
+  gdtools::font_set_liberation()
 }
 
 #' Give the ggiraph font set, built on the first call
