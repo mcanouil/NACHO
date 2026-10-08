@@ -200,8 +200,10 @@ report_reading_guide <- c(
     "The design table gives, for each batch column, its number of levels,",
     "Cram\u00e9r's V between batch and group from 0 to 1, and the levels that hold a single group.",
     "The cross-tables count the samples of each group in each batch level.",
-    "A batch is confounded when one of its levels holds a single group, and then no normalization can tell batch from biology.",
-    "Spread the groups across cartridges and dates in the next run, or add the batch to the model of the downstream analysis."
+    "A batch is confounded when one of its levels holds a single group,",
+    "and then no normalization can tell batch from biology.",
+    "Spread the groups across cartridges and dates in the next run,",
+    "or add the batch to the model of the downstream analysis."
   ),
   parameters = paste(
     "Each row is one limit or setting that NACHO used, with its value and what it means.",
