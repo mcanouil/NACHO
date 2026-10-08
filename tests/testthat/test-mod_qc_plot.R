@@ -515,6 +515,7 @@ test_that("the girafe is built once per rounded card size", {
     ),
     session = root,
     {
+      shiny::getShinyOption("cache", default = session$cache)$reset()
       sizes <- 0L
       shiny::observe({
         girafe_size()
@@ -534,5 +535,62 @@ test_that("the girafe is built once per rounded card size", {
       output$girafe
       expect_identical(c(builds, sizes), c(2L, 3L))
     }
+  )
+})
+
+test_that("the girafe font set is built once", {
+  skip_if_not_installed("ggiraph")
+  withr::defer(NACHO:::reset_girafe_font_set())
+  calls <- 0L
+  local_mocked_bindings(
+    build_font_set = function() {
+      calls <<- calls + 1L
+      structure(list(), class = "font_set")
+    }
+  )
+  NACHO:::reset_girafe_font_set()
+  first <- NACHO:::girafe_font_set()
+  second <- NACHO:::girafe_font_set()
+  expect_identical(calls, 1L)
+  expect_identical(first, second)
+})
+
+test_that("app_girafe() draws with the cached font set", {
+  skip_if_not_installed("ggiraph")
+  withr::defer(NACHO:::reset_girafe_font_set())
+  NACHO:::reset_girafe_font_set()
+  expect_identical(NACHO:::girafe_font_set(), gdtools::font_set_liberation())
+  strip_ids <- function(widget) {
+    html <- htmltools::renderTags(widget)$html
+    html <- gsub("htmlwidget-[0-9a-f]+", "htmlwidget-id", html)
+    gsub("svg_[0-9a-f]+", "svg_id", html)
+  }
+  plot <- ggplot2::ggplot()
+  expect_s3_class(NACHO:::girafe_font_set(), "font_set")
+  expect_identical(
+    strip_ids(NACHO:::app_girafe(plot)),
+    strip_ids(
+      ggiraph::girafe(
+        ggobj = plot,
+        width_svg = 7,
+        height_svg = 4.5,
+        font_set = NACHO:::girafe_font_set(),
+        options = list(
+          ggiraph::opts_sizing(rescale = TRUE, width = 1),
+          ggiraph::opts_hover(css = "stroke:currentColor;stroke-width:2px;"),
+          ggiraph::opts_tooltip(use_fill = FALSE),
+          ggiraph::opts_toolbar(
+            hidden = c(
+              "lasso_select",
+              "lasso_deselect",
+              "zoom_onoff",
+              "zoom_rect",
+              "zoom_reset",
+              "saveaspng"
+            )
+          )
+        )
+      )
+    )
   )
 })

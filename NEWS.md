@@ -139,12 +139,17 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: The "Flagged samples" page is now the "Samples" page.
     It still lists the flagged samples first, and then lists every sample.
 - In `DESCRIPTION`,
-  - build: chromote, ggiraph, jsonlite, later, mirai and shinytest2 join Suggests, and promises and yaml join Imports.
+  - build: chromote, gdtools, ggiraph, jsonlite, later, mirai, parallel and shinytest2 join Suggests, and promises and yaml join Imports.
 
 ## Performance
 
 - In `R/read_rcc.R`, `R/load_rcc.R` and `R/qc.R`,
   - perf: `load_rcc()` reads each RCC file once, with exact section tags, and computes quality control on count matrices. Loading 768 samples takes about 2.5 seconds instead of about 9 in NACHO 2.
+- In `R/mod_qc_plot.R` and `R/plot_worker.R`,
+  - perf: Interactive plots in the app draw about 40% faster, because the font lookup of ggiraph runs once instead of for every plot.
+  - perf: With mirai installed, the app builds the plots of a page in parallel on a small pool of workers shared by all sessions, stays responsive while they build, and stops the unfinished plots of a page you leave.
+    `options(nacho.plot_workers = n)` sets the number of workers, and `0` builds plots in the app process; the app from `deploy()` uses one worker.
+  - perf: Interactive plots built once are shared between browser tabs and sessions of the same app.
 
 ## Fixes
 

@@ -15,6 +15,31 @@ NULL
 #'   server for every user.
 #'
 #' @return A Shiny app object; print it or pass it to [shiny::runApp()].
+#'
+#' @section Plot workers:
+#' When the mirai and ggiraph packages are installed, the app builds the
+#' interactive plots of a page at the same time, in background R processes.
+#' The processes and the plot cache belong to the R process that runs the
+#' app.
+#' All users of that R process share them.
+#' The app starts the processes when the first user opens a page with
+#' interactive plots, and stops them when the app stops.
+#' By default, the app starts one process for each CPU core minus one, with a
+#' maximum of four.
+#' The app from [deploy()] starts one process.
+#'
+#' Each process keeps a copy of the study that it draws, so its memory grows
+#' with the size of the study.
+#' For `GSE74821`, each process uses about 170 MB.
+#' To find the number of processes, divide the memory that you can give to the
+#' plots by the memory of one process.
+#' Set the `nacho.plot_workers` option to that number before you start the
+#' app, for example `options(nacho.plot_workers = 2)`.
+#' To build all plots in the app process, set the option to `0`.
+#' If the processes do not start, the app builds the plots in its own process.
+#'
+#' The processes use the installed NACHO package.
+#'
 #' @export
 #'
 #' @examples
@@ -56,6 +81,17 @@ with_data <- function(...) {
     shiny::conditionalPanel("output.has_data === false", empty_state())
   )
 }
+
+#' Titles of the plot pages, which are also the values of `input$page`
+#'
+#' @noRd
+app_page_titles <- c(
+  qc_metrics = "QC metrics",
+  controls = "Controls",
+  counts = "Counts",
+  normalisation = "Normalisation",
+  batch = "Batch"
+)
 
 plot_page <- function(page, interactive = FALSE) {
   bslib::layout_columns(
@@ -104,16 +140,25 @@ app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
     ),
     bslib::nav_panel("Data", mod_data_ui("data")),
     bslib::nav_panel(
-      "QC metrics",
+      app_page_titles[["qc_metrics"]],
       with_data(plot_page("qc_metrics", interactive))
     ),
-    bslib::nav_panel("Controls", with_data(plot_page("controls", interactive))),
-    bslib::nav_panel("Counts", with_data(plot_page("counts", interactive))),
     bslib::nav_panel(
-      "Normalisation",
+      app_page_titles[["controls"]],
+      with_data(plot_page("controls", interactive))
+    ),
+    bslib::nav_panel(
+      app_page_titles[["counts"]],
+      with_data(plot_page("counts", interactive))
+    ),
+    bslib::nav_panel(
+      app_page_titles[["normalisation"]],
       with_data(plot_page("normalisation", interactive))
     ),
-    bslib::nav_panel("Batch", with_data(mod_batch_ui("batch", interactive))),
+    bslib::nav_panel(
+      app_page_titles[["batch"]],
+      with_data(mod_batch_ui("batch", interactive))
+    ),
     bslib::nav_panel(
       "Samples",
       with_data(mod_outliers_ui("outliers", interactive))
@@ -307,17 +352,26 @@ app_server <- function(
         footer = shiny::modalButton("Close")
       ))
     })
-    lapply(unlist(app_plot_types, use.names = FALSE), function(type) {
-      mod_qc_plot_server(
-        type,
-        object = tuned,
-        qc = qc,
-        type = type,
-        dark = dark,
-        selected = selected,
-        interactive = interactive
-      )
-    })
+    workers <- if (interactive) plot_workers_start()
+    for (page in names(app_plot_types)) {
+      local({
+        title <- app_page_titles[[page]]
+        active <- shiny::reactive(identical(input$page, title))
+        lapply(app_plot_types[[page]], function(type) {
+          mod_qc_plot_server(
+            type,
+            object = tuned,
+            qc = qc,
+            type = type,
+            dark = dark,
+            selected = selected,
+            interactive = interactive,
+            active = active,
+            workers = workers
+          )
+        })
+      })
+    }
     if (done) {
       finished <- new.env()
       observe_done(input, data, settings, announced, finished)

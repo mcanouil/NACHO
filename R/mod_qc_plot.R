@@ -128,11 +128,45 @@ card_size <- function(width, height) {
   c(width = rounded(width) / 96, height = rounded(height) / 96)
 }
 
+font_cache <- new.env(parent = emptyenv())
+
+#' Build the font set that ggiraph uses by default
+#'
+#' This is the call `ggiraph::girafe()` makes when `font_set` is `NULL`.
+#' gdtools is a hard dependency of ggiraph, so it is installed whenever the
+#' interactive plots are.
+#'
+#' @noRd
+build_font_set <- function() {
+  gdtools::font_set_liberation()
+}
+
+#' Give the ggiraph font set, built on the first call
+#'
+#' Each `ggiraph::girafe()` call without a font set looks up the system fonts
+#' about 23 times, which costs about 3 seconds.
+#' The set is kept for the whole R process, because the fonts of a machine do
+#' not change while an app runs.
+#' Each mirai daemon is its own process and builds the set once.
+#'
+#' @noRd
+girafe_font_set <- function() {
+  if (is.null(font_cache$set)) {
+    font_cache$set <- build_font_set()
+  }
+  font_cache$set
+}
+
+reset_girafe_font_set <- function() {
+  font_cache$set <- NULL
+}
+
 app_girafe <- function(plot, width = 7, height = 4.5) {
   ggiraph::girafe(
     ggobj = plot,
     width_svg = width,
     height_svg = height,
+    font_set = girafe_font_set(),
     options = list(
       ggiraph::opts_sizing(rescale = TRUE, width = 1),
       ggiraph::opts_hover(css = "stroke:currentColor;stroke-width:2px;"),
@@ -369,10 +403,14 @@ mod_qc_plot_server <- function(
   type = id,
   dark,
   selected = shiny::reactiveVal(character()),
-  interactive = FALSE
+  interactive = FALSE,
+  active = shiny::reactive(TRUE),
+  workers = NULL
 ) {
   force(type)
   force(dark)
+  force(active)
+  force(workers)
   shiny::moduleServer(id, function(input, output, session) {
     shiny::observeEvent(object(), {
       columns <- names(nacho_samples(object()))
@@ -435,23 +473,24 @@ mod_qc_plot_server <- function(
           girafe_size(size)
         }
       })
-      widget <- shiny::reactive({
-        size <- girafe_size()
-        app_girafe(plot(), size[["width"]], size[["height"]])
-      }) |>
-        shiny::bindCache(
-          object(),
-          type,
-          options(),
-          dark(),
-          shiny::req(girafe_size())
+      inputs <- shiny::reactive(
+        list(
+          object = shiny::req(object()),
+          type = type,
+          options = options(),
+          dark = dark(),
+          interactive = TRUE,
+          size = shiny::req(girafe_size())
         )
+      )
+      widget <- card_widget(session, inputs, workers, active)
       output$girafe <- ggiraph::renderGirafe({
+        built <- widget()
         session$onFlushed(function() {
           send_selection(session, "girafe", shiny::isolate(selected()))
         })
         ggiraph::girafe_options(
-          widget(),
+          built,
           girafe_selection(
             shiny::isolate(if (length(selected()) > 0) selected())
           )

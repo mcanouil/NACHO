@@ -58,9 +58,22 @@ test_that("the app flags samples when a threshold moves", {
   expect_match(accessible_name_in(app, ".nacho-summary-info"), "FoV")
   app$run_js("document.querySelector('a[data-value=\"QC metrics\"]').click()")
   if (requireNamespace("ggiraph", quietly = TRUE)) {
+    wait_for_drawn_cards <- function() {
+      app$wait_for_js(
+        "(function() {
+          var cards = Array.from(document.querySelectorAll('.nacho-girafe'))
+            .filter(e => e.offsetParent);
+          return cards.length > 0 && cards.every(e =>
+            e.querySelector('.html-widget svg') &&
+            !e.querySelector('.recalculating'));
+        })()",
+        timeout = 60000
+      )
+    }
     girafe_boxes <- function(width) {
       app$set_window_size(width, 1000)
       app$wait_for_idle(duration = 1000, timeout = 60000)
+      wait_for_drawn_cards()
       app$get_js(
         "Array.from(document.querySelectorAll('.nacho-girafe .html-widget'))
           .filter(e => e.offsetParent)
@@ -85,10 +98,10 @@ test_that("the app flags samples when a threshold moves", {
       app$run_js("window.girafeRenders = 0;")
       after <- girafe_boxes(width)
       expect_identical(heights(after), 350L)
-      expect_identical(
-        app$get_js("window.girafeRenders"),
-        sum(rounded_widths(before) != rounded_widths(after))
-      )
+      renders <- sum(rounded_widths(before) != rounded_widths(after))
+      expect_identical(app$get_js("window.girafeRenders"), renders)
+      app$wait_for_idle(duration = 1000, timeout = 60000)
+      expect_identical(app$get_js("window.girafeRenders"), renders)
       after
     }
     narrow <- girafe_boxes(1280)
@@ -184,9 +197,34 @@ test_that("the app flags samples when a threshold moves", {
     )
     app$set_window_size(1280, 1000)
     expect_selection(first, "BD-girafe_selected")
+    started <- Sys.time()
+    app$run_js("document.querySelector('a[data-value=\"Counts\"]').click()")
+    wait_for_drawn_cards()
+    expect_identical(
+      app$get_js(
+        "Array.from(document.querySelectorAll('.nacho-girafe'))
+          .filter(e => e.offsetParent)
+          .map(e => e.querySelector('.html-widget').id)
+          .sort()"
+      ),
+      as.list(sort(paste0(NACHO:::app_plot_types$counts, "-girafe")))
+    )
+    expect_lt(as.numeric(difftime(Sys.time(), started, units = "secs")), 30)
+    app$run_js(
+      "document.querySelector('a[data-value=\"Normalisation\"]').click()"
+    )
+    app$wait_for_js(
+      "Array.from(document.querySelectorAll('.nacho-girafe'))
+        .some(e => e.offsetParent && e.querySelector('.recalculating'))",
+      timeout = 30000
+    )
+    Sys.sleep(1)
+    app$run_js("document.querySelector('a[data-value=\"Data\"]').click()")
   }
+  asked <- Sys.time()
   app$run_js("document.querySelector('#cite').click()")
   app$wait_for_js("document.querySelector('.modal.show') !== null")
+  expect_lt(as.numeric(difftime(Sys.time(), asked, units = "secs")), 5)
   expect_match(
     app$get_js("document.querySelector('.modal.show').textContent"),
     "NACHO: an R package for quality control",
