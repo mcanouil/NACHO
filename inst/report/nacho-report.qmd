@@ -17,6 +17,7 @@ format:
     theme:
       light: [brand, nacho-report.scss]
     filters:
+      - nacho-styles.lua
       - accessible-tables.lua
     language:
       skip-to-content: "Skip to the report"
@@ -34,6 +35,8 @@ format:
     pdf-standard: ua-1
     font-paths: fonts
     fig-format: png
+    filters:
+      - nacho-styles.lua
     template-partials:
       - partials/typst-template.typ
       - partials/typst-show.typ
@@ -41,6 +44,8 @@ format:
     toc-title: Contents
     toc-depth: 1
     section-numbering: "1.1"
+crossref:
+  title-delim: "."
 execute:
   echo: false
   warning: false
@@ -53,29 +58,30 @@ report <- NACHO:::report_setup(params$nacho_rds)
 x <- report$object
 ```
 
-# Summary
+# Decision summary
 
 ```{r}
-#| label: summary
+#| label: decisions
 #| output: asis
-cat(NACHO:::report_overview(x), sep = "\n")
-cat("\n\n")
-cat(NACHO:::report_callouts(x), sep = "\n")
+cat(NACHO:::report_decisions(x), sep = "\n")
 ```
 
 # Settings and thresholds
 
 ```{r}
-#| label: thresholds
+#| label: parameters
 #| output: asis
-cat(NACHO:::report_settings(x), sep = "\n")
-cat("\n\nLimits that flag a sample:\n\n")
-cat(NACHO:::report_thresholds(x), sep = "\n")
+cat(NACHO:::report_parameters(x), sep = "\n")
 ```
 
 ```{r}
 #| label: body
 #| output: asis
-#| fig-alt: !expr report$sections$alt[!is.na(report$sections$plot)]
 NACHO:::report_body(report)
+```
+
+```{r}
+#| label: methods
+#| output: asis
+cat(NACHO:::report_methods(x), sep = "\n")
 ```

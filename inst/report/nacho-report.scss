@@ -145,12 +145,15 @@ main.content {
   gap: 1rem;
   margin: 1rem 0 1.5rem;
 
-  > div {
+  > p {
+    margin: 0;
     padding: 0.75rem 1rem;
     border: 1px solid $nacho-line;
     border-top: 4px solid $nacho-navy;
+    color: $nacho-muted;
+    font-size: 0.9rem;
 
-    &.flag {
+    &:has(.flag) {
       border-top-color: $nacho-rust;
     }
   }
@@ -160,11 +163,7 @@ main.content {
     font-size: 1.8rem;
     font-weight: 700;
     line-height: 1.1;
-  }
-
-  span:not(.n) {
-    color: $nacho-muted;
-    font-size: 0.9rem;
+    color: $nacho-navy;
   }
 }
 
@@ -190,6 +189,7 @@ main.content table {
   }
 
   td {
+    text-align: left;
     vertical-align: top;
   }
 
@@ -197,7 +197,6 @@ main.content table {
   .num {
     font-family: $font-family-monospace;
     font-size: 0.85rem;
-    white-space: nowrap;
   }
 }
 

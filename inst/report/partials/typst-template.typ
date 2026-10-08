@@ -41,6 +41,36 @@
   ]
 }
 
+// The three counts of the decision summary, each as `(count, label, flag)`;
+// the flagged box gets a rust top edge.
+#let nacho-verdict(..boxes) = grid(
+  columns: (1fr,) * boxes.pos().len(),
+  gutter: 10pt,
+  ..boxes.pos().map(((count, label, flag)) => block(
+    width: 100%,
+    inset: 10pt,
+    stroke: (
+      top: 3pt + if flag { nacho-rust } else { nacho-navy },
+      rest: 0.6pt + nacho-line,
+    ),
+  )[
+    #text(size: 20pt, weight: 700, count) \
+    #text(size: 9pt, fill: nacho-muted, label)
+  ]),
+)
+
+// The source of a parameter; a source the user chose is amber.
+#let nacho-tag(user: false, body) = box(
+  fill: if user { rgb("#fde9c6") } else { nacho-tint },
+  inset: (x: 3pt, y: 1.5pt),
+  outset: (y: 1pt),
+  radius: 2pt,
+  text(size: 0.85em, body),
+)
+
+// A value or a limit in a table.
+#let nacho-num(body) = text(font: "JetBrains Mono", size: 0.9em, body)
+
 #let nacho-report(
   title: none,
   author: none,
@@ -162,6 +192,7 @@
   ]
   show heading.where(level: 2): set text(size: 13pt)
 
+  show table: set align(left)
   set table(
     stroke: (x, y) => (
       bottom: if y == 0 { 1.2pt + nacho-navy } else { 0.5pt + nacho-line },

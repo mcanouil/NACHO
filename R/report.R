@@ -203,6 +203,15 @@ report_reading_guide <- c(
   )
 )
 
+#' The "How to read this" callout of a plot or table
+#'
+#' @param key A name of [report_reading_guide].
+#'
+#' @noRd
+reading_guide_callout <- function(key) {
+  callout_lines("note", "How to read this", report_reading_guide[[key]])
+}
+
 #' Help page of a metric or of the app
 #'
 #' @param name The page name, such as `"bd"` or `"nacho"`.
@@ -351,9 +360,11 @@ count_words <- function(n, one, many) {
 
 #' Markdown lines for the decision summary of the report
 #'
-#' Three counts in a `nacho-verdict` div, then a table of the flagged samples
-#' with one row per failing metric, then the callouts of
-#' [report_method_callouts()].
+#' Three counts in a `nacho-verdict` div, where the class `flag` marks the
+#' flagged count when there is one, then a table of the flagged samples
+#' with one row per failing metric, then its "How to read this" callout, then
+#' the callouts of [report_method_callouts()].
+#' When nothing is flagged, there is no table and no "How to read this".
 #'
 #' @param x A `nacho` object.
 #'
@@ -377,7 +388,7 @@ report_decisions <- function(x) {
     paste0(
       "[",
       flagged,
-      "]{.n .flag} ",
+      if (flagged > 0) "]{.n .flag} " else "]{.n} ",
       count_words(flagged, "sample is", "samples are"),
       " flagged"
     ),
@@ -451,7 +462,7 @@ report_decisions <- function(x) {
       if (lanes) "Lane" else "Cartridge",
       " | Metric | Value | Limit |"
     ),
-    "|---|---|---|---:|---|",
+    "|------|----|----|---:|----|",
     paste0(
       "| ",
       sample,
@@ -466,6 +477,8 @@ report_decisions <- function(x) {
       " |"
     ),
     "",
+    ": Flagged samples {#tbl-flagged}",
+    "",
     if (any(lane_rows)) {
       c(
         paste(
@@ -475,6 +488,7 @@ report_decisions <- function(x) {
         ""
       )
     },
+    reading_guide_callout("decisions"),
     callouts
   )
 }
@@ -934,7 +948,7 @@ report_parameters <- function(x) {
     "Anyone can rerun the analysis with the same settings and get the same result.",
     "",
     "| Parameter | Value | What it means | Source |",
-    "|---|---|---|---|",
+    "|-----|----|--------|----|",
     paste0(
       "| ",
       parameter,
@@ -945,7 +959,11 @@ report_parameters <- function(x) {
       " | ",
       source_tag(source),
       " |"
-    )
+    ),
+    "",
+    ": Limits and settings {#tbl-parameters}",
+    "",
+    reading_guide_callout("parameters")
   )
 }
 
@@ -1204,7 +1222,7 @@ nacho_citation <- function() {
 #' @noRd
 report_methods <- function(x) {
   c(
-    "# Methods",
+    "# Methods {.unnumbered}",
     "",
     methods_limits(x),
     "",
@@ -1216,59 +1234,12 @@ report_methods <- function(x) {
     "",
     nacho_citation(),
     "",
-    "## Session information",
+    "## Session information {.unnumbered}",
     "",
     "```",
     report_versions(),
     "```"
   )
-}
-
-#' Markdown lines summarising the object
-#'
-#' @noRd
-report_overview <- function(x) {
-  qc <- nacho_qc(x)
-  thresholds <- x@thresholds
-  instrument <- thresholds[["instrument"]]
-  c(
-    paste0("- Samples: ", nrow(qc)),
-    paste0("- Cartridges: ", length(unique(qc[["CartridgeID"]]))),
-    paste0("- Flagged samples: ", sum(qc[["status"]] %in% "fail")),
-    paste0(
-      "- Thresholds: ",
-      thresholds[["preset"]],
-      " preset, instrument ",
-      if (is.na(instrument)) "unknown" else instrument
-    ),
-    paste0(
-      "- Normalisation: ",
-      x@settings[["normalisation_method"]],
-      ", background ",
-      x@settings[["background"]]
-    )
-  )
-}
-
-#' One Quarto callout per failing sample
-#'
-#' @noRd
-report_callouts <- function(x) {
-  failures <- qc_failures(x)
-  if (nrow(failures) == 0) {
-    return("No sample fails a quality-control threshold.")
-  }
-  ids <- failures[[x@settings[["id_colname"]]]]
-  unlist(lapply(seq_len(nrow(failures)), function(i) {
-    c(
-      "::: {.callout-warning}",
-      paste0("## `", ids[i], "`"),
-      "",
-      failures[["reason"]][i],
-      ":::",
-      ""
-    )
-  }))
 }
 
 #' Metrics whose thresholds the report shows
@@ -1313,23 +1284,6 @@ threshold_bounds <- function(x, metric) {
   }
 }
 
-#' Markdown lines for the thresholds that can flag a sample
-#'
-#' Leaves out the bounds that [threshold_bounds()] cannot put in words.
-#'
-#' @noRd
-report_thresholds <- function(x) {
-  bounds <- report_limits(x)
-  paste0(
-    "- ",
-    qc_metric_labels[names(bounds)],
-    " (`",
-    names(bounds),
-    "`): ",
-    bounds
-  )
-}
-
 #' The limits that can flag a sample, in words
 #'
 #' @return A character vector named by metric, without the bounds that
@@ -1340,36 +1294,6 @@ report_limits <- function(x) {
   metrics <- report_metrics(x)
   bounds <- vapply(metrics, threshold_bounds, character(1), x = x)
   bounds[!is.na(bounds)]
-}
-
-#' Markdown lines for the settings that shape the data
-#'
-#' @noRd
-report_settings <- function(x) {
-  settings <- x@settings
-  housekeeping <- settings[["housekeeping_genes"]]
-  c(
-    paste0(
-      "- Housekeeping genes: ",
-      if (length(housekeeping) == 0) {
-        "none"
-      } else {
-        paste(housekeeping, collapse = ", ")
-      }
-    ),
-    paste0(
-      "- Housekeeping genes predicted: ",
-      if (isTRUE(settings[["housekeeping_predict"]])) "yes" else "no"
-    ),
-    paste0(
-      "- Normalised with housekeeping genes: ",
-      if (isTRUE(settings[["housekeeping_norm"]])) "yes" else "no"
-    ),
-    paste0("- Principal components: ", settings[["n_comp"]]),
-    if (identical(settings[["normalisation_method"]], "RUVg")) {
-      paste0("- RUV factors: ", settings[["ruv_k"]])
-    }
-  )
 }
 
 #' The plot types that make sense for the object
@@ -1474,6 +1398,9 @@ report_sections <- function(x) {
 
 #' Design and cross-tables of the batch diagnostics
 #'
+#' Each table gets a caption and a `tbl-` id, so Quarto numbers the tables the
+#' same way in HTML and Typst.
+#'
 #' @noRd
 report_batch_tables <- function(x, group) {
   batch <- intersect(c("CartridgeID", "Date"), names(nacho_samples(x)))
@@ -1497,13 +1424,24 @@ report_batch_tables <- function(x, group) {
         ""
       )
     },
-    knitr::kable(design, digits = 2),
+    knitr::kable(design, format = "pipe", digits = 2),
+    "",
+    ": Batch design {#tbl-batch-design}",
     "",
     unlist(lapply(names(crosstabs), function(column) {
       c(
-        paste0("Groups by `", column, "`:"),
+        knitr::kable(
+          as.data.frame.matrix(crosstabs[[column]]),
+          format = "pipe"
+        ),
         "",
-        knitr::kable(as.data.frame.matrix(crosstabs[[column]])),
+        paste0(
+          ": Groups by `",
+          column,
+          "` {#tbl-batch-",
+          tolower(column),
+          "}"
+        ),
         ""
       )
     }))
@@ -1628,6 +1566,55 @@ report_setup <- function(path) {
   )
 }
 
+#' Show a plot of the report as a numbered figure
+#'
+#' In a knitr chunk, the plot goes to a PNG file in the figure folder of the
+#' chunk, at the size and resolution of the chunk.
+#' A Markdown image then points to it, with a `fig-` id, the section title as
+#' caption and the alt text, so Quarto numbers the figures the same way in
+#' HTML and Typst.
+#' A `fig-` chunk label cannot do this, because Quarto then holds all the
+#' plots of the chunk until its end.
+#' Outside knitr, the plot is printed.
+#'
+#' @param plot A ggplot.
+#' @param type The plot type, which names the file and the figure id.
+#' @param caption The figure caption.
+#' @param alt The alt text.
+#'
+#' @noRd
+report_figure <- function(plot, type, caption, alt) {
+  if (!isTRUE(getOption("knitr.in.progress"))) {
+    print(plot)
+    return(invisible())
+  }
+  chunk <- knitr::opts_current$get()
+  id <- paste0("fig-", tolower(type))
+  path <- paste0(chunk[["fig.path"]], id, ".png")
+  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
+  ggplot2::ggsave(
+    path,
+    plot,
+    width = chunk[["fig.width"]],
+    height = chunk[["fig.height"]],
+    units = "in",
+    dpi = chunk[["dpi"]]
+  )
+  cat(
+    "\n\n![",
+    caption,
+    "](",
+    path,
+    "){#",
+    id,
+    " fig-alt=\"",
+    gsub("\"", "\\\"", alt, fixed = TRUE),
+    "\"}\n\n",
+    sep = ""
+  )
+  invisible()
+}
+
 #' Print the body of the report
 #'
 #' Run in a Quarto chunk with `output: asis`.
@@ -1668,12 +1655,18 @@ report_body <- function(report) {
           invokeRestart("muffleWarning")
         }
       )
-      print(plot)
+      report_figure(
+        plot,
+        sections[["plot"]][i],
+        sections[["title"]][i],
+        sections[["alt"]][i]
+      )
       cat(
-        "\n\n::: {.callout-note title=\"How to read this\"}\n",
-        report_reading_guide[[sections[["plot"]][i]]],
-        "\n:::\n\n",
-        sep = ""
+        "",
+        "",
+        reading_guide_callout(sections[["plot"]][i]),
+        "",
+        sep = "\n"
       )
     }
   }

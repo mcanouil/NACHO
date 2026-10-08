@@ -10,28 +10,6 @@ test_that("qc_failures() lists failing samples with their reasons", {
   expect_identical(nrow(NACHO:::qc_failures(GSE74821)), 0L)
 })
 
-test_that("the overview counts samples, cartridges and flags", {
-  lines <- NACHO:::report_overview(flagged_gse())
-  expect_identical(lines[1], "- Samples: 12")
-  expect_match(lines[3], "^- Flagged samples: [1-9]")
-  expect_match(lines[4], "^- Thresholds: nsolver preset, instrument ")
-  expect_match(lines[5], "^- Normalisation: GLM, background none$")
-})
-
-test_that("each failing sample gets one callout", {
-  x <- flagged_gse()
-  lines <- NACHO:::report_callouts(x)
-  expect_identical(
-    sum(lines == "::: {.callout-warning}"),
-    sum(NACHO:::flagged_samples(x))
-  )
-  expect_match(lines[2], "^## `GSM")
-  expect_identical(
-    NACHO:::report_callouts(GSE74821),
-    "No sample fails a quality-control threshold."
-  )
-})
-
 test_that("thresholds leave out bounds that never flag", {
   x <- toy_nacho(4L)
   thresholds <- x@thresholds
@@ -40,15 +18,11 @@ test_that("thresholds leave out bounds that never flag", {
   thresholds$LoD <- -Inf
   thresholds$PCL <- 0
   x@thresholds <- thresholds
-  lines <- NACHO:::report_thresholds(x)
-  expect_false(any(grepl("Inf", lines, fixed = TRUE)))
-  expect_true("- Binding density (`BD`): at most 2.25" %in% lines)
-  expect_true(
-    "- Content normalization factor (`House_factor`): at least 0.0909" %in%
-      lines
-  )
-  expect_false(any(grepl("`LoD`", lines, fixed = TRUE)))
-  expect_false(any(grepl("`PCL`", lines, fixed = TRUE)))
+  limits <- NACHO:::report_limits(x)
+  expect_false(any(grepl("Inf", limits, fixed = TRUE)))
+  expect_identical(limits[["BD"]], "at most 2.25")
+  expect_identical(limits[["House_factor"]], "at least 0.0909")
+  expect_false(any(c("LoD", "PCL") %in% names(limits)))
 })
 
 test_that("sections follow the object", {
@@ -158,9 +132,7 @@ test_that("thresholds never print a bound at the top of the field of view", {
   thresholds <- x@thresholds
   thresholds$FoV <- c(75, 100)
   S7::prop(x, "thresholds", check = FALSE) <- thresholds
-  lines <- NACHO:::report_thresholds(x)
-  expect_true("- Field of view (`FoV`): at least 75%" %in% lines)
-  expect_false(any(grepl("100", lines[grepl("`FoV`", lines)])))
+  expect_identical(NACHO:::report_limits(x)[["FoV"]], "at least 75%")
 })
 
 test_that("thresholds with two bounds read as a range", {
@@ -168,9 +140,7 @@ test_that("thresholds with two bounds read as a range", {
   thresholds <- x@thresholds
   thresholds$BD <- c(0.1, 2.25)
   x@thresholds <- thresholds
-  expect_true(
-    "- Binding density (`BD`): 0.1 to 2.25" %in% NACHO:::report_thresholds(x)
-  )
+  expect_identical(NACHO:::report_limits(x)[["BD"]], "0.1 to 2.25")
 })
 
 test_that("only the batch section gets the batch tables", {
@@ -305,9 +275,9 @@ test_that("the report template is found, or the error says it is missing", {
 })
 
 test_that("thresholds leave out PCL and LoD for PlexSet data", {
-  lines <- NACHO:::report_thresholds(plexset_nacho)
-  expect_false(any(grepl("`PCL`|`LoD`", lines)))
-  expect_true(any(grepl("`BD`", lines)))
+  limits <- NACHO:::report_limits(plexset_nacho)
+  expect_false(any(c("PCL", "LoD") %in% names(limits)))
+  expect_true("BD" %in% names(limits))
 })
 
 test_that("thresholds name the lower bound first whatever the order", {
@@ -315,9 +285,7 @@ test_that("thresholds name the lower bound first whatever the order", {
   thresholds <- x@thresholds
   thresholds$BD <- c(2.25, 0.1)
   S7::prop(x, "thresholds", check = FALSE) <- thresholds
-  expect_true(
-    "- Binding density (`BD`): 0.1 to 2.25" %in% NACHO:::report_thresholds(x)
-  )
+  expect_identical(NACHO:::report_limits(x)[["BD"]], "0.1 to 2.25")
 })
 
 test_that("a threshold of 0 on the housekeeping count is not printed", {
@@ -326,30 +294,7 @@ test_that("a threshold of 0 on the housekeeping count is not printed", {
   thresholds <- x@thresholds
   thresholds[["Housekeeping_detected"]] <- 0
   x@thresholds <- thresholds
-  expect_false(any(grepl(
-    "Housekeeping_detected",
-    NACHO:::report_thresholds(x),
-    fixed = TRUE
-  )))
-})
-
-test_that("report_settings() lists the settings that shape the data", {
-  x <- toy_nacho(4L)
-  lines <- NACHO:::report_settings(x)
-  expect_true(any(grepl("Housekeeping genes: HK1", lines, fixed = TRUE)))
-  expect_true(any(grepl("Principal components: 2", lines, fixed = TRUE)))
-  expect_false(any(grepl("RUV", lines)))
-
-  x@settings[["housekeeping_genes"]] <- NULL
-  expect_true(any(grepl(
-    "Housekeeping genes: none",
-    NACHO:::report_settings(x),
-    fixed = TRUE
-  )))
-
-  x@settings[["normalisation_method"]] <- "RUVg"
-  x@settings[["ruv_k"]] <- 2L
-  expect_true(any(grepl("RUV factors: 2", NACHO:::report_settings(x))))
+  expect_false("Housekeeping_detected" %in% names(NACHO:::report_limits(x)))
 })
 
 test_that("report_sections() leaves out plots that cannot be drawn", {
@@ -507,10 +452,53 @@ test_that("report_decisions() counts and lists the flagged samples", {
   expect_match(text, "The other 47 samples pass every check.", fixed = TRUE)
 })
 
+test_that("the decision summary puts the table, its help, then the method callouts", {
+  lines <- NACHO:::report_decisions(tuned_gse(FoV = 95))
+  table <- which(startsWith(lines, "| Sample |"))
+  caption <- which(lines == ": Flagged samples {#tbl-flagged}")
+  guide <- which(lines == "## How to read this")
+  method <- which(lines == "## Instrument not in the RCC files")
+  expect_length(caption, 1L)
+  expect_length(guide, 1L)
+  expect_true(table < caption && caption < guide && guide < method)
+  expect_match(
+    lines[guide + 2L],
+    NACHO:::report_reading_guide[["decisions"]],
+    fixed = TRUE
+  )
+  none <- NACHO:::report_decisions(GSE74821)
+  expect_false(any(none == "## How to read this"))
+  expect_false(any(startsWith(none, ": Flagged samples")))
+})
+
+test_that("the parameter table has a caption and its help", {
+  lines <- NACHO:::report_parameters(GSE74821)
+  caption <- which(lines == ": Limits and settings {#tbl-parameters}")
+  expect_length(caption, 1L)
+  expect_gt(caption, max(which(startsWith(lines, "| "))))
+  expect_identical(
+    lines[which(lines == "## How to read this") + 2L],
+    NACHO:::report_reading_guide[["parameters"]]
+  )
+})
+
+test_that("each batch table has a caption with its own id", {
+  skip_if_not_installed("knitr")
+  lines <- NACHO:::report_batch_tables(GSE74821, group = "tissue type:ch1")
+  expect_identical(
+    grep("^: ", lines, value = TRUE),
+    c(
+      ": Batch design {#tbl-batch-design}",
+      ": Groups by `CartridgeID` {#tbl-batch-cartridgeid}",
+      ": Groups by `Date` {#tbl-batch-date}"
+    )
+  )
+})
+
 test_that("report_decisions() says so when nothing is flagged", {
   text <- paste(NACHO:::report_decisions(GSE74821), collapse = "\n")
   expect_match(text, "Every sample passes every check.", fixed = TRUE)
-  expect_match(text, "[0]{.n .flag} samples are flagged", fixed = TRUE)
+  expect_match(text, "[0]{.n} samples are flagged", fixed = TRUE)
   expect_false(grepl("| Sample |", text, fixed = TRUE))
 })
 
@@ -626,7 +614,7 @@ test_that("report_parameters() credits NACHO 2 for the legacy preset", {
   text <- paste(NACHO:::report_parameters(x), collapse = "\n")
   expect_match(text, "Binding density[^\n]*\\[NACHO 2\\]\\{\\.tag\\}")
   expect_match(text, "Field of view[^\n]*\\[NACHO 2\\]\\{\\.tag\\}")
-  expect_false(grepl("nSolver", text, fixed = TRUE))
+  expect_false(grepl("[nSolver]", text, fixed = TRUE))
 })
 
 test_that("report_parameters() covers every setting with its source", {
@@ -991,20 +979,15 @@ test_that("report_body() prints a How to read this callout under each plot", {
     options = NACHO:::check_report_options(GSE74821),
     sections = NACHO:::report_sections(GSE74821)
   )
-  out <- paste(
-    utils::capture.output(NACHO:::report_body(report)),
-    collapse = "\n"
+  lines <- utils::capture.output(NACHO:::report_body(report))
+  out <- paste(lines, collapse = "\n")
+  expect_identical(
+    sum(lines == "## How to read this"),
+    sum(!is.na(report$sections$plot))
   )
   expect_identical(
-    lengths(regmatches(
-      out,
-      gregexpr(
-        "::: {.callout-note title=\"How to read this\"}",
-        out,
-        fixed = TRUE
-      )
-    )),
-    sum(!is.na(report$sections$plot))
+    lines[which(lines == "## How to read this") - 1L],
+    rep("::: {.callout-note}", sum(!is.na(report$sections$plot)))
   )
   expect_match(out, NACHO:::report_reading_guide[["FoV"]], fixed = TRUE)
 })
@@ -1012,7 +995,7 @@ test_that("report_body() prints a How to read this callout under each plot", {
 test_that("the methods appendix cites NACHO and the nSolver guidelines", {
   lines <- NACHO:::report_methods(GSE74821)
   text <- paste(lines, collapse = "\n")
-  expect_identical(lines[1], "# Methods")
+  expect_identical(lines[1], "# Methods {.unnumbered}")
   expect_match(text, "Canouil", fixed = TRUE)
   expect_match(text, "nSolver", fixed = TRUE)
   expect_match(
@@ -1022,7 +1005,11 @@ test_that("the methods appendix cites NACHO and the nSolver guidelines", {
   )
   expect_false(grepl("_Bioinformatics_", text, fixed = TRUE))
   expect_match(text, "\\'t Hart", fixed = TRUE)
-  expect_match(text, "## Session information\n\n```\nR version", fixed = TRUE)
+  expect_match(
+    text,
+    "## Session information {.unnumbered}\n\n```\nR version",
+    fixed = TRUE
+  )
   expect_identical(sum(lines == "```"), 2L)
   expect_false(grepl("ISSN", text, fixed = TRUE))
   expect_identical(

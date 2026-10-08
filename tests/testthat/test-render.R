@@ -172,8 +172,8 @@ test_that("render() writes an HTML report", {
   output_dir <- withr::local_tempdir()
   path <- render(flagged_gse(), output_dir = output_dir)
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
-  expect_match(html, "Flagged samples: [1-9]")
-  expect_match(html, "callout-warning")
+  expect_match(html, '<span class="n flag">[1-9]')
+  expect_match(html, "Flagged samples", fixed = TRUE)
 })
 
 test_that("render() writes a Typst PDF report", {
@@ -321,16 +321,27 @@ test_that("a real HTML render shows the title and author as typed", {
   expect_match(html, "Micka\u00ebl Canouil, Lab &amp; Co", fixed = TRUE)
 })
 
+shared_report <- local({
+  paths <- list()
+  function(format) {
+    if (is.null(paths[[format]])) {
+      paths[[format]] <<- render(
+        tuned_gse(FoV = 95),
+        format = format,
+        group = "tissue type:ch1",
+        title = "GSE74821",
+        author = "Jane Doe",
+        output_dir = withr::local_tempdir(.local_envir = teardown_env())
+      )
+    }
+    paths[[format]]
+  }
+})
+
 test_that("the HTML report has the cover, landmarks and accessible tables", {
   skip_on_cran()
   skip_unless_real_render()
-  path <- render(
-    GSE74821,
-    group = "tissue type:ch1",
-    title = "GSE74821",
-    author = "Jane Doe",
-    output_dir = withr::local_tempdir()
-  )
+  path <- shared_report("html")
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
   expect_match(html, '<html[^>]*lang="en-US"')
   expect_match(html, '<header[^>]*class="[^"]*nacho-cover')
@@ -351,7 +362,14 @@ test_that("the HTML report has the cover, landmarks and accessible tables", {
   ths <- regmatches(html, gregexpr("<th[ >][^>]*>", html))[[1]]
   expect_gt(length(ths), 0)
   expect_true(all(grepl('scope="col"', ths, fixed = TRUE)))
-  expect_match(html, 'class="nacho-table-scroll"[^>]*aria-label="Table 1"')
+  expect_match(
+    html,
+    'class="nacho-table-scroll"[^>]*aria-label="Flagged samples"'
+  )
+  expect_match(
+    html,
+    'class="nacho-table-scroll"[^>]*aria-label="Limits and settings"'
+  )
   imgs <- regmatches(html, gregexpr("<img [^>]*>", html))[[1]]
   expect_true(all(grepl('alt="[^"]+"|aria-hidden="true"|alt=""', imgs)))
   expect_match(html, '<img [^>]*alt="NACHO logo"')
@@ -440,13 +458,7 @@ test_that("the Typst report is a tagged PDF with the cover and decorations as ar
   skip_unless_real_render()
   skip_if(!nzchar(Sys.which("pdftotext")), "pdftotext is missing")
   skip_if(!nzchar(Sys.which("pdfinfo")), "pdfinfo is missing")
-  path <- render(
-    GSE74821,
-    format = "typst",
-    title = "GSE74821",
-    author = "Jane Doe",
-    output_dir = withr::local_tempdir()
-  )
+  path <- shared_report("typst")
   keys <- pdf_keys(path)
   expect_identical(keys[["Title"]], "GSE74821")
   expect_identical(keys[["Author"]], "Jane Doe")
@@ -486,6 +498,115 @@ test_that("the Typst report is a tagged PDF with the cover and decorations as ar
     last,
     "NACHO [0-9.]+ · R [0-9.]+ · [A-Z][a-z]+ [0-9]{1,2}, [0-9]{4}"
   )
+})
+
+html_main_text <- function(path) {
+  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  main <- sub("^.*?<main", "", html, perl = TRUE)
+  text <- gsub("<[^>]+>", " ", main)
+  text <- gsub("&nbsp;|\u00a0", " ", text)
+  gsub("[ \t]+", " ", text)
+}
+
+html_headings <- function(path) {
+  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  main <- sub("^.*?<main", "", html, perl = TRUE)
+  headings <- regmatches(
+    main,
+    gregexpr("(?s)<h[12][^>]*>.*?</h[12]>", main, perl = TRUE)
+  )[[1]]
+  headings <- headings[!grepl('id="toc-title"', headings, fixed = TRUE)]
+  trimws(gsub("\\s+", " ", gsub("<[^>]+>", " ", headings)))
+}
+
+pdf_lines <- function(path) {
+  lines <- system2("pdftotext", c(path, "-"), stdout = TRUE)
+  trimws(gsub("\\s+", " ", lines))
+}
+
+captions <- function(text, kind) {
+  pattern <- paste0(kind, " [0-9]+\\. [A-Za-z`][^\n]*")
+  trimws(regmatches(text, gregexpr(pattern, text))[[1]])
+}
+
+test_that("HTML and Typst reports have the same sections, captions and help", {
+  skip_on_cran()
+  skip_unless_real_render()
+  skip_if(!nzchar(Sys.which("pdftotext")), "pdftotext is missing")
+  html_path <- shared_report("html")
+  pdf_path <- shared_report("typst")
+  headings <- html_headings(html_path)
+  expect_identical(
+    headings[grepl("^[0-9]+ ", headings)],
+    c(
+      "1 Decision summary",
+      "2 Settings and thresholds",
+      "3 Quality-control metrics",
+      "4 Control probes",
+      "5 Counts",
+      "6 Principal components",
+      "7 Normalization",
+      "8 Batch effects"
+    )
+  )
+  expect_identical(
+    utils::tail(headings, 2),
+    c("Methods", "Session information")
+  )
+  lines <- pdf_lines(pdf_path)
+  body <- seq(max(grep("^Methods \\.", lines)) + 1L, length(lines))
+  found <- vapply(
+    headings,
+    function(heading) match(heading, lines[body]),
+    integer(1)
+  )
+  expect_false(
+    anyNA(found),
+    label = paste(headings[is.na(found)], collapse = ", ")
+  )
+  expect_false(is.unsorted(found))
+
+  html <- html_main_text(html_path)
+  html_lines <- trimws(strsplit(html, "\n", fixed = TRUE)[[1]])
+  html_lines <- paste(html_lines[nzchar(html_lines)], collapse = "\n")
+  pdf <- paste(lines, collapse = "\n")
+  sections <- NACHO:::report_sections(tuned_gse(FoV = 95))
+  plots <- sections[!is.na(sections$plot), ]
+  expect_identical(
+    captions(html_lines, "Figure"),
+    paste0("Figure ", seq_len(nrow(plots)), ". ", plots$title)
+  )
+  expect_identical(captions(pdf, "Figure"), captions(html_lines, "Figure"))
+  expect_identical(
+    captions(html_lines, "Table"),
+    c(
+      "Table 1. Flagged samples",
+      "Table 2. Limits and settings",
+      "Table 3. Batch design",
+      "Table 4. Groups by CartridgeID",
+      "Table 5. Groups by Date"
+    )
+  )
+  expect_identical(captions(pdf, "Table"), captions(html_lines, "Table"))
+
+  guides <- function(text) {
+    lengths(regmatches(text, gregexpr("How to read this", text, fixed = TRUE)))
+  }
+  expect_identical(guides(html), nrow(plots) + 2L)
+  expect_identical(guides(pdf), guides(html))
+
+  expect_match(html, "47 samples pass every check", fixed = TRUE)
+  expect_match(pdf, "47\nsamples pass every check", fixed = TRUE)
+
+  raw_html <- paste(readLines(html_path, warn = FALSE), collapse = "\n")
+  bytes <- pdf_streams(pdf_path)
+  for (alt in plots$alt) {
+    expect_match(raw_html, paste0('alt="', alt, '"'), fixed = TRUE)
+    expect_gt(
+      length(grepRaw(paste0("/Alt(", alt, ")"), bytes, fixed = TRUE)),
+      0
+    )
+  }
 })
 
 test_that("a Typst render keeps a title and an author with special characters", {
