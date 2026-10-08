@@ -1255,7 +1255,7 @@ test_that("report_figure() writes a numbered figure in a knitr chunk", {
         fig.path = file.path(dir, "figures", ""),
         fig.width = 4,
         fig.height = 3,
-        dpi = 50,
+        dpi = 100,
         fig.retina = 2
       )
     }

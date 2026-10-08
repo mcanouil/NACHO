@@ -1685,7 +1685,8 @@ knitr_chunk_options <- function() {
 #' Show a plot of the report as a numbered figure
 #'
 #' In a knitr chunk, the plot goes to a PNG file in the figure folder of the
-#' chunk, at the size of the chunk and at its resolution times `fig.retina`.
+#' chunk, at the size and the resolution of the chunk.
+#' knitr has already multiplied the `dpi` of the chunk by `fig.retina`.
 #' A Markdown image then points to it, with a `fig-` id, the section title as
 #' caption, the alt text and the width of the chunk, so Quarto numbers the
 #' figures the same way in HTML and Typst.
@@ -1715,7 +1716,7 @@ report_figure <- function(plot, type, caption, alt) {
     width = chunk[["fig.width"]],
     height = chunk[["fig.height"]],
     units = "in",
-    dpi = chunk[["dpi"]] * (chunk[["fig.retina"]] %||% 1)
+    dpi = chunk[["dpi"]]
   )
   cat(
     "\n\n![",
