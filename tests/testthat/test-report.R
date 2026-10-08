@@ -1135,7 +1135,7 @@ test_that("the methods appendix cites NACHO and the nSolver guidelines", {
   expect_match(text, "\\'t Hart", fixed = TRUE)
   expect_match(
     text,
-    "## Session information {.unnumbered}\n\n```\nR version",
+    "## Session information {.unnumbered}\n\n```\nR ",
     fixed = TRUE
   )
   expect_identical(sum(lines == "```"), 2L)

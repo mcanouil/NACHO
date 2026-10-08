@@ -1240,22 +1240,51 @@ report_versions <- function() {
 
 #' The NACHO citation as plain text
 #'
-#' The `"text"` style marks the journal and the volume with `_` and `*`, so
-#' these marks are removed.
-#' The ISSN and the plain DOI are removed too, so only the DOI link stays, in
-#' angle brackets, which both HTML and Typst show as a link.
+#' Built from the fields of `citation("NACHO")` rather than from its formatted
+#' text, which changes between R versions.
+#' Only the DOI link stays, in angle brackets, which both HTML and Typst show
+#' as a link.
 #' Pandoc writes an apostrophe to Typst as a straight one, and Typst reads it
 #' before a word, as in "'t Hart", as an opening quote.
 #' A backslash keeps each apostrophe straight in both formats.
 #'
 #' @noRd
 nacho_citation <- function() {
-  text <- format(utils::citation("NACHO"), style = "text")
-  text <- paste(gsub("\\s+", " ", text), collapse = " ")
-  text <- gsub("(^|\\W)_([^_]+)_(\\W)", "\\1\\2\\3", text, perl = TRUE)
-  text <- gsub("(^|\\W)\\*([^*]+)\\*(\\W)", "\\1\\2\\3", text, perl = TRUE)
-  text <- gsub(" ISSN [0-9X-]+\\.", "", text)
-  text <- gsub("doi:\\S+ (<https://doi\\.org/[^>]+>)", "\\1", text)
+  entry <- unclass(utils::citation("NACHO"))[[1]]
+  authors <- vapply(
+    utils::citation("NACHO")[[1]]$author,
+    function(person) {
+      initials <- substr(
+        strsplit(paste(person$given, collapse = " "), " ")[[1]],
+        1,
+        1
+      )
+      paste(
+        paste(person$family, collapse = " "),
+        paste(initials, collapse = "")
+      )
+    },
+    character(1)
+  )
+  title <- gsub("[{}]", "", entry$title)
+  text <- paste0(
+    paste(authors, collapse = ", "),
+    " (",
+    entry$year,
+    "). \u201c",
+    title,
+    ".\u201d ",
+    entry$journal,
+    ", ",
+    entry$volume,
+    "(",
+    entry$number,
+    "), ",
+    gsub("--", "-", entry$pages, fixed = TRUE),
+    ". <https://doi.org/",
+    entry$doi,
+    ">."
+  )
   gsub("['\u2019]", "\\\\'", text)
 }
 
