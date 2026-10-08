@@ -592,7 +592,7 @@ test_that("report_parameters() gives meaning and source for each limit", {
   expect_match(text, "Field of view[^\n]*\\[nSolver\\]\\{\\.tag\\}")
   expect_match(
     text,
-    "Binding density[^\n]*\\[MAX/FLEX/PRO \\(assumed\\)\\]\\{\\.tag\\}"
+    "Binding density[^\n]*\\[MAX/FLEX/PRO \\(not in the RCC files\\)\\]\\{\\.tag\\}"
   )
   limits <- strsplit(text, "\n", fixed = TRUE)[[1]]
   limits <- limits[grepl("^\\| (Binding density|Field of view) \\|", limits)]
@@ -607,7 +607,7 @@ test_that("report_parameters() gives meaning and source for each limit", {
   )
   expect_match(
     tuned_text,
-    "Binding density[^\n]*\\[MAX/FLEX/PRO \\(assumed\\)\\]\\{\\.tag\\}"
+    "Binding density[^\n]*\\[MAX/FLEX/PRO \\(not in the RCC files\\)\\]\\{\\.tag\\}"
   )
 })
 
@@ -725,14 +725,14 @@ test_that("the binding density source names the instrument family", {
   )
   expect_identical(
     NACHO:::threshold_source(GSE74821, "BD"),
-    "MAX/FLEX/PRO (assumed)"
+    "MAX/FLEX/PRO (not in the RCC files)"
   )
   thresholds <- GSE74821@thresholds
   thresholds$instrument <- NA_character_
   unknown <- NACHO::normalise(GSE74821, outliers_thresholds = thresholds)
   expect_identical(
     NACHO:::threshold_source(unknown, "BD"),
-    "MAX/FLEX/PRO (assumed)"
+    "MAX/FLEX/PRO (not in the RCC files)"
   )
   detected <- GSE74821
   samples <- detected@samples
@@ -740,12 +740,12 @@ test_that("the binding density source names the instrument family", {
   S7::prop(detected, "samples", check = FALSE) <- samples
   expect_identical(NACHO:::threshold_source(detected, "BD"), "MAX/FLEX/PRO")
   expect_false(any(grepl(
-    "Instrument assumed",
+    "Instrument not in the RCC files",
     NACHO:::report_method_callouts(detected),
     fixed = TRUE
   )))
   expect_true(any(grepl(
-    "Instrument assumed",
+    "Instrument not in the RCC files",
     NACHO:::report_method_callouts(GSE74821),
     fixed = TRUE
   )))
@@ -754,7 +754,7 @@ test_that("the binding density source names the instrument family", {
     outliers_thresholds = NACHO::nacho_thresholds(preset = "legacy")
   )
   expect_false(any(grepl(
-    "Instrument assumed",
+    "Instrument not in the RCC files",
     NACHO:::report_method_callouts(legacy),
     fixed = TRUE
   )))
@@ -906,6 +906,11 @@ test_that("report_method_callouts() gives nothing when nothing applies", {
   expect_identical(NACHO:::report_method_callouts(x), character(0))
 })
 
-test_that("md_escape() keeps three dots the same in both formats", {
-  expect_identical(NACHO:::md_escape("a...b"), "a\u2026b")
+test_that("md_escape() keeps three dots as typed in both formats", {
+  dot <- "`.`{=html}`\\.`{=typst}"
+  expect_identical(
+    NACHO:::md_escape("a...b"),
+    paste0("a\\.", dot, dot, "b")
+  )
+  expect_identical(NACHO:::md_escape("a.b"), "a\\.b")
 })

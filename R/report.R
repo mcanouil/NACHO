@@ -169,15 +169,23 @@ qc_failure_rows <- function(x, qc = nacho_qc(x)) {
 #'
 #' Escapes the Markdown punctuation with a backslash and writes `&`, `<` and
 #' `>` as HTML entities, which Pandoc reads in both HTML and Typst output.
-#' Typst reads three dots as an ellipsis whatever the escaping, so three dots
-#' become the ellipsis character in both formats.
+#' Pandoc writes escaped dots to Typst as plain dots, and Typst reads three
+#' dots as an ellipsis.
+#' So each dot that follows a dot is written twice as raw output: a plain dot
+#' for HTML and an escaped dot for Typst.
+#' Both formats then show the dots as typed.
 #'
 #' @noRd
 md_escape <- function(text) {
-  text <- gsub("...", "\u2026", text, fixed = TRUE)
   text <- gsub(
     "([][!\"#$%'()*+,./:;=?@\\\\^_`{|}~-])",
     "\\\\\\1",
+    text,
+    perl = TRUE
+  )
+  text <- gsub(
+    "(?<=\\\\\\.)\\\\\\.",
+    "`.`{=html}`\\\\.`{=typst}",
     text,
     perl = TRUE
   )
@@ -323,14 +331,15 @@ report_decisions <- function(x) {
   )
 }
 
-#' Whether the binding density limits rest on an assumed instrument
+#' Whether the RCC files leave the instrument of the MAX/FLEX/PRO limits open
 #'
 #' Only RCC file version 1.7 names the instrument; otherwise NACHO uses the
 #' MAX/FLEX/PRO limits unless the user named an instrument.
-#' A user who named `"max"` for such files cannot be told apart.
+#' A user who named `"max"` for such files cannot be told apart, so this only
+#' says what the files do not record.
 #'
 #' @noRd
-instrument_assumed <- function(x) {
+instrument_not_in_files <- function(x) {
   instrument <- x@thresholds[["instrument"]]
   is.na(instrument) ||
     (instrument == "max" && is.na(detect_instrument(x@samples)))
@@ -396,7 +405,8 @@ housekeeping_probes <- function(x) {
 
 #' Markdown callouts about how NACHO treated the data
 #'
-#' Covers a GLM that fell back to the geometric mean, an assumed instrument
+#' Covers a GLM that fell back to the geometric mean, an instrument missing
+#' from the RCC files
 #' (only with the nSolver preset, whose binding density limits depend on it),
 #' excluded negative controls, predicted housekeeping genes, housekeeping
 #' normalisation turned off, and an object migrated from NACHO 2.
@@ -437,14 +447,14 @@ report_method_callouts <- function(x) {
       "BD" %in%
         report_metrics(x) &&
         x@thresholds[["preset"]] != "legacy" &&
-        instrument_assumed(x)
+        instrument_not_in_files(x)
     ) {
       callout_lines(
         "warning",
-        "Instrument assumed",
+        "Instrument not in the RCC files",
         c(
-          "The RCC files do not name the nCounter instrument, so NACHO used the MAX/FLEX/PRO binding density limits.",
-          "Set `instrument` in `load_rcc()` if the data come from a SPRINT."
+          "The RCC files do not name the nCounter instrument, so the MAX/FLEX/PRO binding density limits apply.",
+          "If the data come from a SPRINT, set `instrument = \"sprint\"` in `load_rcc()`."
         )
       )
     },
@@ -578,8 +588,8 @@ threshold_source <- function(x, metric) {
   } else if (preset == "legacy") {
     "NACHO 2"
   } else if (metric == "BD") {
-    if (instrument_assumed(x)) {
-      "MAX/FLEX/PRO (assumed)"
+    if (instrument_not_in_files(x)) {
+      "MAX/FLEX/PRO (not in the RCC files)"
     } else if (instrument == "sprint") {
       "SPRINT"
     } else {
