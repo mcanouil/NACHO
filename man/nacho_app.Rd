@@ -23,6 +23,25 @@ Opens the quality-control app on a \code{nacho} object, or on an empty upload
 page.
 Use \code{\link[=visualise]{visualise()}} to get the tuned object back in the R session.
 }
+\section{Plot workers}{
+
+When the mirai package is installed, the app builds the interactive plots
+of a page at the same time, in background R processes.
+One set of processes serves all users of the app.
+The app starts them when the first user opens it, and stops them when the
+app stops.
+By default, the app starts one process for each CPU core minus one, with a
+maximum of four.
+Each process uses about 170 MB of memory.
+
+To use fewer processes, set the \code{nacho.plot_workers} option to the maximum
+number, for example \code{options(nacho.plot_workers = 2)}.
+To build all plots in the app process, set the option to \code{0}.
+If the processes do not start, the app builds the plots in its own process.
+
+The processes use the installed NACHO package.
+}
+
 \examples{
 if (interactive()) {
   shiny::runApp(nacho_app(GSE74821))

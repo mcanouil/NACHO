@@ -515,6 +515,7 @@ test_that("the girafe is built once per rounded card size", {
     ),
     session = root,
     {
+      shiny::getShinyOption("cache", default = session$cache)$reset()
       sizes <- 0L
       shiny::observe({
         girafe_size()
