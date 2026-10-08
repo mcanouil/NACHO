@@ -22,6 +22,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
 - In `R/autoplot.R`,
   - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
+  - feat: Plot labels, help pages and the app's threshold labels now use US spelling, such as "Normalized" and "Hemolysis".
   - feat: Plots follow the NACHO brand: groups use the Okabe-Ito colours up to eight levels on a light background and seven on a dark one, then viridis, and flagged samples are rust triangles instead of red points.
 - In `R/render.R`,
   - feat: `render()` builds the report with Quarto instead of R Markdown, as a self-contained HTML file or a Typst PDF with `format = "typst"`.
@@ -58,7 +59,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/render.R`,
   - feat: The report reads as a quality-control record: a cover with the study details, a decision summary with the flagged samples and notes on how the data were processed, a table of every setting and limit with its meaning and source, a short "How to read this" under each figure and table, and a methods appendix with the citation and package versions.
   - feat: `render()` gains `title` and `author` for the report cover, and the app's Export page has matching fields.
-  - feat: The HTML and PDF reports share the NACHO look and the same content, and the PDF is a tagged PDF/UA document; the HTML report has landmarks, a skip link and labelled tables.
+  - feat: The HTML and PDF reports share the NACHO look and the same content, and the PDF is a tagged PDF that declares PDF/UA-1, checked by Typst against the PDF/UA-1 rules it can enforce; the HTML report has landmarks, a skip link and labelled tables.
   - feat: `render()` gains `group`, which adds the batch design and cross-tables, with a warning when batch and biology are confounded.
 - In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
   - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.

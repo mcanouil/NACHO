@@ -16,7 +16,7 @@ Two functions summarize and visualize the RCC files:
 *NACHO* also has a `normalise()` function.
 It calculates the sample-specific size factors again and normalizes the data.
 
-* The `normalise()` function creates a list that holds your settings, the raw counts and the normalized counts.
+* The `normalise()` function returns a `nacho` object that holds your settings, the raw counts and the normalized counts.
 
 Since v0.6.0, *NACHO* has two more functions:
 
