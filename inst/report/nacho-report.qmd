@@ -1,5 +1,4 @@
 ---
-title: "NanoString quality-control report"
 brand:
   light: _brand.yml
 params:

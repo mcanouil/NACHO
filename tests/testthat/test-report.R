@@ -418,3 +418,43 @@ test_that("shared report and app text uses US spelling", {
   prose <- gsub("`[^`]*`", "", unlist(lapply(about, readLines)))
   expect_false(any(grepl(british, prose, ignore.case = TRUE)))
 })
+
+test_that("report_metadata() fills the cover from the object", {
+  meta <- report_metadata(GSE74821)
+  expect_identical(meta$title, "NanoString quality-control report")
+  expect_null(meta$author)
+  expect_false("author" %in% names(meta))
+  expect_identical(meta$nacho$samples, "48")
+  expect_identical(meta$nacho$unit, "Cartridges")
+  expect_identical(meta$nacho$units, "4")
+  expect_identical(meta$nacho$method, "GLM")
+  expect_identical(meta$nacho$rcc_version, GSE74821@provenance$file_version)
+  expect_identical(
+    meta$nacho$nacho_version,
+    as.character(utils::packageVersion("NACHO"))
+  )
+  expect_match(meta$nacho$prepared, "^Prepared on ")
+  expect_match(meta$date, "^[A-Z][a-z]+ [0-9]{1,2}, [0-9]{4}$")
+})
+
+test_that("report_metadata() takes the title and author as typed", {
+  meta <- report_metadata(
+    GSE74821,
+    title = 'Run "A": #1 $5',
+    author = "Jane Doe, Genomics Core"
+  )
+  expect_identical(meta$title, 'Run "A": #1 $5')
+  expect_identical(meta$author, "Jane Doe, Genomics Core")
+  expect_match(
+    meta$nacho$prepared,
+    "^Prepared by Jane Doe, Genomics Core · "
+  )
+})
+
+test_that("an empty title falls back to the default", {
+  expect_identical(
+    report_metadata(GSE74821, title = "")$title,
+    "NanoString quality-control report"
+  )
+  expect_null(report_metadata(GSE74821, author = "  ")$author)
+})

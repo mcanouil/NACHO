@@ -506,3 +506,49 @@ report_body <- function(report) {
   }
   invisible(report)
 }
+
+#' Cover fields of the report
+#'
+#' Quarto reads these as document metadata, so the title, the author and the
+#' `nacho.*` fields reach the cover partials.
+#' The date uses English month names whatever the locale.
+#'
+#' @param x A `nacho` object.
+#' @param title The report title, or `NULL` or empty for the default.
+#' @param author Who prepared the report, or `NULL` or blank for nobody.
+#'
+#' @noRd
+report_metadata <- function(x, title = NULL, author = NULL) {
+  blank <- function(value) is.null(value) || !nzchar(trimws(value))
+  overview <- app_overview(x)
+  today <- Sys.Date()
+  date <- paste0(
+    month.name[as.integer(format(today, "%m"))],
+    " ",
+    as.integer(format(today, "%d")),
+    ", ",
+    format(today, "%Y")
+  )
+  author <- if (blank(author)) NULL else trimws(author)
+  metadata <- list(
+    title = if (blank(title)) "NanoString quality-control report" else title,
+    author = author,
+    date = date,
+    nacho = list(
+      prepared = if (is.null(author)) {
+        paste("Prepared on", date)
+      } else {
+        paste0("Prepared by ", author, " \u00b7 ", date)
+      },
+      samples = as.character(overview$samples),
+      unit = overview$unit,
+      units = as.character(overview$units),
+      flagged = as.character(overview$flagged),
+      method = overview$method,
+      rcc_version = x@provenance[["file_version"]],
+      nacho_version = as.character(utils::packageVersion("NACHO")),
+      r_version = paste(R.version$major, R.version$minor, sep = ".")
+    )
+  )
+  metadata[lengths(metadata) > 0]
+}

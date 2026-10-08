@@ -13,7 +13,9 @@ render(
   size = 1,
   show_legend = TRUE,
   outliers_factor = 1,
-  outliers_labels = NULL
+  outliers_labels = NULL,
+  title = NULL,
+  author = NULL
 )
 }
 \arguments{
@@ -39,6 +41,13 @@ confounded; see \code{\link[=batch_diagnostics]{batch_diagnostics()}}.}
 
 \item{outliers_labels}{The column of \code{nacho_samples(x)} that labels the
 flagged samples, or \code{NULL} for no labels.}
+
+\item{title}{The report title.
+\code{NULL} or empty uses "NanoString quality-control report".}
+
+\item{author}{Who prepared the report, as one string, for example
+\code{"Jane Doe, Genomics Core"}.
+\code{NULL} leaves it out.}
 }
 \value{
 The path of the report, invisibly.

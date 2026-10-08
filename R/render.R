@@ -24,6 +24,11 @@
 #' @param outliers_factor The size of flagged samples, relative to `size`.
 #' @param outliers_labels The column of `nacho_samples(x)` that labels the
 #'   flagged samples, or `NULL` for no labels.
+#' @param title The report title.
+#'   `NULL` or empty uses "NanoString quality-control report".
+#' @param author Who prepared the report, as one string, for example
+#'   `"Jane Doe, Genomics Core"`.
+#'   `NULL` leaves it out.
 #'
 #' @return The path of the report, invisibly.
 #' @export
@@ -43,11 +48,19 @@ render <- function(
   size = 1,
   show_legend = TRUE,
   outliers_factor = 1,
-  outliers_labels = NULL
+  outliers_labels = NULL,
+  title = NULL,
+  author = NULL
 ) {
   check_nacho(x)
   format <- check_choice(format, c("html", "typst"))
   check_string(output_dir)
+  if (!identical(title, "")) {
+    check_string(title, allow_null = TRUE)
+  }
+  if (!identical(author, "")) {
+    check_string(author, allow_null = TRUE)
+  }
   options <- check_report_options(
     x,
     colour = colour,
@@ -92,6 +105,7 @@ render <- function(
       input = file.path(work_dir, "nacho-report.qmd"),
       output_format = format,
       execute_params = list(nacho_rds = rds),
+      metadata = report_metadata(x, title = title, author = author),
       quiet = nacho_is_quiet()
     )),
     error = function(cnd) {

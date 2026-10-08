@@ -249,3 +249,49 @@ test_that("render() turns a Quarto failure into render_failed and cleans up", {
   expect_s3_class(error$parent, "error")
   expect_length(list.files(tempdir(), pattern = "^nacho-report-"), 0)
 })
+
+test_that("render() checks title and author", {
+  expect_snapshot(render(GSE74821, title = 1), error = TRUE)
+  expect_snapshot(render(GSE74821, author = c("a", "b")), error = TRUE)
+})
+
+test_that("render() passes the cover metadata to Quarto", {
+  skip_if_not_installed("quarto")
+  seen <- NULL
+  local_mocked_bindings(quarto_cli_version = function() {
+    numeric_version("1.10.18")
+  })
+  local_mocked_bindings(
+    quarto_render = function(input, metadata, ...) {
+      seen <<- metadata
+      writeLines(
+        "<html></html>",
+        file.path(dirname(input), "nacho-report.html")
+      )
+    },
+    .package = "quarto"
+  )
+  render(
+    GSE74821,
+    title = "Run A",
+    author = "Jane Doe",
+    output_dir = withr::local_tempdir()
+  )
+  expect_identical(seen$title, "Run A")
+  expect_identical(seen$author, "Jane Doe")
+  expect_match(seen$nacho$prepared, "^Prepared by Jane Doe")
+})
+
+test_that("a real render receives the cover metadata", {
+  skip_on_cran()
+  skip_unless_real_render()
+  output_dir <- withr::local_tempdir()
+  path <- render(
+    GSE74821,
+    title = "Run A",
+    author = "Jane Doe",
+    output_dir = output_dir
+  )
+  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  expect_match(html, "<title>Run A", fixed = TRUE)
+})
