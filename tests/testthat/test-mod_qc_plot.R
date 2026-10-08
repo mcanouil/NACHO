@@ -556,6 +556,9 @@ test_that("the girafe font set is built once", {
 
 test_that("app_girafe() draws with the cached font set", {
   skip_if_not_installed("ggiraph")
+  withr::defer(NACHO:::reset_girafe_font_set())
+  NACHO:::reset_girafe_font_set()
+  expect_identical(NACHO:::girafe_font_set(), gdtools::font_set_liberation())
   strip_ids <- function(widget) {
     html <- htmltools::renderTags(widget)$html
     html <- gsub("htmlwidget-[0-9a-f]+", "htmlwidget-id", html)
