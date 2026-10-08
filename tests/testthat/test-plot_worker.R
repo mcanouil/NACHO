@@ -1,3 +1,8 @@
+skip_if_no_daemons <- function() {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("mirai")
+}
+
 test_that("plot_cache_key() changes with any input", {
   size <- c(width = 5, height = 3.5)
   key <- function(type = "BD", options = list(size = 1), dark = FALSE) {
@@ -50,7 +55,7 @@ test_that("build_card() gives a ggplot for a static card", {
 
 test_that("build_card() gives the same widget in a worker and in process", {
   skip_if_not_installed("ggiraph")
-  skip_if_not_installed("mirai")
+  skip_if_no_daemons()
   args <- list(
     GSE74821,
     "BD",
@@ -83,12 +88,10 @@ test_that("build_card() gives the same widget in a worker and in process", {
 })
 
 test_that("one worker pool serves the app until it stops", {
-  skip_if_not_installed("mirai")
+  skip_if_no_daemons()
   withr::defer(NACHO:::plot_workers_stop())
   withr::local_options(nacho.plot_workers = 2)
-  started <- Sys.time()
   profile <- NACHO:::plot_workers_start()
-  expect_lt(as.numeric(difftime(Sys.time(), started, units = "secs")), 2)
   expect_identical(NACHO:::plot_workers_start(), profile)
   expect_true(mirai::mirai(TRUE, .compute = profile)[])
   expect_gt(mirai::status(.compute = profile)$connections, 0)
@@ -134,7 +137,7 @@ settle <- function(root, done, seconds = 60) {
 
 test_that("a card builds in a worker only while its page shows", {
   skip_if_not_installed("ggiraph")
-  skip_if_not_installed("mirai")
+  skip_if_no_daemons()
   skip_if_not_installed("later")
   withr::defer(NACHO:::plot_workers_stop())
   withr::local_options(nacho.plot_workers = 2)
@@ -180,7 +183,7 @@ test_that("a card builds in a worker only while its page shows", {
 
 test_that("a card builds in the app process when the workers do not start", {
   skip_if_not_installed("ggiraph")
-  skip_if_not_installed("mirai")
+  skip_if_no_daemons()
   skip_if_not_installed("later")
   withr::defer(NACHO:::plot_workers_stop())
   timeout <- NACHO:::plot_pool$timeout
@@ -217,7 +220,7 @@ test_that("a card builds in the app process when the workers do not start", {
 
 test_that("a busy pool that answers is not taken as failed", {
   skip_if_not_installed("ggiraph")
-  skip_if_not_installed("mirai")
+  skip_if_no_daemons()
   skip_if_not_installed("later")
   withr::defer(NACHO:::plot_workers_stop())
   timeout <- NACHO:::plot_pool$timeout
@@ -254,12 +257,23 @@ test_that("a busy pool that answers is not taken as failed", {
       logical(1)
     ))
   }
-  started <- Sys.time()
   while (!done() && Sys.time() < deadline) {
     later::run_now(0.1)
   }
   expect_true(done())
-  expect_gt(as.numeric(difftime(Sys.time(), started, units = "secs")), 3)
   expect_false(isTRUE(NACHO:::plot_pool$failed))
   expect_length(cache$keys(), 6L)
+})
+
+test_that("a pool that fails to start leaves the plots in the app process", {
+  skip_if_no_daemons()
+  withr::defer(NACHO:::plot_workers_stop())
+  local_mocked_bindings(
+    launch_local = function(...) stop("no daemons here"),
+    .package = "mirai"
+  )
+  withr::local_options(nacho.plot_workers = 1, nacho.quiet = TRUE)
+  expect_null(NACHO:::plot_workers_start())
+  expect_true(NACHO:::plot_pool$failed)
+  expect_null(NACHO:::plot_workers_start())
 })

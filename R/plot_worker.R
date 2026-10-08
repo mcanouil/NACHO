@@ -1,7 +1,7 @@
 #' @include mod_qc_plot.R
 NULL
 
-#' Give the key of a card in the session cache
+#' Give the key of a card in the app cache
 #'
 #' The key changes when any input of the card changes: the object, the plot
 #' type, the display options, dark mode, or the size of the card.
@@ -69,6 +69,7 @@ plot_pool$timeout <- 30000
 #' after you change the plot code.
 #' When all daemons are connected, each one loads NACHO and builds the ggiraph
 #' font set, so the first page does not wait for that work.
+#' When the daemons cannot start, the plots build in the app process.
 #'
 #' @return The name of the compute profile, or `NULL` when the plots build in
 #'   the app process: mirai is not installed, the option `nacho.plot_workers`
@@ -82,15 +83,27 @@ plot_workers_start <- function() {
   }
   if (is.null(plot_pool$profile)) {
     profile <- "nacho-plots"
-    with_library_paths({
-      mirai::daemons(
-        url = mirai::local_url(),
-        dispatcher = TRUE,
-        .compute = profile
-      )
-      mirai::launch_local(count, .compute = profile)
-    })
     plot_pool$profile <- profile
+    started <- tryCatch(
+      {
+        with_library_paths({
+          mirai::daemons(
+            url = mirai::local_url(),
+            dispatcher = TRUE,
+            .compute = profile
+          )
+          mirai::launch_local(count, .compute = profile)
+        })
+        TRUE
+      },
+      error = function(cnd) {
+        plot_workers_fail()
+        FALSE
+      }
+    )
+    if (!started) {
+      return(NULL)
+    }
     shiny::onStop(plot_workers_stop, session = NULL)
     plot_workers_probe(profile)
     plot_workers_warm(profile, count, .libPaths())
