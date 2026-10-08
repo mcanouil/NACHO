@@ -1,0 +1,25 @@
+<header id="title-block-header" class="quarto-title-block nacho-cover">
+  <a class="nacho-skip" href="#quarto-document-content">Skip to the report</a>
+  <svg class="nacho-chips" aria-hidden="true" focusable="false" viewBox="0 0 260 240">
+    <path d="M30 60 L140 40 Q160 37 150 56 L95 150 Q85 167 76 150 Z" fill="#D85460" fill-opacity=".75"/>
+    <path d="M90 20 L215 15 Q235 15 225 32 L165 125 Q155 140 145 125 Z" fill="#E45430" fill-opacity=".75"/>
+    <path d="M60 110 L170 95 Q190 93 180 110 L130 200 Q120 216 110 200 Z" fill="#F0D83C" fill-opacity=".75"/>
+    <path d="M150 80 L245 120 Q260 128 245 138 L170 200 Q155 210 155 192 Z" fill="#FCB448" fill-opacity=".75"/>
+    <path d="M20 170 L120 150 Q138 147 130 163 L95 235 Q85 250 74 236 Z" fill="#E8EE9A" fill-opacity=".75"/>
+  </svg>
+  <div class="nacho-cover-inner">
+    <div class="nacho-cover-label"><img src="nacho_hex.png" alt="NACHO logo">NACHO quality-control report</div>
+    <h1 class="title">$title$</h1>
+$if(nacho)$
+    <p class="nacho-prepared">$nacho.prepared$</p>
+    <dl class="nacho-details">
+      <div><dt>Samples</dt><dd>$nacho.samples$</dd></div>
+      <div><dt>$nacho.unit$</dt><dd>$nacho.units$</dd></div>
+      <div><dt>Flagged</dt><dd>$nacho.flagged$</dd></div>
+      <div><dt>Normalization</dt><dd>$nacho.method$</dd></div>
+      <div><dt>RCC version</dt><dd>$nacho.rcc_version$</dd></div>
+      <div><dt>NACHO</dt><dd>$nacho.nacho_version$</dd></div>
+    </dl>
+$endif$
+  </div>
+</header>

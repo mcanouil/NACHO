@@ -8,9 +8,21 @@ knitr:
     fig.retina: 1
 format:
   html:
+    lang: en-US
     format-links: false
     embed-resources: true
+    template-partials:
+      - partials/title-block.html
+    title-block-banner: true
+    theme:
+      light: [brand, nacho-report.scss]
+    filters:
+      - accessible-tables.lua
+    language:
+      skip-to-content: "Skip to the report"
     toc: true
+    toc-title: Contents
+    toc-location: right
     toc-depth: 2
     number-sections: true
     fig-width: 7
@@ -35,10 +47,6 @@ execute:
 report <- NACHO:::report_setup(params$nacho_rds)
 x <- report$object
 ```
-
-::: {.content-visible when-format="html"}
-![](nacho_hex.png){fig-alt="NACHO logo" width=1.2in}
-:::
 
 # Summary
 

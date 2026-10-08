@@ -85,7 +85,10 @@ render <- function(
   dir.create(work_dir)
   on.exit(unlink(work_dir, recursive = TRUE), add = TRUE)
   staged <- file.copy(
-    c(report_template_path(), list.files(brand_path(), full.names = TRUE)),
+    c(
+      list.files(dirname(report_template_path()), full.names = TRUE),
+      list.files(brand_path(), full.names = TRUE)
+    ),
     work_dir,
     recursive = TRUE
   )

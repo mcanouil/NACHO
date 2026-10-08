@@ -67,6 +67,9 @@ test_that("render() passes the library paths to Quarto and cleans up", {
   expect_true(all(
     c(
       "nacho-report.qmd",
+      "nacho-report.scss",
+      "accessible-tables.lua",
+      "partials/title-block.html",
       "_brand.yml",
       "nacho_hex.png",
       "fonts/SourceSans3-Regular.ttf"
@@ -304,6 +307,33 @@ test_that("a real HTML render shows the title and author as typed", {
   expect_match(html, paste0("<title>", escaped_title, "</title>"), fixed = TRUE)
   expect_match(html, paste0(">", escaped_title, "</h1>"), fixed = TRUE)
   expect_match(html, "Micka\u00ebl Canouil, Lab &amp; Co", fixed = TRUE)
+})
+
+test_that("the HTML report has the cover, landmarks and accessible tables", {
+  skip_on_cran()
+  skip_unless_real_render()
+  path <- render(
+    GSE74821,
+    group = "tissue type:ch1",
+    title = "GSE74821",
+    author = "Jane Doe",
+    output_dir = withr::local_tempdir()
+  )
+  html <- paste(readLines(path, warn = FALSE), collapse = "\n")
+  expect_match(html, '<html[^>]*lang="en-US"')
+  expect_match(html, '<header[^>]*class="[^"]*nacho-cover')
+  expect_match(html, "Prepared by Jane Doe", fixed = TRUE)
+  expect_match(html, 'class="nacho-chips"[^>]*aria-hidden="true"')
+  expect_match(html, '<main[^>]*id="quarto-document-content"')
+  expect_match(html, 'href="#quarto-document-content"', fixed = TRUE)
+  expect_match(html, '<nav[^>]*id="TOC"[^>]*aria-labelledby="toc-title"')
+  expect_match(html, '<h2 id="toc-title">Contents</h2>', fixed = TRUE)
+  ths <- regmatches(html, gregexpr("<th[ >][^>]*>", html))[[1]]
+  expect_gt(length(ths), 0)
+  expect_true(all(grepl('scope="col"', ths, fixed = TRUE)))
+  imgs <- regmatches(html, gregexpr("<img [^>]*>", html))[[1]]
+  expect_true(all(grepl('alt="[^"]+"|aria-hidden="true"|alt=""', imgs)))
+  expect_match(html, '<img [^>]*alt="NACHO logo"')
 })
 
 test_that("a real Typst render shows the title and author as typed", {

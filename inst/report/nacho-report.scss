@@ -1,0 +1,264 @@
+/*-- scss:defaults --*/
+
+$font-family-sans-serif: "Source Sans 3", system-ui, sans-serif;
+$font-family-base: $font-family-sans-serif;
+$headings-font-family: $font-family-sans-serif;
+$font-family-monospace: "JetBrains Mono", ui-monospace, monospace;
+$toc-title-font-size: 1rem;
+
+/*-- scss:rules --*/
+
+$nacho-navy: $brand-navy;
+$nacho-rust: $brand-rust;
+$nacho-amber: $brand-amber;
+$nacho-muted: #5b6672;
+$nacho-line: #d9dee3;
+$nacho-tint: #f4f6f8;
+$nacho-cover-text: #c9d1d9;
+$nacho-cover-term: #9aa7b4;
+
+body:has(#quarto-skip-link) .nacho-skip {
+  display: none;
+}
+
+.nacho-skip {
+  position: absolute;
+  left: -999px;
+
+  &:focus {
+    left: 1rem;
+    top: 1rem;
+    z-index: 1100;
+    padding: 0.5rem;
+    background: #fff;
+    color: $nacho-navy;
+  }
+}
+
+.nacho-cover {
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 1rem;
+  padding: 1.5rem 0 1.25rem;
+  background: $nacho-navy;
+  color: #fff;
+
+  .nacho-chips {
+    position: absolute;
+    right: -30px;
+    bottom: -60px;
+    width: 220px;
+    opacity: 0.45;
+
+    @media (max-width: 576px) {
+      width: 140px;
+      bottom: -50px;
+      opacity: 0.3;
+    }
+  }
+
+  .nacho-cover-inner {
+    position: relative;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    border-left: 5px solid $nacho-amber;
+  }
+
+  .nacho-cover-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1rem;
+    color: $nacho-cover-text;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.04em;
+
+    img {
+      height: 28px;
+      width: auto;
+    }
+  }
+
+  h1.title {
+    margin: 0.5rem 0 0.1rem;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #fff;
+  }
+
+  .nacho-prepared {
+    margin: 0;
+    color: $nacho-cover-text;
+  }
+
+  .nacho-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 2.25rem;
+    margin: 1rem 0 0;
+
+    dt {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: $nacho-cover-term;
+    }
+
+    dd {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+  }
+}
+
+main.content {
+  h1 {
+    margin: 2.5rem 0 0.75rem;
+    padding-bottom: 0.3rem;
+    font-size: 1.6rem;
+    border-bottom: 2px solid $nacho-navy;
+  }
+
+  h2 {
+    margin: 1.75rem 0 0.5rem;
+    font-size: 1.2rem;
+    border-bottom: none;
+  }
+
+  .header-section-number {
+    margin-right: 0.25rem;
+    color: $nacho-rust;
+  }
+}
+
+.nacho-verdict {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 1.5rem;
+
+  > div {
+    padding: 0.75rem 1rem;
+    border: 1px solid $nacho-line;
+    border-top: 4px solid $nacho-navy;
+
+    &.flag {
+      border-top-color: $nacho-rust;
+    }
+  }
+
+  .n {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  span:not(.n) {
+    color: $nacho-muted;
+    font-size: 0.9rem;
+  }
+}
+
+main.content table {
+  width: 100%;
+  margin: 0.75rem 0 1.25rem;
+  font-size: 0.95rem;
+  border-collapse: collapse;
+
+  > :not(caption) > * > * {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid $nacho-line;
+    box-shadow: none;
+  }
+
+  > thead > tr > th {
+    text-align: left;
+    border-bottom: 2px solid $nacho-navy;
+  }
+
+  > tbody {
+    border-top: none;
+  }
+
+  td {
+    vertical-align: top;
+  }
+
+  td.num,
+  .num {
+    font-family: $font-family-monospace;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+}
+
+.tag {
+  display: inline-block;
+  padding: 0 0.4rem;
+  font-size: 0.75rem;
+  border-radius: 3px;
+  background: $nacho-tint;
+
+  &.user {
+    background: #fde9c6;
+  }
+}
+
+.nacho-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+div.callout.callout-style-default {
+  margin: 1rem 0;
+  border: 1px solid $nacho-line;
+  border-left: 5px solid $nacho-navy;
+  border-radius: 0;
+  background: $nacho-tint;
+
+  &.callout-warning,
+  &.callout-important,
+  &.callout-caution {
+    border-left-color: $nacho-amber;
+    background: #fff8eb;
+  }
+
+  > div.callout-header {
+    padding-top: 0.5rem;
+    border: none;
+    font-size: 1rem;
+    font-weight: 700;
+    color: $nacho-navy;
+    background: transparent;
+    opacity: 1;
+  }
+
+  div.callout-icon-container {
+    display: none;
+  }
+
+  .callout-body {
+    font-size: 1rem;
+  }
+}
+
+figcaption {
+  font-size: 0.9rem;
+  color: $nacho-muted;
+}
+
+#TOC {
+  padding-left: 0.75rem;
+  border-left: 3px solid $nacho-rust;
+
+  #toc-title {
+    font-weight: 700;
+  }
+
+  .nav-link {
+    color: $nacho-navy;
+  }
+}
