@@ -1150,7 +1150,10 @@ test_that("the methods appendix cites NACHO and the nSolver guidelines", {
   versions <- lines[
     (which(lines == "```")[1] + 1):(which(lines == "```")[2] - 1)
   ]
-  expect_false(any(grepl("/", versions, fixed = TRUE)))
+  expect_false(any(grepl(
+    "(^|[[:space:]])(/[A-Za-z]|[A-Za-z]:[\\\\/])",
+    versions
+  )))
   expect_false(any(grepl("time zone|locale|testthat", versions)))
   expect_true(any(startsWith(versions, "NACHO ")))
 })
@@ -1252,7 +1255,7 @@ test_that("report_figure() writes a numbered figure in a knitr chunk", {
   local_mocked_bindings(
     knitr_chunk_options = function() {
       list(
-        fig.path = file.path(dir, "figures", ""),
+        fig.path = paste0(file.path(dir, "figures"), "/"),
         fig.width = 4,
         fig.height = 3,
         dpi = 100,

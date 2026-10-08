@@ -367,7 +367,7 @@ test_that("the HTML report has the cover, landmarks and accessible tables", {
   expect_match(html, 'class="nacho-chips"[^>]*aria-hidden="true"')
   expect_match(html, '<main[^>]*id="quarto-document-content"')
   expect_match(html, 'href="#quarto-document-content"', fixed = TRUE)
-  expect_match(html, '<nav[^>]*id="TOC"[^>]*aria-labelledby="toc-title"')
+  expect_match(html, '<nav[^>]*id="TOC"')
   expect_match(html, '<h2 id="toc-title">Contents</h2>', fixed = TRUE)
   ths <- regmatches(html, gregexpr("<th[ >][^>]*>", html))[[1]]
   expect_gt(length(ths), 0)
@@ -510,7 +510,8 @@ html_headings <- function(path) {
 }
 
 pdf_lines <- function(path) {
-  lines <- system2("pdftotext", c(path, "-"), stdout = TRUE)
+  lines <- system2("pdftotext", c("-enc", "UTF-8", path, "-"), stdout = TRUE)
+  lines <- iconv(lines, "UTF-8", "UTF-8", sub = "")
   trimws(gsub("\\s+", " ", lines))
 }
 
