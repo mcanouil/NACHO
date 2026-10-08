@@ -46,7 +46,7 @@ test_that("the report card says when rendering blocks the app", {
   expect_no_match(ui(), "install mirai", fixed = TRUE)
 })
 
-stub_render <- function(x, format, output_dir) {
+stub_render <- function(x, format, output_dir, title = NULL, author = NULL) {
   dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
   path <- file.path(output_dir, "nacho-report.html")
   writeLines(format(Sys.time(), "%H:%M:%OS6"), path)
@@ -133,7 +133,7 @@ test_that("a report finished for an old object is deleted", {
   finished <- NULL
   local_mocked_bindings(
     has_package = function(package) package != "mirai",
-    render = function(x, format, output_dir) {
+    render = function(x, format, output_dir, ...) {
       object(flagged_gse())
       finished <<- stub_render(x, format, output_dir)
     }
@@ -156,7 +156,7 @@ test_that("a failed render reaches the user as an error toast", {
   toasts <- list()
   local_mocked_bindings(
     has_package = function(package) package != "mirai",
-    render = function(x, format, output_dir) stop("Quarto exploded."),
+    render = function(x, format, output_dir, ...) stop("Quarto exploded."),
     notify_user = function(message, type) {
       toasts[[length(toasts) + 1L]] <<- list(message = message, type = type)
     }
@@ -204,7 +204,7 @@ test_that("the background render hands the library paths to the daemon", {
   expect_match(captured$expression, "NACHO::render", fixed = TRUE)
   expect_setequal(
     names(captured$args),
-    c("object", "format", "output_dir", "libs")
+    c("object", "format", "output_dir", "title", "author", "libs")
   )
   expect_identical(captured$args$libs, .libPaths())
 })
@@ -248,7 +248,7 @@ test_that("ending the session stops a running background render", {
   pid_file <- withr::local_tempfile()
   local_mocked_bindings(
     has_package = function(package) TRUE,
-    render_in_background = function(object, format, output_dir, compute) {
+    render_in_background = function(object, format, output_dir, compute, ...) {
       mirai::mirai(
         {
           writeLines(as.character(Sys.getpid()), pid_file)
@@ -308,4 +308,51 @@ test_that("a render stopped after the session ends never settles", {
   }
   expect_identical(outcome(ended = FALSE), "rejected")
   expect_identical(outcome(ended = TRUE), "pending")
+})
+
+test_that("the report card has labelled title and author fields", {
+  html <- htmltools::renderTags(
+    NACHO:::mod_export_ui("export", quarto = TRUE)
+  )$html
+  expect_match(
+    html,
+    '<label[^>]*for="export-title"[^>]*>Title \\(optional\\)'
+  )
+  expect_match(
+    html,
+    '<label[^>]*for="export-author"[^>]*>Author \\(optional\\)'
+  )
+  expect_match(
+    html,
+    'placeholder="NanoString quality-control report"',
+    fixed = TRUE
+  )
+})
+
+test_that("the render gets the title and author, blank ones as NULL", {
+  seen <- list()
+  local_mocked_bindings(
+    has_package = function(package) package != "mirai",
+    render = function(x, format, output_dir, title = NULL, author = NULL) {
+      seen <<- list(title = title, author = author)
+      stub_render(x, format, output_dir)
+    }
+  )
+  shiny::testServer(
+    NACHO:::mod_export_server,
+    args = list(object = shiny::reactiveVal(GSE74821), quarto = TRUE),
+    {
+      session$setInputs(
+        format = "html",
+        title = "Run A",
+        author = "Jane Doe",
+        render = 1
+      )
+      wait_for_task(task, session)
+      expect_identical(seen, list(title = "Run A", author = "Jane Doe"))
+      session$setInputs(title = "   ", author = "", render = 2)
+      wait_for_task(task, session)
+      expect_identical(seen, list(title = NULL, author = NULL))
+    }
+  )
 })
