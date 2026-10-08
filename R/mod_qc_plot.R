@@ -128,11 +128,46 @@ card_size <- function(width, height) {
   c(width = rounded(width) / 96, height = rounded(height) / 96)
 }
 
+font_cache <- new.env(parent = emptyenv())
+
+#' Build the font set that ggiraph uses by default
+#'
+#' This is the call `ggiraph::girafe()` makes when `font_set` is `NULL`.
+#' gdtools is a hard dependency of ggiraph, so it is installed whenever the
+#' interactive plots are.
+#' It is read with `getExportedValue()` because NACHO does not import it.
+#'
+#' @noRd
+build_font_set <- function() {
+  getExportedValue("gdtools", "font_set_liberation")()
+}
+
+#' Give the ggiraph font set, built on the first call
+#'
+#' Each `ggiraph::girafe()` call without a font set looks up the system fonts
+#' about 23 times, which costs about 3 seconds.
+#' The set is kept for the whole R process, because the fonts of a machine do
+#' not change while an app runs.
+#' Each mirai daemon is its own process and builds the set once.
+#'
+#' @noRd
+girafe_font_set <- function() {
+  if (is.null(font_cache$set)) {
+    font_cache$set <- build_font_set()
+  }
+  font_cache$set
+}
+
+reset_girafe_font_set <- function() {
+  font_cache$set <- NULL
+}
+
 app_girafe <- function(plot, width = 7, height = 4.5) {
   ggiraph::girafe(
     ggobj = plot,
     width_svg = width,
     height_svg = height,
+    font_set = girafe_font_set(),
     options = list(
       ggiraph::opts_sizing(rescale = TRUE, width = 1),
       ggiraph::opts_hover(css = "stroke:currentColor;stroke-width:2px;"),
