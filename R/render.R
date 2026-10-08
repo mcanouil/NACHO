@@ -26,9 +26,11 @@
 #'   flagged samples, or `NULL` for no labels.
 #' @param title The report title.
 #'   `NULL` or empty uses "NanoString quality-control report".
+#'   A missing value (`NA`) is an error.
 #' @param author Who prepared the report, as one string, for example
 #'   `"Jane Doe, Genomics Core"`.
-#'   `NULL` leaves it out.
+#'   `NULL` or empty leaves it out.
+#'   A missing value (`NA`) is an error.
 #'
 #' @return The path of the report, invisibly.
 #' @export
@@ -55,12 +57,8 @@ render <- function(
   check_nacho(x)
   format <- check_choice(format, c("html", "typst"))
   check_string(output_dir)
-  if (!identical(title, "")) {
-    check_string(title, allow_null = TRUE)
-  }
-  if (!identical(author, "")) {
-    check_string(author, allow_null = TRUE)
-  }
+  check_cover_text(title)
+  check_cover_text(author)
   options <- check_report_options(
     x,
     colour = colour,
@@ -105,7 +103,9 @@ render <- function(
       input = file.path(work_dir, "nacho-report.qmd"),
       output_format = format,
       execute_params = list(nacho_rds = rds),
-      metadata = report_metadata(x, title = title, author = author),
+      metadata = report_metadata_literal(
+        report_metadata(x, title = title, author = author)
+      ),
       quiet = nacho_is_quiet()
     )),
     error = function(cnd) {

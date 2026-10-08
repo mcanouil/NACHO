@@ -413,6 +413,10 @@ check_report_options <- function(
 
 #' Read and check what render() saved for the report
 #'
+#' The report takes its title, author and cover fields from the metadata that
+#' [render()] passes, so only [render()] is supported.
+#' A title in the template would win over that metadata.
+#'
 #' @param path The `.rds` file.
 #'
 #' @noRd
@@ -517,6 +521,9 @@ report_body <- function(report) {
 #' @param title The report title, or `NULL` or empty for the default.
 #' @param author Who prepared the report, or `NULL` or blank for nobody.
 #'
+#' The date is not a field: the cover reads it from `nacho$prepared`, because
+#' Quarto would reformat a `date` field in the PDF.
+#'
 #' @noRd
 report_metadata <- function(x, title = NULL, author = NULL) {
   blank <- function(value) is.null(value) || !nzchar(trimws(value))
@@ -530,10 +537,13 @@ report_metadata <- function(x, title = NULL, author = NULL) {
     format(today, "%Y")
   )
   author <- if (blank(author)) NULL else trimws(author)
+  rcc_version <- x@provenance[["file_version"]]
+  if (length(rcc_version) != 1 || is.na(rcc_version)) {
+    rcc_version <- "unknown"
+  }
   metadata <- list(
     title = if (blank(title)) "NanoString quality-control report" else title,
     author = author,
-    date = date,
     nacho = list(
       prepared = if (is.null(author)) {
         paste("Prepared on", date)
@@ -545,10 +555,46 @@ report_metadata <- function(x, title = NULL, author = NULL) {
       units = as.character(overview$units),
       flagged = as.character(overview$flagged),
       method = overview$method,
-      rcc_version = x@provenance[["file_version"]],
+      rcc_version = rcc_version,
       nacho_version = as.character(utils::packageVersion("NACHO")),
       r_version = paste(R.version$major, R.version$minor, sep = ".")
     )
   )
   metadata[lengths(metadata) > 0]
+}
+
+#' Make cover text reach the document as typed
+#'
+#' Quarto reads the title, the author and `nacho$prepared` as Markdown, so
+#' smart quotes, emphasis and HTML would change them.
+#' A backslash before each ASCII punctuation character keeps them literal.
+#'
+#' @param metadata The list from [report_metadata()].
+#'
+#' @noRd
+report_metadata_literal <- function(metadata) {
+  literal <- function(value) {
+    gsub("([[:punct:]])", "\\\\\\1", value)
+  }
+  for (field in intersect(c("title", "author"), names(metadata))) {
+    metadata[[field]] <- literal(metadata[[field]])
+  }
+  metadata$nacho$prepared <- literal(metadata$nacho$prepared)
+  metadata
+}
+
+#' Check the title or the author of the report
+#'
+#' `NULL` and the empty string mean "not given".
+#'
+#' @noRd
+check_cover_text <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (is.null(x) || identical(x, "")) {
+    return(invisible(x))
+  }
+  check_string(x, arg = arg, call = call)
 }

@@ -253,6 +253,11 @@ test_that("render() turns a Quarto failure into render_failed and cleans up", {
 test_that("render() checks title and author", {
   expect_snapshot(render(GSE74821, title = 1), error = TRUE)
   expect_snapshot(render(GSE74821, author = c("a", "b")), error = TRUE)
+  expect_snapshot(render(GSE74821, title = NA_character_), error = TRUE)
+  expect_error(
+    render(GSE74821, author = NA_character_),
+    class = "nacho_error_bad_argument"
+  )
 })
 
 test_that("render() passes the cover metadata to Quarto", {
@@ -282,16 +287,41 @@ test_that("render() passes the cover metadata to Quarto", {
   expect_match(seen$nacho$prepared, "^Prepared by Jane Doe")
 })
 
-test_that("a real render receives the cover metadata", {
+cover_title <- 'Run "A": *x* <b>y</b> #1 $5'
+cover_author <- "Micka\u00ebl Canouil, Lab & Co"
+
+test_that("a real HTML render shows the title and author as typed", {
   skip_on_cran()
   skip_unless_real_render()
-  output_dir <- withr::local_tempdir()
   path <- render(
     GSE74821,
-    title = "Run A",
-    author = "Jane Doe",
-    output_dir = output_dir
+    title = cover_title,
+    author = cover_author,
+    output_dir = withr::local_tempdir()
   )
   html <- paste(readLines(path, warn = FALSE), collapse = "\n")
-  expect_match(html, "<title>Run A", fixed = TRUE)
+  escaped_title <- r"(Run &quot;A&quot;: *x* &lt;b&gt;y&lt;/b&gt; #1 $5)"
+  expect_match(html, paste0("<title>", escaped_title, "</title>"), fixed = TRUE)
+  expect_match(html, paste0(">", escaped_title, "</h1>"), fixed = TRUE)
+  expect_match(html, "Micka\u00ebl Canouil, Lab &amp; Co", fixed = TRUE)
+})
+
+test_that("a real Typst render shows the title and author as typed", {
+  skip_on_cran()
+  skip_unless_real_render()
+  skip_if(!nzchar(Sys.which("pdftotext")), "pdftotext is missing")
+  path <- render(
+    GSE74821,
+    format = "typst",
+    title = cover_title,
+    author = cover_author,
+    output_dir = withr::local_tempdir()
+  )
+  text <- paste(
+    system2("pdftotext", c(path, "-"), stdout = TRUE),
+    collapse = " "
+  )
+  text <- gsub("\\s+", " ", text)
+  expect_match(text, cover_title, fixed = TRUE)
+  expect_match(text, cover_author, fixed = TRUE)
 })

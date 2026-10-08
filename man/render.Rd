@@ -43,11 +43,13 @@ confounded; see \code{\link[=batch_diagnostics]{batch_diagnostics()}}.}
 flagged samples, or \code{NULL} for no labels.}
 
 \item{title}{The report title.
-\code{NULL} or empty uses "NanoString quality-control report".}
+\code{NULL} or empty uses "NanoString quality-control report".
+A missing value (\code{NA}) is an error.}
 
 \item{author}{Who prepared the report, as one string, for example
 \code{"Jane Doe, Genomics Core"}.
-\code{NULL} leaves it out.}
+\code{NULL} or empty leaves it out.
+A missing value (\code{NA}) is an error.}
 }
 \value{
 The path of the report, invisibly.

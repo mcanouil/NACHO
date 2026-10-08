@@ -14,3 +14,11 @@
       Error in `render()`:
       ! `author` must be a single non-empty string, not a character vector.
 
+---
+
+    Code
+      render(GSE74821, title = NA_character_)
+    Condition
+      Error in `render()`:
+      ! `title` must be a single non-empty string, not a character `NA`.
+

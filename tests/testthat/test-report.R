@@ -423,7 +423,7 @@ test_that("report_metadata() fills the cover from the object", {
   meta <- report_metadata(GSE74821)
   expect_identical(meta$title, "NanoString quality-control report")
   expect_null(meta$author)
-  expect_false("author" %in% names(meta))
+  expect_false(any(c("author", "date") %in% names(meta)))
   expect_identical(meta$nacho$samples, "48")
   expect_identical(meta$nacho$unit, "Cartridges")
   expect_identical(meta$nacho$units, "4")
@@ -434,7 +434,10 @@ test_that("report_metadata() fills the cover from the object", {
     as.character(utils::packageVersion("NACHO"))
   )
   expect_match(meta$nacho$prepared, "^Prepared on ")
-  expect_match(meta$date, "^[A-Z][a-z]+ [0-9]{1,2}, [0-9]{4}$")
+  expect_match(
+    meta$nacho$prepared,
+    "^Prepared on [A-Z][a-z]+ [0-9]{1,2}, [0-9]{4}$"
+  )
 })
 
 test_that("report_metadata() takes the title and author as typed", {
@@ -457,4 +460,20 @@ test_that("an empty title falls back to the default", {
     "NanoString quality-control report"
   )
   expect_null(report_metadata(GSE74821, author = "  ")$author)
+})
+
+test_that("report_metadata() says unknown when the RCC version is missing", {
+  x <- GSE74821
+  x@provenance$file_version <- NULL
+  expect_identical(report_metadata(x)$nacho$rcc_version, "unknown")
+})
+
+test_that("report_metadata_literal() escapes Markdown in the cover text", {
+  meta <- report_metadata_literal(report_metadata(
+    GSE74821,
+    title = 'A "b" *c*',
+    author = "Lab & Co"
+  ))
+  expect_identical(meta$title, 'A \\"b\\" \\*c\\*')
+  expect_identical(meta$author, "Lab \\& Co")
 })
