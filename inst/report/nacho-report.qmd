@@ -57,6 +57,9 @@ execute:
 
 ```{r}
 #| label: setup
+if (knitr::is_html_output()) {
+  knitr::opts_chunk$set(fig.retina = 2)
+}
 report <- NACHO:::report_setup(params$nacho_rds)
 x <- report$object
 ```
