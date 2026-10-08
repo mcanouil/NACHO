@@ -159,7 +159,7 @@ test_that("thresholds never print a bound at the top of the field of view", {
   thresholds$FoV <- c(75, 100)
   S7::prop(x, "thresholds", check = FALSE) <- thresholds
   lines <- NACHO:::report_thresholds(x)
-  expect_true("- Field of view (`FoV`): at least 75" %in% lines)
+  expect_true("- Field of view (`FoV`): at least 75%" %in% lines)
   expect_false(any(grepl("100", lines[grepl("`FoV`", lines)])))
 })
 
@@ -496,7 +496,7 @@ test_that("report_decisions() counts and lists the flagged samples", {
     "| Sample | Cartridge | Metric | Value | Limit |",
     fixed = TRUE
   )
-  expect_match(text, "| Field of view | 93.94 | at least 95 |", fixed = TRUE)
+  expect_match(text, "| Field of view | 93.94% | at least 95% |", fixed = TRUE)
   expect_match(text, "The other 47 samples pass every check.", fixed = TRUE)
 })
 
@@ -512,7 +512,16 @@ test_that("report_decisions() gives one row per sample and failing metric", {
   rows <- NACHO:::qc_failure_rows(x)
   expect_named(
     rows,
-    c("sample", "cartridge", "lane", "metric", "metric_label", "value", "limit")
+    c(
+      "sample",
+      "cartridge",
+      "lane",
+      "lane_samples",
+      "metric",
+      "metric_label",
+      "value",
+      "limit"
+    )
   )
   expect_identical(
     nrow(rows),
@@ -540,7 +549,7 @@ test_that("md_escape() shows sample ids literally in tables", {
   text <- paste(NACHO:::report_decisions(odd_ids_nacho()), collapse = "\n")
   expect_match(
     text,
-    "| a\\*b\\_c&lt;d&gt;\\|e\\[1\\] | C\\_2 | Field of view | 50 | at least 75 |",
+    "| a\\*b\\_c&lt;d&gt;\\|e\\[1\\] | C\\_2 | Field of view | 50% | at least 75% |",
     fixed = TRUE
   )
 })
@@ -557,6 +566,16 @@ test_that("report_decisions() names the lane on PlexSet data", {
   expect_match(text, "| Sample | Lane | Metric | Value | Limit |", fixed = TRUE)
   expect_match(
     text,
+    "| All 8 samples of the lane | plexset\\_20191218, lane 1 | Binding density | 1.07 | 0.05 to 0.5 |",
+    fixed = TRUE
+  )
+  expect_identical(
+    sum(grepl("^\\| All 8 samples", strsplit(text, "\n")[[1]])),
+    12L
+  )
+  expect_match(text, "a lane row stands for every sample", fixed = TRUE)
+  expect_match(
+    text,
     "| plexset\\_20191218, lane 1 | Binding density |",
     fixed = TRUE
   )
@@ -569,21 +588,27 @@ test_that("report_parameters() gives meaning and source for each limit", {
     "| Parameter | Value | What it means | Source |",
     fixed = TRUE
   )
-  expect_match(text, "| Field of view | at least 75 |", fixed = TRUE)
+  expect_match(text, "| Field of view | at least 75% |", fixed = TRUE)
   expect_match(text, "Field of view[^\n]*\\[nSolver\\]\\{\\.tag\\}")
-  expect_match(text, "Binding density[^\n]*\\[MAX\\]\\{\\.tag\\}")
+  expect_match(
+    text,
+    "Binding density[^\n]*\\[MAX/FLEX/PRO \\(assumed\\)\\]\\{\\.tag\\}"
+  )
   limits <- strsplit(text, "\n", fixed = TRUE)[[1]]
   limits <- limits[grepl("^\\| (Binding density|Field of view) \\|", limits)]
   expect_length(limits, 2L)
   expect_false(any(grepl("your choice", limits, fixed = TRUE)))
   tuned <- tuned_gse(FoV = 95)
   tuned_text <- paste(NACHO:::report_parameters(tuned), collapse = "\n")
-  expect_match(tuned_text, "| Field of view | at least 95 |", fixed = TRUE)
+  expect_match(tuned_text, "| Field of view | at least 95% |", fixed = TRUE)
   expect_match(
     tuned_text,
     "Field of view[^\n]*\\[your choice\\]\\{\\.tag \\.user\\}"
   )
-  expect_match(tuned_text, "Binding density[^\n]*\\[MAX\\]\\{\\.tag\\}")
+  expect_match(
+    tuned_text,
+    "Binding density[^\n]*\\[MAX/FLEX/PRO \\(assumed\\)\\]\\{\\.tag\\}"
+  )
 })
 
 test_that("report_parameters() credits NACHO 2 for the legacy preset", {
@@ -633,7 +658,11 @@ test_that("report_parameters() says when RUVg uses the suggested count", {
   k <- table$k[table$suggested]
   expect_identical(suggested@settings$ruv_k, k)
   text <- paste(NACHO:::report_parameters(suggested), collapse = "\n")
-  expect_row(text, paste0("| RUV factors | ", k, " |"), "[default]")
+  expect_row(
+    text,
+    paste0("| RUV factors | ", k, " |"),
+    "[NACHO suggestion]"
+  )
   chosen <- suppressMessages(NACHO::normalise(
     GSE74821,
     normalisation_method = "RUVg",
@@ -648,4 +677,226 @@ test_that("report_parameters() leaves out PCL and LoD on PlexSet data", {
   expect_false(grepl("Positive control linearity|Limit of detection", text))
   expect_match(text, "| Binding density | 0.05 to 2.25 |", fixed = TRUE)
   expect_match(text, "| Housekeeping genes | none |", fixed = TRUE)
+})
+
+test_that("report_decisions() leaves out a missing cartridge on PlexSet data", {
+  x <- NACHO::normalise(
+    plexset_nacho,
+    outliers_thresholds = utils::modifyList(
+      plexset_nacho@thresholds,
+      list(BD = c(0.05, 0.5))
+    )
+  )
+  samples <- x@samples
+  samples$CartridgeID <- NA_character_
+  S7::prop(x, "samples", check = FALSE) <- samples
+  text <- paste(NACHO:::report_decisions(x), collapse = "\n")
+  expect_match(text, "| All 8 samples of the lane | lane 1 |", fixed = TRUE)
+  expect_false(grepl("NA", text, fixed = TRUE))
+})
+
+test_that("report_decisions() counts only assessed samples as passing", {
+  x <- tuned_gse(FoV = 95)
+  samples <- x@samples
+  samples[2, c("BD", "FoV", "PCL", "LoD")] <- NA
+  samples[2, c("Positive_factor", "House_factor")] <- NA
+  samples[2, "Housekeeping_detected"] <- NA
+  S7::prop(x, "samples", check = FALSE) <- samples
+  expect_true(is.na(NACHO::nacho_qc(x)$status[2]))
+  text <- paste(NACHO:::report_decisions(x), collapse = "\n")
+  expect_match(text, "[46]{.n} samples pass every check", fixed = TRUE)
+})
+
+test_that("the binding density source names the instrument family", {
+  sources <- vapply(
+    c("flex", "pro", "sprint"),
+    function(instrument) {
+      x <- NACHO::normalise(
+        GSE74821,
+        outliers_thresholds = NACHO::nacho_thresholds(instrument)
+      )
+      NACHO:::threshold_source(x, "BD")
+    },
+    character(1)
+  )
+  expect_identical(
+    unname(sources),
+    c("MAX/FLEX/PRO", "MAX/FLEX/PRO", "SPRINT")
+  )
+  expect_identical(
+    NACHO:::threshold_source(GSE74821, "BD"),
+    "MAX/FLEX/PRO (assumed)"
+  )
+  thresholds <- GSE74821@thresholds
+  thresholds$instrument <- NA_character_
+  unknown <- NACHO::normalise(GSE74821, outliers_thresholds = thresholds)
+  expect_identical(
+    NACHO:::threshold_source(unknown, "BD"),
+    "MAX/FLEX/PRO (assumed)"
+  )
+  detected <- GSE74821
+  samples <- detected@samples
+  samples$Header.header_FileVersion <- "1.7"
+  S7::prop(detected, "samples", check = FALSE) <- samples
+  expect_identical(NACHO:::threshold_source(detected, "BD"), "MAX/FLEX/PRO")
+  expect_false(any(grepl(
+    "Instrument assumed",
+    NACHO:::report_method_callouts(detected),
+    fixed = TRUE
+  )))
+  expect_true(any(grepl(
+    "Instrument assumed",
+    NACHO:::report_method_callouts(GSE74821),
+    fixed = TRUE
+  )))
+})
+
+test_that("the hemolysis limit is credited to NACHO, even with legacy", {
+  for (preset in c("nsolver", "legacy")) {
+    x <- NACHO::normalise(
+      GSE74821,
+      outliers_thresholds = NACHO::nacho_thresholds(
+        preset = preset,
+        haemolysis = TRUE
+      )
+    )
+    expect_identical(NACHO:::threshold_source(x, "Haemolysis"), "NACHO")
+  }
+})
+
+test_that("a GLM fallback shows in the method row and in a callout", {
+  x <- suppressMessages(NACHO::normalise(
+    GSE74821,
+    normalisation_method = "GEO"
+  ))
+  positives <- NACHO::nacho_probes(x)[["CodeClass"]] == "Positive"
+  x@counts[positives, 1] <- rev(x@counts[positives, 1])
+  expect_warning(
+    y <- suppressMessages(NACHO::normalise(x, normalisation_method = "GLM")),
+    class = "nacho_warning_glm_convergence"
+  )
+  text <- paste(NACHO:::report_parameters(y), collapse = "\n")
+  expect_row(
+    text,
+    "| Normalization method | GLM \\(GEO used\\) |",
+    "[your choice]"
+  )
+  callouts <- paste(NACHO:::report_method_callouts(y), collapse = "\n")
+  expect_match(
+    callouts,
+    "::: {.callout-warning}\n## GLM fell back",
+    fixed = TRUE
+  )
+  expect_match(
+    callouts,
+    NACHO:::md_escape(colnames(x@counts)[1]),
+    fixed = TRUE
+  )
+  expect_match(
+    paste(NACHO:::report_decisions(y), collapse = "\n"),
+    "## GLM fell back to the geometric mean",
+    fixed = TRUE
+  )
+})
+
+test_that("predicted housekeeping genes are credited to NACHO", {
+  x <- suppressMessages(NACHO::normalise(
+    GSE74821,
+    housekeeping_predict = TRUE
+  ))
+  text <- paste(NACHO:::report_parameters(x), collapse = "\n")
+  expect_row(text, "| Housekeeping genes | ", "[NACHO prediction]")
+  expect_row(text, "| Housekeeping prediction | yes |", "[your choice]")
+  callouts <- paste(NACHO:::report_method_callouts(x), collapse = "\n")
+  expect_match(
+    callouts,
+    "::: {.callout-note}\n## Housekeeping genes predicted",
+    fixed = TRUE
+  )
+  expect_match(callouts, x@settings$housekeeping_genes[1], fixed = TRUE)
+})
+
+test_that("housekeeping normalization off gets a callout", {
+  off <- suppressMessages(NACHO::normalise(
+    GSE74821,
+    housekeeping_norm = FALSE
+  ))
+  text <- paste(NACHO:::report_parameters(off), collapse = "\n")
+  expect_row(text, "| Housekeeping normalization | no |", "[your choice]")
+  expect_match(
+    paste(NACHO:::report_method_callouts(off), collapse = "\n"),
+    "::: {.callout-note}\n## Housekeeping normalization off",
+    fixed = TRUE
+  )
+  expect_match(
+    paste(NACHO:::report_method_callouts(plexset_nacho), collapse = "\n"),
+    "::: {.callout-warning}\n## Housekeeping normalization off",
+    fixed = TRUE
+  )
+})
+
+test_that("the housekeeping normalization default follows load_rcc()", {
+  x <- toy_nacho(4L)
+  settings <- x@settings
+  settings$housekeeping_genes <- "GENE1"
+  settings$panel <- "mirna"
+  S7::prop(x, "settings", check = FALSE) <- settings
+  expect_true(NACHO:::default_housekeeping_norm(x))
+  settings$housekeeping_genes <- "HK1"
+  S7::prop(x, "settings", check = FALSE) <- settings
+  expect_false(NACHO:::default_housekeeping_norm(x))
+})
+
+test_that("excluded negative controls get a callout", {
+  x <- GSE74821
+  negatives <- which(NACHO::nacho_probes(x)[["CodeClass"]] == "Negative")
+  x@counts[negatives[1], ] <- x@counts[negatives[1], ] * 50L + 500L
+  y <- suppressMessages(NACHO::normalise(x, background = "mean"))
+  excluded <- y@provenance$excluded_negatives
+  expect_length(excluded, 1L)
+  callouts <- paste(NACHO:::report_method_callouts(y), collapse = "\n")
+  expect_match(
+    callouts,
+    "::: {.callout-note}\n## Negative controls left out",
+    fixed = TRUE
+  )
+  expect_match(callouts, NACHO:::md_escape(excluded), fixed = TRUE)
+  expect_match(callouts, "more than 3-fold", fixed = TRUE)
+})
+
+test_that("a migrated object credits NACHO 2 and says so", {
+  withr::local_options(nacho.quiet = TRUE)
+  x <- NULL
+  suppressMessages(expect_warning(
+    x <- NACHO::read_nacho(test_path("fixtures", "nacho-schema-1.rds")),
+    class = "nacho_warning_n_comp_reduced"
+  ))
+  text <- paste(NACHO:::report_parameters(x), collapse = "\n")
+  expect_row(text, "| Background | none |", "[NACHO 2]")
+  expect_match(
+    paste(NACHO:::report_method_callouts(x), collapse = "\n"),
+    "::: {.callout-note}\n## Migrated from NACHO 2",
+    fixed = TRUE
+  )
+})
+
+test_that("the background mode does not count when there is no background", {
+  x <- toy_nacho(4L)
+  settings <- x@settings
+  settings$background_mode <- "subtract"
+  S7::prop(x, "settings", check = FALSE) <- settings
+  text <- paste(NACHO:::report_parameters(x), collapse = "\n")
+  expect_row(text, "| Background | none |", "[default]")
+})
+
+test_that("report_method_callouts() gives nothing when nothing applies", {
+  x <- toy_nacho(4L)
+  samples <- x@samples
+  samples$Header.header_FileVersion <- "1.7"
+  S7::prop(x, "samples", check = FALSE) <- samples
+  expect_identical(NACHO:::report_method_callouts(x), character(0))
+})
+
+test_that("md_escape() keeps three dots the same in both formats", {
+  expect_identical(NACHO:::md_escape("a...b"), "a\u2026b")
 })

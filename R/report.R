@@ -92,17 +92,27 @@ qc_failures <- function(x, qc = nacho_qc(x)) {
   qc[qc[["status"]] %in% "fail", columns, drop = FALSE]
 }
 
+#' Format a metric value for the report
+#'
+#' Field of view is a percentage, so it gets a `%` sign.
+#'
+#' @noRd
+format_metric_value <- function(value, metric) {
+  shown <- trimws(formatC(value, digits = 4, format = "fg"))
+  if (metric == "FoV") paste0(shown, "%") else shown
+}
+
 #' One row per failing sample and failing metric
 #'
-#' On PlexSet files, a sample whose lane fails a lane metric gets a row for
-#' it, with the value of the lane sample that fails and the label marked
-#' "(lane)".
+#' On PlexSet files, binding density and field of view are measured once per
+#' lane, so a failing lane gets one row, with `sample` `NA` and the number of
+#' its samples in `lane_samples`.
 #'
 #' @param x A `nacho` object.
 #' @param qc The quality-control table of `x`.
 #'
-#' @return A data frame with `sample`, `cartridge`, `lane`, `metric`,
-#'   `metric_label`, `value` and `limit`, ordered as the samples.
+#' @return A data frame with `sample`, `cartridge`, `lane`, `lane_samples`,
+#'   `metric`, `metric_label`, `value` and `limit`, ordered as the samples.
 #'
 #' @noRd
 qc_failure_rows <- function(x, qc = nacho_qc(x)) {
@@ -111,31 +121,27 @@ qc_failure_rows <- function(x, qc = nacho_qc(x)) {
   lane_key <- if (lanes) paste(qc[["CartridgeID"]], qc[["lane"]], sep = "\r")
   rows <- lapply(metrics, function(metric) {
     fails <- qc[[paste0(metric, "_status")]] %in% "fail"
-    source <- seq_len(nrow(qc))
-    inherited <- rep(FALSE, nrow(qc))
-    if (lanes && metric %in% lane_metrics) {
-      failing <- which(fails)
-      first_failing <- failing[match(lane_key, lane_key[failing])]
-      inherited <- !is.na(first_failing) & !fails
-      source[inherited] <- first_failing[inherited]
-    }
-    keep <- which(fails | inherited)
-    if (length(keep) == 0) {
+    if (!any(fails)) {
       return(NULL)
     }
+    if (lanes && metric %in% lane_metrics) {
+      failing <- which(fails)
+      keys <- unique(lane_key[failing])
+      row <- match(keys, lane_key)
+      source <- failing[match(keys, lane_key[failing])]
+      lane_samples <- as.integer(table(lane_key)[keys])
+    } else {
+      row <- which(fails)
+      source <- row
+      lane_samples <- NA_integer_
+    }
     data.frame(
-      row = keep,
+      row = row,
       order = match(metric, qc_metrics),
+      lane_samples = lane_samples,
       metric = metric,
-      metric_label = paste0(
-        qc_metric_labels[[metric]],
-        ifelse(inherited[keep], " (lane)", "")
-      ),
-      value = trimws(formatC(
-        qc[[metric]][source[keep]],
-        digits = 4,
-        format = "fg"
-      )),
+      metric_label = qc_metric_labels[[metric]],
+      value = format_metric_value(qc[[metric]][source], metric),
       limit = threshold_bounds(x, metric)
     )
   })
@@ -148,11 +154,13 @@ qc_failure_rows <- function(x, qc = nacho_qc(x)) {
       rep(NA_character_, nrow(rows))
     }
   }
+  sample <- column(x@settings[["id_colname"]])
+  sample[!is.na(rows[["lane_samples"]])] <- NA_character_
   data.frame(
-    sample = column(x@settings[["id_colname"]]),
+    sample = sample,
     cartridge = column("CartridgeID"),
     lane = if (lanes) column("lane") else rep(NA_character_, nrow(rows)),
-    rows[c("metric", "metric_label", "value", "limit")],
+    rows[c("lane_samples", "metric", "metric_label", "value", "limit")],
     row.names = NULL
   )
 }
@@ -161,9 +169,12 @@ qc_failure_rows <- function(x, qc = nacho_qc(x)) {
 #'
 #' Escapes the Markdown punctuation with a backslash and writes `&`, `<` and
 #' `>` as HTML entities, which Pandoc reads in both HTML and Typst output.
+#' Typst reads three dots as an ellipsis whatever the escaping, so three dots
+#' become the ellipsis character in both formats.
 #'
 #' @noRd
 md_escape <- function(text) {
+  text <- gsub("...", "\u2026", text, fixed = TRUE)
   text <- gsub(
     "([][!\"#$%'()*+,./:;=?@\\\\^_`{|}~-])",
     "\\\\\\1",
@@ -175,10 +186,18 @@ md_escape <- function(text) {
   gsub(">", "&gt;", text, fixed = TRUE)
 }
 
+#' Pick the singular or the plural
+#'
+#' @noRd
+count_words <- function(n, one, many) {
+  if (n == 1) one else many
+}
+
 #' Markdown lines for the decision summary of the report
 #'
 #' Three counts in a `nacho-verdict` div, then a table of the flagged samples
-#' with one row per failing metric.
+#' with one row per failing metric, then the callouts of
+#' [report_method_callouts()].
 #'
 #' @param x A `nacho` object.
 #'
@@ -186,26 +205,24 @@ md_escape <- function(text) {
 report_decisions <- function(x) {
   qc <- nacho_qc(x)
   overview <- app_overview(x, qc)
-  passed <- overview$samples - overview$flagged
+  passed <- sum(qc[["status"]] %in% "pass")
+  flagged <- overview$flagged
   n_reasons <- length(overview$reasons)
-  count <- function(n, one, many) {
-    paste(if (n == 1) one else many)
-  }
   boxes <- c(
     "::: {.nacho-verdict}",
     paste0(
       "[",
       passed,
       "]{.n} ",
-      count(passed, "sample passes", "samples pass"),
+      count_words(passed, "sample passes", "samples pass"),
       " every check"
     ),
     "",
     paste0(
       "[",
-      overview$flagged,
+      flagged,
       "]{.n .flag} ",
-      count(overview$flagged, "sample is", "samples are"),
+      count_words(flagged, "sample is", "samples are"),
       " flagged"
     ),
     "",
@@ -213,37 +230,62 @@ report_decisions <- function(x) {
       "[",
       n_reasons,
       "]{.n} ",
-      count(n_reasons, "metric drives", "metrics drive"),
+      count_words(n_reasons, "metric drives", "metrics drive"),
       " the flags"
     ),
     ":::",
     ""
   )
-  if (overview$flagged == 0) {
-    return(c(boxes, "Every sample passes every check."))
+  callouts <- report_method_callouts(x)
+  if (flagged == 0) {
+    return(c(boxes, "Every sample passes every check.", "", callouts))
   }
   rows <- qc_failure_rows(x, qc)
   lanes <- x@rcc_type == "n8" && "lane" %in% names(qc)
+  cartridge <- ifelse(
+    is.na(rows[["cartridge"]]),
+    "",
+    md_escape(rows[["cartridge"]])
+  )
   unit <- if (lanes) {
-    paste0(md_escape(rows[["cartridge"]]), ", lane ", md_escape(rows[["lane"]]))
+    lane <- ifelse(
+      is.na(rows[["lane"]]),
+      "",
+      paste("lane", md_escape(rows[["lane"]]))
+    )
+    ifelse(
+      nzchar(cartridge) & nzchar(lane),
+      paste0(cartridge, ", ", lane),
+      paste0(cartridge, lane)
+    )
   } else {
-    ifelse(is.na(rows[["cartridge"]]), "", md_escape(rows[["cartridge"]]))
+    cartridge
   }
+  lane_rows <- !is.na(rows[["lane_samples"]])
+  sample <- ifelse(
+    lane_rows,
+    paste("All", rows[["lane_samples"]], "samples of the lane"),
+    md_escape(rows[["sample"]])
+  )
   c(
     boxes,
     paste0(
-      overview$flagged,
+      flagged,
       " ",
-      count(overview$flagged, "sample falls", "samples fall"),
+      count_words(flagged, "sample falls", "samples fall"),
       " outside at least one limit."
     ),
-    "Look at them before you use the counts downstream.",
+    paste0(
+      "Look at ",
+      count_words(flagged, "it", "them"),
+      " before you use the counts downstream."
+    ),
     if (passed > 0) {
       paste0(
         "The other ",
         passed,
         " ",
-        count(passed, "sample passes", "samples pass"),
+        count_words(passed, "sample passes", "samples pass"),
         " every check."
       )
     },
@@ -256,7 +298,7 @@ report_decisions <- function(x) {
     "|---|---|---|---:|---|",
     paste0(
       "| ",
-      md_escape(rows[["sample"]]),
+      sample,
       " | ",
       unit,
       " | ",
@@ -266,8 +308,203 @@ report_decisions <- function(x) {
       " | ",
       rows[["limit"]],
       " |"
-    )
+    ),
+    "",
+    if (any(lane_rows)) {
+      c(
+        paste(
+          "PlexSet measures binding density and field of view once per lane,",
+          "so a lane row stands for every sample in that lane."
+        ),
+        ""
+      )
+    },
+    callouts
   )
+}
+
+#' Whether the binding density limits rest on an assumed instrument
+#'
+#' Only RCC file version 1.7 names the instrument; otherwise NACHO uses the
+#' MAX/FLEX/PRO limits unless the user named an instrument.
+#' A user who named `"max"` for such files cannot be told apart.
+#'
+#' @noRd
+instrument_assumed <- function(x) {
+  instrument <- x@thresholds[["instrument"]]
+  is.na(instrument) ||
+    (instrument == "max" && is.na(detect_instrument(x@samples)))
+}
+
+#' One Quarto callout
+#'
+#' @noRd
+callout_lines <- function(type, title, text) {
+  c(
+    paste0("::: {.callout-", type, "}"),
+    paste("##", title),
+    "",
+    text,
+    ":::",
+    ""
+  )
+}
+
+#' A short list of names for a callout
+#'
+#' @noRd
+name_list <- function(names, max = 5) {
+  shown <- paste(md_escape(utils::head(names, max)), collapse = ", ")
+  extra <- length(names) - max
+  if (extra > 0) paste0(shown, " and ", extra, " more") else shown
+}
+
+#' Housekeeping normalisation as NACHO would have chosen it
+#'
+#' Calls [resolve_housekeeping_norm()] with `housekeeping_norm = NULL`.
+#' Its warning about missing housekeeping genes is muffled, because only the
+#' resulting value is needed here; [report_method_callouts()] reports the
+#' missing genes.
+#'
+#' @noRd
+default_housekeeping_norm <- function(x) {
+  settings <- x@settings
+  predict <- isTRUE(settings[["housekeeping_predict"]])
+  genes <- settings[["housekeeping_genes"]]
+  probe_genes <- housekeeping_probes(x)
+  user_genes <- if (predict || setequal(genes, probe_genes)) NULL else genes
+  withCallingHandlers(
+    resolve_housekeeping_norm(
+      x@probes[["CodeClass"]],
+      user_genes,
+      predict,
+      NULL,
+      settings[["panel"]] %||% "mrna"
+    ),
+    nacho_warning_no_housekeeping = function(cnd) {
+      invokeRestart("muffleWarning")
+    }
+  )
+}
+
+#' Names of the `Housekeeping` probes of the RCC files
+#'
+#' @noRd
+housekeeping_probes <- function(x) {
+  x@probes[["Name"]][grepl("Housekeeping", x@probes[["CodeClass"]])]
+}
+
+#' Markdown callouts about how NACHO treated the data
+#'
+#' Covers a GLM that fell back to the geometric mean, an assumed instrument,
+#' excluded negative controls, predicted housekeeping genes, housekeeping
+#' normalisation turned off, and an object migrated from NACHO 2.
+#'
+#' @param x A `nacho` object.
+#'
+#' @return Markdown lines, or an empty character vector when nothing applies.
+#'
+#' @noRd
+report_method_callouts <- function(x) {
+  settings <- x@settings
+  provenance <- x@provenance
+  method <- settings[["normalisation_method"]]
+  fallback <- provenance[["glm_fallback"]]
+  excluded <- provenance[["excluded_negatives"]]
+  genes <- settings[["housekeeping_genes"]]
+  uses_housekeeping <- method %in% c("GEO", "GLM", "RUVg")
+  callouts <- c(
+    if (length(fallback) > 0) {
+      callout_lines(
+        "warning",
+        "GLM fell back to the geometric mean",
+        c(
+          paste0(
+            "The positive control GLM did not fit ",
+            length(fallback),
+            " ",
+            count_words(length(fallback), "sample", "samples"),
+            ": ",
+            name_list(fallback),
+            "."
+          ),
+          "NACHO used the geometric mean (GEO) for every sample instead."
+        )
+      )
+    },
+    if ("BD" %in% report_metrics(x) && instrument_assumed(x)) {
+      callout_lines(
+        "warning",
+        "Instrument assumed",
+        c(
+          "The RCC files do not name the nCounter instrument, so NACHO used the MAX/FLEX/PRO binding density limits.",
+          "Set `instrument` in `load_rcc()` if the data come from a SPRINT."
+        )
+      )
+    },
+    if (length(excluded) > 0) {
+      callout_lines(
+        "note",
+        "Negative controls left out",
+        c(
+          paste0(
+            "NACHO left out ",
+            length(excluded),
+            " negative ",
+            count_words(length(excluded), "control", "controls"),
+            " from the background and detection limits: ",
+            name_list(excluded),
+            "."
+          ),
+          if (identical(x@thresholds[["preset"]], "legacy")) {
+            "Each has a median more than 50% away from the median of all negative controls."
+          } else {
+            "Each sits more than 3-fold above the other negative controls."
+          }
+        )
+      )
+    },
+    if (uses_housekeeping && isTRUE(settings[["housekeeping_predict"]])) {
+      callout_lines(
+        "note",
+        "Housekeeping genes predicted",
+        paste0(
+          "NACHO picked the housekeeping genes as the most stable genes by geNorm: ",
+          name_list(genes, max = 10),
+          "."
+        )
+      )
+    },
+    if (uses_housekeeping && !isTRUE(settings[["housekeeping_norm"]])) {
+      if (length(genes) == 0) {
+        callout_lines(
+          "warning",
+          "Housekeeping normalization off",
+          c(
+            "No housekeeping genes are available, so housekeeping normalization is off.",
+            "Only the positive controls scale the samples."
+          )
+        )
+      } else {
+        callout_lines(
+          "note",
+          "Housekeeping normalization off",
+          "Housekeeping normalization is off, so only the positive controls scale the samples."
+        )
+      }
+    },
+    if (!is.null(provenance[["migrated_from_schema"]])) {
+      callout_lines(
+        "note",
+        "Migrated from NACHO 2",
+        c(
+          "This object was saved with NACHO 2 and rebuilt with NACHO 3.",
+          "It keeps the NACHO 2 background correction and limits, so its results match the ones NACHO 2 gave."
+        )
+      )
+    }
+  )
+  as.character(callouts)
 }
 
 #' What each threshold means, in plain words
@@ -303,8 +540,8 @@ method_meanings <- c(
 #' Where the value of a threshold comes from
 #'
 #' @return `"your choice"` when the value differs from its preset, otherwise
-#'   `"NACHO 2"` for the legacy preset, the instrument for binding density,
-#'   `"NACHO"` for the miRNA metrics Bruker gives no limit for, and
+#'   `"NACHO"` for the miRNA metrics Bruker gives no limit for, `"NACHO 2"`
+#'   for the legacy preset, the instrument family for binding density, and
 #'   `"nSolver"` for the others.
 #'
 #' @noRd
@@ -328,14 +565,20 @@ threshold_source <- function(x, metric) {
   )
   if (!any(same)) {
     "your choice"
-  } else if (preset == "legacy") {
-    "NACHO 2"
-  } else if (metric == "BD") {
-    toupper(instrument)
   } else if (
     metric %in% c("Ligation_order", "Ligation_R2", "Ligation_NEG", "Haemolysis")
   ) {
     "NACHO"
+  } else if (preset == "legacy") {
+    "NACHO 2"
+  } else if (metric == "BD") {
+    if (instrument_assumed(x)) {
+      "MAX/FLEX/PRO (assumed)"
+    } else if (instrument == "sprint") {
+      "SPRINT"
+    } else {
+      "MAX/FLEX/PRO"
+    }
   } else {
     "nSolver"
   }
@@ -357,8 +600,10 @@ source_tag <- function(source) {
 #' The defaults are those of [load_rcc()].
 #' The default housekeeping genes are the `Housekeeping` probes of the RCC
 #' files.
-#' A RUVg factor count is the default when [suggest_ruv_k()] suggests the same
-#' count; when it cannot suggest one, the count is the user's choice.
+#' A RUVg factor count is `"NACHO suggestion"` when [suggest_ruv_k()] suggests
+#' the same count; when it cannot suggest one, the count is the user's choice.
+#' On an object migrated from NACHO 2, the background settings that
+#' `legacy_settings()` writes are credited to `"NACHO 2"`.
 #'
 #' @return A data frame with `parameter`, `value` (escaped for Markdown),
 #'   `meaning` and `source`.
@@ -368,24 +613,48 @@ setting_rows <- function(x) {
   settings <- x@settings
   defaults <- formals(load_rcc)
   default <- function(name) eval(defaults[[name]])
+  chosen <- function(is_default) if (is_default) "default" else "your choice"
   method <- settings[["normalisation_method"]]
+  fallback <- x@provenance[["glm_fallback"]]
   background <- settings[["background"]]
   mode <- settings[["background_mode"]]
   predict <- isTRUE(settings[["housekeeping_predict"]])
   genes <- settings[["housekeeping_genes"]]
-  probe_genes <- x@probes[["Name"]][
-    grepl("Housekeeping", x@probes[["CodeClass"]])
-  ]
-  panel <- settings[["panel"]] %||% "mrna"
-  default_norm <- (panel == "mrna" || predict) &&
-    (length(probe_genes) > 0 || predict)
+  same_background <- function(reference) {
+    same_mode <- background == "none" ||
+      identical(mode, reference[["background_mode"]])
+    identical(background, reference[["background"]]) && same_mode
+  }
+  background_source <- if (
+    !is.null(x@provenance[["migrated_from_schema"]]) &&
+      same_background(legacy_settings(settings, x@probes))
+  ) {
+    "NACHO 2"
+  } else {
+    chosen(same_background(list(
+      background = default("background"),
+      background_mode = default("background_mode")
+    )))
+  }
   rows <- list(
-    c(
-      "Normalization method",
-      md_escape(method),
-      method_meanings[[method]],
-      identical(method, default("normalisation_method"))
-    ),
+    if (length(fallback) > 0) {
+      c(
+        "Normalization method",
+        "GLM \\(GEO used\\)",
+        paste(
+          method_meanings[["GLM"]],
+          "The GLM did not fit every sample, so the geometric mean scaled them all."
+        ),
+        "your choice"
+      )
+    } else {
+      c(
+        "Normalization method",
+        md_escape(method),
+        method_meanings[[method]],
+        chosen(identical(method, default("normalisation_method")))
+      )
+    },
     c(
       "Background",
       md_escape(
@@ -398,8 +667,7 @@ setting_rows <- function(x) {
       } else {
         "Counts below the negative-control background are raised to it."
       },
-      identical(background, default("background")) &&
-        identical(mode, default("background_mode"))
+      background_source
     )
   )
   if (method %in% c("GEO", "GLM", "RUVg")) {
@@ -414,19 +682,26 @@ setting_rows <- function(x) {
             paste(md_escape(genes), collapse = ", ")
           },
           "Genes used to correct for differences in sample input.",
-          !predict && setequal(genes, probe_genes)
+          if (predict) {
+            "NACHO prediction"
+          } else {
+            chosen(setequal(genes, housekeeping_probes(x)))
+          }
         ),
         c(
           "Housekeeping prediction",
           if (predict) "yes" else "no",
           "Whether NACHO picked the most stable genes as housekeeping genes.",
-          predict == default("housekeeping_predict")
+          chosen(predict == default("housekeeping_predict"))
         ),
         c(
           "Housekeeping normalization",
           if (isTRUE(settings[["housekeeping_norm"]])) "yes" else "no",
           "Whether the housekeeping genes scale each sample.",
-          isTRUE(settings[["housekeeping_norm"]]) == default_norm
+          chosen(
+            isTRUE(settings[["housekeeping_norm"]]) ==
+              default_housekeeping_norm(x)
+          )
         )
       )
     )
@@ -445,7 +720,11 @@ setting_rows <- function(x) {
         "RUV factors",
         settings[["ruv_k"]] %||% "none",
         "Factors of unwanted variation removed from the counts.",
-        !is.null(suggested) && identical(suggested, settings[["ruv_k"]])
+        if (!is.null(suggested) && identical(suggested, settings[["ruv_k"]])) {
+          "NACHO suggestion"
+        } else {
+          "your choice"
+        }
       ))
     )
   }
@@ -455,7 +734,7 @@ setting_rows <- function(x) {
       "Principal components",
       settings[["n_comp"]],
       "Components computed for the principal component plots.",
-      settings[["n_comp"]] == default("n_comp")
+      chosen(settings[["n_comp"]] == default("n_comp"))
     ))
   )
   rows <- do.call(rbind, rows)
@@ -463,7 +742,7 @@ setting_rows <- function(x) {
     parameter = rows[, 1],
     value = rows[, 2],
     meaning = rows[, 3],
-    source = ifelse(rows[, 4] == "TRUE", "default", "your choice")
+    source = rows[, 4]
   )
 }
 
@@ -571,7 +850,7 @@ report_metrics <- function(x) {
 
 #' The limits of a metric in words
 #'
-#' @return `"0.05 to 2.25"`, `"at least 75"` or `"at most 3"`, or `NA` when
+#' @return `"0.05 to 2.25"`, `"at least 75%"` or `"at most 3"`, or `NA` when
 #'   the bounds are infinite or at the edge of the values the metric can take,
 #'   since such bounds cannot flag a sample.
 #'
@@ -583,7 +862,8 @@ threshold_bounds <- function(x, metric) {
   domain <- qc_metric_domains[[metric]] %||% c(-Inf, Inf)
   has_lower <- is.finite(lower) && lower > domain[1]
   has_upper <- is.finite(upper) && upper < domain[2]
-  shown <- function(v) format(signif(v, 3))
+  unit <- if (metric == "FoV") "%" else ""
+  shown <- function(v) paste0(format(signif(v, 3)), unit)
   if (has_lower && has_upper) {
     paste(shown(lower), "to", shown(upper))
   } else if (has_lower) {
