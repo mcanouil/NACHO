@@ -1,1 +1,1 @@
-**Positive Factor** (**PF**) is a normalisation factor computed based on positive probes **POS_X**.
+The **Positive Factor** (**PF**) is a normalization factor that NACHO computes from the positive probes **POS_X**.

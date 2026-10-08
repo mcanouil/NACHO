@@ -9,13 +9,13 @@ qc_metric_labels <- c(
   FoV = "Field of view",
   PCL = "Positive control linearity",
   LoD = "Limit of detection",
-  Positive_factor = "Positive normalisation factor",
-  House_factor = "Content normalisation factor",
+  Positive_factor = "Positive normalization factor",
+  House_factor = "Content normalization factor",
   Housekeeping_detected = "Housekeeping genes above background",
   Ligation_order = "Ligation controls in order",
   Ligation_R2 = "Ligation control linearity",
   Ligation_NEG = "Ligation negative above the detection limit",
-  Haemolysis = "Haemolysis"
+  Haemolysis = "Hemolysis"
 )
 
 #' Values a metric can take, where a bound at the edge never flags
@@ -46,12 +46,12 @@ plot_alt_texts <- c(
   PCA12 = "Samples on the first two principal components.",
   PCAi = "Share of variance explained by each principal component.",
   PCA = "Samples on each pair of the first principal components.",
-  PFNF = "Positive normalisation factor against the negative factor, one point per sample, with the thresholds shaded.",
-  HF = "Content normalisation factor against the positive factor, one point per sample, with the thresholds shaded.",
-  NORM = "Control or housekeeping gene counts before and after normalisation, one line per probe.",
+  PFNF = "Positive normalization factor against the negative factor, one point per sample, with the thresholds shaded.",
+  HF = "Content normalization factor against the positive factor, one point per sample, with the thresholds shaded.",
+  NORM = "Control or housekeeping gene counts before and after normalization, one line per probe.",
   Stability = "geNorm stability of each housekeeping gene, from the most to the least stable.",
-  RLE = "Relative log expression of each sample after normalisation.",
-  BatchFactors = "Normalisation factors of each sample, grouped by cartridge.",
+  RLE = "Relative log expression of each sample after normalization.",
+  BatchFactors = "Normalization factors of each sample, grouped by cartridge.",
   PCBatch = "Share of each principal component explained by cartridge and date."
 )
 
@@ -296,7 +296,7 @@ report_sections <- function(x) {
       plot_section("PCAi", "Variance explained"),
       section("Normalisation", 1),
       plot_section("PFNF", "Positive against negative factor", help = "pf"),
-      plot_section("HF", "Content normalisation factor", help = "hgf"),
+      plot_section("HF", "Content normalization factor", help = "hgf"),
       plot_section("NORM", "Normalisation result"),
       plot_section("RLE", "Relative log expression"),
       plot_section("Stability", "Housekeeping gene stability"),

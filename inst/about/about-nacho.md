@@ -1,25 +1,26 @@
 ### NACHO
 
-*NACHO* (**NA**noString quality **C**ontrol das**H**b**O**ard) is developed for NanoString nCounter data.  
-NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA) expression assay and works with fluorescent barcodes.  
-Each barcode is assigned an mRNA/miRNA, which can be counted after bonding with its target.  
-As a result each count of a specific barcode represents the presence of its target mRNA/miRNA.
+*NACHO* (**NA**noString quality **C**ontrol das**H**b**O**ard) works with NanoString nCounter data.
+An nCounter assay measures messenger RNA and micro RNA (mRNA/miRNA) expression with fluorescent barcodes.
+Each barcode is assigned to an mRNA or miRNA, and it is counted after it binds its target.
+Each count of a barcode therefore shows how much of its target is present.
 
-*NACHO* is able to load, visualise and normalise the exported NanoString nCounter data and facilitates the user in performing a quality control.  
-*NACHO* does this by visualising quality control metrics, expression of control genes, principal components and sample specific size factors in an interactive web application.
+*NACHO* loads, visualizes and normalizes the exported nCounter data, and it helps you to check its quality.
+It shows quality control metrics, the expression of control genes, principal components and sample-specific size factors in an interactive web application.
 
-With the use of two functions, RCC files are summarised and visualised, namely: `load_rcc()` and `visualise()`.
+Two functions summarize and visualize the RCC files:
 
-* The `load_rcc()` function is used to preprocess the data.
-* The `visualise()` function initiates a [Shiny-based dashboard](https://shiny.posit.co/) that visualises all relevant QC plots.
+* The `load_rcc()` function preprocesses the data.
+* The `visualise()` function starts a [Shiny-based dashboard](https://shiny.posit.co/) with all relevant QC plots.
 
-*NACHO* also includes a function `normalise()`, which (re)calculates sample specific size factors and normalises the data.
+*NACHO* also has a `normalise()` function.
+It calculates the sample-specific size factors again and normalizes the data.
 
-* The `normalise()` function creates a list in which your settings, the raw counts and normalised counts are stored.
+* The `normalise()` function creates a list that holds your settings, the raw counts and the normalized counts.
 
-In addition (since v0.6.0) *NACHO* includes two (three) additional functions:
+Since v0.6.0, *NACHO* has two more functions:
 
-* The `render()` function writes a full quality-control report with Quarto, as an HTML or PDF file, from the results of a call to `load_rcc()` or `normalise()`.
-* The `autoplot()` function draws any quality-control metrics from `visualise()` and `render()`.
+* The `render()` function writes a full quality control report with Quarto, as an HTML or PDF file, from the result of `load_rcc()` or `normalise()`.
+* The `autoplot()` function draws the quality control metrics of `visualise()` and `render()`.
 
-For more `vignette("NACHO")` and `vignette("NACHO-analysis")`.
+For more information, see `vignette("NACHO")` and `vignette("NACHO-analysis")`.

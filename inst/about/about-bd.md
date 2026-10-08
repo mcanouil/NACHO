@@ -1,17 +1,18 @@
-The imaging unit only counts the codes that are unambiguously distinguishable.  
-It simply will not count codes that overlap within an image.  
-This provides increased confidence that the molecular counts you receive are from truly recognisable codes.  
-Under most conditions, forgoing the few barcodes that do overlap will not impact your data.  
-Too many overlapping codes in the image, however, will create a condition called image saturation in which significant data loss could occur (critical data loss from saturation is uncommon).
+The imaging unit only counts codes that it can tell apart.
+It does not count codes that overlap within an image.
+This gives you more confidence that the molecular counts come from clearly recognizable codes.
+Dropping the few barcodes that overlap rarely changes your data.
+Too many overlapping codes cause image saturation, and then data loss is possible, although serious loss from saturation is uncommon.
 
-To determine the level of image saturation, the nCounter instrument calculates the number of optical features per square micron for each lane as it processes the images.  
-This is called the **Binding Density** (**BD**).  
-The **Binding Density** is useful for determining whether data collection has been compromised due to image saturation.
-The acceptable range for **Binding Density** is:
+The nCounter instrument calculates the number of optical features per square micron for each lane while it processes the images.
+This is the **Binding Density** (**BD**).
+Use it to check whether image saturation compromised the data collection.
 
-* `0.1 - 2.25` for **MAX**/**FLEX** instruments
-* `0.1 - 1.8` for **SPRINT** instruments
+NACHO flags a lane when its **Binding Density** is outside the range of the preset:
 
-Within these ranges, relatively few reporters on the slide surface will overlap, enabling the instrument to accurately tabulate counts for each reporter species.  
-A **Binding Density** significantly greater than the upper limit in either range is indicative of overlapping reporters on the slide surface.  
-The counts observed in lanes with a **Binding Density** at this level may have had significant numbers of codes ignored, which could potentially affect quantification and linearity of the assay.
+* `0.05 - 2.25` for **MAX**, **FLEX** and **PRO** instruments (the legacy preset uses `0.1 - 2.25`).
+* `0.1 - 1.8` for **SPRINT** instruments (the legacy preset uses `0.1 - 2.25`).
+
+Within these ranges, few reporters on the slide surface overlap, so the instrument can count each reporter species accurately.
+A **Binding Density** above the upper limit means that reporters overlap on the slide surface.
+The instrument may have ignored many codes in such a lane, which can affect the quantification and the linearity of the assay.

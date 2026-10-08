@@ -1,6 +1,8 @@
-Each individual lane scanned on an nCounter system is divided into a few hundred imaging sections, called Fields of View (**FOV**), the exact number of which will depend on the system being used (*i.e.*, **MAX/FLEX** or **SPRINT**), and the scanner settings selected by the user.  
-The system images these **FOV**s separately, and sums the barcode counts of all **FOV**s from a single lane to form the final raw data count for each unique barcode target.  
-Finally, the system reports the number of **FOV**s successfully imaged as **FOV** Counted.
+The instrument divides each lane into a few hundred imaging sections called Fields of View (**FOV**).
+The exact number depends on the system (**MAX**/**FLEX** or **SPRINT**) and on the scanner settings.
+The system images each **FOV** separately.
+It sums the barcode counts of all **FOV**s of a lane to get the raw count of each barcode target.
+It then reports the number of **FOV**s that it imaged successfully as **FOV Counted**.
 
-Significant discrepancy between the number of **FOV** for which imaging was attempted (**FOV Count**) and for which imaging was successful (**FOV Counted**) may indicate an issue with imaging performance.  
-Recommended percentage of registered FOVs (*i.e.*, **FOV Counted** over **FOV Count**) is `75 %`.
+A large gap between the **FOV** that the instrument tried to image (**FOV Count**) and the **FOV** that it imaged successfully (**FOV Counted**) can point to a problem with imaging.
+The recommended share of registered **FOV**s (**FOV Counted** over **FOV Count**) is `75 %`.

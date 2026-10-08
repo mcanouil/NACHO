@@ -44,7 +44,7 @@ test_that("thresholds leave out bounds that never flag", {
   expect_false(any(grepl("Inf", lines, fixed = TRUE)))
   expect_true("- Binding density (`BD`): at most 2.25" %in% lines)
   expect_true(
-    "- Content normalisation factor (`House_factor`): at least 0.0909" %in%
+    "- Content normalization factor (`House_factor`): at least 0.0909" %in%
       lines
   )
   expect_false(any(grepl("`LoD`", lines, fixed = TRUE)))
@@ -372,9 +372,9 @@ test_that("report_sections() leaves out component plots with one component", {
 })
 
 test_that("the report names House_factor the same way everywhere", {
-  expect_match(NACHO:::plot_alt_texts[["HF"]], "Content normalisation factor")
+  expect_match(NACHO:::plot_alt_texts[["HF"]], "Content normalization factor")
   sections <- NACHO:::report_sections(GSE74821)
-  expect_true("Content normalisation factor" %in% sections$title)
+  expect_true("Content normalization factor" %in% sections$title)
   expect_false(any(grepl(
     "Housekeeping factor",
     c(sections$title, NACHO:::plot_alt_texts)
@@ -398,4 +398,27 @@ test_that("the report shows exactly the applicable plots", {
     shown <- stats::na.omit(NACHO:::report_sections(x)[["plot"]])
     expect_setequal(shown, NACHO:::applicable_plots(x))
   }
+})
+
+test_that("shared report and app text uses US spelling", {
+  british <- "normalis|colour|recognis|analys(e|ing)|behaviour|centre|favour|organis|summaris|visualis|haemoly"
+  text <- c(NACHO:::qc_metric_labels, NACHO:::plot_alt_texts)
+  flagged <- text[grepl(british, text, ignore.case = TRUE)]
+  expect_length(flagged, 0L)
+  expect_identical(NACHO:::qc_metric_labels[["Haemolysis"]], "Hemolysis")
+  expect_identical(
+    NACHO:::qc_metric_labels[["Positive_factor"]],
+    "Positive normalization factor"
+  )
+  expect_identical(
+    NACHO:::qc_metric_labels[["House_factor"]],
+    "Content normalization factor"
+  )
+  about <- list.files(
+    system.file("about", package = "NACHO"),
+    full.names = TRUE
+  )
+  expect_gt(length(about), 0L)
+  prose <- gsub("`[^`]*`", "", unlist(lapply(about, readLines)))
+  expect_false(any(grepl(british, prose, ignore.case = TRUE)))
 })
