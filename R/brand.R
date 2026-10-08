@@ -113,22 +113,53 @@ brand_font_dependency <- function() {
   )
 }
 
-value_box_rules <- paste(
-  ".bslib-value-box.default .value-box-showcase > i {",
-  "  background: none !important;",
-  "  -webkit-text-fill-color: currentcolor !important;",
-  "  color: var(--bs-primary);",
+summary_rules <- paste(
+  ".nacho-summary {",
+  "  display: flex;",
+  "  flex-wrap: wrap;",
+  "  gap: 0.25rem 1.5rem;",
+  "  align-items: center;",
+  "  padding: 0.5rem 0.75rem;",
+  "  margin-bottom: 1rem;",
+  "  border: 1px solid var(--bs-border-color);",
+  "  border-radius: var(--bs-border-radius);",
+  "  background: var(--bs-body-bg);",
   "}",
-  ".bslib-value-box.default .value-box-showcase > svg {",
-  "  fill: var(--bs-primary) !important;",
+  ".nacho-summary-item { display: flex; align-items: center; gap: 0.4rem; }",
+  ".nacho-summary-item > i, .nacho-summary-item > svg { color: var(--bs-primary); }",
+  ".nacho-summary-info { color: var(--bs-primary); }",
+  ".nacho-summary-info:focus-visible {",
+  "  outline: 2px solid var(--bs-focus-ring-color, var(--bs-primary));",
+  "  outline-offset: 2px;",
   "}",
+  ".nacho-summary-label { color: var(--bs-secondary-color); }",
+  ".nacho-summary-value { font-weight: 700; }",
   sep = "\n"
 )
 
 popover_rules <- paste(
+  ".popover.nacho-help {",
+  "  --bs-popover-max-width: min(40rem, 90vw);",
+  "}",
   ".popover.nacho-help .popover-body {",
-  "  max-height: 60vh;",
+  "  max-height: 70vh;",
   "  overflow-y: auto;",
+  "}",
+  sep = "\n"
+)
+
+girafe_rules <- paste(
+  ".nacho-girafe {",
+  "  height: 350px;",
+  "  overflow: hidden;",
+  "  overflow: clip;",
+  "  overflow-clip-margin: 4px;",
+  "}",
+  ".nacho-girafe .girafe_container_std { height: 100%; }",
+  ".bslib-card[data-full-screen='true'] .nacho-girafe {",
+  "  height: 100%;",
+  "  flex: 1 1 auto;",
+  "  min-height: 0;",
   "}",
   sep = "\n"
 )
@@ -165,5 +196,10 @@ nacho_theme <- function() {
         "ui-monospace, monospace"
       )
     ) |>
-    bslib::bs_add_rules(c(value_box_rules, popover_rules, dark_rules))
+    bslib::bs_add_rules(c(
+      summary_rules,
+      popover_rules,
+      girafe_rules,
+      dark_rules
+    ))
 }

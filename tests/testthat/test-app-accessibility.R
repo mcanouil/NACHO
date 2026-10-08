@@ -102,7 +102,7 @@ test_that("help popovers scroll and carry the class that scopes the rule", {
     collapse = ""
   )
   rule <- "\\.popover\\.nacho-help \\.popover-body\\s*\\{[^}]*"
-  expect_match(css, paste0(rule, "max-height:\\s*60vh"), perl = TRUE)
+  expect_match(css, paste0(rule, "max-height:\\s*70vh"), perl = TRUE)
   expect_match(css, paste0(rule, "overflow-y:\\s*auto"), perl = TRUE)
   expect_false(grepl(
     "(?<!nacho-help )\\.popover-body\\s*\\{[^}]*max-height",
@@ -165,4 +165,30 @@ test_that("every static plot has alt text", {
       }
     )
   }
+})
+
+test_that("the cite action is a named button the audit sees", {
+  buttons <- button_tags(app_html(interactive = FALSE, done = TRUE))
+  cite <- buttons[grepl('id="cite"', buttons, fixed = TRUE)]
+  expect_length(cite, 1)
+  expect_match(cite, 'type="button"', fixed = TRUE)
+  expect_match(cite, "action-button", fixed = TRUE)
+  expect_true(accessible_name(cite))
+})
+
+test_that("the external link and summary icons add no second name", {
+  html <- app_html(interactive = FALSE, done = TRUE)
+  expect_no_match(html, "arrow-up-right-from-square icon", fixed = TRUE)
+  strip <- regmatches(
+    html,
+    regexpr(
+      '(?s)<div class="nacho-summary".*?id="overview-preset"',
+      html,
+      perl = TRUE
+    )
+  )
+  expect_length(strip, 1L)
+  icons <- regmatches(strip, gregexpr("<i [^>]*>", strip))[[1]]
+  expect_length(icons, 5L)
+  expect_false(any(grepl("aria-label", icons, fixed = TRUE)))
 })

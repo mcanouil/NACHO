@@ -443,3 +443,96 @@ test_that("deselecting clears the selection, including an empty array", {
     }
   )
 })
+
+test_that("card_size() rounds pixels to 50 and converts to inches", {
+  expect_identical(
+    NACHO:::card_size(612, 349),
+    c(width = 600 / 96, height = 350 / 96)
+  )
+  expect_identical(NACHO:::card_size(NULL, NULL), c(width = 7, height = 4.5))
+  expect_identical(NACHO:::card_size(0, 0), c(width = 7, height = 4.5))
+})
+
+test_that("app_girafe() draws at the given size", {
+  skip_if_not_installed("ggiraph")
+  widget <- NACHO:::app_girafe(ggplot2::ggplot(), width = 10, height = 6)
+  expect_match(widget$x$html, "viewBox='0 0 720 432'", fixed = TRUE)
+})
+
+test_that("the interactive card body fills the card", {
+  skip_if_not_installed("ggiraph")
+  html <- htmltools::renderTags(
+    NACHO:::mod_qc_plot_ui("BD", interactive = TRUE)
+  )$html
+  expect_match(
+    html,
+    '(?s)<div class="nacho-girafe" role="img"[^>]*>\\s*<div[^>]*height:100%;',
+    perl = TRUE
+  )
+  expect_no_match(html, "min-height: 350px", fixed = TRUE)
+  expect_match(html, "card-body[^\"]*html-fill-container")
+})
+
+test_that("the girafe follows the card size", {
+  skip_if_not_installed("ggiraph")
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(plot_args(GSE74821, "BD"), list(interactive = TRUE)),
+    {
+      session$setInputs(colour = "CartridgeID")
+      session$elapse(300)
+      expect_identical(girafe_size(), NACHO:::card_size(600, 400))
+    }
+  )
+})
+
+test_that("the girafe is built once per rounded card size", {
+  skip_if_not_installed("ggiraph")
+  builds <- 0L
+  original <- NACHO:::app_girafe
+  testthat::local_mocked_bindings(
+    app_girafe = function(...) {
+      builds <<- builds + 1L
+      original(...)
+    }
+  )
+  root <- shiny::MockShinySession$new()
+  root$clientData <- shiny::reactiveValues(
+    `output_BD-girafe_width` = 600,
+    `output_BD-girafe_height` = 350
+  )
+  resize <- function(width) {
+    root$clientData[["output_BD-girafe_width"]] <- width
+    root$flushReact()
+    root$elapse(300)
+  }
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      list(id = "BD"),
+      plot_args(GSE74821, "BD"),
+      list(interactive = TRUE)
+    ),
+    session = root,
+    {
+      sizes <- 0L
+      shiny::observe({
+        girafe_size()
+        sizes <<- sizes + 1L
+      })
+      session$setInputs(colour = "CartridgeID")
+      session$elapse(300)
+      output$girafe
+      expect_identical(c(builds, sizes), c(1L, 1L))
+      resize(610)
+      output$girafe
+      expect_identical(c(builds, sizes), c(1L, 1L))
+      resize(900)
+      output$girafe
+      expect_identical(c(builds, sizes), c(2L, 2L))
+      resize(600)
+      output$girafe
+      expect_identical(c(builds, sizes), c(2L, 3L))
+    }
+  )
+})

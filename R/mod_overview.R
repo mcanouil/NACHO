@@ -12,9 +12,17 @@ app_overview <- function(x, qc = nacho_qc(x)) {
   if (length(reasons) == 0) {
     reasons <- integer()
   }
+  lanes <- x@rcc_type == "n8" && "lane" %in% names(qc)
+  unit <- if (lanes) "Lanes" else "Cartridges"
+  units <- if (lanes) {
+    nrow(unique(stats::na.omit(qc[c("CartridgeID", "lane")])))
+  } else {
+    length(unique(stats::na.omit(qc[["CartridgeID"]])))
+  }
   list(
     samples = nrow(qc),
-    cartridges = length(unique(stats::na.omit(qc[["CartridgeID"]]))),
+    unit = unit,
+    units = units,
     flagged = sum(qc[["status"]] %in% "fail"),
     method = x@settings[["normalisation_method"]],
     preset = x@thresholds[["preset"]],
@@ -22,38 +30,70 @@ app_overview <- function(x, qc = nacho_qc(x)) {
   )
 }
 
+reasons_text <- function(reasons) {
+  if (length(reasons) == 0) {
+    "None"
+  } else {
+    paste(names(reasons), reasons, sep = ": ", collapse = ", ")
+  }
+}
+
+reasons_description <- function(reasons) {
+  if (length(reasons) == 0) {
+    "No sample is flagged."
+  } else {
+    paste("Flagged because:", reasons_text(reasons))
+  }
+}
+
 mod_overview_ui <- function(id) {
   ns <- shiny::NS(id)
-  icon <- function(name) shiny::icon(name, `aria-hidden` = "true")
-  bslib::layout_column_wrap(
-    width = "200px",
-    fill = FALSE,
-    class = "mb-3",
-    bslib::value_box(
-      "Samples",
-      shiny::textOutput(ns("samples")),
-      showcase = icon("vial"),
-      showcase_layout = bslib::showcase_top_right(max_height = "52px")
+  item <- function(icon_name, label, value, extra = NULL) {
+    shiny::tags$div(
+      class = "nacho-summary-item",
+      unnamed_icon(icon_name),
+      shiny::tags$span(class = "nacho-summary-label", label),
+      shiny::tags$span(class = "nacho-summary-value", value),
+      extra
+    )
+  }
+  shiny::tags$div(
+    class = "nacho-summary",
+    role = "group",
+    `aria-label` = "Summary of the data",
+    item("vial", "Samples", shiny::textOutput(ns("samples"), inline = TRUE)),
+    item(
+      "layer-group",
+      shiny::textOutput(ns("unit"), inline = TRUE),
+      shiny::textOutput(ns("units"), inline = TRUE)
     ),
-    bslib::value_box(
-      "Cartridges",
-      shiny::textOutput(ns("cartridges")),
-      showcase = icon("layer-group"),
-      showcase_layout = bslib::showcase_top_right(max_height = "52px")
+    item(
+      "triangle-exclamation",
+      "Flagged",
+      shiny::textOutput(ns("flagged_count"), inline = TRUE),
+      bslib::tooltip(
+        shiny::tags$button(
+          type = "button",
+          class = "btn btn-link btn-sm p-0 nacho-summary-info",
+          unnamed_icon("circle-info"),
+          shiny::tags$span(
+            class = "visually-hidden",
+            "Why samples are flagged.",
+            shiny::textOutput(ns("reasons"), inline = TRUE)
+          )
+        ),
+        id = ns("reasons_tip"),
+        "None"
+      )
     ),
-    bslib::value_box(
-      "Flagged samples",
-      shiny::textOutput(ns("flagged_count")),
-      shiny::textOutput(ns("reasons")),
-      showcase = icon("triangle-exclamation"),
-      showcase_layout = bslib::showcase_top_right(max_height = "52px")
-    ),
-    bslib::value_box(
+    item(
+      "scale-balanced",
       "Method",
-      shiny::textOutput(ns("method")),
-      shiny::textOutput(ns("preset")),
-      showcase = icon("scale-balanced"),
-      showcase_layout = bslib::showcase_top_right(max_height = "52px")
+      shiny::tagList(
+        shiny::textOutput(ns("method"), inline = TRUE),
+        " \u00b7 ",
+        shiny::textOutput(ns("preset"), inline = TRUE)
+      )
     )
   )
 }
@@ -64,16 +104,16 @@ mod_overview_server <- function(id, object, qc) {
       app_overview(shiny::req(object()), shiny::req(qc()))
     )
     output$samples <- shiny::renderText(overview()$samples)
-    output$cartridges <- shiny::renderText(overview()$cartridges)
     output$flagged_count <- shiny::renderText(overview()$flagged)
-    output$reasons <- shiny::renderText({
-      reasons <- overview()$reasons
-      if (length(reasons) == 0) {
-        "None"
-      } else {
-        paste(names(reasons), reasons, sep = ": ", collapse = ", ")
-      }
-    })
+    output$unit <- shiny::renderText(overview()$unit)
+    output$units <- shiny::renderText(overview()$units)
+    reasons <- shiny::reactive(overview()$reasons)
+    output$reasons <- shiny::renderText(reasons_description(reasons()))
+    shiny::observeEvent(
+      reasons(),
+      bslib::update_tooltip("reasons_tip", reasons_text(reasons())),
+      ignoreNULL = FALSE
+    )
     output$method <- shiny::renderText(overview()$method)
     output$preset <- shiny::renderText(paste(
       preset_label(overview()$preset),

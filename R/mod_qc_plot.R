@@ -101,12 +101,40 @@ girafe_selection <- function(selected = NULL) {
   )
 }
 
-app_girafe <- function(plot) {
+#' Convert the pixel size of a card to the size of a plot in inches
+#'
+#' Sizes round to 50 pixels, so small changes in the layout do not redraw the
+#' plot, and a return from full screen finds the plot in the cache.
+#' In the grid the plot output has a fixed height of 350 pixels, so only the
+#' width follows the card; in full screen the output fills the card.
+#' Without a usable size, the default size is used.
+#'
+#' @noRd
+card_size <- function(width, height) {
+  default <- c(width = 7, height = 4.5)
+  if (
+    !is.numeric(width) ||
+      !is.numeric(height) ||
+      length(width) != 1 ||
+      length(height) != 1 ||
+      !is.finite(width) ||
+      !is.finite(height) ||
+      width <= 0 ||
+      height <= 0
+  ) {
+    return(default)
+  }
+  rounded <- function(pixels) max(50, round(pixels / 50) * 50)
+  c(width = rounded(width) / 96, height = rounded(height) / 96)
+}
+
+app_girafe <- function(plot, width = 7, height = 4.5) {
   ggiraph::girafe(
     ggobj = plot,
-    width_svg = 7,
-    height_svg = 4.5,
+    width_svg = width,
+    height_svg = height,
     options = list(
+      ggiraph::opts_sizing(rescale = TRUE, width = 1),
       ggiraph::opts_hover(css = "stroke:currentColor;stroke-width:2px;"),
       ggiraph::opts_tooltip(use_fill = FALSE),
       ggiraph::opts_toolbar(
@@ -203,11 +231,13 @@ mod_qc_plot_ui <- function(id, type = id, interactive = FALSE) {
       )
     ),
     bslib::card_body(
+      fillable = TRUE,
       if (interactive) {
         shiny::tags$div(
+          class = "nacho-girafe",
           role = "img",
           `aria-label` = plot_alt_texts[[type]],
-          ggiraph::girafeOutput(ns("girafe"), height = "350px")
+          ggiraph::girafeOutput(ns("girafe"), height = "100%")
         )
       } else {
         shiny::plotOutput(ns("plot"), height = "350px")
@@ -326,8 +356,36 @@ mod_qc_plot_server <- function(
         ignoreNULL = FALSE,
         ignoreInit = TRUE
       )
-      widget <- shiny::reactive(app_girafe(plot())) |>
-        shiny::bindCache(object(), type, options(), dark())
+      card_pixels <- shiny::reactive({
+        output_id <- paste0("output_", session$ns("girafe"))
+        width <- session$clientData[[paste0(output_id, "_width")]]
+        height <- session$clientData[[paste0(output_id, "_height")]]
+        shiny::req(
+          is.numeric(width) && length(width) == 1 && isTRUE(width > 0),
+          is.numeric(height) && length(height) == 1 && isTRUE(height > 0)
+        )
+        c(width = width, height = height)
+      }) |>
+        shiny::debounce(250)
+      girafe_size <- shiny::reactiveVal()
+      shiny::observe({
+        pixels <- card_pixels()
+        size <- card_size(pixels[["width"]], pixels[["height"]])
+        if (!identical(size, shiny::isolate(girafe_size()))) {
+          girafe_size(size)
+        }
+      })
+      widget <- shiny::reactive({
+        size <- girafe_size()
+        app_girafe(plot(), size[["width"]], size[["height"]])
+      }) |>
+        shiny::bindCache(
+          object(),
+          type,
+          options(),
+          dark(),
+          shiny::req(girafe_size())
+        )
       output$girafe <- ggiraph::renderGirafe(
         ggiraph::girafe_options(
           widget(),

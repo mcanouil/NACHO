@@ -84,6 +84,7 @@ app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
     header = shiny::tagList(
       shiny::useBusyIndicators(),
       brand_font_dependency(),
+      restore_help_focus,
       shiny::conditionalPanel(
         "output.has_data === true",
         mod_overview_ui("overview")
@@ -117,10 +118,98 @@ app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
       with_data(mod_outliers_ui("outliers", interactive))
     ),
     bslib::nav_panel("Export", with_data(mod_export_ui("export", quarto))),
-    bslib::nav_panel("About", help_page("nacho")),
+    help_menu(),
     bslib::nav_spacer(),
     bslib::nav_item(bslib::input_dark_mode(id = "dark_mode"))
   )
+}
+
+package_description <- function() {
+  utils::packageDescription("NACHO")
+}
+
+help_links <- function() {
+  description <- package_description()
+  urls <- trimws(strsplit(description[["URL"]] %||% "", ",")[[1]])
+  github <- urls[grepl("^https://github.com/", urls)][1]
+  site <- urls[nzchar(urls) & !grepl("^https://github.com/", urls)][1]
+  issues <- description[["BugReports"]]
+  missing <- c(
+    "a GitHub URL in the URL field" = is.na(github),
+    "a documentation site URL in the URL field" = is.na(site),
+    "the BugReports field" = is.null(issues) || !nzchar(issues)
+  )
+  if (any(missing)) {
+    nacho_abort(
+      c(
+        "The DESCRIPTION file of NACHO lacks {names(missing)[missing]}.",
+        i = "Reinstall NACHO so the Help menu can link to its pages."
+      ),
+      class = "bad_description"
+    )
+  }
+  c(
+    documentation = site,
+    discussions = paste0(sub("/$", "", github), "/discussions"),
+    issues = issues
+  )
+}
+
+unnamed_icon <- function(name) {
+  icon <- shiny::icon(name, `aria-hidden` = "true")
+  icon$attribs[["aria-label"]] <- NULL
+  icon
+}
+
+external_link <- function(label, href) {
+  shiny::tags$a(
+    class = "dropdown-item",
+    href = href,
+    target = "_blank",
+    rel = "noopener",
+    label,
+    unnamed_icon("arrow-up-right-from-square"),
+    shiny::tags$span(class = "visually-hidden", "(opens in a new tab)")
+  )
+}
+
+restore_help_focus <- shiny::tags$script(shiny::HTML(
+  "$(document).on('hidden.bs.modal', function() {
+    $('a.dropdown-toggle').filter(function() {
+      return $(this).text().trim() === 'Help';
+    }).first().trigger('focus');
+  });"
+))
+
+help_menu <- function() {
+  links <- help_links()
+  bslib::nav_menu(
+    "Help",
+    align = "right",
+    bslib::nav_panel("About NACHO", help_page("nacho")),
+    bslib::nav_item(external_link("Documentation", links[["documentation"]])),
+    bslib::nav_item(external_link("Ask a question", links[["discussions"]])),
+    bslib::nav_item(external_link("Report a problem", links[["issues"]])),
+    bslib::nav_item(
+      shiny::tags$button(
+        id = "cite",
+        type = "button",
+        class = "dropdown-item action-button",
+        "Cite NACHO"
+      )
+    )
+  )
+}
+
+citation_html <- function() {
+  shiny::HTML(paste(
+    format(utils::citation("NACHO"), style = "html"),
+    collapse = "\n"
+  ))
+}
+
+citation_bibtex <- function() {
+  paste(format(utils::citation("NACHO"), style = "bibtex"), collapse = "\n")
 }
 
 tune_object <- function(object, chosen, thresholds) {
@@ -205,6 +294,18 @@ app_server <- function(
     mod_outliers_server("outliers", tuned, qc, selected)
     mod_batch_server("batch", tuned)
     mod_export_server("export", tuned, quarto)
+    shiny::observeEvent(input$cite, {
+      shiny::showModal(shiny::modalDialog(
+        title = "Cite NACHO",
+        citation_html(),
+        shiny::tags$pre(
+          style = "white-space: pre-wrap; word-break: break-word;",
+          citation_bibtex()
+        ),
+        easyClose = TRUE,
+        footer = shiny::modalButton("Close")
+      ))
+    })
     lapply(unlist(app_plot_types, use.names = FALSE), function(type) {
       mod_qc_plot_server(
         type,
