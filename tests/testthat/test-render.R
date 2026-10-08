@@ -629,6 +629,42 @@ test_that("a Typst render keeps a title and an author with special characters", 
   expect_match(cover, paste("Prepared by", author), fixed = TRUE)
 })
 
+test_that("the Typst filter lets long ids in table cells break", {
+  skip_on_cran()
+  skip_if_not_installed("quarto")
+  skip_if(is.null(quarto_cli_version()), "Quarto is missing")
+  dir <- withr::local_tempdir()
+  table <- file.path(dir, "table.md")
+  writeLines(
+    c(
+      "| Sample | Cartridge | Metric |",
+      "|---|---|---|",
+      "| GSM1934699 | 20111228-9741-2-0044 | Binding density |"
+    ),
+    table
+  )
+  typst <- system2(
+    quarto::quarto_path(),
+    c(
+      "pandoc",
+      table,
+      "--to",
+      "typst",
+      "--lua-filter",
+      report_template_path("nacho-styles.lua")
+    ),
+    stdout = TRUE,
+    stderr = FALSE
+  )
+  typst <- paste(typst, collapse = "\n")
+  expect_match(
+    typst,
+    "#box[20111228-]#box[9741-]#box[2-]#box[0044]",
+    fixed = TRUE
+  )
+  expect_match(typst, "[GSM1934699]", fixed = TRUE)
+})
+
 test_that("Typst callouts keep their title and get a navy or amber edge", {
   skip_on_cran()
   skip_if_not_installed("quarto")
@@ -649,7 +685,13 @@ test_that("Typst callouts keep their title and get a navy or amber edge", {
     "#assert.eq(edge(rgb(\"#CC1914\")), nacho-amber)",
     "#assert.eq(edge(rgb(\"#FC5300\")), nacho-amber)",
     "#let kept = callout(title: [Kept title], body: [B], icon_color: nacho-rust)",
-    "#assert(repr(kept.body).contains(\"Kept title\"))"
+    "#assert(repr(kept.body).contains(\"Kept title\"))",
+    "#assert(not repr(kept.body).contains(\"Warning:\"))",
+    "#let warned = callout(title: [Watch out], body: [B], icon_color: rgb(\"#EB9113\"))",
+    "#assert(repr(warned.body).contains(\"Warning:\"))",
+    "#assert(repr(warned.body).contains(\"Watch out\"))",
+    "#let bare = callout(body: [B], icon_color: rgb(\"#CC1914\"))",
+    "#assert(repr(bare.body).contains(\"Warning:\"))"
   )
   writeLines(
     c(

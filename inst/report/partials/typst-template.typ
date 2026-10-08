@@ -16,6 +16,8 @@
 // the icon colour tells the kinds apart: the brand primary or Quarto's blue
 // for a note and Quarto's green for a tip give a navy edge; warning, caution
 // and important give an amber edge.
+// An amber callout also starts with "Warning:", so the kind does not rest on
+// colour alone, as the hidden kind text does in HTML.
 #let nacho-calm-callouts = (nacho-rust, rgb("#0758E5"), rgb("#00A047"))
 
 #let callout(
@@ -36,7 +38,7 @@
       rest: 0.6pt + nacho-line,
     ),
   )[
-    #if title != none [*#title* \ ]
+    #if warn or title != none [*#if warn { "Warning: " }#title* \ ]
     #body
   ]
 }

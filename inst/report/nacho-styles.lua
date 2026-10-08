@@ -16,12 +16,12 @@
 --- - A table with no column widths gets equal widths, so it fills the page
 ---   width like the tables that have widths.
 --- - Typst cannot break a long sample id inside a table cell, so each word of
----   more than 20 characters in the text of a cell is split into boxes, after
----   each `_`, `.`, `-` and `/`, and then every 20 characters.
+---   more than 12 characters in the text of a cell is split into boxes, after
+---   each `_`, `.`, `-` and `/`, and then every 12 characters.
 ---   Typst can break a line between two boxes, and the PDF text stays as typed.
 ---   Code in backticks is not split.
 
-local long_word = 20
+local long_word = 12
 
 local function typst_markup(inlines)
   local text = pandoc.write(pandoc.Pandoc({ pandoc.Plain(inlines) }), "typst")
