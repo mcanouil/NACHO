@@ -749,6 +749,15 @@ test_that("the binding density source names the instrument family", {
     NACHO:::report_method_callouts(GSE74821),
     fixed = TRUE
   )))
+  legacy <- NACHO::normalise(
+    GSE74821,
+    outliers_thresholds = NACHO::nacho_thresholds(preset = "legacy")
+  )
+  expect_false(any(grepl(
+    "Instrument assumed",
+    NACHO:::report_method_callouts(legacy),
+    fixed = TRUE
+  )))
 })
 
 test_that("the hemolysis limit is credited to NACHO, even with legacy", {

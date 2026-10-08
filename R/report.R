@@ -396,7 +396,8 @@ housekeeping_probes <- function(x) {
 
 #' Markdown callouts about how NACHO treated the data
 #'
-#' Covers a GLM that fell back to the geometric mean, an assumed instrument,
+#' Covers a GLM that fell back to the geometric mean, an assumed instrument
+#' (only with the nSolver preset, whose binding density limits depend on it),
 #' excluded negative controls, predicted housekeeping genes, housekeeping
 #' normalisation turned off, and an object migrated from NACHO 2.
 #'
@@ -432,7 +433,12 @@ report_method_callouts <- function(x) {
         )
       )
     },
-    if ("BD" %in% report_metrics(x) && instrument_assumed(x)) {
+    if (
+      "BD" %in%
+        report_metrics(x) &&
+        x@thresholds[["preset"]] != "legacy" &&
+        instrument_assumed(x)
+    ) {
       callout_lines(
         "warning",
         "Instrument assumed",
