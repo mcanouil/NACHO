@@ -171,6 +171,19 @@ test_that("the app flags samples when a threshold moves", {
     click_sample(first)
     pick_sample("")
     click_sample(first)
+    pick_sample(second)
+    app$run_js(
+      sprintf(
+        "$(document).on('shiny:recalculating.redraw', function(e) {
+          if (!/-girafe$/.test(e.target.id)) return;
+          $(document).off('.redraw');
+          setTimeout(function() { clickSample('%s'); }, 0);
+        });",
+        first
+      )
+    )
+    app$set_window_size(1280, 1000)
+    expect_selection(first, "BD-girafe_selected")
   }
   app$run_js("document.querySelector('#cite').click()")
   app$wait_for_js("document.querySelector('.modal.show') !== null")
