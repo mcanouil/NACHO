@@ -61,6 +61,13 @@ test_that("the app flags samples when a threshold moves", {
     girafe_boxes <- function(width) {
       app$set_window_size(width, 1000)
       app$wait_for_idle(duration = 1000, timeout = 60000)
+      app$wait_for_js(
+        "Array.from(document.querySelectorAll('.nacho-girafe'))
+          .filter(e => e.offsetParent)
+          .every(e => e.querySelector('.html-widget svg') &&
+            !e.querySelector('.recalculating'))",
+        timeout = 60000
+      )
       app$get_js(
         "Array.from(document.querySelectorAll('.nacho-girafe .html-widget'))
           .filter(e => e.offsetParent)
