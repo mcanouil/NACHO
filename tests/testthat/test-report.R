@@ -21,7 +21,7 @@ test_that("thresholds leave out bounds that never flag", {
   limits <- NACHO:::report_limits(x)
   expect_false(any(grepl("Inf", limits, fixed = TRUE)))
   expect_identical(limits[["BD"]], "at most 2.25")
-  expect_identical(limits[["House_factor"]], "at least 0.0909")
+  expect_identical(limits[["House_factor"]], "at least 0.0909090909090909")
   expect_false(any(c("LoD", "PCL") %in% names(limits)))
 })
 
@@ -62,14 +62,11 @@ test_that("the batch tables put the design first and flag confounding", {
 test_that("the batch design table reads in plain words", {
   skip_if_not_installed("knitr")
   lines <- NACHO:::report_batch_tables(GSE74821, group = "tissue type:ch1")
-  expect_true(
-    "|Batch       |    Levels|   Cram\u00e9r's V| Levels with one group|Confounded |" %in%
-      lines
-  )
+  header <- "^\\|Batch +\\| +Levels\\| +Cram\u00e9r's V\\| +Levels with one group\\|Confounded +\\|$"
+  expect_true(any(grepl(header, lines)))
   rows <- lines[startsWith(lines, "|CartridgeID") | startsWith(lines, "|Date")]
   expect_length(rows, 2L)
   expect_true(all(grepl("not computed", rows, fixed = TRUE)))
-  expect_true(all(grepl("|yes", rows, fixed = TRUE)))
   expect_false(any(grepl("NA|TRUE|FALSE|n_levels|cramers_v", lines)))
   expect_true(any(grepl("[4]{.num}", rows, fixed = TRUE)))
 })
@@ -83,6 +80,15 @@ test_that("a grouping with one level says batch cannot be checked", {
   )
   expect_match(lines[4], "`tissue type:ch1` has one level", fixed = TRUE)
   expect_false(any(grepl("are confounded", lines, fixed = TRUE)))
+})
+
+test_that("a grouping with one level leaves the confounding unchecked", {
+  skip_if_not_installed("knitr")
+  lines <- NACHO:::report_batch_tables(GSE74821, group = "tissue type:ch1")
+  rows <- lines[startsWith(lines, "|CartridgeID") | startsWith(lines, "|Date")]
+  expect_length(rows, 2L)
+  expect_true(all(grepl("\\| *not checked *\\|not checked *\\|$", rows)))
+  expect_false(any(grepl("yes", rows, fixed = TRUE)))
 })
 
 test_that("every plot type has alt text", {
@@ -178,6 +184,39 @@ test_that("thresholds with two bounds read as a range", {
   thresholds$BD <- c(0.1, 2.25)
   x@thresholds <- thresholds
   expect_identical(NACHO:::report_limits(x)[["BD"]], "0.1 to 2.25")
+})
+
+test_that("limits print exactly as set", {
+  x <- tuned_gse(PCL = 0.9995, FoV = 99.95, BD = c(0.1, 2.25))
+  limits <- NACHO:::report_limits(x)
+  expect_identical(limits[["PCL"]], "at least 0.9995")
+  expect_identical(limits[["FoV"]], "at least 99.95%")
+  expect_identical(limits[["BD"]], "0.1 to 2.25")
+  text <- paste(NACHO:::report_parameters(x), collapse = "\n")
+  expect_match(text, "[at least 0.9995]{.num}", fixed = TRUE)
+  methods <- paste(NACHO:::methods_limits(x), collapse = "\n")
+  expect_match(methods, "(at least 0.9995)", fixed = TRUE)
+  expect_match(methods, "(at least 99.95%)", fixed = TRUE)
+})
+
+test_that("a flagged value never prints the same as its limit", {
+  x <- tuned_gse(PCL = 0.999)
+  qc <- NACHO::nacho_qc(x)
+  expect_true(any(abs(qc$PCL - 0.99896) < 5e-6 & qc$PCL_status == "fail"))
+  rows <- NACHO:::qc_failure_rows(x)
+  pcl <- rows[rows$metric == "PCL", ]
+  expect_gt(nrow(pcl), 0L)
+  expect_true(all(pcl$limit == "at least 0.999"))
+  expect_false(any(pcl$value == "0.999"))
+  expect_true("0.99896" %in% pcl$value)
+  expect_identical(
+    NACHO:::format_metric_value(c(0.99949, 0.9994, 0.5), "PCL", 0.9995),
+    c("0.99949", "0.9994", "0.5")
+  )
+  expect_identical(
+    NACHO:::format_metric_value(99.949, "FoV", c(99.95, 100)),
+    "99.949%"
+  )
 })
 
 test_that("only the batch section gets the batch tables", {
@@ -719,6 +758,16 @@ test_that("report_parameters() leaves out PCL and LoD on PlexSet data", {
   expect_match(text, "| Housekeeping genes | [none]{.num} |", fixed = TRUE)
 })
 
+test_that("a metric no sample has is left out of the limits", {
+  expect_false(
+    "Housekeeping_detected" %in% NACHO:::report_metrics(plexset_nacho)
+  )
+  text <- paste(NACHO:::report_parameters(plexset_nacho), collapse = "\n")
+  expect_false(grepl("Housekeeping genes above background", text, fixed = TRUE))
+  methods <- paste(NACHO:::methods_limits(plexset_nacho), collapse = "\n")
+  expect_match(methods, "against 3 quality-control limits", fixed = TRUE)
+})
+
 test_that("report_decisions() leaves out a missing cartridge on PlexSet data", {
   x <- NACHO::normalise(
     plexset_nacho,
@@ -796,6 +845,16 @@ test_that("the binding density source names the instrument family", {
   expect_false(any(grepl(
     "Instrument not in the RCC files",
     NACHO:::report_method_callouts(legacy),
+    fixed = TRUE
+  )))
+})
+
+test_that("a binding density the user set gets no instrument warning", {
+  chosen <- tuned_gse(BD = c(0.15, 2.25))
+  expect_identical(NACHO:::threshold_source(chosen, "BD"), "your choice")
+  expect_false(any(grepl(
+    "Instrument not in the RCC files",
+    NACHO:::report_method_callouts(chosen),
     fixed = TRUE
   )))
 })
@@ -886,6 +945,26 @@ test_that("housekeeping normalization off gets a callout", {
     "::: {.callout-warning}\n## Housekeeping normalization off",
     fixed = TRUE
   )
+})
+
+test_that("the method meaning names housekeeping genes only when they scale", {
+  off <- suppressMessages(NACHO::normalise(
+    GSE74821,
+    housekeeping_norm = FALSE
+  ))
+  for (x in list(off, plexset_nacho)) {
+    text <- paste(
+      c(NACHO:::report_parameters(x), NACHO:::methods_normalisation(x)),
+      collapse = "\n"
+    )
+    expect_false(grepl("then housekeeping genes", text, fixed = TRUE))
+    expect_match(
+      text,
+      "Positive controls scale each sample (by their geometric mean|through a Poisson model)\\."
+    )
+  }
+  on <- paste(NACHO:::report_parameters(GSE74821), collapse = "\n")
+  expect_match(on, "Positive controls, then housekeeping genes", fixed = TRUE)
 })
 
 test_that("the housekeeping normalization default follows load_rcc()", {

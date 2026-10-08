@@ -59,7 +59,7 @@ plot_alt_texts <- c(
 #'
 #' Two to four sentences each: what a good result looks like, what a flag
 #' looks like, and what to do next.
-#' Keyed like [plot_alt_texts], plus `decisions`, `parameters` and `batch` for
+#' Keyed like `plot_alt_texts`, plus `decisions`, `parameters` and `batch` for
 #' the tables.
 #'
 #' @noRd
@@ -214,7 +214,7 @@ report_reading_guide <- c(
 
 #' The "How to read this" callout of a plot or table
 #'
-#' @param key A name of [report_reading_guide].
+#' @param key A name of `report_reading_guide`.
 #'
 #' @noRd
 reading_guide_callout <- function(key) {
@@ -260,11 +260,28 @@ qc_failures <- function(x, qc = nacho_qc(x)) {
 
 #' Format a metric value for the report
 #'
+#' Each value gets four significant digits, or more, up to six, when it would
+#' otherwise print the same as one of the limits of the metric.
 #' Field of view is a percentage, so it gets a `%` sign.
 #'
+#' @param limits The limits of the metric.
+#'
 #' @noRd
-format_metric_value <- function(value, metric) {
-  shown <- trimws(formatC(value, digits = 4, format = "fg"))
+format_metric_value <- function(value, metric, limits = numeric()) {
+  limit_text <- vapply(limits, format, character(1), digits = 15)
+  shown <- vapply(
+    value,
+    function(v) {
+      for (digits in 4:6) {
+        text <- trimws(formatC(v, digits = digits, format = "fg"))
+        if (!text %in% limit_text) {
+          break
+        }
+      }
+      text
+    },
+    character(1)
+  )
   if (metric == "FoV") paste0(shown, "%") else shown
 }
 
@@ -307,7 +324,11 @@ qc_failure_rows <- function(x, qc = nacho_qc(x)) {
       lane_samples = lane_samples,
       metric = metric,
       metric_label = qc_metric_labels[[metric]],
-      value = format_metric_value(qc[[metric]][source], metric),
+      value = format_metric_value(
+        qc[[metric]][source],
+        metric,
+        as.numeric(x@thresholds[[metric]])
+      ),
       limit = threshold_bounds(x, metric)
     )
   })
@@ -372,7 +393,7 @@ count_words <- function(n, one, many) {
 #' Three counts in a `nacho-verdict` div, where the class `flag` marks the
 #' flagged count when there is one, then a table of the flagged samples
 #' with one row per failing metric, then its "How to read this" callout, then
-#' the callouts of [report_method_callouts()].
+#' the callouts of `report_method_callouts()`.
 #' When nothing is flagged, there is no table and no "How to read this".
 #'
 #' @param x A `nacho` object.
@@ -541,9 +562,9 @@ name_list <- function(names, max = 5) {
 
 #' Housekeeping normalisation as NACHO would have chosen it
 #'
-#' Calls [resolve_housekeeping_norm()] with `housekeeping_norm = NULL`.
+#' Calls `resolve_housekeeping_norm()` with `housekeeping_norm = NULL`.
 #' Its warning about missing housekeeping genes is muffled, because only the
-#' resulting value is needed here; [report_method_callouts()] reports the
+#' resulting value is needed here; `report_method_callouts()` reports the
 #' missing genes.
 #'
 #' @noRd
@@ -617,8 +638,7 @@ report_method_callouts <- function(x) {
     if (
       "BD" %in%
         report_metrics(x) &&
-        x@thresholds[["preset"]] != "legacy" &&
-        instrument_not_in_files(x)
+        threshold_source(x, "BD") == "MAX/FLEX/PRO (not in the RCC files)"
     ) {
       callout_lines(
         "warning",
@@ -724,6 +744,24 @@ method_meanings <- c(
   ligation = "The ligation positive controls scale each sample."
 )
 
+#' What a normalisation method did, given whether housekeeping genes scaled
+#' the samples
+#'
+#' With housekeeping normalisation off, GEO and GLM use the positive controls
+#' only.
+#'
+#' @noRd
+method_meaning <- function(method, housekeeping) {
+  if (!housekeeping && method %in% c("GEO", "GLM")) {
+    return(switch(
+      method,
+      GEO = "Positive controls scale each sample by their geometric mean.",
+      GLM = "Positive controls scale each sample through a Poisson model."
+    ))
+  }
+  method_meanings[[method]]
+}
+
 #' Where the value of a threshold comes from
 #'
 #' @return `"your choice"` when the value differs from its preset, otherwise
@@ -784,10 +822,10 @@ source_tag <- function(source) {
 
 #' The settings that shape the data, with their meaning and source
 #'
-#' The defaults are those of [load_rcc()].
+#' The defaults are those of `load_rcc()`.
 #' The default housekeeping genes are the `Housekeeping` probes of the RCC
 #' files.
-#' A RUVg factor count is `"NACHO suggestion"` when [suggest_ruv_k()] suggests
+#' A RUVg factor count is `"NACHO suggestion"` when `suggest_ruv_k()` suggests
 #' the same count; when it cannot suggest one, the count is the user's choice.
 #' On an object migrated from NACHO 2, the background settings that
 #' `legacy_settings()` writes are credited to `"NACHO 2"`.
@@ -807,6 +845,7 @@ setting_rows <- function(x) {
   mode <- settings[["background_mode"]]
   predict <- isTRUE(settings[["housekeeping_predict"]])
   genes <- settings[["housekeeping_genes"]]
+  housekeeping <- isTRUE(settings[["housekeeping_norm"]]) && length(genes) > 0
   same_background <- function(reference) {
     same_mode <- background == "none" ||
       identical(mode, reference[["background_mode"]])
@@ -829,7 +868,7 @@ setting_rows <- function(x) {
         "Normalization method",
         "GLM \\(GEO used\\)",
         paste(
-          method_meanings[["GLM"]],
+          method_meaning("GLM", housekeeping),
           "The GLM did not fit every sample, so the geometric mean scaled them all."
         ),
         "your choice"
@@ -838,7 +877,7 @@ setting_rows <- function(x) {
       c(
         "Normalization method",
         md_escape(method),
-        method_meanings[[method]],
+        method_meaning(method, housekeeping),
         chosen(identical(method, default("normalisation_method")))
       )
     },
@@ -999,7 +1038,7 @@ metric_phrase <- function(metrics) {
 
 #' Sentences on the quality-control limits for the methods appendix
 #'
-#' The sources come from [threshold_source()], as in the parameter table.
+#' The sources come from `threshold_source()`, as in the parameter table.
 #'
 #' @noRd
 methods_limits <- function(x) {
@@ -1078,9 +1117,9 @@ methods_limits <- function(x) {
   )
 }
 
-#' Sentences on the normalization for the methods appendix
+#' Sentences on the normalisation for the methods appendix
 #'
-#' The method and the background come from [setting_rows()], so the text
+#' The method and the background come from `setting_rows()`, so the text
 #' matches the parameter table, a GLM that fell back to GEO included.
 #'
 #' @noRd
@@ -1170,14 +1209,14 @@ methods_software <- function(x) {
 #'
 #' data.table holds the counts and the quality-control tables, and ggplot2,
 #' ggforce and ggrepel draw the plots.
-#' The normalization and the statistics use base R.
+#' The normalisation and the statistics use base R.
 #'
 #' @noRd
 report_packages <- c("data.table", "ggplot2", "ggforce", "ggrepel", "S7")
 
 #' A compact list of versions for the report
 #'
-#' Unlike [utils::sessionInfo()], it leaves out library paths, the time zone,
+#' Unlike `utils::sessionInfo()`, it leaves out library paths, the time zone,
 #' the locale and the packages of the session that do not shape the report.
 #'
 #' @noRd
@@ -1223,7 +1262,7 @@ nacho_citation <- function() {
 #' Markdown lines for the methods appendix of the report
 #'
 #' A level-1 "Methods" section: the quality-control limits, the
-#' normalization, the software, the NACHO citation, and the versions of R
+#' normalisation, the software, the NACHO citation, and the versions of R
 #' and of the key packages in a code block.
 #'
 #' @param x A `nacho` object.
@@ -1254,6 +1293,8 @@ report_methods <- function(x) {
 #' Metrics whose thresholds the report shows
 #'
 #' PlexSet files have no positive control linearity or limit of detection.
+#' A metric with no value for any sample cannot flag a sample, so it is left
+#' out.
 #'
 #' @noRd
 report_metrics <- function(x) {
@@ -1263,7 +1304,12 @@ report_metrics <- function(x) {
   if (x@rcc_type == "n8") {
     metrics <- setdiff(metrics, plexset_unassessed)
   }
-  metrics
+  assessed <- vapply(
+    metrics,
+    function(metric) any(!is.na(x@samples[[metric]])),
+    logical(1)
+  )
+  metrics[assessed]
 }
 
 #' The limits of a metric in words
@@ -1281,7 +1327,7 @@ threshold_bounds <- function(x, metric) {
   has_lower <- is.finite(lower) && lower > domain[1]
   has_upper <- is.finite(upper) && upper < domain[2]
   unit <- if (metric == "FoV") "%" else ""
-  shown <- function(v) paste0(format(signif(v, 3)), unit)
+  shown <- function(v) paste0(format(v, digits = 15), unit)
   if (has_lower && has_upper) {
     paste(shown(lower), "to", shown(upper))
   } else if (has_lower) {
@@ -1296,7 +1342,7 @@ threshold_bounds <- function(x, metric) {
 #' The limits that can flag a sample, in words
 #'
 #' @return A character vector named by metric, without the bounds that
-#'   [threshold_bounds()] cannot put in words.
+#'   `threshold_bounds()` cannot put in words.
 #'
 #' @noRd
 report_limits <- function(x) {
@@ -1438,6 +1484,10 @@ report_batch_tables <- function(x, group) {
     single = num_span(design[["single_group_levels"]]),
     confounded = ifelse(design[["confounded"]], "yes", "no")
   )
+  if (one_level) {
+    shown[["single"]] <- "not checked"
+    shown[["confounded"]] <- "not checked"
+  }
   c(
     if (one_level) {
       callout_lines(
@@ -1575,7 +1625,7 @@ check_report_options <- function(
 #' Read and check what render() saved for the report
 #'
 #' The report takes its title, author and cover fields from the metadata that
-#' [render()] passes, so only [render()] is supported.
+#' `render()` passes, so only `render()` is supported.
 #' A title in the template would win over that metadata.
 #'
 #' @param path The `.rds` file.
@@ -1803,7 +1853,7 @@ report_metadata <- function(x, title = NULL, author = NULL) {
 #' smart quotes, emphasis and HTML would change them.
 #' A backslash before each ASCII punctuation character keeps them literal.
 #'
-#' @param metadata The list from [report_metadata()].
+#' @param metadata The list from `report_metadata()`.
 #'
 #' @noRd
 report_metadata_literal <- function(metadata) {
