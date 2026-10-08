@@ -148,8 +148,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 - In `R/mod_qc_plot.R` and `R/plot_worker.R`,
   - perf: Interactive plots in the app draw about 40% faster, because the font lookup of ggiraph runs once instead of for every plot.
   - perf: With mirai installed, the app builds the plots of a page in parallel on a small pool of workers shared by all sessions, stays responsive while they build, and stops the unfinished plots of a page you leave.
-    Plots built once are shared between browser tabs.
-    `options(nacho.plot_workers = n)` sets the number of workers, and `0` builds plots in the app process.
+    `options(nacho.plot_workers = n)` sets the number of workers, and `0` builds plots in the app process; the app from `deploy()` uses one worker.
+  - perf: Interactive plots built once are shared between browser tabs and sessions of the same app.
 
 ## Fixes
 
