@@ -213,6 +213,12 @@ test_that("the app flags samples when a threshold moves", {
     app$run_js(
       "document.querySelector('a[data-value=\"Normalisation\"]').click()"
     )
+    app$wait_for_js(
+      "Array.from(document.querySelectorAll('.nacho-girafe'))
+        .some(e => e.offsetParent && e.querySelector('.recalculating'))",
+      timeout = 30000
+    )
+    Sys.sleep(1)
     app$run_js("document.querySelector('a[data-value=\"Data\"]').click()")
   }
   asked <- Sys.time()
