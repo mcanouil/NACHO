@@ -67,7 +67,8 @@ report_reading_guide <- c(
   BD = paste(
     "Each point is one sample, or one lane on PlexSet files, and each box covers one cartridge.",
     "Points between the dashed lines are fine, and the shaded bands above and below are outside the limits.",
-    "A point in the upper band means that codes overlapped, so the instrument may have dropped some of them.",
+    "A point in the upper band means that codes overlapped, so the instrument may have dropped some of them,",
+    "and a point in the lower band often comes from low input or a poor hybridization.",
     "Triangles mark samples flagged by any check: find each one in the decision summary and check its input."
   ),
   FoV = paste(
@@ -89,13 +90,15 @@ report_reading_guide <- c(
     "Check the negative controls and the input amount of that sample before you trust its low counts."
   ),
   Positive = paste(
-    "Each box shows the counts of one positive control probe on a log scale, and each point is one sample.",
+    "Each box shows the counts of one positive control probe on a log scale,",
+    "and each point is one sample, or one lane on PlexSet files.",
     "The boxes should step down evenly from POS_A to POS_F, and each box should be tight.",
     "A sample apart from the others on several probes had a weaker or stronger hybridization.",
     "Triangles mark samples flagged by any check, and the positive factor plot shows how much each was scaled."
   ),
   Negative = paste(
-    "Each box shows the counts of one negative control probe on a log scale, and each point is one sample.",
+    "Each box shows the counts of one negative control probe on a log scale,",
+    "and each point is one sample, or one lane on PlexSet files.",
     "Good negative controls sit low and close together, because they only measure background.",
     "A probe well above the others may cross-hybridize, and a sample high on every probe has more background.",
     "If many samples sit high, look at the background setting in the settings table."
@@ -107,8 +110,9 @@ report_reading_guide <- c(
     "A sample low on every gene may have had less RNA input, and triangles mark samples flagged by any check."
   ),
   PN = paste(
-    "Each line follows one control probe across the samples on a log scale: negative controls left, positive right.",
-    "Good lines run flat and parallel, and the dark smooth curve stays level.",
+    "Each line follows one control probe across the samples, or the lanes on PlexSet files, on a log scale:",
+    "negative controls left, positive right.",
+    "Good lines run flat and parallel, and the smooth curve with the gray band stays level.",
     "A dip or a jump that many lines share points to a sample, or a run of samples, that behaved differently.",
     "Find those samples in the plots above to see which check they fail."
   ),
@@ -150,14 +154,17 @@ report_reading_guide <- c(
   HF = paste(
     "Each point is one sample, with its positive factor across and its content factor up, both on a log scale.",
     "Points in the clear area between the dashed lines are fine.",
-    "A point in a shaded area needed a large correction, often because of too much or too little RNA input.",
+    "A point in the band above or below needed a large correction from the housekeeping genes,",
+    "often because of too much or too little RNA input, and a point in the band left or right",
+    "needed a large correction from the positive controls.",
     "Triangles mark samples flagged by any check, so look at those first."
   ),
   NORM = paste(
     "Each line follows one housekeeping gene across the samples on a log scale: raw left, normalized right.",
     "Without housekeeping genes, the lines show the positive controls.",
-    "After normalization, the lines should be flatter and closer to the dark smooth curve.",
-    "A line that stays uneven points to a gene or a sample that the method couldn't correct."
+    "After normalization, each line should zigzag less from sample to sample,",
+    "and the smooth curve with the gray band should run level.",
+    "A line that still zigzags points to a gene or a sample that the method couldn't correct."
   ),
   Stability = paste(
     "Each point is one housekeeping gene, from the most stable on the left to the least stable on the right.",
@@ -168,14 +175,15 @@ report_reading_guide <- c(
   RLE = paste(
     "Each box shows how far the normalized genes of one sample sit from the median of each gene.",
     "Good boxes are narrow and centered on the dashed line at zero.",
-    "A box shifted away from zero, or much wider than the others, marks a sample that normalization missed.",
+    "A box shifted away from zero, or much wider than the others, marks a sample that normalization",
+    "did not fully correct, or one that differs in its biology.",
     "Check the metrics of that sample, and if boxes of one color shift together, look for a batch effect."
   ),
   BatchFactors = paste(
     "Each panel shows one normalization factor, with one box per cartridge and one point per sample.",
     "The boxes should sit at about the same level across cartridges.",
     "A cartridge whose box sits higher or lower than the others needed a different correction.",
-    "That hints at a batch effect, and the next plot shows how much the batches shape the data."
+    "That hints at a batch effect, so check whether that cartridge holds only one kind of sample."
   ),
   PCBatch = paste(
     "Each tile shows the share of one principal component that cartridge or date explains, from 0 to 1.",
@@ -989,6 +997,7 @@ methods_limits <- function(x) {
   }
   own <- metrics[sources == "NACHO"]
   chosen <- metrics[sources == "your choice"]
+  these <- if (length(chosen) > 0) "The other limits" else "These limits"
   c(
     paste0(
       "NACHO checked each sample against ",
@@ -1005,16 +1014,21 @@ methods_limits <- function(x) {
       "."
     ),
     "A sample outside any limit is flagged, and the decision summary lists each one.",
+    if (length(chosen) > 0) {
+      paste0("You changed the limits for ", metric_phrase(chosen), ".")
+    },
     if (legacy) {
       paste0(
-        "These limits come from the legacy preset, which gives back the limits of NACHO 2, ",
+        these,
+        " come from the legacy preset, which gives back the limits of NACHO 2, ",
         "rather than from the nSolver preset, which follows ",
         guidelines,
         "."
       )
     } else {
       paste0(
-        "These limits come from the nSolver preset, which follows ",
+        these,
+        " come from the nSolver preset, which follows ",
         guidelines,
         "."
       )
@@ -1033,9 +1047,6 @@ methods_limits <- function(x) {
         metric_phrase(own),
         " itself, since Bruker publishes none."
       )
-    },
-    if (length(chosen) > 0) {
-      paste0("You changed the limits for ", metric_phrase(chosen), ".")
     }
   )
 }
@@ -1103,36 +1114,70 @@ methods_software <- function(x) {
   built_with <- provenance[["nacho_version"]]
   file_version <- provenance[["file_version"]]
   known <- function(value) length(value) == 1 && !is.na(value)
+  version <- as.character(utils::packageVersion("NACHO"))
   c(
     paste0(
       "NACHO ",
-      utils::packageVersion("NACHO"),
+      version,
       " wrote this report with R ",
       paste(R.version$major, R.version$minor, sep = "."),
       "."
     ),
-    if (known(built_with)) {
-      paste0(
-        "The data were loaded with NACHO ",
-        built_with,
-        if (known(file_version)) {
-          paste0(" from RCC files of version ", file_version)
-        },
-        "."
-      )
+    if (known(file_version)) {
+      paste0("The RCC files are of version ", file_version, ".")
+    },
+    if (known(built_with) && built_with != version) {
+      paste0("The data were loaded with NACHO ", built_with, ".")
     },
     if (!is.null(provenance[["migrated_from_schema"]])) {
       "They were saved with NACHO 2 and rebuilt with NACHO 3."
     },
-    "The settings and thresholds section lists every value, so anyone can run the same analysis again."
+    paste(
+      "The settings and thresholds section lists every value,",
+      "so anyone with the same RCC files can run the same analysis again."
+    )
+  )
+}
+
+#' Packages whose versions shape the results of the report
+#'
+#' data.table holds the counts and the quality-control tables, and ggplot2,
+#' ggforce and ggrepel draw the plots.
+#' The normalization and the statistics use base R.
+#'
+#' @noRd
+report_packages <- c("data.table", "ggplot2", "ggforce", "ggrepel", "S7")
+
+#' A compact list of versions for the report
+#'
+#' Unlike [utils::sessionInfo()], it leaves out library paths, the time zone,
+#' the locale and the packages of the session that do not shape the report.
+#'
+#' @noRd
+report_versions <- function() {
+  info <- utils::sessionInfo()
+  packages <- c("NACHO", report_packages)
+  c(
+    R.version.string,
+    paste("Platform:", info[["platform"]]),
+    paste("Running under:", info[["running"]]),
+    paste(
+      format(packages),
+      vapply(
+        packages,
+        function(package) as.character(utils::packageVersion(package)),
+        character(1)
+      )
+    )
   )
 }
 
 #' The NACHO citation as plain text
 #'
 #' The `"text"` style marks the journal and the volume with `_` and `*`, so
-#' these marks are removed; the DOI link stays in angle brackets, which both
-#' HTML and Typst show as a link.
+#' these marks are removed.
+#' The ISSN and the plain DOI are removed too, so only the DOI link stays, in
+#' angle brackets, which both HTML and Typst show as a link.
 #' Pandoc writes an apostrophe to Typst as a straight one, and Typst reads it
 #' before a word, as in "'t Hart", as an opening quote.
 #' A backslash keeps each apostrophe straight in both formats.
@@ -1143,14 +1188,16 @@ nacho_citation <- function() {
   text <- paste(gsub("\\s+", " ", text), collapse = " ")
   text <- gsub("(^|\\W)_([^_]+)_(\\W)", "\\1\\2\\3", text, perl = TRUE)
   text <- gsub("(^|\\W)\\*([^*]+)\\*(\\W)", "\\1\\2\\3", text, perl = TRUE)
+  text <- gsub(" ISSN [0-9X-]+\\.", "", text)
+  text <- gsub("doi:\\S+ (<https://doi\\.org/[^>]+>)", "\\1", text)
   gsub("['\u2019]", "\\\\'", text)
 }
 
 #' Markdown lines for the methods appendix of the report
 #'
 #' A level-1 "Methods" section: the quality-control limits, the
-#' normalization, the software, the NACHO citation, and the session
-#' information in a code block.
+#' normalization, the software, the NACHO citation, and the versions of R
+#' and of the key packages in a code block.
 #'
 #' @param x A `nacho` object.
 #'
@@ -1172,7 +1219,7 @@ report_methods <- function(x) {
     "## Session information",
     "",
     "```",
-    utils::capture.output(print(utils::sessionInfo())),
+    report_versions(),
     "```"
   )
 }

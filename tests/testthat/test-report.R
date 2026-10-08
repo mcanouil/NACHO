@@ -411,7 +411,10 @@ test_that("shared report and app text uses US spelling", {
     NACHO:::plot_alt_texts,
     NACHO:::parameter_meanings,
     NACHO:::method_meanings,
-    NACHO:::setting_rows(GSE74821)$meaning
+    NACHO:::setting_rows(GSE74821)$meaning,
+    NACHO:::report_reading_guide,
+    NACHO:::report_sections(GSE74821)$title,
+    NACHO:::report_methods(GSE74821)
   )
   flagged <- text[grepl(british, text, ignore.case = TRUE)]
   expect_length(flagged, 0L)
@@ -926,11 +929,38 @@ test_that("every plot and table has reading help", {
 })
 
 test_that("a decimal in the reading help does not end a sentence", {
-  text <- "Points above 0.95 are fine. Points below 0.95 are flagged."
+  guide <- NACHO:::report_reading_guide[c("Stability", "LoD")]
+  expect_match(guide[["Stability"]], "M = 1.5", fixed = TRUE)
+  expect_match(guide[["LoD"]], "0.5 fM", fixed = TRUE)
   expect_identical(
-    lengths(regmatches(text, gregexpr("[.!?](\\s|$)", text))),
-    2L
+    lengths(regmatches(guide, gregexpr("[.!?](\\s|$)", guide))),
+    c(Stability = 4L, LoD = 4L)
   )
+})
+
+test_that("the labels autoplot() draws use US spelling", {
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  british <- "normalis|colour|centre|grey|haemoly|visualis|analys(e|ing)"
+  labels <- unlist(lapply(NACHO:::applicable_plots(GSE74821), function(type) {
+    plot <- ggplot2::autoplot(GSE74821, type = type)
+    built <- ggplot2::ggplot_build(plot)
+    facets <- built$layout$layout
+    facets <- facets[setdiff(
+      names(facets),
+      c("PANEL", "ROW", "COL", "SCALE_X", "SCALE_Y")
+    )]
+    c(
+      vapply(
+        ggplot2::get_labs(plot),
+        function(l) paste(format(l), collapse = " "),
+        ""
+      ),
+      unlist(lapply(facets, as.character))
+    )
+  }))
+  expect_true("Normalized" %in% labels)
+  expect_false(any(grepl(british, labels, ignore.case = TRUE)))
 })
 
 test_that("report_sections() carries the reading help of each plot", {
@@ -990,6 +1020,20 @@ test_that("the methods appendix cites NACHO and the nSolver guidelines", {
   expect_match(text, "\\'t Hart", fixed = TRUE)
   expect_match(text, "## Session information\n\n```\nR version", fixed = TRUE)
   expect_identical(sum(lines == "```"), 2L)
+  expect_false(grepl("ISSN", text, fixed = TRUE))
+  expect_identical(
+    lengths(regmatches(
+      text,
+      gregexpr("10.1093/bioinformatics/btz647", text, fixed = TRUE)
+    )),
+    1L
+  )
+  versions <- lines[
+    (which(lines == "```")[1] + 1):(which(lines == "```")[2] - 1)
+  ]
+  expect_false(any(grepl("/", versions, fixed = TRUE)))
+  expect_false(any(grepl("time zone|locale|testthat", versions)))
+  expect_true(any(startsWith(versions, "NACHO ")))
 })
 
 test_that("the methods appendix describes the object", {
@@ -1037,6 +1081,11 @@ test_that("the methods appendix credits limits the user changed", {
   text <- paste(NACHO:::report_methods(x), collapse = "\n")
   expect_match(text, "field of view (at least 80%)", fixed = TRUE)
   expect_match(text, "You changed the limits for field of view.", fixed = TRUE)
+  expect_match(
+    text,
+    "The other limits come from the nSolver preset",
+    fixed = TRUE
+  )
 })
 
 test_that("the methods appendix names the RUVg factors", {
@@ -1048,4 +1097,18 @@ test_that("the methods appendix names the RUVg factors", {
     "RUVg then removed 1 factor of unwanted variation.",
     fixed = TRUE
   )
+})
+
+test_that("the methods appendix gives the load version only when it differs", {
+  x <- GSE74821
+  provenance <- x@provenance
+  provenance$nacho_version <- as.character(utils::packageVersion("NACHO"))
+  S7::prop(x, "provenance", check = FALSE) <- provenance
+  text <- paste(NACHO:::report_methods(x), collapse = "\n")
+  expect_false(grepl("loaded with", text, fixed = TRUE))
+  expect_match(text, "The RCC files are of version 1.6.", fixed = TRUE)
+  provenance$nacho_version <- "1.0.0"
+  S7::prop(x, "provenance", check = FALSE) <- provenance
+  text <- paste(NACHO:::report_methods(x), collapse = "\n")
+  expect_match(text, "The data were loaded with NACHO 1.0.0.", fixed = TRUE)
 })
