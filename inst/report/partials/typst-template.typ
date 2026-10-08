@@ -12,9 +12,12 @@
 #let nacho-cover-text = rgb("#c9d1d9")
 #let nacho-cover-term = rgb("#9aa7b4")
 
-// Quarto writes each callout as a call to `callout()`.
-// Notes get the brand primary colour as icon colour; the other kinds are
-// warnings and get an amber edge.
+// Quarto writes each callout as a call to `callout()` without its kind, so
+// the icon colour tells the kinds apart: the brand primary or Quarto's blue
+// for a note and Quarto's green for a tip give a navy edge; warning, caution
+// and important give an amber edge.
+#let nacho-calm-callouts = (nacho-rust, rgb("#0758E5"), rgb("#00A047"))
+
 #let callout(
   body: [],
   title: none,
@@ -23,7 +26,7 @@
   icon_color: none,
   body_background_color: none,
 ) = {
-  let warn = icon_color != nacho-rust
+  let warn = icon_color not in nacho-calm-callouts
   block(
     width: 100%,
     inset: 10pt,

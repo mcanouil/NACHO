@@ -23,6 +23,8 @@ $endif$
 $if(toc-title)$
   toc_title: [$toc-title$],
 $endif$
+$if(toc-depth)$
   toc_depth: $toc-depth$,
+$endif$
   doc,
 )

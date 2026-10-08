@@ -94,7 +94,7 @@ mod_export_ui <- function(id, quarto) {
       } else {
         shiny::helpText(
           "This app cannot render the report, because the Quarto",
-          "command-line interface 1.9 or newer and the quarto R package",
+          "command-line interface 1.9.18 or newer and the quarto R package",
           "are not installed where the app runs."
         )
       }

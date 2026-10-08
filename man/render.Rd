@@ -60,8 +60,8 @@ for each sample that fails a threshold, then each plot of \code{\link[=autoplot]
 a short explanation.
 }
 \details{
-The report needs the Quarto command-line interface 1.9 or newer, and the
-quarto, knitr and rmarkdown packages.
+The report needs the Quarto command-line interface 1.9.18 or newer, and
+the quarto, knitr and rmarkdown packages.
 RStudio and Positron bundle Quarto; elsewhere, install it from
 \url{https://quarto.org/docs/get-started/}.
 The PDF goes through Typst, which Quarto bundles, so no LaTeX is needed.

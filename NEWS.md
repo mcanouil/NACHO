@@ -25,7 +25,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: Plots follow the NACHO brand: groups use the Okabe-Ito colours up to eight levels on a light background and seven on a dark one, then viridis, and flagged samples are rust triangles instead of red points.
 - In `R/render.R`,
   - feat: `render()` builds the report with Quarto instead of R Markdown, as a self-contained HTML file or a Typst PDF with `format = "typst"`.
-    It needs the Quarto command-line interface 1.9 or newer, which RStudio and Positron bundle.
+    It needs the Quarto command-line interface 1.9.18 or newer, which RStudio and Positron bundle.
   - feat: `render()` takes the object as `x`, writes `nacho-report.html` or `nacho-report.pdf` to `output_dir` and returns the path; `output_file`, `show_outliers` and `clean` are gone.
 - In `R/thresholds.R`,
   - feat: Samples are flagged against the nSolver thresholds by default.

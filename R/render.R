@@ -4,8 +4,8 @@
 #' for each sample that fails a threshold, then each plot of [autoplot()] with
 #' a short explanation.
 #'
-#' The report needs the Quarto command-line interface 1.9 or newer, and the
-#' quarto, knitr and rmarkdown packages.
+#' The report needs the Quarto command-line interface 1.9.18 or newer, and
+#' the quarto, knitr and rmarkdown packages.
 #' RStudio and Positron bundle Quarto; elsewhere, install it from
 #' <https://quarto.org/docs/get-started/>.
 #' The PDF goes through Typst, which Quarto bundles, so no LaTeX is needed.
@@ -196,7 +196,7 @@ quarto_cli_version <- function() {
 #' @noRd
 quarto_available <- function() {
   all(vapply(c("quarto", "knitr", "rmarkdown"), has_package, logical(1))) &&
-    isTRUE(quarto_cli_version() >= "1.9")
+    isTRUE(quarto_cli_version() >= "1.9.18")
 }
 
 #' Check that the report can render
@@ -207,13 +207,13 @@ check_quarto <- function(call = rlang::caller_env()) {
     check_package(package, reason = "to render the report", call = call)
   }
   version <- quarto_cli_version()
-  if (is.null(version) || version < "1.9") {
+  if (is.null(version) || version < "1.9.18") {
     nacho_abort(
       c(
         if (is.null(version)) {
           "The Quarto command-line interface is needed to render the report."
         } else {
-          "Quarto {version} is too old to render the report; it needs 1.9 or newer."
+          "Quarto {version} is too old to render the report; it needs 1.9.18 or newer."
         },
         i = "Install Quarto from {.url https://quarto.org/docs/get-started/}.",
         i = "RStudio and Positron bundle Quarto."

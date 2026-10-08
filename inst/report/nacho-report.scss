@@ -111,6 +111,12 @@ body:has(#quarto-skip-link) .nacho-skip {
       font-weight: 700;
     }
   }
+
+  .nacho-generated {
+    margin: 1rem 0 0;
+    font-size: 0.8rem;
+    color: $nacho-cover-term;
+  }
 }
 
 main.content {
