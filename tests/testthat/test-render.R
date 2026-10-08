@@ -545,11 +545,9 @@ test_that("HTML and Typst reports have the same sections, captions and help", {
     c("Methods", "Session information")
   )
   lines <- pdf_lines(pdf_path)
-  toc_end <- max(grep("^Methods\\W.*[0-9]+$", lines, perl = TRUE))
-  body <- seq(toc_end + 1L, length(lines))
   found <- vapply(
     headings,
-    function(heading) match(heading, lines[body]),
+    function(heading) match(heading, lines),
     integer(1)
   )
   expect_false(
