@@ -21,18 +21,14 @@ body:has(#quarto-skip-link) .nacho-skip {
   display: none;
 }
 
-.nacho-skip {
-  position: absolute;
-  left: -999px;
-
-  &:focus {
-    left: 1rem;
-    top: 1rem;
-    z-index: 1100;
-    padding: 0.5rem;
-    background: #fff;
-    color: $nacho-navy;
-  }
+.nacho-skip:focus {
+  position: fixed !important;
+  top: 0.5rem;
+  inset-inline-start: 0.5rem;
+  z-index: 1100;
+  padding: 0.5rem 1rem;
+  background: #fff;
+  color: $nacho-navy;
 }
 
 .nacho-cover {
@@ -44,6 +40,7 @@ body:has(#quarto-skip-link) .nacho-skip {
   color: #fff;
 
   .nacho-chips {
+    grid-column: screen-start / screen-end;
     position: absolute;
     right: -30px;
     bottom: -60px;
@@ -59,10 +56,13 @@ body:has(#quarto-skip-link) .nacho-skip {
 
   .nacho-cover-inner {
     position: relative;
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
+    grid-column: body-start / page-end;
+    padding: 0 1.5rem 0 calc(1.5em - 5px);
     border-left: 5px solid $nacho-amber;
+
+    @media (max-width: 767.98px) {
+      grid-column: screen-start / screen-end;
+    }
   }
 
   .nacho-cover-label {

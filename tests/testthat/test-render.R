@@ -323,6 +323,10 @@ test_that("the HTML report has the cover, landmarks and accessible tables", {
   expect_match(html, '<html[^>]*lang="en-US"')
   expect_match(html, '<header[^>]*class="[^"]*nacho-cover')
   expect_match(html, "Prepared by Jane Doe", fixed = TRUE)
+  expect_match(html, '<dl class="nacho-details">', fixed = TRUE)
+  expect_match(html, "<dt>Samples</dt><dd>48</dd>", fixed = TRUE)
+  expect_match(html, "<dt>Cartridges</dt><dd>4</dd>", fixed = TRUE)
+  expect_match(html, "<dt>Normalization</dt><dd>GLM</dd>", fixed = TRUE)
   expect_match(html, 'class="nacho-chips"[^>]*aria-hidden="true"')
   expect_match(html, '<main[^>]*id="quarto-document-content"')
   expect_match(html, 'href="#quarto-document-content"', fixed = TRUE)
@@ -331,6 +335,7 @@ test_that("the HTML report has the cover, landmarks and accessible tables", {
   ths <- regmatches(html, gregexpr("<th[ >][^>]*>", html))[[1]]
   expect_gt(length(ths), 0)
   expect_true(all(grepl('scope="col"', ths, fixed = TRUE)))
+  expect_match(html, 'class="nacho-table-scroll"[^>]*aria-label="Table 1"')
   imgs <- regmatches(html, gregexpr("<img [^>]*>", html))[[1]]
   expect_true(all(grepl('alt="[^"]+"|aria-hidden="true"|alt=""', imgs)))
   expect_match(html, '<img [^>]*alt="NACHO logo"')
