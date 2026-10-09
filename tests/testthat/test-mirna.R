@@ -202,10 +202,10 @@ test_that("summary() copes with thresholds that lack the miRNA metrics", {
 })
 
 test_that("the report lists only the thresholds of metrics the data have", {
-  expect_false(any(grepl("Ligation", NACHO:::report_thresholds(GSE74821))))
+  expect_false(any(grepl("Ligation", names(NACHO:::report_limits(GSE74821)))))
   expect_false(any(grepl("Ligation", NACHO:::report_sections(GSE74821)$title)))
   x <- mirna_fixture()
-  expect_true(any(grepl("Ligation", NACHO:::report_thresholds(x))))
+  expect_true(any(grepl("Ligation", names(NACHO:::report_limits(x)))))
   expect_false("HF" %in% NACHO:::report_sections(x)$plot)
 })
 

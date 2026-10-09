@@ -9,22 +9,51 @@ NULL
 #' @param compute The mirai compute profile that runs the render.
 #'
 #' @noRd
-render_in_background <- function(object, format, output_dir, compute = NULL) {
+render_in_background <- function(
+  object,
+  format,
+  output_dir,
+  compute = NULL,
+  title = NULL,
+  author = NULL
+) {
   if (has_package("mirai")) {
     libs <- .libPaths()
     return(mirai::mirai(
       {
         .libPaths(libs)
-        NACHO::render(object, format = format, output_dir = output_dir)
+        NACHO::render(
+          object,
+          format = format,
+          output_dir = output_dir,
+          title = title,
+          author = author
+        )
       },
       object = object,
       format = format,
       output_dir = output_dir,
+      title = title,
+      author = author,
       libs = libs,
       .compute = compute
     ))
   }
-  render(object, format = format, output_dir = output_dir)
+  render(
+    object,
+    format = format,
+    output_dir = output_dir,
+    title = title,
+    author = author
+  )
+}
+
+#' Turn blank text input into NULL, so render() leaves the field out
+#'
+#' @noRd
+blank_to_null <- function(x) {
+  x <- trimws(x %||% "")
+  if (nzchar(x)) x else NULL
 }
 
 #' Hand a background render to an ExtendedTask
@@ -76,6 +105,12 @@ mod_export_ui <- function(id, quarto) {
       bslib::card_header("Report"),
       if (quarto) {
         shiny::tagList(
+          shiny::textInput(
+            ns("title"),
+            "Title (optional)",
+            placeholder = "NanoString quality-control report"
+          ),
+          shiny::textInput(ns("author"), "Author (optional)"),
           shiny::radioButtons(
             ns("format"),
             "Format",
@@ -94,7 +129,7 @@ mod_export_ui <- function(id, quarto) {
       } else {
         shiny::helpText(
           "This app cannot render the report, because the Quarto",
-          "command-line interface 1.9 or newer and the quarto R package",
+          "command-line interface 1.9.18 or newer and the quarto R package",
           "are not installed where the app runs."
         )
       }
@@ -142,12 +177,19 @@ mod_export_server <- function(id, object, quarto) {
       }
       unlink(report_dir, recursive = TRUE)
     })
-    start_render <- function(object, format, output_dir) {
+    start_render <- function(object, format, output_dir, title, author) {
       if (has_package("mirai") && !daemons_on) {
         mirai::daemons(1, dispatcher = TRUE, .compute = profile)
         daemons_on <<- TRUE
       }
-      running <<- render_in_background(object, format, output_dir, profile)
+      running <<- render_in_background(
+        object,
+        format,
+        output_dir,
+        profile,
+        title,
+        author
+      )
       settle_while_open(running, function() ended)
     }
     task <- shiny::ExtendedTask$new(start_render) |>
@@ -159,7 +201,13 @@ mod_export_server <- function(id, object, quarto) {
     shiny::observeEvent(input$render, {
       drop_report()
       requested <<- object()
-      task$invoke(requested, input$format, report_dir)
+      task$invoke(
+        requested,
+        input$format,
+        report_dir,
+        blank_to_null(input$title),
+        blank_to_null(input$author)
+      )
     })
     shiny::observeEvent(object(), drop_report(), ignoreInit = TRUE)
     shiny::observeEvent(task$status(), {

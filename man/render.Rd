@@ -13,7 +13,9 @@ render(
   size = 1,
   show_legend = TRUE,
   outliers_factor = 1,
-  outliers_labels = NULL
+  outliers_labels = NULL,
+  title = NULL,
+  author = NULL
 )
 }
 \arguments{
@@ -39,21 +41,40 @@ confounded; see \code{\link[=batch_diagnostics]{batch_diagnostics()}}.}
 
 \item{outliers_labels}{The column of \code{nacho_samples(x)} that labels the
 flagged samples, or \code{NULL} for no labels.}
+
+\item{title}{The report title.
+\code{NULL} or empty uses "NanoString quality-control report".
+A missing value (\code{NA}) is an error.}
+
+\item{author}{Who prepared the report, as one string, for example
+\code{"Jane Doe, Genomics Core"}.
+\code{NULL} or empty leaves it out.
+A missing value (\code{NA}) is an error.}
 }
 \value{
 The path of the report, invisibly.
 }
 \description{
-Writes a report with Quarto: the quality-control summary first, one callout
-for each sample that fails a threshold, then each plot of \code{\link[=autoplot]{autoplot()}} with
-a short explanation.
+Writes a quality-control report with Quarto.
+The report starts with a cover that gives the study details.
+Then comes a decision summary, with the flagged samples and notes on how
+the data were processed.
+A table gives each setting and limit, with its meaning and its source.
+Each plot of \code{\link[=autoplot]{autoplot()}} and each table has a short "How to read this".
+A methods appendix gives the citation and the package versions.
 }
 \details{
-The report needs the Quarto command-line interface 1.9 or newer, and the
-quarto, knitr and rmarkdown packages.
+The report needs the Quarto command-line interface 1.9.18 or newer, and
+the quarto, knitr and rmarkdown packages.
 RStudio and Positron bundle Quarto; elsewhere, install it from
 \url{https://quarto.org/docs/get-started/}.
 The PDF goes through Typst, which Quarto bundles, so no LaTeX is needed.
+
+The PDF is tagged and declares PDF/UA-1.
+When Typst compiles the PDF, it checks the PDF/UA-1 rules that it can
+enforce.
+When Quarto shows the warning "verapdf is not installed", you can ignore
+it: it only means that Quarto did not do the extra validation step.
 }
 \examples{
 if (interactive()) {

@@ -102,3 +102,31 @@ flagged_points <- function(plot) {
   })
   do.call(rbind, triangles)
 }
+
+tuned_gse <- function(...) {
+  thresholds <- utils::modifyList(NACHO::GSE74821@thresholds, list(...))
+  NACHO::normalise(NACHO::GSE74821, outliers_thresholds = thresholds)
+}
+
+expect_row <- function(text, start, source) {
+  lines <- strsplit(text, "\n", fixed = TRUE)[[1]]
+  row <- lines[startsWith(lines, start)]
+  testthat::expect_length(row, 1L)
+  testthat::expect_true(grepl(source, row, fixed = TRUE), info = row)
+}
+
+odd_ids_nacho <- function() {
+  x <- toy_nacho(4L)
+  samples <- x@samples
+  samples$IDFILE[2] <- "a*b_c<d>|e[1]"
+  samples$CartridgeID[2] <- "C_2"
+  samples$FoV[2] <- 50
+  S7::prop(x, "samples", check = FALSE) <- samples
+  x
+}
+
+british_stems <- paste(
+  "normalis|colour|recognis|analys(e|ing)|behaviour|centre|favour",
+  "organis|summaris|visualis|haemoly|minimis|maximis|grey|licence|whilst",
+  sep = "|"
+)

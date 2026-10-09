@@ -1082,8 +1082,8 @@ plot_norm <- function(
     ][
       j = `:=`(
         Status = factor(
-          x = c("Count" = "Raw", "Count_Norm" = "Normalised")[Status],
-          levels = c("Count" = "Raw", "Count_Norm" = "Normalised")
+          x = c("Count" = "Raw", "Count_Norm" = "Normalized")[Status],
+          levels = c("Count" = "Raw", "Count_Norm" = "Normalized")
         ),
         Count = Count + 1
       )

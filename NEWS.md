@@ -22,10 +22,11 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
 - In `R/autoplot.R`,
   - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
+  - feat: Plot labels, help pages and the app's threshold labels now use US spelling, such as "Normalized" and "Hemolysis".
   - feat: Plots follow the NACHO brand: groups use the Okabe-Ito colours up to eight levels on a light background and seven on a dark one, then viridis, and flagged samples are rust triangles instead of red points.
 - In `R/render.R`,
   - feat: `render()` builds the report with Quarto instead of R Markdown, as a self-contained HTML file or a Typst PDF with `format = "typst"`.
-    It needs the Quarto command-line interface 1.9 or newer, which RStudio and Positron bundle.
+    It needs the Quarto command-line interface 1.9.18 or newer, which RStudio and Positron bundle.
   - feat: `render()` takes the object as `x`, writes `nacho-report.html` or `nacho-report.pdf` to `output_dir` and returns the path; `output_file`, `show_outliers` and `clean` are gone.
 - In `R/thresholds.R`,
   - feat: Samples are flagged against the nSolver thresholds by default.
@@ -56,7 +57,9 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 ## New features
 
 - In `R/render.R`,
-  - feat: The report opens with the quality-control summary and one callout for each flagged sample, and gives every figure alt text.
+  - feat: The report reads as a quality-control record: a cover with the study details, a decision summary with the flagged samples and notes on how the data were processed, a table of every setting and limit with its meaning and source, a short "How to read this" under each figure and table, and a methods appendix with the citation and package versions.
+  - feat: `render()` gains `title` and `author` for the report cover, and the app's Export page has matching fields.
+  - feat: The HTML and PDF reports share the NACHO look and the same content, and the PDF is a tagged PDF that declares PDF/UA-1, checked by Typst against the PDF/UA-1 rules it can enforce; the HTML report has landmarks, a skip link and labelled tables.
   - feat: `render()` gains `group`, which adds the batch design and cross-tables, with a warning when batch and biology are confounded.
 - In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
   - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.
@@ -132,7 +135,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - feat: The app wears the NACHO look, with a navy navbar and the brand fonts in light and dark mode.
   - feat: With ggiraph installed, hovering a point shows the sample and its value, and clicking it outlines that sample in the plots that show one point per sample.
     The "Highlight a sample" list on the Samples page does the same from the keyboard.
-  - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS and the report.
+  - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS and the report, with an optional title and author.
     The report can be HTML or PDF, and it renders in the background when mirai is installed.
     If you close the app page during a render, the render stops.
   - feat: A Help menu in the navbar opens About NACHO, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.

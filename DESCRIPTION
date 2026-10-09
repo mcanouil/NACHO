@@ -88,7 +88,7 @@ Encoding: UTF-8
 Language: en-GB
 LazyData: true
 Roxygen: list(markdown = TRUE)
-SystemRequirements: Quarto command-line interface (>= 1.9), pandoc (>= 2.11)
+SystemRequirements: Quarto command-line interface (>= 1.9.18), pandoc (>= 2.11)
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.0
 Collate: 

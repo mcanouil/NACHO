@@ -1,14 +1,24 @@
 #' Render the quality-control report of a nacho object
 #'
-#' Writes a report with Quarto: the quality-control summary first, one callout
-#' for each sample that fails a threshold, then each plot of [autoplot()] with
-#' a short explanation.
+#' Writes a quality-control report with Quarto.
+#' The report starts with a cover that gives the study details.
+#' Then comes a decision summary, with the flagged samples and notes on how
+#' the data were processed.
+#' A table gives each setting and limit, with its meaning and its source.
+#' Each plot of [autoplot()] and each table has a short "How to read this".
+#' A methods appendix gives the citation and the package versions.
 #'
-#' The report needs the Quarto command-line interface 1.9 or newer, and the
-#' quarto, knitr and rmarkdown packages.
+#' The report needs the Quarto command-line interface 1.9.18 or newer, and
+#' the quarto, knitr and rmarkdown packages.
 #' RStudio and Positron bundle Quarto; elsewhere, install it from
 #' <https://quarto.org/docs/get-started/>.
 #' The PDF goes through Typst, which Quarto bundles, so no LaTeX is needed.
+#'
+#' The PDF is tagged and declares PDF/UA-1.
+#' When Typst compiles the PDF, it checks the PDF/UA-1 rules that it can
+#' enforce.
+#' When Quarto shows the warning "verapdf is not installed", you can ignore
+#' it: it only means that Quarto did not do the extra validation step.
 #'
 #' @param x A `nacho` object from [load_rcc()] or [normalise()].
 #' @param format `"html"` (the default) for a self-contained HTML file, or
@@ -24,6 +34,13 @@
 #' @param outliers_factor The size of flagged samples, relative to `size`.
 #' @param outliers_labels The column of `nacho_samples(x)` that labels the
 #'   flagged samples, or `NULL` for no labels.
+#' @param title The report title.
+#'   `NULL` or empty uses "NanoString quality-control report".
+#'   A missing value (`NA`) is an error.
+#' @param author Who prepared the report, as one string, for example
+#'   `"Jane Doe, Genomics Core"`.
+#'   `NULL` or empty leaves it out.
+#'   A missing value (`NA`) is an error.
 #'
 #' @return The path of the report, invisibly.
 #' @export
@@ -43,11 +60,15 @@ render <- function(
   size = 1,
   show_legend = TRUE,
   outliers_factor = 1,
-  outliers_labels = NULL
+  outliers_labels = NULL,
+  title = NULL,
+  author = NULL
 ) {
   check_nacho(x)
   format <- check_choice(format, c("html", "typst"))
   check_string(output_dir)
+  check_cover_text(title)
+  check_cover_text(author)
   options <- check_report_options(
     x,
     colour = colour,
@@ -74,7 +95,10 @@ render <- function(
   dir.create(work_dir)
   on.exit(unlink(work_dir, recursive = TRUE), add = TRUE)
   staged <- file.copy(
-    c(report_template_path(), list.files(brand_path(), full.names = TRUE)),
+    c(
+      list.files(dirname(report_template_path()), full.names = TRUE),
+      list.files(brand_path(), full.names = TRUE)
+    ),
     work_dir,
     recursive = TRUE
   )
@@ -92,6 +116,9 @@ render <- function(
       input = file.path(work_dir, "nacho-report.qmd"),
       output_format = format,
       execute_params = list(nacho_rds = rds),
+      metadata = report_metadata_literal(
+        report_metadata(x, title = title, author = author)
+      ),
       quiet = nacho_is_quiet()
     )),
     error = function(cnd) {
@@ -179,7 +206,7 @@ quarto_cli_version <- function() {
 #' @noRd
 quarto_available <- function() {
   all(vapply(c("quarto", "knitr", "rmarkdown"), has_package, logical(1))) &&
-    isTRUE(quarto_cli_version() >= "1.9")
+    isTRUE(quarto_cli_version() >= "1.9.18")
 }
 
 #' Check that the report can render
@@ -190,13 +217,13 @@ check_quarto <- function(call = rlang::caller_env()) {
     check_package(package, reason = "to render the report", call = call)
   }
   version <- quarto_cli_version()
-  if (is.null(version) || version < "1.9") {
+  if (is.null(version) || version < "1.9.18") {
     nacho_abort(
       c(
         if (is.null(version)) {
           "The Quarto command-line interface is needed to render the report."
         } else {
-          "Quarto {version} is too old to render the report; it needs 1.9 or newer."
+          "Quarto {version} is too old to render the report; it needs 1.9.18 or newer."
         },
         i = "Install Quarto from {.url https://quarto.org/docs/get-started/}.",
         i = "RStudio and Positron bundle Quarto."
