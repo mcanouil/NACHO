@@ -62,10 +62,8 @@ shoot <- function(name, directory = figures) {
   invisible(path)
 }
 
-frame_count <- 0
 frame <- function() {
-  frame_count <<- frame_count + 1
-  shoot(sprintf("frame-%02d.png", frame_count), frames)
+  shoot(sprintf("frame-%02d.png", length(list.files(frames)) + 1), frames)
 }
 
 click <- function(selector) {
@@ -187,7 +185,11 @@ app$run_js(
 # The picture for the README.
 go_to("QC metrics")
 shoot("README-app.png", "man/figures")
-file.copy("man/figures/README-app.png", "vignettes/README-app.png", overwrite = TRUE)
+file.copy(
+  "man/figures/README-app.png",
+  "vignettes/README-app.png",
+  overwrite = TRUE
+)
 
 gif <- "man/figures/README-nacho_app.gif"
 unlink(gif)
