@@ -546,28 +546,28 @@ plot_pn <- function(
   interactive = FALSE
 ) {
   id <- object@settings[["id_colname"]]
-  ggplot2::ggplot(
-    data = lane_samples(
+  data <- lane_samples(
+    object,
+    plot_probes(
       object,
-      plot_probes(
-        object,
-        which(object@probes[["CodeClass"]] %in% c("Positive", "Negative")),
-        colour
-      ),
-      id
-    )[
-      j = unique(.SD),
-      .SDcols = unique(c(
-        "CartridgeID",
-        colour,
-        id,
-        "CodeClass",
-        "Name",
-        "Count",
-        "flagged"
-      ))
-    ]
-  ) +
+      which(object@probes[["CodeClass"]] %in% c("Positive", "Negative")),
+      colour
+    ),
+    id
+  )[
+    j = unique(.SD),
+    .SDcols = unique(c(
+      "CartridgeID",
+      colour,
+      id,
+      "CodeClass",
+      "Name",
+      "Count",
+      "flagged"
+    ))
+  ]
+
+  ggplot2::ggplot(data = data) +
     theme_nacho(dark) +
     ggplot2::aes(
       x = .data[[id]],
@@ -592,15 +592,24 @@ plot_pn <- function(
       panel.grid.minor.x = ggplot2::element_blank()
     ) +
     ggplot2::geom_smooth(
-      mapping = ggplot2::aes(
-        x = as.numeric(as.factor(.data[[id]])),
-        linetype = "Loess",
-        group = "CodeClass"
+      data = sample_trend(
+        data.frame(
+          x = as.numeric(as.factor(data[[id]])),
+          y = data[["Count"]] + 1,
+          CodeClass = data[["CodeClass"]]
+        ),
+        by = "CodeClass"
       ),
+      mapping = ggplot2::aes(
+        x = .data[["x"]],
+        y = .data[["y"]],
+        ymin = .data[["ymin"]],
+        ymax = .data[["ymax"]],
+        linetype = "Loess"
+      ),
+      stat = "identity",
       colour = plot_colours(dark)[["ink"]],
-      se = TRUE,
-      method = "loess",
-      formula = y ~ x
+      inherit.aes = FALSE
     ) +
     ggplot2::guides(colour = ggplot2::guide_legend(ncol = 2)) +
     (if (!show_legend) ggplot2::guides(colour = "none"))
@@ -1052,43 +1061,42 @@ plot_norm <- function(
     which(object@probes[["is_housekeeping"]])
   }
 
-  ggplot2::ggplot(
-    data = plot_probes(object, rows, "CartridgeID")[
-      j = c("Count", "Count_Norm") := lapply(.SD, as.double),
-      .SDcols = c("Count", "Count_Norm")
-    ][
-      j = data.table::melt(
-        data = unique(.SD),
-        id.vars = unique(c(
-          "CartridgeID",
-          id,
-          "Name",
-          "CodeClass",
-          "flagged"
-        )),
-        measure.vars = c("Count", "Count_Norm"),
-        variable.name = "Status",
-        value.name = "Count"
-      ),
-      .SDcols = unique(c(
+  data <- plot_probes(object, rows, "CartridgeID")[
+    j = c("Count", "Count_Norm") := lapply(.SD, as.double),
+    .SDcols = c("Count", "Count_Norm")
+  ][
+    j = data.table::melt(
+      data = unique(.SD),
+      id.vars = unique(c(
         "CartridgeID",
         id,
-        "Count",
-        "Count_Norm",
         "Name",
         "CodeClass",
         "flagged"
-      ))
-    ][
-      j = `:=`(
-        Status = factor(
-          x = c("Count" = "Raw", "Count_Norm" = "Normalized")[Status],
-          levels = c("Count" = "Raw", "Count_Norm" = "Normalized")
-        ),
-        Count = Count + 1
-      )
-    ]
-  ) +
+      )),
+      measure.vars = c("Count", "Count_Norm"),
+      variable.name = "Status",
+      value.name = "Count"
+    ),
+    .SDcols = unique(c(
+      "CartridgeID",
+      id,
+      "Count",
+      "Count_Norm",
+      "Name",
+      "CodeClass",
+      "flagged"
+    ))
+  ][
+    j = `:=`(
+      Status = factor(
+        x = c("Count" = "Raw", "Count_Norm" = "Normalized")[Status],
+        levels = c("Count" = "Raw", "Count_Norm" = "Normalized")
+      ),
+      Count = Count + 1
+    )
+  ]
+  ggplot2::ggplot(data = data) +
     theme_nacho(dark) +
     ggplot2::aes(
       x = .data[[id]],
@@ -1119,14 +1127,24 @@ plot_norm <- function(
       panel.grid.minor.x = ggplot2::element_blank()
     ) +
     ggplot2::geom_smooth(
+      data = sample_trend(
+        data.frame(
+          x = as.numeric(as.factor(data[[id]])),
+          y = data[["Count"]],
+          Status = data[["Status"]]
+        ),
+        by = "Status"
+      ),
       mapping = ggplot2::aes(
-        x = as.numeric(as.factor(.data[[id]])),
+        x = .data[["x"]],
+        y = .data[["y"]],
+        ymin = .data[["ymin"]],
+        ymax = .data[["ymax"]],
         linetype = "Loess"
       ),
+      stat = "identity",
       colour = plot_colours(dark)[["ink"]],
-      se = TRUE,
-      method = "loess",
-      formula = y ~ x
+      inherit.aes = FALSE
     ) +
     (if (!(show_legend && length(housekeeping_genes) <= 10)) {
       ggplot2::guides(colour = "none")
@@ -1177,6 +1195,101 @@ plot_stability <- function(
     )
 }
 
+#' Box statistics of each column, with the rule of `stat_boxplot()`
+#'
+#' The whiskers reach the most extreme value within 1.5 times the
+#' interquartile range of the box.
+#' A plot of these boxes draws hundreds of samples much faster than
+#' `geom_boxplot()`, which summarises every value.
+#'
+#' @param values A numeric matrix with column names, one column per box.
+#'
+#' @return A data frame with one row per column: `sample`, `ymin`, `lower`,
+#'   `middle`, `upper` and `ymax`.
+#'
+#' @noRd
+box_stats <- function(values) {
+  stats <- apply(values, 2, function(v) {
+    v <- v[!is.na(v)]
+    if (length(v) == 0) {
+      return(rep(NA_real_, 5))
+    }
+    q <- stats::quantile(v, c(0.25, 0.5, 0.75), names = FALSE)
+    iqr <- q[3] - q[1]
+    inside <- v[v >= q[1] - 1.5 * iqr & v <= q[3] + 1.5 * iqr]
+    c(min(c(q, inside)), q, max(c(q, inside)))
+  })
+  data.frame(
+    sample = colnames(values),
+    ymin = stats[1, ],
+    lower = stats[2, ],
+    middle = stats[3, ],
+    upper = stats[4, ],
+    ymax = stats[5, ],
+    row.names = NULL
+  )
+}
+
+#' Loess trend of the sample means
+#'
+#' `geom_smooth()` fits a loess on every point, which takes seconds when a
+#' study has hundreds of samples.
+#' This fit uses the mean of each sample on the log10 scale, weighted by the
+#' number of points of the sample.
+#' When every sample has the same number of points, the curve is the same as
+#' the curve of `geom_smooth()`.
+#' The band is the 95% confidence interval of the trend of the sample means.
+#' A loess needs six samples, so a panel with fewer has no trend.
+#'
+#' @param data A data frame with a numeric `x` (the position of the sample),
+#'   a positive `y` (the count) and the columns named in `by`.
+#' @param by The names of the columns that split the data into panels.
+#' @param n The number of points of each curve.
+#'
+#' @return A data frame with the columns in `by`, then `x`, `y`, `ymin` and
+#'   `ymax`, with `y`, `ymin` and `ymax` on the count scale.
+#'
+#' @noRd
+sample_trend <- function(data, by, n = 80L) {
+  keep <- is.finite(data[["x"]]) & is.finite(data[["y"]]) & data[["y"]] > 0
+  data <- data[keep, , drop = FALSE]
+  empty <- cbind(
+    data[0, by, drop = FALSE],
+    data.frame(x = numeric(), y = numeric(), ymin = numeric(), ymax = numeric())
+  )
+  panels <- split(data, data[by], drop = TRUE)
+  trends <- lapply(panels, function(panel) {
+    log_y <- log10(panel[["y"]])
+    means <- tapply(log_y, panel[["x"]], mean)
+    if (length(means) < 6L) {
+      return(NULL)
+    }
+    points <- data.frame(
+      x = as.numeric(names(means)),
+      y = as.vector(means),
+      w = as.vector(tapply(log_y, panel[["x"]], length))
+    )
+    fit <- stats::loess(y ~ x, data = points, weights = points[["w"]])
+    grid <- data.frame(
+      x = seq(min(points[["x"]]), max(points[["x"]]), length.out = n)
+    )
+    predicted <- stats::predict(fit, grid, se = TRUE)
+    half <- predicted[["se.fit"]] * stats::qt(0.975, predicted[["df"]])
+    trend <- data.frame(
+      x = grid[["x"]],
+      y = 10^predicted[["fit"]],
+      ymin = 10^(predicted[["fit"]] - half),
+      ymax = 10^(predicted[["fit"]] + half)
+    )
+    cbind(panel[rep(1L, n), by, drop = FALSE], trend, row.names = NULL)
+  })
+  trends <- trends[!vapply(trends, is.null, logical(1))]
+  if (length(trends) == 0) {
+    return(empty)
+  }
+  do.call(rbind, trends)
+}
+
 plot_rle <- function(
   object,
   type,
@@ -1194,21 +1307,21 @@ plot_rle <- function(
   values <- log2(object@normalised[rows, , drop = FALSE] + 1)
   rle <- rle_centre(values, 1)
   samples <- plot_samples(object, colour)
-  data <- data.frame(
-    Name = rep(rownames(rle), times = ncol(rle)),
-    sample = rep(colnames(rle), each = nrow(rle)),
-    rle = as.vector(rle)
-  )
-  data[[colour]] <- samples[[colour]][match(data[["sample"]], samples[[id]])]
-  data[["sample"]] <- factor(
-    data[["sample"]],
+  boxes <- box_stats(rle)
+  boxes[[colour]] <- samples[[colour]][match(boxes[["sample"]], samples[[id]])]
+  boxes[["sample"]] <- factor(
+    boxes[["sample"]],
     levels = samples[[id]][order(nacho_samples(object)[[colour]])]
   )
-  ggplot2::ggplot(data) +
+  ggplot2::ggplot(boxes) +
     theme_nacho(dark) +
     ggplot2::aes(
       x = .data[["sample"]],
-      y = .data[["rle"]],
+      ymin = .data[["ymin"]],
+      lower = .data[["lower"]],
+      middle = .data[["middle"]],
+      upper = .data[["upper"]],
+      ymax = .data[["ymax"]],
       colour = .data[[colour]]
     ) +
     ggplot2::geom_hline(
@@ -1216,7 +1329,7 @@ plot_rle <- function(
       colour = plot_colours(dark)[["accent"]],
       linetype = "longdash"
     ) +
-    ggplot2::geom_boxplot(outliers = FALSE, na.rm = TRUE) +
+    ggplot2::geom_boxplot(stat = "identity", na.rm = TRUE) +
     ggplot2::labs(
       x = "Sample",
       y = "Relative log expression",

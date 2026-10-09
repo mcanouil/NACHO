@@ -157,19 +157,21 @@ test_that("the Stability plot orders the genes by geNorm rank", {
 test_that("the RLE plot centres each gene on its median", {
   plot <- autoplot(GSE74821, type = "RLE")
   data <- plot$data
-  expect_true(all(c("sample", "rle") %in% names(data)))
-  genes <- nacho_probes(GSE74821)$Name[
-    grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
-  ]
-  expect_setequal(unique(data$Name), genes)
-  medians <- tapply(data$rle, data$Name, stats::median)
-  expect_equal(as.vector(medians), rep(0, length(medians)), tolerance = 1e-8)
-  gene <- genes[3]
-  sample <- as.character(data$sample[data$Name == gene][2])
-  log_gene <- log2(nacho_counts(GSE74821, normalised = TRUE)[gene, ] + 1)
+  expect_true(all(c("sample", "lower", "middle", "upper") %in% names(data)))
+  rows <- grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
+  log_counts <- log2(nacho_counts(GSE74821, normalised = TRUE)[rows, ] + 1)
+  centred <- NACHO:::rle_centre(log_counts, 1)
+  medians <- apply(centred, 1, stats::median)
+  expect_equal(unname(medians), rep(0, length(medians)), tolerance = 1e-8)
+  gene <- rownames(log_counts)[3]
+  sample <- as.character(data$sample[2])
   expect_equal(
-    data$rle[data$Name == gene & data$sample == sample],
-    unname(log_gene[sample] - stats::median(log_gene))
+    centred[gene, sample],
+    unname(log_counts[gene, sample] - stats::median(log_counts[gene, ]))
+  )
+  expect_equal(
+    data$middle[data$sample == sample],
+    stats::median(centred[, sample])
   )
 })
 
@@ -788,4 +790,77 @@ test_that("a sample column named id or y does not shadow the hover", {
   plot <- NACHO:::app_plot(x, "FoV", list(), dark = FALSE, interactive = TRUE)
   tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
   expect_match(tooltips[1], "^GSM[^\n]+\nField of view: ")
+})
+
+test_that("RLE boxes match the boxes ggplot2 computes", {
+  plot <- autoplot(GSE74821, type = "RLE")
+  built <- ggplot2::ggplot_build(plot)
+  boxes <- built$data[[2]]
+  rows <- grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
+  values <- log2(GSE74821@normalised[rows, , drop = FALSE] + 1)
+  centred <- NACHO:::rle_centre(values, 1)
+  reference <- data.frame(
+    sample = rep(colnames(centred), each = nrow(centred)),
+    rle = as.vector(centred)
+  )
+  reference[["sample"]] <- factor(
+    reference[["sample"]],
+    levels = levels(plot$data[["sample"]])
+  )
+  expected <- ggplot2::ggplot_build(
+    ggplot2::ggplot(reference) +
+      ggplot2::aes(x = .data[["sample"]], y = .data[["rle"]]) +
+      ggplot2::geom_boxplot(outliers = FALSE)
+  )$data[[1]]
+  columns <- c("ymin", "lower", "middle", "upper", "ymax")
+  expect_equal(
+    boxes[order(boxes$x), columns],
+    expected[order(expected$x), columns],
+    ignore_attr = TRUE,
+    tolerance = 1e-12
+  )
+  expect_identical(nrow(plot$data), ncol(centred))
+})
+
+test_that("the NORM and PN trends match a loess on every point", {
+  for (type in c("NORM", "PN")) {
+    plot <- autoplot(GSE74821, type = type)
+    built <- ggplot2::ggplot_build(plot)
+    smooth <- which(vapply(
+      plot$layers,
+      function(layer) inherits(layer$geom, "GeomSmooth"),
+      logical(1)
+    ))
+    expect_length(smooth, 1L)
+    trend <- built$data[[smooth]]
+    lines <- built$data[[1]]
+    for (panel in unique(trend$PANEL)) {
+      points <- lines[lines$PANEL == panel, ]
+      points <- data.frame(x = as.numeric(points$x), y = points$y)
+      fit <- stats::loess(y ~ x, data = points)
+      at <- trend[trend$PANEL == panel, ]
+      expect_equal(
+        at$y,
+        unname(stats::predict(fit, data.frame(x = at$x))),
+        tolerance = 1e-8,
+        info = paste(type, panel)
+      )
+    }
+  }
+})
+
+test_that("the trend needs six samples", {
+  for (type in c("NORM", "PN")) {
+    few <- autoplot(toy_nacho(5L), type = type)
+    expect_no_warning(built <- ggplot2::ggplot_build(few))
+    smooth <- which(vapply(
+      few$layers,
+      function(layer) inherits(layer$geom, "GeomSmooth"),
+      logical(1)
+    ))
+    expect_identical(nrow(built$data[[smooth]]), 0L)
+    enough <- autoplot(toy_nacho(6L), type = type)
+    expect_no_warning(built <- ggplot2::ggplot_build(enough))
+    expect_gt(nrow(built$data[[smooth]]), 0L)
+  }
 })

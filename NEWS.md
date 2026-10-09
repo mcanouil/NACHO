@@ -148,6 +148,10 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 
 - In `R/read_rcc.R`, `R/load_rcc.R` and `R/qc.R`,
   - perf: `load_rcc()` reads each RCC file once, with exact section tags, and computes quality control on count matrices. Loading 768 samples takes about 2.5 seconds instead of about 9 in NACHO 2.
+- In `R/autoplot.R`,
+  - perf: The normalisation and positive against negative plots draw in about half a second on 768 samples, instead of 2 to 4 seconds.
+    The trend line of both now fits the mean of each sample, which gives the same line and a band that shows the spread between samples.
+  - perf: The relative log expression plot draws precomputed boxes instead of summarising every value, which keeps its data to one row per sample.
 - In `R/mod_qc_plot.R` and `R/plot_worker.R`,
   - perf: Interactive plots in the app draw about 40% faster, because the font lookup of ggiraph runs once instead of for every plot.
   - perf: With mirai installed, the app builds the plots of a page in parallel on a small pool of workers shared by all sessions, stays responsive while they build, and stops the unfinished plots of a page you leave.
