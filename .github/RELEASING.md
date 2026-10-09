@@ -14,13 +14,17 @@ The checks still run on `main`, and the submission workflow checks the tarball a
 Tick "rhub" to run the R-hub checks as well.
 They're optional, and `cran-comments.md` only lists them when they run.
 
-Untick "auto-merge" when `cran-comments.md` needs a note, for example to explain breaking changes.
+Untick "auto-merge" when `cran-comments.md` needs a note, for example to explain breaking changes or a NOTE you expect from the check.
 The pull request is then assigned to you: edit the file on it and merge it yourself.
 
 ## 2. Submit to CRAN
 
 Merging the bump starts the "CRAN submission" workflow.
 It builds the tarball with the PDF manual and runs `R CMD check --as-cran`.
+
+The workflow then compares the check with the results line of `cran-comments.md`, for example `0 errors | 0 warnings | 1 note`.
+If they differ, it stops before the upload and lists the sections that raised a NOTE, a WARNING or an ERROR.
+Open a pull request that explains each NOTE in `cran-comments.md` and corrects the results line, merge it, then run "CRAN submission" by hand from `main` with "dry run" unticked.
 
 It then waits for your approval on the `cran` environment.
 Approve it, and the workflow uploads the tarball and records the submission in `CRAN-SUBMISSION` on `main`.
