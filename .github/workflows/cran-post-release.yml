@@ -58,14 +58,15 @@ jobs:
           VERSION: ${{ steps.accepted.outputs.version }}
           SHA: ${{ steps.accepted.outputs.sha }}
         run: |
+          .github/scripts/release-tag.sh "${VERSION}" "${SHA}" > /dev/null
           if gh release view "v${VERSION}" > /dev/null 2>&1; then
-            echo "::error::The release v${VERSION} already exists."
-            exit 1
+            echo "The release v${VERSION} already exists on ${SHA}; going on to the development version."
+          else
+            gh release create "v${VERSION}" \
+              --target "${SHA}" \
+              --title "NACHO ${VERSION}" \
+              --notes-file "${RUNNER_TEMP}/release-notes.md"
           fi
-          gh release create "v${VERSION}" \
-            --target "${SHA}" \
-            --title "NACHO ${VERSION}" \
-            --notes-file "${RUNNER_TEMP}/release-notes.md"
 
       - name: Start the next development version
         id: dev
@@ -76,6 +77,10 @@ jobs:
           BRANCH="ci/dev-version-${VERSION//./-}"
           .github/scripts/bump-version.sh dev
           git rm -q CRAN-SUBMISSION
+          if git ls-remote --exit-code --heads origin "${BRANCH}" > /dev/null 2>&1; then
+            echo "::error::${BRANCH} already exists. Merge or close its pull request, delete the branch, then run this again."
+            exit 1
+          fi
           git switch -c "${BRANCH}"
           git add DESCRIPTION NEWS.md
           git commit -m "chore: start development after NACHO ${VERSION}"

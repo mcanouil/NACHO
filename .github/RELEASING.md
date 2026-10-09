@@ -58,6 +58,8 @@ It then opens a pull request that starts the next development version and remove
 
 If CRAN doesn't serve the version yet, the workflow stops without changing anything, and you can run it again later.
 
+If a run stops after it published the release, run it again: it keeps the existing release when its tag points to the submitted commit, and goes on to the development version.
+
 ## Scripts and tests
 
 The workflows call the scripts in `.github/scripts/`.

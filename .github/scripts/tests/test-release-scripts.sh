@@ -232,6 +232,22 @@ out="$("${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-c
 check "results name the NOTE section" 1 \
   "$(grep -c 'checking CRAN incoming feasibility' <<<"${out}")"
 
+make_repo "${tmp}/tag" 2.0.7
+first="$(git -C "${tmp}/tag" rev-parse HEAD)"
+out="$("${scripts}/release-tag.sh" 2.0.7 "${first}" "${tmp}/tag")"
+check "tag check reports a missing tag" false "$(field tagged <<<"${out}")"
+git -C "${tmp}/tag" -c tag.gpgSign=false tag v2.0.7
+out="$("${scripts}/release-tag.sh" 2.0.7 "${first}" "${tmp}/tag")"
+check "tag check accepts a tag on the submitted commit" true \
+  "$(field tagged <<<"${out}")"
+git -C "${tmp}/tag" -c user.name=test -c user.email=test@example.com \
+  -c commit.gpgsign=false commit -q --allow-empty -m later
+second="$(git -C "${tmp}/tag" rev-parse HEAD)"
+check "tag check stops on a tag on another commit" 1 \
+  "$(status_of "${scripts}/release-tag.sh" 2.0.7 "${second}" "${tmp}/tag")"
+check "tag check fails without a version" 1 \
+  "$(status_of "${scripts}/release-tag.sh" "" "${first}" "${tmp}/tag")"
+
 if [ "${failures}" -gt 0 ]; then
   printf '%s check(s) failed\n' "${failures}"
   exit 1
