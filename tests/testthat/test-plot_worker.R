@@ -3,6 +3,39 @@ skip_if_no_daemons <- function() {
   testthat::skip_if_not_installed("mirai")
 }
 
+settle <- function(root, done, seconds = 60) {
+  start <- Sys.time()
+  deadline <- start + seconds
+  while (!done() && Sys.time() < deadline) {
+    later::run_now(0.1)
+    if (!is.null(root)) root$flushReact()
+  }
+  if (!done()) {
+    profile <- NACHO:::plot_pool$profile
+    cat(
+      "\nThe wait ended after",
+      format(round(difftime(Sys.time(), start, units = "secs"), 1)),
+      "and the state of the plot pool",
+      if (is.null(profile)) "(no pool)" else profile,
+      "is:\n"
+    )
+    if (!is.null(profile)) print(mirai::status(.compute = profile))
+  }
+  done()
+}
+
+idle <- function(root, seconds) {
+  deadline <- Sys.time() + seconds
+  while (Sys.time() < deadline) {
+    later::run_now(0.1)
+    if (!is.null(root)) root$flushReact()
+  }
+}
+
+connected <- function(profile, count) {
+  function() mirai::status(.compute = profile)$connections >= count
+}
+
 test_that("plot_cache_key() changes with any input", {
   size <- c(width = 5, height = 3.5)
   key <- function(type = "BD", options = list(size = 1), dark = FALSE) {
@@ -89,14 +122,43 @@ test_that("build_card() gives the same widget in a worker and in process", {
 
 test_that("one worker pool serves the app until it stops", {
   skip_if_no_daemons()
+  skip_if_not_installed("later")
   withr::defer(NACHO:::plot_workers_stop())
   withr::local_options(nacho.plot_workers = 2)
   profile <- NACHO:::plot_workers_start()
   expect_identical(NACHO:::plot_workers_start(), profile)
   expect_true(mirai::mirai(TRUE, .compute = profile)[])
-  expect_gt(mirai::status(.compute = profile)$connections, 0)
+  expect_true(settle(NULL, connected(profile, 2L), seconds = 30))
   NACHO:::plot_workers_stop()
+  later::run_now(0)
   expect_identical(mirai::status(.compute = profile)$connections, 0L)
+})
+
+test_that("callbacks of a stopped pool do nothing to the next pool", {
+  skip_if_no_daemons()
+  skip_if_not_installed("later")
+  withr::defer(NACHO:::plot_workers_stop())
+  withr::local_options(nacho.plot_workers = 2, nacho.quiet = TRUE)
+  warmed <- 0L
+  local_mocked_bindings(
+    everywhere = function(...) {
+      warmed <<- warmed + 1L
+      invisible(NULL)
+    },
+    .package = "mirai"
+  )
+  with_mocked_bindings(
+    NACHO:::plot_workers_start(),
+    launch_local = function(...) invisible(NULL),
+    .package = "mirai"
+  )
+  NACHO:::plot_workers_stop()
+  profile <- NACHO:::plot_workers_start()
+  expect_true(settle(NULL, function() warmed > 0L, seconds = 30))
+  idle(NULL, 1)
+  expect_identical(warmed, 1L)
+  expect_false(isTRUE(NACHO:::plot_pool$failed))
+  expect_identical(NACHO:::plot_pool$profile, profile)
 })
 
 test_that("without mirai the app starts no workers", {
@@ -126,15 +188,6 @@ card_session <- function() {
   root
 }
 
-settle <- function(root, done, seconds = 60) {
-  deadline <- Sys.time() + seconds
-  while (!done() && Sys.time() < deadline) {
-    later::run_now(0.1)
-    root$flushReact()
-  }
-  done()
-}
-
 test_that("a card builds in a worker only while its page shows", {
   skip_if_not_installed("ggiraph")
   skip_if_no_daemons()
@@ -144,9 +197,11 @@ test_that("a card builds in a worker only while its page shows", {
   root <- card_session()
   on.exit(root$close(), add = TRUE)
   active <- shiny::reactiveVal(FALSE)
+  profile <- NACHO:::plot_workers_start()
+  expect_true(settle(NULL, connected(profile, 2L), seconds = 30))
   shiny::testServer(
     NACHO:::mod_qc_plot_server,
-    args = card_args(active, NACHO:::plot_workers_start()),
+    args = card_args(active, profile),
     session = root,
     {
       cache <- shiny::getShinyOption("cache", default = session$cache)
@@ -157,7 +212,7 @@ test_that("a card builds in a worker only while its page shows", {
       }
       session$setInputs(colour = "CartridgeID")
       session$elapse(300)
-      settle(root, function() FALSE, seconds = 1)
+      idle(root, 1)
       expect_identical(keys(), 0L)
       active(TRUE)
       expect_true(settle(root, function() keys() == 1L))
@@ -166,7 +221,7 @@ test_that("a card builds in a worker only while its page shows", {
       expect_match(widget$x$html, "viewBox='0 0 450 262.5'", fixed = TRUE)
       session$setInputs(size = 2)
       active(FALSE)
-      settle(root, function() FALSE, seconds = 3)
+      idle(root, 3)
       expect_identical(keys(), 1L)
       session$setInputs(size = 3)
       active(TRUE)
@@ -276,4 +331,51 @@ test_that("a pool that fails to start leaves the plots in the app process", {
   expect_null(NACHO:::plot_workers_start())
   expect_true(NACHO:::plot_pool$failed)
   expect_null(NACHO:::plot_workers_start())
+})
+
+test_that("an interrupted build ends its task without a result", {
+  skip_if_no_daemons()
+  skip_if_not_installed("later")
+  profile <- "nacho-interrupt"
+  mirai::daemons(1, dispatcher = TRUE, .compute = profile)
+  withr::defer(mirai::daemons(0, .compute = profile))
+  real_mirai <- mirai::mirai
+  local_mocked_bindings(
+    mirai = function(..., .compute) {
+      real_mirai(
+        signalCondition(structure(
+          list(message = "", call = NULL),
+          class = c("interrupt", "condition")
+        )),
+        .compute = .compute
+      )
+    },
+    .package = "mirai"
+  )
+  session <- shiny::MockShinySession$new()
+  on.exit(session$close(), add = TRUE)
+  jobs <- new.env(parent = emptyenv())
+  jobs$build <- 1L
+  task <- NACHO:::card_task(session, profile, jobs, session$cache)
+  shiny::isolate(task$invoke(1L, "key", list()))
+  finished <- function() shiny::isolate(task$status()) != "running"
+  expect_true(settle(NULL, finished, seconds = 30))
+  expect_true(mirai::is_mirai_interrupt(jobs$running$data))
+  expect_identical(shiny::isolate(task$status()), "success")
+  expect_null(shiny::isolate(task$result()))
+  expect_length(session$cache$keys(), 0L)
+})
+
+test_that("build_cancelled() knows a stopped or interrupted build", {
+  error_value <- function(code) {
+    structure(code, class = c("errorValue", "try-error"))
+  }
+  interrupt <- structure(
+    "",
+    class = c("miraiInterrupt", "errorValue", "try-error")
+  )
+  expect_true(NACHO:::build_cancelled(error_value(20L)))
+  expect_true(NACHO:::build_cancelled(interrupt))
+  expect_false(NACHO:::build_cancelled(error_value(5L)))
+  expect_false(NACHO:::build_cancelled(error_value(7L)))
 })
