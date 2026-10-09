@@ -15,6 +15,7 @@
 ^man/figures/README-nacho_app\.gif$
 ^LICENSE\.md$
 ^data-raw$
+^vignettes/articles$
 ^\.superpowers$
 ^\.kata\.toml$
 ^\.ruff_cache$
