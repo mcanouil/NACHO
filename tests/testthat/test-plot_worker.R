@@ -134,6 +134,33 @@ test_that("one worker pool serves the app until it stops", {
   expect_identical(mirai::status(.compute = profile)$connections, 0L)
 })
 
+test_that("callbacks of a stopped pool do nothing to the next pool", {
+  skip_if_no_daemons()
+  skip_if_not_installed("later")
+  withr::defer(NACHO:::plot_workers_stop())
+  withr::local_options(nacho.plot_workers = 2, nacho.quiet = TRUE)
+  warmed <- 0L
+  local_mocked_bindings(
+    everywhere = function(...) {
+      warmed <<- warmed + 1L
+      invisible(NULL)
+    },
+    .package = "mirai"
+  )
+  with_mocked_bindings(
+    NACHO:::plot_workers_start(),
+    launch_local = function(...) invisible(NULL),
+    .package = "mirai"
+  )
+  NACHO:::plot_workers_stop()
+  profile <- NACHO:::plot_workers_start()
+  expect_true(settle(NULL, function() warmed > 0L, seconds = 30))
+  idle(NULL, 1)
+  expect_identical(warmed, 1L)
+  expect_false(isTRUE(NACHO:::plot_pool$failed))
+  expect_identical(NACHO:::plot_pool$profile, profile)
+})
+
 test_that("without mirai the app starts no workers", {
   local_mocked_bindings(has_package = function(package) FALSE)
   expect_null(NACHO:::plot_workers_start())
@@ -304,4 +331,51 @@ test_that("a pool that fails to start leaves the plots in the app process", {
   expect_null(NACHO:::plot_workers_start())
   expect_true(NACHO:::plot_pool$failed)
   expect_null(NACHO:::plot_workers_start())
+})
+
+test_that("an interrupted build ends its task without a result", {
+  skip_if_no_daemons()
+  skip_if_not_installed("later")
+  profile <- "nacho-interrupt"
+  mirai::daemons(1, dispatcher = TRUE, .compute = profile)
+  withr::defer(mirai::daemons(0, .compute = profile))
+  real_mirai <- mirai::mirai
+  local_mocked_bindings(
+    mirai = function(..., .compute) {
+      real_mirai(
+        signalCondition(structure(
+          list(message = "", call = NULL),
+          class = c("interrupt", "condition")
+        )),
+        .compute = .compute
+      )
+    },
+    .package = "mirai"
+  )
+  session <- shiny::MockShinySession$new()
+  on.exit(session$close(), add = TRUE)
+  jobs <- new.env(parent = emptyenv())
+  jobs$build <- 1L
+  task <- NACHO:::card_task(session, profile, jobs, session$cache)
+  shiny::isolate(task$invoke(1L, "key", list()))
+  finished <- function() shiny::isolate(task$status()) != "running"
+  expect_true(settle(NULL, finished, seconds = 30))
+  expect_true(mirai::is_mirai_interrupt(jobs$running$data))
+  expect_identical(shiny::isolate(task$status()), "success")
+  expect_null(shiny::isolate(task$result()))
+  expect_length(session$cache$keys(), 0L)
+})
+
+test_that("build_cancelled() knows a stopped or interrupted build", {
+  error_value <- function(code) {
+    structure(code, class = c("errorValue", "try-error"))
+  }
+  interrupt <- structure(
+    "",
+    class = c("miraiInterrupt", "errorValue", "try-error")
+  )
+  expect_true(NACHO:::build_cancelled(error_value(20L)))
+  expect_true(NACHO:::build_cancelled(interrupt))
+  expect_false(NACHO:::build_cancelled(error_value(5L)))
+  expect_false(NACHO:::build_cancelled(error_value(7L)))
 })

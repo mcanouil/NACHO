@@ -55,6 +55,7 @@ plot_worker_count <- function(
 
 plot_pool <- new.env(parent = emptyenv())
 plot_pool$timeout <- 30000
+plot_pool$generation <- 0L
 
 #' Start the daemons that build the plots of the app
 #'
@@ -70,6 +71,8 @@ plot_pool$timeout <- 30000
 #' When all daemons are connected, each one loads NACHO and builds the ggiraph
 #' font set, so the first page does not wait for that work.
 #' When the daemons cannot start, the plots build in the app process.
+#' Each pool has its own profile name, so a callback of a stopped pool, such
+#' as a late probe or warm-up, does nothing to the next pool.
 #'
 #' @return The name of the compute profile, or `NULL` when the plots build in
 #'   the app process: mirai is not installed, the option `nacho.plot_workers`
@@ -82,7 +85,8 @@ plot_workers_start <- function() {
     return(NULL)
   }
   if (is.null(plot_pool$profile)) {
-    profile <- "nacho-plots"
+    plot_pool$generation <- plot_pool$generation + 1L
+    profile <- paste0("nacho-plots-", plot_pool$generation)
     plot_pool$profile <- profile
     started <- tryCatch(
       {
@@ -222,7 +226,7 @@ build_in_process <- function(build, key, args, cache) {
 #' it.
 #'
 #' The task never fails.
-#' It gives `NULL` for a skipped or stopped build, and otherwise a list with the
+#' It gives `NULL` for a skipped, stopped or interrupted build, and otherwise a list with the
 #' build number, the key, and either the value or the error.
 #' A failure in ExtendedTask writes a warning to the console, which a stopped
 #' build must not do.
@@ -255,6 +259,12 @@ card_task <- function(session, profile, jobs, cache) {
       promises::then(
         running,
         onFulfilled = function(value) {
+          if (mirai::is_mirai_interrupt(value)) {
+            if (!session$isClosed()) {
+              resolve(NULL)
+            }
+            return(invisible(NULL))
+          }
           cache$set(key, value)
           if (!session$isClosed()) {
             resolve(list(build = build, key = key, value = value))
@@ -269,7 +279,7 @@ card_task <- function(session, profile, jobs, cache) {
             !inherits(code, "errorValue")
           result <- if (build_error) {
             list(build = build, key = key, error = error)
-          } else if (as.integer(code) == 20L) {
+          } else if (build_cancelled(code)) {
             NULL
           } else if (isTRUE(plot_pool$failed)) {
             build_in_process(build, key, args, cache)
@@ -281,6 +291,16 @@ card_task <- function(session, profile, jobs, cache) {
       )
     })
   })
+}
+
+#' Tell whether a build ended because it was stopped or interrupted
+#'
+#' `mirai::stop_mirai()` gives the error value 20, and an interrupt in the
+#' daemon gives a `miraiInterrupt`, which has no number.
+#'
+#' @noRd
+build_cancelled <- function(code) {
+  mirai::is_mirai_interrupt(code) || identical(as.integer(code), 20L)
 }
 
 #' Give the message of a failed build
