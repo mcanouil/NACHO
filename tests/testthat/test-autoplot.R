@@ -795,7 +795,18 @@ test_that("a sample column named id or y does not shadow the hover", {
 test_that("RLE boxes match the boxes ggplot2 computes", {
   plot <- autoplot(GSE74821, type = "RLE")
   built <- ggplot2::ggplot_build(plot)
-  boxes <- built$data[[2]]
+  expect_s3_class(plot$layers[[2]]$geom, "GeomLinerange")
+  expect_s3_class(plot$layers[[3]]$geom, "GeomCrossbar")
+  whiskers <- built$data[[2]]
+  crossbars <- built$data[[3]]
+  boxes <- data.frame(
+    x = crossbars$x,
+    ymin = whiskers$ymin[match(crossbars$x, whiskers$x)],
+    lower = crossbars$ymin,
+    middle = crossbars$y,
+    upper = crossbars$ymax,
+    ymax = whiskers$ymax[match(crossbars$x, whiskers$x)]
+  )
   rows <- grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
   values <- log2(GSE74821@normalised[rows, , drop = FALSE] + 1)
   centred <- NACHO:::rle_centre(values, 1)
@@ -820,6 +831,7 @@ test_that("RLE boxes match the boxes ggplot2 computes", {
     tolerance = 1e-12
   )
   expect_identical(nrow(plot$data), ncol(centred))
+  expect_identical(nrow(crossbars), ncol(centred))
 })
 
 test_that("the NORM and PN trends match a loess on every point", {

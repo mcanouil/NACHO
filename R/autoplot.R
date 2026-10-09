@@ -1315,21 +1315,29 @@ plot_rle <- function(
   )
   ggplot2::ggplot(boxes) +
     theme_nacho(dark) +
-    ggplot2::aes(
-      x = .data[["sample"]],
-      ymin = .data[["ymin"]],
-      lower = .data[["lower"]],
-      middle = .data[["middle"]],
-      upper = .data[["upper"]],
-      ymax = .data[["ymax"]],
-      colour = .data[[colour]]
-    ) +
+    ggplot2::aes(x = .data[["sample"]], colour = .data[[colour]]) +
     ggplot2::geom_hline(
       yintercept = 0,
       colour = plot_colours(dark)[["accent"]],
       linetype = "longdash"
     ) +
-    ggplot2::geom_boxplot(stat = "identity", na.rm = TRUE) +
+    ggplot2::geom_linerange(
+      mapping = ggplot2::aes(
+        ymin = .data[["ymin"]],
+        ymax = .data[["ymax"]]
+      ),
+      na.rm = TRUE
+    ) +
+    ggplot2::geom_crossbar(
+      mapping = ggplot2::aes(
+        y = .data[["middle"]],
+        ymin = .data[["lower"]],
+        ymax = .data[["upper"]]
+      ),
+      fill = plot_colours(dark)[["paper"]],
+      width = 0.9,
+      na.rm = TRUE
+    ) +
     ggplot2::labs(
       x = "Sample",
       y = "Relative log expression",
