@@ -1239,21 +1239,24 @@ plot_batch_factors <- function(
   interactive = FALSE
 ) {
   samples <- plot_samples(object, colour)
-  factors <- intersect(
-    c("Positive_factor", "Negative_factor", "House_factor"),
-    names(samples)
+  labels <- c(
+    Positive_factor = "Positive",
+    Negative_factor = "Negative",
+    House_factor = "Housekeeping"
   )
+  factors <- intersect(names(labels), names(samples))
   data <- do.call(
     rbind,
     lapply(factors, function(f) {
       data.frame(
         CartridgeID = samples[["CartridgeID"]],
         colour = samples[[colour]],
-        factor = f,
+        factor = labels[[f]],
         value = samples[[f]]
       )
     })
   )
+  data[["factor"]] <- factor(data[["factor"]], levels = labels[factors])
   ggplot2::ggplot(data) +
     theme_nacho(dark) +
     ggplot2::aes(x = .data[["CartridgeID"]], y = .data[["value"]]) +
@@ -1267,7 +1270,8 @@ plot_batch_factors <- function(
     ggplot2::facet_wrap(ggplot2::vars(.data[["factor"]]), scales = "free_y") +
     ggplot2::labs(x = "CartridgeID", y = "Factor", colour = colour) +
     ggplot2::theme(
-      axis.text.x = ggplot2::element_text(angle = 30, hjust = 1, vjust = 1)
+      axis.text.x = ggplot2::element_text(angle = 30, hjust = 1, vjust = 1),
+      legend.position = "bottom"
     ) +
     (if (!show_legend) ggplot2::guides(colour = "none"))
 }
