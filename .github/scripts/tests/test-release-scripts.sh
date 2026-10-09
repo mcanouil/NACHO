@@ -65,6 +65,20 @@ out="$("${scripts}/release-guard.sh" "${tmp}/rerun")"
 check "guard skips a version recorded on origin/main" false \
   "$(field submit <<<"${out}")"
 
+make_repo "${tmp}/crlf" 2.0.7
+printf 'Package: NACHO\r\nVersion: 2.0.7 \r\n' >"${tmp}/crlf/DESCRIPTION"
+out="$("${scripts}/release-guard.sh" "${tmp}/crlf")"
+check "guard reads a version with CRLF line ends" 2.0.7 \
+  "$(field version <<<"${out}")"
+check "guard submits a CRLF release version" true \
+  "$(field submit <<<"${out}")"
+
+printf 'Version: 2.0.7\r\nDate: 2026-10-01 10:00:00 UTC\r\nSHA: abc\r\n' \
+  >"${tmp}/crlf/CRAN-SUBMISSION"
+out="$("${scripts}/release-guard.sh" "${tmp}/crlf")"
+check "guard skips a CRLF submission record" false \
+  "$(field submit <<<"${out}")"
+
 mkdir -p "${tmp}/empty"
 check "guard fails without a version" 1 \
   "$(status_of "${scripts}/release-guard.sh" "${tmp}/empty")"
