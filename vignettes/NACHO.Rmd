@@ -113,10 +113,9 @@ visualise(GSE74821)
 #| echo: false
 #| out-width: 650px
 #| fig-alt: >-
-#|   NACHO dashboard on the QC Metrics tab, with threshold sliders on the left
-#|   and boxplots of binding density, field of view, positive control linearity
-#|   and limit of detection per cartridge.
-knitr::include_graphics(path = "README-visualise.png")
+#|   NACHO app on the QC metrics page, with the threshold sliders on the left
+#|   and box plots of binding density and field of view for each cartridge.
+knitr::include_graphics(path = "README-app.png")
 ```
 
 ### Raw data from GEO
@@ -368,15 +367,7 @@ The app can also be run directly, without manually summarising and normalising R
 shiny::runApp(system.file("app", package = "NACHO"))
 ```
 
-```{r}
-#| label: app-fig
-#| echo: false
-#| out-width: 650px
-#| fig-alt: >-
-#|   NACHO Shiny application on the Upload RCC Files tab, with a choice of
-#|   normalisation method and a file picker for RCC files.
-knitr::include_graphics(path = "README-app.png")
-```
+The article [Explore quality control in the app](https://m.canouil.dev/NACHO/articles/nacho-app.html) walks through every page of the app.
 
 ## The `render()` function
 

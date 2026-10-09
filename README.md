@@ -30,59 +30,56 @@ pak::pak("mcanouil/NACHO")
 
 ## Overview
 
-*NACHO* (**NA**noString quality **C**ontrol das**H**b**O**ard) is
-developed for NanoString nCounter data.\
-NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA)
-expression assay and works with fluorescent barcodes.\
-Each barcode is assigned an mRNA/miRNA, which can be counted after
-bonding with its target.\
-As a result each count of a specific barcode represents the presence of
-its target mRNA/miRNA.
+*NACHO* (**NA**noString quality **C**ontrol das**H**b**O**ard) works
+with NanoString nCounter data. An nCounter assay measures messenger RNA
+and micro RNA (mRNA/miRNA) expression with fluorescent barcodes. Each
+barcode is assigned to an mRNA or miRNA, and it is counted after it
+binds its target. Each count of a barcode therefore shows how much of
+its target is present.
 
-*NACHO* is able to load, visualise and normalise the exported NanoString
-nCounter data and facilitates the user in performing a quality control.\
-*NACHO* does this by visualising quality control metrics, expression of
-control genes, principal components and sample specific size factors in
-an interactive web application.
+*NACHO* loads, visualizes and normalizes the exported nCounter data, and
+it helps you to check its quality. It shows quality control metrics, the
+expression of control genes, principal components and sample-specific
+size factors in an interactive web application.
 
-With the use of two functions, RCC files are summarised and visualised,
-namely: `load_rcc()` and `visualise()`.
+Two functions summarize and visualize the RCC files:
 
-- The `load_rcc()` function is used to preprocess the data.
-- The `visualise()` function initiates a [Shiny-based
-  dashboard](https://shiny.posit.co/) that visualises all relevant QC
-  plots.
+- The `load_rcc()` function preprocesses the data.
+- The `visualise()` function starts a [Shiny-based
+  dashboard](https://shiny.posit.co/) with all relevant QC plots.
 
-*NACHO* also includes a function `normalise()`, which (re)calculates
-sample specific size factors and normalises the data.
+*NACHO* also has a `normalise()` function. It calculates the
+sample-specific size factors again and normalizes the data.
 
-- The `normalise()` function creates a list in which your settings, the
-  raw counts and normalised counts are stored.
+- The `normalise()` function returns a `nacho` object that holds your
+  settings, the raw counts and the normalized counts.
 
-In addition (since v0.6.0) *NACHO* includes two (three) additional
-functions:
+Since v0.6.0, *NACHO* has two more functions:
 
-- The `render()` function writes a full quality-control report with
-  Quarto, as an HTML or PDF file, from the results of a call to
-  `load_rcc()` or `normalise()`.
-- The `autoplot()` function draws any quality-control metrics from
+- The `render()` function writes a full quality control report with
+  Quarto, as an HTML or PDF file, from the result of `load_rcc()` or
+  `normalise()`.
+- The `autoplot()` function draws the quality control metrics of
   `visualise()` and `render()`.
 
-For more `vignette("NACHO")` and `vignette("NACHO-analysis")`.
+For more information, see `vignette("NACHO")` and
+`vignette("NACHO-analysis")`.
 
 ### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
 
-``` r
-shiny::runApp(system.file("app", package = "NACHO"))
-```
-
-<img src="man/figures/README-nacho_app.gif" alt="NACHO Shiny application in use." width="100%" />
+Open the app on your data with `visualise()`.
 
 ``` r
 visualise(GSE74821)
 ```
 
-<img src="man/figures/README-visualise.png" alt="NACHO interactive dashboard showing quality-control plots for the GSE74821 dataset." width="100%" />
+<img src="man/figures/README-nacho_app.gif" alt="Short recording of the NACHO app. The example data load, a threshold slider moves, the summary strip changes, a sample is selected and outlined in the plots, and the Export page opens." width="100%" />
+
+<img src="man/figures/README-app.png" alt="NACHO app on the QC metrics page, with the threshold sliders on the left and box plots of binding density and field of view for each cartridge." width="100%" />
+
+The article [Explore quality control in the
+app](https://m.canouil.dev/NACHO/articles/nacho-app.html) shows each
+page.
 
 ## Citing NACHO
 
@@ -94,7 +91,7 @@ data.” <em>Bioinformatics</em>, <b>36</b>(3), 970–971. ISSN 1367-4803.
 <a href="https://doi.org/10.1093/bioinformatics/btz647">doi:10.1093/bioinformatics/btz647</a>.
 </p>
 
-    @Article{,
+    @Article{Canouil2020,
       title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
       author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
       journal = {Bioinformatics},
