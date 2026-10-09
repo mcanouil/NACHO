@@ -67,15 +67,13 @@ For more information, see `vignette("NACHO")` and
 
 ### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
 
-Open the app on your data with `visualise()`.
+Open the app on a `nacho` object with `visualise()`.
 
 ``` r
 visualise(GSE74821)
 ```
 
-<img src="man/figures/README-nacho_app.gif" alt="Short recording of the NACHO app. The example data load, a threshold slider moves, the summary strip changes, a sample is selected and outlined in the plots, and the Export page opens." width="100%" />
-
-<img src="man/figures/README-app.png" alt="NACHO app on the QC metrics page, with the threshold sliders on the left and box plots of binding density and field of view for each cartridge." width="100%" />
+<img src="man/figures/README-nacho_app.gif" alt="Short recording of the NACHO app on the example data. The summary strip changes when the field of view threshold moves to 95 and one sample is flagged. A selected sample is outlined in the QC metrics plots. The recording then shows the Samples, Normalisation and Batch pages, the Help menu, and the Export page with a report ready to download." width="100%" />
 
 The article [Explore quality control in the
 app](https://m.canouil.dev/NACHO/articles/nacho-app.html) shows each

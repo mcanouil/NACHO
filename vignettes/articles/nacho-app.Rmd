@@ -42,6 +42,7 @@ shiny::runApp(nacho_app())
 The **Data** page loads a study.
 Choose RCC files, zip archives and an optional sample sheet, then click **Import**.
 The sample sheet is a CSV file with an `IDFILE` column that holds the RCC file names.
+For PlexSet files, it also has a `plexset_id` column with the values S1 to S8.
 To try the app first, click **Load the example data (GSE74821)**.
 
 Above every page, a summary strip shows the number of samples, the number of cartridges, the number of flagged samples and the method.
@@ -66,7 +67,7 @@ Every page uses them.
 - **Preset** gives a set of starting thresholds.
   Choose the `nSolver` preset or the `NACHO 2` preset, and choose your instrument.
   **Reset** returns the thresholds to the preset.
-- **Normalisation** sets the method, the background and, for RUVg, the number of unwanted factors.
+- **Normalisation** sets the method, the background, the background mode and, for RUVg, the number of unwanted factors.
   To choose that number, use `suggest_ruv_k()` in R.
 - The other sections hold one slider for each threshold, grouped as imaging, controls, content and miRNA.
 
@@ -89,7 +90,7 @@ For example, a field of view threshold of 95 flags one sample of `GSE74821`.
 Five pages show plots.
 Each page answers one question.
 
-- **QC metrics** shows the imaging and linearity metrics, with the thresholds drawn as shaded bands.
+- **QC metrics** shows the imaging, linearity and limit of detection metrics, with the thresholds drawn as shaded bands.
 - **Controls** shows the positive controls, the negative controls, the housekeeping genes and the control probes.
 - **Counts** shows counts against the quality metrics, and the principal components.
 - **Normalisation** shows the normalisation factors, the result of the normalisation and the stability of the housekeeping genes.
@@ -105,13 +106,14 @@ knitr::include_graphics("figures/app-qc-metrics.png")
 ```
 
 A page shows only the plots that your data can draw.
-For example, the miRNA metrics appear only for miRNA data.
+For example, the housekeeping plots appear only when the study has housekeeping genes.
 
 ### Display options and full screen
 
 Each plot card has a button with sliders in its top right corner.
 It opens the display options.
 There you choose the variable that colours the points, show or hide the legend, and choose a column to label the flagged samples.
+You can also change the point size, and download the plot as a PNG file with a width and height in centimetres.
 
 The full-screen button appears at the bottom right of a card when you point at it.
 Click it to see the plot at the size of the window.
@@ -130,8 +132,8 @@ knitr::include_graphics("figures/app-full-screen.png")
 The plots that show one point for each sample are linked.
 If you select a sample in one place, the app outlines it in all of them.
 
-On the **Samples** page, choose a sample in **Highlight a sample**.
-The page then marks the sample in its table.
+Click a point in a plot, or choose a sample in **Highlight a sample** on the **Samples** page.
+The **Samples** page marks the sample in its table.
 The plots on the other pages outline the same sample.
 To clear the selection, choose **None**.
 
@@ -192,7 +194,7 @@ The **Export** page saves your work.
 For the report, enter a title and an author, both optional, and choose HTML or PDF (Typst).
 Then click **Render the report**.
 When the report is ready, a button with its file name appears.
-The report needs the Quarto command-line interface and the `quarto` package where the app runs.
+The report needs the Quarto command-line interface 1.9.18 or newer and the `quarto` package where the app runs.
 If you have the `mirai` package, the app renders the report in the background.
 
 ```{r}
@@ -259,3 +261,4 @@ visualise(GSE74821)
 To build all plots in the app process, set the option to `0`.
 If the workers do not start, the app builds the plots in its own process.
 The workers use the installed NACHO package.
+All users of one R process share its workers and its plot cache.

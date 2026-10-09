@@ -10,6 +10,6 @@ $nacho-rose: #D85460;
   border-image: linear-gradient(90deg, $nacho-yellow, $nacho-amber, $nacho-orange, $nacho-rose) 1;
 }
 
-[data-bs-theme="dark"] img.r-plt:is([src$="nacho_hex.png"], [src$="README-app.png"]) {
+[data-bs-theme="dark"] img.r-plt:is([src$="nacho_hex.png"], [src$="README-app.png"], [src^="figures/app-"]) {
   filter: none;
 }
