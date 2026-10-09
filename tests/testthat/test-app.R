@@ -5,6 +5,7 @@ test_that("nacho_app() builds a Shiny app", {
 })
 
 test_that("the app flags samples when a threshold moves", {
+  testthat::skip_on_cran()
   shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
     session$flushReact()
     session$elapse(600)
@@ -16,6 +17,7 @@ test_that("the app flags samples when a threshold moves", {
 })
 
 test_that("the app normalises again when the method changes", {
+  testthat::skip_on_cran()
   shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
     session$flushReact()
     session$setInputs(
@@ -31,6 +33,7 @@ test_that("the app normalises again when the method changes", {
 })
 
 test_that("a method the data cannot support shows a message, not a crash", {
+  testthat::skip_on_cran()
   toy <- toy_nacho(6L)
   shiny::testServer(NACHO:::app_server(toy, done = TRUE), {
     # The 6-sample toy data makes ggplot2 warn about an empty density layer.
@@ -42,6 +45,7 @@ test_that("a method the data cannot support shows a message, not a crash", {
 })
 
 test_that("Done returns the tuned object", {
+  testthat::skip_on_cran()
   returned <- NULL
   local_mocked_bindings(
     stopApp = function(returnValue = NULL) returned <<- returnValue,
@@ -64,6 +68,7 @@ test_that("help pages render with shiny::markdown()", {
 })
 
 test_that("Done warns instead of closing when the settings fail", {
+  testthat::skip_on_cran()
   stopped <- FALSE
   warned <- NULL
   local_mocked_bindings(
@@ -87,6 +92,7 @@ test_that("Done warns instead of closing when the settings fail", {
 })
 
 test_that("each plot module draws its own plot type", {
+  testthat::skip_on_cran()
   shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
     session$flushReact()
     session$elapse(600)
@@ -115,6 +121,7 @@ test_that("the page holds every navigation panel and plot card", {
 })
 
 test_that("Done uses the thresholds as they stand, before the debounce", {
+  testthat::skip_on_cran()
   returned <- NULL
   local_mocked_bindings(
     stopApp = function(returnValue = NULL) returned <<- returnValue,
@@ -130,6 +137,7 @@ test_that("Done uses the thresholds as they stand, before the debounce", {
 })
 
 test_that("the Done button only exists when the app is allowed to stop", {
+  testthat::skip_on_cran()
   expect_no_match(
     as.character(NACHO:::app_ui(done = FALSE)),
     "Done",
@@ -143,6 +151,7 @@ test_that("the Done button only exists when the app is allowed to stop", {
 })
 
 test_that("a deployed app never stops on Done", {
+  testthat::skip_on_cran()
   stopped <- FALSE
   local_mocked_bindings(
     stopApp = function(returnValue = NULL) stopped <<- TRUE,
@@ -156,6 +165,7 @@ test_that("a deployed app never stops on Done", {
 })
 
 test_that("Done explains why the object cannot be returned", {
+  testthat::skip_on_cran()
   messages <- character()
   local_mocked_bindings(
     notify_user = function(message, type) messages <<- c(messages, message)
@@ -192,6 +202,7 @@ test_that("closing the page ends visualise() but not a deployed app", {
 })
 
 test_that("closing the page after Done keeps the tuned object", {
+  testthat::skip_on_cran()
   values <- list()
   local_mocked_bindings(
     stopApp = function(returnValue = NULL) {
@@ -241,6 +252,7 @@ test_that("the overview shows only when data is loaded", {
 })
 
 test_that("the app reports whether it has data", {
+  testthat::skip_on_cran()
   shiny::testServer(NACHO:::app_server(NULL), {
     expect_false(output$has_data)
   })
@@ -250,6 +262,7 @@ test_that("the app reports whether it has data", {
 })
 
 test_that("normalisation warnings reach the user once as toasts", {
+  testthat::skip_on_cran()
   messages <- character()
   local_mocked_bindings(
     notify_user = function(message, type) messages <<- c(messages, message)
@@ -273,6 +286,7 @@ test_that("normalisation warnings reach the user once as toasts", {
 })
 
 test_that("changing the normalisation settings announces the warning again", {
+  testthat::skip_on_cran()
   messages <- character()
   local_mocked_bindings(
     notify_user = function(message, type) messages <<- c(messages, message)
@@ -311,6 +325,7 @@ test_that("an unavailable metric is muffled without a toast", {
 })
 
 test_that("Done sends normalisation warnings to the user", {
+  testthat::skip_on_cran()
   messages <- character()
   local_mocked_bindings(
     notify_user = function(message, type) messages <<- c(messages, message),
@@ -334,6 +349,7 @@ test_that("Done sends normalisation warnings to the user", {
 })
 
 test_that("plots follow the dark-mode toggle", {
+  testthat::skip_on_cran()
   html <- as.character(NACHO:::app_ui(done = FALSE))
   expect_match(html, 'id="dark_mode"', fixed = TRUE)
   shiny::testServer(NACHO:::app_server(GSE74821), {
@@ -359,6 +375,7 @@ test_that("the page loads the bold and italic faces of the brand font", {
 })
 
 test_that("cards for plots that do not apply are hidden", {
+  testthat::skip_on_cran()
   shiny::testServer(NACHO:::app_server(plexset_nacho), {
     session$flushReact()
     types <- strsplit(output$applicable, ",", fixed = TRUE)[[1]]
@@ -375,6 +392,7 @@ test_that("cards for plots that do not apply are hidden", {
 })
 
 test_that("a new object is normalised once, with its own settings", {
+  testthat::skip_on_cran()
   geo <- suppressMessages(
     normalise(GSE74821, normalisation_method = "GEO")
   )

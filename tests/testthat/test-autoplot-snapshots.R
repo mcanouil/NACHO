@@ -1,4 +1,5 @@
 test_that("each plot type keeps its look in light mode", {
+  testthat::skip_on_cran()
   skip_if_not_installed("vdiffr")
   x <- flagged_gse()
   for (type in names(NACHO:::nacho_plot_registry)) {

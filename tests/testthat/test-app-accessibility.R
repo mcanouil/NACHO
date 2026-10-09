@@ -145,6 +145,7 @@ test_that("help text sits outside labels", {
 })
 
 test_that("every static plot has alt text", {
+  testthat::skip_on_cran()
   for (type in plot_types()) {
     shiny::testServer(
       NACHO:::mod_qc_plot_server,
