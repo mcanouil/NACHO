@@ -335,6 +335,7 @@ test_that("the fallback tells the user, and ggiraph is detected when present", {
 })
 
 test_that("a click selects the sample in every plot", {
+  testthat::skip_on_cran()
   skip_if_not_installed("ggiraph")
   selected <- shiny::reactiveVal(character())
   sent <- list()
@@ -364,6 +365,7 @@ test_that("a click selects the sample in every plot", {
 })
 
 test_that("a plot rendered after a selection shows it", {
+  testthat::skip_on_cran()
   skip_if_not_installed("ggiraph")
   selected <- shiny::reactiveVal(character())
   shiny::testServer(
@@ -386,6 +388,7 @@ test_that("a plot rendered after a selection shows it", {
 })
 
 test_that("a selection change does not render the plot again", {
+  testthat::skip_on_cran()
   skip_if_not_installed("ggiraph")
   renders <- 0L
   original <- ggiraph::girafe_options
@@ -417,6 +420,7 @@ test_that("a selection change does not render the plot again", {
 })
 
 test_that("the girafe toolbar is hidden from every reader", {
+  testthat::skip_on_cran()
   skip_if_not_installed("ggiraph")
   widget <- NACHO:::app_girafe(ggplot2::ggplot())
   hidden <- widget$x$settings$toolbar$hidden
@@ -426,6 +430,7 @@ test_that("the girafe toolbar is hidden from every reader", {
 })
 
 test_that("deselecting clears the selection, including an empty array", {
+  testthat::skip_on_cran()
   skip_if_not_installed("ggiraph")
   selected <- shiny::reactiveVal("a")
   shiny::testServer(
@@ -454,6 +459,7 @@ test_that("card_size() rounds pixels to 50 and converts to inches", {
 })
 
 test_that("app_girafe() draws at the given size", {
+  testthat::skip_on_cran()
   skip_if_not_installed("ggiraph")
   widget <- NACHO:::app_girafe(ggplot2::ggplot(), width = 10, height = 6)
   expect_match(widget$x$html, "viewBox='0 0 720 432'", fixed = TRUE)
@@ -474,6 +480,7 @@ test_that("the interactive card body fills the card", {
 })
 
 test_that("the girafe follows the card size", {
+  testthat::skip_on_cran()
   skip_if_not_installed("ggiraph")
   shiny::testServer(
     NACHO:::mod_qc_plot_server,
@@ -487,6 +494,7 @@ test_that("the girafe follows the card size", {
 })
 
 test_that("the girafe is built once per rounded card size", {
+  testthat::skip_on_cran()
   skip_if_not_installed("ggiraph")
   builds <- 0L
   original <- NACHO:::app_girafe
@@ -556,6 +564,7 @@ test_that("the girafe font set is built once", {
 })
 
 test_that("app_girafe() draws with the cached font set", {
+  testthat::skip_on_cran()
   skip_if_not_installed("ggiraph")
   withr::defer(NACHO:::reset_girafe_font_set())
   NACHO:::reset_girafe_font_set()

@@ -226,6 +226,7 @@ test_that("only the batch section gets the batch tables", {
 })
 
 test_that("report_body() prints headings, help and plots", {
+  testthat::skip_on_cran()
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   path <- withr::local_tempfile(fileext = ".rds")
@@ -323,6 +324,7 @@ test_that("report_body() passes the report options to the plots", {
 })
 
 test_that("report_body() puts the confounding callout before the design table", {
+  testthat::skip_on_cran()
   skip_if_not_installed("knitr")
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
@@ -1059,6 +1061,7 @@ test_that("a decimal in the reading help does not end a sentence", {
 })
 
 test_that("the labels autoplot() draws use US spelling", {
+  testthat::skip_on_cran()
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   british <- "normalis|colour|centre|grey|haemoly|visualis|analys(e|ing)"
@@ -1100,6 +1103,7 @@ test_that("report_sections() titles use US spelling", {
 })
 
 test_that("report_body() prints a How to read this callout under each plot", {
+  testthat::skip_on_cran()
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off(), add = TRUE)
   report <- list(

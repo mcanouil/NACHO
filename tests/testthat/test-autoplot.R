@@ -34,6 +34,7 @@ test_that("every plot type builds", {
 })
 
 test_that("every plot type of a toy object builds without warnings", {
+  testthat::skip_on_cran()
   toy <- toy_nacho(6L)
   for (type in setdiff(names(NACHO:::nacho_plot_registry), "Stability")) {
     expect_no_warning(ggplot2::ggplot_build(autoplot(toy, type = type)))
@@ -516,6 +517,7 @@ test_that("flagged samples are triangles in the accent colour", {
 })
 
 test_that("dark plots draw nothing in black or the old red", {
+  testthat::skip_on_cran()
   x <- flagged_gse()
   for (type in names(NACHO:::nacho_plot_registry)) {
     built <- suppressWarnings(ggplot2::ggplot_build(
@@ -610,6 +612,7 @@ interactive_points <- function(plot) {
 }
 
 test_that("every plot type draws interactively", {
+  testthat::skip_on_cran()
   skip_if_not_installed("ggiraph")
   x <- flagged_gse()
   for (type in names(NACHO:::nacho_plot_registry)) {
