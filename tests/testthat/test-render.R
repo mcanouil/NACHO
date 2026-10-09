@@ -517,7 +517,8 @@ pdf_lines <- function(path) {
 
 captions <- function(text, kind) {
   pattern <- paste0(kind, " [0-9]+\\. [A-Za-z`][^\n]*")
-  trimws(regmatches(text, gregexpr(pattern, text))[[1]])
+  found <- regmatches(text, gregexpr(pattern, text))[[1]]
+  trimws(sub(" NACHO [0-9.]+ \u00b7 R .*$", "", found))
 }
 
 test_that("HTML and Typst reports have the same sections, captions and help", {
