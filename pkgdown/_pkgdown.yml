@@ -34,6 +34,13 @@ development:
   mode: auto
   version_label: white
 
+articles:
+  - title: Guides
+    navbar: Articles
+    contents:
+      - articles/nacho-app
+      - NACHO-analysis
+
 authors:
   Mickaël Canouil:
     href: https://mickael.canouil.fr

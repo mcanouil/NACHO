@@ -12,34 +12,6 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
-
-if (file.exists("man/figures/nacho_app.mp4")) {
-  system("ffmpeg -i man/figures/nacho_app.mp4 -vf fps=1 man/figures/nacho_app%04d.png")
-  gif_app <- gifski::gifski(
-    png_files = list.files(
-      path = dirname(knitr::opts_chunk$get("fig.path")),
-      pattern = "nacho_app.*.png",
-      full.names = TRUE
-    ),
-    gif_file = paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"),
-    width = 1920 * 2 / 3,
-    height = 1080 * 2 / 3,
-    delay = 0.50,
-    loop = TRUE,
-    progress = FALSE
-  )
-  unlink(list.files(
-    path = dirname(knitr::opts_chunk$get("fig.path")),
-    pattern = "nacho_app.*.png",
-    full.names = TRUE
-  ))
-}
-
-if (file.exists(paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif"))) {
-  gif_app <- paste0(knitr::opts_chunk$get("fig.path"), "nacho_app.gif")
-} else {
-  gif_app <- paste0(knitr::opts_chunk$get("fig.path"), "app.png")
-}
 ```
 
 # NAnoString quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" alt="NACHO hexagonal logo" />
@@ -76,16 +48,7 @@ cat(readLines(file.path("inst", "about", "about-nacho.md"))[-c(1, 2)], sep = "\n
 
 ### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
 
-```{r}
-#| eval: false
-shiny::runApp(system.file("app", package = "NACHO"))
-```
-
-```{r}
-#| echo: false
-#| fig-alt: "NACHO Shiny application in use."
-knitr::include_graphics(sub(".*/man", "man", gif_app))
-```
+Open the app on a `nacho` object with `visualise()`.
 
 ```{r}
 #| eval: false
@@ -94,9 +57,11 @@ visualise(GSE74821)
 
 ```{r}
 #| echo: false
-#| fig-alt: "NACHO interactive dashboard showing quality-control plots for the GSE74821 dataset."
-knitr::include_graphics("man/figures/README-visualise.png")
+#| fig-alt: "Short recording of the NACHO app on the example data. The summary strip changes when the field of view threshold moves to 95 and one sample is flagged. A selected sample is outlined in the QC metrics plots. The recording then shows the Samples, Normalisation and Batch pages, the Help menu, and the Export page with a report ready to download."
+knitr::include_graphics("man/figures/README-nacho_app.gif")
 ```
+
+The article [Explore quality control in the app](https://m.canouil.dev/NACHO/articles/nacho-app.html) shows each page.
 
 ## Citing NACHO
 
