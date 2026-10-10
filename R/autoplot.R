@@ -1364,7 +1364,7 @@ plot_rle <- function(
         ymax = .data[["upper"]]
       ),
       fill = plot_colours(dark)[["paper"]],
-      width = 0.9,
+      width = 0.75,
       na.rm = TRUE
     ) +
     ggplot2::labs(
