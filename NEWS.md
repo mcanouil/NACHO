@@ -172,6 +172,7 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
     `summary()`, `as.data.frame()` and `[` refuse it with the same classed error as `autoplot()`.
 - In `R/autoplot.R`,
   - fix: `autoplot()` now draws samples whose outlier flag is missing as ordinary points, where NACHO 2 left them out of the plot.
+  - fix: The normalisation factors by cartridge plot names its panels Positive, Negative and Housekeeping, and puts its legend below, so the panel titles are no longer cut in the app.
 - In `R/render.R`,
   - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`.
 - In `inst/app/`,

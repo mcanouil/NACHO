@@ -495,16 +495,22 @@ test_that("the outlier layer of a plot holds only the failing sample", {
   expect_true(all(layers[[which(draws_failing)]][["y"]] == failing_value))
 })
 
-test_that("BatchFactors drops a factor column the samples lack", {
+test_that("BatchFactors labels the factors the samples have", {
   toy <- toy_nacho(6L)
   toy@samples[["Negative_factor"]] <- NULL
   plot <- autoplot(toy, type = "BatchFactors")
-  expect_setequal(
-    as.character(unique(plot$data[["factor"]])),
-    c("Positive_factor", "House_factor")
-  )
+  expect_identical(levels(plot$data[["factor"]]), c("Positive", "Housekeeping"))
   built <- ggplot2::ggplot_build(plot)
   expect_length(unique(built$data[[1]]$PANEL), 2L)
+  expect_identical(plot$theme$legend.position, "bottom")
+})
+
+test_that("BatchFactors keeps the order positive, negative, housekeeping", {
+  plot <- autoplot(GSE74821, type = "BatchFactors")
+  expect_identical(
+    levels(plot$data[["factor"]]),
+    c("Positive", "Negative", "Housekeeping")
+  )
 })
 
 test_that("flagged samples are triangles in the accent colour", {
