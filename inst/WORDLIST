@@ -12,6 +12,7 @@ Lifecycle
 NAnoString
 NanoString
 ORCID
+PanCancer
 PlexSet
 Presummarised
 RC
@@ -19,6 +20,8 @@ RCC
 RData
 RUO
 Rmd
+SummarizedExperiment
+Typst
 WCAG
 ard
 autoplot
@@ -33,6 +36,7 @@ dasHbOard
 datatable
 doi
 fontawesome
+geNorm
 ggforce
 ggplot
 ggrepel
@@ -40,6 +44,7 @@ github
 img
 io
 knitr
+mRNA
 mRNAs
 mcanouil
 miRNA
