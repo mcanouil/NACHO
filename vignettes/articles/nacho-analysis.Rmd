@@ -54,6 +54,13 @@ geo <- tryCatch(
 )
 
 rcc_files <- list.files(rcc_directory, pattern = "\\.RCC(\\.gz)?$", ignore.case = TRUE)
+if (length(rcc_files) != 30) {
+  stop(
+    "Expected 30 RCC files from GSE178516, found ", length(rcc_files), ". ",
+    "The GEO download may be incomplete; delete ", download_directory, " and build the article again.",
+    call. = FALSE
+  )
+}
 phenotypes <- Biobase::pData(geo)
 samplesheet <- data.frame(
   IDFILE = rcc_files,
