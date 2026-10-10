@@ -176,6 +176,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
   - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`.
 - In `inst/app/`,
   - fix: The app detects PlexSet files from their exact code classes.
+- In `R/plot_worker.R`,
+  - fix: When a plot worker stops while the app runs, the app builds the plots itself instead of showing a connection error or waiting for ever.
 - In `R/mod_qc_plot.R`,
   - fix: Two quick clicks on an interactive plot no longer start a selection loop that kept the app busy.
 - In `R/brand.R` and `R/mod_thresholds.R`,
