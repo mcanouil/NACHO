@@ -156,6 +156,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
 
 ## Fixes
 
+- In `R/app.R`,
+  - fix: Closing a dialog other than "Cite NACHO" no longer moves the keyboard focus to the Help menu.
 - In `R/stability.R`,
   - fix: The geNorm M calculation refuses fewer than three genes with a classed error, and the geNorm ranking refuses a matrix without column names.
 - In `R/ruv.R`,

@@ -239,6 +239,29 @@ test_that("the app flags samples when a threshold moves", {
   app$wait_for_js(
     "document.activeElement.getAttribute('data-value') === 'Help'"
   )
+  app$run_js(
+    "const other = document.createElement('div');
+     other.className = 'modal';
+     other.id = 'other-modal';
+     other.tabIndex = -1;
+     other.innerHTML = '<div class=\"modal-dialog\"><div class=\"modal-content\">' +
+       '<button type=\"button\" class=\"btn\" data-bs-dismiss=\"modal\">Close</button>' +
+       '</div></div>';
+     document.body.appendChild(other);
+     document.querySelector('a[data-value=\"Data\"]').focus();
+     new bootstrap.Modal(other).show();"
+  )
+  app$wait_for_js("document.querySelector('#other-modal.show') !== null")
+  app$wait_for_js(
+    "getComputedStyle(document.querySelector('#other-modal')).opacity === '1'"
+  )
+  app$run_js("document.querySelector('#other-modal .btn').click()")
+  app$wait_for_js("document.querySelector('#other-modal.show') === null")
+  app$wait_for_idle(duration = 500)
+  expect_false(identical(
+    app$get_js("document.activeElement.getAttribute('data-value')"),
+    "Help"
+  ))
   logs <- app$get_logs()
   errors <- logs[logs$location == "shiny" & logs$level == "stderr", ]
   expect_false(any(grepl("^(Error|Warning)|Unhandled promise", errors$message)))
