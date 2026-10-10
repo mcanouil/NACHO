@@ -1304,6 +1304,9 @@ sample_trend <- function(data, by, n = 80L) {
       predicted <- stats::predict(fit, grid, se = TRUE)
     }
     half <- predicted[["se.fit"]] * stats::qt(0.975, predicted[["df"]])
+    if (!trend_bounds_ok(predicted[["fit"]], half)) {
+      return(NULL)
+    }
     trend <- data.frame(
       x = grid[["x"]],
       y = 10^predicted[["fit"]],
@@ -1317,6 +1320,23 @@ sample_trend <- function(data, by, n = 80L) {
     return(empty)
   }
   do.call(rbind, trends)
+}
+
+#' Check that a trend band can be drawn on a log scale
+#'
+#' A nearly singular fit gives a huge standard error, so `10^(fit - half)`
+#' underflows to 0 or `10^(fit + half)` overflows to infinity, and the log
+#' scale then warns about infinite values.
+#' A double holds powers of ten up to about 300 without underflow or overflow.
+#'
+#' @param fit,half Numeric vectors on the log10 scale.
+#'
+#' @return `TRUE` when every band edge is finite and within that range.
+#'
+#' @noRd
+trend_bounds_ok <- function(fit, half) {
+  edges <- c(fit, fit - half, fit + half)
+  all(is.finite(edges)) && all(abs(edges) < 300)
 }
 
 plot_rle <- function(

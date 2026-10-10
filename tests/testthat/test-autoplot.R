@@ -908,3 +908,18 @@ test_that("small studies keep a trend fitted on every point", {
   }
   expect_trend_matches_loess(curved(6L))
 })
+
+test_that("a trend band that a log scale cannot draw is rejected", {
+  expect_true(trend_bounds_ok(c(1, 2), c(0.5, 0.5)))
+  expect_false(trend_bounds_ok(1, 400))
+  expect_false(trend_bounds_ok(1, Inf))
+  expect_false(trend_bounds_ok(c(1, NA), c(0.5, 0.5)))
+  expect_false(trend_bounds_ok(350, 0))
+})
+
+test_that("a small panel with a degenerate fit has no trend", {
+  data <- data.frame(x = 1:6, y = 10^(1:6), g = "a")
+  expect_no_warning(trend <- sample_trend(data, by = "g"))
+  expect_true(all(is.finite(c(trend[["ymin"]], trend[["ymax"]]))))
+  expect_true(all(trend[["ymin"]] > 0))
+})
