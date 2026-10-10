@@ -79,6 +79,18 @@ out="$("${scripts}/release-guard.sh" "${tmp}/crlf")"
 check "guard skips a CRLF submission record" false \
   "$(field submit <<<"${out}")"
 
+make_repo "${tmp}/upstream-crlf" 2.0.7
+git clone -q "${tmp}/upstream-crlf" "${tmp}/rerun-crlf"
+printf 'Version: 2.0.7\r\nDate: 2026-10-01 10:00:00 UTC\r\nSHA: abc\r\n' \
+  >"${tmp}/upstream-crlf/CRAN-SUBMISSION"
+git -C "${tmp}/upstream-crlf" add CRAN-SUBMISSION
+git -C "${tmp}/upstream-crlf" -c user.name=test -c user.email=test@example.com \
+  -c commit.gpgsign=false commit -q -m record
+git -C "${tmp}/rerun-crlf" fetch -q origin
+out="$("${scripts}/release-guard.sh" "${tmp}/rerun-crlf")"
+check "guard skips a CRLF version recorded on origin/main" false \
+  "$(field submit <<<"${out}")"
+
 mkdir -p "${tmp}/empty"
 check "guard fails without a version" 1 \
   "$(status_of "${scripts}/release-guard.sh" "${tmp}/empty")"
@@ -222,6 +234,10 @@ check "results stop on notes cran-comments.md leaves out" 1 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-clean.md")"
 check "results match notes cran-comments.md explains" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-notes.md")"
+printf '## R CMD check results\n\n0 errors | 0 warnings | 1 note\n\n- NOTE one.\n' \
+  >"${tmp}/comments-one-note.md"
+check "results accept a note cran-comments.md explains but the check did not find" 0 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-one-note.md")"
 check "results stop on a warning" 1 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-warn.log" "${tmp}/comments-notes.md")"
 check "results stop without a results line" 1 \

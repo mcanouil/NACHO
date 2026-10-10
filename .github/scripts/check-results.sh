@@ -39,13 +39,17 @@ if [ -z "${claimed}" ]; then
 fi
 
 read -r errors warnings notes <<<"${found}"
+read -r claimed_errors claimed_warnings claimed_notes <<<"${claimed}"
 summary="${errors} errors | ${warnings} warnings | ${notes} notes"
-if [ "${found}" != "${claimed}" ]; then
+claimed_summary="${claimed_errors} errors | ${claimed_warnings} warnings | ${claimed_notes} notes"
+if [ "${claimed_errors}" -lt "${errors}" ] ||
+  [ "${claimed_warnings}" -lt "${warnings}" ] ||
+  [ "${claimed_notes}" -lt "${notes}" ]; then
   {
-    echo "::error::The check found ${summary}, but ${comments} says otherwise. Explain each problem in ${comments}, correct its results line, and run the CRAN submission again."
+    echo "::error::${comments} reports fewer problems than the check found. The check found ${summary}, but ${comments} says ${claimed_summary}. Explain each problem in ${comments}, correct its results line, and run the CRAN submission again."
     tr -d '\r' <"${log}" | grep -E '\.\.\. .*(NOTE|WARNING|ERROR)$' || true
   } >&2
   exit 1
 fi
 
-echo "${comments} matches the check: ${summary}"
+echo "${comments} reports at least what the check found: check ${summary}, ${comments} ${claimed_summary}"

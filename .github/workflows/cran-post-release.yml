@@ -58,8 +58,16 @@ jobs:
           VERSION: ${{ steps.accepted.outputs.version }}
           SHA: ${{ steps.accepted.outputs.sha }}
         run: |
-          .github/scripts/release-tag.sh "${VERSION}" "${SHA}" > /dev/null
+          TAG_OUTPUT="$(.github/scripts/release-tag.sh "${VERSION}" "${SHA}")"
           if gh release view "v${VERSION}" > /dev/null 2>&1; then
+            if [ "$(gh release view "v${VERSION}" --json isDraft --jq .isDraft)" = "true" ]; then
+              echo "::error::The release v${VERSION} is a draft. Publish or delete it, then run this again."
+              exit 1
+            fi
+            if grep -Fxq "tagged=false" <<<"${TAG_OUTPUT}"; then
+              echo "::error::The release v${VERSION} exists without its tag. Delete the release, then run this again."
+              exit 1
+            fi
             echo "The release v${VERSION} already exists on ${SHA}; going on to the development version."
           else
             gh release create "v${VERSION}" \

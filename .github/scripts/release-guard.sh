@@ -36,9 +36,7 @@ recorded_versions() {
     field_value Version "${dir}/CRAN-SUBMISSION"
   fi
   git -C "${dir}" show origin/main:CRAN-SUBMISSION 2>/dev/null |
-    sed -n 's/^Version:[[:space:]]*//p' |
-    tr -d '\r' |
-    sed 's/[[:space:]]*$//' || true
+    field_value Version /dev/stdin || true
 }
 
 if grep -Fxq "${version}" <<<"$(recorded_versions)"; then

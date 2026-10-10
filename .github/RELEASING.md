@@ -54,6 +54,7 @@ Once CRAN's acceptance email arrives, run the "CRAN post-release" workflow from 
 
 It checks that CRAN serves the version, tags `vX.Y.Z` on the submitted commit, and publishes the "NACHO X.Y.Z" release with the notes from `NEWS.md`.
 The release deploys the pkgdown site.
+A draft release `vX.Y.Z` stops the run, so publish or delete it before you run the workflow again.
 It then opens a pull request that starts the next development version and removes `CRAN-SUBMISSION`.
 
 If CRAN doesn't serve the version yet, the workflow stops without changing anything, and you can run it again later.
