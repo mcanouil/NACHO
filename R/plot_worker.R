@@ -119,6 +119,7 @@ plot_workers_start <- function() {
 #'
 #' The probe is a small task with a time limit, sent before any build, so it
 #' does not wait behind builds.
+#' When a daemon answers, the pool is warm.
 #' When no daemon answers within the limit (30 seconds), the pool fails and the
 #' plots build in the app process.
 #' Builds have no time limit, because a large page can wait in the queue of a
@@ -129,6 +130,9 @@ plot_workers_probe <- function(profile) {
   probe <- mirai::mirai(TRUE, .timeout = plot_pool$timeout, .compute = profile)
   promises::then(
     probe,
+    onFulfilled = function(value) {
+      if (identical(plot_pool$profile, profile)) plot_pool$warm <- TRUE
+    },
     onRejected = function(error) {
       if (identical(plot_pool$profile, profile)) plot_workers_fail()
     }
@@ -147,7 +151,6 @@ plot_workers_warm <- function(profile, count, libs, tries = 120L) {
     return(invisible(NULL))
   }
   if (mirai::status(.compute = profile)$connections >= count) {
-    plot_pool$warm <- TRUE
     mirai::everywhere(
       {
         .libPaths(libs)
@@ -181,7 +184,9 @@ plot_workers_stop <- function() {
   invisible(NULL)
 }
 
-#' Give up on daemons that did not start or that stopped
+#' Give up on daemons that are unavailable
+#'
+#' This covers daemons that did not start and daemons that stopped.
 #'
 #' The pool stops, and the plots build in the app process until the app
 #' stops.
@@ -198,14 +203,14 @@ plot_workers_fail <- function() {
     mirai::daemons(0, .compute = plot_pool$profile)
   }
   nacho_inform(
-    "The plot workers stopped, so the app builds the plots itself."
+    "The plot workers are unavailable, so the app builds the plots itself."
   )
   invisible(NULL)
 }
 
 #' Tell whether every daemon of a warm pool has gone
 #'
-#' A pool is warm once all its daemons have connected.
+#' A pool is warm once a daemon has answered the start probe.
 #' When none is connected after that, a build sent to the pool would wait in
 #' the queue for ever.
 #'
