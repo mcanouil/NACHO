@@ -42,8 +42,9 @@ n = 192: PN       0.42 s    0.38 s
 n = 768: RLE      5.61 s    0.63 s
 n = 768: NORM     3.97 s    0.47 s
 n = 768: PN       2.42 s    0.48 s
-targets at 768 samples: RLE, NORM and PN each under 1 s PASS
 ```
+
+At 768 samples, RLE, NORM and PN each draw in under 1 s, which meets the target.
 
 The relative log expression plot draws one line range and one crossbar layer from precomputed box statistics.
 `geom_boxplot()` builds one grob per box, which took about 4 s for 768 boxes, while the crossbar layer draws all boxes in one pass.

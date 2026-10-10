@@ -870,7 +870,7 @@ test_that("the trend matches when 0.75 times the samples is not whole", {
   expect_trend_matches_loess(GSE74821[, 1:30])
 })
 
-test_that("the trend needs seven samples", {
+test_that("small studies keep a trend fitted on every point", {
   curved <- function(n) {
     object <- toy_nacho(n)
     factor <- seq_len(n)^2 * ((seq_len(n) %% 3) + 1)
@@ -881,22 +881,30 @@ test_that("the trend needs seven samples", {
       "*"
     )
     S7::prop(object, "normalised", check = FALSE) <- object@counts * 1
+    probes <- object@probes
+    probes[["is_housekeeping"]] <- probes[["CodeClass"]] != "Negative"
+    S7::prop(object, "probes", check = FALSE) <- probes
     object
   }
-  for (type in c("NORM", "PN")) {
-    few <- autoplot(curved(6L), type = type)
-    expect_no_warning(built <- ggplot2::ggplot_build(few))
-    smooth <- which(vapply(
-      few$layers,
+  trend_layer <- function(plot) {
+    which(vapply(
+      plot$layers,
       function(layer) inherits(layer$geom, "GeomSmooth"),
       logical(1)
     ))
-    expect_identical(nrow(built$data[[smooth]]), 0L)
-    enough <- autoplot(curved(7L), type = type)
-    expect_no_warning(built <- ggplot2::ggplot_build(enough))
-    trend <- built$data[[smooth]]
-    expect_gt(nrow(trend), 0L)
-    expect_true(all(is.finite(c(trend$ymin, trend$ymax))))
-    expect_true(all(trend$ymin <= trend$y & trend$y <= trend$ymax))
   }
+  for (type in c("NORM", "PN")) {
+    for (n in c(6L, 7L)) {
+      expect_no_warning(plot <- autoplot(curved(n), type = type))
+      expect_no_warning(built <- ggplot2::ggplot_build(plot))
+      trend <- built$data[[trend_layer(plot)]]
+      expect_gt(nrow(trend), 0L)
+      expect_true(all(is.finite(c(trend$ymin, trend$ymax))))
+      expect_true(all(trend$ymin <= trend$y & trend$y <= trend$ymax))
+    }
+    expect_no_warning(plot <- autoplot(toy_nacho(2L), type = type))
+    expect_no_warning(built <- ggplot2::ggplot_build(plot))
+    expect_identical(nrow(built$data[[trend_layer(plot)]]), 0L)
+  }
+  expect_trend_matches_loess(curved(6L))
 })

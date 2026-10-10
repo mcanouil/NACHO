@@ -1240,8 +1240,10 @@ box_stats <- function(values) {
 #' the loess on every point, which gives the same curve when every sample has
 #' the same number of points.
 #' The band is the 95% confidence interval of the trend of the sample means.
-#' A loess needs seven samples to give a band, so a panel with fewer has no
-#' trend.
+#' A loess on the means needs seven samples to give a band.
+#' A panel with fewer samples is fitted on every point, as `geom_smooth()`
+#' does, which is fast for a small study.
+#' A panel where that fit fails has no trend.
 #'
 #' @param data A data frame with a numeric `x` (the position of the sample),
 #'   a positive `y` (the count) and the columns named in `by`.
@@ -1265,25 +1267,42 @@ sample_trend <- function(data, by, n = 80L) {
     positions <- sort(unique(panel[["x"]]))
     by_position <- factor(panel[["x"]], levels = positions)
     k <- length(positions)
-    if (k < 7L) {
-      return(NULL)
-    }
-    points <- data.frame(
-      x = positions,
-      y = as.vector(tapply(log_y, by_position, mean)),
-      w = as.vector(tapply(log_y, by_position, length))
-    )
-    per_sample <- length(log_y) / k
-    neighbours <- min(k, ceiling(floor(0.75 * length(log_y)) / per_sample))
-    span <- min(1, (neighbours + 0.5) / k)
-    fit <- stats::loess(
-      y ~ x,
-      data = points,
-      weights = points[["w"]],
-      span = span
-    )
     grid <- data.frame(x = seq(min(positions), max(positions), length.out = n))
-    predicted <- stats::predict(fit, grid, se = TRUE)
+    if (k < 7L) {
+      # A fit on too few distinct positions warns or fails, so drop the trend.
+      predicted <- tryCatch(
+        withCallingHandlers(
+          stats::predict(
+            stats::loess(y ~ x, data = data.frame(x = panel[["x"]], y = log_y)),
+            grid,
+            se = TRUE
+          ),
+          warning = function(w) stop(conditionMessage(w))
+        ),
+        error = function(e) NULL
+      )
+      usable <- !is.null(predicted) &&
+        all(is.finite(c(predicted[["fit"]], predicted[["se.fit"]])))
+      if (!usable) {
+        return(NULL)
+      }
+    } else {
+      points <- data.frame(
+        x = positions,
+        y = as.vector(tapply(log_y, by_position, mean)),
+        w = as.vector(tapply(log_y, by_position, length))
+      )
+      per_sample <- length(log_y) / k
+      neighbours <- min(k, ceiling(floor(0.75 * length(log_y)) / per_sample))
+      span <- min(1, (neighbours + 0.5) / k)
+      fit <- stats::loess(
+        y ~ x,
+        data = points,
+        weights = points[["w"]],
+        span = span
+      )
+      predicted <- stats::predict(fit, grid, se = TRUE)
+    }
     half <- predicted[["se.fit"]] * stats::qt(0.975, predicted[["df"]])
     trend <- data.frame(
       x = grid[["x"]],
