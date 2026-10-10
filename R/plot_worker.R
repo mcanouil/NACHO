@@ -119,6 +119,7 @@ plot_workers_start <- function() {
 #'
 #' The probe is a small task with a time limit, sent before any build, so it
 #' does not wait behind builds.
+#' When a daemon answers, the pool is warm.
 #' When no daemon answers within the limit (30 seconds), the pool fails and the
 #' plots build in the app process.
 #' Builds have no time limit, because a large page can wait in the queue of a
@@ -129,6 +130,9 @@ plot_workers_probe <- function(profile) {
   probe <- mirai::mirai(TRUE, .timeout = plot_pool$timeout, .compute = profile)
   promises::then(
     probe,
+    onFulfilled = function(value) {
+      if (identical(plot_pool$profile, profile)) plot_pool$warm <- TRUE
+    },
     onRejected = function(error) {
       if (identical(plot_pool$profile, profile)) plot_workers_fail()
     }
@@ -176,10 +180,13 @@ plot_workers_stop <- function() {
   }
   plot_pool$profile <- NULL
   plot_pool$failed <- NULL
+  plot_pool$warm <- NULL
   invisible(NULL)
 }
 
-#' Give up on daemons that did not answer in time
+#' Give up on daemons that are unavailable
+#'
+#' This covers daemons that did not start and daemons that stopped.
 #'
 #' The pool stops, and the plots build in the app process until the app
 #' stops.
@@ -196,9 +203,22 @@ plot_workers_fail <- function() {
     mirai::daemons(0, .compute = plot_pool$profile)
   }
   nacho_inform(
-    "The plot workers did not start, so the app builds the plots itself."
+    "The plot workers are unavailable, so the app builds the plots itself."
   )
   invisible(NULL)
+}
+
+#' Tell whether every daemon of a warm pool has gone
+#'
+#' A pool is warm once a daemon has answered the start probe.
+#' When none is connected after that, a build sent to the pool would wait in
+#' the queue for ever.
+#'
+#' @noRd
+pool_lost <- function(profile) {
+  isTRUE(plot_pool$warm) &&
+    identical(plot_pool$profile, profile) &&
+    mirai::status(.compute = profile)$connections == 0L
 }
 
 #' Build one card in the app process for a task
@@ -233,7 +253,8 @@ build_in_process <- function(build, key, args, cache) {
 #' After the session ends, the task does not settle, so it does not write to the
 #' reactive values of a session that no longer exists.
 #'
-#' When the pool fails, a build that it rejects builds in the app process.
+#' When the daemon of a build stops, or no daemon is left, the pool fails and
+#' the build runs in the app process.
 #'
 #' @noRd
 card_task <- function(session, profile, jobs, cache) {
@@ -241,6 +262,9 @@ card_task <- function(session, profile, jobs, cache) {
   shiny::ExtendedTask$new(function(build, key, args) {
     if (!identical(build, jobs$build)) {
       return(NULL)
+    }
+    if (!isTRUE(plot_pool$failed) && pool_lost(profile)) {
+      plot_workers_fail()
     }
     if (isTRUE(plot_pool$failed)) {
       return(build_in_process(build, key, args, cache))
@@ -281,10 +305,11 @@ card_task <- function(session, profile, jobs, cache) {
             list(build = build, key = key, error = error)
           } else if (build_cancelled(code)) {
             NULL
-          } else if (isTRUE(plot_pool$failed)) {
-            build_in_process(build, key, args, cache)
           } else {
-            list(build = build, key = key, error = error)
+            if (identical(plot_pool$profile, profile)) {
+              plot_workers_fail()
+            }
+            build_in_process(build, key, args, cache)
           }
           resolve(result)
         }
