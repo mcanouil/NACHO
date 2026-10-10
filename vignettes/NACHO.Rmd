@@ -141,7 +141,7 @@ head(nacho_qc(nacho)[, c("IDFILE", "BD", "FoV", "PCL", "LoD")], n = 3)
 ```
 
 Earlier versions of *NACHO* kept all of this in a `$nacho` data frame.
-That slot is gone, and the article [Moving from NACHO 2](https://m.canouil.dev/NACHO/articles/moving-from-nacho-2.html) maps each old element to its accessor.
+That slot is gone, and the article "Moving from NACHO 2" on the [package website](https://m.canouil.dev/NACHO/) maps each old element to its accessor.
 
 # Quality control
 
@@ -327,7 +327,7 @@ tuned <- visualise(nacho)
 knitr::include_graphics(path = "README-app.png")
 ```
 
-The article [Explore quality control in the app](https://m.canouil.dev/NACHO/articles/nacho-app.html) walks through every page of the app.
+The article "Explore quality control in the app" on the [package website](https://m.canouil.dev/NACHO/) walks through every page of the app.
 
 # Bioconductor
 
