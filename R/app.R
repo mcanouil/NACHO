@@ -220,7 +220,10 @@ external_link <- function(label, href) {
 }
 
 restore_help_focus <- shiny::tags$script(shiny::HTML(
-  "$(document).on('hidden.bs.modal', function() {
+  "$(document).on('hidden.bs.modal', function(event) {
+    if ($(event.target).find('.nacho-cite').length === 0) {
+      return;
+    }
     $('a.dropdown-toggle').filter(function() {
       return $(this).text().trim() === 'Help';
     }).first().trigger('focus');
@@ -343,10 +346,13 @@ app_server <- function(
     shiny::observeEvent(input$cite, {
       shiny::showModal(shiny::modalDialog(
         title = "Cite NACHO",
-        citation_html(),
-        shiny::tags$pre(
-          style = "white-space: pre-wrap; word-break: break-word;",
-          citation_bibtex()
+        shiny::tags$div(
+          class = "nacho-cite",
+          citation_html(),
+          shiny::tags$pre(
+            style = "white-space: pre-wrap; word-break: break-word;",
+            citation_bibtex()
+          )
         ),
         easyClose = TRUE,
         footer = shiny::modalButton("Close")
