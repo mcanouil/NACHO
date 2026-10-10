@@ -157,19 +157,21 @@ test_that("the Stability plot orders the genes by geNorm rank", {
 test_that("the RLE plot centres each gene on its median", {
   plot <- autoplot(GSE74821, type = "RLE")
   data <- plot$data
-  expect_true(all(c("sample", "rle") %in% names(data)))
-  genes <- nacho_probes(GSE74821)$Name[
-    grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
-  ]
-  expect_setequal(unique(data$Name), genes)
-  medians <- tapply(data$rle, data$Name, stats::median)
-  expect_equal(as.vector(medians), rep(0, length(medians)), tolerance = 1e-8)
-  gene <- genes[3]
-  sample <- as.character(data$sample[data$Name == gene][2])
-  log_gene <- log2(nacho_counts(GSE74821, normalised = TRUE)[gene, ] + 1)
+  expect_true(all(c("sample", "lower", "middle", "upper") %in% names(data)))
+  rows <- grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
+  log_counts <- log2(nacho_counts(GSE74821, normalised = TRUE)[rows, ] + 1)
+  centred <- NACHO:::rle_centre(log_counts, 1)
+  medians <- apply(centred, 1, stats::median)
+  expect_equal(unname(medians), rep(0, length(medians)), tolerance = 1e-8)
+  gene <- rownames(log_counts)[3]
+  sample <- as.character(data$sample[2])
   expect_equal(
-    data$rle[data$Name == gene & data$sample == sample],
-    unname(log_gene[sample] - stats::median(log_gene))
+    centred[gene, sample],
+    unname(log_counts[gene, sample] - stats::median(log_counts[gene, ]))
+  )
+  expect_equal(
+    data$middle[data$sample == sample],
+    stats::median(centred[, sample])
   )
 })
 
@@ -788,4 +790,136 @@ test_that("a sample column named id or y does not shadow the hover", {
   plot <- NACHO:::app_plot(x, "FoV", list(), dark = FALSE, interactive = TRUE)
   tooltips <- unlist(lapply(interactive_points(plot), function(d) d$tooltip))
   expect_match(tooltips[1], "^GSM[^\n]+\nField of view: ")
+})
+
+test_that("RLE boxes match the boxes ggplot2 computes", {
+  plot <- autoplot(GSE74821, type = "RLE")
+  built <- ggplot2::ggplot_build(plot)
+  expect_s3_class(plot$layers[[2]]$geom, "GeomLinerange")
+  expect_s3_class(plot$layers[[3]]$geom, "GeomCrossbar")
+  whiskers <- built$data[[2]]
+  crossbars <- built$data[[3]]
+  boxes <- data.frame(
+    x = crossbars$x,
+    ymin = whiskers$ymin[match(crossbars$x, whiskers$x)],
+    lower = crossbars$ymin,
+    middle = crossbars$y,
+    upper = crossbars$ymax,
+    ymax = whiskers$ymax[match(crossbars$x, whiskers$x)]
+  )
+  rows <- grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
+  values <- log2(GSE74821@normalised[rows, , drop = FALSE] + 1)
+  centred <- NACHO:::rle_centre(values, 1)
+  reference <- data.frame(
+    sample = rep(colnames(centred), each = nrow(centred)),
+    rle = as.vector(centred)
+  )
+  reference[["sample"]] <- factor(
+    reference[["sample"]],
+    levels = levels(plot$data[["sample"]])
+  )
+  expected <- ggplot2::ggplot_build(
+    ggplot2::ggplot(reference) +
+      ggplot2::aes(x = .data[["sample"]], y = .data[["rle"]]) +
+      ggplot2::geom_boxplot(outliers = FALSE)
+  )$data[[1]]
+  columns <- c("ymin", "lower", "middle", "upper", "ymax")
+  expect_equal(
+    boxes[order(boxes$x), columns],
+    expected[order(expected$x), columns],
+    ignore_attr = TRUE,
+    tolerance = 1e-12
+  )
+  expect_identical(nrow(plot$data), ncol(centred))
+  expect_identical(nrow(crossbars), ncol(centred))
+})
+
+expect_trend_matches_loess <- function(object, tolerance = 1e-8) {
+  for (type in c("NORM", "PN")) {
+    plot <- autoplot(object, type = type)
+    built <- ggplot2::ggplot_build(plot)
+    smooth <- which(vapply(
+      plot$layers,
+      function(layer) inherits(layer$geom, "GeomSmooth"),
+      logical(1)
+    ))
+    testthat::expect_length(smooth, 1L)
+    trend <- built$data[[smooth]]
+    lines <- built$data[[1]]
+    for (panel in unique(trend$PANEL)) {
+      points <- lines[lines$PANEL == panel, ]
+      points <- data.frame(x = as.numeric(points$x), y = points$y)
+      fit <- stats::loess(y ~ x, data = points)
+      at <- trend[trend$PANEL == panel, ]
+      testthat::expect_equal(
+        at$y,
+        unname(stats::predict(fit, data.frame(x = at$x))),
+        tolerance = tolerance,
+        info = paste(type, panel, nlevels(plot$data[[1]]))
+      )
+    }
+  }
+}
+
+test_that("the NORM and PN trends match a loess on every point", {
+  expect_trend_matches_loess(GSE74821)
+})
+
+test_that("the trend matches when 0.75 times the samples is not whole", {
+  expect_trend_matches_loess(GSE74821[, 1:47])
+  expect_trend_matches_loess(GSE74821[, 1:30])
+})
+
+test_that("small studies keep a trend fitted on every point", {
+  curved <- function(n) {
+    object <- toy_nacho(n)
+    factor <- seq_len(n)^2 * ((seq_len(n) %% 3) + 1)
+    S7::prop(object, "counts", check = FALSE) <- sweep(
+      object@counts,
+      2,
+      factor,
+      "*"
+    )
+    S7::prop(object, "normalised", check = FALSE) <- object@counts * 1
+    probes <- object@probes
+    probes[["is_housekeeping"]] <- probes[["CodeClass"]] != "Negative"
+    S7::prop(object, "probes", check = FALSE) <- probes
+    object
+  }
+  trend_layer <- function(plot) {
+    which(vapply(
+      plot$layers,
+      function(layer) inherits(layer$geom, "GeomSmooth"),
+      logical(1)
+    ))
+  }
+  for (type in c("NORM", "PN")) {
+    for (n in c(6L, 7L)) {
+      expect_no_warning(plot <- autoplot(curved(n), type = type))
+      expect_no_warning(built <- ggplot2::ggplot_build(plot))
+      trend <- built$data[[trend_layer(plot)]]
+      expect_gt(nrow(trend), 0L)
+      expect_true(all(is.finite(c(trend$ymin, trend$ymax))))
+      expect_true(all(trend$ymin <= trend$y & trend$y <= trend$ymax))
+    }
+    expect_no_warning(plot <- autoplot(toy_nacho(2L), type = type))
+    expect_no_warning(built <- ggplot2::ggplot_build(plot))
+    expect_identical(nrow(built$data[[trend_layer(plot)]]), 0L)
+  }
+  expect_trend_matches_loess(curved(6L))
+})
+
+test_that("a trend band that a log scale cannot draw is rejected", {
+  expect_true(trend_bounds_ok(c(1, 2), c(0.5, 0.5)))
+  expect_false(trend_bounds_ok(1, 400))
+  expect_false(trend_bounds_ok(1, Inf))
+  expect_false(trend_bounds_ok(c(1, NA), c(0.5, 0.5)))
+  expect_false(trend_bounds_ok(350, 0))
+})
+
+test_that("a small panel with a degenerate fit has no trend", {
+  data <- data.frame(x = 1:6, y = 10^(1:6), g = "a")
+  expect_no_warning(trend <- sample_trend(data, by = "g"))
+  expect_true(all(is.finite(c(trend[["ymin"]], trend[["ymax"]]))))
+  expect_true(all(trend[["ymin"]] > 0))
 })
