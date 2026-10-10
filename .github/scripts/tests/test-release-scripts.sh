@@ -65,6 +65,32 @@ out="$("${scripts}/release-guard.sh" "${tmp}/rerun")"
 check "guard skips a version recorded on origin/main" false \
   "$(field submit <<<"${out}")"
 
+make_repo "${tmp}/crlf" 2.0.7
+printf 'Package: NACHO\r\nVersion: 2.0.7 \r\n' >"${tmp}/crlf/DESCRIPTION"
+out="$("${scripts}/release-guard.sh" "${tmp}/crlf")"
+check "guard reads a version with CRLF line ends" 2.0.7 \
+  "$(field version <<<"${out}")"
+check "guard submits a CRLF release version" true \
+  "$(field submit <<<"${out}")"
+
+printf 'Version: 2.0.7\r\nDate: 2026-10-01 10:00:00 UTC\r\nSHA: abc\r\n' \
+  >"${tmp}/crlf/CRAN-SUBMISSION"
+out="$("${scripts}/release-guard.sh" "${tmp}/crlf")"
+check "guard skips a CRLF submission record" false \
+  "$(field submit <<<"${out}")"
+
+make_repo "${tmp}/upstream-crlf" 2.0.7
+git clone -q "${tmp}/upstream-crlf" "${tmp}/rerun-crlf"
+printf 'Version: 2.0.7\r\nDate: 2026-10-01 10:00:00 UTC\r\nSHA: abc\r\n' \
+  >"${tmp}/upstream-crlf/CRAN-SUBMISSION"
+git -C "${tmp}/upstream-crlf" add CRAN-SUBMISSION
+git -C "${tmp}/upstream-crlf" -c user.name=test -c user.email=test@example.com \
+  -c commit.gpgsign=false commit -q -m record
+git -C "${tmp}/rerun-crlf" fetch -q origin
+out="$("${scripts}/release-guard.sh" "${tmp}/rerun-crlf")"
+check "guard skips a CRLF version recorded on origin/main" false \
+  "$(field submit <<<"${out}")"
+
 mkdir -p "${tmp}/empty"
 check "guard fails without a version" 1 \
   "$(status_of "${scripts}/release-guard.sh" "${tmp}/empty")"
@@ -187,6 +213,56 @@ check "bump rejects a malformed version" 1 \
   "$(status_of "${scripts}/bump-version.sh" patch "${tmp}/bump-malformed")"
 check "bump fails without DESCRIPTION" 1 \
   "$(status_of "${scripts}/bump-version.sh" patch "${tmp}/missing")"
+
+printf '* checking CRAN incoming feasibility ... NOTE\nMaintainer: x\n* DONE\n\nStatus: 2 NOTEs\n' \
+  >"${tmp}/check-notes.log"
+printf '* DONE\n\nStatus: OK\n' >"${tmp}/check-ok.log"
+printf '* DONE\n\nStatus: 1 WARNING, 1 NOTE\n' >"${tmp}/check-warn.log"
+printf '## R CMD check results\n\n0 errors | 0 warnings | 0 notes\n' \
+  >"${tmp}/comments-clean.md"
+printf '## R CMD check results\n\n0 errors | 0 warnings | 2 notes\n\n- NOTE one.\n' \
+  >"${tmp}/comments-notes.md"
+printf '## R CMD check results\r\n\r\n0 errors | 0 warnings | 0 notes\r\n' \
+  >"${tmp}/comments-crlf.md"
+printf '## R CMD check results\n' >"${tmp}/comments-none.md"
+
+check "results match a clean check" 0 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-clean.md")"
+check "results match a CRLF cran-comments.md" 0 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-crlf.md")"
+check "results stop on notes cran-comments.md leaves out" 1 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-clean.md")"
+check "results match notes cran-comments.md explains" 0 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-notes.md")"
+printf '## R CMD check results\n\n0 errors | 0 warnings | 1 note\n\n- NOTE one.\n' \
+  >"${tmp}/comments-one-note.md"
+check "results accept a note cran-comments.md explains but the check did not find" 0 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-one-note.md")"
+check "results stop on a warning" 1 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-warn.log" "${tmp}/comments-notes.md")"
+check "results stop without a results line" 1 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-none.md")"
+check "results stop without a check log" 1 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/missing.log" "${tmp}/comments-clean.md")"
+out="$("${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-clean.md" 2>&1 || true)"
+check "results name the NOTE section" 1 \
+  "$(grep -c 'checking CRAN incoming feasibility' <<<"${out}")"
+
+make_repo "${tmp}/tag" 2.0.7
+first="$(git -C "${tmp}/tag" rev-parse HEAD)"
+out="$("${scripts}/release-tag.sh" 2.0.7 "${first}" "${tmp}/tag")"
+check "tag check reports a missing tag" false "$(field tagged <<<"${out}")"
+git -C "${tmp}/tag" -c tag.gpgSign=false tag v2.0.7
+out="$("${scripts}/release-tag.sh" 2.0.7 "${first}" "${tmp}/tag")"
+check "tag check accepts a tag on the submitted commit" true \
+  "$(field tagged <<<"${out}")"
+git -C "${tmp}/tag" -c user.name=test -c user.email=test@example.com \
+  -c commit.gpgsign=false commit -q --allow-empty -m later
+second="$(git -C "${tmp}/tag" rev-parse HEAD)"
+check "tag check stops on a tag on another commit" 1 \
+  "$(status_of "${scripts}/release-tag.sh" 2.0.7 "${second}" "${tmp}/tag")"
+check "tag check fails without a version" 1 \
+  "$(status_of "${scripts}/release-tag.sh" "" "${first}" "${tmp}/tag")"
 
 if [ "${failures}" -gt 0 ]; then
   printf '%s check(s) failed\n' "${failures}"

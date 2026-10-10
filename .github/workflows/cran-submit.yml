@@ -103,6 +103,9 @@ jobs:
         run: |
           Rscript -e 'rcmdcheck::rcmdcheck(Sys.getenv("TARBALL"), args = "--as-cran", error_on = "warning", check_dir = "check")'
 
+      - name: Compare the check with cran-comments.md
+        run: .github/scripts/check-results.sh check/NACHO.Rcheck/00check.log cran-comments.md
+
       - name: Upload the tarball
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
