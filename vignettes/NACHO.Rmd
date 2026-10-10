@@ -3,7 +3,7 @@ title: 'NACHO'
 subtitle: "A NAnoString quality Control dasHbOard"
 author: "Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D."
 email: "pro@mickael.canouil.dev"
-date: '`r format(Sys.time(), "%B %d, %Y")`'
+date: '`r format(Sys.time(), "%d %B %Y")`'
 bibliography: nacho.bib
 link-citations: true
 output:
@@ -29,7 +29,6 @@ knitr::opts_chunk$set(
   echo = TRUE,
   warning = TRUE,
   message = TRUE,
-  error = TRUE,
   fig.align = "center",
   fig.pos = "!h",
   cache = FALSE
@@ -154,7 +153,7 @@ The default `"nsolver"` preset follows the nCounter knowledge base, and `preset 
 str(nacho_thresholds(), max.level = 1)
 ```
 
-Every `*_status` column of `nacho_qc()` records one check.
+Each `*_status` column of `nacho_qc()` holds the result of one check.
 Three more columns summarise them: `status`, `n_flags` and `reason`.
 
 ```{r}
@@ -186,9 +185,9 @@ The default scales the samples with the geometric mean of the positive controls 
 
 ```{r}
 #| label: normalise
-geo <- normalise(nacho, normalisation_method = "GEO")
-glm <- normalise(nacho, normalisation_method = "GLM")
-head(nacho_counts(glm, normalised = TRUE), n = c(3, 3))
+geo_norm <- normalise(nacho, normalisation_method = "GEO")
+glm_norm <- normalise(nacho, normalisation_method = "GLM")
+head(nacho_counts(glm_norm, normalised = TRUE), n = c(3, 3))
 ```
 
 Background handling has two arguments.
@@ -209,7 +208,7 @@ Here nothing is flagged, so the object stays as it is.
 
 ```{r}
 #| label: exclude
-cleaned <- exclude_outliers(geo)
+cleaned <- exclude_outliers(geo_norm)
 ```
 
 # miRNA panels
@@ -248,14 +247,15 @@ It takes the object and a `type`, and returns a `ggplot` object.
 autoplot(nacho, type = "BD")
 ```
 
-Each `type` has the same arguments: `colour`, `size`, `show_legend`, `show_outliers`, `outliers_factor`, `outliers_labels` and `dark`.
+Every `type` takes the same arguments: `colour`, `size`, `show_legend`, `show_outliers`, `outliers_factor`, `outliers_labels` and `dark`.
+A few plot types ignore some of them, and `?autoplot.nacho` says which.
 The relative log expression of the normalised counts shows whether the samples line up.
 
 ```{r}
 #| label: plot-rle
 #| fig-alt: >-
 #|   Box plots of the relative log expression of each sample, centred on zero.
-autoplot(geo, type = "RLE")
+autoplot(geo_norm, type = "RLE")
 ```
 
 The first two principal components show how the samples spread.
@@ -265,10 +265,10 @@ The first two principal components show how the samples spread.
 #| fig-alt: >-
 #|   Scatter plot of the first two principal components, with one point per
 #|   sample coloured by cartridge.
-autoplot(geo, type = "PCA12")
+autoplot(geo_norm, type = "PCA12")
 ```
 
-The following table lists every plot type.
+This table lists every plot type.
 
 | `type` | What it shows |
 |:---|:---|
