@@ -3,6 +3,7 @@
 ## Breaking changes
 
 NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho()` and `read_nacho()`.
+The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev/NACHO/) maps the NACHO 2 code to NACHO 3.
 
 - In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
   - feat: `load_rcc()` and `normalise()` return an S7 `nacho` object. Read it with `nacho_counts()`, `nacho_samples()`, `nacho_probes()` and `nacho_qc()`; the `$nacho` long table and the other list slots are gone, and `as.data.frame(x, long = TRUE)` gives the long layout.

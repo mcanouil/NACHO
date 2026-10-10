@@ -40,6 +40,7 @@ articles:
     contents:
       - articles/nacho-app
       - articles/nacho-analysis
+      - articles/moving-from-nacho-2
 
 authors:
   Mickaël Canouil:
