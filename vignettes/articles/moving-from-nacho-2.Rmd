@@ -65,7 +65,7 @@ Read `x` as a `nacho` object.
 | The `Count_Norm` column of `x$nacho` | `nacho_counts(x, normalised = TRUE)`. |
 | The sample columns of `x$nacho` | `nacho_samples(x)`, one row per sample. |
 | The probe columns of `x$nacho` | `nacho_probes(x)`, one row per probe. |
-| Other elements, such as `x$housekeeping_genes` and `x$normalisation_method` | `x@settings`, for example `x@settings$housekeeping_genes`. `print(x)` gives a summary. |
+| Other elements, such as `x$housekeeping_genes` and `x$normalisation_method` | `x@settings`, for example `x@settings[["housekeeping_genes"]]`. `print(x)` gives a summary. |
 | `x$outliers_thresholds` | `nacho_thresholds()` builds a set of limits, and `x@thresholds` holds the ones in use. |
 | The `is_outlier` column of `x$nacho` | `nacho_qc(x)[["status"]]`, with one status per metric, `n_flags` and `reason` beside it. |
 | `check_outliers()` | Removed, since the status always follows the thresholds of the object. |
@@ -236,7 +236,7 @@ The modules pin NACHO 2.0.7, so they keep working until they update.
 |:------------|:--------------------|
 | `[["nacho"]]`, with `Count_Norm` pivoted to a wide table | `nacho_counts(x, normalised = TRUE)`. |
 | `[["outliers_thresholds"]]` and the PASS or FAIL table the module builds by hand | `x@thresholds` and the `*_status` columns of `nacho_qc(x)`. |
-| `[["housekeeping_genes"]]` | `x@settings$housekeeping_genes`. |
+| `[["housekeeping_genes"]]` | `x@settings[["housekeeping_genes"]]`. |
 | `autoplot(x, x = "BD")` | `autoplot(x, type = "BD")`. |
 | `render(x, output_file = "report.html", show_outliers = TRUE)` | `render(x, output_dir = "reports")`, which writes `reports/nacho-report.html`. |
 
