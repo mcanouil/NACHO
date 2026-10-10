@@ -143,6 +143,8 @@ NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho
     It still lists the flagged samples first, and then lists every sample.
 - In `DESCRIPTION`,
   - build: chromote, gdtools, ggiraph, jsonlite, later, mirai, parallel and shinytest2 join Suggests, and promises and yaml join Imports.
+- In `vignettes/`,
+  - docs: The vignette shows the NACHO 3 workflow on the example RCC files shipped with the package, and the GEO analysis moves to the article "Analyse a GEO study" on the website, with GSE178516.
 
 ## Performance
 

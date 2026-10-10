@@ -39,7 +39,7 @@ articles:
     navbar: Articles
     contents:
       - articles/nacho-app
-      - NACHO-analysis
+      - articles/nacho-analysis
 
 authors:
   Mickaël Canouil:

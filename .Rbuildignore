@@ -12,7 +12,7 @@
 ^CRAN-SUBMISSION$
 ^revdep$
 ^README\.Rmd$
-^man/figures/README-nacho_app\.gif$
+^man/figures/README-.*\.(gif|png)$
 ^LICENSE\.md$
 ^data-raw$
 ^vignettes/articles$
