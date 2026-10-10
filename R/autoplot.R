@@ -1236,10 +1236,12 @@ box_stats <- function(values) {
 #' study has hundreds of samples.
 #' This fit uses the mean of each sample on the log10 scale, weighted by the
 #' number of points of the sample.
-#' When every sample has the same number of points, the curve is the same as
-#' the curve of `geom_smooth()`.
+#' The span is set so that each fit uses the same share of the samples as
+#' the loess on every point, which gives the same curve when every sample has
+#' the same number of points.
 #' The band is the 95% confidence interval of the trend of the sample means.
-#' A loess needs six samples, so a panel with fewer has no trend.
+#' A loess needs seven samples to give a band, so a panel with fewer has no
+#' trend.
 #'
 #' @param data A data frame with a numeric `x` (the position of the sample),
 #'   a positive `y` (the count) and the columns named in `by`.
@@ -1260,19 +1262,27 @@ sample_trend <- function(data, by, n = 80L) {
   panels <- split(data, data[by], drop = TRUE)
   trends <- lapply(panels, function(panel) {
     log_y <- log10(panel[["y"]])
-    means <- tapply(log_y, panel[["x"]], mean)
-    if (length(means) < 6L) {
+    positions <- sort(unique(panel[["x"]]))
+    by_position <- factor(panel[["x"]], levels = positions)
+    k <- length(positions)
+    if (k < 7L) {
       return(NULL)
     }
     points <- data.frame(
-      x = as.numeric(names(means)),
-      y = as.vector(means),
-      w = as.vector(tapply(log_y, panel[["x"]], length))
+      x = positions,
+      y = as.vector(tapply(log_y, by_position, mean)),
+      w = as.vector(tapply(log_y, by_position, length))
     )
-    fit <- stats::loess(y ~ x, data = points, weights = points[["w"]])
-    grid <- data.frame(
-      x = seq(min(points[["x"]]), max(points[["x"]]), length.out = n)
+    per_sample <- length(log_y) / k
+    neighbours <- min(k, ceiling(floor(0.75 * length(log_y)) / per_sample))
+    span <- min(1, (neighbours + 0.5) / k)
+    fit <- stats::loess(
+      y ~ x,
+      data = points,
+      weights = points[["w"]],
+      span = span
     )
+    grid <- data.frame(x = seq(min(positions), max(positions), length.out = n))
     predicted <- stats::predict(fit, grid, se = TRUE)
     half <- predicted[["se.fit"]] * stats::qt(0.975, predicted[["df"]])
     trend <- data.frame(

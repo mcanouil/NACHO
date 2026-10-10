@@ -834,16 +834,16 @@ test_that("RLE boxes match the boxes ggplot2 computes", {
   expect_identical(nrow(crossbars), ncol(centred))
 })
 
-test_that("the NORM and PN trends match a loess on every point", {
+expect_trend_matches_loess <- function(object, tolerance = 1e-8) {
   for (type in c("NORM", "PN")) {
-    plot <- autoplot(GSE74821, type = type)
+    plot <- autoplot(object, type = type)
     built <- ggplot2::ggplot_build(plot)
     smooth <- which(vapply(
       plot$layers,
       function(layer) inherits(layer$geom, "GeomSmooth"),
       logical(1)
     ))
-    expect_length(smooth, 1L)
+    testthat::expect_length(smooth, 1L)
     trend <- built$data[[smooth]]
     lines <- built$data[[1]]
     for (panel in unique(trend$PANEL)) {
@@ -851,19 +851,40 @@ test_that("the NORM and PN trends match a loess on every point", {
       points <- data.frame(x = as.numeric(points$x), y = points$y)
       fit <- stats::loess(y ~ x, data = points)
       at <- trend[trend$PANEL == panel, ]
-      expect_equal(
+      testthat::expect_equal(
         at$y,
         unname(stats::predict(fit, data.frame(x = at$x))),
-        tolerance = 1e-8,
-        info = paste(type, panel)
+        tolerance = tolerance,
+        info = paste(type, panel, nlevels(plot$data[[1]]))
       )
     }
   }
+}
+
+test_that("the NORM and PN trends match a loess on every point", {
+  expect_trend_matches_loess(GSE74821)
 })
 
-test_that("the trend needs six samples", {
+test_that("the trend matches when 0.75 times the samples is not whole", {
+  expect_trend_matches_loess(GSE74821[, 1:47])
+  expect_trend_matches_loess(GSE74821[, 1:30])
+})
+
+test_that("the trend needs seven samples", {
+  curved <- function(n) {
+    object <- toy_nacho(n)
+    factor <- seq_len(n)^2 * ((seq_len(n) %% 3) + 1)
+    S7::prop(object, "counts", check = FALSE) <- sweep(
+      object@counts,
+      2,
+      factor,
+      "*"
+    )
+    S7::prop(object, "normalised", check = FALSE) <- object@counts * 1
+    object
+  }
   for (type in c("NORM", "PN")) {
-    few <- autoplot(toy_nacho(5L), type = type)
+    few <- autoplot(curved(6L), type = type)
     expect_no_warning(built <- ggplot2::ggplot_build(few))
     smooth <- which(vapply(
       few$layers,
@@ -871,8 +892,11 @@ test_that("the trend needs six samples", {
       logical(1)
     ))
     expect_identical(nrow(built$data[[smooth]]), 0L)
-    enough <- autoplot(toy_nacho(6L), type = type)
+    enough <- autoplot(curved(7L), type = type)
     expect_no_warning(built <- ggplot2::ggplot_build(enough))
-    expect_gt(nrow(built$data[[smooth]]), 0L)
+    trend <- built$data[[smooth]]
+    expect_gt(nrow(trend), 0L)
+    expect_true(all(is.finite(c(trend$ymin, trend$ymax))))
+    expect_true(all(trend$ymin <= trend$y & trend$y <= trend$ymax))
   }
 })
