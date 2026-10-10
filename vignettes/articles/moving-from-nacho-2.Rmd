@@ -40,7 +40,8 @@ nacho <- read_nacho("nacho-2-object.rds")
 
 The conversion keeps the raw counts, the sample sheet, the settings and the thresholds.
 It computes the quality-control metrics, the normalised counts, the PCA and the outlier flags again, with the NACHO 3 definitions.
-It also moves the object to the legacy preset with `background = "geo", background_mode = "subtract"`, so the flags and the background correction stay close to what NACHO 2 gave you.
+It also moves the object to the legacy preset, with `background = "geo", background_mode = "subtract"` when the panel has negative probes, so the flags and the background correction stay close to what NACHO 2 gave you.
+Housekeeping genes that NACHO 2 predicted are kept as fixed genes and are not predicted again, so the geNorm change does not affect a converted object.
 The numbers can still differ slightly, because of the changes listed in the section on results.
 Only read files you trust, since `readRDS()` can run code stored in a file.
 
@@ -52,7 +53,7 @@ Only read files you trust, since `readRDS()` can run code stored in a file.
 identical(upgrade_nacho(GSE74821), GSE74821)
 ```
 
-## From NACHO 2 to NACHO 3
+## Function and object changes
 
 The table gives the NACHO 3 call for each NACHO 2 call.
 Read `x` as a `nacho` object.
@@ -64,6 +65,7 @@ Read `x` as a `nacho` object.
 | The `Count_Norm` column of `x$nacho` | `nacho_counts(x, normalised = TRUE)`. |
 | The sample columns of `x$nacho` | `nacho_samples(x)`, one row per sample. |
 | The probe columns of `x$nacho` | `nacho_probes(x)`, one row per probe. |
+| Other elements, such as `x$housekeeping_genes` and `x$normalisation_method` | `x@settings`, for example `x@settings$housekeeping_genes`. `print(x)` gives a summary. |
 | `x$outliers_thresholds` | `nacho_thresholds()` builds a set of limits, and `x@thresholds` holds the ones in use. |
 | The `is_outlier` column of `x$nacho` | `nacho_qc(x)[["status"]]`, with one status per metric, `n_flags` and `reason` beside it. |
 | `check_outliers()` | Removed, since the status always follows the thresholds of the object. |
@@ -115,7 +117,7 @@ dim(nacho_counts(nacho))
 ### Plots
 
 `autoplot()` takes the plot name in `type`.
-NACHO 3 stops when you pass `x`, and the error names the new argument.
+NACHO 3 stops when you pass `x`, and the error says that `x` was renamed `type`.
 
 ```{r}
 #| label: autoplot
@@ -127,7 +129,6 @@ autoplot(GSE74821, type = "BD")
 #| label: autoplot-old
 #| eval: false
 autoplot(GSE74821, x = "BD")
-#> Error: `x` was renamed `type` in NACHO 3.0.0.
 ```
 
 ### Reports
@@ -152,14 +153,14 @@ path <- render(
 )
 ```
 
-The first argument is `x`, not `nacho_object`, so name it only when you use the new name.
+The first argument is now `x`, so change `render(nacho_object = ...)` to `render(x = ...)` or drop the name.
 `title`, `author` and `group` are new.
 With `group`, which names a column of `nacho_samples(x)`, the report checks whether the batches and the biological groups are confounded.
 
 ### The app
 
 `visualise()` opens the app and returns the tuned object when you click **Done**.
-`nacho_app()` returns a Shiny app object, and `deploy()` writes a one-line `app.R` next to the app files.
+`nacho_app()` returns a Shiny app object, and `deploy()` copies an `app.R` that calls `nacho_app()` into `directory/app_name`.
 `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory`.
 Read [Explore quality control in the app](nacho-app.html) for a tour of the pages.
 
@@ -210,8 +211,14 @@ legacy <- normalise(
 table(nacho_qc(legacy)[["status"]])
 ```
 
-For new data, give the preset to `load_rcc()`, with `preset = "legacy"`.
-The limits of the preset are the NACHO 2 defaults, the ones stored in `x$outliers_thresholds`.
+For new data, pass the preset and the background to `load_rcc()`, because its default is `background = "none"`.
+The limits of the preset are the defaults NACHO 2 stored in `x$outliers_thresholds`.
+
+```{r}
+#| label: legacy-load
+#| eval: false
+load_rcc(data_directory, ssheet_csv, preset = "legacy", background = "geo", background_mode = "subtract")
+```
 
 ```{r}
 #| label: legacy-limits
@@ -220,20 +227,28 @@ str(nacho_thresholds(preset = "legacy"), max.level = 1)
 
 ## Pipelines
 
-The nf-core/modules modules `nacho/qc` and `nacho/normalize`, which `nf-core/nanostring` uses, call NACHO 2 code.
-They read `$nacho`, and call `autoplot(x = )` and `render(output_file = , show_outliers = )`.
-All three fail in NACHO 3.
-The modules pin NACHO 2.0.6, so they keep working until they update.
+Two nf-core modules, `nacho/qc` and `nacho/normalize`, which the `nf-core/nanostring` pipeline uses, call NACHO 2 code.
+They read list elements such as `[["nacho"]]`, `[["outliers_thresholds"]]` and `[["housekeeping_genes"]]`, and call `autoplot(x = )` and `render(output_file = , show_outliers = )`.
+In NACHO 3, `x[["..."]]` fails with the error `S7 objects are not subsettable`, and the two calls fail as described above.
+The modules pin NACHO 2.0.7, so they keep working until they update.
 
 | Module call | NACHO 3 replacement |
 |:------------|:--------------------|
-| `x$nacho` | `as.data.frame(x, long = TRUE)`. |
+| `[["nacho"]]`, with `Count_Norm` pivoted to a wide table | `nacho_counts(x, normalised = TRUE)`. |
+| `[["outliers_thresholds"]]` and the PASS or FAIL table the module builds by hand | `x@thresholds` and the `*_status` columns of `nacho_qc(x)`. |
+| `[["housekeeping_genes"]]` | `x@settings$housekeeping_genes`. |
 | `autoplot(x, x = "BD")` | `autoplot(x, type = "BD")`. |
 | `render(x, output_file = "report.html", show_outliers = TRUE)` | `render(x, output_dir = "reports")`, which writes `reports/nacho-report.html`. |
 
+The call to `load_rcc()` in the modules uses no preset or background, so NACHO 3 gives it the nSolver preset with no background correction.
+The numbers change even where the calls still run.
+To keep the NACHO 2 results, pass `preset = "legacy", background = "geo", background_mode = "subtract"`, as shown in the section on NACHO 2 outlier calls.
+
+The `nacho/qc` module renders twice, to two file names.
+In NACHO 3 both reports are called `nacho-report.html`, so the second overwrites the first unless you give each call its own `output_dir`.
 Rename or move the report in the next step of the pipeline if it expects another file name.
 
 ## Further reading
 
-The `NEWS.md` file lists every breaking change by source file.
+The [changelog](../news/index.html) lists every breaking change by source file.
 [Analyse a GEO study](nacho-analysis.html) uses the NACHO 3 functions on a public study from start to finish.
