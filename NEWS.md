@@ -146,6 +146,7 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - build: chromote, gdtools, ggiraph, jsonlite, later, mirai, parallel and shinytest2 join Suggests, and promises and yaml join Imports.
 - In `vignettes/`,
   - docs: The vignette shows the NACHO 3 workflow on the example RCC files shipped with the package, and the GEO analysis moves to the article "Analyse a GEO study" on the website, with GSE178516.
+  - docs: A new article on the website shows what the quality-control report looks like, with screenshots taken from a real report each time the site is built.
 
 ## Performance
 

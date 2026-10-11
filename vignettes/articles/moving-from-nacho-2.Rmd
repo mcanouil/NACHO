@@ -227,10 +227,11 @@ str(nacho_thresholds(preset = "legacy"), max.level = 1)
 
 ## Pipelines
 
-Two nf-core modules, `nacho/qc` and `nacho/normalize`, which the `nf-core/nanostring` pipeline uses, call NACHO 2 code.
+Two [nf-core modules](https://github.com/nf-core/modules/tree/master/modules/nf-core/nacho), `nacho/qc` and `nacho/normalize`, which the [nf-core/nanostring](https://github.com/nf-core/nanostring) pipeline uses, call NACHO 2 code.
 They read list elements such as `[["nacho"]]`, `[["outliers_thresholds"]]` and `[["housekeeping_genes"]]`, and call `autoplot(x = )` and `render(output_file = , show_outliers = )`.
 In NACHO 3, `x[["..."]]` fails with the error `S7 objects are not subsettable`, and the two calls fail as described above.
 The modules pin NACHO 2.0.7, so they keep working until they update.
+This section was checked on 11 October 2026 against nf-core/modules, whose `nacho` modules pin NACHO 2.0.7.
 
 | Module call | NACHO 3 replacement |
 |:------------|:--------------------|

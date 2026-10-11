@@ -39,6 +39,7 @@ articles:
     navbar: Articles
     contents:
       - articles/nacho-app
+      - articles/nacho-report
       - articles/nacho-analysis
       - articles/moving-from-nacho-2
 
