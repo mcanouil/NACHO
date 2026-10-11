@@ -75,6 +75,15 @@ make_report_images <- function() {
   limits <- NACHO::nacho_thresholds()
   limits[["FoV"]] <- 95
   example <- NACHO::normalise(example, outliers_thresholds = limits)
+  n_flagged <- sum(NACHO::nacho_qc(example)[["status"]] %in% "fail")
+  if (!identical(n_flagged, 1L)) {
+    stop(
+      "The article text says one sample is flagged, but ",
+      n_flagged,
+      " samples have status 'fail' with the field-of-view limit at 95.",
+      call. = FALSE
+    )
+  }
 
   report_dir <- tempfile("nacho-report-article-")
   on.exit(unlink(report_dir, recursive = TRUE), add = TRUE)
@@ -108,9 +117,10 @@ make_report_images <- function() {
   deadline <- Sys.time() + 60
   repeat {
     state <- browser$Runtime$evaluate(
-      "document.readyState + ' ' + location.protocol.replace(':', '')"
+      "document.readyState + ' ' + document.fonts.status + ' ' +
+        location.protocol.replace(':', '')"
     )[["result"]][["value"]]
-    if (identical(state, "complete file")) {
+    if (identical(state, "complete loaded file")) {
       break
     }
     if (Sys.time() > deadline) {
@@ -125,7 +135,14 @@ make_report_images <- function() {
   shoot_section(browser, "#methods", methods_image)
 
   pdf_pages <- pdftools::pdf_text(pdf_report)
-  figure_page <- grep("Figure 1. Binding density", pdf_pages, fixed = TRUE)[[1]]
+  hits <- grep("Figure 1. Binding density", pdf_pages, fixed = TRUE)
+  if (length(hits) == 0L) {
+    stop(
+      "The PDF has no page with the caption 'Figure 1. Binding density'.",
+      call. = FALSE
+    )
+  }
+  figure_page <- hits[[1L]]
   for (job in list(
     list(page = 1, path = pdf_cover_image),
     list(page = figure_page, path = pdf_figure_image)
