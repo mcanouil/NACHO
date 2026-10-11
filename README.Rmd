@@ -2,8 +2,6 @@
 output: github_document
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 ```{r}
 #| echo: false
 knitr::opts_chunk$set(
@@ -16,7 +14,6 @@ knitr::opts_chunk$set(
 
 # NAnoString quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" alt="NACHO hexagonal logo" />
 
-<!-- badges: start -->
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![GitHub tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest tag&include_prereleases)](https://github.com/mcanouil/NACHO)
 [![codecov](https://codecov.io/gh/mcanouil/NACHO/branch/main/graph/badge.svg)](https://app.codecov.io/gh/mcanouil/NACHO?branch=main)
@@ -24,7 +21,6 @@ knitr::opts_chunk$set(
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-ago/NACHO)](https://cran.r-project.org/package=NACHO)
 [![cran checks_worst](https://badges.cranchecks.info/worst/NACHO.svg)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
 [![CRAN_Download_total](https://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
-<!-- badges: end -->
 
 ## Installation
 
@@ -36,6 +32,40 @@ install.packages("NACHO")
 # Or the development version from GitHub:
 # install.packages("pak")
 pak::pak("mcanouil/NACHO")
+```
+
+## Quick start
+
+The package ships six samples of the public study GSE178516, so this runs offline.
+`load_rcc()` reads the RCC files, computes the quality-control metrics and normalises the counts.
+
+```{r}
+#| label: quick-start
+library(NACHO)
+
+data_directory <- system.file("extdata", "GSE178516", package = "NACHO")
+nacho <- load_rcc(
+  data_directory = data_directory,
+  ssheet_csv = file.path(data_directory, "samplesheet.csv"),
+  id_colname = "IDFILE",
+  instrument = "max",
+  n_comp = 5
+)
+nacho_qc(nacho)[, c("IDFILE", "status", "n_flags", "reason")]
+```
+
+`autoplot()` draws any quality-control figure, `render()` writes a report with Quarto, and `visualise()` opens the app.
+
+```{r}
+#| label: quick-start-plot
+#| fig-alt: "Box plot of the binding density of each cartridge, with the limits of the quality control drawn as dashed lines."
+autoplot(nacho, type = "BD")
+```
+
+```{r}
+#| eval: false
+render(nacho, output_dir = tempdir())
+visualise(nacho)
 ```
 
 ## Overview
@@ -61,7 +91,8 @@ visualise(GSE74821)
 knitr::include_graphics("man/figures/README-nacho_app.gif")
 ```
 
-The article [Explore quality control in the app](https://m.canouil.dev/NACHO/articles/nacho-app.html) shows each page.
+The articles "Explore quality control in the app" and "Analyse a GEO study" on the [package website](https://m.canouil.dev/NACHO/) show each page of the app and a full analysis of GSE178516.
+The article "Moving from NACHO 2" on the same website maps the NACHO 2 code to NACHO 3.
 
 ## Citing NACHO
 
@@ -86,5 +117,5 @@ For questions and other discussion, please contact the package maintainer.
 
 ## Code of Conduct
 
-Please note that this project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).  
+Please note that this project is released with a [Contributor Code of Conduct](https://github.com/mcanouil/NACHO/blob/main/.github/CODE_OF_CONDUCT.md).  
 By contributing to this project, you agree to abide by its terms.

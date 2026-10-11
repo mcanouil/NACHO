@@ -23,4 +23,4 @@ Since v0.6.0, *NACHO* has two more functions:
 * The `render()` function writes a full quality control report with Quarto, as an HTML or PDF file, from the result of `load_rcc()` or `normalise()`.
 * The `autoplot()` function draws the quality control metrics of `visualise()` and `render()`.
 
-For more information, see `vignette("NACHO")` and `vignette("NACHO-analysis")`.
+For more information, see `vignette("NACHO")` and the articles on the package website.

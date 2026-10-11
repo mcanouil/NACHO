@@ -3,7 +3,7 @@ title: 'NACHO'
 subtitle: "A NAnoString quality Control dasHbOard"
 author: "Mickaël Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D."
 email: "pro@mickael.canouil.dev"
-date: '`r format(Sys.time(), "%B %d, %Y")`'
+date: '`r format(Sys.time(), "%d %B %Y")`'
 bibliography: nacho.bib
 link-citations: true
 output:
@@ -29,7 +29,6 @@ knitr::opts_chunk$set(
   echo = TRUE,
   warning = TRUE,
   message = TRUE,
-  error = TRUE,
   fig.align = "center",
   fig.pos = "!h",
   cache = FALSE
@@ -82,34 +81,244 @@ print(citation("NACHO"), "html")
 print(citation("NACHO"), "bibtex")
 ```
 
-# An example
+# Load RCC files
 
-To display the usage and utility of *NACHO*, we show three examples in which the above mentioned functions are used and the results are briefly examined.
+*NACHO* ships two small datasets in `inst/extdata`, so every chunk below runs offline.
+`GSE178516` holds six mRNA samples measured with the PanCancer IO 360 panel.
+`GSE270837` holds six miRNA samples.
+Both come from the NCBI GEO public database [@barrett_ncbi_2013], and each folder has a `samplesheet.csv` whose `IDFILE` column holds the exact name of each RCC file.
 
-*NACHO* comes with presummarised data and in the first example we use this dataset to call the interactive web application using `visualise()`.  
-In the second example, we show the process of going from raw RCC files to visualisations with a dataset queried from **GEO** using `GEOquery`.  
-In the third example, we use the summarised dataset from the second example to calculate the sample specific size factors using `normalise()` and its added functionality to predict housekeeping genes.
-
-Besides creating interactive visualisations, *NACHO* also identifies poorly performing samples which can be seen under the Outlier Table tab in the interactive web application.  
-While calling `normalise()`, the user has the possibility to remove these outliers before size factor calculation.
-
-## Get NanoString nCounter data
-
-### Presummarised data from *NACHO*
-
-This example shows how to use summarised data to call the interactive web application.  
-The raw data used is from a study of @liu_pam50_2016 and was acquired from the NCBI GEO public database [@barrett_ncbi_2013].
+`load_rcc()` takes the folder with the RCC files, the samplesheet and the name of the identifier column.
+It reads the files, computes the quality-control metrics, normalises the counts and returns a `nacho` object.
+With only six samples, there are at most five principal components, so we ask for five.
+The RCC files do not name the instrument, so we say it is an nCounter MAX, which sets the binding density limits.
 
 ```{r}
-#| label: ex1
+#| label: load
+data_directory <- system.file("extdata", "GSE178516", package = "NACHO")
+nacho <- load_rcc(
+  data_directory = data_directory,
+  ssheet_csv = file.path(data_directory, "samplesheet.csv"),
+  id_colname = "IDFILE",
+  instrument = "max",
+  n_comp = 5
+)
+print(nacho)
+```
+
+# Read the object
+
+Four accessors give you the content of a `nacho` object as plain matrices and data frames.
+`nacho_counts()` returns the counts, with one row per probe and one column per sample.
+Pass `normalised = TRUE` for the normalised counts, and `log2 = TRUE` for `log2(count + 1)`.
+
+```{r}
+#| label: counts
+head(nacho_counts(nacho), n = c(5, 3))
+```
+
+`nacho_samples()` has one row per sample, with the samplesheet columns, the RCC header fields and the quality-control metrics.
+
+```{r}
+#| label: samples
+head(nacho_samples(nacho)[, c("IDFILE", "title", "CartridgeID", "BD", "FoV")], n = 3)
+```
+
+`nacho_probes()` has one row per probe, with its code class, its detection rate and whether it is a housekeeping gene.
+
+```{r}
+#| label: probes
+head(nacho_probes(nacho), n = 3)
+table(nacho_probes(nacho)[["CodeClass"]])
+```
+
+`nacho_qc()` has the quality-control table, one row per sample.
+
+```{r}
+#| label: qc
+head(nacho_qc(nacho)[, c("IDFILE", "BD", "FoV", "PCL", "LoD")], n = 3)
+```
+
+Earlier versions of *NACHO* kept all of this in a `$nacho` data frame.
+That slot is gone, and the article "Moving from NACHO 2" on the [package website](https://m.canouil.dev/NACHO/) maps each old element to its accessor.
+
+# Quality control
+
+A sample is flagged when a metric falls outside its limits.
+`nacho_thresholds()` builds those limits.
+The default `"nsolver"` preset follows the nCounter knowledge base, and `preset = "legacy"` reproduces the limits of *NACHO* 2.
+
+```{r}
+#| label: thresholds
+str(nacho_thresholds(), max.level = 1)
+```
+
+Each `*_status` column of `nacho_qc()` holds the result of one check.
+Three more columns summarise them: `status`, `n_flags` and `reason`.
+
+```{r}
+#| label: flags
+nacho_qc(nacho)[, c("IDFILE", "status", "n_flags", "reason")]
+```
+
+All six samples pass.
+To use the legacy limits, give `load_rcc()` the preset, or pass new limits to `normalise()`.
+
+```{r}
+#| label: legacy
+legacy <- load_rcc(
+  data_directory = data_directory,
+  ssheet_csv = file.path(data_directory, "samplesheet.csv"),
+  id_colname = "IDFILE",
+  instrument = "max",
+  n_comp = 5,
+  preset = "legacy"
+)
+table(nacho_qc(legacy)[["status"]])
+```
+
+# Normalise
+
+`normalise()` normalises a `nacho` object again with new settings and returns a new object.
+The default scales the samples with the geometric mean of the positive controls (`"GEO"`).
+`"GLM"` fits a Poisson model to the positive and negative controls instead.
+
+```{r}
+#| label: normalise
+geo_norm <- normalise(nacho, normalisation_method = "GEO")
+glm_norm <- normalise(nacho, normalisation_method = "GLM")
+head(nacho_counts(glm_norm, normalised = TRUE), n = c(3, 3))
+```
+
+Background handling has two arguments.
+`background` chooses how to estimate each sample's background from its negative controls, for example `"mean_2sd"`.
+`background_mode` chooses what to do with it: `"threshold"` raises lower counts to the background, and `"subtract"` removes it.
+
+```{r}
+#| label: background
+background <- normalise(
+  nacho,
+  background = "mean_2sd",
+  background_mode = "subtract"
+)
+```
+
+`exclude_outliers()` drops the flagged samples and normalises the remaining ones again.
+Here nothing is flagged, so the object stays as it is.
+
+```{r}
+#| label: exclude
+cleaned <- exclude_outliers(geo_norm)
+```
+
+# miRNA panels
+
+`load_rcc()` recognises miRNA panels from their probes.
+The folder `GSE270837` holds six samples from such a panel.
+
+```{r}
+#| label: mirna
+mirna_directory <- system.file("extdata", "GSE270837", package = "NACHO")
+mirna <- load_rcc(
+  data_directory = mirna_directory,
+  ssheet_csv = file.path(mirna_directory, "samplesheet.csv"),
+  id_colname = "IDFILE",
+  instrument = "max",
+  n_comp = 5
+)
+print(mirna)
+table(nacho_probes(mirna)[["CodeClass"]])
+```
+
+The housekeeping mRNAs of a miRNA panel sit at the background level, so housekeeping normalisation is off by default.
+It only switches on when you pass `housekeeping_genes` or set `housekeeping_predict = TRUE`.
+The miRNA methods of `normalisation_method` (`"stable_mirna"`, `"total_mirna"`, `"spike_in"` and `"ligation"`) scale the samples with miRNAs or with the spike-in and ligation controls instead.
+
+# Plots
+
+`autoplot()` draws any quality-control figure of the app and of the report.
+It takes the object and a `type`, and returns a `ggplot` object.
+
+```{r}
+#| label: plot-bd
+#| fig-alt: >-
+#|   Box plot of the binding density of each cartridge, with the limits of
+#|   the quality control drawn as dashed lines.
+autoplot(nacho, type = "BD")
+```
+
+Every `type` takes the same arguments: `colour`, `size`, `show_legend`, `show_outliers`, `outliers_factor`, `outliers_labels` and `dark`.
+A few plot types ignore some of them, and `?autoplot.nacho` says which.
+The relative log expression of the normalised counts shows whether the samples line up.
+
+```{r}
+#| label: plot-rle
+#| fig-alt: >-
+#|   Box plots of the relative log expression of each sample, centred on zero.
+autoplot(geo_norm, type = "RLE")
+```
+
+The first two principal components show how the samples spread.
+
+```{r}
+#| label: plot-pca
+#| fig-alt: >-
+#|   Scatter plot of the first two principal components, with one point per
+#|   sample coloured by cartridge.
+autoplot(geo_norm, type = "PCA12")
+```
+
+This table lists every plot type.
+
+| `type` | What it shows |
+|:---|:---|
+| `"BD"` | Binding Density. |
+| `"FoV"` | Field of View (imaging). |
+| `"PCL"` | Positive Control Linearity. |
+| `"LoD"` | Limit of Detection. |
+| `"Positive"` | Positive controls. |
+| `"Negative"` | Negative controls. |
+| `"Housekeeping"` | Housekeeping genes. |
+| `"PN"` | Positive controls against negative controls. |
+| `"ACBD"` | Average counts against binding density. |
+| `"ACMC"` | Average counts against median counts. |
+| `"PCA12"` | Principal component 1 against 2. |
+| `"PCAi"` | Scree plot of the principal components. |
+| `"PCA"` | Planes of the first principal components. |
+| `"PFNF"` | Positive factor against negative factor. |
+| `"HF"` | Housekeeping factor. |
+| `"NORM"` | Normalisation factor. |
+| `"Stability"` | geNorm stability of the housekeeping genes. |
+| `"RLE"` | Relative log expression of the normalised endogenous genes. |
+| `"BatchFactors"` | Normalisation factors by cartridge. |
+| `"PCBatch"` | Share of each principal component explained by cartridge and date. |
+
+# Report
+
+`render()` builds a report with every quality-control metric and a description of each.
+It writes a self-contained HTML file, or a Typst PDF with `format = "typst"`, and returns the path.
+It needs Quarto 1.9.18 or newer.
+
+```{r}
+#| label: render
 #| eval: false
-library(NACHO)
-data(GSE74821)
-visualise(GSE74821)
+render(nacho, format = "html", output_dir = tempdir())
+```
+
+# App
+
+`visualise()` opens the interactive app.
+The sidebar holds the quality-control thresholds and the normalisation settings for every page.
+When you click Done, `visualise()` returns the tuned object to your R session.
+
+```{r}
+#| label: app
+#| eval: false
+tuned <- visualise(nacho)
 ```
 
 ```{r}
-#| label: ex1-fig
+#| label: app-fig
 #| echo: false
 #| out-width: 650px
 #| fig-alt: >-
@@ -118,272 +327,18 @@ visualise(GSE74821)
 knitr::include_graphics(path = "README-app.png")
 ```
 
-### Raw data from GEO
+The article "Explore quality control in the app" on the [package website](https://m.canouil.dev/NACHO/) walks through every page of the app.
 
-Numerous NanoString nCounter datasets are available from GEO [@barrett_ncbi_2013].  
-In this example, we use a miRNA dataset from the study of @bruce_identification_2015 with the GEO accession number: **GSE70970**.
-The samples were measured with two versions of the miRNA CodeSet, each exported by a different nSolver version, and `load_rcc()` refuses files that mix versions.
-The following code extracts the data and keeps the samples measured with `NS_H_miR_1.4`.
+# Bioconductor
 
-```{r}
-#| label: geo-down
-#| echo: false
-#| warning: false
-#| message: false
-#| error: false
-gse <- try(GEOquery::getGEO("GSE70970"), silent = TRUE)
-if (inherits(gse, "try-error")) { # when GEOquery is down
-  cons <- showConnections(all = TRUE)
-  icons <- which(grepl("GSE70970", cons[, "description"])) - 1
-  for (icon in icons) close(getConnection(icon))
-  cat(
-    "Note: `GEOquery` seems to be currently down. Thus, the following code was not executed.\n"
-  )
-}
-```
+`as_summarized_experiment()` converts a `nacho` object into a `SummarizedExperiment`, and `as_nacho()` converts it back.
+This needs the *SummarizedExperiment* package from Bioconductor.
 
 ```{r}
-#| label: ex2
-#| results: hide
-#| message: false
-#| warning: false
-#| eval: !expr '!inherits(gse, "try-error")'
-library(GEOquery)
-data_directory <- file.path(tempdir(), "GSE70970", "Data")
-# Download data
-gse <- getGEO("GSE70970")
-getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir())
-# Unzip data
-untar(
-  tarfile = file.path(tempdir(), "GSE70970", "GSE70970_RAW.tar"),
-  exdir = data_directory
-)
-# Get phenotypes and add IDs
-targets <- pData(phenoData(gse[[1]]))
-rcc_files <- list.files(data_directory, pattern = "\\.RCC(\\.gz)?$", ignore.case = TRUE)
-targets$IDFILE <- rcc_files[match(targets$geo_accession, sub("_.*", "", rcc_files))]
-targets <- targets[!is.na(targets$IDFILE), ]
-# Keep the samples measured with the same CodeSet
-codeset <- vapply(
-  X = file.path(data_directory, targets$IDFILE),
-  FUN = function(file) {
-    header <- grep("^GeneRLF,", readLines(file, n = 40), value = TRUE)
-    if (length(header) == 0) NA_character_ else header[1]
-  },
-  FUN.VALUE = character(1)
-)
-targets <- targets[codeset %in% "GeneRLF,NS_H_miR_1.4", ]
-```
-
-```{r}
-#| echo: false
-#| message: false
-#| warning: false
-#| eval: !expr '!inherits(gse, "try-error")'
-targets[1:5, unique(c("IDFILE", names(targets)))]
-```
-
-After we extracted the dataset to the `` `r file.path(tempdir(), "GSE70970", "Data")` `` directory, a `Samplesheet.csv` containing a column with the exact names of the files for each sample can be written or used as is.
-
-## The `load_rcc()` function
-
-The first argument requires the path to the directory containing the RCC files, the second argument is the location of the samplesheet, followed by the third argument with the column name containing the exact names of the files.  
-The `housekeeping_genes` and `normalisation_method` arguments respectively indicate which housekeeping genes and normalisation method should be used.
-
-```{r}
-#| label: ex3
-#| eval: !expr '!inherits(gse, "try-error")'
-GSE70970_sum <- load_rcc(
-  data_directory = data_directory, # Where the data is
-  ssheet_csv = targets, # The samplesheet
-  id_colname = "IDFILE", # Name of the column that contains the unique identifiers
-  housekeeping_genes = NULL, # Custom list of housekeeping genes
-  housekeeping_predict = TRUE, # Whether or not to predict the housekeeping genes
-  normalisation_method = "GEO", # Geometric mean or GLM
-  n_comp = 5 # Number indicating how many principal components should be computed.
-)
-```
-
-```{r}
-#| echo: false
-#| results: hide
-#| eval: !expr '!inherits(gse, "try-error")'
-unlink(file.path(tempdir(), "GSE70970"), recursive = TRUE)
-```
-
-## The `visualise()` function
-
-When the summarisation is done, the summarised (or normalised) data can be visualised using the `visualise()` function as can be seen in the following chunk of code.
-
-```{r}
-#| eval: false
-visualise(GSE70970_sum)
-```
-
-The app has one sidebar, which holds the quality-control thresholds and the normalisation settings for every page.
-When you click Done, `visualise()` returns the tuned object to your R session.
-Each sample in the plots can be coloured based on either technical specifications which are included in the RCC files or based on specifications of your own choosing, though these specifications need to be included in the samplesheet.
-
-## The `normalise()` function
-
-*NACHO* allows the discovery of housekeeping genes within your own dataset.
-*NACHO* finds the five best suitable housekeeping genes, however, it is possible that one of these five genes might not be suitable, which is why a subset of these discovered housekeeping genes might work better in some cases.
-For this example, we use the **GSE70970** dataset from the previous example.
-The discovered housekeeping genes are flagged in the `is_housekeeping` column of `nacho_probes()`.
-
-```{r}
-#| label: ex5
-#| eval: !expr '!inherits(gse, "try-error")'
-housekeeping <- nacho_probes(GSE70970_sum)$Name[nacho_probes(GSE70970_sum)$is_housekeeping]
-print(housekeeping)
-```
-
-```{r}
-#| label: intext
-#| eval: !expr '!inherits(gse, "try-error")'
-#| echo: false
-#| results: asis
-cat(
-  "Let's say _", housekeeping[1],
-  "_ and _", housekeeping[2],
-  "_ are not suitable, therefore, you want to exclude these genes from the normalisation process.",
-  sep = ""
-)
-```
-
-```{r}
-#| eval: !expr '!inherits(gse, "try-error")'
-my_housekeeping <- housekeeping[-c(1, 2)]
-print(my_housekeeping)
-```
-
-The next step is the actual normalisation.
-The first argument requires the summary which is created with the `load_rcc()` function.
-The second argument requires a vector of gene names.
-In this case, it is a subset of the discovered housekeeping genes we just made.
-The third argument turns off housekeeping gene prediction, since the housekeeping genes are already chosen.
-The fourth argument turns on housekeeping normalisation.
-Lastly, the normalisation method can be chosen.
-Here, the user has a choice between `"GLM"` or `"GEO"`.
-The differences between normalisation methods are nuanced, however, a preference for either method is use case specific.
-In this example, `"GEO"` is used.
-`exclude_outliers()` then drops the flagged samples and normalises the ones that are left again.
-
-```{r}
-#| label: ex7
-#| eval: !expr '!inherits(gse, "try-error")'
-GSE70970_norm <- normalise(
-  nacho_object = GSE70970_sum,
-  housekeeping_genes = my_housekeeping,
-  housekeeping_predict = FALSE,
-  housekeeping_norm = TRUE,
-  normalisation_method = "GEO"
-) |>
-  exclude_outliers()
-```
-
-`normalise()` returns a `nacho` object, like `load_rcc()`.
-Read the raw and normalised counts with `nacho_counts()`, and the per-sample metrics with `nacho_qc()`.
-
-## The `autoplot()` function
-
-The `autoplot()` function provides an easy way to plot any quality-control from the `visualise()` function.
-
-```{r}
-#| eval: false
-autoplot(
-  GSE74821,
-  type = "BD",
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE
-)
-```
-
-The possible plot types (`type`) are:
-
-* `"BD"` (Binding Density)
-* `"FoV"` (Imaging)
-* `"PCL"` (Positive Control Linearity)
-* `"LoD"` (Limit of Detection)
-* `"Positive"` (Positive Controls)
-* `"Negative"` (Negative Controls)
-* `"Housekeeping"` (Housekeeping Genes)
-* `"PN"` (Positive Controls vs. Negative Controls)
-* `"ACBD"` (Average Counts vs. Binding Density)
-* `"ACMC"` (Average Counts vs. Median Counts)
-* `"PCA12"` (Principal Component 1 vs. 2)
-* `"PCAi"` (Principal Component scree plot)
-* `"PCA"` (Principal Components planes)
-* `"PFNF"` (Positive Factor vs. Negative Factor)
-* `"HF"` (Housekeeping Factor)
-* `"NORM"` (Normalisation Factor)
-
-```{r}
-#| echo: false
-#| results: asis
-metrics <- c(
-  "BD" = "Binding Density",
-  "FoV" = "Imaging",
-  "PCL" = "Positive Control Linearity",
-  "LoD" = "Limit of Detection",
-  "Positive" = "Positive Controls",
-  "Negative" = "Negative Controls",
-  "Housekeeping" = "Housekeeping Genes",
-  "PN" = "Positive Controls vs. Negative Controls",
-  "ACBD" = "Average Counts vs. Binding Density",
-  "ACMC" = "Average Counts vs. Median Counts",
-  "PCA12" = "Principal Component 1 vs. 2",
-  "PCAi" = "Principal Component scree plot",
-  "PCA" = "Principal Components planes",
-  "PFNF" = "Positive Factor vs. Negative Factor",
-  "HF" = "Housekeeping Factor",
-  "NORM" = "Normalisation Factor"
-)
-
-for (imetric in seq_along(metrics)) {
-  cat("\n\n###", metrics[imetric], "\n\n")
-  print(autoplot(GSE74821, type = names(metrics[imetric])))
-  cat("\n")
-}
-```
-
-## NACHO as a standalone app
-
-*NACHO* is also available as a standalone app to be used in a Shiny Server configuration.
-A convenience function `deploy()` is available to directly copy the *NACHO* app to the default directory of a Shiny Server.
-
-```{r}
-#| label: deploy
-#| eval: false
-deploy(directory = "/srv/shiny-server", app_name = "NACHO")
-```
-
-The app can also be run directly, without manually summarising and normalising RCC files:
-
-```{r}
-#| label: app
-#| eval: false
-shiny::runApp(system.file("app", package = "NACHO"))
-```
-
-The article [Explore quality control in the app](https://m.canouil.dev/NACHO/articles/nacho-app.html) walks through every page of the app.
-
-## The `render()` function
-
-The `render()` function builds a report with Quarto, which includes all quality-control metrics and a description of each.
-It writes a self-contained HTML file, or a Typst PDF with `format = "typst"`, and returns the path.
-
-```{r}
-#| eval: false
-render(GSE74821, format = "html", output_dir = ".")
-```
-
-`print()` shows a short summary of the object.
-
-```{r}
-#| label: print
-print(GSE74821)
+#| label: bioconductor
+#| eval: !expr requireNamespace("SummarizedExperiment", quietly = TRUE)
+se <- as_summarized_experiment(nacho)
+se
 ```
 
 # References
