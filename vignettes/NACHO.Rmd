@@ -298,6 +298,7 @@ This table lists every plot type.
 `render()` builds a report with every quality-control metric and a description of each.
 It writes a self-contained HTML file, or a Typst PDF with `format = "typst"`, and returns the path.
 It needs Quarto 1.9.18 or newer.
+The article "The quality-control report" on the [package website](https://m.canouil.dev/NACHO/) shows what the report looks like.
 
 ```{r}
 #| label: render
