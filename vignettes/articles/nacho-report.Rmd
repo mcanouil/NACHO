@@ -72,7 +72,7 @@ make_report_images <- function() {
   }
 
   example <- NACHO::GSE74821
-  limits <- example@thresholds
+  limits <- NACHO::nacho_thresholds()
   limits[["FoV"]] <- 95
   example <- NACHO::normalise(example, outliers_thresholds = limits)
 
@@ -98,7 +98,7 @@ make_report_images <- function() {
   chrome <- chromote::Chromote$new(
     browser = chromote::Chrome$new(args = chrome_args)
   )
-  on.exit(chrome$close(), add = TRUE)
+  on.exit(chrome$close(), add = TRUE, after = FALSE)
   browser <- chromote::ChromoteSession$new(
     parent = chrome,
     width = 1280,
@@ -107,8 +107,10 @@ make_report_images <- function() {
   browser$Page$navigate(paste0("file://", html_report))
   deadline <- Sys.time() + 60
   repeat {
-    state <- browser$Runtime$evaluate("document.readyState")[["result"]][["value"]]
-    if (identical(state, "complete")) {
+    state <- browser$Runtime$evaluate(
+      "document.readyState + ' ' + location.protocol.replace(':', '')"
+    )[["result"]][["value"]]
+    if (identical(state, "complete file")) {
       break
     }
     if (Sys.time() > deadline) {
