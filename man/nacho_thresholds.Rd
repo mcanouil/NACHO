@@ -31,7 +31,7 @@ samples.
 }
 \details{
 \code{"nsolver"} follows the current Bruker nCounter knowledge base
-(\url{https://nanostring.com/support/}, "nCounter QC flags"): binding density
+(\url{https://brukerspatialbiology.com/support/}, "nCounter QC flags"): binding density
 0.05 to 2.25 on MAX, FLEX and PRO and 0.1 to 1.8 on SPRINT, field of view at
 least 75 \%, positive control linearity at least 0.95 (POS_A to POS_E, with
 \code{log2(count + 1)}), limit of detection at least 2, positive factor 0.3 to 3
