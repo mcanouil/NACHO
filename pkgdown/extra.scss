@@ -10,6 +10,12 @@ $nacho-rose: #D85460;
   border-image: linear-gradient(90deg, $nacho-yellow, $nacho-amber, $nacho-orange, $nacho-rose) 1;
 }
 
-[data-bs-theme="dark"] img.r-plt:is([src$="nacho_hex.png"], [src$="README-app.png"], [src^="figures/app-"]) {
-  filter: none;
+// pkgdown inverts generated images in dark mode; NACHO plots and screenshots keep their own colours.
+[data-bs-theme="dark"] {
+  img.r-plt,
+  pre .r-plt.img img,
+  .cell-output-display img,
+  .html-widget {
+    filter: none;
+  }
 }
