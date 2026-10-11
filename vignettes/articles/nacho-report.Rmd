@@ -9,59 +9,44 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", out.width = "100%")
 ```
 
 ```{r}
-#| label: render-reports
+#| label: report-images
 #| include: false
-if (!NACHO:::quarto_available()) {
-  stop(
-    "This article renders the real report, which needs the Quarto command-line interface 1.9.18 or newer.",
-    call. = FALSE
-  )
-}
-report_dir <- tempfile("nacho-report-article-")
-html_report <- NACHO::render(
-  NACHO::GSE74821,
-  format = "html",
-  output_dir = report_dir
-)
-pdf_report <- NACHO::render(
-  NACHO::GSE74821,
-  format = "typst",
-  output_dir = report_dir
-)
-```
+figure_dir <- dirname(knitr::fig_path("report.png"))
+dir.create(figure_dir, recursive = TRUE, showWarnings = FALSE)
+cover_image <- file.path(figure_dir, "report-cover.png")
+flagged_image <- file.path(figure_dir, "report-flagged.png")
+figure_image <- file.path(figure_dir, "report-figure.png")
+methods_image <- file.path(figure_dir, "report-methods.png")
+pdf_cover_image <- file.path(figure_dir, "report-pdf-cover.png")
+pdf_figure_image <- file.path(figure_dir, "report-pdf-figure.png")
 
-```{r}
-#| label: screenshots
-#| include: false
-brave <- "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
-if (
-  is.null(suppressMessages(chromote::find_chrome())) &&
-    file.exists(brave) &&
-    !nzchar(Sys.getenv("CHROMOTE_CHROME"))
-) {
-  Sys.setenv(CHROMOTE_CHROME = brave)
-}
-
-image_path <- function(name) {
-  path <- knitr::fig_path(name)
-  dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
-  path
-}
-
-shoot_section <- function(session, selector, path, first = "#title-block-header") {
-  bounds <- session$Runtime$evaluate(
+shoot_section <- function(session, selector, path, first = selector) {
+  bounds <- unlist(session$Runtime$evaluate(
     sprintf(
       "(function () {
-        const top = document.querySelector('%s').getBoundingClientRect();
-        const bottom = document.querySelector('%s').getBoundingClientRect();
-        return [top.top + window.scrollY, bottom.bottom + window.scrollY];
+        const top = document.querySelector('%s');
+        const bottom = document.querySelector('%s');
+        if (!top || !bottom) { return []; }
+        return [
+          top.getBoundingClientRect().top + window.scrollY,
+          bottom.getBoundingClientRect().bottom + window.scrollY
+        ];
       })()",
       first,
       selector
     ),
     returnByValue = TRUE
-  )[["result"]][["value"]]
-  bounds <- unlist(bounds)
+  )[["result"]][["value"]])
+  if (length(bounds) != 2L) {
+    stop(
+      "The report has no element matching '",
+      first,
+      "' or '",
+      selector,
+      "'.",
+      call. = FALSE
+    )
+  }
   shot <- session$Page$captureScreenshot(
     format = "png",
     captureBeyondViewport = TRUE,
@@ -76,38 +61,83 @@ shoot_section <- function(session, selector, path, first = "#title-block-header"
   writeBin(jsonlite::base64_dec(shot[["data"]]), path)
 }
 
-browser <- chromote::ChromoteSession$new(
-  width = 1280,
-  height = 900
-)
-browser$Page$navigate(paste0("file://", html_report))
-Sys.sleep(5)
+make_report_images <- function() {
+  brave <- "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+  if (
+    is.null(suppressMessages(chromote::find_chrome())) &&
+      file.exists(brave) &&
+      !nzchar(Sys.getenv("CHROMOTE_CHROME"))
+  ) {
+    Sys.setenv(CHROMOTE_CHROME = brave)
+  }
 
-cover_image <- image_path("report-cover.png")
-figure_image <- image_path("report-figure.png")
-methods_image <- image_path("report-methods.png")
+  example <- NACHO::GSE74821
+  limits <- example@thresholds
+  limits[["FoV"]] <- 95
+  example <- NACHO::normalise(example, outliers_thresholds = limits)
 
-shoot_section(browser, "#decision-summary", cover_image)
-shoot_section(
-  browser,
-  "#binding-density",
-  figure_image,
-  first = "#binding-density"
-)
-shoot_section(browser, "#methods", methods_image, first = "#methods")
-browser$close()
+  report_dir <- tempfile("nacho-report-article-")
+  on.exit(unlink(report_dir, recursive = TRUE), add = TRUE)
+  html_report <- NACHO::render(
+    example,
+    format = "html",
+    output_dir = report_dir,
+    title = "PAM50 study, batch 3"
+  )
+  pdf_report <- NACHO::render(
+    example,
+    format = "typst",
+    output_dir = report_dir,
+    title = "PAM50 study, batch 3"
+  )
 
-pdf_cover_image <- image_path("report-pdf-cover.png")
-pdf_figure_image <- image_path("report-pdf-figure.png")
-pdf_pages <- pdftools::pdf_text(pdf_report)
-figure_page <- grep("Figure 1. Binding density", pdf_pages, fixed = TRUE)[[1]]
-for (job in list(
-  list(page = 1, path = pdf_cover_image),
-  list(page = figure_page, path = pdf_figure_image)
-)) {
-  bitmap <- pdftools::pdf_render_page(pdf_report, page = job[["page"]], dpi = 100)
-  png::writePNG(bitmap, job[["path"]])
+  chrome_args <- chromote::default_chrome_args()
+  if (nzchar(Sys.getenv("CI"))) {
+    chrome_args <- c(chrome_args, "--no-sandbox")
+  }
+  chrome <- chromote::Chromote$new(
+    browser = chromote::Chrome$new(args = chrome_args)
+  )
+  on.exit(chrome$close(), add = TRUE)
+  browser <- chromote::ChromoteSession$new(
+    parent = chrome,
+    width = 1280,
+    height = 900
+  )
+  browser$Page$navigate(paste0("file://", html_report))
+  deadline <- Sys.time() + 60
+  repeat {
+    state <- browser$Runtime$evaluate("document.readyState")[["result"]][["value"]]
+    if (identical(state, "complete")) {
+      break
+    }
+    if (Sys.time() > deadline) {
+      stop("The report did not finish loading within 60 seconds.", call. = FALSE)
+    }
+    Sys.sleep(0.2)
+  }
+
+  shoot_section(browser, "#title-block-header", cover_image)
+  shoot_section(browser, "#decision-summary", flagged_image)
+  shoot_section(browser, "#binding-density", figure_image)
+  shoot_section(browser, "#methods", methods_image)
+
+  pdf_pages <- pdftools::pdf_text(pdf_report)
+  figure_page <- grep("Figure 1. Binding density", pdf_pages, fixed = TRUE)[[1]]
+  for (job in list(
+    list(page = 1, path = pdf_cover_image),
+    list(page = figure_page, path = pdf_figure_image)
+  )) {
+    bitmap <- pdftools::pdf_render_page(
+      pdf_report,
+      page = job[["page"]],
+      dpi = 100
+    )
+    png::writePNG(bitmap, job[["path"]])
+  }
 }
+
+make_report_images()
 ```
 
 The `render()` function writes the quality-control report of a `nacho` object.
@@ -115,6 +145,7 @@ The report is one file, either a self-contained HTML page or a tagged A4 PDF.
 The HTML file needs nothing else to open, so you can email it or keep it with the data.
 The PDF goes through Typst, which Quarto bundles, so you do not need LaTeX.
 Both formats hold the same content, and this article shows a real report of the example data `GSE74821` in each.
+The example raises the field-of-view limit to 95, so that one sample is flagged and the report has something to show.
 The pictures come from a report that the website build renders each time.
 
 ## Create a report
@@ -131,7 +162,7 @@ render(
   GSE74821,
   format = "html",
   output_dir = "reports",
-  title = "Lynch syndrome study, batch 3",
+  title = "PAM50 study, batch 3",
   author = "Jane Doe, Genomics Core"
 )
 ```
@@ -163,13 +194,22 @@ Under the table, a "How to read this" box explains the columns.
 #| label: cover-html
 #| echo: false
 #| fig-alt: >-
-#|   The top of the HTML report. A dark banner shows the NACHO logo, the title
-#|   "NanoString quality-control report", the preparation date and the cover
-#|   details: 48 samples, 4 cartridges, 0 flagged, GLM normalisation and the
-#|   versions. Below it, the decision summary shows three tiles (48 samples pass
-#|   every check, 0 flagged, 0 metrics drive the flags) and a note about the
-#|   instrument.
+#|   The cover of the HTML report on a dark banner. It shows the NACHO logo, the
+#|   title "PAM50 study, batch 3", the preparation date and the cover details:
+#|   48 samples, 4 cartridges, 1 flagged, GLM normalisation, RCC version 1.6 and
+#|   the NACHO version.
 knitr::include_graphics(cover_image)
+```
+
+```{r}
+#| label: flagged-html
+#| echo: false
+#| fig-alt: >-
+#|   The Decision summary section of the HTML report. Three tiles give the
+#|   number of samples that pass, the number of flagged samples and the number of
+#|   metrics behind the flags. A table lists the flagged sample with the metric
+#|   that failed, and a "How to read this" box explains the table.
+knitr::include_graphics(flagged_image)
 ```
 
 ## Settings and thresholds
@@ -224,9 +264,9 @@ The warning only means that Quarto skipped an extra validation step.
 #| out.width: "60%"
 #| fig-alt: >-
 #|   The cover page of the PDF report on a dark A4 page. It shows the NACHO logo,
-#|   the title "NanoString quality-control report", the preparation date and the
-#|   cover details: 48 samples, 4 cartridges, 0 flagged, GLM normalisation and
-#|   the versions.
+#|   the title "PAM50 study, batch 3", the preparation date and the cover
+#|   details: 48 samples, 4 cartridges, 1 flagged, GLM normalisation and the
+#|   versions.
 knitr::include_graphics(pdf_cover_image)
 ```
 
