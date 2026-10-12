@@ -2,7 +2,7 @@
 # Run from the package root with the development version of NACHO installed.
 # Without Chrome, set CHROMOTE_CHROME to the path of a Chromium based browser.
 
-rlang::check_installed(c("chromote", "pdftools"))
+rlang::check_installed(c("chromote", "jsonlite", "pdftools"))
 
 brave <- "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
 if (

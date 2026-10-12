@@ -67,7 +67,7 @@ visualise(nacho)
 
 ![The cover page of the PDF report.](home/report-pdf-cover.png){.nacho-page .nacho-cover width="413" height="585" loading="lazy"}
 
-![Page 2 of the PDF report, with the running header, the decision summary and the page footer.](home/report-pdf-page.png){.nacho-page .nacho-inner-page width="413" height="585" loading="lazy"}
+![A page of the PDF report, with the running header, the decision summary and the page footer.](home/report-pdf-page.png){.nacho-page .nacho-inner-page width="413" height="585" loading="lazy"}
 :::
 
 ::: {.nacho-text}
