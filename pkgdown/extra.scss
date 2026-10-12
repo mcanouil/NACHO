@@ -197,8 +197,14 @@ body:has(.template-home) {
   }
 }
 
-[data-bs-theme="dark"] .nacho-step:nth-child(1) {
-  border-top-color: $nacho-yellow;
+[data-bs-theme="dark"] .nacho-step {
+  &:nth-child(1) {
+    border-top-color: $nacho-yellow;
+  }
+
+  &:nth-child(3) {
+    border-top-color: $nacho-orange;
+  }
 }
 
 .nacho-feature {
