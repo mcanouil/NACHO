@@ -1,13 +1,27 @@
 @import "../inst/brand/dark.scss";
 
-$nacho-yellow: #F0D83C;
-$nacho-amber: #FCB448;
-$nacho-orange: #E45430;
-$nacho-rose: #D85460;
+$nacho-navy: $brand-navy;
+$nacho-yellow: $brand-yellow;
+$nacho-amber: $brand-amber;
+$nacho-orange: $brand-orange;
+$nacho-rose: $brand-rose;
+$nacho-muted-on-navy: #C9D1D9;
+$nacho-gradient: linear-gradient(90deg, $nacho-yellow, $nacho-amber, $nacho-orange, $nacho-rose);
+
+%nacho-strip {
+  border-bottom: 4px solid transparent;
+  border-image: $nacho-gradient 1;
+}
+
+%nacho-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 
 .navbar {
-  border-bottom: 4px solid transparent;
-  border-image: linear-gradient(90deg, $nacho-yellow, $nacho-amber, $nacho-orange, $nacho-rose) 1;
+  @extend %nacho-strip;
 }
 
 // pkgdown inverts generated images in dark mode; NACHO plots and screenshots keep their own colours.
@@ -21,35 +35,35 @@ $nacho-rose: #D85460;
 }
 
 // Home page.
-$nacho-gradient: linear-gradient(90deg, $nacho-yellow, $nacho-amber, $nacho-orange, $nacho-rose);
-
 body:has(.template-home) {
   overflow-x: clip;
 }
 
+// The hero sits under the fixed navbar, so it takes over the offset that pkgdown gives to main and aside.
 .nacho-hero {
-  position: relative;
+  @extend %nacho-strip;
   margin-inline: calc(50% - 50vw);
   margin-bottom: 2.5rem;
   padding-top: $pkgdown-nav-height;
-  background: #182430;
-  color: #FFFFFF;
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 4px;
-    background: $nacho-gradient;
-  }
+  background: $nacho-navy;
+  color: $white;
 
   .nacho-headline {
     margin: 0.75rem 0 1rem;
     font-weight: 700;
     font-size: clamp(2rem, 4vw, 2.9rem);
     line-height: 1.1;
-    color: #FFFFFF;
+    color: $white;
   }
+}
+
+.template-home .row > main,
+.template-home .row > aside {
+  margin-top: 0;
+}
+
+.template-home .page-header {
+  @include visually-hidden;
 }
 
 .nacho-hero-inner {
@@ -66,11 +80,8 @@ body:has(.template-home) {
   display: flex;
   gap: 0.6rem;
   align-items: center;
+  @extend %nacho-label;
   margin: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: $nacho-amber;
 }
 
@@ -85,7 +96,7 @@ body:has(.template-home) {
   max-width: 34em;
   margin-bottom: 1.75rem;
   font-size: 1.2rem;
-  color: #C9D1D9;
+  color: $nacho-muted-on-navy;
 }
 
 .nacho-buttons {
@@ -99,7 +110,7 @@ body:has(.template-home) {
   border: 1.5px solid rgba(255, 255, 255, 0.5);
   border-radius: 6px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: $white;
   text-decoration: none;
 
   &:hover,
@@ -112,13 +123,13 @@ body:has(.template-home) {
 .nacho-button-primary {
   border-color: $nacho-amber;
   background: $nacho-amber;
-  color: #182430;
+  color: $nacho-navy;
 
   &:hover,
   &:focus-visible {
     background: $nacho-yellow;
     border-color: $nacho-yellow;
-    color: #182430;
+    color: $nacho-navy;
   }
 }
 
@@ -130,7 +141,7 @@ body:has(.template-home) {
     padding: 0.5rem 0.9rem;
     border-radius: 6px;
     background: rgba(0, 0, 0, 0.25);
-    color: #C9D1D9;
+    color: $nacho-muted-on-navy;
   }
 }
 
@@ -140,18 +151,17 @@ body:has(.template-home) {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
 
-  img {
-    display: block;
-    width: 100%;
-  }
+.nacho-hero-shot img,
+.nacho-media img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .nacho-kicker {
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  @extend %nacho-label;
   color: var(--bs-primary);
 }
 
@@ -165,7 +175,7 @@ body:has(.template-home) {
 .nacho-step {
   padding: 1.1rem 1.1rem 0.9rem;
   border: 1px solid var(--bs-border-color);
-  border-top: 4px solid #182430;
+  border-top: 4px solid $nacho-navy;
   border-radius: 8px;
 
   &:nth-child(2) {
@@ -236,8 +246,6 @@ body:has(.template-home) {
 }
 
 .nacho-media img {
-  display: block;
-  width: 100%;
   border: 1px solid var(--bs-border-color);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(24, 36, 48, 0.12);
@@ -285,7 +293,7 @@ body:has(.template-home) {
   border-top: 1px solid var(--bs-border-color);
 }
 
-@media (max-width: 767.98px) {
+@include media-breakpoint-down(md) {
   .nacho-hero-inner,
   .nacho-steps,
   .nacho-feature {
@@ -302,26 +310,3 @@ body:has(.template-home) {
   }
 }
 
-.template-home main,
-.template-home aside {
-  margin-top: 0;
-}
-
-.nacho-page-title > .page-header {
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-h1.nacho-page-title {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}

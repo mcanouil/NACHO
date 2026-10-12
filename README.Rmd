@@ -81,7 +81,7 @@ It reads the RCC files, flags the samples that fail quality control and normalis
 
 The [package website](https://m.canouil.dev/NACHO/) shows the app, the report and a full analysis.
 
-### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
+### Shiny application
 
 Open the app on a `nacho` object with `visualise()`.
 

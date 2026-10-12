@@ -1,4 +1,4 @@
-# NACHO {.nacho-page-title}
+# NACHO
 
 ::: {.nacho-steps}
 
@@ -38,7 +38,7 @@ Write an HTML or PDF report that records the decisions you made.
 ::: {.nacho-feature}
 
 ::: {.nacho-media}
-![The quality-control metrics page of the NACHO app, with a box plot for each metric and the limits drawn as dashed lines.](articles/figures/app-qc-metrics.png)
+![The quality-control metrics page of the NACHO app, with a box plot for each metric and the limits drawn as dashed lines.](articles/figures/app-qc-metrics.png){width="1280" height="800" loading="lazy"}
 :::
 
 ::: {.nacho-text}
@@ -63,11 +63,11 @@ visualise(nacho)
 ::: {.nacho-feature .nacho-flip}
 
 ::: {.nacho-media .nacho-stack}
-![The top of the HTML report, with the study header and the decision summary for one flagged sample.](home/report-html.png){.nacho-front}
+![The top of the HTML report, with the study header and the decision summary for one flagged sample.](home/report-html.png){.nacho-front width="1280" height="720" loading="lazy"}
 
-![The cover page of the PDF report.](home/report-pdf-cover.png){.nacho-page .nacho-cover}
+![The cover page of the PDF report.](home/report-pdf-cover.png){.nacho-page .nacho-cover width="413" height="585" loading="lazy"}
 
-![Page 2 of the PDF report, with the running header, the decision summary and the page footer.](home/report-pdf-page.png){.nacho-page .nacho-inner-page}
+![Page 2 of the PDF report, with the running header, the decision summary and the page footer.](home/report-pdf-page.png){.nacho-page .nacho-inner-page width="413" height="585" loading="lazy"}
 :::
 
 ::: {.nacho-text}
@@ -92,7 +92,7 @@ render(nacho, format = "typst")
 ::: {.nacho-feature}
 
 ::: {.nacho-media}
-![Box plot of the binding density of each cartridge, with the limits of the quality control drawn as dashed lines.](reference/figures/README-quick-start-plot-1.png)
+![Box plot of the binding density of each cartridge, with the limits of the quality control drawn as dashed lines.](reference/figures/README-quick-start-plot-1.png){width="672" height="480" loading="lazy"}
 :::
 
 ::: {.nacho-text}

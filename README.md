@@ -41,13 +41,13 @@ nacho <- load_rcc(
   n_comp = 5
 )
 #> ℹ Reading 6 RCC files
-#> ✔ Reading 6 RCC files [26ms]
+#> ✔ Reading 6 RCC files [27ms]
 #> 
 #> ℹ Assembling 6 samples
 #> ✔ Assembling 6 samples [17ms]
 #> 
 #> ℹ Computing quality-control metrics and normalising
-#> ✔ Computing quality-control metrics and normalising [31ms]
+#> ✔ Computing quality-control metrics and normalising [26ms]
 #> 
 nacho_qc(nacho)[, c("IDFILE", "status", "n_flags", "reason")]
 #>                  IDFILE status n_flags reason
@@ -90,7 +90,7 @@ the samples that fail quality control and normalises the counts.
 The [package website](https://m.canouil.dev/NACHO/) shows the app, the
 report and a full analysis.
 
-### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
+### Shiny application
 
 Open the app on a `nacho` object with `visualise()`.
 

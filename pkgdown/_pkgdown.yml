@@ -35,9 +35,6 @@ home:
   description: >
     Load RCC files, flag the samples that fail quality control, normalise the counts,
     and share the result as a Shiny app or a Quarto report.
-  links:
-    - text: Live demo app
-      href: https://mcanouil.shinyapps.io/NACHO_data/
   sidebar:
     structure: [links, license, community, citation, authors, status]
     components:

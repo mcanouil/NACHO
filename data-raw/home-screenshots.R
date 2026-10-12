@@ -2,7 +2,7 @@
 # Run from the package root with the development version of NACHO installed.
 # Without Chrome, set CHROMOTE_CHROME to the path of a Chromium based browser.
 
-rlang::check_installed(c("chromote", "pdftools", "png"))
+rlang::check_installed(c("chromote", "pdftools"))
 
 brave <- "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
 if (
@@ -24,20 +24,10 @@ shoot_html_top <- function(html_report, path) {
   browser$Emulation$setEmulatedMedia(
     features = list(list(name = "prefers-color-scheme", value = "light"))
   )
-  browser$Page$navigate(paste0("file://", html_report))
-  deadline <- Sys.time() + 60
-  repeat {
-    state <- browser$Runtime$evaluate(
-      "document.readyState + ' ' + document.fonts.status"
-    )[["result"]][["value"]]
-    if (identical(state, "complete loaded")) {
-      break
-    }
-    if (Sys.time() > deadline) {
-      stop("The report did not finish loading within 60 seconds.", call. = FALSE)
-    }
-    Sys.sleep(0.2)
-  }
+  loaded <- browser$Page$loadEventFired(wait_ = FALSE)
+  browser$Page$navigate(paste0("file://", html_report), wait_ = FALSE)
+  browser$wait_for(loaded)
+  browser$Runtime$evaluate("document.fonts.ready.then(() => true)", awaitPromise = TRUE)
   shot <- browser$Page$captureScreenshot(format = "png")
   writeBin(jsonlite::base64_dec(shot[["data"]]), path)
 }
@@ -51,9 +41,16 @@ find_pdf_page <- function(pdf_report, text) {
   hits[[length(hits)]]
 }
 
+# Each page shows at about 200 CSS pixels wide, so 50 dpi gives a sharp image on 2x screens.
 save_pdf_page <- function(pdf_report, page, path) {
-  bitmap <- pdftools::pdf_render_page(pdf_report, page = page, dpi = 110)
-  png::writePNG(bitmap, path)
+  pdftools::pdf_convert(
+    pdf_report,
+    format = "png",
+    pages = page,
+    filenames = path,
+    dpi = 50,
+    verbose = FALSE
+  )
 }
 
 main <- function() {
