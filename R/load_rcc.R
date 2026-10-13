@@ -6,6 +6,13 @@
 #' @param ssheet_csv [[character]] or [[data.frame]] Either a string with the name of the CSV
 #'   of the samplesheet or the samplesheet as a `data.frame`.
 #'   Should contain a column that matches the file names in the folder.
+#'   NACHO computes the columns `Date`, `ID`, `BD`, `ScannerID`,
+#'   `StagePosition`, `CartridgeID`, `FoV`, `PCL`, `LoD`, `MC`, `MedC`,
+#'   `Positive_factor`, `Negative_factor`, `Detection_rate`, `Background`,
+#'   `House_factor`, `Housekeeping_detected`, `Ligation_order`, `Ligation_R2`,
+#'   `Ligation_NEG`, `Haemolysis`, `is_outlier`, `PC1`, `PC2`, ... and `W_1`,
+#'   `W_2`, ....
+#'   A sample sheet column with one of these names is replaced, with a warning.
 #' @param id_colname [[character]] Character string of the column in `ssheet_csv` that matches
 #'   the file names in `data_directory`.
 #' @param housekeeping_genes [[character]] A vector of names of the miRNAs/mRNAs
@@ -292,6 +299,19 @@ load_rcc <- function(
   )
   sheet <- as.data.frame(nacho_df)
   sheet <- sheet[, setdiff(names(sheet), "file_path"), drop = FALSE]
+  reserved <- names(sheet)[
+    names(sheet) %in% computed_sample_columns |
+      grepl("^(PC|W_)[0-9]+$", names(sheet))
+  ]
+  if (length(reserved) > 0) {
+    nacho_warn(
+      c(
+        "NACHO computes the sample sheet column{?s} {.field {reserved}}, so {?it is/they are} replaced.",
+        i = "Rename {cli::qty(length(reserved))}{?it/them} in {.arg ssheet_csv} to keep your values."
+      ),
+      class = "reserved_column"
+    )
+  }
   samples <- cbind(
     column_first(sheet, id_colname),
     as.data.frame(attributes)[file_index, , drop = FALSE]

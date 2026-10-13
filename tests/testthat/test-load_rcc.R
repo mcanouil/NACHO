@@ -653,3 +653,19 @@ test_that("load_rcc() names the folder when the sample sheet lists no file", {
   expect_match(conditionMessage(error), basename(empty), fixed = TRUE)
   expect_match(conditionMessage(error), "ssheet_csv", fixed = TRUE)
 })
+
+test_that("load_rcc() warns when sample sheet columns use computed names", {
+  fixture <- geo_fixture("GSE178516")
+  sheet <- fixture$samplesheet
+  sheet$ID <- paste0("patient", seq_len(nrow(sheet)))
+  sheet$Date <- "2020-01-01"
+  warning <- expect_warning(
+    suppressMessages(load_rcc(fixture$dir, sheet, "IDFILE", n_comp = 3)),
+    class = "nacho_warning_reserved_column"
+  )
+  expect_match(conditionMessage(warning), "ID", fixed = TRUE)
+  expect_match(conditionMessage(warning), "Date", fixed = TRUE)
+  expect_no_warning(suppressMessages(
+    load_rcc(fixture$dir, fixture$samplesheet, "IDFILE", n_comp = 3)
+  ))
+})

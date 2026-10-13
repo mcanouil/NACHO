@@ -25,7 +25,14 @@ load_rcc(
 
 \item{ssheet_csv}{[\link{character}] or [\link{data.frame}] Either a string with the name of the CSV
 of the samplesheet or the samplesheet as a \code{data.frame}.
-Should contain a column that matches the file names in the folder.}
+Should contain a column that matches the file names in the folder.
+NACHO computes the columns \code{Date}, \code{ID}, \code{BD}, \code{ScannerID},
+\code{StagePosition}, \code{CartridgeID}, \code{FoV}, \code{PCL}, \code{LoD}, \code{MC}, \code{MedC},
+\code{Positive_factor}, \code{Negative_factor}, \code{Detection_rate}, \code{Background},
+\code{House_factor}, \code{Housekeeping_detected}, \code{Ligation_order}, \code{Ligation_R2},
+\code{Ligation_NEG}, \code{Haemolysis}, \code{is_outlier}, \code{PC1}, \code{PC2}, ... and \code{W_1},
+\code{W_2}, ....
+A sample sheet column with one of these names is replaced, with a warning.}
 
 \item{id_colname}{[\link{character}] Character string of the column in \code{ssheet_csv} that matches
 the file names in \code{data_directory}.}
