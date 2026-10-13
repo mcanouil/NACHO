@@ -578,3 +578,35 @@ test_that("a sample without usable positive counts warns and leaves the others f
     )
   }
 })
+
+test_that("PCL is NA when only two positive controls are usable", {
+  x <- GSE74821
+  probes <- nacho_probes(x)
+  dropped <- probes$CodeClass == "Positive" &
+    !grepl("^POS_[AB]", probes$Name)
+  x@counts[dropped, 1] <- NA_integer_
+  y <- suppressWarnings(
+    suppressMessages(normalise(x, background = "mean")),
+    classes = "nacho_warning_missing_counts"
+  )
+  pcl <- nacho_samples(y)$PCL
+  expect_true(is.na(pcl[1]))
+  expect_true(all(is.finite(pcl[-1])))
+})
+
+test_that("a rebuild warns only about samples whose positive factor was usable", {
+  x <- GSE74821
+  positives <- nacho_probes(x)$CodeClass == "Positive"
+  x@counts[positives, 1] <- NA_integer_
+  quiet_normalise <- function(object, ...) {
+    suppressWarnings(
+      suppressMessages(normalise(object, ...)),
+      classes = "nacho_warning_missing_counts"
+    )
+  }
+  expect_warning(
+    y <- quiet_normalise(x, background = "mean"),
+    class = "nacho_warning_metric_unavailable"
+  )
+  expect_no_warning(quiet_normalise(y, background = "median"))
+})

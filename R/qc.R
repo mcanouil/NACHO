@@ -646,7 +646,7 @@ sample_pcl <- function(positives, probe_names, preset) {
   }
   round(
     apply(measured, 2, function(m) {
-      if (sum(!is.na(m) & !is.na(known)) < 2) {
+      if (sum(!is.na(m) & !is.na(known)) < 3) {
         return(NA_real_)
       }
       stats::cor(m, known, use = "complete.obs")^2
@@ -776,6 +776,8 @@ sample_metrics <- function(
 #' @param warn_missing Whether to warn about missing lane or sample
 #'   attributes.
 #'   Only a first build warns, so rebuilding an object does not repeat it.
+#'   A rebuild still warns about a sample whose positive factor was usable
+#'   before and is not now.
 #' @param call The environment whose call names the function in errors.
 #'
 #' @noRd
@@ -792,6 +794,8 @@ build_nacho <- function(
 ) {
   probes <- as.data.frame(probes)[, c("CodeClass", "Name", "Accession")]
   samples <- as.data.frame(samples)
+  previous_factor <- samples[["Positive_factor"]] %||%
+    rep(1, nrow(samples))
   samples <- samples[,
     setdiff(
       names(samples),
@@ -820,15 +824,19 @@ build_nacho <- function(
     excluded,
     settings[["normalisation_method"]]
   )
-  if (length(factors[["unusable"]]) > 0) {
+  newly_unusable <- factors[["unusable"]][
+    warn_missing |
+      !is.na(previous_factor[match(factors[["unusable"]], colnames(counts))])
+  ]
+  if (length(newly_unusable) > 0) {
     nacho_warn(
       c(
         paste(
-          "{length(factors[['unusable']])} sample{?s} ha{?s/ve} no usable",
+          "{length(newly_unusable)} sample{?s} ha{?s/ve} no usable",
           "positive control counts, so the positive factor and normalised",
           "counts are {.val NA}."
         ),
-        x = "Affected: {.val {cli::cli_vec(factors[['unusable']], list('vec-trunc' = 5))}}.",
+        x = "Affected: {.val {cli::cli_vec(newly_unusable, list('vec-trunc' = 5))}}.",
         i = "Check the positive controls of those samples with {.code autoplot(x, type = \"Positive\")}."
       ),
       class = "metric_unavailable",
