@@ -163,13 +163,10 @@ jobs:
           VERSION: ${{ steps.bump.outputs.version }}
           BRANCH: ${{ steps.bump.outputs.branch }}
         run: |
-          # A merged bump branch is already deleted, so check main instead.
-          ref="${BRANCH}"
-          if [ "${AUTO_MERGE}" = "true" ]; then
-            ref="main"
-          fi
+          # Auto-merge waits for the required checks, so main still holds the
+          # previous version here; the bump branch has the version to submit.
           gh workflow run rhub.yaml \
-            --ref "${ref}" \
+            --ref "${BRANCH}" \
             -f config="linux,windows,macos-arm64,nosuggests" \
             -f name="NACHO ${VERSION}"
 
