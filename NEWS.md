@@ -107,6 +107,8 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
 - In `R/autoplot.R`,
   - feat: `autoplot()` checks that `colour` and `outliers_labels` name columns of `nacho_samples()`, and `outliers_labels` must be a column name.
   - feat: `autoplot()` gains `dark` to draw a plot for a dark background, with amber flags.
+- In `inst/extdata/`,
+  - feat: `GSE346526` holds six mRNA samples in RCC files that nSolver 4.0.1.8 wrote, the most recent nSolver version on GEO in October 2026.
 - In `inst/brand/`,
   - feat: NACHO ships its brand file, with the Source Sans 3 and JetBrains Mono fonts, so the app, the report and the website share one look offline.
 - In `R/stability.R`,

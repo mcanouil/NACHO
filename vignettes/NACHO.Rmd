@@ -83,10 +83,11 @@ print(citation("NACHO"), "bibtex")
 
 # Load RCC files
 
-*NACHO* ships two small datasets in `inst/extdata`, so every chunk below runs offline.
+*NACHO* ships three small datasets in `inst/extdata`, so every chunk below runs offline.
 `GSE178516` holds six mRNA samples measured with the PanCancer IO 360 panel.
 `GSE270837` holds six miRNA samples.
-Both come from the NCBI GEO public database [@barrett_ncbi_2013], and each folder has a `samplesheet.csv` whose `IDFILE` column holds the exact name of each RCC file.
+`GSE346526` holds six mRNA samples in RCC files that nSolver 4.0.1.8 wrote.
+All three come from the NCBI GEO public database [@barrett_ncbi_2013], and each folder has a `samplesheet.csv` whose `IDFILE` column holds the exact name of each RCC file.
 
 `load_rcc()` takes the folder with the RCC files, the samplesheet and the name of the identifier column.
 It reads the files, computes the quality-control metrics, normalises the counts and returns a `nacho` object.
