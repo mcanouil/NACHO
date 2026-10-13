@@ -669,3 +669,13 @@ test_that("load_rcc() warns when sample sheet columns use computed names", {
     load_rcc(fixture$dir, fixture$samplesheet, "IDFILE", n_comp = 3)
   ))
 })
+
+test_that("load_rcc() refuses an id column with a computed name", {
+  fixture <- geo_fixture("GSE178516")
+  sheet <- data.frame(ID = fixture$samplesheet$IDFILE)
+  error <- expect_error(
+    load_rcc(fixture$dir, sheet, "ID"),
+    class = "nacho_error_bad_argument"
+  )
+  expect_match(conditionMessage(error), "ID", fixed = TRUE)
+})

@@ -210,6 +210,34 @@ geometric_means <- function(m) {
   exp(colMeans(log(m), na.rm = TRUE))
 }
 
+#' Tell which sample columns NACHO computes
+#'
+#' @noRd
+is_computed_sample_column <- function(names) {
+  names %in% computed_sample_columns | grepl("^(PC|W_)[0-9]+$", names)
+}
+
+#' Refuse a sample id column whose name NACHO computes
+#'
+#' @noRd
+check_id_colname <- function(
+  id_colname,
+  arg = "id_colname",
+  call = rlang::caller_env()
+) {
+  if (is_computed_sample_column(id_colname)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} cannot be {.val {id_colname}}, since NACHO computes a sample column of that name.",
+        i = "Rename the id column, for example to {.val IDFILE}."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(id_colname)
+}
+
 #' Background statistics and modes
 #'
 #' @noRd
@@ -796,16 +824,7 @@ build_nacho <- function(
   samples <- as.data.frame(samples)
   previous_factor <- samples[["Positive_factor"]] %||%
     rep(1, nrow(samples))
-  samples <- samples[,
-    setdiff(
-      names(samples),
-      c(
-        computed_sample_columns,
-        grep("^(PC|W_)[0-9]+$", names(samples), value = TRUE)
-      )
-    ),
-    drop = FALSE
-  ]
+  samples <- samples[, !is_computed_sample_column(names(samples)), drop = FALSE]
   code_class <- probes[["CodeClass"]]
   settings[["panel"]] <- detect_panel(probes, samples)
 

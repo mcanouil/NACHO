@@ -183,6 +183,7 @@ nacho_from_parts <- function(
     call = call
   )
   id_colname <- settings[["id_colname"]]
+  check_id_colname(id_colname, call = call)
   if (
     id_colname %in%
       names(samples) &&

@@ -481,3 +481,19 @@ test_that("as_nacho() stores the panel it detects", {
   y <- suppressWarnings(suppressMessages(as_nacho(se)))
   expect_identical(y@settings$panel, "mirna")
 })
+
+test_that("as_nacho() refuses an id column with a computed name", {
+  skip_if_not_installed("SummarizedExperiment")
+  counts <- nacho_counts(GSE74821)
+  rownames(counts) <- nacho_probes(GSE74821)[["Name"]]
+  se <- SummarizedExperiment::SummarizedExperiment(
+    assays = list(counts = counts),
+    rowData = S4Vectors::DataFrame(
+      CodeClass = nacho_probes(GSE74821)[["CodeClass"]]
+    )
+  )
+  expect_error(
+    suppressMessages(as_nacho(se, id_colname = "Date")),
+    class = "nacho_error_bad_argument"
+  )
+})

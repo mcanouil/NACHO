@@ -174,6 +174,7 @@ load_rcc <- function(
   }
   check_string(id_colname)
   check_column(id_colname, ssheet_csv)
+  check_id_colname(id_colname)
 
   nacho_df <- data.table::as.data.table(ssheet_csv)
   nacho_df[["file_path"]] <- file.path(data_directory, nacho_df[[id_colname]])
@@ -299,10 +300,7 @@ load_rcc <- function(
   )
   sheet <- as.data.frame(nacho_df)
   sheet <- sheet[, setdiff(names(sheet), "file_path"), drop = FALSE]
-  reserved <- names(sheet)[
-    names(sheet) %in% computed_sample_columns |
-      grepl("^(PC|W_)[0-9]+$", names(sheet))
-  ]
+  reserved <- names(sheet)[is_computed_sample_column(names(sheet))]
   if (length(reserved) > 0) {
     nacho_warn(
       c(
