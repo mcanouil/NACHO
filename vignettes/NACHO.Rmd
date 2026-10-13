@@ -235,6 +235,21 @@ The housekeeping mRNAs of a miRNA panel sit at the background level, so housekee
 It only switches on when you pass `housekeeping_genes` or set `housekeeping_predict = TRUE`.
 The miRNA methods of `normalisation_method` (`"stable_mirna"`, `"total_mirna"`, `"spike_in"` and `"ligation"`) scale the samples with miRNAs or with the spike-in and ligation controls instead.
 
+`Ligation_NEG` flags a sample when its largest ligation negative control is above the detection limit.
+Whole-blood RNA raises the ligation negative `LIG_NEG_A` together with red blood cell miRNAs such as miR-451a.
+Thus most samples of a whole-blood study can fail `Ligation_NEG` without a fault in the assay.
+When more than half of the samples fail, `load_rcc()` warns about this pattern.
+For whole-blood samples, set a higher upper bound for `Ligation_NEG` and normalise again.
+The bound below is an example; choose it from the `Ligation_NEG` values of your study.
+
+```{r}
+#| label: mirna-whole-blood
+#| eval: false
+thresholds <- nacho_thresholds(instrument = "max")
+thresholds[["Ligation_NEG"]] <- c(-Inf, 100)
+mirna <- normalise(mirna, outliers_thresholds = thresholds)
+```
+
 # Plots
 
 `autoplot()` draws any quality-control figure of the app and of the report.

@@ -120,6 +120,7 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
 - In `R/mirna.R`,
   - feat: NACHO recognises miRNA panels and offers `normalisation_method = "stable_mirna"`, `"total_mirna"`, `"spike_in"` and `"ligation"`.
   - feat: `nacho_qc()` checks the ligation controls of miRNA panels, and `nacho_thresholds(haemolysis = TRUE)` flags haemolysed plasma and serum samples.
+  - feat: `load_rcc()` warns when more than half of the samples fail `Ligation_NEG`, since whole-blood RNA raises `LIG_NEG_A` with red blood cell miRNAs, and the warning shows how to relax the threshold.
 - In `R/batch.R` and `R/autoplot.R`,
   - feat: `batch_diagnostics()` crosses the study groups with cartridges and dates, with Cramér's V and a flag when a batch holds a single group, tests the QC metrics against each batch, and measures how much of each principal component each batch explains.
     `autoplot()` draws `"RLE"`, `"BatchFactors"` and `"PCBatch"`.

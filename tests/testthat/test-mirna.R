@@ -416,3 +416,54 @@ test_that("mirna_reference() names the method that found no reference probes", {
     )
   }
 })
+
+rebuild_mirna <- function(x, counts) {
+  NACHO:::build_nacho(
+    counts = counts,
+    probes = x@probes,
+    samples = x@samples,
+    settings = x@settings,
+    thresholds = x@thresholds,
+    rcc_type = x@rcc_type,
+    provenance = x@provenance
+  )
+}
+
+test_that("a study where most samples fail Ligation_NEG gets the whole-blood hint", {
+  x <- mirna_fixture()
+  counts <- x@counts
+  counts["LIG_NEG_A", ] <- 500L
+  warning <- expect_warning(
+    suppressMessages(rebuild_mirna(x, counts)),
+    class = "nacho_warning_ligation_background"
+  )
+  message <- conditionMessage(warning)
+  expect_match(message, "6 of 6", fixed = TRUE)
+  expect_match(message, "miR-451a", fixed = TRUE)
+  expect_match(message, format(stats::median(counts["hsa-miR-451a", ]), big.mark = ","), fixed = TRUE)
+  expect_match(message, "nacho_thresholds()", fixed = TRUE)
+  expect_match(message, "exclude_outliers()", fixed = TRUE)
+})
+
+test_that("the whole-blood hint stays quiet when half the samples or fewer fail", {
+  x <- mirna_fixture()
+  counts <- x@counts
+  counts["LIG_NEG_A", 1:3] <- 500L
+  expect_no_warning(
+    suppressMessages(rebuild_mirna(x, counts)),
+    class = "nacho_warning_ligation_background"
+  )
+  expect_no_warning(
+    suppressMessages(rebuild_mirna(x, x@counts)),
+    class = "nacho_warning_ligation_background"
+  )
+})
+
+test_that("the whole-blood hint is not repeated when normalise() rebuilds", {
+  x <- mirna_fixture()
+  x@counts["LIG_NEG_A", ] <- 500L
+  expect_no_warning(
+    suppressMessages(normalise(x, background = "mean")),
+    class = "nacho_warning_ligation_background"
+  )
+})

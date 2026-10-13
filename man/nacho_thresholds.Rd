@@ -54,6 +54,20 @@ in decreasing order), \code{Ligation_R2} (their log2 counts on a line) and
 are NACHO's own definitions, since Bruker publishes no threshold.
 \code{"legacy"} never flags them.
 
+Whole-blood RNA raises \code{LIG_NEG_A}, and to a lesser extent \code{LIG_NEG_B},
+together with red blood cell miRNAs such as \verb{miR-451a}.
+The ligation negatives of such samples are above the detection limit, so
+most samples of a whole-blood study fail \code{Ligation_NEG}.
+This pattern occurs in independent PAXgene whole-blood studies on GEO
+(GSE303669 and GSE317496), and not in plasma, serum or extracellular
+vesicle studies.
+When more than half of the samples fail \code{Ligation_NEG}, \code{\link[=load_rcc]{load_rcc()}}
+warns about this pattern.
+For whole-blood samples, set a higher upper bound for \code{Ligation_NEG} and
+pass the thresholds to \code{normalise(outliers_thresholds = )}.
+Do not remove these samples with \code{\link[=exclude_outliers]{exclude_outliers()}} because of this
+flag only.
+
 Each element can be changed afterwards; two numbers are a lower and an
 upper bound, and one number is a lower bound. Use \code{-Inf} or \code{Inf} for an
 open bound.

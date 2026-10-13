@@ -105,6 +105,56 @@ ligation_metrics <- function(counts, probes, limits) {
   metrics
 }
 
+#' Warn when most samples of a study fail Ligation_NEG
+#'
+#' Whole-blood RNA raises `LIG_NEG_A`, and to a lesser extent `LIG_NEG_B`,
+#' together with red blood cell miRNAs such as miR-451a, so a whole
+#' whole-blood study can fail `Ligation_NEG` without a fault in the assay.
+#'
+#' @noRd
+warn_ligation_background <- function(
+  ligation_neg,
+  limits,
+  counts,
+  probes,
+  call = rlang::caller_env()
+) {
+  if (is.null(ligation_neg) || is.null(limits)) {
+    return(invisible(NULL))
+  }
+  failing <- metric_fails(ligation_neg, limits)
+  if (sum(failing) <= length(failing) / 2) {
+    return(invisible(NULL))
+  }
+  mir451 <- match("hsa-miR-451a", probes[["Name"]])
+  level <- if (is.na(mir451)) {
+    ""
+  } else {
+    paste0(
+      " (median ",
+      format(stats::median(counts[mir451, ], na.rm = TRUE), big.mark = ","),
+      " counts here)"
+    )
+  }
+  nacho_warn(
+    c(
+      "{sum(failing)} of {length(failing)} samples fail {.field Ligation_NEG}.",
+      i = paste0(
+        "Whole-blood RNA raises {.val LIG_NEG_A} together with red blood cell ",
+        "miRNAs such as miR-451a", level, ", so a whole study can fail."
+      ),
+      i = paste(
+        "If your samples are whole blood, relax the {.field Ligation_NEG}",
+        "limit from {.fn nacho_thresholds} in",
+        "{.code normalise(x, outliers_thresholds = )}, rather than dropping",
+        "the samples with {.fn exclude_outliers}."
+      )
+    ),
+    class = "ligation_background",
+    call = call
+  )
+}
+
 #' Haemolysis of plasma and serum samples
 #'
 #' `log2(miR-451a + 1) - log2(miR-23a-3p + 1)`, the count analogue of the

@@ -964,6 +964,15 @@ build_nacho <- function(
   if (settings[["panel"]] == "mirna") {
     metrics <- cbind(metrics, ligation_metrics(counts, probes, limits))
     metrics[["Haemolysis"]] <- haemolysis_metric(counts, probes)
+    if (warn_missing) {
+      warn_ligation_background(
+        metrics[["Ligation_NEG"]],
+        thresholds[["Ligation_NEG"]],
+        counts,
+        probes,
+        call = call
+      )
+    }
   }
   samples <- cbind(samples, metrics, content[["extra_columns"]])
 
