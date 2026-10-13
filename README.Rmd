@@ -70,13 +70,18 @@ visualise(nacho)
 
 ## Overview
 
-```{r}
-#| echo: false
-#| results: asis
-cat(readLines(file.path("inst", "about", "about-nacho.md"))[-c(1, 2)], sep = "\n")
-```
+NACHO works with NanoString nCounter data.
+It reads the RCC files, flags the samples that fail quality control and normalises the counts.
 
-### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
+- `load_rcc()` reads the RCC files and a sample sheet, computes the quality-control metrics and normalises the counts.
+- `visualise()` opens a Shiny app to look at every metric and change the limits.
+- `autoplot()` draws any quality-control figure as a `ggplot2` plot.
+- `render()` writes a quality-control report with Quarto, as an HTML or a PDF file.
+- `normalise()` runs the normalisation again with new settings.
+
+The [package website](https://m.canouil.dev/NACHO/) shows the app, the report and a full analysis.
+
+### Shiny application
 
 Open the app on a `nacho` object with `visualise()`.
 
