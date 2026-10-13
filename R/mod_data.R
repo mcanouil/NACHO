@@ -125,22 +125,30 @@ merge_sample_sheet <- function(targets, sheet, merge_by) {
 #'
 #' @noRd
 expand_upload <- function(name, datapath, type) {
+  name <- basename(name)
   if (is_zip_upload(name, type)) {
     extract_directory <- file.path(
       dirname(datapath),
       sub("\\.zip$", "", name, ignore.case = TRUE)
     )
+    not_a_zip <- function(cnd) {
+      nacho_abort(
+        c(
+          "{.file {name}} is not a valid zip archive.",
+          i = "Upload the RCC files themselves, or zip them again."
+        ),
+        class = "bad_upload"
+      )
+    }
+    entries <- tryCatch(
+      utils::unzip(datapath, list = TRUE)[["Name"]],
+      warning = not_a_zip,
+      error = not_a_zip
+    )
+    check_zip_entries(entries, name)
     tryCatch(
       utils::unzip(datapath, exdir = extract_directory),
-      warning = function(cnd) {
-        nacho_abort(
-          c(
-            "{.file {name}} is not a valid zip archive.",
-            i = "Upload the RCC files themselves, or zip them again."
-          ),
-          class = "bad_upload"
-        )
-      }
+      warning = not_a_zip
     )
     files <- list.files(extract_directory, recursive = TRUE)
     if (length(files) == 0) {
@@ -162,6 +170,32 @@ expand_upload <- function(name, datapath, type) {
   renamed <- file.path(dirname(datapath), name)
   file.rename(from = datapath, to = renamed)
   data.frame(name = name, datapath = renamed, type = type, IDFILE = name)
+}
+
+#' Refuse zip entries that would be extracted outside the upload folder
+#'
+#' The internal `utils::unzip()` method keeps `../` in entry names before
+#' R 4.5.1, so absolute paths and `..` components are refused here.
+#'
+#' @noRd
+check_zip_entries <- function(entries, name) {
+  outside <- grepl("^([/\\\\]|[A-Za-z]:)", entries) |
+    vapply(
+      strsplit(entries, "[/\\\\]"),
+      function(parts) any(parts == ".."),
+      logical(1)
+    )
+  if (any(outside)) {
+    nacho_abort(
+      c(
+        "{.file {name}} has files outside its own folder, so NACHO does not extract it.",
+        x = "Refused: {.file {entries[outside]}}.",
+        i = "Zip the RCC files again from their folder."
+      ),
+      class = "bad_upload"
+    )
+  }
+  invisible(entries)
 }
 
 #' Tell whether an upload is a zip archive
