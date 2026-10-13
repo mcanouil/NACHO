@@ -197,8 +197,20 @@ batch_diagnostics <- function(
       )
     })
   )
+  list(
+    design = design,
+    crosstabs = crosstabs,
+    metrics = metrics,
+    pc_batch = pc_batch_r2(x, samples, batch)
+  )
+}
+
+#' Share of each principal component's variance explained by each batch
+#'
+#' @noRd
+pc_batch_r2 <- function(x, samples, batch) {
   scores <- x@pca[["scores"]]
-  pc_batch <- bind_or_empty(
+  bind_or_empty(
     pc_batch_template,
     lapply(batch, function(b) {
       data.frame(
@@ -211,11 +223,5 @@ batch_diagnostics <- function(
         )
       )
     })
-  )
-  list(
-    design = design,
-    crosstabs = crosstabs,
-    metrics = metrics,
-    pc_batch = pc_batch
   )
 }

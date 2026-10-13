@@ -1458,12 +1458,9 @@ plot_pc_batch <- function(
   dark,
   interactive = FALSE
 ) {
-  batch <- intersect(c("CartridgeID", "Date"), names(nacho_samples(object)))
-  data <- if (length(batch) > 0) {
-    batch_diagnostics(object, batch = batch)[["pc_batch"]]
-  } else {
-    data.frame(PC = character(), batch = character(), r_squared = numeric())
-  }
+  samples <- nacho_samples(object)
+  batch <- intersect(c("CartridgeID", "Date"), names(samples))
+  data <- pc_batch_r2(object, samples, batch)
   if (nrow(data) == 0) {
     warn_too_few_components(type)
     return(not_available_plot("Batch", "Principal component", dark))
