@@ -254,7 +254,10 @@ test_that("read_nacho() migrates the frozen schema-1 object", {
   path <- test_path("fixtures", "nacho-schema-1.rds")
   expect_message(
     expect_warning(
-      x <- read_nacho(path),
+      x <- suppressWarnings(
+        read_nacho(path),
+        classes = "nacho_warning_metric_unavailable"
+      ),
       class = "nacho_warning_n_comp_reduced"
     ),
     "no negative probes"
@@ -291,7 +294,10 @@ test_that("migrating a schema 1 object with negatives subtracts the geometric me
   expect_message(
     x <- suppressWarnings(
       NACHO:::migrate_schema_1(properties),
-      classes = "nacho_warning_n_comp_reduced"
+      classes = c(
+        "nacho_warning_n_comp_reduced",
+        "nacho_warning_metric_unavailable"
+      )
     ),
     "geometric",
     class = "nacho_message"
@@ -308,7 +314,10 @@ test_that("migrating a schema 1 object with negatives subtracts the geometric me
   without$counts <- without$counts[without$probes$Name, ]
   plain <- suppressWarnings(
     suppressMessages(NACHO:::migrate_schema_1(without)),
-    classes = "nacho_warning_n_comp_reduced"
+    classes = c(
+      "nacho_warning_n_comp_reduced",
+      "nacho_warning_metric_unavailable"
+    )
   )
   expect_identical(
     nacho_samples(plain)$Background,

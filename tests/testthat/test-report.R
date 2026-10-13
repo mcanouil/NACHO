@@ -1002,7 +1002,10 @@ test_that("a migrated object credits NACHO 2 and says so", {
   withr::local_options(nacho.quiet = TRUE)
   x <- NULL
   suppressMessages(expect_warning(
-    x <- NACHO::read_nacho(test_path("fixtures", "nacho-schema-1.rds")),
+    x <- suppressWarnings(
+      NACHO::read_nacho(test_path("fixtures", "nacho-schema-1.rds")),
+      classes = "nacho_warning_metric_unavailable"
+    ),
     class = "nacho_warning_n_comp_reduced"
   ))
   text <- paste(NACHO:::report_parameters(x), collapse = "\n")

@@ -394,9 +394,12 @@ control_factors <- function(counts, probes, excluded, method) {
   positive <- geometric_means(
     counts[used & code_class == "Positive", , drop = FALSE]
   )
+  positive[is.nan(positive)] <- NA_real_
+  unusable <- colnames(counts)[is.na(positive)]
   geo <- list(
-    positive_factor = mean(positive) / positive,
-    glm_failed = character(0)
+    positive_factor = mean(positive, na.rm = TRUE) / positive,
+    glm_failed = character(0),
+    unusable = unusable
   )
   if (method != "GLM") {
     return(geo)
@@ -408,11 +411,16 @@ control_factors <- function(counts, probes, excluded, method) {
     function(k) glm_slope(concentration, controls[, k]),
     numeric(1)
   )
-  if (anyNA(slopes)) {
-    geo[["glm_failed"]] <- colnames(counts)[is.na(slopes)]
+  failed <- is.na(slopes) & !is.na(positive)
+  if (any(failed)) {
+    geo[["glm_failed"]] <- colnames(counts)[failed]
     return(geo)
   }
-  list(positive_factor = mean(slopes) / slopes, glm_failed = character(0))
+  list(
+    positive_factor = mean(slopes, na.rm = TRUE) / slopes,
+    glm_failed = character(0),
+    unusable = unusable
+  )
 }
 
 #' Slope of a Poisson GLM with an identity link on the controls
@@ -638,6 +646,9 @@ sample_pcl <- function(positives, probe_names, preset) {
   }
   round(
     apply(measured, 2, function(m) {
+      if (sum(!is.na(m) & !is.na(known)) < 2) {
+        return(NA_real_)
+      }
       stats::cor(m, known, use = "complete.obs")^2
     }),
     5
@@ -809,6 +820,21 @@ build_nacho <- function(
     excluded,
     settings[["normalisation_method"]]
   )
+  if (length(factors[["unusable"]]) > 0) {
+    nacho_warn(
+      c(
+        paste(
+          "{length(factors[['unusable']])} sample{?s} ha{?s/ve} no usable",
+          "positive control counts, so the positive factor and normalised",
+          "counts are {.val NA}."
+        ),
+        x = "Affected: {.val {cli::cli_vec(factors[['unusable']], list('vec-trunc' = 5))}}.",
+        i = "Check the positive controls of those samples with {.code autoplot(x, type = \"Positive\")}."
+      ),
+      class = "metric_unavailable",
+      call = call
+    )
+  }
   provenance[["glm_fallback"]] <- NULL
   if (length(factors[["glm_failed"]]) > 0) {
     nacho_warn(

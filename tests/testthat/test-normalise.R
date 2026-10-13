@@ -541,3 +541,40 @@ test_that("normalise() without any housekeeping probe leaves counts finite and a
   expect_false("House_factor" %in% names(nacho_samples(result)))
   expect_false(result@settings$housekeeping_norm)
 })
+
+test_that("normalise() without positive control probes warns", {
+  probes <- nacho_probes(GSE74821)
+  kept <- suppressWarnings(
+    GSE74821[which(probes$CodeClass != "Positive"), ]
+  )
+  expect_warning(
+    suppressMessages(normalise(kept, background = "mean")),
+    class = "nacho_warning_metric_unavailable"
+  )
+})
+
+test_that("a sample without usable positive counts warns and leaves the others finite", {
+  x <- GSE74821
+  positives <- nacho_probes(x)$CodeClass == "Positive"
+  x@counts[positives, 1] <- NA_integer_
+  for (method in c("GEO", "GLM")) {
+    expect_warning(
+      y <- suppressWarnings(
+        suppressMessages(
+          normalise(x, normalisation_method = method, background = "mean")
+        ),
+        classes = "nacho_warning_missing_counts"
+      ),
+      regexp = colnames(x@counts)[1],
+      class = "nacho_warning_metric_unavailable"
+    )
+    expect_identical(y@settings$normalisation_method, method, info = method)
+    factor <- nacho_samples(y)$Positive_factor
+    expect_true(is.na(factor[1]), info = method)
+    expect_true(all(is.finite(factor[-1])), info = method)
+    expect_false(
+      anyNA(nacho_counts(y, normalised = TRUE)[!positives, -1]),
+      info = method
+    )
+  }
+})
