@@ -1,4 +1,7 @@
 # Generates the report screenshots of the home page of the package website.
+# The pkgdown workflow runs it before each site build, so the images match the
+# NACHO version that the workflow installs. The images are not in git: run it
+# once before a local pkgdown::build_site().
 # Run from the package root with the development version of NACHO installed.
 # Without Chrome, set CHROMOTE_CHROME to the path of a Chromium based browser.
 
@@ -14,7 +17,13 @@ if (
 }
 
 shoot_html_top <- function(html_report, path) {
-  chrome <- chromote::Chromote$new()
+  chrome_args <- chromote::default_chrome_args()
+  if (nzchar(Sys.getenv("CI"))) {
+    chrome_args <- c(chrome_args, "--no-sandbox")
+  }
+  chrome <- chromote::Chromote$new(
+    browser = chromote::Chrome$new(args = chrome_args)
+  )
   on.exit(chrome$close(), add = TRUE)
   browser <- chromote::ChromoteSession$new(
     parent = chrome,

@@ -12,6 +12,7 @@ on:
       - "pkgdown/**"
       - "inst/brand/**"
       - "data-raw/brand-to-pkgdown.R"
+      - "data-raw/home-screenshots.R"
       - "inst/CITATION"
       - "DESCRIPTION"
       - "NEWS.md"
@@ -28,6 +29,7 @@ on:
       - "pkgdown/**"
       - "inst/brand/**"
       - "data-raw/brand-to-pkgdown.R"
+      - "data-raw/home-screenshots.R"
       - "inst/CITATION"
       - "DESCRIPTION"
       - "NEWS.md"
@@ -81,6 +83,9 @@ jobs:
             echo "::error file=pkgdown/_brand.yml::pkgdown/_brand.yml is out of date. Run Rscript data-raw/brand-to-pkgdown.R and commit the result."
             exit 1
           }
+
+      - name: Render the home page screenshots
+        run: Rscript data-raw/home-screenshots.R
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
