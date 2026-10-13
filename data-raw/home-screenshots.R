@@ -36,7 +36,10 @@ shoot_html_top <- function(html_report, path) {
   loaded <- browser$Page$loadEventFired(wait_ = FALSE)
   browser$Page$navigate(paste0("file://", html_report), wait_ = FALSE)
   browser$wait_for(loaded)
-  browser$Runtime$evaluate("document.fonts.ready.then(() => true)", awaitPromise = TRUE)
+  browser$Runtime$evaluate(
+    "document.fonts.ready.then(() => true)",
+    awaitPromise = TRUE
+  )
   shot <- browser$Page$captureScreenshot(format = "png")
   writeBin(jsonlite::base64_dec(shot[["data"]]), path)
 }
@@ -45,7 +48,12 @@ find_pdf_page <- function(pdf_report, text) {
   pages <- pdftools::pdf_text(pdf_report)
   hits <- grep(text, pages, fixed = TRUE)
   if (length(hits) == 0L) {
-    stop("The PDF report has no page with the text '", text, "'.", call. = FALSE)
+    stop(
+      "The PDF report has no page with the text '",
+      text,
+      "'.",
+      call. = FALSE
+    )
   }
   hits[[length(hits)]]
 }
