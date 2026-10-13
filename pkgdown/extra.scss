@@ -90,6 +90,11 @@ body:has(.template-home) {
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
+
+  @media (forced-colors: active) {
+    background: none;
+    color: CanvasText;
+  }
 }
 
 .nacho-lead {
