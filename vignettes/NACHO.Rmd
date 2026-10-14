@@ -178,6 +178,18 @@ legacy <- load_rcc(
 table(nacho_qc(legacy)[["status"]])
 ```
 
+`write_thresholds()` saves a set of limits to a YAML file, and `read_thresholds()` reads the file back.
+With this file, you can use the same limits for each study.
+The **Export** page of the app writes the same file.
+
+```{r}
+#| label: thresholds-file
+thresholds_file <- tempfile(fileext = ".yml")
+write_thresholds(nacho_thresholds(preset = "legacy"), thresholds_file)
+legacy <- normalise(nacho, outliers_thresholds = read_thresholds(thresholds_file))
+table(nacho_qc(legacy)[["status"]])
+```
+
 # Normalise
 
 `normalise()` normalises a `nacho` object again with new settings and returns a new object.

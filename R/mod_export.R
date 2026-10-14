@@ -151,7 +151,7 @@ mod_export_server <- function(id, object, quarto) {
     )
     output$thresholds_yaml <- shiny::downloadHandler(
       filename = "nacho-thresholds.yml",
-      content = function(file) yaml::write_yaml(object()@thresholds, file)
+      content = function(file) write_thresholds(object()@thresholds, file)
     )
     output$object_rds <- shiny::downloadHandler(
       filename = "nacho.rds",

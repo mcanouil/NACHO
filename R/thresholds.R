@@ -298,3 +298,114 @@ check_thresholds <- function(
   }
   invisible(thresholds)
 }
+
+#' Write and read quality-control thresholds
+#'
+#' `write_thresholds()` saves thresholds to a YAML file, and
+#' `read_thresholds()` reads them back.
+#' Use the file to apply the same quality-control policy to each study, or to
+#' load thresholds that you tuned in [nacho_app()].
+#' The Export page of the app writes the same file.
+#'
+#' In the file, `.inf` and `-.inf` are open bounds, and `.na.character` is an
+#' unknown instrument.
+#' You can edit the file by hand.
+#' `read_thresholds()` reads whole numbers such as `80` as numbers, and checks
+#' the thresholds as [normalise()] does.
+#'
+#' @param thresholds A list of thresholds, as returned by [nacho_thresholds()]
+#'   or found in the `@thresholds` property of a `nacho` object.
+#' @param file The path of the YAML file.
+#'
+#' @return `write_thresholds()` returns `file`, invisibly.
+#'   `read_thresholds()` returns the list of thresholds.
+#' @export
+#' @examples
+#' file <- tempfile(fileext = ".yml")
+#' thresholds <- nacho_thresholds("sprint")
+#' thresholds$FoV <- 80
+#' write_thresholds(thresholds, file)
+#' read_thresholds(file)
+#' unlink(file)
+write_thresholds <- function(thresholds, file) {
+  check_thresholds(thresholds)
+  yaml::write_yaml(
+    thresholds,
+    file,
+    handlers = list(numeric = function(value) {
+      structure(yaml_numbers(value), class = "verbatim")
+    })
+  )
+  invisible(file)
+}
+
+#' @rdname write_thresholds
+#' @export
+read_thresholds <- function(file) {
+  call <- rlang::current_env()
+  fail <- function(problems) {
+    problems <- gsub("([{}])", "\\1\\1", problems)
+    nacho_abort(
+      c(
+        "{.file {basename(file)}} does not hold valid NACHO thresholds.",
+        stats::setNames(problems, rep("x", length(problems))),
+        i = "Write the file with {.fn write_thresholds}, or from the Export page of the app."
+      ),
+      class = "bad_thresholds",
+      call = call
+    )
+  }
+  if (!file.exists(file)) {
+    fail("The file does not exist.")
+  }
+  thresholds <- tryCatch(
+    yaml::read_yaml(file),
+    error = function(cnd) fail(conditionMessage(cnd))
+  )
+  if (!is.list(thresholds) || is.null(names(thresholds))) {
+    fail("The file is not a list of named thresholds.")
+  }
+  thresholds[] <- lapply(thresholds, function(value) {
+    if (is.integer(value)) as.double(value) else value
+  })
+  problems <- validate_thresholds(thresholds)
+  if (length(problems) > 0) {
+    fail(sub("^@thresholds", "thresholds", problems))
+  }
+  thresholds
+}
+
+#' Write numbers for YAML with the fewest digits that read back exactly
+#'
+#' The yaml package writes seven significant digits by default, so a bound
+#' such as `1 / 11` would change in a write and a read.
+#' Each number gets 15, 16 or 17 significant digits, the first that gives the
+#' same double back.
+#' A number without a decimal point gets `.0`, so YAML reads it as a float.
+#'
+#' @param value A double vector without `NA`.
+#'
+#' @return A character vector of YAML scalars.
+#'
+#' @noRd
+yaml_numbers <- function(value) {
+  vapply(
+    value,
+    function(number) {
+      if (is.infinite(number)) {
+        return(if (number > 0) ".inf" else "-.inf")
+      }
+      for (digits in 15:17) {
+        text <- trimws(formatC(number, digits = digits, format = "g"))
+        if (identical(as.numeric(text), number)) {
+          break
+        }
+      }
+      if (!grepl(".", text, fixed = TRUE)) {
+        text <- sub("^(-?[0-9]+)", "\\1.0", text)
+      }
+      text
+    },
+    character(1)
+  )
+}

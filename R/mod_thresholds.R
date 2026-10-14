@@ -183,6 +183,17 @@ mod_thresholds_ui <- function(id) {
         icon = shiny::icon("rotate-left", `aria-hidden` = "true"),
         `aria-label` = "Reset the thresholds to the preset",
         class = "btn-outline-secondary btn-sm"
+      ),
+      shiny::tags$div(
+        class = "mt-3",
+        shiny::fileInput(
+          ns("thresholds_file"),
+          "Load thresholds (YAML)",
+          accept = c(".yml", ".yaml")
+        )
+      ),
+      shiny::helpText(
+        "Read a file from the Export page, or one written with write_thresholds()."
       )
     ),
     bslib::accordion_panel(
@@ -321,6 +332,37 @@ mod_thresholds_server <- function(id, data) {
     }
 
     shiny::observeEvent(input$reset, reset())
+
+    shiny::observeEvent(input$thresholds_file, {
+      shiny::req(data())
+      limits <- tryCatch(
+        read_thresholds(input$thresholds_file[["datapath"]][1]),
+        nacho_error = function(cnd) {
+          message <- cli::ansi_strip(rlang::cnd_message(cnd))
+          notify_user(
+            sub(
+              basename(input$thresholds_file[["datapath"]][1]),
+              input$thresholds_file[["name"]][1],
+              message,
+              fixed = TRUE
+            ),
+            "error"
+          )
+          NULL
+        }
+      )
+      if (is.null(limits)) {
+        return(invisible(NULL))
+      }
+      start(limits)
+      instrument <- limits[["instrument"]]
+      shiny::updateSelectInput(session, "preset", selected = limits[["preset"]])
+      shiny::updateSelectInput(
+        session,
+        "instrument",
+        selected = if (is.na(instrument)) "max" else instrument
+      )
+    })
 
     for (metric in qc_metrics) {
       local({

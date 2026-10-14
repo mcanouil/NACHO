@@ -437,3 +437,60 @@ test_that("integer limits stay integer after the slider", {
   )
   expect_identical(NACHO:::slider_to_limits(2, c(0, 10), 3L), 2L)
 })
+
+test_that("a thresholds file replaces the limits and the preset", {
+  wanted <- utils::modifyList(
+    nacho_thresholds("flex", "legacy"),
+    list(FoV = 80)
+  )
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(wanted, file)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(GSE74821)),
+    {
+      session$setInputs(preset = "nsolver", instrument = "max")
+      session$elapse(600)
+      session$setInputs(
+        thresholds_file = data.frame(
+          name = "lab.yml",
+          size = file.size(file),
+          type = "",
+          datapath = file
+        )
+      )
+      session$setInputs(preset = "legacy", instrument = "flex")
+      session$elapse(600)
+      expect_identical(session$returned$thresholds(), wanted)
+    }
+  )
+})
+
+test_that("a bad thresholds file keeps the current limits", {
+  file <- withr::local_tempfile(fileext = ".yml")
+  writeLines("FoV: [75", file)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(GSE74821)),
+    {
+      session$setInputs(preset = "nsolver", instrument = "max")
+      session$elapse(600)
+      session$setInputs(
+        thresholds_file = data.frame(
+          name = "broken.yml",
+          size = file.size(file),
+          type = "",
+          datapath = file
+        )
+      )
+      session$elapse(600)
+      expect_identical(session$returned$thresholds(), GSE74821@thresholds)
+    }
+  )
+})
+
+test_that("the preset panel offers a thresholds file", {
+  html <- htmltools::renderTags(NACHO:::mod_thresholds_ui("thresholds"))$html
+  expect_match(html, 'id="thresholds-thresholds_file"', fixed = TRUE)
+  expect_match(html, ".yml,.yaml", fixed = TRUE)
+})
