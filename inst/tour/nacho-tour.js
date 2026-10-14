@@ -9,8 +9,8 @@
  * - steps come from R in a Shiny message ("nacho-tour-start"),
  * - before a step shows, the page switches, the threshold panel opens and
  *   the sidebar opens, then the step waits until the Shiny server is idle
- *   and no panel is still opening (plots that build in the background do
- *   not hold the tour back),
+ *   and no panel or sidebar is still opening (plots that build in the
+ *   background do not hold the tour back),
  * - a step whose part of the app is missing is skipped, and the skip is read
  *   out with the next step; the skip comes after 1.5 s once Shiny is idle,
  *   or after 10 s at most while Shiny is busy,
@@ -163,7 +163,9 @@
     return (
       !document.documentElement.classList.contains("shiny-busy") &&
       !Array.prototype.some.call(
-        document.querySelectorAll(".collapsing"),
+        document.querySelectorAll(
+          ".collapsing, .bslib-sidebar-layout.transitioning"
+        ),
         visible
       )
     );

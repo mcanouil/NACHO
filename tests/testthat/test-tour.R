@@ -320,6 +320,18 @@ test_that("Esc ends the tour from a collapsed sidebar in dark mode", {
     "document.querySelector('.bslib-sidebar-layout.sidebar-collapsed') !== null"
   )
   start_tour_in(app)
+  app$run_js(paste0(
+    "document.querySelector('.bslib-sidebar-layout').style.setProperty(",
+    "'--bslib-sidebar-transition-duration', '2s');"
+  ))
+  app$run_js(paste0(
+    "window.tourTestSliding = null; new MutationObserver(function (m, o) {",
+    "var p = document.querySelector('.driver-popover-progress-text');",
+    "if (p && p.textContent === '3 of 9') { window.tourTestSliding = ",
+    "!!document.querySelector('.bslib-sidebar-layout.transitioning'); ",
+    "o.disconnect(); } }).observe(document.body, ",
+    "{childList: true, subtree: true, characterData: true})"
+  ))
   expect_identical(
     js_string(
       app,
@@ -346,6 +358,7 @@ test_that("Esc ends the tour from a collapsed sidebar in dark mode", {
     ),
     "true"
   )
+  expect_identical(js_string(app, "window.tourTestSliding"), "false")
   app$run_js(
     "window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Escape'}))"
   )
