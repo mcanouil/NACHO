@@ -471,7 +471,7 @@ test_that("help_links() names what DESCRIPTION lacks", {
 
 test_that("the Help menu holds five items and safe external links", {
   html <- as.character(NACHO:::app_ui())
-  expect_match(html, 'data-value="Help"', fixed = TRUE)
+  expect_match(html, 'data-value="help"', fixed = TRUE)
   labels <- c(
     "About NACHO",
     "Documentation",

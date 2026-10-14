@@ -208,6 +208,7 @@ mod_qc_plot_ui <- function(id, type = id, interactive = FALSE) {
   ns <- shiny::NS(id)
   title <- app_plot_titles[[type]]
   bslib::card(
+    id = ns("card"),
     full_screen = TRUE,
     bslib::card_header(
       class = "d-flex justify-content-between align-items-center",

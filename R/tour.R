@@ -35,3 +35,102 @@ tour_dependency <- function() {
 tour_dependencies <- function() {
   list(driver_dependency(), tour_dependency())
 }
+
+#' The steps of the app tour
+#'
+#' Each step names a CSS selector of a stable element of the app, a title
+#' and a description in plain text, and optionally the page to show, the
+#' threshold panel to open and the side of the card.
+#' `nacho-tour.js` escapes the text, so it must not hold HTML.
+#'
+#' @noRd
+tour_steps <- function() {
+  list(
+    list(
+      element = "#data-files",
+      title = "Load your data",
+      description = paste(
+        "Choose RCC files, zip archives of RCC files and an optional sample",
+        "sheet (CSV). Then click Import."
+      ),
+      page = "Data"
+    ),
+    list(
+      element = ".nacho-summary",
+      title = "Summary of the data",
+      description = paste(
+        "This strip shows the samples, the cartridges, the flagged samples",
+        "and the method. It shows on every page and changes when you change a",
+        "threshold."
+      ),
+      page = "Data",
+      side = "bottom"
+    ),
+    list(
+      element = "#thresholds-sections",
+      title = "Thresholds",
+      description = paste(
+        "Choose a preset and your instrument. Then move a slider to change",
+        "one threshold. Every page uses these thresholds."
+      ),
+      page = "Data",
+      open = "Preset",
+      side = "right"
+    ),
+    list(
+      element = "#BD-card",
+      title = "Quality-control plots",
+      description = paste(
+        "Each card shows one metric for each sample. Shaded bands show the",
+        "thresholds, and flagged samples show as triangles."
+      ),
+      page = "QC metrics"
+    ),
+    list(
+      element = "button[aria-label='Display options for Binding density']",
+      title = "Display options",
+      description = paste(
+        "Use this button to change the colours, the legend, the labels and",
+        "the point size, or to download the plot as a PNG file."
+      ),
+      page = "QC metrics",
+      side = "left"
+    ),
+    list(
+      element = "#outliers-highlight",
+      title = "Samples",
+      description = paste(
+        "Choose a sample to mark it in the tables. Interactive plots outline",
+        "the same sample."
+      ),
+      page = "Samples"
+    ),
+    list(
+      element = "#batch-group",
+      title = "Batches and groups",
+      description = paste(
+        "Choose the column that holds the biological groups. The page then",
+        "shows whether batches and groups are confounded."
+      ),
+      page = "Batch"
+    ),
+    list(
+      element = "#export-cards",
+      title = "Export",
+      description = paste(
+        "Download the quality-control table, the thresholds and the nacho",
+        "object, or render a report."
+      ),
+      page = "Export"
+    ),
+    list(
+      element = "a.dropdown-toggle[data-value='help']",
+      title = "Help",
+      description = paste(
+        "Open this menu to take the tour again, to read about NACHO or to",
+        "report a problem."
+      ),
+      side = "bottom"
+    )
+  )
+}

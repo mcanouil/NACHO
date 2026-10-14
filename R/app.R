@@ -234,6 +234,7 @@ help_menu <- function() {
   links <- help_links()
   bslib::nav_menu(
     "Help",
+    value = "help",
     align = "right",
     bslib::nav_panel("About NACHO", help_page("nacho")),
     bslib::nav_item(external_link("Documentation", links[["documentation"]])),
