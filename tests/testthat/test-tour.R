@@ -206,9 +206,13 @@ active_page <- function(app) {
   ))
 }
 
-relative_luminance <- function(rgb) {
-  channels <- as.numeric(regmatches(rgb, gregexpr("[0-9.]+", rgb))[[1]][1:3]) /
-    255
+relative_luminance <- function(colour) {
+  values <- as.numeric(regmatches(colour, gregexpr("[0-9.]+", colour))[[1]])
+  channels <- if (startsWith(colour, "color(srgb")) {
+    values[1:3]
+  } else {
+    values[1:3] / 255
+  }
   linear <- ifelse(
     channels <= 0.03928,
     channels / 12.92,
@@ -581,4 +585,55 @@ test_that("arrow keys typed in an input do not move the tour", {
     "new KeyboardEvent('keyup', {key: 'ArrowRight', bubbles: true}))"
   ))
   wait_for_step(app, 4)
+})
+
+hover_next <- function(app) {
+  centre <- app$get_js(paste0(
+    "(function() { var r = document.querySelector('.driver-popover-next-btn')",
+    ".getBoundingClientRect(); return [r.left + r.width / 2, ",
+    "r.top + r.height / 2]; })()"
+  ))
+  app$get_chromote_session()$Input$dispatchMouseEvent(
+    type = "mouseMoved",
+    x = centre[[1]],
+    y = centre[[2]]
+  )
+  Sys.sleep(0.5)
+}
+
+test_that("the Next button shows a hover state that keeps its contrast", {
+  skip_if_no_browser()
+  app <- tour_app(GSE74821)
+  next_background <- function() {
+    js_string(
+      app,
+      "getComputedStyle(document.querySelector('.driver-popover-next-btn')).backgroundColor"
+    )
+  }
+  for (mode in c("light", "dark")) {
+    app$run_js(sprintf(
+      "document.querySelector('bslib-input-dark-mode').setAttribute('mode', '%s')",
+      mode
+    ))
+    start_tour_in(app)
+    app$get_chromote_session()$Input$dispatchMouseEvent(
+      type = "mouseMoved",
+      x = 1,
+      y = 1
+    )
+    Sys.sleep(0.5)
+    resting <- next_background()
+    hover_next(app)
+    expect_false(identical(next_background(), resting), info = mode)
+    expect_gte(next_button_contrast(app), 4.5)
+    expect_identical(
+      js_string(
+        app,
+        "getComputedStyle(document.querySelector('.driver-popover-next-btn')).cursor"
+      ),
+      "pointer"
+    )
+    app$run_js("document.querySelector('.driver-popover-close-btn').click()")
+    wait_for_end(app)
+  }
 })

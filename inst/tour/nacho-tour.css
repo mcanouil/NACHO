@@ -53,6 +53,15 @@
   border-color: var(--bs-primary);
 }
 
+.driver-popover.nacho-tour .driver-popover-prev-btn:hover:not(:disabled) {
+  background-color: var(--bs-secondary-bg);
+}
+
+.driver-popover.nacho-tour .driver-popover-next-btn:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--bs-primary) 88%, #000);
+  border-color: color-mix(in srgb, var(--bs-primary) 88%, #000);
+}
+
 .driver-popover.nacho-tour .driver-popover-footer-btn:focus-visible,
 .driver-popover.nacho-tour .driver-popover-close-btn:focus-visible {
   outline: 0.25rem solid var(--bs-focus-ring-color);
