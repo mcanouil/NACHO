@@ -73,6 +73,7 @@ reference:
       - upgrade_nacho
       - as_summarized_experiment
       - nacho_thresholds
+      - write_thresholds
       - normalise
       - exclude_outliers
       - housekeeping_stability

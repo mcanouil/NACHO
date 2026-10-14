@@ -84,7 +84,7 @@ main <- function() {
 
   click <- function(selector) {
     app$run_js(sprintf(
-      "document.querySelector(%s).click()",
+      "var element = document.querySelector(%s); element.scrollIntoView({block: 'center'}); element.click();",
       jsonlite::toJSON(selector, auto_unbox = TRUE)
     ))
     Sys.sleep(1)

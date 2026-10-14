@@ -7,7 +7,7 @@ test_that("the data downloads hold the tuned object", {
       qc <- utils::read.csv(output$qc_csv)
       expect_identical(nrow(qc), 12L)
       expect_identical(sum(qc$FoV_status == "fail"), 2L)
-      thresholds <- yaml::read_yaml(output$thresholds_yaml)
+      thresholds <- read_thresholds(output$thresholds_yaml)
       expect_identical(thresholds$FoV, 99.9)
       expect_identical(thresholds$preset, "nsolver")
       expect_identical(readRDS(output$object_rds), x)
@@ -21,7 +21,7 @@ test_that("open bounds survive the YAML export", {
     NACHO:::mod_export_server,
     args = list(object = shiny::reactiveVal(x), quarto = FALSE),
     {
-      thresholds <- yaml::read_yaml(output$thresholds_yaml)
+      thresholds <- read_thresholds(output$thresholds_yaml)
       expect_identical(thresholds$Ligation_NEG, c(-Inf, 0))
     }
   )
@@ -353,6 +353,18 @@ test_that("the render gets the title and author, blank ones as NULL", {
       session$setInputs(title = "   ", author = "", render = 2)
       wait_for_task(task, session)
       expect_identical(seen, list(title = NULL, author = NULL))
+    }
+  )
+})
+
+test_that("the thresholds download reads back exactly", {
+  x <- GSE74821
+  x@thresholds <- nacho_thresholds("max", "legacy")
+  shiny::testServer(
+    NACHO:::mod_export_server,
+    args = list(object = shiny::reactiveVal(x), quarto = FALSE),
+    {
+      expect_identical(read_thresholds(output$thresholds_yaml), x@thresholds)
     }
   )
 })

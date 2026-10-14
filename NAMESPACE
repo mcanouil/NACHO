@@ -24,11 +24,13 @@ export(nacho_thresholds)
 export(normalise)
 export(normalize)
 export(read_nacho)
+export(read_thresholds)
 export(render)
 export(suggest_ruv_k)
 export(upgrade_nacho)
 export(visualise)
 export(visualize)
+export(write_thresholds)
 importFrom(ggplot2,
   .data,
   autoplot

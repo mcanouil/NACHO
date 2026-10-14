@@ -242,3 +242,91 @@ test_that("legacy_thresholds() passes unnamed or unknown lists on untouched", {
     class = "nacho_error_bad_argument"
   )
 })
+
+test_that("thresholds survive a write and a read", {
+  for (preset in c("nsolver", "legacy")) {
+    thresholds <- nacho_thresholds("sprint", preset, haemolysis = TRUE)
+    file <- withr::local_tempfile(fileext = ".yml")
+    write_thresholds(thresholds, file)
+    expect_identical(read_thresholds(file), thresholds)
+  }
+})
+
+test_that("an unknown instrument survives a write and a read", {
+  thresholds <- GSE74821@thresholds
+  thresholds[["instrument"]] <- NA_character_
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(thresholds, file)
+  expect_identical(read_thresholds(file), thresholds)
+})
+
+test_that("read_thresholds() reads whole numbers written by hand", {
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(nacho_thresholds(), file)
+  lines <- readLines(file)
+  writeLines(sub("^FoV: .*$", "FoV: 80", lines), file)
+  thresholds <- read_thresholds(file)
+  expect_identical(thresholds[["FoV"]], 80)
+  expect_identical(thresholds[["BD"]], nacho_thresholds()[["BD"]])
+})
+
+test_that("write_thresholds() refuses invalid thresholds", {
+  thresholds <- replace(nacho_thresholds(), "FoV", list(150))
+  file <- withr::local_tempfile(fileext = ".yml")
+  expect_error(
+    write_thresholds(thresholds, file),
+    class = "nacho_error_bad_argument"
+  )
+  expect_false(file.exists(file))
+})
+
+test_that("read_thresholds() names the file and the problem", {
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(nacho_thresholds(), file)
+  lines <- readLines(file)
+  writeLines(sub("^FoV: .*$", "FoV: 150", lines), file)
+  expect_error(read_thresholds(file), class = "nacho_error_bad_thresholds")
+  expect_error(read_thresholds(file), basename(file), fixed = TRUE)
+  expect_error(read_thresholds(file), "FoV", fixed = TRUE)
+})
+
+test_that("read_thresholds() refuses files that are not thresholds", {
+  missing <- withr::local_tempfile(fileext = ".yml")
+  expect_error(read_thresholds(missing), class = "nacho_error_bad_thresholds")
+  broken <- withr::local_tempfile(fileext = ".yml")
+  writeLines("FoV: [75", broken)
+  expect_error(read_thresholds(broken), class = "nacho_error_bad_thresholds")
+  scalar <- withr::local_tempfile(fileext = ".yml")
+  writeLines("75", scalar)
+  expect_error(read_thresholds(scalar), class = "nacho_error_bad_thresholds")
+  legacy <- withr::local_tempfile(fileext = ".yml")
+  writeLines(c("BD:", "- 0.1", "- 2.25", "FoV: 75"), legacy)
+  expect_error(read_thresholds(legacy), class = "nacho_error_bad_thresholds")
+})
+
+test_that("yaml_numbers() keeps each double exactly and briefly", {
+  values <- c(0.95, 1 / 11, 75, -2, 1e20, 1.5e-10, -Inf, Inf)
+  text <- NACHO:::yaml_numbers(values)
+  expect_identical(
+    text[c(1, 3, 4, 7, 8)],
+    c("0.95", "75.0", "-2.0", "-.inf", ".inf")
+  )
+  expect_identical(yaml::yaml.load(paste0("[", toString(text), "]")), values)
+})
+
+test_that("read_thresholds() never evaluates R code in the file", {
+  withr::local_options(yaml.eval.expr = TRUE)
+  withr::local_envvar(NACHO_YAML_RAN = "")
+  file <- withr::local_tempfile(fileext = ".yml")
+  writeLines("FoV: !expr Sys.setenv(NACHO_YAML_RAN = 'yes')", file)
+  expect_error(read_thresholds(file), class = "nacho_error_bad_thresholds")
+  expect_identical(Sys.getenv("NACHO_YAML_RAN"), "")
+})
+
+test_that("read_thresholds() fills the miRNA thresholds from the preset", {
+  partial <- nacho_thresholds("flex", "nsolver")
+  partial[c("Ligation_NEG", "Haemolysis")] <- NULL
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(partial, file)
+  expect_identical(read_thresholds(file), nacho_thresholds("flex", "nsolver"))
+})
