@@ -135,6 +135,7 @@ wait_until <- function(session, done, tries = 50) {
   for (i in seq_len(tries)) {
     session$flushReact()
     if (done()) {
+      session$flushReact()
       return(invisible(TRUE))
     }
     later::run_now(0.1)

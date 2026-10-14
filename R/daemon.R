@@ -1,17 +1,18 @@
-#' Run a NACHO function in a mirai daemon when mirai is installed
+#' Run a NACHO function in a mirai daemon, or in the app process
 #'
 #' The daemon uses the installed NACHO package, not the loaded one, so
 #' reinstall NACHO after you change the function.
 #'
 #' @param fun The name of the NACHO function.
 #' @param args The list of arguments of the function.
-#' @param compute The mirai compute profile that runs the function.
+#' @param compute The mirai compute profile that runs the function, or `NULL`
+#'   to run it in the app process.
 #'
-#' @return A mirai, or the result of the function when mirai is not installed.
+#' @return A mirai, or the result of the function when `compute` is `NULL`.
 #'
 #' @noRd
 run_in_daemon <- function(fun, args, compute = NULL) {
-  if (has_package("mirai")) {
+  if (!is.null(compute)) {
     libs <- .libPaths()
     return(mirai::mirai(
       {
@@ -51,7 +52,10 @@ settle_while_open <- function(running, ended) {
 
 #' Run the jobs of a task button in the background
 #'
-#' The first job starts one mirai daemon for the session.
+#' When mirai is installed, the first job starts one mirai daemon for the
+#' session.
+#' When the daemon cannot start, or mirai is not installed, the jobs run in the
+#' app process.
 #' When the session ends, the running job and the daemon stop, and the task
 #' gives no more results.
 #'
@@ -78,6 +82,7 @@ session_task <- function(
   profile <- basename(tempfile("nacho-task-"))
   running <- NULL
   daemons_on <- FALSE
+  daemons_tried <- FALSE
   ended <- FALSE
   session$onSessionEnded(function() {
     ended <<- TRUE
@@ -90,13 +95,19 @@ session_task <- function(
     on_end()
   })
   task <- shiny::ExtendedTask$new(function(...) {
-    if (has_package("mirai") && !daemons_on) {
-      with_library_paths(
-        mirai::daemons(1, dispatcher = TRUE, .compute = profile)
+    if (!daemons_tried && has_package("mirai")) {
+      daemons_tried <<- TRUE
+      daemons_on <<- tryCatch(
+        {
+          with_library_paths(
+            mirai::daemons(1, dispatcher = TRUE, .compute = profile)
+          )
+          TRUE
+        },
+        error = function(cnd) FALSE
       )
-      daemons_on <<- TRUE
     }
-    running <<- run_in_daemon(fun, list(...), profile)
+    running <<- run_in_daemon(fun, list(...), if (daemons_on) profile)
     settle_while_open(running, function() ended)
   }) |>
     bslib::bind_task_button(button_id)

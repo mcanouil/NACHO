@@ -1,5 +1,4 @@
-test_that("without mirai, a job runs in the app process", {
-  local_no_mirai()
+test_that("without a compute profile, a job runs in the app process", {
   local_mocked_bindings(blank_to_null = function(x) paste("ran", x))
   expect_identical(
     NACHO:::run_in_daemon("blank_to_null", list("here")),
@@ -10,7 +9,6 @@ test_that("without mirai, a job runs in the app process", {
 test_that("a background job hands the library paths to the daemon", {
   skip_if_not_installed("mirai")
   captured <- NULL
-  local_mocked_bindings(has_package = function(package) TRUE)
   local_mocked_bindings(
     mirai = function(.expression, ..., .compute = NULL) {
       captured <<- list(
@@ -89,4 +87,33 @@ test_that("the session daemon starts with the library paths of the app", {
     }
   )
   expect_identical(seen, paste(.libPaths(), collapse = .Platform$path.sep))
+})
+
+test_that("a job runs in the app process when the daemon cannot start", {
+  skip_if_not_installed("mirai")
+  results <- NULL
+  local_mocked_bindings(
+    has_package = function(package) TRUE,
+    blank_to_null = function(x) paste("ran", x)
+  )
+  local_mocked_bindings(
+    daemons = function(...) stop("No socket."),
+    .package = "mirai"
+  )
+  shiny::testServer(
+    function(input, output, session) {
+      task <- NACHO:::session_task(
+        session,
+        "go",
+        "blank_to_null",
+        on_success = function(result) results <<- c(results, result),
+        on_error = function(message) stop(message)
+      )
+    },
+    {
+      task$invoke("here")
+      wait_for_task(task, session)
+    }
+  )
+  expect_identical(results, "ran here")
 })

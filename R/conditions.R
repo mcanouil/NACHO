@@ -80,10 +80,12 @@ nacho_inform <- function(message, ..., .envir = parent.frame()) {
 nacho_progress_step <- function(message, .envir = parent.frame()) {
   progress_file <- getOption("nacho.progress_file")
   if (!is.null(progress_file)) {
+    staged <- paste0(progress_file, ".tmp")
     writeLines(
       cli::ansi_strip(cli::format_inline(message, .envir = .envir)),
-      progress_file
+      staged
     )
+    file.rename(staged, progress_file)
   }
   if (nacho_is_quiet()) {
     return(invisible(NULL))
