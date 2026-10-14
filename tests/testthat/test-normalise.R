@@ -610,3 +610,18 @@ test_that("a rebuild warns only about samples whose positive factor was usable",
   )
   expect_no_warning(quiet_normalise(y, background = "median"))
 })
+
+test_that("normalise() refuses housekeeping genes that are not probes", {
+  error <- expect_error(
+    suppressMessages(normalise(GSE74821, housekeeping_genes = "ACTB_typo")),
+    class = "nacho_error_bad_argument"
+  )
+  expect_match(conditionMessage(error), "ACTB_typo", fixed = TRUE)
+  genes <- GSE74821@settings$housekeeping_genes
+  expect_error(
+    suppressMessages(
+      normalise(GSE74821, housekeeping_genes = c(genes[1], "ACTB_typo"))
+    ),
+    class = "nacho_error_bad_argument"
+  )
+})

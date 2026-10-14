@@ -679,3 +679,18 @@ test_that("load_rcc() refuses an id column with a computed name", {
   )
   expect_match(conditionMessage(error), "ID", fixed = TRUE)
 })
+
+test_that("load_rcc() refuses housekeeping genes that are not probes", {
+  fixture <- geo_fixture("GSE178516")
+  error <- expect_error(
+    suppressMessages(load_rcc(
+      fixture$dir,
+      fixture$samplesheet,
+      "IDFILE",
+      housekeeping_genes = "ACTB_typo",
+      n_comp = 3
+    )),
+    class = "nacho_error_bad_argument"
+  )
+  expect_match(conditionMessage(error), "ACTB_typo", fixed = TRUE)
+})

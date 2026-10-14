@@ -319,6 +319,7 @@ load_rcc <- function(
   rownames(samples) <- NULL
   counts <- counts[, sample_order, drop = FALSE]
 
+  check_housekeeping_genes(housekeeping_genes, probes[["Name"]])
   housekeeping_norm <- resolve_housekeeping_norm(
     probes[["CodeClass"]],
     housekeeping_genes,
@@ -397,6 +398,28 @@ resolve_housekeeping_norm <- function(
     return(FALSE)
   }
   housekeeping_norm
+}
+
+#' Refuse housekeeping genes that are not probes of the data
+#'
+#' @noRd
+check_housekeeping_genes <- function(
+  housekeeping_genes,
+  probe_names,
+  call = rlang::caller_env()
+) {
+  unknown <- setdiff(housekeeping_genes, probe_names)
+  if (length(unknown) > 0) {
+    nacho_abort(
+      c(
+        "{.arg housekeeping_genes} has name{?s} that {?is/are} not a probe: {.val {utils::head(unknown, 5)}}.",
+        i = "Use the names in {.code nacho_probes(x)$Name}."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(housekeeping_genes)
 }
 
 #' Keep the housekeeping genes of the settings that are still probes

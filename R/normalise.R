@@ -99,6 +99,7 @@ normalise <- function(
     background_mode,
     ruv_k
   )
+  check_housekeeping_genes(housekeeping_genes, nacho_object@probes[["Name"]])
   check_thresholds(outliers_thresholds)
 
   settings <- list(
