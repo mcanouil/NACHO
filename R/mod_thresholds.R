@@ -249,23 +249,22 @@ mod_thresholds_server <- function(id, data) {
       current(limits)
       revision(shiny::isolate(revision()) + 1L)
     }
+    show_preset <- function(limits) {
+      instrument <- limits[["instrument"]]
+      shiny::updateSelectInput(session, "preset", selected = limits[["preset"]])
+      shiny::updateSelectInput(
+        session,
+        "instrument",
+        selected = if (is.na(instrument)) "max" else instrument
+      )
+    }
 
     shiny::observeEvent(data(), {
       x <- data()
       start(x@thresholds)
       published(x@thresholds)
       chosen(settings_of(x))
-      instrument <- x@thresholds[["instrument"]]
-      shiny::updateSelectInput(
-        session,
-        "preset",
-        selected = x@thresholds[["preset"]]
-      )
-      shiny::updateSelectInput(
-        session,
-        "instrument",
-        selected = if (is.na(instrument)) "max" else instrument
-      )
+      show_preset(x@thresholds)
       shiny::updateSelectInput(
         session,
         "method",
@@ -335,13 +334,14 @@ mod_thresholds_server <- function(id, data) {
 
     shiny::observeEvent(input$thresholds_file, {
       shiny::req(data())
+      path <- input$thresholds_file[["datapath"]][1]
       limits <- tryCatch(
-        read_thresholds(input$thresholds_file[["datapath"]][1]),
+        read_thresholds(path),
         nacho_error = function(cnd) {
           message <- cli::ansi_strip(rlang::cnd_message(cnd))
           notify_user(
             sub(
-              basename(input$thresholds_file[["datapath"]][1]),
+              basename(path),
               input$thresholds_file[["name"]][1],
               message,
               fixed = TRUE
@@ -351,17 +351,10 @@ mod_thresholds_server <- function(id, data) {
           NULL
         }
       )
-      if (is.null(limits)) {
-        return(invisible(NULL))
+      if (!is.null(limits)) {
+        start(limits)
+        show_preset(limits)
       }
-      start(limits)
-      instrument <- limits[["instrument"]]
-      shiny::updateSelectInput(session, "preset", selected = limits[["preset"]])
-      shiny::updateSelectInput(
-        session,
-        "instrument",
-        selected = if (is.na(instrument)) "max" else instrument
-      )
     })
 
     for (metric in qc_metrics) {
