@@ -117,3 +117,44 @@ test_that("a job runs in the app process when the daemon cannot start", {
   )
   expect_identical(results, "ran here")
 })
+
+test_that("the session daemon starts and loads NACHO when the warm-up input changes", {
+  skip_if_not_installed("mirai")
+  started <- 0
+  warmed <- NULL
+  local_mocked_bindings(has_package = function(package) TRUE)
+  local_mocked_bindings(
+    daemons = function(n, ...) {
+      if (n > 0) {
+        started <<- started + 1
+      }
+      invisible(NULL)
+    },
+    mirai = function(.expr, ..., .compute = NULL) {
+      warmed <<- paste(deparse(substitute(.expr)), collapse = " ")
+      invisible(NULL)
+    },
+    .package = "mirai"
+  )
+  shiny::testServer(
+    function(input, output, session) {
+      task <- NACHO:::session_task(
+        session,
+        "go",
+        "run",
+        on_success = function(result) NULL,
+        on_error = function(message) NULL,
+        warm_on = shiny::reactive(input$files)
+      )
+    },
+    {
+      expect_identical(started, 0)
+      session$setInputs(files = "a")
+      expect_identical(started, 1)
+      session$setInputs(files = "b")
+      expect_identical(started, 1)
+    }
+  )
+  expect_match(warmed, ".libPaths(libs)", fixed = TRUE)
+  expect_match(warmed, 'loadNamespace("NACHO")', fixed = TRUE)
+})

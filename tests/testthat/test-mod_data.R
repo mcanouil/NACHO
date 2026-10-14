@@ -677,7 +677,14 @@ test_that("a background import shows its stage and then loads the object", {
   )
   shiny::testServer(NACHO:::mod_data_server, {
     session$setInputs(files = upload_table("salmon_data"), import = 1)
-    wait_until(session, function() nzchar(output$progress), tries = 100)
+    wait_until(
+      session,
+      function() {
+        session$elapse(250)
+        nzchar(output$progress)
+      },
+      tries = 100
+    )
     expect_identical(output$progress, "Reading 2 RCC files")
     wait_for_task(task, session, tries = 100)
     expect_identical(session$returned(), "loaded")
@@ -716,5 +723,25 @@ test_that("the example data loaded during an import is kept", {
     session$setInputs(example = 1)
     wait_for_task(task, session)
     expect_identical(session$returned(), GSE74821)
+  })
+})
+
+test_that("choosing files starts the import daemon", {
+  skip_if_not_installed("mirai")
+  started <- 0
+  local_mocked_bindings(has_package = function(package) TRUE)
+  local_mocked_bindings(
+    daemons = function(n, ...) {
+      if (n > 0) {
+        started <<- started + 1
+      }
+      invisible(NULL)
+    },
+    mirai = function(...) invisible(NULL),
+    .package = "mirai"
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(files = upload_table("salmon_data"))
+    expect_identical(started, 1)
   })
 })

@@ -340,7 +340,8 @@ mod_data_server <- function(id, initial = NULL) {
       on_error = function(message) {
         notify_user(paste("The upload could not be read:", message), "error")
       },
-      on_end = function() unlink(progress_file)
+      on_end = function() unlink(progress_file),
+      warm_on = shiny::reactive(input$files)
     )
     shiny::observeEvent(input$import, {
       if (is.null(input$files)) {

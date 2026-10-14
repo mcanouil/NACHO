@@ -52,8 +52,9 @@ settle_while_open <- function(running, ended) {
 
 #' Run the jobs of a task button in the background
 #'
-#' When mirai is installed, the first job starts one mirai daemon for the
-#' session.
+#' When mirai is installed, the session gets one mirai daemon.
+#' The daemon starts, and loads NACHO, when `warm_on` first gives a value, or
+#' else with the first job.
 #' When the daemon cannot start, or mirai is not installed, the jobs run in the
 #' app process.
 #' When the session ends, the running job and the daemon stop, and the task
@@ -66,6 +67,8 @@ settle_while_open <- function(running, ended) {
 #' @param on_success A function of the result of a job.
 #' @param on_error A function of the error message of a job.
 #' @param on_end A function that runs when the session ends.
+#' @param warm_on A reactive expression whose first value starts the daemon
+#'   before the first job, or `NULL`.
 #'
 #' @return A [shiny::ExtendedTask], whose `invoke()` takes the arguments of
 #'   `fun`.
@@ -77,7 +80,8 @@ session_task <- function(
   fun,
   on_success,
   on_error,
-  on_end = function() NULL
+  on_end = function() NULL,
+  warm_on = NULL
 ) {
   profile <- basename(tempfile("nacho-task-"))
   running <- NULL
@@ -94,19 +98,36 @@ session_task <- function(
     }
     on_end()
   })
-  task <- shiny::ExtendedTask$new(function(...) {
-    if (!daemons_tried && has_package("mirai")) {
-      daemons_tried <<- TRUE
-      daemons_on <<- tryCatch(
-        {
-          with_library_paths(
-            mirai::daemons(1, dispatcher = TRUE, .compute = profile)
-          )
-          TRUE
-        },
-        error = function(cnd) FALSE
-      )
+  start_daemon <- function() {
+    if (daemons_tried || !has_package("mirai")) {
+      return(invisible(NULL))
     }
+    daemons_tried <<- TRUE
+    daemons_on <<- tryCatch(
+      {
+        libs <- .libPaths()
+        with_library_paths(
+          mirai::daemons(1, dispatcher = TRUE, .compute = profile)
+        )
+        mirai::mirai(
+          {
+            .libPaths(libs)
+            loadNamespace("NACHO")
+            NULL
+          },
+          libs = libs,
+          .compute = profile
+        )
+        TRUE
+      },
+      error = function(cnd) FALSE
+    )
+  }
+  if (!is.null(warm_on)) {
+    shiny::observeEvent(warm_on(), start_daemon(), once = TRUE)
+  }
+  task <- shiny::ExtendedTask$new(function(...) {
+    start_daemon()
     running <<- run_in_daemon(fun, list(...), if (daemons_on) profile)
     settle_while_open(running, function() ended)
   }) |>
