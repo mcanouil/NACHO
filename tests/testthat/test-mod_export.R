@@ -53,16 +53,6 @@ stub_render <- function(x, format, output_dir, title = NULL, author = NULL) {
   path
 }
 
-wait_for_task <- function(task, session, status = "success") {
-  for (i in 1:50) {
-    session$flushReact()
-    if (identical(task$status(), status)) {
-      break
-    }
-    later::run_now(0.1)
-  }
-}
-
 test_that("the report renders in a task and offers a download", {
   local_mocked_bindings(
     has_package = function(package) package != "mirai",

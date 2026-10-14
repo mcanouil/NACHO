@@ -228,6 +228,7 @@ test_that("a discarded sample sheet is announced", {
 test_that("a rejected upload keeps the previous data", {
   messages <- character()
   local_mocked_bindings(
+    has_package = function(package) package != "mirai",
     notify_user = function(message, type) {
       messages <<- c(messages, type)
     }
@@ -246,6 +247,7 @@ test_that("a rejected upload keeps the previous data", {
     args = list(initial = GSE74821),
     {
       session$setInputs(files = bad, import = 1)
+      wait_for_task(task, session)
       expect_identical(session$returned(), GSE74821)
     }
   )
@@ -253,9 +255,11 @@ test_that("a rejected upload keeps the previous data", {
 })
 
 test_that("the module loads an upload", {
+  local_mocked_bindings(has_package = function(package) package != "mirai")
   shiny::testServer(NACHO:::mod_data_server, {
     expect_null(session$returned())
     session$setInputs(files = upload_table("salmon_data"), import = 1)
+    wait_for_task(task, session)
     expect_true(S7::S7_inherits(session$returned(), NACHO:::nacho))
   })
 })
@@ -263,6 +267,7 @@ test_that("the module loads an upload", {
 test_that("a corrupt zip shows an error and keeps the previous data", {
   types <- character()
   local_mocked_bindings(
+    has_package = function(package) package != "mirai",
     notify_user = function(message, type) types <<- c(types, type)
   )
   directory <- withr::local_tempdir()
@@ -278,7 +283,8 @@ test_that("a corrupt zip shows an error and keeps the previous data", {
     NACHO:::mod_data_server,
     args = list(initial = GSE74821),
     {
-      suppressWarnings(session$setInputs(files = bad, import = 1))
+      session$setInputs(files = bad, import = 1)
+      wait_for_task(task, session)
       expect_identical(session$returned(), GSE74821)
     }
   )
@@ -389,6 +395,7 @@ test_that("an empty zip is refused as an upload without RCC files", {
 test_that("a corrupt zip names the problem", {
   messages <- character()
   local_mocked_bindings(
+    has_package = function(package) package != "mirai",
     notify_user = function(message, type) messages <<- c(messages, message)
   )
   path <- file.path(withr::local_tempdir(), "0")
@@ -400,7 +407,8 @@ test_that("a corrupt zip names the problem", {
     datapath = path
   )
   shiny::testServer(NACHO:::mod_data_server, {
-    suppressWarnings(session$setInputs(files = bad, import = 1))
+    session$setInputs(files = bad, import = 1)
+    wait_for_task(task, session)
   })
   expect_match(messages, "not a valid zip archive")
 })
@@ -516,11 +524,13 @@ test_that("an error toast stays open until it is closed", {
 test_that("a discarded sample sheet and other load warnings become warning toasts", {
   types <- character()
   local_mocked_bindings(
+    has_package = function(package) package != "mirai",
     notify_user = function(message, type) types <<- c(types, type)
   )
   sheet <- data.frame(file = "salmon_01_01.RCC", group = "case")
   shiny::testServer(NACHO:::mod_data_server, {
     session$setInputs(files = upload_table("salmon_data", sheet), import = 1)
+    wait_for_task(task, session)
     expect_true(S7::S7_inherits(session$returned(), NACHO:::nacho))
   })
   expect_true("warning" %in% types)
@@ -530,6 +540,7 @@ test_that("a discarded sample sheet and other load warnings become warning toast
 test_that("any load warning of the package is shown as a warning toast", {
   messages <- character()
   local_mocked_bindings(
+    has_package = function(package) package != "mirai",
     notify_user = function(message, type) messages <<- c(messages, message),
     read_uploads = function(files) {
       NACHO:::nacho_warn("Too few genes.", class = "n_comp_reduced")
@@ -541,6 +552,7 @@ test_that("any load warning of the package is shown as a warning toast", {
       files = data.frame(name = "a", size = 1, type = "x", datapath = "a"),
       import = 1
     )
+    wait_for_task(task, session)
     expect_identical(session$returned(), GSE74821)
   })
   expect_identical(messages, "Too few genes.")
@@ -588,4 +600,142 @@ test_that("an upload name cannot leave the upload folder", {
   )
   expect_identical(upload$name, "escaped.RCC")
   expect_true(file.exists(file.path(directory, "escaped.RCC")))
+})
+
+test_that("an import returns the object and writes its last stage", {
+  progress <- withr::local_tempfile()
+  imported <- NACHO:::import_uploads(upload_table("salmon_data"), progress)
+  expect_nacho(imported$object)
+  expect_null(imported$error)
+  expect_identical(
+    readLines(progress),
+    "Computing quality-control metrics and normalising"
+  )
+})
+
+test_that("an import returns its warnings as text", {
+  local_mocked_bindings(
+    read_uploads = function(files) {
+      NACHO:::nacho_warn("Metric missing.", class = "metric_unavailable")
+      NACHO:::nacho_warn("Too few genes.", class = "n_comp_reduced")
+      warning("Not from NACHO.")
+      GSE74821
+    }
+  )
+  expect_warning(
+    imported <- NACHO:::import_uploads(data.frame()),
+    "Not from NACHO."
+  )
+  expect_identical(imported$object, GSE74821)
+  expect_identical(imported$warnings, "Too few genes.")
+  expect_null(imported$error)
+})
+
+test_that("an import returns its error as text", {
+  local_mocked_bindings(
+    read_uploads = function(files) {
+      NACHO:::nacho_warn("Too few genes.", class = "n_comp_reduced")
+      NACHO:::nacho_abort("No RCC file.", class = "bad_upload")
+    }
+  )
+  imported <- NACHO:::import_uploads(data.frame())
+  expect_null(imported$object)
+  expect_identical(imported$warnings, "Too few genes.")
+  expect_identical(imported$error, "No RCC file.")
+  local_mocked_bindings(read_uploads = function(files) stop("disk full"))
+  expect_identical(
+    NACHO:::import_uploads(data.frame())$error,
+    "The upload could not be read: disk full"
+  )
+})
+
+test_that("without mirai, the import runs in the app process", {
+  local_mocked_bindings(
+    has_package = function(package) package != "mirai",
+    read_uploads = function(files) GSE74821
+  )
+  expect_identical(
+    NACHO:::import_in_background(data.frame(), "progress")$object,
+    GSE74821
+  )
+})
+
+test_that("the background import hands the library paths to the daemon", {
+  skip_if_not_installed("mirai")
+  captured <- NULL
+  local_mocked_bindings(has_package = function(package) TRUE)
+  local_mocked_bindings(
+    mirai = function(.expression, ..., .compute = NULL) {
+      captured <<- list(
+        expression = paste(deparse(substitute(.expression)), collapse = " "),
+        args = list(...),
+        compute = .compute
+      )
+      "task"
+    },
+    .package = "mirai"
+  )
+  expect_identical(
+    NACHO:::import_in_background(data.frame(), "progress", "profile"),
+    "task"
+  )
+  expect_identical(captured$compute, "profile")
+  expect_match(captured$expression, ".libPaths(libs)", fixed = TRUE)
+  expect_match(captured$expression, "import_uploads", fixed = TRUE)
+  expect_setequal(names(captured$args), c("files", "progress_file", "libs"))
+  expect_identical(captured$args$libs, .libPaths())
+})
+
+test_that("the upload panel says when the import blocks the app", {
+  ui <- function() htmltools::renderTags(NACHO:::mod_data_ui("data"))$html
+  local_mocked_bindings(has_package = function(package) FALSE)
+  expect_match(ui(), "install mirai to import in the background", fixed = TRUE)
+  local_mocked_bindings(has_package = function(package) TRUE)
+  expect_no_match(ui(), "install mirai", fixed = TRUE)
+})
+
+test_that("a background import shows its stage and then loads the object", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  local_mocked_bindings(
+    has_package = function(package) TRUE,
+    import_in_background = function(files, progress_file, compute) {
+      mirai::mirai(
+        {
+          writeLines("Reading 2 RCC files", progress_file)
+          Sys.sleep(1)
+          list(object = "loaded", warnings = character(), error = NULL)
+        },
+        progress_file = progress_file,
+        .compute = compute
+      )
+    }
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(files = upload_table("salmon_data"), import = 1)
+    shown <- ""
+    for (i in 1:100) {
+      shown <- output$progress
+      if (nzchar(shown)) {
+        break
+      }
+      later::run_now(0.1)
+    }
+    expect_identical(shown, "Reading 2 RCC files")
+    wait_for_task(task, session, tries = 100)
+    expect_identical(session$returned(), "loaded")
+    expect_identical(output$progress, "")
+    session$close()
+    expect_false(file.exists(progress_file))
+  })
+})
+
+test_that("the background import uses the installed NACHO", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(files = upload_table("salmon_data"), import = 1)
+    wait_for_task(task, session, tries = 300)
+    expect_nacho(session$returned())
+  })
 })

@@ -41,6 +41,8 @@ shiny::runApp(nacho_app())
 
 The **Data** page loads a study.
 Choose RCC files, zip archives and an optional sample sheet, then click **Import**.
+If you have the `mirai` package, the app reads the files in the background, and the line under **Import** shows the current stage.
+Without `mirai`, the app is blocked until the import ends.
 The sample sheet is a CSV file with an `IDFILE` column that holds the RCC file names.
 For PlexSet files, it also has a `plexset_id` column with the values S1 to S8.
 To try the app first, click **Load the example data (GSE74821)**.

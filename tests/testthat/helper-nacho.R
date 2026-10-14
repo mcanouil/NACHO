@@ -130,3 +130,13 @@ british_stems <- paste(
   "organis|summaris|visualis|haemoly|minimis|maximis|grey|licence|whilst",
   sep = "|"
 )
+
+wait_for_task <- function(task, session, status = "success", tries = 50) {
+  for (i in seq_len(tries)) {
+    session$flushReact()
+    if (identical(task$status(), status)) {
+      break
+    }
+    later::run_now(0.1)
+  }
+}
