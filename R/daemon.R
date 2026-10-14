@@ -85,25 +85,26 @@ session_task <- function(
 ) {
   profile <- basename(tempfile("nacho-task-"))
   running <- NULL
-  daemons_on <- FALSE
-  daemons_tried <- FALSE
+  daemon <- new.env(parent = emptyenv())
+  daemon$tried <- FALSE
+  daemon$on <- FALSE
   ended <- FALSE
   session$onSessionEnded(function() {
     ended <<- TRUE
     if (inherits(running, "mirai")) {
       mirai::stop_mirai(running)
     }
-    if (daemons_on) {
+    if (daemon$on) {
       mirai::daemons(0, .compute = profile)
     }
     on_end()
   })
   start_daemon <- function() {
-    if (daemons_tried || !has_package("mirai")) {
+    if (daemon$tried || !has_package("mirai")) {
       return(invisible(NULL))
     }
-    daemons_tried <<- TRUE
-    daemons_on <<- tryCatch(
+    daemon$tried <- TRUE
+    daemon$on <- tryCatch(
       {
         libs <- .libPaths()
         with_library_paths(
@@ -128,7 +129,7 @@ session_task <- function(
   }
   task <- shiny::ExtendedTask$new(function(...) {
     start_daemon()
-    running <<- run_in_daemon(fun, list(...), if (daemons_on) profile)
+    running <<- run_in_daemon(fun, list(...), if (daemon$on) profile)
     settle_while_open(running, function() ended)
   }) |>
     bslib::bind_task_button(button_id)
