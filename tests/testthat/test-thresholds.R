@@ -313,3 +313,12 @@ test_that("yaml_numbers() keeps each double exactly and briefly", {
   )
   expect_identical(yaml::yaml.load(paste0("[", toString(text), "]")), values)
 })
+
+test_that("read_thresholds() never evaluates R code in the file", {
+  withr::local_options(yaml.eval.expr = TRUE)
+  withr::local_envvar(NACHO_YAML_RAN = "")
+  file <- withr::local_tempfile(fileext = ".yml")
+  writeLines("FoV: !expr Sys.setenv(NACHO_YAML_RAN = 'yes')", file)
+  expect_error(read_thresholds(file), class = "nacho_error_bad_thresholds")
+  expect_identical(Sys.getenv("NACHO_YAML_RAN"), "")
+})

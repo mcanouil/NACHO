@@ -359,7 +359,7 @@ read_thresholds <- function(file) {
     fail("The file does not exist.")
   }
   thresholds <- tryCatch(
-    yaml::read_yaml(file),
+    yaml::read_yaml(file, eval.expr = FALSE),
     error = function(cnd) fail(conditionMessage(cnd))
   )
   if (!is.list(thresholds) || is.null(names(thresholds))) {

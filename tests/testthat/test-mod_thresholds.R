@@ -494,3 +494,44 @@ test_that("the preset panel offers a thresholds file", {
   expect_match(html, 'id="thresholds-thresholds_file"', fixed = TRUE)
   expect_match(html, ".yml,.yaml", fixed = TRUE)
 })
+
+test_that("a thresholds file without a measured metric takes it from its preset", {
+  x <- suppressWarnings(mirna_fixture())
+  partial <- nacho_thresholds("flex", "nsolver")
+  partial[["Ligation_NEG"]] <- NULL
+  neg_range <- NACHO:::threshold_range(
+    x@samples$Ligation_NEG,
+    nacho_thresholds()$Ligation_NEG
+  )
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(partial, file)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(x)),
+    {
+      session$flushReact()
+      session$elapse(600)
+      session$setInputs(
+        thresholds_file = data.frame(
+          name = "partial.yml",
+          size = file.size(file),
+          type = "",
+          datapath = file
+        )
+      )
+      session$setInputs(
+        preset = "nsolver",
+        instrument = "flex",
+        Ligation_NEG = c(neg_range[1], -1)
+      )
+      session$elapse(600)
+      limits <- session$returned$thresholds()
+      expect_identical(limits[["Ligation_NEG"]], c(-Inf, -1))
+      expect_identical(
+        base()[["Ligation_NEG"]],
+        nacho_thresholds("flex", "nsolver")[["Ligation_NEG"]]
+      )
+      expect_identical(limits[["preset"]], "nsolver")
+    }
+  )
+})

@@ -352,6 +352,12 @@ mod_thresholds_server <- function(id, data) {
         }
       )
       if (!is.null(limits)) {
+        instrument <- limits[["instrument"]]
+        preset <- nacho_thresholds(
+          instrument = if (is.na(instrument)) "max" else instrument,
+          preset = limits[["preset"]]
+        )
+        limits <- c(limits, preset[setdiff(names(preset), names(limits))])
         start(limits)
         show_preset(limits)
       }
