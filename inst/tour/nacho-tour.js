@@ -13,6 +13,10 @@
  *   not hold the tour back),
  * - a step whose part of the app is missing is skipped, and the skip is read
  *   out with the next step,
+ * - when keys or clicks arrive while a step waits, the last move wins,
+ * - a sidebar or a collapsed navbar that the tour opens is closed again when
+ *   the tour moves on, so it does not cover the next steps on a narrow
+ *   window,
  * - a live region reads "Step N of M: title" to screen readers,
  * - reduced motion turns off the animations,
  * - at the end, the page that was open comes back and focus goes to the
@@ -31,6 +35,8 @@
   var tour = null;
   var startPage = null;
   var pendingSkip = "";
+  var navigation = 0;
+  var opened = [];
 
   function escapeText(text) {
     var element = document.createElement("div");
@@ -86,6 +92,16 @@
     }
   }
 
+  function closeOpenedAround(target) {
+    opened = opened.filter(function (entry) {
+      if (target && entry.container.contains(target)) {
+        return true;
+      }
+      entry.toggle.click();
+      return false;
+    });
+  }
+
   function openSidebarAround(target) {
     var layout =
       target && target.closest(".bslib-sidebar-layout.sidebar-collapsed");
@@ -96,6 +112,23 @@
     var toggle = layout.querySelector(":scope > .collapse-toggle");
     if (toggle) {
       toggle.click();
+      opened.push({ toggle: toggle, container: sidebar });
+    }
+  }
+
+  function openNavbarAround(target) {
+    var collapse = target && target.closest(".navbar-collapse");
+    if (!collapse || collapse.classList.contains("show")) {
+      return;
+    }
+    var toggler = collapse.id
+      ? document.querySelector(
+          '[data-bs-target="#' + CSS.escape(collapse.id) + '"]'
+        )
+      : null;
+    if (toggler && visible(toggler)) {
+      toggler.click();
+      opened.push({ toggle: toggler, container: collapse });
     }
   }
 
@@ -116,7 +149,10 @@
   function prepare(step) {
     showPage(step.data.page);
     openPanel(step.data.open);
-    openSidebarAround(document.querySelector(step.element));
+    var target = document.querySelector(step.element);
+    closeOpenedAround(target);
+    openSidebarAround(target);
+    openNavbarAround(target);
     return new Promise(function (resolve) {
       var waited = 0;
       (function check() {
@@ -147,8 +183,10 @@
     }
     tour = null;
     driverObj.destroy();
+    closeOpenedAround(null);
     showPage(startPage);
-    announce("");
+    announce(pendingSkip);
+    pendingSkip = "";
     window.setTimeout(function () {
       var help = document.querySelector(HELP_TOGGLE);
       if (help) {
@@ -157,7 +195,11 @@
     }, 0);
   }
 
-  function go(driverObj, from, direction) {
+  function go(driverObj, from, direction, token) {
+    if (token === undefined) {
+      navigation += 1;
+      token = navigation;
+    }
     var steps = driverObj.getConfig().steps;
     var index = from + direction;
     if (index < 0 || index >= steps.length) {
@@ -173,7 +215,7 @@
     }
     setButtons(driverObj, true);
     prepare(steps[index]).then(function (ready) {
-      if (tour !== driverObj) {
+      if (tour !== driverObj || token !== navigation) {
         return;
       }
       if (!ready) {
@@ -181,7 +223,7 @@
           "Step " +
           (index + 1) +
           " skipped: its part of the app is not available. ";
-        go(driverObj, index, direction);
+        go(driverObj, index, direction, token);
         return;
       }
       if (driverObj.isActive()) {

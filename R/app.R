@@ -321,19 +321,19 @@ app_server <- function(
   quarto = FALSE
 ) {
   function(input, output, session) {
-    data <- mod_data_server("data", initial = x)
-    settings <- mod_thresholds_server("thresholds", data = data)
+    loaded <- mod_data_server("data", initial = x)
+    settings <- mod_thresholds_server("thresholds", data = loaded)
     # The value must stay logical: text such as "FALSE" is truthy in JavaScript.
     output$has_data <- shiny::markRenderFunction(
       uiFunc = shiny::textOutput,
-      renderFunc = function(shinysession, name, ...) !is.null(data())
+      renderFunc = function(shinysession, name, ...) !is.null(loaded())
     )
     shiny::outputOptions(output, "has_data", suspendWhenHidden = FALSE)
     dark <- shiny::reactive(identical(input$dark_mode, "dark"))
     announced <- new.env()
     tuned <- shiny::reactive(
       tune_with_toasts(
-        shiny::req(data()),
+        shiny::req(loaded()),
         settings$settings(),
         settings$thresholds(),
         announced
@@ -369,8 +369,8 @@ app_server <- function(
       ))
     })
     shiny::observeEvent(input$tour, {
-      if (is.null(data())) {
-        data(example_data())
+      if (is.null(loaded())) {
+        loaded(example_data())
       }
       start_tour(session)
     })
@@ -396,7 +396,7 @@ app_server <- function(
     }
     if (done) {
       finished <- new.env()
-      observe_done(input, data, settings, announced, finished)
+      observe_done(input, loaded, settings, announced, finished)
       session$onSessionEnded(function() {
         if (!isTRUE(finished$done)) shiny::stopApp(NULL)
       })

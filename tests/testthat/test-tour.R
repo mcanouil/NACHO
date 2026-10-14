@@ -122,7 +122,7 @@ test_that("the tour loads the example data when the app has none", {
     session$setInputs(tour = 1)
     expect_identical(started, 1L)
     expect_true(output$has_data)
-    expect_identical(colnames(data()@counts), colnames(GSE74821@counts))
+    expect_identical(colnames(loaded()@counts), colnames(GSE74821@counts))
   })
 })
 
@@ -132,7 +132,7 @@ test_that("the tour keeps data that is already loaded", {
   local_mocked_bindings(start_tour = function(session) invisible(NULL))
   shiny::testServer(NACHO:::app_server(x), {
     session$setInputs(tour = 1)
-    expect_identical(ncol(data()@counts), 12L)
+    expect_identical(ncol(loaded()@counts), 12L)
   })
 })
 
@@ -376,4 +376,82 @@ test_that("a skipped first step is announced with the next step", {
     "Step 1 skipped: its part of the app is not available. Step 2 of 9",
     fixed = TRUE
   )
+})
+
+press_key <- function(app, key) {
+  app$run_js(sprintf(
+    "window.dispatchEvent(new KeyboardEvent('keyup', {key: '%s'}))",
+    key
+  ))
+}
+
+test_that("the last move wins when keys arrive while a step waits", {
+  skip_if_no_browser()
+  app <- tour_app(GSE74821)
+  start_tour_in(app)
+  click_next(app)
+  wait_for_step(app, 2)
+  click_next(app)
+  wait_for_step(app, 3)
+  Sys.sleep(1)
+  app$run_js("document.getElementById('BD-card').remove()")
+  click_next(app)
+  Sys.sleep(1)
+  press_key(app, "ArrowLeft")
+  wait_for_step(app, 2)
+  Sys.sleep(12)
+  expect_match(
+    js_string(
+      app,
+      "document.querySelector('.driver-popover-progress-text').textContent"
+    ),
+    "2 of 9",
+    fixed = TRUE
+  )
+  expect_identical(active_page(app), "Data")
+})
+
+test_that("on a narrow window the tour closes what it opened and reaches Help", {
+  skip_if_no_browser()
+  app <- shinytest2::AppDriver$new(
+    nacho_app(GSE74821),
+    name = "tour-narrow",
+    width = 800,
+    height = 800,
+    load_timeout = 60000,
+    timeout = 30000
+  )
+  withr::defer(app$stop())
+  sidebar_open <- function() {
+    js_string(
+      app,
+      "document.querySelector('.bslib-sidebar-layout.sidebar-collapsed') === null"
+    )
+  }
+  navbar_open <- function() {
+    js_string(app, "document.querySelector('.navbar-collapse.show') !== null")
+  }
+  app$run_js(
+    "document.querySelector('.bslib-sidebar-layout > .collapse-toggle').click()"
+  )
+  app$wait_for_js(
+    "document.querySelector('.bslib-sidebar-layout.sidebar-collapsed') !== null"
+  )
+  app$run_js("document.getElementById('tour').click()")
+  for (i in 1:8) {
+    wait_for_step(app, i)
+    if (i == 3) {
+      expect_identical(sidebar_open(), "true")
+    }
+    if (i == 4) {
+      expect_identical(sidebar_open(), "false")
+    }
+    click_next(app)
+  }
+  wait_for_step(app, 9, timeout = 8000)
+  expect_identical(navbar_open(), "true")
+  click_next(app)
+  app$wait_for_js("document.querySelector('.driver-popover') === null")
+  app$wait_for_js("document.querySelector('.navbar-collapse.show') === null")
+  expect_identical(sidebar_open(), "false")
 })
