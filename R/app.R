@@ -1,4 +1,4 @@
-#' @include mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R mod_batch.R mod_export.R
+#' @include tour.R mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R mod_batch.R mod_export.R
 NULL
 
 #' Run the NACHO app
@@ -120,6 +120,7 @@ app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
     header = shiny::tagList(
       shiny::useBusyIndicators(),
       brand_font_dependency(),
+      tour_dependencies(),
       restore_help_focus,
       if (interactive) selection_echo_guard,
       shiny::conditionalPanel(
@@ -236,6 +237,14 @@ help_menu <- function() {
     "Help",
     value = "help",
     align = "right",
+    bslib::nav_item(
+      shiny::tags$button(
+        id = "tour",
+        type = "button",
+        class = "dropdown-item action-button",
+        "Take the tour"
+      )
+    ),
     bslib::nav_panel("About NACHO", help_page("nacho")),
     bslib::nav_item(external_link("Documentation", links[["documentation"]])),
     bslib::nav_item(external_link("Ask a question", links[["discussions"]])),
@@ -358,6 +367,12 @@ app_server <- function(
         easyClose = TRUE,
         footer = shiny::modalButton("Close")
       ))
+    })
+    shiny::observeEvent(input$tour, {
+      if (is.null(data())) {
+        data(example_data())
+      }
+      start_tour(session)
     })
     workers <- if (interactive) plot_workers_start()
     for (page in names(app_plot_types)) {

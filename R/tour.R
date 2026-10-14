@@ -134,3 +134,12 @@ tour_steps <- function() {
     )
   )
 }
+
+#' Start the app tour in the browser
+#'
+#' @param session The Shiny session.
+#'
+#' @noRd
+start_tour <- function(session) {
+  session$sendCustomMessage("nacho-tour-start", list(steps = tour_steps()))
+}

@@ -112,3 +112,44 @@ test_that("each tour target exists in the app with interactive plots", {
   testthat::skip_if_not_installed("ggiraph")
   expect_tour_targets(tour_page_html(interactive = TRUE))
 })
+
+test_that("the tour loads the example data when the app has none", {
+  testthat::skip_on_cran()
+  started <- 0L
+  local_mocked_bindings(start_tour = function(session) started <<- started + 1L)
+  shiny::testServer(NACHO:::app_server(NULL), {
+    expect_false(output$has_data)
+    session$setInputs(tour = 1)
+    expect_identical(started, 1L)
+    expect_true(output$has_data)
+    expect_identical(colnames(data()@counts), colnames(GSE74821@counts))
+  })
+})
+
+test_that("the tour keeps data that is already loaded", {
+  testthat::skip_on_cran()
+  x <- GSE74821[, 1:12]
+  local_mocked_bindings(start_tour = function(session) invisible(NULL))
+  shiny::testServer(NACHO:::app_server(x), {
+    session$setInputs(tour = 1)
+    expect_identical(ncol(data()@counts), 12L)
+  })
+})
+
+test_that("start_tour() sends the steps to the page", {
+  session <- shiny::MockShinySession$new()
+  sent <- NULL
+  session$sendCustomMessage <- function(type, message) {
+    sent <<- list(type = type, message = message)
+  }
+  NACHO:::start_tour(session)
+  expect_identical(sent$type, "nacho-tour-start")
+  expect_identical(sent$message$steps, NACHO:::tour_steps())
+})
+
+test_that("the page loads the tour scripts", {
+  html <- htmltools::renderTags(NACHO:::app_ui(done = FALSE))
+  names <- vapply(html$dependencies, function(d) d$name, character(1))
+  expect_true(all(c("driver.js", "nacho-tour") %in% names))
+  expect_lt(match("driver.js", names), match("nacho-tour", names))
+})
