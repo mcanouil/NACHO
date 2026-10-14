@@ -54,8 +54,8 @@ stub_render <- function(x, format, output_dir, title = NULL, author = NULL) {
 }
 
 test_that("the report renders in a task and offers a download", {
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = stub_render
   )
   shiny::testServer(
@@ -70,8 +70,8 @@ test_that("the report renders in a task and offers a download", {
 })
 
 test_that("changing the object withdraws the report", {
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = stub_render
   )
   object <- shiny::reactiveVal(GSE74821)
@@ -96,8 +96,8 @@ test_that("changing the object withdraws the report", {
 })
 
 test_that("one report folder per session holds one report and goes away", {
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = stub_render
   )
   folder <- NULL
@@ -121,8 +121,8 @@ test_that("one report folder per session holds one report and goes away", {
 test_that("a report finished for an old object is deleted", {
   object <- shiny::reactiveVal(GSE74821)
   finished <- NULL
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = function(x, format, output_dir, ...) {
       object(flagged_gse())
       finished <<- stub_render(x, format, output_dir)
@@ -144,8 +144,8 @@ test_that("a report finished for an old object is deleted", {
 
 test_that("a failed render reaches the user as an error toast", {
   toasts <- list()
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = function(x, format, output_dir, ...) stop("Quarto exploded."),
     notify_user = function(message, type) {
       toasts[[length(toasts) + 1L]] <<- list(message = message, type = type)
@@ -168,35 +168,6 @@ test_that("a failed render reaches the user as an error toast", {
       expect_match(toasts[[1]]$message, "Quarto exploded.", fixed = TRUE)
     }
   )
-})
-
-test_that("the background render hands the library paths to the daemon", {
-  skip_if_not_installed("mirai")
-  captured <- NULL
-  local_mocked_bindings(has_package = function(package) TRUE)
-  local_mocked_bindings(
-    mirai = function(.expression, ..., .compute = NULL) {
-      captured <<- list(
-        expression = paste(deparse(substitute(.expression)), collapse = " "),
-        args = list(...),
-        compute = .compute
-      )
-      "task"
-    },
-    .package = "mirai"
-  )
-  expect_identical(
-    NACHO:::render_in_background(GSE74821, "html", "folder", "profile"),
-    "task"
-  )
-  expect_identical(captured$compute, "profile")
-  expect_match(captured$expression, ".libPaths(libs)", fixed = TRUE)
-  expect_match(captured$expression, "NACHO::render", fixed = TRUE)
-  expect_setequal(
-    names(captured$args),
-    c("object", "format", "output_dir", "title", "author", "libs")
-  )
-  expect_identical(captured$args$libs, .libPaths())
 })
 
 test_that("the CSV export defuses spreadsheet formulas", {
@@ -238,7 +209,7 @@ test_that("ending the session stops a running background render", {
   pid_file <- withr::local_tempfile()
   local_mocked_bindings(
     has_package = function(package) TRUE,
-    render_in_background = function(object, format, output_dir, compute, ...) {
+    run_in_daemon = function(fun, args, compute) {
       mirai::mirai(
         {
           writeLines(as.character(Sys.getpid()), pid_file)
@@ -277,29 +248,6 @@ test_that("ending the session stops a running background render", {
   expect_lt(as.numeric(Sys.time() - started, units = "secs"), 20)
 })
 
-test_that("a render stopped after the session ends never settles", {
-  skip_on_cran()
-  skip_if_not_installed("mirai")
-  mirai::daemons(1, dispatcher = TRUE, .compute = "nacho-settle")
-  withr::defer(mirai::daemons(0, .compute = "nacho-settle"))
-  outcome <- function(ended) {
-    settled <- "pending"
-    running <- mirai::mirai(Sys.sleep(30), .compute = "nacho-settle")
-    promises::then(
-      NACHO:::settle_while_open(running, function() ended),
-      onFulfilled = function(value) settled <<- "resolved",
-      onRejected = function(error) settled <<- "rejected"
-    )
-    mirai::stop_mirai(running)
-    for (i in 1:20) {
-      later::run_now(0.1)
-    }
-    settled
-  }
-  expect_identical(outcome(ended = FALSE), "rejected")
-  expect_identical(outcome(ended = TRUE), "pending")
-})
-
 test_that("the report card has labelled title and author fields", {
   html <- htmltools::renderTags(
     NACHO:::mod_export_ui("export", quarto = TRUE)
@@ -321,8 +269,8 @@ test_that("the report card has labelled title and author fields", {
 
 test_that("the render gets the title and author, blank ones as NULL", {
   seen <- list()
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = function(x, format, output_dir, title = NULL, author = NULL) {
       seen <<- list(title = title, author = author)
       stub_render(x, format, output_dir)

@@ -1,4 +1,4 @@
-#' @include load_rcc.R
+#' @include load_rcc.R daemon.R
 NULL
 
 #' Load the files of a Shiny upload
@@ -135,32 +135,6 @@ import_uploads <- function(files, progress_file = NULL) {
     }
   )
   list(object = object, warnings = warnings, error = error)
-}
-
-#' Import an upload, in a mirai daemon when mirai is installed
-#'
-#' The background import uses the installed NACHO package, not the loaded
-#' one, so reinstall NACHO after you change `import_uploads()`.
-#'
-#' @inheritParams import_uploads
-#' @param compute The mirai compute profile that runs the import.
-#'
-#' @noRd
-import_in_background <- function(files, progress_file, compute = NULL) {
-  if (has_package("mirai")) {
-    libs <- .libPaths()
-    return(mirai::mirai(
-      {
-        .libPaths(libs)
-        asNamespace("NACHO")[["import_uploads"]](files, progress_file)
-      },
-      files = files,
-      progress_file = progress_file,
-      libs = libs,
-      .compute = compute
-    ))
-  }
-  import_uploads(files, progress_file)
 }
 
 #' Join a sample sheet to the uploaded files
@@ -344,44 +318,11 @@ mod_data_server <- function(id, initial = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
     current <- shiny::reactiveVal(initial)
     progress_file <- tempfile("nacho-import-", fileext = ".txt")
-    profile <- basename(progress_file)
-    running <- NULL
-    daemons_on <- FALSE
-    ended <- FALSE
-    session$onSessionEnded(function() {
-      ended <<- TRUE
-      if (inherits(running, "mirai")) {
-        mirai::stop_mirai(running)
-      }
-      if (daemons_on) {
-        mirai::daemons(0, .compute = profile)
-      }
-      unlink(progress_file)
-    })
-    start_import <- function(files) {
-      if (has_package("mirai") && !daemons_on) {
-        mirai::daemons(1, dispatcher = TRUE, .compute = profile)
-        daemons_on <<- TRUE
-      }
-      unlink(progress_file)
-      running <<- import_in_background(files, progress_file, profile)
-      settle_while_open(running, function() ended)
-    }
-    task <- shiny::ExtendedTask$new(start_import) |>
-      bslib::bind_task_button("import")
-    shiny::observeEvent(input$import, {
-      if (is.null(input$files)) {
-        notify_user("Choose the RCC files to import first.", "warning")
-        return()
-      }
-      task$invoke(input$files)
-    })
-    shiny::observeEvent(task$status(), {
-      if (ended) {
-        return(invisible(NULL))
-      }
-      if (task$status() == "success") {
-        imported <- task$result()
+    task <- session_task(
+      session,
+      "import",
+      "import_uploads",
+      on_success = function(imported) {
         for (message in imported[["warnings"]]) {
           notify_user(message, "warning")
         }
@@ -390,13 +331,19 @@ mod_data_server <- function(id, initial = NULL) {
         } else {
           notify_user(imported[["error"]], "error")
         }
-      } else if (task$status() == "error") {
-        reason <- tryCatch(
-          task$result(),
-          error = function(cnd) cli::ansi_strip(rlang::cnd_message(cnd))
-        )
-        notify_user(paste("The upload could not be read:", reason), "error")
+      },
+      on_error = function(message) {
+        notify_user(paste("The upload could not be read:", message), "error")
+      },
+      on_end = function() unlink(progress_file)
+    )
+    shiny::observeEvent(input$import, {
+      if (is.null(input$files)) {
+        notify_user("Choose the RCC files to import first.", "warning")
+        return()
       }
+      unlink(progress_file)
+      task$invoke(input$files, progress_file)
     })
     output$progress <- shiny::renderText({
       if (task$status() != "running") {
