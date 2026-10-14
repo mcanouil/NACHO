@@ -373,6 +373,19 @@ test_that("a busy app still shows its step, a missing target is skipped, and a r
   )
   app$run_js("document.querySelector('.driver-popover-close-btn').click()")
   wait_for_end(app)
+  expect_identical(active_page(app), "Data")
+})
+
+test_that("the live region exists before the first tour", {
+  skip_if_no_browser()
+  app <- tour_app(GSE74821)
+  expect_identical(
+    js_string(
+      app,
+      "document.getElementById('nacho-tour-status').getAttribute('aria-live')"
+    ),
+    "polite"
+  )
 })
 
 test_that("a skipped first step is announced with the next step", {

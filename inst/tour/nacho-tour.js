@@ -13,11 +13,13 @@
  *   not hold the tour back),
  * - a step whose part of the app is missing is skipped, and the skip is read
  *   out with the next step,
- * - when keys or clicks arrive while a step waits, the last move wins,
+ * - when keys or clicks arrive while a step waits, the last move wins, and a
+ *   restart keeps the page the first tour started from,
  * - a threshold panel, a sidebar or a collapsed navbar that the tour opens is
  *   closed again when the tour moves on, so it does not cover the next steps
  *   on a narrow window,
- * - a live region reads "Step N of M: title" to screen readers,
+ * - a live region, created when the page loads, reads "Step N of M: title"
+ *   to screen readers,
  * - reduced motion turns off the animations,
  * - at the end, the page that was open comes back and focus goes to the
  *   Help menu, or to the navbar toggle when the Help menu sits in a navbar
@@ -299,8 +301,9 @@
       var previous = tour;
       tour = null;
       previous.destroy();
+    } else {
+      startPage = activePage();
     }
-    startPage = activePage();
     pendingSkip = "";
     var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var steps = message.steps.map(toDriverStep);
@@ -331,6 +334,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    liveRegion();
     if (window.Shiny && window.Shiny.addCustomMessageHandler) {
       window.Shiny.addCustomMessageHandler("nacho-tour-start", start);
     }
