@@ -8,7 +8,9 @@
  * This file adds what the NACHO app needs on top of driver.js:
  * - steps come from R in a Shiny message ("nacho-tour-start"),
  * - before a step shows, the page switches, the threshold panel opens and
- *   the sidebar opens, then the step waits for Shiny to finish rendering,
+ *   the sidebar opens, then the step waits until the Shiny server is idle
+ *   and no panel is still opening (plots that build in the background do
+ *   not hold the tour back),
  * - a step whose part of the app is missing is skipped, and the skip is read
  *   out with the next step,
  * - a live region reads "Step N of M: title" to screen readers,
@@ -105,7 +107,7 @@
     return (
       !document.documentElement.classList.contains("shiny-busy") &&
       !Array.prototype.some.call(
-        document.querySelectorAll(".recalculating, .collapsing"),
+        document.querySelectorAll(".collapsing"),
         visible
       )
     );

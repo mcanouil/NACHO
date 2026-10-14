@@ -155,7 +155,6 @@ test_that("the page loads the tour scripts", {
 })
 
 tour_app <- function(x = NULL, envir = parent.frame()) {
-  skip_if_no_browser()
   app <- shinytest2::AppDriver$new(
     nacho_app(x),
     name = "tour",
@@ -170,7 +169,10 @@ tour_app <- function(x = NULL, envir = parent.frame()) {
 
 js_string <- function(app, script) {
   app$get_js(sprintf(
-    "(function() { var v = %s; return v === null || v === undefined ? '' : String(v); })()",
+    paste0(
+      "(function() { var v = %s; ",
+      "return v === null || v === undefined ? '' : String(v); })()"
+    ),
     script
   ))
 }
@@ -178,7 +180,10 @@ js_string <- function(app, script) {
 wait_for_step <- function(app, n, timeout = 30000) {
   app$wait_for_js(
     sprintf(
-      "(document.querySelector('.driver-popover.nacho-tour .driver-popover-progress-text') || {}).textContent === '%d of 9'",
+      paste0(
+        "(document.querySelector('.driver-popover.nacho-tour ",
+        ".driver-popover-progress-text') || {}).textContent === '%d of 9'"
+      ),
       n
     ),
     timeout = timeout
@@ -240,6 +245,7 @@ wait_for_end <- function(app) {
 }
 
 test_that("the tour walks every step and ends where it started", {
+  skip_if_no_browser()
   app <- tour_app()
   steps <- NACHO:::tour_steps()
   app$run_js(
@@ -270,7 +276,12 @@ test_that("the tour walks every step and ends where it started", {
     expect_identical(
       js_string(
         app,
-        "(function() { var r = document.querySelector('.driver-active-element').getBoundingClientRect(); return r.left >= 0 && r.top >= 0 && r.right <= window.innerWidth && r.width > 0; })()"
+        paste0(
+          "(function() { var r = document.querySelector(",
+          "'.driver-active-element').getBoundingClientRect(); ",
+          "return r.left >= 0 && r.top >= 0 && ",
+          "r.right <= window.innerWidth && r.width > 0; })()"
+        )
       ),
       "true",
       info = steps[[i]]$element
@@ -282,6 +293,7 @@ test_that("the tour walks every step and ends where it started", {
 })
 
 test_that("Esc ends the tour from a collapsed sidebar in dark mode", {
+  skip_if_no_browser()
   app <- tour_app(GSE74821)
   app$run_js("document.querySelector('a[data-value=\"Counts\"]').click()")
   app$run_js(
@@ -328,14 +340,13 @@ test_that("Esc ends the tour from a collapsed sidebar in dark mode", {
 })
 
 test_that("a busy app still shows its step, a missing target is skipped, and a restart gives one tour", {
+  skip_if_no_browser()
   app <- tour_app(GSE74821)
   start_tour_in(app)
-  app$run_js(
-    "document.body.insertAdjacentHTML('beforeend', '<div id=\"tour-test-busy\" class=\"recalculating\"></div>')"
-  )
+  app$run_js("document.documentElement.classList.add('shiny-busy')")
   click_next(app)
   wait_for_step(app, 2, timeout = 20000)
-  app$run_js("document.getElementById('tour-test-busy').remove()")
+  app$run_js("document.documentElement.classList.remove('shiny-busy')")
   app$run_js("document.getElementById('batch-batch-design').remove()")
   for (i in 2:6) {
     wait_for_step(app, i)
@@ -355,6 +366,7 @@ test_that("a busy app still shows its step, a missing target is skipped, and a r
 })
 
 test_that("a skipped first step is announced with the next step", {
+  skip_if_no_browser()
   app <- tour_app(GSE74821)
   app$run_js("document.getElementById('data-card').remove()")
   app$run_js("document.getElementById('tour').click()")
