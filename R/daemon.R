@@ -106,10 +106,17 @@ session_task <- function(
     daemon$tried <- TRUE
     daemon$on <- tryCatch(
       {
-        libs <- .libPaths()
         with_library_paths(
           mirai::daemons(1, dispatcher = TRUE, .compute = profile)
         )
+        TRUE
+      },
+      error = function(cnd) FALSE
+    )
+    if (daemon$on) {
+      libs <- .libPaths()
+      # The warm-up only saves time: without it, the first job loads NACHO.
+      try(
         mirai::mirai(
           {
             .libPaths(libs)
@@ -118,11 +125,10 @@ session_task <- function(
           },
           libs = libs,
           .compute = profile
-        )
-        TRUE
-      },
-      error = function(cnd) FALSE
-    )
+        ),
+        silent = TRUE
+      )
+    }
   }
   if (!is.null(warm_on)) {
     shiny::observeEvent(warm_on(), start_daemon(), once = TRUE)

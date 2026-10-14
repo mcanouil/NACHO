@@ -158,3 +158,42 @@ test_that("the session daemon starts and loads NACHO when the warm-up input chan
   expect_match(warmed, ".libPaths(libs)", fixed = TRUE)
   expect_match(warmed, 'loadNamespace("NACHO")', fixed = TRUE)
 })
+
+test_that("a failed warm-up keeps the daemon and stops it with the session", {
+  skip_if_not_installed("mirai")
+  calls <- integer()
+  used <- NULL
+  local_mocked_bindings(
+    has_package = function(package) TRUE,
+    run_in_daemon = function(fun, args, compute) {
+      used <<- compute
+      "done"
+    }
+  )
+  local_mocked_bindings(
+    daemons = function(n, ...) {
+      calls <<- c(calls, n)
+      invisible(NULL)
+    },
+    mirai = function(...) stop("Queue full."),
+    .package = "mirai"
+  )
+  shiny::testServer(
+    function(input, output, session) {
+      task <- NACHO:::session_task(
+        session,
+        "go",
+        "run",
+        on_success = function(result) NULL,
+        on_error = function(message) NULL
+      )
+    },
+    {
+      task$invoke()
+      wait_for_task(task, session)
+      expect_false(is.null(used))
+      session$close()
+    }
+  )
+  expect_identical(calls, c(1, 0))
+})
