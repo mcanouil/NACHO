@@ -318,11 +318,16 @@ mod_data_server <- function(id, initial = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
     current <- shiny::reactiveVal(initial)
     progress_file <- tempfile("nacho-import-", fileext = ".txt")
+    awaited <- FALSE
     task <- session_task(
       session,
       "import",
       "import_uploads",
       on_success = function(imported) {
+        if (!awaited) {
+          return(invisible(NULL))
+        }
+        awaited <<- FALSE
         for (message in imported[["warnings"]]) {
           notify_user(message, "warning")
         }
@@ -343,6 +348,7 @@ mod_data_server <- function(id, initial = NULL) {
         return()
       }
       unlink(progress_file)
+      awaited <<- TRUE
       task$invoke(input$files, progress_file)
     })
     output$progress <- shiny::renderText({
@@ -354,7 +360,10 @@ mod_data_server <- function(id, initial = NULL) {
         readLines(progress_file, warn = FALSE)
       }
     })
-    shiny::observeEvent(input$example, current(example_data()))
+    shiny::observeEvent(input$example, {
+      awaited <<- FALSE
+      current(example_data())
+    })
     current
   })
 }

@@ -696,3 +696,25 @@ test_that("the background import uses the installed NACHO", {
     expect_nacho(session$returned())
   })
 })
+
+test_that("the example data loaded during an import is kept", {
+  local_no_mirai()
+  local_mocked_bindings(
+    run_in_daemon = function(fun, args, compute) {
+      promises::promise(function(resolve, reject) {
+        later::later(
+          function() {
+            resolve(list(object = "late", warnings = character(), error = NULL))
+          },
+          0.5
+        )
+      })
+    }
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(files = upload_table("salmon_data"), import = 1)
+    session$setInputs(example = 1)
+    wait_for_task(task, session)
+    expect_identical(session$returned(), GSE74821)
+  })
+})
