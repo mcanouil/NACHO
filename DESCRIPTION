@@ -126,6 +126,7 @@ Collate:
     'plot_worker.R'
     'read_nacho.R'
     'read_rcc.R'
+    'tour.R'
     'utils.R'
     'visualise.R'
     'zzz.R'
