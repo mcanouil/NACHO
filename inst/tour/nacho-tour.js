@@ -12,7 +12,8 @@
  *   and no panel is still opening (plots that build in the background do
  *   not hold the tour back),
  * - a step whose part of the app is missing is skipped, and the skip is read
- *   out with the next step,
+ *   out with the next step; the skip comes after 1.5 s once Shiny is idle,
+ *   or after 10 s at most while Shiny is busy,
  * - when keys or clicks arrive while a step waits, the last move wins, and a
  *   restart keeps the page the first tour started from,
  * - a threshold panel, a sidebar or a collapsed navbar that the tour opens is
@@ -34,6 +35,7 @@
   "use strict";
 
   var WAIT_MS = 10000;
+  var SETTLE_MS = 1500;
   var POLL_MS = 100;
   var HELP_TOGGLE = "a.dropdown-toggle[data-value='help']";
 
@@ -177,11 +179,14 @@
     openNavbarAround(target);
     return new Promise(function (resolve) {
       var waited = 0;
+      var settled = 0;
       (function check() {
         var target = document.querySelector(step.element);
-        if (visible(target) && shinyIdle()) {
+        var idle = shinyIdle();
+        settled = idle && !visible(target) ? settled + POLL_MS : 0;
+        if (visible(target) && idle) {
           resolve(true);
-        } else if (waited >= WAIT_MS) {
+        } else if (settled >= SETTLE_MS || waited >= WAIT_MS) {
           resolve(visible(target));
         } else {
           waited += POLL_MS;

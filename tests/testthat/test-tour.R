@@ -393,7 +393,7 @@ test_that("a skipped first step is announced with the next step", {
   app <- tour_app(GSE74821)
   app$run_js("document.getElementById('data-card').remove()")
   app$run_js("document.getElementById('tour').click()")
-  wait_for_step(app, 2, timeout = 20000)
+  wait_for_step(app, 2, timeout = 5000)
   expect_match(
     tour_status(app),
     "Step 1 skipped: its part of the app is not available. Step 2 of 9",
