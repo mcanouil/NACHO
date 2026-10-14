@@ -91,7 +91,9 @@ session_task <- function(
   })
   task <- shiny::ExtendedTask$new(function(...) {
     if (has_package("mirai") && !daemons_on) {
-      mirai::daemons(1, dispatcher = TRUE, .compute = profile)
+      with_library_paths(
+        mirai::daemons(1, dispatcher = TRUE, .compute = profile)
+      )
       daemons_on <<- TRUE
     }
     running <<- run_in_daemon(fun, list(...), profile)

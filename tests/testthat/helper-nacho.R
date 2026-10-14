@@ -135,10 +135,11 @@ wait_until <- function(session, done, tries = 50) {
   for (i in seq_len(tries)) {
     session$flushReact()
     if (done()) {
-      break
+      return(invisible(TRUE))
     }
     later::run_now(0.1)
   }
+  testthat::fail(paste("Gave up after", tries, "tries of", deparse1(done)))
 }
 
 wait_for_task <- function(task, session, status = "success", tries = 50) {

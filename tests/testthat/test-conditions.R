@@ -91,3 +91,14 @@ test_that("a progress step is written to the progress file, even when quiet", {
   (function() NACHO:::nacho_progress_step("Assembling"))()
   expect_identical(readLines(path), "Assembling")
 })
+
+test_that("a progress step is written without colours", {
+  path <- withr::local_tempfile()
+  withr::local_options(
+    cli.num_colors = 256,
+    nacho.quiet = TRUE,
+    nacho.progress_file = path
+  )
+  (function() NACHO:::nacho_progress_step("Reading {.val run1}"))()
+  expect_identical(readLines(path), "Reading \"run1\"")
+})

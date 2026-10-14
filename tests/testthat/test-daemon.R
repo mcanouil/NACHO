@@ -56,3 +56,37 @@ test_that("a job stopped after the session ends never settles", {
   expect_identical(outcome(ended = FALSE), "rejected")
   expect_identical(outcome(ended = TRUE), "pending")
 })
+
+test_that("the session daemon starts with the library paths of the app", {
+  skip_if_not_installed("mirai")
+  seen <- NULL
+  local_mocked_bindings(
+    has_package = function(package) TRUE,
+    run_in_daemon = function(fun, args, compute) "done"
+  )
+  local_mocked_bindings(
+    daemons = function(...) {
+      if (is.null(seen)) {
+        seen <<- Sys.getenv("R_LIBS")
+      }
+      invisible(NULL)
+    },
+    .package = "mirai"
+  )
+  shiny::testServer(
+    function(input, output, session) {
+      task <- NACHO:::session_task(
+        session,
+        "go",
+        "run",
+        on_success = function(result) NULL,
+        on_error = function(message) NULL
+      )
+    },
+    {
+      task$invoke()
+      wait_for_task(task, session)
+    }
+  )
+  expect_identical(seen, paste(.libPaths(), collapse = .Platform$path.sep))
+})
