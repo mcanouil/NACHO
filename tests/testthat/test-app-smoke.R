@@ -237,7 +237,7 @@ test_that("the app flags samples when a threshold moves", {
   app$run_js("document.querySelector('.modal.show .btn').click()")
   app$wait_for_js("document.querySelector('.modal.show') === null")
   app$wait_for_js(
-    "document.activeElement.getAttribute('data-value') === 'Help'"
+    "document.activeElement.getAttribute('data-value') === 'help'"
   )
   app$run_js(
     "const other = document.createElement('div');
