@@ -183,6 +183,17 @@ mod_thresholds_ui <- function(id) {
         icon = shiny::icon("rotate-left", `aria-hidden` = "true"),
         `aria-label` = "Reset the thresholds to the preset",
         class = "btn-outline-secondary btn-sm"
+      ),
+      shiny::tags$div(
+        class = "mt-3",
+        shiny::fileInput(
+          ns("thresholds_file"),
+          "Load thresholds (YAML)",
+          accept = c(".yml", ".yaml")
+        )
+      ),
+      shiny::helpText(
+        "Read a file from the Export page, or one written with write_thresholds()."
       )
     ),
     bslib::accordion_panel(
@@ -238,23 +249,22 @@ mod_thresholds_server <- function(id, data) {
       current(limits)
       revision(shiny::isolate(revision()) + 1L)
     }
+    show_preset <- function(limits) {
+      instrument <- limits[["instrument"]]
+      shiny::updateSelectInput(session, "preset", selected = limits[["preset"]])
+      shiny::updateSelectInput(
+        session,
+        "instrument",
+        selected = if (is.na(instrument)) "max" else instrument
+      )
+    }
 
     shiny::observeEvent(data(), {
       x <- data()
       start(x@thresholds)
       published(x@thresholds)
       chosen(settings_of(x))
-      instrument <- x@thresholds[["instrument"]]
-      shiny::updateSelectInput(
-        session,
-        "preset",
-        selected = x@thresholds[["preset"]]
-      )
-      shiny::updateSelectInput(
-        session,
-        "instrument",
-        selected = if (is.na(instrument)) "max" else instrument
-      )
+      show_preset(x@thresholds)
       shiny::updateSelectInput(
         session,
         "method",
@@ -321,6 +331,37 @@ mod_thresholds_server <- function(id, data) {
     }
 
     shiny::observeEvent(input$reset, reset())
+
+    shiny::observeEvent(input$thresholds_file, {
+      if (is.null(data())) {
+        notify_user(
+          "Load RCC files or the example data before you load thresholds.",
+          "warning"
+        )
+        return(invisible(NULL))
+      }
+      path <- input$thresholds_file[["datapath"]][1]
+      limits <- tryCatch(
+        read_thresholds(path),
+        nacho_error = function(cnd) {
+          message <- cli::ansi_strip(rlang::cnd_message(cnd))
+          notify_user(
+            sub(
+              basename(path),
+              input$thresholds_file[["name"]][1],
+              message,
+              fixed = TRUE
+            ),
+            "error"
+          )
+          NULL
+        }
+      )
+      if (!is.null(limits)) {
+        start(limits)
+        show_preset(limits)
+      }
+    })
 
     for (metric in qc_metrics) {
       local({

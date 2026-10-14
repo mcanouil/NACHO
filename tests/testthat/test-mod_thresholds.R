@@ -437,3 +437,128 @@ test_that("integer limits stay integer after the slider", {
   )
   expect_identical(NACHO:::slider_to_limits(2, c(0, 10), 3L), 2L)
 })
+
+test_that("a thresholds file replaces the limits and the preset", {
+  wanted <- utils::modifyList(
+    nacho_thresholds("flex", "legacy"),
+    list(FoV = 80)
+  )
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(wanted, file)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(GSE74821)),
+    {
+      session$setInputs(preset = "nsolver", instrument = "max")
+      session$elapse(600)
+      session$setInputs(
+        thresholds_file = data.frame(
+          name = "lab.yml",
+          size = file.size(file),
+          type = "",
+          datapath = file
+        )
+      )
+      session$setInputs(preset = "legacy", instrument = "flex")
+      session$elapse(600)
+      expect_identical(session$returned$thresholds(), wanted)
+    }
+  )
+})
+
+test_that("a bad thresholds file keeps the current limits", {
+  file <- withr::local_tempfile(fileext = ".yml")
+  writeLines("FoV: [75", file)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(GSE74821)),
+    {
+      session$setInputs(preset = "nsolver", instrument = "max")
+      session$elapse(600)
+      session$setInputs(
+        thresholds_file = data.frame(
+          name = "broken.yml",
+          size = file.size(file),
+          type = "",
+          datapath = file
+        )
+      )
+      session$elapse(600)
+      expect_identical(session$returned$thresholds(), GSE74821@thresholds)
+    }
+  )
+})
+
+test_that("the preset panel offers a thresholds file", {
+  html <- htmltools::renderTags(NACHO:::mod_thresholds_ui("thresholds"))$html
+  expect_match(html, 'id="thresholds-thresholds_file"', fixed = TRUE)
+  expect_match(html, ".yml,.yaml", fixed = TRUE)
+})
+
+test_that("a thresholds file without a measured metric takes it from its preset", {
+  x <- suppressWarnings(mirna_fixture())
+  partial <- nacho_thresholds("flex", "nsolver")
+  partial[["Ligation_NEG"]] <- NULL
+  neg_range <- NACHO:::threshold_range(
+    x@samples$Ligation_NEG,
+    nacho_thresholds()$Ligation_NEG
+  )
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(partial, file)
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(x)),
+    {
+      session$flushReact()
+      session$elapse(600)
+      session$setInputs(
+        thresholds_file = data.frame(
+          name = "partial.yml",
+          size = file.size(file),
+          type = "",
+          datapath = file
+        )
+      )
+      session$setInputs(
+        preset = "nsolver",
+        instrument = "flex",
+        Ligation_NEG = c(neg_range[1], -1)
+      )
+      session$elapse(600)
+      limits <- session$returned$thresholds()
+      expect_identical(limits[["Ligation_NEG"]], c(-Inf, -1))
+      expect_identical(
+        base()[["Ligation_NEG"]],
+        nacho_thresholds("flex", "nsolver")[["Ligation_NEG"]]
+      )
+      expect_identical(limits[["preset"]], "nsolver")
+    }
+  )
+})
+
+test_that("a thresholds file before any data asks for the data first", {
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(nacho_thresholds(), file)
+  told <- character()
+  testthat::local_mocked_bindings(
+    notify_user = function(message, type = "message") {
+      told <<- c(told, type)
+    }
+  )
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(NULL)),
+    {
+      session$setInputs(
+        thresholds_file = data.frame(
+          name = "lab.yml",
+          size = file.size(file),
+          type = "",
+          datapath = file
+        )
+      )
+      expect_identical(told, "warning")
+      expect_null(current())
+    }
+  )
+})

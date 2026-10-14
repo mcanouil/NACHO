@@ -75,6 +75,10 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - feat: `nacho_thresholds()` builds thresholds for the MAX, FLEX, PRO and SPRINT instruments.
     `load_rcc()` gains `instrument` and `preset` arguments and reads the instrument from MAX/FLEX files.
     When it cannot read the instrument, it warns with class `nacho_warning_instrument_unknown` and uses the MAX/FLEX values.
+- In `R/thresholds.R`, `R/mod_thresholds.R` and `R/mod_export.R`,
+  - feat: `write_thresholds()` saves thresholds to a YAML file and `read_thresholds()` reads them back, so one set of limits can serve every study.
+    The app's Export page writes the same file, and the Preset section of the sidebar loads it.
+    A file without a miRNA threshold takes it from the preset in the file.
 - In `R/detection.R` and `R/accessors.R`,
   - feat: A gene counts as detected in a sample when its count is above the mean of the kept negative probes plus two standard deviations.
     `nacho_samples()` gains `Detection_rate`, the share of endogenous genes detected in each sample, and `nacho_probes()` gains `detection_rate`, the share of samples detecting each gene.
