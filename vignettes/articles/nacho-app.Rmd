@@ -209,20 +209,36 @@ knitr::include_graphics("figures/app-export.png")
 
 ## Help
 
-The **Help** menu in the navigation bar has five items.
+The **Help** menu in the navigation bar has six items.
 
+- **Take the tour** shows each part of the app, one step at a time.
+  If no data is loaded, the tour loads the example data first.
 - **About NACHO** explains the app.
 - **Documentation** opens this website.
 - **Ask a question** opens the discussions on GitHub.
 - **Report a problem** opens the issues on GitHub.
 - **Cite NACHO** shows how to cite the package.
 
+Move through the tour with **Next** and **Back**, or with the arrow keys.
+To stop the tour, press Esc or click the close button.
+
 ```{r}
 #| echo: false
 #| fig-alt: >-
-#|   The Help menu open over the QC metrics page. It lists About NACHO,
-#|   Documentation, Ask a question, Report a problem and Cite NACHO.
+#|   The Help menu open over the QC metrics page. It lists Take the tour,
+#|   About NACHO, Documentation, Ask a question, Report a problem and Cite
+#|   NACHO.
 knitr::include_graphics("figures/app-help-menu.png")
+```
+
+```{r}
+#| echo: false
+#| fig-alt: >-
+#|   A step of the tour on the QC metrics page. The binding density card is
+#|   lit and the rest of the page is dim. A card next to it has the title
+#|   Quality-control plots, a short text, the progress 4 of 9, and the Back
+#|   and Next buttons.
+knitr::include_graphics("figures/app-tour.png")
 ```
 
 ## Finish with Done

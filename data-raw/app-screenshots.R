@@ -184,6 +184,31 @@ main <- function() {
   shoot("app-export.png")
   frame()
 
+  # A step of the guided tour.
+  tour_step <- function(step) {
+    app$wait_for_js(
+      sprintf(
+        paste0(
+          "(document.querySelector('.driver-popover-progress-text') || {})",
+          ".textContent === '%d of 9'"
+        ),
+        step
+      ),
+      timeout = 30000
+    )
+  }
+  app$run_js("document.getElementById('tour').click()")
+  for (step in 1:3) {
+    tour_step(step)
+    app$run_js("document.querySelector('.driver-popover-next-btn').click()")
+  }
+  tour_step(4)
+  wait_for_plots()
+  Sys.sleep(1)
+  shoot("app-tour.png")
+  app$run_js("document.querySelector('.driver-popover-close-btn').click()")
+  app$wait_for_js("document.querySelector('.driver-popover') === null")
+
   # Done button at the foot of the sidebar, with the open sections folded.
   go_to("QC metrics")
   app$run_js(

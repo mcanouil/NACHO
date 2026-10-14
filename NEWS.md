@@ -133,6 +133,7 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - feat: Each plot sits in a card that opens full screen, and interactive plots redraw to fill the card.
     Its display options set the colour, legend, point size and labels, and the plot downloads as a PNG at the size you choose.
   - feat: A dark mode toggle in the navbar switches the app and its plots.
+  - feat: A guided tour in the Help menu walks through the app, and loads the example data first when no data is loaded.
   - feat: Each threshold has a help popover next to it, and upload errors and normalisation warnings show once as toasts.
   - feat: The batch page shows the design and cross-tables of batches against biological groups before the batch plots.
   - feat: Pages without data explain what to do, and "Load the example data" opens GSE74821.
