@@ -62,7 +62,9 @@
   }
 
   function activePage() {
-    var link = document.querySelector(".navbar .nav-link.active[data-value]");
+    var link = document.querySelector(
+      '.navbar a.active[data-bs-toggle="tab"][data-value]'
+    );
     return link ? link.getAttribute("data-value") : null;
   }
 
@@ -71,10 +73,20 @@
       return;
     }
     var link = document.querySelector(
-      '.navbar a[data-value="' + CSS.escape(page) + '"]'
+      '.navbar a[data-bs-toggle="tab"][data-value="' + CSS.escape(page) + '"]'
     );
-    if (link) {
+    if (!link) {
+      return;
+    }
+    if (window.bootstrap && window.bootstrap.Tab) {
+      window.bootstrap.Tab.getOrCreateInstance(link).show();
+    } else {
       link.click();
+    }
+    var menu = link.closest(".dropdown");
+    var toggle = menu && menu.querySelector(".dropdown-toggle");
+    if (toggle && window.bootstrap && window.bootstrap.Dropdown) {
+      window.bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
     }
   }
 
@@ -205,9 +217,12 @@
     if (index < 0 || index >= steps.length) {
       if (!driverObj.isActive()) {
         tour = null;
+        pendingSkip = "";
+        closeOpenedAround(null);
+        showPage(startPage);
         announce("The tour could not start: no part of the app is ready.");
       } else if (index < 0) {
-        driverObj.moveTo(driverObj.getActiveIndex());
+        show(driverObj, driverObj.getActiveIndex());
       } else {
         finish(driverObj);
       }
@@ -226,22 +241,27 @@
         go(driverObj, index, direction, token);
         return;
       }
-      if (driverObj.isActive()) {
-        driverObj.moveTo(index);
-      } else {
-        driverObj.drive(index);
-      }
-      announce(
-        pendingSkip +
-          "Step " +
-          (index + 1) +
-          " of " +
-          steps.length +
-          ": " +
-          steps[index].data.title
-      );
-      pendingSkip = "";
+      show(driverObj, index);
     });
+  }
+
+  function show(driverObj, index) {
+    var steps = driverObj.getConfig().steps;
+    if (driverObj.isActive()) {
+      driverObj.moveTo(index);
+    } else {
+      driverObj.drive(index);
+    }
+    announce(
+      pendingSkip +
+        "Step " +
+        (index + 1) +
+        " of " +
+        steps.length +
+        ": " +
+        steps[index].data.title
+    );
+    pendingSkip = "";
   }
 
   function toDriverStep(step) {

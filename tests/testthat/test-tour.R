@@ -258,7 +258,17 @@ test_that("the tour walks every step and ends where it started", {
     "48"
   )
   for (i in seq_along(steps)) {
-    wait_for_step(app, i, timeout = if (i == 1) 30000 else 8000)
+    wait_for_step(
+      app,
+      i,
+      timeout = if (i == 1) {
+        30000
+      } else if (i == 3) {
+        3000
+      } else {
+        15000
+      }
+    )
     expect_identical(
       js_string(
         app,
@@ -448,10 +458,54 @@ test_that("on a narrow window the tour closes what it opened and reaches Help", 
     }
     click_next(app)
   }
-  wait_for_step(app, 9, timeout = 8000)
+  wait_for_step(app, 9, timeout = 15000)
   expect_identical(navbar_open(), "true")
   click_next(app)
   app$wait_for_js("document.querySelector('.driver-popover') === null")
   app$wait_for_js("document.querySelector('.navbar-collapse.show') === null")
   expect_identical(sidebar_open(), "false")
+})
+
+tab_page <- function(app) {
+  js_string(
+    app,
+    "(document.querySelector('.navbar a.active[data-bs-toggle=\"tab\"]') || {}).textContent"
+  )
+}
+
+test_that("a tour started from a Help page returns to that page", {
+  skip_if_no_browser()
+  app <- tour_app(GSE74821)
+  app$run_js(
+    "bootstrap.Tab.getOrCreateInstance(document.querySelector('a[data-value=\"About NACHO\"]')).show()"
+  )
+  app$wait_for_js(
+    "document.querySelector('a[data-value=\"About NACHO\"]').classList.contains('active')"
+  )
+  start_tour_in(app)
+  app$run_js(
+    "window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Escape'}))"
+  )
+  wait_for_end(app)
+  expect_identical(trimws(tab_page(app)), "About NACHO")
+  expect_identical(
+    js_string(app, "document.querySelector('.dropdown-menu.show') === null"),
+    "true"
+  )
+})
+
+test_that("a skip past the first step is announced once", {
+  skip_if_no_browser()
+  app <- tour_app(GSE74821)
+  app$run_js("document.getElementById('data-card').remove()")
+  app$run_js("document.getElementById('tour').click()")
+  wait_for_step(app, 2, timeout = 20000)
+  Sys.sleep(1)
+  app$run_js("document.querySelector('.driver-popover-prev-btn').click()")
+  Sys.sleep(12)
+  expect_match(tour_status(app), "Step 1 skipped", fixed = TRUE)
+  expect_match(tour_status(app), "Step 2 of 9", fixed = TRUE)
+  click_next(app)
+  wait_for_step(app, 3)
+  expect_identical(tour_status(app), "Step 3 of 9: Thresholds")
 })

@@ -250,7 +250,7 @@ test_that("the app flags samples when a threshold moves", {
   app$wait_for_idle(duration = 500)
   expect_false(identical(
     app$get_js("document.activeElement.getAttribute('data-value')"),
-    "Help"
+    "help"
   ))
   logs <- app$get_logs()
   errors <- logs[logs$location == "shiny" & logs$level == "stderr", ]
