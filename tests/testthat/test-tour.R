@@ -464,6 +464,37 @@ test_that("on a narrow window the tour closes what it opened and reaches Help", 
   app$wait_for_js("document.querySelector('.driver-popover') === null")
   app$wait_for_js("document.querySelector('.navbar-collapse.show') === null")
   expect_identical(sidebar_open(), "false")
+  Sys.sleep(1)
+  expect_identical(
+    js_string(
+      app,
+      "document.activeElement.getAttribute('data-bs-target') === '#' + document.querySelector('.navbar-collapse').id"
+    ),
+    "true"
+  )
+})
+
+test_that("the tour folds back a threshold panel it opened", {
+  skip_if_no_browser()
+  app <- tour_app(GSE74821)
+  button <- paste0(
+    "document.querySelector(",
+    "'.accordion-item[data-value=\"Preset\"] .accordion-button')"
+  )
+  collapsed <- paste0(button, ".classList.contains('collapsed')")
+  preset_open <- function() js_string(app, paste0("!", collapsed))
+  app$run_js(paste0(button, ".click()"))
+  app$wait_for_js(collapsed)
+  start_tour_in(app)
+  click_next(app)
+  wait_for_step(app, 2)
+  click_next(app)
+  wait_for_step(app, 3)
+  expect_identical(preset_open(), "true")
+  click_next(app)
+  wait_for_step(app, 4)
+  app$wait_for_js("document.querySelector('.collapsing') === null")
+  expect_identical(preset_open(), "false")
 })
 
 tab_page <- function(app) {

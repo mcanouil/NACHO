@@ -14,13 +14,14 @@
  * - a step whose part of the app is missing is skipped, and the skip is read
  *   out with the next step,
  * - when keys or clicks arrive while a step waits, the last move wins,
- * - a sidebar or a collapsed navbar that the tour opens is closed again when
- *   the tour moves on, so it does not cover the next steps on a narrow
- *   window,
+ * - a threshold panel, a sidebar or a collapsed navbar that the tour opens is
+ *   closed again when the tour moves on, so it does not cover the next steps
+ *   on a narrow window,
  * - a live region reads "Step N of M: title" to screen readers,
  * - reduced motion turns off the animations,
  * - at the end, the page that was open comes back and focus goes to the
- *   Help menu. The end runs from onDestroyStarted and from Done, not from
+ *   Help menu, or to the navbar toggle when the Help menu sits in a navbar
+ *   that the tour has just closed. The end runs from onDestroyStarted and from Done, not from
  *   onDestroyed, because driver.js calls onDestroyed only after an animation
  *   frame has run.
  * nacho-tour.css gives the card the colours of the Bootstrap theme.
@@ -101,17 +102,21 @@
     );
     if (button && button.classList.contains("collapsed")) {
       button.click();
+      opened.push({ toggle: button, container: button.closest(".accordion") });
     }
   }
 
   function closeOpenedAround(target) {
+    var closed = [];
     opened = opened.filter(function (entry) {
       if (target && entry.container.contains(target)) {
         return true;
       }
       entry.toggle.click();
+      closed.push(entry);
       return false;
     });
+    return closed;
   }
 
   function openSidebarAround(target) {
@@ -160,9 +165,10 @@
 
   function prepare(step) {
     showPage(step.data.page);
-    openPanel(step.data.open);
     var target = document.querySelector(step.element);
     closeOpenedAround(target);
+    openPanel(step.data.open);
+    target = document.querySelector(step.element);
     openSidebarAround(target);
     openNavbarAround(target);
     return new Promise(function (resolve) {
@@ -195,14 +201,16 @@
     }
     tour = null;
     driverObj.destroy();
-    closeOpenedAround(null);
+    var navbar = closeOpenedAround(null).filter(function (entry) {
+      return entry.container.classList.contains("navbar-collapse");
+    })[0];
     showPage(startPage);
     announce(pendingSkip);
     pendingSkip = "";
     window.setTimeout(function () {
-      var help = document.querySelector(HELP_TOGGLE);
-      if (help) {
-        help.focus();
+      var focus = navbar ? navbar.toggle : document.querySelector(HELP_TOGGLE);
+      if (focus) {
+        focus.focus();
       }
     }, 0);
   }
