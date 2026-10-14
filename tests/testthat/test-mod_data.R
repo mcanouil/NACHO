@@ -559,7 +559,13 @@ test_that("importing without a file asks the user to choose files", {
 })
 
 test_that("zip entries that leave the upload folder are refused", {
-  for (entry in c("../evil.RCC", "a/../../evil.RCC", "/tmp/evil.RCC", "C:/evil.RCC", "a\\..\\..\\evil.RCC")) {
+  for (entry in c(
+    "../evil.RCC",
+    "a/../../evil.RCC",
+    "/tmp/evil.RCC",
+    "C:/evil.RCC",
+    "a\\..\\..\\evil.RCC"
+  )) {
     expect_error(
       NACHO:::check_zip_entries(c("ok.RCC", entry), "upload.zip"),
       class = "nacho_error_bad_upload",
@@ -576,7 +582,10 @@ test_that("an upload name cannot leave the upload folder", {
   datapath <- file.path(directory, "0")
   writeLines("x", datapath)
   upload <- NACHO:::expand_upload("../../escaped.RCC", datapath, "")
-  expect_identical(dirname(upload$datapath), directory)
+  expect_identical(
+    normalizePath(dirname(upload$datapath)),
+    normalizePath(directory)
+  )
   expect_identical(upload$name, "escaped.RCC")
   expect_true(file.exists(file.path(directory, "escaped.RCC")))
 })
