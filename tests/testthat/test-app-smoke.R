@@ -1,13 +1,3 @@
-skip_if_no_browser <- function() {
-  testthat::skip_on_cran()
-  testthat::skip_if_not_installed("shinytest2")
-  testthat::skip_if_not_installed("chromote")
-  testthat::skip_if(
-    is.null(suppressMessages(chromote::find_chrome())),
-    "Chrome is not available."
-  )
-}
-
 accessible_name_in <- function(app, selector) {
   cdp <- app$get_chromote_session()
   cdp$Accessibility$enable()
@@ -237,7 +227,7 @@ test_that("the app flags samples when a threshold moves", {
   app$run_js("document.querySelector('.modal.show .btn').click()")
   app$wait_for_js("document.querySelector('.modal.show') === null")
   app$wait_for_js(
-    "document.activeElement.getAttribute('data-value') === 'Help'"
+    "document.activeElement.getAttribute('data-value') === 'help'"
   )
   app$run_js(
     "const other = document.createElement('div');
@@ -260,7 +250,7 @@ test_that("the app flags samples when a threshold moves", {
   app$wait_for_idle(duration = 500)
   expect_false(identical(
     app$get_js("document.activeElement.getAttribute('data-value')"),
-    "Help"
+    "help"
   ))
   logs <- app$get_logs()
   errors <- logs[logs$location == "shiny" & logs$level == "stderr", ]

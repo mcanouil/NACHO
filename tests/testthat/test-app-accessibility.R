@@ -193,3 +193,13 @@ test_that("the external link and summary icons add no second name", {
   expect_length(icons, 5L)
   expect_false(any(grepl("aria-label", icons, fixed = TRUE)))
 })
+
+test_that("the tour action is a named button the audit sees", {
+  buttons <- button_tags(app_html(interactive = FALSE, done = TRUE))
+  tour <- buttons[grepl('id="tour"', buttons, fixed = TRUE)]
+  expect_length(tour, 1)
+  expect_match(tour, 'type="button"', fixed = TRUE)
+  expect_match(tour, "action-button", fixed = TRUE)
+  expect_match(tour, ">Take the tour<", fixed = TRUE)
+  expect_true(accessible_name(tour))
+})

@@ -110,6 +110,7 @@ Collate:
     'mod_thresholds.R'
     'load_rcc.R'
     'mod_data.R'
+    'tour.R'
     'app.R'
     'autoplot.R'
     'stability.R'

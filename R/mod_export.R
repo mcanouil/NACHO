@@ -93,6 +93,7 @@ spreadsheet_safe <- function(data) {
 mod_export_ui <- function(id, quarto) {
   ns <- shiny::NS(id)
   bslib::layout_column_wrap(
+    id = ns("cards"),
     width = "320px",
     bslib::card(
       bslib::card_header("Data"),

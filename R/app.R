@@ -1,4 +1,4 @@
-#' @include mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R mod_batch.R mod_export.R
+#' @include tour.R mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R mod_batch.R mod_export.R
 NULL
 
 #' Run the NACHO app
@@ -120,6 +120,7 @@ app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
     header = shiny::tagList(
       shiny::useBusyIndicators(),
       brand_font_dependency(),
+      tour_dependencies(),
       restore_help_focus,
       if (interactive) selection_echo_guard,
       shiny::conditionalPanel(
@@ -234,7 +235,16 @@ help_menu <- function() {
   links <- help_links()
   bslib::nav_menu(
     "Help",
+    value = "help",
     align = "right",
+    bslib::nav_item(
+      shiny::tags$button(
+        id = "tour",
+        type = "button",
+        class = "dropdown-item action-button",
+        "Take the tour"
+      )
+    ),
     bslib::nav_panel("About NACHO", help_page("nacho")),
     bslib::nav_item(external_link("Documentation", links[["documentation"]])),
     bslib::nav_item(external_link("Ask a question", links[["discussions"]])),
@@ -311,19 +321,19 @@ app_server <- function(
   quarto = FALSE
 ) {
   function(input, output, session) {
-    data <- mod_data_server("data", initial = x)
-    settings <- mod_thresholds_server("thresholds", data = data)
+    loaded <- mod_data_server("data", initial = x)
+    settings <- mod_thresholds_server("thresholds", data = loaded)
     # The value must stay logical: text such as "FALSE" is truthy in JavaScript.
     output$has_data <- shiny::markRenderFunction(
       uiFunc = shiny::textOutput,
-      renderFunc = function(shinysession, name, ...) !is.null(data())
+      renderFunc = function(shinysession, name, ...) !is.null(loaded())
     )
     shiny::outputOptions(output, "has_data", suspendWhenHidden = FALSE)
     dark <- shiny::reactive(identical(input$dark_mode, "dark"))
     announced <- new.env()
     tuned <- shiny::reactive(
       tune_with_toasts(
-        shiny::req(data()),
+        shiny::req(loaded()),
         settings$settings(),
         settings$thresholds(),
         announced
@@ -358,6 +368,12 @@ app_server <- function(
         footer = shiny::modalButton("Close")
       ))
     })
+    shiny::observeEvent(input$tour, {
+      if (is.null(loaded())) {
+        loaded(example_data())
+      }
+      start_tour(session)
+    })
     workers <- if (interactive) plot_workers_start()
     for (page in names(app_plot_types)) {
       local({
@@ -380,7 +396,7 @@ app_server <- function(
     }
     if (done) {
       finished <- new.env()
-      observe_done(input, data, settings, announced, finished)
+      observe_done(input, loaded, settings, announced, finished)
       session$onSessionEnded(function() {
         if (!isTRUE(finished$done)) shiny::stopApp(NULL)
       })

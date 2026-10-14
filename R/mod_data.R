@@ -235,6 +235,7 @@ notify_user <- function(message, type = c("message", "warning", "error")) {
 mod_data_ui <- function(id) {
   ns <- shiny::NS(id)
   bslib::card(
+    id = ns("card"),
     bslib::card_header("Load RCC files"),
     shiny::fileInput(
       ns("files"),
