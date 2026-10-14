@@ -1,1 +1,81 @@
-/* Written in Task 4. */
+/*
+ * Look of the NACHO app tour.
+ * driver.css (driver.js 1.9.0) stays unchanged; these rules override it for
+ * cards with the nacho-tour class, with the colours of the Bootstrap theme,
+ * so the card follows the brand and the dark mode of the app.
+ */
+.driver-popover.nacho-tour {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  box-shadow: var(--bs-box-shadow);
+  font-family: inherit;
+  max-width: 22rem;
+}
+
+.driver-popover.nacho-tour .driver-popover-title {
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+.driver-popover.nacho-tour .driver-popover-description {
+  font-family: inherit;
+  color: inherit;
+}
+
+.driver-popover.nacho-tour .driver-popover-progress-text,
+.driver-popover.nacho-tour .driver-popover-close-btn {
+  color: var(--bs-secondary-color);
+}
+
+.driver-popover.nacho-tour .driver-popover-close-btn:hover,
+.driver-popover.nacho-tour .driver-popover-close-btn:focus-visible {
+  color: var(--bs-body-color);
+}
+
+.driver-popover.nacho-tour .driver-popover-footer-btn {
+  font-family: inherit;
+  font-size: 0.875rem;
+  text-shadow: none;
+  color: var(--bs-body-color);
+  background-color: transparent;
+  border: 1px solid var(--bs-secondary-color);
+  border-radius: var(--bs-border-radius-sm);
+  padding: 0.25rem 0.75rem;
+}
+
+.driver-popover.nacho-tour .driver-popover-next-btn {
+  color: var(--bs-body-bg);
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.driver-popover.nacho-tour .driver-popover-footer-btn:focus-visible,
+.driver-popover.nacho-tour .driver-popover-close-btn:focus-visible {
+  outline: 0.25rem solid var(--bs-focus-ring-color);
+  outline-offset: 1px;
+}
+
+.driver-popover.nacho-tour .driver-popover-footer-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.driver-popover.nacho-tour .driver-popover-arrow-side-left {
+  border-left-color: var(--bs-body-bg);
+}
+
+.driver-popover.nacho-tour .driver-popover-arrow-side-right {
+  border-right-color: var(--bs-body-bg);
+}
+
+.driver-popover.nacho-tour .driver-popover-arrow-side-top {
+  border-top-color: var(--bs-body-bg);
+}
+
+.driver-popover.nacho-tour .driver-popover-arrow-side-bottom {
+  border-bottom-color: var(--bs-body-bg);
+}

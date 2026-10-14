@@ -7,3 +7,13 @@ if (
 ) {
   Sys.setenv(CHROMOTE_CHROME = brave_path)
 }
+
+skip_if_no_browser <- function() {
+  testthat::skip_on_cran()
+  testthat::skip_if_not_installed("shinytest2")
+  testthat::skip_if_not_installed("chromote")
+  testthat::skip_if(
+    is.null(suppressMessages(chromote::find_chrome())),
+    "Chrome is not available."
+  )
+}

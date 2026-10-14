@@ -47,7 +47,7 @@ tour_dependencies <- function() {
 tour_steps <- function() {
   list(
     list(
-      element = "#data-files",
+      element = "#data-card",
       title = "Load your data",
       description = paste(
         "Choose RCC files, zip archives of RCC files and an optional sample",
@@ -106,7 +106,7 @@ tour_steps <- function() {
       page = "Samples"
     ),
     list(
-      element = "#batch-group",
+      element = "#batch-batch-design",
       title = "Batches and groups",
       description = paste(
         "Choose the column that holds the biological groups. The page then",

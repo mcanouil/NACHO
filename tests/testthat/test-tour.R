@@ -153,3 +153,215 @@ test_that("the page loads the tour scripts", {
   expect_true(all(c("driver.js", "nacho-tour") %in% names))
   expect_lt(match("driver.js", names), match("nacho-tour", names))
 })
+
+tour_app <- function(x = NULL, envir = parent.frame()) {
+  skip_if_no_browser()
+  app <- shinytest2::AppDriver$new(
+    nacho_app(x),
+    name = "tour",
+    width = 1280,
+    height = 800,
+    load_timeout = 60000,
+    timeout = 30000
+  )
+  withr::defer(app$stop(), envir = envir)
+  app
+}
+
+js_string <- function(app, script) {
+  app$get_js(sprintf(
+    "(function() { var v = %s; return v === null || v === undefined ? '' : String(v); })()",
+    script
+  ))
+}
+
+wait_for_step <- function(app, n, timeout = 30000) {
+  app$wait_for_js(
+    sprintf(
+      "(document.querySelector('.driver-popover.nacho-tour .driver-popover-progress-text') || {}).textContent === '%d of 9'",
+      n
+    ),
+    timeout = timeout
+  )
+}
+
+start_tour_in <- function(app) {
+  app$run_js("document.getElementById('tour').click()")
+  wait_for_step(app, 1)
+}
+
+click_next <- function(app) {
+  app$run_js("document.querySelector('.driver-popover-next-btn').click()")
+}
+
+active_page <- function(app) {
+  trimws(js_string(
+    app,
+    "(document.querySelector('.navbar .nav-link.active') || {}).textContent"
+  ))
+}
+
+relative_luminance <- function(rgb) {
+  channels <- as.numeric(regmatches(rgb, gregexpr("[0-9.]+", rgb))[[1]][1:3]) /
+    255
+  linear <- ifelse(
+    channels <= 0.03928,
+    channels / 12.92,
+    ((channels + 0.055) / 1.055)^2.4
+  )
+  sum(c(0.2126, 0.7152, 0.0722) * linear)
+}
+
+contrast_ratio <- function(foreground, background) {
+  luminance <- sort(
+    c(relative_luminance(foreground), relative_luminance(background)),
+    decreasing = TRUE
+  )
+  (luminance[1] + 0.05) / (luminance[2] + 0.05)
+}
+
+next_button_contrast <- function(app) {
+  style <- "getComputedStyle(document.querySelector('.driver-popover-next-btn'))"
+  contrast_ratio(
+    js_string(app, paste0(style, ".color")),
+    js_string(app, paste0(style, ".backgroundColor"))
+  )
+}
+
+tour_status <- function(app) {
+  js_string(app, "document.getElementById('nacho-tour-status').textContent")
+}
+
+wait_for_end <- function(app) {
+  app$wait_for_js("document.querySelector('.driver-popover') === null")
+  app$wait_for_js(
+    "document.activeElement && document.activeElement.getAttribute('data-value') === 'help'"
+  )
+}
+
+test_that("the tour walks every step and ends where it started", {
+  app <- tour_app()
+  steps <- NACHO:::tour_steps()
+  app$run_js(
+    "document.querySelector('bslib-input-dark-mode').setAttribute('mode', 'light')"
+  )
+  start_tour_in(app)
+  expect_gte(next_button_contrast(app), 4.5)
+  expect_identical(
+    app$wait_for_value(output = "overview-samples", ignore = list(NULL, "")),
+    "48"
+  )
+  for (i in seq_along(steps)) {
+    wait_for_step(app, i, timeout = if (i == 1) 30000 else 8000)
+    expect_identical(
+      js_string(
+        app,
+        "document.querySelector('.driver-popover-title').textContent"
+      ),
+      steps[[i]]$title
+    )
+    expect_identical(
+      tour_status(app),
+      sprintf("Step %d of 9: %s", i, steps[[i]]$title)
+    )
+    if (!is.null(steps[[i]]$page)) {
+      expect_identical(active_page(app), steps[[i]]$page)
+    }
+    expect_identical(
+      js_string(
+        app,
+        "(function() { var r = document.querySelector('.driver-active-element').getBoundingClientRect(); return r.left >= 0 && r.top >= 0 && r.right <= window.innerWidth && r.width > 0; })()"
+      ),
+      "true",
+      info = steps[[i]]$element
+    )
+    click_next(app)
+  }
+  wait_for_end(app)
+  expect_identical(active_page(app), "Data")
+})
+
+test_that("Esc ends the tour from a collapsed sidebar in dark mode", {
+  app <- tour_app(GSE74821)
+  app$run_js("document.querySelector('a[data-value=\"Counts\"]').click()")
+  app$run_js(
+    "document.querySelector('bslib-input-dark-mode').setAttribute('mode', 'dark')"
+  )
+  app$run_js(
+    "document.querySelector('.bslib-sidebar-layout > .collapse-toggle').click()"
+  )
+  app$wait_for_js(
+    "document.querySelector('.bslib-sidebar-layout.sidebar-collapsed') !== null"
+  )
+  start_tour_in(app)
+  expect_identical(
+    js_string(
+      app,
+      "document.querySelector('.driver-popover-close-btn').getAttribute('aria-label')"
+    ),
+    "Close the tour"
+  )
+  expect_identical(
+    js_string(
+      app,
+      "getComputedStyle(document.querySelector('.driver-popover')).backgroundColor"
+    ),
+    js_string(app, "getComputedStyle(document.body).backgroundColor")
+  )
+  expect_gte(next_button_contrast(app), 4.5)
+  click_next(app)
+  wait_for_step(app, 2)
+  click_next(app)
+  wait_for_step(app, 3)
+  expect_identical(
+    js_string(
+      app,
+      "document.querySelector('.bslib-sidebar-layout.sidebar-collapsed') === null"
+    ),
+    "true"
+  )
+  app$run_js(
+    "window.dispatchEvent(new KeyboardEvent('keyup', {key: 'Escape'}))"
+  )
+  wait_for_end(app)
+  expect_identical(active_page(app), "Counts")
+})
+
+test_that("a busy app still shows its step, a missing target is skipped, and a restart gives one tour", {
+  app <- tour_app(GSE74821)
+  start_tour_in(app)
+  app$run_js(
+    "document.body.insertAdjacentHTML('beforeend', '<div id=\"tour-test-busy\" class=\"recalculating\"></div>')"
+  )
+  click_next(app)
+  wait_for_step(app, 2, timeout = 20000)
+  app$run_js("document.getElementById('tour-test-busy').remove()")
+  app$run_js("document.getElementById('batch-batch-design').remove()")
+  for (i in 2:6) {
+    wait_for_step(app, i)
+    click_next(app)
+  }
+  wait_for_step(app, 8, timeout = 20000)
+  expect_match(tour_status(app), "Step 7 skipped", fixed = TRUE)
+  expect_match(tour_status(app), "Step 8 of 9: Export", fixed = TRUE)
+  app$run_js("document.getElementById('tour').click()")
+  wait_for_step(app, 1)
+  expect_identical(
+    js_string(app, "document.querySelectorAll('.driver-popover').length"),
+    "1"
+  )
+  app$run_js("document.querySelector('.driver-popover-close-btn').click()")
+  wait_for_end(app)
+})
+
+test_that("a skipped first step is announced with the next step", {
+  app <- tour_app(GSE74821)
+  app$run_js("document.getElementById('data-card').remove()")
+  app$run_js("document.getElementById('tour').click()")
+  wait_for_step(app, 2, timeout = 20000)
+  expect_match(
+    tour_status(app),
+    "Step 1 skipped: its part of the app is not available. Step 2 of 9",
+    fixed = TRUE
+  )
+})
