@@ -440,7 +440,11 @@ test_that("a study where most samples fail Ligation_NEG gets the whole-blood hin
   message <- conditionMessage(warning)
   expect_match(message, "6 of 6", fixed = TRUE)
   expect_match(message, "miR-451a", fixed = TRUE)
-  expect_match(message, format(stats::median(counts["hsa-miR-451a", ]), big.mark = ","), fixed = TRUE)
+  expect_match(
+    message,
+    format(stats::median(counts["hsa-miR-451a", ]), big.mark = ","),
+    fixed = TRUE
+  )
   expect_match(message, "nacho_thresholds()", fixed = TRUE)
   expect_match(message, "exclude_outliers()", fixed = TRUE)
 })

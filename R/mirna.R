@@ -141,7 +141,9 @@ warn_ligation_background <- function(
       "{sum(failing)} of {length(failing)} samples fail {.field Ligation_NEG}.",
       i = paste0(
         "Whole-blood RNA raises {.val LIG_NEG_A} together with red blood cell ",
-        "miRNAs such as miR-451a", level, ", so a whole study can fail."
+        "miRNAs such as miR-451a",
+        level,
+        ", so a whole study can fail."
       ),
       i = paste(
         "If your samples are whole blood, relax the {.field Ligation_NEG}",
