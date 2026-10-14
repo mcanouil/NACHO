@@ -20,6 +20,8 @@
  *   on a narrow window,
  * - a live region, created when the page loads, reads "Step N of M: title"
  *   to screen readers,
+ * - arrow keys typed in an input move the cursor, not the tour (driver.js
+ *   listens on window, so the event stops at document),
  * - reduced motion turns off the animations,
  * - at the end, the page that was open comes back and focus goes to the
  *   Help menu, or to the navbar toggle when the Help menu sits in a navbar
@@ -332,6 +334,24 @@
     tour = driverObj;
     go(driverObj, -1, 1);
   }
+
+  function editable(element) {
+    return (
+      !!element &&
+      (element.isContentEditable ||
+        /^(INPUT|TEXTAREA|SELECT)$/.test(element.tagName))
+    );
+  }
+
+  document.addEventListener("keyup", function (event) {
+    if (
+      tour &&
+      (event.key === "ArrowLeft" || event.key === "ArrowRight") &&
+      editable(event.target)
+    ) {
+      event.stopPropagation();
+    }
+  });
 
   document.addEventListener("DOMContentLoaded", function () {
     liveRegion();

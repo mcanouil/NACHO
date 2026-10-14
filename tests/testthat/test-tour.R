@@ -553,3 +553,32 @@ test_that("a skip past the first step is announced once", {
   wait_for_step(app, 3)
   expect_identical(tour_status(app), "Step 3 of 9: Thresholds")
 })
+
+test_that("arrow keys typed in an input do not move the tour", {
+  skip_if_no_browser()
+  app <- tour_app(GSE74821)
+  start_tour_in(app)
+  click_next(app)
+  wait_for_step(app, 2)
+  click_next(app)
+  wait_for_step(app, 3)
+  Sys.sleep(1)
+  app$run_js(paste0(
+    "document.querySelector('#thresholds-sections input, ",
+    "#thresholds-sections select').dispatchEvent(",
+    "new KeyboardEvent('keyup', {key: 'ArrowRight', bubbles: true}))"
+  ))
+  Sys.sleep(2)
+  expect_identical(
+    js_string(
+      app,
+      "document.querySelector('.driver-popover-progress-text').textContent"
+    ),
+    "3 of 9"
+  )
+  app$run_js(paste0(
+    "document.body.dispatchEvent(",
+    "new KeyboardEvent('keyup', {key: 'ArrowRight', bubbles: true}))"
+  ))
+  wait_for_step(app, 4)
+})
