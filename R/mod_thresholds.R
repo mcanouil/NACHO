@@ -333,7 +333,13 @@ mod_thresholds_server <- function(id, data) {
     shiny::observeEvent(input$reset, reset())
 
     shiny::observeEvent(input$thresholds_file, {
-      shiny::req(data())
+      if (is.null(data())) {
+        notify_user(
+          "Load RCC files or the example data before you load thresholds.",
+          "warning"
+        )
+        return(invisible(NULL))
+      }
       path <- input$thresholds_file[["datapath"]][1]
       limits <- tryCatch(
         read_thresholds(path),
@@ -352,12 +358,6 @@ mod_thresholds_server <- function(id, data) {
         }
       )
       if (!is.null(limits)) {
-        instrument <- limits[["instrument"]]
-        preset <- nacho_thresholds(
-          instrument = if (is.na(instrument)) "max" else instrument,
-          preset = limits[["preset"]]
-        )
-        limits <- c(limits, preset[setdiff(names(preset), names(limits))])
         start(limits)
         show_preset(limits)
       }

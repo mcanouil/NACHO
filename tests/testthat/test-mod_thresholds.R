@@ -535,3 +535,30 @@ test_that("a thresholds file without a measured metric takes it from its preset"
     }
   )
 })
+
+test_that("a thresholds file before any data asks for the data first", {
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(nacho_thresholds(), file)
+  told <- character()
+  testthat::local_mocked_bindings(
+    notify_user = function(message, type = "message") {
+      told <<- c(told, type)
+    }
+  )
+  shiny::testServer(
+    NACHO:::mod_thresholds_server,
+    args = list(data = shiny::reactiveVal(NULL)),
+    {
+      session$setInputs(
+        thresholds_file = data.frame(
+          name = "lab.yml",
+          size = file.size(file),
+          type = "",
+          datapath = file
+        )
+      )
+      expect_identical(told, "warning")
+      expect_null(current())
+    }
+  )
+})

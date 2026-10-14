@@ -312,6 +312,9 @@ check_thresholds <- function(
 #' You can edit the file by hand.
 #' `read_thresholds()` reads whole numbers such as `80` as numbers, and checks
 #' the thresholds as [normalise()] does.
+#' If the file does not give a miRNA threshold (`Ligation_order`,
+#' `Ligation_R2`, `Ligation_NEG` or `Haemolysis`), `read_thresholds()` uses the
+#' value of the preset in the file.
 #'
 #' @param thresholds A list of thresholds, as returned by [nacho_thresholds()]
 #'   or found in the `@thresholds` property of a `nacho` object.
@@ -372,7 +375,12 @@ read_thresholds <- function(file) {
   if (length(problems) > 0) {
     fail(sub("^@thresholds", "thresholds", problems))
   }
-  thresholds
+  instrument <- thresholds[["instrument"]]
+  preset <- nacho_thresholds(
+    instrument = if (is.na(instrument)) "max" else instrument,
+    preset = thresholds[["preset"]]
+  )
+  c(thresholds, preset[setdiff(names(preset), names(thresholds))])
 }
 
 #' Write numbers for YAML with the fewest digits that read back exactly

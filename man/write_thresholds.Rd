@@ -32,6 +32,9 @@ unknown instrument.
 You can edit the file by hand.
 \code{read_thresholds()} reads whole numbers such as \code{80} as numbers, and checks
 the thresholds as \code{\link[=normalise]{normalise()}} does.
+If the file does not give a miRNA threshold (\code{Ligation_order},
+\code{Ligation_R2}, \code{Ligation_NEG} or \code{Haemolysis}), \code{read_thresholds()} uses the
+value of the preset in the file.
 }
 \examples{
 file <- tempfile(fileext = ".yml")

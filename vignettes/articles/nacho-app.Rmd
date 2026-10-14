@@ -69,7 +69,7 @@ Every page uses them.
   **Reset** returns the thresholds to the preset.
   **Load thresholds (YAML)** reads a thresholds file and replaces the preset and the limits.
   The file comes from the **Export** page or from `write_thresholds()` in R.
-  If the file does not give a miRNA threshold (`Ligation_order`, `Ligation_R2`, `Ligation_NEG` or `Haemolysis`), the app uses the value of the preset in the file.
+  If the file does not give a miRNA threshold, the app uses the value of the preset in the file, as `read_thresholds()` does.
 - **Normalisation** sets the method, the background, the background mode and, for RUVg, the number of unwanted factors.
   To choose that number, use `suggest_ruv_k()` in R.
 - The other sections hold one slider for each threshold, grouped as imaging, controls, content and miRNA.

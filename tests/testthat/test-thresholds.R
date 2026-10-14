@@ -322,3 +322,11 @@ test_that("read_thresholds() never evaluates R code in the file", {
   expect_error(read_thresholds(file), class = "nacho_error_bad_thresholds")
   expect_identical(Sys.getenv("NACHO_YAML_RAN"), "")
 })
+
+test_that("read_thresholds() fills the miRNA thresholds from the preset", {
+  partial <- nacho_thresholds("flex", "nsolver")
+  partial[c("Ligation_NEG", "Haemolysis")] <- NULL
+  file <- withr::local_tempfile(fileext = ".yml")
+  write_thresholds(partial, file)
+  expect_identical(read_thresholds(file), nacho_thresholds("flex", "nsolver"))
+})
