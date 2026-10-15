@@ -368,3 +368,125 @@ test_that("the thresholds download reads back exactly", {
     }
   )
 })
+
+run_script <- function(lines, data_directory = NULL, sample_sheet = NULL) {
+  lines <- lines[lines != "library(NACHO)"]
+  if (!is.null(data_directory)) {
+    lines <- sub(
+      "\"path/to/rcc-files\"",
+      deparse(data_directory),
+      lines,
+      fixed = TRUE
+    )
+    lines <- sub(
+      "\"path/to/samplesheet.csv\"",
+      deparse(sample_sheet),
+      lines,
+      fixed = TRUE
+    )
+  }
+  env <- new.env(parent = parent.frame())
+  suppressWarnings(suppressMessages(eval(parse(text = lines), envir = env)))
+  env[["nacho"]]
+}
+
+expect_same_result <- function(script, app) {
+  testthat::expect_identical(
+    nacho_counts(script, normalised = TRUE),
+    nacho_counts(app, normalised = TRUE)
+  )
+  testthat::expect_identical(nacho_qc(script), nacho_qc(app))
+  testthat::expect_identical(script@thresholds, app@thresholds)
+}
+
+test_that("the R script reproduces the example data as tuned in the app", {
+  thresholds <- utils::modifyList(
+    GSE74821@thresholds,
+    list(FoV = 95, BD = c(0.1, 2))
+  )
+  chosen <- list(
+    normalisation_method = "GEO",
+    ruv_k = NULL,
+    background = "mean",
+    background_mode = "subtract"
+  )
+  app <- suppressWarnings(NACHO:::tune_object(GSE74821, chosen, thresholds))
+  script <- NACHO:::reproduce_script(app)
+  expect_true("nacho <- GSE74821" %in% script)
+  expect_same_result(run_script(script), app)
+})
+
+test_that("the R script reproduces RUVg with its number of factors", {
+  skip_if_not_installed("RUVSeq")
+  chosen <- list(
+    normalisation_method = "RUVg",
+    ruv_k = 2L,
+    background = "none",
+    background_mode = "threshold"
+  )
+  app <- suppressWarnings(
+    NACHO:::tune_object(GSE74821, chosen, GSE74821@thresholds)
+  )
+  expect_same_result(run_script(NACHO:::reproduce_script(app)), app)
+})
+
+test_that("the R script loads uploaded files from the paths the user sets", {
+  directory <- test_path("salmon_data")
+  rcc <- list.files(directory, pattern = "\\.RCC$", ignore.case = TRUE)
+  sheet <- withr::local_tempfile(fileext = ".csv")
+  utils::write.csv(
+    data.frame(
+      IDFILE = rep(rcc, each = 8),
+      plexset_id = paste0("S", 1:8),
+      group = "case"
+    ),
+    sheet,
+    row.names = FALSE
+  )
+  loaded <- suppressWarnings(suppressMessages(
+    load_rcc(directory, sheet, id_colname = "IDFILE")
+  ))
+  chosen <- list(
+    normalisation_method = "GLM",
+    ruv_k = NULL,
+    background = "none",
+    background_mode = "threshold"
+  )
+  app <- suppressWarnings(NACHO:::tune_object(
+    loaded,
+    chosen,
+    loaded@thresholds
+  ))
+  script <- NACHO:::reproduce_script(app)
+  expect_false("nacho <- GSE74821" %in% script)
+  expect_true(any(grepl("load_rcc(", script, fixed = TRUE)))
+  expect_same_result(run_script(script, directory, sheet), app)
+})
+
+test_that("a subset of the example data is not reproduced as the example", {
+  script <- NACHO:::reproduce_script(flagged_gse())
+  expect_false("nacho <- GSE74821" %in% script)
+  expect_true(any(grepl("load_rcc(", script, fixed = TRUE)))
+})
+
+test_that("the Export page previews and downloads the R script", {
+  shiny::testServer(
+    NACHO:::mod_export_server,
+    args = list(object = shiny::reactiveVal(GSE74821), quarto = FALSE),
+    {
+      expect_identical(
+        output$script,
+        paste(NACHO:::reproduce_script(GSE74821), collapse = "\n")
+      )
+      expect_identical(
+        readLines(output$script_r),
+        NACHO:::reproduce_script(GSE74821)
+      )
+    }
+  )
+  html <- htmltools::renderTags(
+    NACHO:::mod_export_ui("export", quarto = FALSE)
+  )$html
+  expect_match(html, "Reproduce in R", fixed = TRUE)
+  expect_match(html, "id=\"export-script_r\"", fixed = TRUE)
+})

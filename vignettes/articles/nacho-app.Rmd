@@ -195,6 +195,10 @@ The **Export** page saves your work.
 - **nacho object (RDS)** holds the object.
   Read it back in R with `read_nacho()`.
 - **Render the report** builds a quality-control report.
+- **R script** holds R code that repeats the analysis of the app, with the same normalisation and thresholds.
+  The **Reproduce in R** card shows the script before you download it.
+  For your own data, set the paths to your RCC files and sample sheet at the top of the script.
+  For the example data, the script runs as it is.
 
 For the report, enter a title and an author, both optional, and choose HTML or PDF (Typst).
 Then click **Render the report**.
@@ -208,7 +212,8 @@ If you have the `mirai` package, the app renders the report in the background.
 #|   The Export page. A card lists three download buttons for the data. A
 #|   second card holds the title and author fields, the HTML and PDF choice,
 #|   the Render the report button, and a button to download the finished
-#|   report.
+#|   report. Below them, the Reproduce in R card has an R script button and
+#|   the start of the script.
 knitr::include_graphics("figures/app-export.png")
 ```
 
