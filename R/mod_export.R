@@ -115,6 +115,7 @@ reproduce_script <- function(object) {
   } else {
     directory <- object@provenance[["data_directory"]]
     uploaded <- !rlang::is_string(directory) ||
+      !dir.exists(directory) ||
       startsWith(directory, tempdir()) ||
       startsWith(
         normalizePath(directory, mustWork = FALSE),

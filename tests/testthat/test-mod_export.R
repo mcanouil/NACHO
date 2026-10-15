@@ -499,9 +499,14 @@ test_that("the R script leaves an unknown instrument to load_rcc()", {
 
 test_that("the R script keeps the folder the object was loaded from", {
   x <- salmon_nacho
-  x@provenance[["data_directory"]] <- "/data/run1"
+  x@provenance[["data_directory"]] <- R.home("bin")
   script <- NACHO:::reproduce_script(x)
-  expect_true("  data_directory = \"/data/run1\"," %in% script)
+  expect_true(
+    paste0("  data_directory = ", deparse(R.home("bin")), ",") %in% script
+  )
+  x@provenance[["data_directory"]] <- "/no/such/run1"
+  script <- NACHO:::reproduce_script(x)
+  expect_true("  data_directory = \"path/to/rcc-files\"," %in% script)
 })
 
 test_that("the R script names the sample sheet columns for an upload", {
