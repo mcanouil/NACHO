@@ -110,10 +110,7 @@ reproduce_script <- function(object) {
   argument <- function(name, x, last = FALSE) {
     paste0("  ", name, " = ", x, if (!last) ",")
   }
-  example <- example_data()
-  is_example <- identical(object@provenance, example@provenance) &&
-    identical(colnames(object@counts), colnames(example@counts))
-  load <- if (is_example) {
+  load <- if (identical(data_fingerprint(object), example_fingerprint())) {
     "nacho <- GSE74821"
   } else {
     c(
@@ -134,10 +131,10 @@ reproduce_script <- function(object) {
       ")"
     )
   }
-  yaml_file <- tempfile(fileext = ".yml")
-  on.exit(unlink(yaml_file), add = TRUE)
-  write_thresholds(thresholds, yaml_file)
-  yaml_lines <- encodeString(readLines(yaml_file), quote = "\"")
+  yaml_lines <- encodeString(
+    strsplit(thresholds_yaml(thresholds), "\n", fixed = TRUE)[[1]],
+    quote = "\""
+  )
   c(
     paste0(
       "# Reproduces a NACHO app session (NACHO ",
@@ -175,6 +172,27 @@ reproduce_script <- function(object) {
     ),
     ")"
   )
+}
+
+#' Tell loaded data apart by their load time and samples
+#'
+#' `normalise()` adds to the provenance, so only the load time is compared.
+#'
+#' @noRd
+data_fingerprint <- function(object) {
+  list(object@provenance[["created"]], colnames(object@counts))
+}
+
+example_cache <- new.env(parent = emptyenv())
+
+#' The fingerprint of the example data, worked out once
+#'
+#' @noRd
+example_fingerprint <- function() {
+  if (is.null(example_cache$fingerprint)) {
+    example_cache$fingerprint <- data_fingerprint(example_data())
+  }
+  example_cache$fingerprint
 }
 
 mod_export_ui <- function(id, quarto) {

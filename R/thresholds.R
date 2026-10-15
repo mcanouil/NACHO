@@ -331,15 +331,25 @@ check_thresholds <- function(
 #' read_thresholds(file)
 #' unlink(file)
 write_thresholds <- function(thresholds, file) {
+  writeLines(thresholds_yaml(thresholds), file, sep = "")
+  invisible(file)
+}
+
+#' Write thresholds as YAML text
+#'
+#' @inheritParams write_thresholds
+#'
+#' @return One string, with a line break after each line.
+#'
+#' @noRd
+thresholds_yaml <- function(thresholds) {
   check_thresholds(thresholds)
-  yaml::write_yaml(
+  yaml::as.yaml(
     thresholds,
-    file,
     handlers = list(numeric = function(value) {
       structure(yaml_numbers(value), class = "verbatim")
     })
   )
-  invisible(file)
 }
 
 #' @rdname write_thresholds

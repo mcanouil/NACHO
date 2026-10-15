@@ -390,6 +390,23 @@ run_script <- function(lines, data_directory = NULL, sample_sheet = NULL) {
   env[["nacho"]]
 }
 
+tune_app <- function(
+  x,
+  method,
+  background = "none",
+  mode = "threshold",
+  ruv_k = NULL,
+  thresholds = x@thresholds
+) {
+  chosen <- list(
+    normalisation_method = method,
+    ruv_k = ruv_k,
+    background = background,
+    background_mode = mode
+  )
+  suppressWarnings(NACHO:::tune_object(x, chosen, thresholds))
+}
+
 expect_same_result <- function(script, app) {
   testthat::expect_identical(
     nacho_counts(script, normalised = TRUE),
@@ -404,13 +421,7 @@ test_that("the R script reproduces the example data as tuned in the app", {
     GSE74821@thresholds,
     list(FoV = 95, BD = c(0.1, 2))
   )
-  chosen <- list(
-    normalisation_method = "GEO",
-    ruv_k = NULL,
-    background = "mean",
-    background_mode = "subtract"
-  )
-  app <- suppressWarnings(NACHO:::tune_object(GSE74821, chosen, thresholds))
+  app <- tune_app(GSE74821, "GEO", "mean", "subtract", thresholds = thresholds)
   script <- NACHO:::reproduce_script(app)
   expect_true("nacho <- GSE74821" %in% script)
   expect_same_result(run_script(script), app)
@@ -418,49 +429,28 @@ test_that("the R script reproduces the example data as tuned in the app", {
 
 test_that("the R script reproduces RUVg with its number of factors", {
   skip_if_not_installed("RUVSeq")
-  chosen <- list(
-    normalisation_method = "RUVg",
-    ruv_k = 2L,
-    background = "none",
-    background_mode = "threshold"
-  )
-  app <- suppressWarnings(
-    NACHO:::tune_object(GSE74821, chosen, GSE74821@thresholds)
-  )
+  app <- tune_app(GSE74821, "RUVg", ruv_k = 2L)
   expect_same_result(run_script(NACHO:::reproduce_script(app)), app)
 })
 
 test_that("the R script loads uploaded files from the paths the user sets", {
-  directory <- test_path("salmon_data")
-  rcc <- list.files(directory, pattern = "\\.RCC$", ignore.case = TRUE)
   sheet <- withr::local_tempfile(fileext = ".csv")
   utils::write.csv(
-    data.frame(
-      IDFILE = rep(rcc, each = 8),
-      plexset_id = paste0("S", 1:8),
-      group = "case"
-    ),
+    salmon_tidy[c("IDFILE", "plexset_id")],
     sheet,
     row.names = FALSE
   )
-  loaded <- suppressWarnings(suppressMessages(
-    load_rcc(directory, sheet, id_colname = "IDFILE")
-  ))
-  chosen <- list(
-    normalisation_method = "GLM",
-    ruv_k = NULL,
-    background = "none",
-    background_mode = "threshold"
-  )
-  app <- suppressWarnings(NACHO:::tune_object(
-    loaded,
-    chosen,
-    loaded@thresholds
-  ))
+  app <- tune_app(salmon_nacho, "GLM")
   script <- NACHO:::reproduce_script(app)
   expect_false("nacho <- GSE74821" %in% script)
   expect_true(any(grepl("load_rcc(", script, fixed = TRUE)))
-  expect_same_result(run_script(script, directory, sheet), app)
+  expect_same_result(run_script(script, test_path("salmon_data"), sheet), app)
+})
+
+test_that("the example data is still known after normalise() adds provenance", {
+  x <- GSE74821
+  x@provenance[["glm_fallback"]] <- TRUE
+  expect_true("nacho <- GSE74821" %in% NACHO:::reproduce_script(x))
 })
 
 test_that("a subset of the example data is not reproduced as the example", {
