@@ -444,6 +444,14 @@ test_that("the R script loads uploaded files from the paths the user sets", {
   script <- NACHO:::reproduce_script(app)
   expect_false("nacho <- GSE74821" %in% script)
   expect_true(any(grepl("load_rcc(", script, fixed = TRUE)))
+  expect_true(
+    paste0(
+      "  data_directory = ",
+      deparse(salmon_nacho@provenance[["data_directory"]]),
+      ","
+    ) %in%
+      script
+  )
   expect_same_result(run_script(script, test_path("salmon_data"), sheet), app)
 })
 
@@ -479,4 +487,20 @@ test_that("the Export page previews and downloads the R script", {
   )$html
   expect_match(html, "Reproduce in R", fixed = TRUE)
   expect_match(html, "id=\"export-script_r\"", fixed = TRUE)
+})
+
+test_that("the R script keeps the placeholder for an uploaded folder", {
+  x <- salmon_nacho
+  x@provenance[["data_directory"]] <- withr::local_tempdir()
+  script <- NACHO:::reproduce_script(x)
+  expect_true("  data_directory = \"path/to/rcc-files\"," %in% script)
+  expect_true(any(grepl("every RCC file of the folder", script, fixed = TRUE)))
+})
+
+test_that("the R script leaves an unknown instrument to load_rcc()", {
+  x <- salmon_nacho
+  x@thresholds[["instrument"]] <- NA_character_
+  script <- NACHO:::reproduce_script(x)
+  expect_true("  instrument = NULL," %in% script)
+  expect_no_error(parse(text = script))
 })

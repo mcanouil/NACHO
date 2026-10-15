@@ -113,10 +113,26 @@ reproduce_script <- function(object) {
   load <- if (identical(data_fingerprint(object), example_fingerprint())) {
     "nacho <- GSE74821"
   } else {
+    directory <- object@provenance[["data_directory"]]
+    uploaded <- !rlang::is_string(directory) ||
+      startsWith(directory, tempdir()) ||
+      startsWith(
+        normalizePath(directory, mustWork = FALSE),
+        normalizePath(tempdir(), mustWork = FALSE)
+      )
     c(
-      "# Point these to your RCC files and sample sheet.",
+      "# This loads every RCC file of the folder, so samples left out before",
+      "# the app are back.",
+      if (uploaded) {
+        "# Point these to your RCC files and sample sheet."
+      } else {
+        "# Point this to your sample sheet."
+      },
       "nacho <- load_rcc(",
-      argument("data_directory", "\"path/to/rcc-files\""),
+      argument(
+        "data_directory",
+        if (uploaded) "\"path/to/rcc-files\"" else value(directory)
+      ),
       argument("ssheet_csv", "\"path/to/samplesheet.csv\""),
       argument("id_colname", value(settings[["id_colname"]])),
       argument("housekeeping_genes", value(settings[["housekeeping_genes"]])),
@@ -125,7 +141,14 @@ reproduce_script <- function(object) {
         value(settings[["housekeeping_predict"]])
       ),
       argument("housekeeping_norm", value(settings[["housekeeping_norm"]])),
-      argument("instrument", value(thresholds[["instrument"]])),
+      argument(
+        "instrument",
+        if (is.na(thresholds[["instrument"]])) {
+          "NULL"
+        } else {
+          value(thresholds[["instrument"]])
+        }
+      ),
       argument("preset", value(thresholds[["preset"]])),
       argument("n_comp", value(settings[["n_comp"]]), last = TRUE),
       ")"
