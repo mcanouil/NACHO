@@ -10,19 +10,7 @@ NULL
 #'
 #' @noRd
 samples_table_data <- function(x, qc) {
-  columns <- intersect(
-    c(
-      x@settings[["id_colname"]],
-      "lane",
-      "lane_status",
-      "CartridgeID",
-      "status",
-      "n_flags",
-      "reason"
-    ),
-    names(qc)
-  )
-  data <- qc[, columns, drop = FALSE]
+  data <- qc[, qc_table_columns(x, qc), drop = FALSE]
   data <- data[
     order(!data[["status"]] %in% "fail", -data[["n_flags"]]),
     ,
@@ -32,15 +20,51 @@ samples_table_data <- function(x, qc) {
   data
 }
 
-#' Show a quality-control status as a coloured word
+#' The labels of the samples table columns
+#'
+#' @noRd
+samples_table_labels <- c(
+  lane = "Lane",
+  lane_status = "Lane status",
+  CartridgeID = "Cartridge",
+  status = "Status",
+  n_flags = "Flags",
+  reason = "Reason"
+)
+
+#' Show quality-control statuses as coloured words
+#'
+#' @param status A character vector of `"fail"`, `"pass"` or `NA`.
+#'
+#' @return HTML strings.
 #'
 #' @noRd
 status_badge <- function(status) {
-  if (is.na(status)) {
-    return(htmltools::span(class = "badge text-bg-secondary", "not assessed"))
-  }
-  style <- c(fail = "text-bg-danger", pass = "text-bg-success")[[status]]
-  htmltools::span(class = paste("badge", style), status)
+  style <- ifelse(
+    is.na(status),
+    "secondary",
+    ifelse(status %in% "fail", "danger", "success")
+  )
+  label <- ifelse(is.na(status), "not assessed", htmltools::htmlEscape(status))
+  paste0('<span class="badge text-bg-', style, '">', label, "</span>")
+}
+
+#' The look of the reactable samples table, from the Bootstrap colours
+#'
+#' @noRd
+samples_table_theme <- function() {
+  reactable::reactableTheme(
+    color = "inherit",
+    backgroundColor = "transparent",
+    borderColor = "var(--bs-border-color)",
+    highlightColor = "var(--bs-tertiary-bg)",
+    rowSelectedStyle = list(
+      backgroundColor = "var(--bs-secondary-bg)",
+      boxShadow = "inset 3px 0 0 0 var(--bs-primary)"
+    ),
+    inputStyle = list(backgroundColor = "transparent", color = "inherit"),
+    paginationStyle = list(color = "inherit")
+  )
 }
 
 mod_outliers_ui <- function(id, interactive = FALSE) {
@@ -67,7 +91,7 @@ mod_outliers_ui <- function(id, interactive = FALSE) {
     ),
     shiny::div(
       bslib::input_switch(ns("flagged_only"), "Flagged only"),
-      shiny::uiOutput(ns("body")),
+      shiny::textOutput(ns("message")),
       if (has_package("reactable")) {
         reactable::reactableOutput(ns("samples"))
       } else {
@@ -120,30 +144,32 @@ mod_outliers_server <- function(
       ignoreNULL = FALSE,
       ignoreInit = TRUE
     )
-    output$body <- shiny::renderUI({
-      if (nrow(failures()) == 0) {
-        shiny::tags$p("No sample is flagged.")
-      }
-    })
+    output$message <- shiny::renderText(
+      if (nrow(failures()) == 0) "No sample is flagged." else ""
+    )
+    badged <- c("status", "lane_status")
     if (has_package("reactable")) {
       output$samples <- reactable::renderReactable({
         data <- rows()
         chosen <- match(shiny::isolate(selected()), data[[1]])
-        columns <- list(
-          lane = reactable::colDef(name = "Lane", maxWidth = 80),
-          lane_status = reactable::colDef(
-            name = "Lane status",
-            cell = status_badge
-          ),
-          CartridgeID = reactable::colDef(name = "Cartridge", minWidth = 150),
-          status = reactable::colDef(name = "Status", cell = status_badge),
-          n_flags = reactable::colDef(name = "Flags", maxWidth = 80),
-          reason = reactable::colDef(name = "Reason", minWidth = 160)
+        shown <- intersect(names(samples_table_labels), names(data))
+        min_width <- c(CartridgeID = 150, reason = 160)
+        columns <- stats::setNames(
+          lapply(shown, function(column) {
+            reactable::colDef(
+              name = samples_table_labels[[column]],
+              cell = if (column %in% badged) status_badge,
+              html = column %in% badged,
+              minWidth = if (column %in% names(min_width)) min_width[[column]],
+              maxWidth = if (column %in% c("lane", "n_flags")) 80
+            )
+          }),
+          shown
         )
         columns[[names(data)[1]]] <- reactable::colDef(minWidth = 260)
         reactable::reactable(
           data,
-          columns = columns[intersect(names(columns), names(data))],
+          columns = columns,
           selection = "single",
           onClick = "select",
           defaultSelected = chosen[!is.na(chosen)],
@@ -151,40 +177,24 @@ mod_outliers_server <- function(
           highlight = TRUE,
           compact = TRUE,
           defaultPageSize = 20,
-          theme = reactable::reactableTheme(
-            color = "inherit",
-            backgroundColor = "transparent",
-            borderColor = "var(--bs-border-color)",
-            highlightColor = "var(--bs-tertiary-bg)",
-            rowSelectedStyle = list(
-              backgroundColor = "var(--bs-secondary-bg)",
-              boxShadow = "inset 3px 0 0 0 var(--bs-primary)"
-            ),
-            inputStyle = list(
-              backgroundColor = "transparent",
-              color = "inherit"
-            ),
-            paginationStyle = list(color = "inherit")
-          )
+          theme = samples_table_theme()
         )
       })
-      shiny::observeEvent(
-        reactable::getReactableState("samples", "selected"),
-        {
-          id <- rows()[[1]][reactable::getReactableState("samples", "selected")]
-          if (!identical(id, selected())) {
-            selected(id)
-          }
+      shiny::observeEvent(input$samples__reactable__selected, {
+        id <- rows()[[1]][input$samples__reactable__selected]
+        if (!identical(id, selected())) {
+          selected(id)
         }
-      )
+      })
       shiny::observeEvent(
         selected(),
         {
           chosen <- match(selected(), rows()[[1]])
-          reactable::updateReactable(
-            "samples",
-            selected = if (length(chosen) == 1 && !is.na(chosen)) chosen else NA
-          )
+          wanted <- if (length(chosen) == 1 && !is.na(chosen)) chosen
+          shown <- input$samples__reactable__selected
+          if (!identical(as.integer(wanted), as.integer(shown))) {
+            reactable::updateReactable("samples", selected = wanted %||% NA)
+          }
         },
         ignoreNULL = FALSE,
         ignoreInit = TRUE
@@ -194,20 +204,20 @@ mod_outliers_server <- function(
         {
           table <- rows()
           chosen <- table[[1]] %in% selected()
-          status <- vapply(
-            table[["status"]],
-            function(value) as.character(status_badge(value)),
-            character(1)
-          )
-          table[] <- lapply(table, function(column) {
+          plain <- setdiff(names(table), badged)
+          table[plain] <- lapply(table[plain], function(column) {
             htmltools::htmlEscape(as.character(column))
           })
-          table[["status"]] <- status
+          for (column in intersect(badged, names(table))) {
+            table[[column]] <- status_badge(table[[column]])
+          }
           table[[1]] <- ifelse(
             chosen,
             paste0("<strong>", table[[1]], "</strong>"),
             table[[1]]
           )
+          labelled <- names(table) %in% names(samples_table_labels)
+          names(table)[labelled] <- samples_table_labels[names(table)[labelled]]
           table
         },
         sanitize.text.function = function(x) x,

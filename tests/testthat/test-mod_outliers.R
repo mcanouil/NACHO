@@ -50,11 +50,7 @@ test_that("the outliers module returns zero rows without failures", {
     ),
     {
       expect_identical(nrow(failures()), 0L)
-      expect_match(
-        as.character(output$body$html),
-        "No sample is flagged.",
-        fixed = TRUE
-      )
+      expect_identical(output$message, "No sample is flagged.")
     }
   )
 })
@@ -68,8 +64,7 @@ test_that("the outliers module shows the table when samples are flagged", {
       qc = shiny::reactive(nacho_qc(x))
     ),
     {
-      body <- paste(as.character(output$body$html), collapse = "")
-      expect_false(grepl("No sample is flagged.", body, fixed = TRUE))
+      expect_identical(output$message, "")
     }
   )
 })
@@ -212,21 +207,7 @@ test_that("the samples table lists flagged samples first", {
   qc <- nacho_qc(x)
   data <- NACHO:::samples_table_data(x, qc)
   id <- x@settings[["id_colname"]]
-  expect_identical(
-    names(data),
-    intersect(
-      c(
-        id,
-        "lane",
-        "lane_status",
-        "CartridgeID",
-        "status",
-        "n_flags",
-        "reason"
-      ),
-      names(qc)
-    )
-  )
+  expect_identical(names(data), NACHO:::qc_table_columns(x, qc))
   flagged <- qc[[id]][qc[["status"]] %in% "fail"]
   expect_setequal(data[[id]][seq_along(flagged)], flagged)
   expect_identical(nrow(data), nrow(qc))
@@ -256,20 +237,13 @@ test_that("the flagged only switch keeps the flagged samples", {
 })
 
 test_that("the status reads as a coloured word", {
-  expect_match(
-    as.character(NACHO:::status_badge("fail")),
-    "text-bg-danger[^>]*>fail<",
-    perl = TRUE
-  )
-  expect_match(
-    as.character(NACHO:::status_badge("pass")),
-    "text-bg-success[^>]*>pass<",
-    perl = TRUE
-  )
-  expect_match(
-    as.character(NACHO:::status_badge(NA_character_)),
-    "text-bg-secondary[^>]*>not assessed<",
-    perl = TRUE
+  expect_identical(
+    NACHO:::status_badge(c("fail", "pass", NA)),
+    c(
+      '<span class="badge text-bg-danger">fail</span>',
+      '<span class="badge text-bg-success">pass</span>',
+      '<span class="badge text-bg-secondary">not assessed</span>'
+    )
   )
 })
 
@@ -317,9 +291,15 @@ test_that("a sample chosen elsewhere is selected in the reactable table", {
       selected(rows()[[1]][3])
       session$flushReact()
       expect_identical(sent[[length(sent)]], 3L)
+      session$setInputs(samples__reactable__selected = 3L)
       selected(character())
       session$flushReact()
       expect_identical(sent[[length(sent)]], NA)
+      session$setInputs(samples__reactable__selected = NULL)
+      count <- length(sent)
+      session$setInputs(samples__reactable__selected = 2L)
+      expect_identical(selected(), rows()[[1]][2])
+      expect_length(sent, count)
     }
   )
 })
