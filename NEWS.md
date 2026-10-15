@@ -2,54 +2,62 @@
 
 ## Breaking changes
 
-NACHO 2 users can stay on NACHO 2.* or convert saved objects with `upgrade_nacho()` and `read_nacho()`.
-The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev/NACHO/) maps the NACHO 2 code to NACHO 3.
+If you use NACHO 2, you can stay on NACHO 2.*, or convert your saved objects with `upgrade_nacho()` and `read_nacho()`.
+The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev/NACHO/) maps NACHO 2 code to NACHO 3.
 
 - In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
-  - feat: `load_rcc()` and `normalise()` return an S7 `nacho` object. Read it with `nacho_counts()`, `nacho_samples()`, `nacho_probes()` and `nacho_qc()`; the `$nacho` long table and the other list slots are gone, and `as.data.frame(x, long = TRUE)` gives the long layout.
-  - feat: `print()` shows a short summary; the full report stays in `render()`.
-  - feat: The load path of the data moves to the object's provenance and is no longer stored in `GSE74821`.
+  - feat: `load_rcc()` and `normalise()` return an S7 `nacho` object.
+    Read it with `nacho_counts()`, `nacho_samples()`, `nacho_probes()` and `nacho_qc()`.
+    The `$nacho` long table and the other list slots are gone; `as.data.frame(x, long = TRUE)` gives the long layout.
+  - feat: `print()` shows a short summary, and the full report comes from `render()`.
+  - feat: The path the data were loaded from is now part of the object's provenance, and `GSE74821` no longer stores it.
 - In `R/conditions.R`,
-  - feat: Errors, warnings and messages now use cli and carry classes such as `nacho_error_bad_argument`, so code can catch them selectively.
+  - feat: Errors, warnings and messages use cli and carry classes such as `nacho_error_bad_argument`, so your code can catch the ones it expects.
 - In `R/load_rcc.R`,
-  - feat: `load_rcc()` refuses duplicated sample ids for single-sample RCC files; PlexSet files may repeat an id, since `plexset_id` tells the samples apart.
-  - feat: `load_rcc()` refuses RCC files whose probes clash, the same name with a different code class or accession, and names the clashing probes in the error.
-  - feat: Duplicated probe names within one RCC sample are now refused with a clear error.
-  - feat: miRNA panels are no longer normalised with housekeeping genes by default, since their housekeeping mRNAs sit at background.
-    Passing `housekeeping_genes` or `housekeeping_predict = TRUE` turns it back on, and so does `housekeeping_norm = TRUE`.
+  - feat: `load_rcc()` refuses duplicated sample ids in single-sample RCC files.
+    PlexSet files can repeat an id, because `plexset_id` tells their samples apart.
+  - feat: `load_rcc()` refuses RCC files whose probes clash, that is, share a name but differ in code class or accession, and the error names those probes.
+  - feat: `load_rcc()` refuses an RCC sample that repeats a probe name, with a clear error.
+  - feat: miRNA panels are no longer normalised with housekeeping genes by default, because their housekeeping mRNAs sit at background.
+    To turn it back on, pass `housekeeping_genes`, `housekeeping_predict = TRUE` or `housekeeping_norm = TRUE`.
 - In `R/accessors.R` and `R/normalise.R`,
-  - feat: `nacho_qc()` gives a status for each metric, `n_flags`, an overall `status` and a readable `reason`, and replaces `is_outlier`.
-    `check_outliers()` is gone, since the status always follows the object's thresholds.
-  - feat: `exclude_outliers()` drops flagged samples and normalises the others again. `normalise()` no longer has `remove_outliers`.
+  - feat: `nacho_qc()` replaces `is_outlier` with a status for each metric, `n_flags`, an overall `status` and a readable `reason`.
+    `check_outliers()` is gone, because the status always follows the object's thresholds.
+  - feat: `exclude_outliers()` drops the flagged samples and normalises the rest again.
+    `normalise()` no longer has `remove_outliers`.
 - In `R/autoplot.R`,
-  - feat: `autoplot()` takes the plot name in `type` instead of `x`, and it points NACHO 2 code that still passes `x` to the new argument.
-  - feat: Plot labels, help pages and the app's threshold labels now use US spelling, such as "Normalized" and "Hemolysis".
-  - feat: Plots follow the NACHO brand: groups use the Okabe-Ito colours up to eight levels on a light background and seven on a dark one, then viridis, and flagged samples are rust triangles instead of red points.
+  - feat: `autoplot()` takes the plot name in `type` instead of `x`, and points NACHO 2 code that still passes `x` to the new argument.
+  - feat: Plot labels, help pages and the threshold labels in the app use US spelling, such as "Normalized" and "Hemolysis".
+  - feat: Plots use the NACHO brand.
+    Groups take the Okabe-Ito colours, up to eight groups on a light background and seven on a dark one, and viridis beyond that.
+    Flagged samples are rust triangles instead of red points.
 - In `R/render.R`,
-  - feat: `render()` builds the report with Quarto instead of R Markdown, as a self-contained HTML file or a Typst PDF with `format = "typst"`.
+  - feat: `render()` builds the report with Quarto instead of R Markdown, as a self-contained HTML file, or as a Typst PDF with `format = "typst"`.
     It needs the Quarto command-line interface 1.9.18 or newer, which RStudio and Positron bundle.
-  - feat: `render()` takes the object as `x`, writes `nacho-report.html` or `nacho-report.pdf` to `output_dir` and returns the path; `output_file`, `show_outliers` and `clean` are gone.
+  - feat: `render()` takes the object as `x`, writes `nacho-report.html` or `nacho-report.pdf` to `output_dir`, and returns the path.
+    `output_file`, `show_outliers` and `clean` are gone.
 - In `R/thresholds.R`,
   - feat: Samples are flagged against the nSolver thresholds by default.
-    `nacho_thresholds(preset = "legacy")` keeps the NACHO 2 limits, and with `background = "geo", background_mode = "subtract"` it gives back NACHO 2 outlier calls.
+    `nacho_thresholds(preset = "legacy")` keeps the NACHO 2 limits, and with `background = "geo", background_mode = "subtract"` it gives the NACHO 2 outlier calls back.
 - In `R/qc.R`,
-  - feat: Negative probes are excluded with Bruker's rule, at most two probes 3-fold above the others; the legacy preset keeps the NACHO 2 rule.
-  - feat: Positive control linearity leaves out POS_F and adds 1 to every count in the nSolver preset.
-  - feat: Ligation controls of miRNA panels now flag samples under the default nSolver preset.
+  - feat: Negative probes are excluded with Bruker's rule, which drops at most two probes that sit 3-fold above the others.
+    The legacy preset keeps the NACHO 2 rule.
+  - feat: In the nSolver preset, positive control linearity leaves out POS_F and adds 1 to every count.
+  - feat: Under the default nSolver preset, the ligation controls of miRNA panels flag samples.
   - feat: Normalised counts are no longer rounded or floored at 0.1.
   - feat: There is no background correction by default (`background = "none"`).
-    Choose a statistic with `background` and whether to threshold or subtract with `background_mode`.
+    Choose a statistic with `background`, and whether to threshold or subtract with `background_mode`.
     `background = "geo", background_mode = "subtract"` gives the NACHO 2 correction, and subtracting floors the counts at 0.
-  - feat: `Negative_factor` is always the geometric mean of the kept negative controls, including with `normalisation_method = "GLM"`.
-    The background applied is in the new `Background` column.
-    With `"GLM"`, the normalised counts therefore differ from NACHO 2, which subtracted the model intercept.
-  - feat: `housekeeping_predict = TRUE` picks the five most stable genes by geNorm, among genes above background in at least 90% of samples, instead of the five with the smallest spread.
+  - feat: `Negative_factor` is always the geometric mean of the kept negative controls, with `normalisation_method = "GLM"` too.
+    The new `Background` column holds the background that was applied.
+    So with `"GLM"`, normalised counts differ from NACHO 2, which subtracted the model intercept.
+  - feat: `housekeeping_predict = TRUE` picks the five most stable genes by geNorm, among the genes above background in at least 90% of samples, instead of the five with the smallest spread.
 - In `R/interop.R`,
-  - feat: `as_nacho()` on a miRNA `SummarizedExperiment` without saved settings no longer normalises with housekeeping genes, unless you set `housekeeping_norm = TRUE` or give `housekeeping_genes`.
+  - feat: `as_nacho()` no longer normalises a miRNA `SummarizedExperiment` without saved settings with housekeeping genes, unless you set `housekeeping_norm = TRUE` or give `housekeeping_genes`.
 - In `R/deploy.R`,
-  - feat: `deploy()` no longer defaults to `/srv/shiny-server`, so pass `directory` explicitly.
+  - feat: `deploy()` has no default `directory` any more, so pass the folder yourself; it used to be `/srv/shiny-server`.
 - In `DESCRIPTION`,
-  - build: NACHO now requires R 4.3 or newer.
+  - build: NACHO needs R 4.3 or newer.
   - build: knitr and rmarkdown move to Suggests, and quarto joins them.
   - build: The app no longer needs shinyWidgets or markdown, and needs shiny 1.11.0 or newer.
 - In `R/visualise.R`,
@@ -58,122 +66,133 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
 ## New features
 
 - In `R/render.R`,
-  - feat: The report reads as a quality-control record: a cover with the study details, a decision summary with the flagged samples and notes on how the data were processed, a table of every setting and limit with its meaning and source, a short "How to read this" under each figure and table, and a methods appendix with the citation and package versions.
-  - feat: `render()` gains `title` and `author` for the report cover, and the app's Export page has matching fields.
-  - feat: The HTML and PDF reports share the NACHO look and the same content, and the PDF is a tagged PDF that declares PDF/UA-1, checked by Typst against the PDF/UA-1 rules it can enforce; the HTML report has landmarks, a skip link and labelled tables.
-  - feat: `render()` gains `group`, which adds the batch design and cross-tables, with a warning when batch and biology are confounded.
+  - feat: The report reads as a quality-control record.
+    It opens with a cover holding the study details, then a summary of the decision, with the flagged samples and notes on how the data were processed.
+    A table lists every setting and limit with its meaning and source, each figure and table has a short "How to read this", and an appendix gives the methods, the citation and the package versions.
+  - feat: `render()` gains `title` and `author` for the report cover, and the Export page of the app has the same fields.
+  - feat: The HTML and PDF reports have the same content and the NACHO look.
+    The PDF is a tagged PDF that declares PDF/UA-1, and Typst checks it against the PDF/UA-1 rules it can enforce.
+    The HTML report has landmarks, a skip link and labelled tables.
+  - feat: `render()` gains `group`, which adds the batch design and its cross-tables, and warns when batch and biology are confounded.
 - In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
-  - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, recomputing the PCA and the outlier flags.
+  - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, and both recompute the PCA and the outlier flags.
 - In `R/read_nacho.R`,
-  - feat: `upgrade_nacho()` converts a NACHO 2 object, and `read_nacho()` reads a saved object from any NACHO version.
-  - feat: `read_nacho()` reads objects saved by earlier development versions of NACHO 3 and rebuilds them.
+  - feat: `upgrade_nacho()` converts a NACHO 2 object, and `read_nacho()` reads an object saved by any NACHO version.
+  - feat: `read_nacho()` reads objects saved by earlier development versions of NACHO 3, and rebuilds them.
   - feat: Upgraded NACHO 2 objects and migrated schema 1 objects move to the legacy preset, with `background = "geo", background_mode = "subtract"`, so they keep their NACHO 2 flags and background correction.
-    Use `normalise()` to switch to the nSolver preset.
+    Use `normalise()` to switch them to the nSolver preset.
 - In `R/interop.R`,
-  - feat: `as_summarized_experiment()` and `as_nacho()` convert between `nacho` objects and `SummarizedExperiment`, and `as_nacho()` also reads a `NanoStringRccSet` from NanoStringNCTools.
+  - feat: `as_summarized_experiment()` and `as_nacho()` convert between `nacho` objects and `SummarizedExperiment`.
+    `as_nacho()` also reads a `NanoStringRccSet` from NanoStringNCTools.
 - In `R/thresholds.R` and `R/load_rcc.R`,
   - feat: `nacho_thresholds()` builds thresholds for the MAX, FLEX, PRO and SPRINT instruments.
-    `load_rcc()` gains `instrument` and `preset` arguments and reads the instrument from MAX/FLEX files.
-    When it cannot read the instrument, it warns with class `nacho_warning_instrument_unknown` and uses the MAX/FLEX values.
+    `load_rcc()` gains `instrument` and `preset`, and reads the instrument from MAX/FLEX files.
+    When it can't read the instrument, it warns with class `nacho_warning_instrument_unknown` and uses the MAX/FLEX values.
 - In `R/thresholds.R`, `R/mod_thresholds.R` and `R/mod_export.R`,
-  - feat: `write_thresholds()` saves thresholds to a YAML file and `read_thresholds()` reads them back, so one set of limits can serve every study.
-    The app's Export page writes the same file, and the Preset section of the sidebar loads it.
-    A file without a miRNA threshold takes it from the preset in the file.
+  - feat: `write_thresholds()` saves thresholds to a YAML file and `read_thresholds()` reads them back, so you can use one set of limits for every study.
+    The Export page of the app writes the same file, and the Preset section of the sidebar loads it.
+    A file without a miRNA threshold takes it from the preset named in the file.
 - In `R/detection.R` and `R/accessors.R`,
   - feat: A gene counts as detected in a sample when its count is above the mean of the kept negative probes plus two standard deviations.
-    `nacho_samples()` gains `Detection_rate`, the share of endogenous genes detected in each sample, and `nacho_probes()` gains `detection_rate`, the share of samples detecting each gene.
-  - feat: `filter_detected(x, min_rate)` keeps the genes detected often enough.
-    `min_rate` is the share of samples in which a gene must be detected.
+    `nacho_samples()` gains `Detection_rate`, the share of endogenous genes each sample detects, and `nacho_probes()` gains `detection_rate`, the share of samples that detect each gene.
+  - feat: `filter_detected(x, min_rate)` keeps the genes detected often enough, where `min_rate` is the share of samples in which a gene must be detected.
 - In `R/qc-table.R`,
-  - feat: For PlexSet files, `nacho_qc()` has a `lane_status`, and a lane failure flags the eight samples of that lane.
+  - feat: For PlexSet files, `nacho_qc()` has a `lane_status`, and a lane that fails flags its eight samples.
     Their reason reads "lane fails" followed by the metric name.
 - In `R/methods.R`,
   - feat: `print()` lists the excluded negative probes.
 - In `R/qc.R`,
-  - feat: Quality control runs on data without lane attributes; the metrics that need them are `NA`, with one warning.
-  - feat: `nacho_qc()` flags samples with too few housekeeping genes above background, following Bruker's RNA content check.
-    The count is in `Housekeeping_detected`, and the nSolver preset flags a sample below 3, while the legacy preset uses 0 and never flags.
-  - feat: A sample without a detection limit, because it has fewer than two negative probes with counts, gets a missing `Detection_rate` and `Housekeeping_detected`.
-    `load_rcc()` then gives one `metric_unavailable` warning that names the samples.
-  - feat: GLM normalisation starts from the least squares line, checks convergence, and falls back to the geometric mean with a classed warning when a sample does not fit.
-    The stored `normalisation_method` then reads `"GEO"`, and `provenance$glm_fallback` lists the failed samples.
+  - feat: Quality control runs on data without lane attributes.
+    The metrics that need them are `NA`, with one warning.
+  - feat: Following Bruker's RNA content check, `nacho_qc()` flags samples with too few housekeeping genes above background.
+    `Housekeeping_detected` holds the count, and the nSolver preset flags a sample below 3, while the legacy preset uses 0 and never flags.
+  - feat: A sample with fewer than two negative probes with counts has no detection limit, so its `Detection_rate` and `Housekeeping_detected` are missing.
+    `load_rcc()` then gives one `metric_unavailable` warning that names those samples.
+  - feat: GLM normalisation starts from the least squares line and checks that it converges.
+    When a sample doesn't fit, it falls back to the geometric mean with a classed warning, the stored `normalisation_method` reads `"GEO"`, and `provenance$glm_fallback` lists the samples that failed.
 - In `R/conditions.R`,
-  - feat: `options(nacho.quiet = TRUE)` silences progress and informative messages.
+  - feat: `options(nacho.quiet = TRUE)` silences the progress and informative messages.
 - In `R/load_rcc.R`,
-  - feat: `load_rcc()` and `normalise()` check their arguments before reading any file.
-  - feat: `load_rcc()` reads gzipped RCC files directly and accepts files with Windows line endings.
-  - feat: `background` and `background_mode` choose how negative controls correct each sample.
+  - feat: `load_rcc()` and `normalise()` check their arguments before they read any file.
+  - feat: `load_rcc()` reads gzipped RCC files directly, and accepts files with Windows line endings.
+  - feat: `background` and `background_mode` choose how the negative controls correct each sample.
 - In `R/normalise.R`,
   - feat: `normalise()` checks `outliers_thresholds` before it runs.
   - feat: `?normalise` documents the order of the normalisation steps.
-  - feat: Changing only `outliers_thresholds` in `normalise()` recalculates the flags without rebuilding the object.
+  - feat: When you change only `outliers_thresholds` in `normalise()`, it recalculates the flags without rebuilding the object.
   - feat: `normalise()` refuses a thresholds list written for NACHO 2, one without `preset`, and the error points to `nacho_thresholds()`.
 - In `R/autoplot.R`,
   - feat: `autoplot()` checks that `colour` and `outliers_labels` name columns of `nacho_samples()`, and `outliers_labels` must be a column name.
-  - feat: `autoplot()` gains `dark` to draw a plot for a dark background, with amber flags.
+  - feat: `autoplot()` gains `dark`, which draws the plot for a dark background, with amber flags.
 - In `inst/extdata/`,
-  - feat: `GSE346526` holds six mRNA samples in RCC files that nSolver 4.0.1.8 wrote, the most recent nSolver version on GEO in October 2026.
+  - feat: `GSE346526` holds six mRNA samples in RCC files written by nSolver 4.0.1.8, the most recent nSolver version on GEO in October 2026.
 - In `inst/brand/`,
-  - feat: NACHO ships its brand file, with the Source Sans 3 and JetBrains Mono fonts, so the app, the report and the website share one look offline.
+  - feat: NACHO ships its brand file with the Source Sans 3 and JetBrains Mono fonts, so the app, the report and the website look the same, even offline.
 - In `R/stability.R`,
   - feat: `housekeeping_stability()` ranks reference genes with geNorm and NormFinder, gives the geNorm pairwise variation, and tests each gene against a biological group.
     `autoplot(x, type = "Stability")` draws the ranking.
 - In `R/ruv.R`,
-  - feat: `normalisation_method = "RUVg"` removes unwanted variation estimated from the housekeeping genes, and gives the factors as `W_1`, `W_2`, ... in `nacho_samples()`.
-    `suggest_ruv_k()` suggests how many to remove.
+  - feat: `normalisation_method = "RUVg"` removes unwanted variation estimated from the housekeeping genes, and adds the factors to `nacho_samples()` as `W_1`, `W_2`, and so on.
+    `suggest_ruv_k()` suggests how many factors to remove.
 - In `R/mirna.R`,
   - feat: NACHO recognises miRNA panels and offers `normalisation_method = "stable_mirna"`, `"total_mirna"`, `"spike_in"` and `"ligation"`.
   - feat: `nacho_qc()` checks the ligation controls of miRNA panels, and `nacho_thresholds(haemolysis = TRUE)` flags haemolysed plasma and serum samples.
-  - feat: `load_rcc()` warns when more than half of the samples fail `Ligation_NEG`, since whole-blood RNA raises `LIG_NEG_A` with red blood cell miRNAs, and the warning shows how to relax the threshold.
+  - feat: `load_rcc()` warns when more than half of the samples fail `Ligation_NEG`, and shows how to relax the threshold.
+    This happens with whole-blood RNA, where miRNAs from red blood cells raise `LIG_NEG_A`.
 - In `R/batch.R` and `R/autoplot.R`,
-  - feat: `batch_diagnostics()` crosses the study groups with cartridges and dates, with Cramér's V and a flag when a batch holds a single group, tests the QC metrics against each batch, and measures how much of each principal component each batch explains.
+  - feat: `batch_diagnostics()` crosses the study groups with cartridges and dates, with Cramér's V and a flag when a batch holds a single group.
+    It also tests the QC metrics against each batch, and measures how much of each principal component each batch explains.
     `autoplot()` draws `"RLE"`, `"BatchFactors"` and `"PCBatch"`.
 - In `R/app.R`,
-  - feat: `nacho_app()` returns the app as a Shiny app object, so it can run from any R session or be deployed; `deploy()` copies a one-line `app.R` that calls it, and the "Done" button only appears with `nacho_app(done = TRUE)`, which `visualise()` uses.
-  - feat: The app starts from the object's own thresholds, keeps its preset and instrument, and offers RUVg, the miRNA methods and the background settings.
-  - feat: The app has one sidebar with every threshold and the instrument presets.
-    A reset button puts the thresholds back to the preset.
+  - feat: `nacho_app()` returns the app as a Shiny app object, so you can run it from any R session or deploy it.
+    `deploy()` copies a one-line `app.R` that calls it, and the "Done" button only appears with `nacho_app(done = TRUE)`, which `visualise()` uses.
+  - feat: The app starts from the object's own thresholds and keeps its preset and instrument.
+    It offers RUVg, the miRNA methods and the background settings.
+  - feat: The app has one sidebar with every threshold and the instrument presets, and a reset button puts the thresholds back to the preset.
   - feat: A summary strip at the top of every page shows the samples, the cartridges (lanes for PlexSet), the flagged samples with their reasons, and the method.
   - feat: Each plot sits in a card that opens full screen, and interactive plots redraw to fill the card.
-    Its display options set the colour, legend, point size and labels, and the plot downloads as a PNG at the size you choose.
+    The display options of a card set the colour, legend, point size and labels, and you can download the plot as a PNG at the size you choose.
   - feat: A dark mode toggle in the navbar switches the app and its plots.
-  - feat: A guided tour in the Help menu walks through the app, and loads the example data first when no data is loaded.
-  - feat: Each threshold has a help popover next to it, and upload errors and normalisation warnings show once as toasts.
-  - feat: The batch page shows the design and cross-tables of batches against biological groups before the batch plots.
+  - feat: A guided tour in the Help menu walks you through the app, and loads the example data first when no data are loaded.
+  - feat: Each threshold has a help popover next to it, and upload errors and normalisation warnings show once, as toasts.
+  - feat: Before the batch plots, the Batch page shows the design and cross-tables of the batches against the biological groups.
   - feat: Pages without data explain what to do, and "Load the example data" opens GSE74821.
-  - feat: The app wears the NACHO look, with a navy navbar and the brand fonts in light and dark mode.
-  - feat: With ggiraph installed, hovering a point shows the sample and its value, and clicking it outlines that sample in the plots that show one point per sample.
+  - feat: The app uses the NACHO brand, with a navy navbar and the brand fonts in light and dark mode.
+  - feat: With ggiraph installed, hovering over a point shows the sample and its value, and clicking it outlines that sample in every plot that shows one point per sample.
     The "Highlight a sample" list on the Samples page does the same from the keyboard.
-  - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS and the report, with an optional title and author.
+  - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS, and the report, with an optional title and author.
     The report can be HTML or PDF, and it renders in the background when mirai is installed.
     If you close the app page during a render, the render stops.
-  - feat: The Export page also downloads an R script that repeats the analysis of the app with `load_rcc()`, `normalise()` and the thresholds you set, and shows it before you download it.
+  - feat: The Export page also shows and downloads an R script that repeats the analysis of the app with `load_rcc()`, `normalise()` and the thresholds you set.
   - feat: A Help menu in the navbar opens About NACHO, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.
   - feat: The "Flagged samples" page is now the "Samples" page.
-    One table lists every sample with its status as a coloured word, flagged samples first, and a "Flagged only" switch hides the others.
+    One table lists every sample, flagged samples first, with its status as a coloured word, and a "Flagged only" switch hides the others.
     With reactable installed, you can sort and search the table, and click a row to select that sample in the plots.
 - In `R/mod_data.R`,
-  - feat: When you choose files, the Data page lists the RCC files of the upload before you import them, zip archives included.
+  - feat: When you choose files, the Data page lists the RCC files of the upload before you import them, including those inside zip archives.
     For each file, it shows the zip it came from, whether it is a PlexSet file, and whether the sample sheet lists it.
 - In `DESCRIPTION`,
   - build: chromote, gdtools, ggiraph, jsonlite, later, mirai, parallel, reactable and shinytest2 join Suggests, and promises and yaml join Imports.
 - In `vignettes/`,
-  - docs: The vignette shows the NACHO 3 workflow on the example RCC files shipped with the package, and the GEO analysis moves to the article "Analyse a GEO study" on the website, with GSE178516.
-  - docs: A new article on the website shows what the quality-control report looks like, with screenshots taken from a real report each time the site is built.
+  - docs: The vignette shows the NACHO 3 workflow on the example RCC files shipped with the package.
+    The GEO analysis moves to the article "Analyse a GEO study" on the website, with GSE178516.
+  - docs: A new article on the website shows what the quality-control report looks like, with screenshots of a real report taken each time the site is built.
 
 ## Performance
 
 - In `R/read_rcc.R`, `R/load_rcc.R` and `R/qc.R`,
-  - perf: `load_rcc()` reads each RCC file once, with exact section tags, and computes quality control on count matrices. Loading 768 samples takes about 2.5 seconds instead of about 9 in NACHO 2.
+  - perf: `load_rcc()` reads each RCC file once, with exact section tags, and computes quality control on count matrices.
+    Loading 768 samples takes about 2.5 seconds, against about 9 in NACHO 2.
 - In `R/autoplot.R`,
-  - perf: The relative log expression, normalisation and positive against negative plots draw in under a second on 768 samples, instead of 2 to 6 seconds.
-    The trend line of the last two now fits the mean of each sample, which gives the same line and a band that shows the spread between samples.
-    Studies with fewer than seven samples keep the earlier trend fitted on every point.
+  - perf: On 768 samples, the relative log expression, normalisation and positive against negative plots draw in under a second, instead of 2 to 6 seconds.
+    The trend line of the last two now fits the mean of each sample, which gives the same line, with a band that shows the spread between samples.
+    Studies with fewer than seven samples keep the earlier trend, fitted on every point.
 - In `R/mod_qc_plot.R` and `R/plot_worker.R`,
-  - perf: Interactive plots in the app draw about 40% faster, because the font lookup of ggiraph runs once instead of for every plot.
-  - perf: With mirai installed, the app builds the plots of a page in parallel on a small pool of workers shared by all sessions, stays responsive while they build, and stops the unfinished plots of a page you leave.
-    `options(nacho.plot_workers = n)` sets the number of workers, and `0` builds plots in the app process; the app from `deploy()` uses one worker.
-  - perf: Interactive plots built once are shared between browser tabs and sessions of the same app.
+  - perf: Interactive plots in the app draw about 40% faster, because ggiraph looks up the fonts once instead of for every plot.
+  - perf: With mirai installed, the app builds the plots of a page in parallel, on a small pool of workers shared by all sessions.
+    The app stays responsive while they build, and stops building the plots of a page you leave.
+    `options(nacho.plot_workers = n)` sets the number of workers, and `0` builds the plots in the app process; the app from `deploy()` uses one worker.
+  - perf: An interactive plot is built once and shared between the browser tabs and sessions of the same app.
 - In `R/mod_data.R`,
   - perf: With mirai installed, the app reads uploaded RCC files in a background R process, so other sessions of the app stay responsive.
     The Data page shows the current stage of the import under the Import button.
@@ -183,56 +202,55 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
 
 - In `R/app.R`,
   - fix: Closing a dialog other than "Cite NACHO" no longer moves the keyboard focus to the Help menu.
+  - fix: The app detects PlexSet files from their exact code classes.
 - In `R/stability.R`,
   - fix: The geNorm M calculation refuses fewer than three genes with a classed error, and the geNorm ranking refuses a matrix without column names.
 - In `R/ruv.R`,
-  - fix: `suggest_ruv_k()` no longer tries a `k` that fits the samples exactly, so two samples only get `k = 0`, and one sample gives `NA` for `pc1_variance` instead of `NaN`.
+  - fix: `suggest_ruv_k()` no longer tries a `k` that fits the samples exactly.
+    Two samples now get only `k = 0`, and one sample gives `NA` for `pc1_variance` instead of `NaN`.
 - In `R/methods.R`,
-  - fix: Subsetting probes with `[` removes the dropped genes from the `housekeeping_genes` setting, and `filter_detected()` inherits it.
-    When none is left, the object warns that it uses its Housekeeping probes, or turns `housekeeping_norm` off with a warning when there are none.
+  - fix: Subsetting probes with `[` removes the dropped genes from the `housekeeping_genes` setting, and `filter_detected()` does the same.
+    When none are left, the object warns that it uses its Housekeeping probes, or, when it has none, turns `housekeeping_norm` off with a warning.
 - In `R/qc.R`,
-  - fix: `normalise()` lowers an explicit `ruv_k` to two less than the number of samples, or one less than the number of control genes, with a `nacho_warning_ruv_k_reduced` warning, since a larger `k` fits the samples exactly.
+  - fix: `normalise()` lowers an explicit `ruv_k` to two less than the number of samples, or to one less than the number of control genes, with a `nacho_warning_ruv_k_reduced` warning, because a larger `k` fits the samples exactly.
 - In `R/qc.R` and `R/interop.R`,
-  - fix: Errors about the background statistic now name `load_rcc()`, `normalise()` or `as_nacho()` instead of `build_nacho()`.
+  - fix: Errors about the background statistic name `load_rcc()`, `normalise()` or `as_nacho()`, the function you called, instead of the internal `build_nacho()`.
 - In `R/methods.R`,
-  - fix: `print()` and `format()` on a NACHO 2 object now show one line pointing to `upgrade_nacho()`, instead of dumping the list.
+  - fix: `print()` and `format()` on a NACHO 2 object show one line that points to `upgrade_nacho()`, instead of printing the whole list.
     `summary()`, `as.data.frame()` and `[` refuse it with the same classed error as `autoplot()`.
 - In `R/autoplot.R`,
-  - fix: `autoplot()` now draws samples whose outlier flag is missing as ordinary points, where NACHO 2 left them out of the plot.
-  - fix: The normalisation factors by cartridge plot names its panels Positive, Negative and Housekeeping, and puts its legend below, so the panel titles are no longer cut in the app.
+  - fix: `autoplot()` draws samples with a missing outlier flag as ordinary points, where NACHO 2 left them out of the plot.
+  - fix: The plot of normalisation factors by cartridge names its panels Positive, Negative and Housekeeping, and puts its legend below, so the app no longer cuts off the panel titles.
 - In `R/render.R`,
   - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`.
-- In `inst/app/`,
-  - fix: The app detects PlexSet files from their exact code classes.
 - In `R/plot_worker.R`,
-  - fix: When a plot worker stops while the app runs, the app builds the plots itself instead of showing a connection error or waiting for ever.
+  - fix: When a plot worker stops while the app runs, the app builds the plots itself, instead of showing a connection error or waiting for ever.
 - In `R/mod_qc_plot.R`,
   - fix: Two quick clicks on an interactive plot no longer start a selection loop that kept the app busy.
 - In `R/brand.R` and `R/mod_thresholds.R`,
   - fix: Help popovers in the app are wider, so most help fits without scrolling, and very long help scrolls instead of running off the screen.
 - In `R/read_rcc.R`,
-  - fix: Empty RCC attributes, such as a blank owner or comment, are now read as empty text instead of repeating the attribute name.
+  - fix: Empty RCC attributes, such as a blank owner or comment, are read as empty text instead of repeating the attribute name.
   - fix: A probe named like an RCC section, such as `Messages`, no longer breaks parsing.
-  - fix: Probe names keep every inner `|` field, so protein names such as `4E-BP1(53H11)|NA|EIF4EBP1|53H11|0` are no longer mangled.
+  - fix: Probe names keep every inner `|` field, so protein names such as `4E-BP1(53H11)|NA|EIF4EBP1|53H11|0` stay intact.
     Only a trailing pipe and number, such as `|0` or `|0.014`, is removed.
-  - fix: Attribute values that contain `|` followed by digits, such as a comment `Batch|2`, are kept as written.
-  - fix: Accessions are read exactly as written.
-    Probes whose accessions differ between files are reported as a clash.
+  - fix: Attribute values that contain `|` followed by digits, such as the comment `Batch|2`, are kept as written.
+  - fix: Accessions are read exactly as written, and probes whose accessions differ between files are reported as a clash.
 - In `R/interop.R`,
-  - fix: `as_nacho()` on a `NanoStringRccSet` now gives the same probe names as `load_rcc()` on the same RCC files.
+  - fix: `as_nacho()` on a `NanoStringRccSet` gives the same probe names as `load_rcc()` on the same RCC files.
 - In `R/load_rcc.R`,
-  - fix: `load_rcc()` now checks a supplied `plexset_id` column: values outside `S1` to `S8` and duplicated id/`plexset_id` pairs raise a classed error before any file is read into a matrix.
+  - fix: `load_rcc()` checks a `plexset_id` column when you supply one.
+    Values outside `S1` to `S8`, and an id that repeats with the same `plexset_id`, raise a classed error before any file is read into a matrix.
   - fix: `load_rcc()` says when the sample sheet lists no file to read, instead of failing with an internal error.
 - In `R/qc.R`,
-  - fix: Housekeeping prediction no longer returns missing gene names when fewer than five candidates exist.
+  - fix: Housekeeping prediction no longer returns missing gene names when there are fewer than five candidates.
   - fix: Predicting housekeeping genes no longer misaligns probes when some RCC files lack a probe.
-  - fix: PCA components now have a fixed sign, so plots no longer flip between machines.
-  - fix: The warning about missing lane or sample attributes now comes once, when the object is built.
-    `normalise()` and `exclude_outliers()` no longer repeat it.
+  - fix: PCA components have a fixed sign, so plots no longer flip between machines.
+  - fix: The warning about missing lane or sample attributes comes once, when the object is built, and `normalise()` and `exclude_outliers()` no longer repeat it.
 - In `R/nacho-class.R`,
-  - fix: Outlier thresholds accept `-Inf` as a lower bound, `Inf` as an upper bound and `-Inf` as `LoD` to mean no bound.
-    `normalise()`, `upgrade_nacho()`, `read_nacho()` and the `nacho` validator refuse `NaN`, an `Inf` lower bound, a negative upper bound and an `Inf` `LoD` with a classed error.
-    A saved object with `LoD = Inf` must have it changed to a finite value or `-Inf` before it can be read.
+  - fix: Outlier thresholds accept `-Inf` as a lower bound, `Inf` as an upper bound, and `-Inf` as `LoD`, to mean no bound.
+    `normalise()`, `upgrade_nacho()`, `read_nacho()` and the `nacho` validator refuse `NaN`, an `Inf` lower bound, a negative upper bound and an `Inf` `LoD`, with a classed error.
+    To read a saved object with `LoD = Inf`, first change it to a finite value or `-Inf`.
     `autoplot()` draws no threshold line for an open bound, `summary()` shows it as `NA`, and the report leaves it out.
 
 # NACHO 2.0.8
