@@ -140,6 +140,11 @@ The **Samples** page marks the sample in its table.
 The plots on the other pages outline the same sample.
 To clear the selection, choose **None**.
 
+The table on the **Samples** page lists every sample, with the flagged samples first.
+The status of each sample shows as a coloured word: fail, pass or not assessed.
+Turn on **Flagged only** to hide the samples that pass.
+If you have the `reactable` package, you can also sort the table by a column, search it, and click a row to select that sample.
+
 ```{r}
 #| echo: false
 #| fig-alt: >-
@@ -152,9 +157,10 @@ knitr::include_graphics("figures/app-selected-qc.png")
 ```{r}
 #| echo: false
 #| fig-alt: >-
-#|   The Samples page. A table lists the flagged sample with its lane,
-#|   cartridge and the reason, and a second table lists all samples, with the
-#|   selected sample in bold.
+#|   The Samples page. Above the table are the Highlight a sample list and a
+#|   Flagged only switch. The table lists the flagged sample first, with a red
+#|   fail badge and its reason, then the samples that pass, with green badges.
+#|   The selected sample's row is shaded and its radio button is on.
 knitr::include_graphics("figures/app-selected-samples.png")
 ```
 

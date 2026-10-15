@@ -1,4 +1,13 @@
+local_no_reactable <- function(env = parent.frame()) {
+  testthat::local_mocked_bindings(
+    has_package = function(package) package != "reactable",
+    .package = "NACHO",
+    .env = env
+  )
+}
+
 test_that("the outliers module lists failing samples only", {
+  local_no_reactable()
   x <- flagged_gse()
   shiny::testServer(
     NACHO:::mod_outliers_server,
@@ -8,7 +17,7 @@ test_that("the outliers module lists failing samples only", {
     ),
     {
       expect_identical(failures(), NACHO:::qc_failures(x))
-      expect_match(output$failures, "FoV")
+      expect_match(output$samples, "FoV")
     }
   )
 })
@@ -59,14 +68,14 @@ test_that("the outliers module shows the table when samples are flagged", {
       qc = shiny::reactive(nacho_qc(x))
     ),
     {
-      body <- as.character(output$body$html)
-      expect_no_match(body, "No sample is flagged.", fixed = TRUE)
-      expect_match(body, "failures", fixed = TRUE)
+      body <- paste(as.character(output$body$html), collapse = "")
+      expect_false(grepl("No sample is flagged.", body, fixed = TRUE))
     }
   )
 })
 
 test_that("the keyboard route highlights a sample", {
+  local_no_reactable()
   selected <- shiny::reactiveVal(character())
   x <- flagged_gse()
   shiny::testServer(
@@ -99,6 +108,7 @@ test_that("the keyboard route highlights a sample", {
 })
 
 test_that("the samples table escapes cell text", {
+  local_no_reactable()
   x <- flagged_gse()
   selected <- shiny::reactiveVal(character())
   qc <- nacho_qc(x)
@@ -125,6 +135,7 @@ test_that("the samples table escapes cell text", {
 })
 
 test_that("the samples table escapes the id column name", {
+  local_no_reactable()
   x <- flagged_gse()
   samples <- x@samples
   names(samples)[names(samples) == x@settings[["id_colname"]]] <- "a<b"
@@ -194,4 +205,132 @@ test_that("an empty selection sends an empty string to the select", {
       expect_identical(sent[[1]], "")
     }
   )
+})
+
+test_that("the samples table lists flagged samples first", {
+  x <- flagged_gse()
+  qc <- nacho_qc(x)
+  data <- NACHO:::samples_table_data(x, qc)
+  id <- x@settings[["id_colname"]]
+  expect_identical(
+    names(data),
+    intersect(
+      c(
+        id,
+        "lane",
+        "lane_status",
+        "CartridgeID",
+        "status",
+        "n_flags",
+        "reason"
+      ),
+      names(qc)
+    )
+  )
+  flagged <- qc[[id]][qc[["status"]] %in% "fail"]
+  expect_setequal(data[[id]][seq_along(flagged)], flagged)
+  expect_identical(nrow(data), nrow(qc))
+  expect_false(is.unsorted(rev(data[["n_flags"]][seq_along(flagged)])))
+})
+
+test_that("the flagged only switch keeps the flagged samples", {
+  local_no_reactable()
+  x <- flagged_gse()
+  table <- nacho_qc(x)
+  id <- x@settings[["id_colname"]]
+  passed <- table[[id]][table[["status"]] %in% "pass"][1]
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(object = shiny::reactiveVal(x), qc = shiny::reactive(table)),
+    {
+      session$setInputs(flagged_only = FALSE)
+      expect_match(output$samples, passed, fixed = TRUE)
+      session$setInputs(flagged_only = TRUE)
+      expect_no_match(output$samples, passed, fixed = TRUE)
+      expect_identical(
+        lengths(regmatches(output$samples, gregexpr("<tr>", output$samples))),
+        sum(table[["status"]] %in% "fail") + 1L
+      )
+    }
+  )
+})
+
+test_that("the status reads as a coloured word", {
+  expect_match(
+    as.character(NACHO:::status_badge("fail")),
+    "text-bg-danger[^>]*>fail<",
+    perl = TRUE
+  )
+  expect_match(
+    as.character(NACHO:::status_badge("pass")),
+    "text-bg-success[^>]*>pass<",
+    perl = TRUE
+  )
+  expect_match(
+    as.character(NACHO:::status_badge(NA_character_)),
+    "text-bg-secondary[^>]*>not assessed<",
+    perl = TRUE
+  )
+})
+
+test_that("choosing a row of the reactable table selects the sample", {
+  skip_if_not_installed("reactable")
+  x <- flagged_gse()
+  qc <- nacho_qc(x)
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = shiny::reactiveVal(x),
+      qc = shiny::reactive(qc),
+      selected = selected
+    ),
+    {
+      session$setInputs(flagged_only = FALSE)
+      session$setInputs(samples__reactable__selected = 2L)
+      expect_identical(selected(), rows()[[1]][2])
+    }
+  )
+})
+
+test_that("a sample chosen elsewhere is selected in the reactable table", {
+  skip_if_not_installed("reactable")
+  sent <- list()
+  local_mocked_bindings(
+    updateReactable = function(outputId, ..., selected = NULL, session = NULL) {
+      sent[[length(sent) + 1L]] <<- selected
+    },
+    .package = "reactable"
+  )
+  x <- flagged_gse()
+  qc <- nacho_qc(x)
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = shiny::reactiveVal(x),
+      qc = shiny::reactive(qc),
+      selected = selected
+    ),
+    {
+      session$setInputs(flagged_only = FALSE)
+      selected(rows()[[1]][3])
+      session$flushReact()
+      expect_identical(sent[[length(sent)]], 3L)
+      selected(character())
+      session$flushReact()
+      expect_identical(sent[[length(sent)]], NA)
+    }
+  )
+})
+
+test_that("the samples card holds a reactable table only when it is installed", {
+  local_no_reactable()
+  html <- htmltools::renderTags(NACHO:::mod_outliers_ui("o"))$html
+  expect_match(html, "id=\"o-flagged_only\"", fixed = TRUE)
+  expect_no_match(html, "reactable", fixed = TRUE)
+  skip_if_not_installed("reactable")
+  local_mocked_bindings(has_package = function(package) TRUE)
+  html <- htmltools::renderTags(NACHO:::mod_outliers_ui("o"))$html
+  expect_match(html, "reactable", fixed = TRUE)
 })
