@@ -76,14 +76,22 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - feat: `render()` gains `group`, which adds the batch design and its cross-tables, and warns when batch and biology are confounded.
 - In `R/nacho-class.R`, `R/accessors.R` and `R/methods.R`,
   - feat: `x[, j]` subsets samples and `x[i, ]` subsets probes, and both recompute the PCA and the outlier flags.
+    Subsetting probes, or `filter_detected()`, also removes the dropped genes from the `housekeeping_genes` setting.
+    When none are left, the object warns that it uses its Housekeeping probes, or, when it has none, turns `housekeeping_norm` off with a warning.
 - In `R/read_nacho.R`,
   - feat: `upgrade_nacho()` converts a NACHO 2 object, and `read_nacho()` reads an object saved by any NACHO version.
-  - feat: `read_nacho()` reads objects saved by earlier development versions of NACHO 3, and rebuilds them.
-  - feat: Upgraded NACHO 2 objects and migrated schema 1 objects move to the legacy preset, with `background = "geo", background_mode = "subtract"`, so they keep their NACHO 2 flags and background correction.
+  - feat: Upgraded NACHO 2 objects move to the legacy preset, with `background = "geo", background_mode = "subtract"`, so they keep their NACHO 2 flags and background correction.
     Use `normalise()` to switch them to the nSolver preset.
+  - feat: `print()` and `format()` on a NACHO 2 object show one line that points to `upgrade_nacho()`.
+    `summary()`, `as.data.frame()`, `[` and `autoplot()` refuse it with a classed error.
 - In `R/interop.R`,
   - feat: `as_summarized_experiment()` and `as_nacho()` convert between `nacho` objects and `SummarizedExperiment`.
-    `as_nacho()` also reads a `NanoStringRccSet` from NanoStringNCTools.
+    `as_nacho()` also reads a `NanoStringRccSet` from NanoStringNCTools, with the same probe names as `load_rcc()` on the same RCC files.
+- In `R/nacho-class.R`,
+  - feat: Outlier thresholds accept `-Inf` as a lower bound, `Inf` as an upper bound, and `-Inf` as `LoD`, to mean no bound.
+    `normalise()`, `upgrade_nacho()` and `read_nacho()` refuse `NaN`, an `Inf` lower bound, a negative upper bound and an `Inf` `LoD`, with a classed error.
+    To read a saved object with `LoD = Inf`, first change it to a finite value or `-Inf`.
+    `autoplot()` draws no threshold line for an open bound, `summary()` shows it as `NA`, and the report leaves it out.
 - In `R/thresholds.R` and `R/load_rcc.R`,
   - feat: `nacho_thresholds()` builds thresholds for the MAX, FLEX, PRO and SPRINT instruments.
     `load_rcc()` gains `instrument` and `preset`, and reads the instrument from MAX/FLEX files.
@@ -134,6 +142,7 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
 - In `R/ruv.R`,
   - feat: `normalisation_method = "RUVg"` removes unwanted variation estimated from the housekeeping genes, and adds the factors to `nacho_samples()` as `W_1`, `W_2`, and so on.
     `suggest_ruv_k()` suggests how many factors to remove.
+    `normalise()` lowers an explicit `ruv_k` to two less than the number of samples, or to one less than the number of control genes, with a `nacho_warning_ruv_k_reduced` warning, because a larger `k` fits the samples exactly.
 - In `R/mirna.R`,
   - feat: NACHO recognises miRNA panels and offers `normalisation_method = "stable_mirna"`, `"total_mirna"`, `"spike_in"` and `"ligation"`.
   - feat: `nacho_qc()` checks the ligation controls of miRNA panels, and `nacho_thresholds(haemolysis = TRUE)` flags haemolysed plasma and serum samples.
@@ -165,8 +174,7 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
     If you close the app page during a render, the render stops.
   - feat: The Export page also shows and downloads an R script that repeats the analysis of the app with `load_rcc()`, `normalise()` and the thresholds you set.
   - feat: A Help menu in the navbar opens About NACHO, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.
-  - feat: The "Flagged samples" page is now the "Samples" page.
-    One table lists every sample, flagged samples first, with its status as a coloured word, and a "Flagged only" switch hides the others.
+  - feat: The Samples page lists every sample in one table, flagged samples first, with its status as a coloured word, and a "Flagged only" switch hides the others.
     With reactable installed, you can sort and search the table, and click a row to select that sample in the plots.
 - In `R/mod_data.R`,
   - feat: When you choose files, the Data page lists the RCC files of the upload before you import them, including those inside zip archives.
@@ -188,47 +196,23 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
     The trend line of the last two now fits the mean of each sample, which gives the same line, with a band that shows the spread between samples.
     Studies with fewer than seven samples keep the earlier trend, fitted on every point.
 - In `R/mod_qc_plot.R` and `R/plot_worker.R`,
-  - perf: Interactive plots in the app draw about 40% faster, because ggiraph looks up the fonts once instead of for every plot.
   - perf: With mirai installed, the app builds the plots of a page in parallel, on a small pool of workers shared by all sessions.
     The app stays responsive while they build, and stops building the plots of a page you leave.
     `options(nacho.plot_workers = n)` sets the number of workers, and `0` builds the plots in the app process; the app from `deploy()` uses one worker.
+    If a worker stops while the app runs, the app builds the plots itself.
   - perf: An interactive plot is built once and shared between the browser tabs and sessions of the same app.
 - In `R/mod_data.R`,
   - perf: With mirai installed, the app reads uploaded RCC files in a background R process, so other sessions of the app stay responsive.
     The Data page shows the current stage of the import under the Import button.
-  - perf: The app finds PlexSet files when it lists the upload, and checks only the lines that can name a PlexSet code class, so a large upload takes about a third less time once you click Import.
 
 ## Fixes
 
 - In `R/app.R`,
-  - fix: Closing a dialog other than "Cite NACHO" no longer moves the keyboard focus to the Help menu.
   - fix: The app detects PlexSet files from their exact code classes.
-- In `R/stability.R`,
-  - fix: The geNorm M calculation refuses fewer than three genes with a classed error, and the geNorm ranking refuses a matrix without column names.
-- In `R/ruv.R`,
-  - fix: `suggest_ruv_k()` no longer tries a `k` that fits the samples exactly.
-    Two samples now get only `k = 0`, and one sample gives `NA` for `pc1_variance` instead of `NaN`.
-- In `R/methods.R`,
-  - fix: Subsetting probes with `[` removes the dropped genes from the `housekeeping_genes` setting, and `filter_detected()` does the same.
-    When none are left, the object warns that it uses its Housekeeping probes, or, when it has none, turns `housekeeping_norm` off with a warning.
-- In `R/qc.R`,
-  - fix: `normalise()` lowers an explicit `ruv_k` to two less than the number of samples, or to one less than the number of control genes, with a `nacho_warning_ruv_k_reduced` warning, because a larger `k` fits the samples exactly.
-- In `R/qc.R` and `R/interop.R`,
-  - fix: Errors about the background statistic name `load_rcc()`, `normalise()` or `as_nacho()`, the function you called, instead of the internal `build_nacho()`.
-- In `R/methods.R`,
-  - fix: `print()` and `format()` on a NACHO 2 object show one line that points to `upgrade_nacho()`, instead of printing the whole list.
-    `summary()`, `as.data.frame()` and `[` refuse it with the same classed error as `autoplot()`.
 - In `R/autoplot.R`,
   - fix: `autoplot()` draws samples with a missing outlier flag as ordinary points, where NACHO 2 left them out of the plot.
-  - fix: The plot of normalisation factors by cartridge names its panels Positive, Negative and Housekeeping, and puts its legend below, so the app no longer cuts off the panel titles.
 - In `R/render.R`,
   - fix: `render()` no longer deletes a folder named `tmp_nacho` in `output_dir`.
-- In `R/plot_worker.R`,
-  - fix: When a plot worker stops while the app runs, the app builds the plots itself, instead of showing a connection error or waiting for ever.
-- In `R/mod_qc_plot.R`,
-  - fix: Two quick clicks on an interactive plot no longer start a selection loop that kept the app busy.
-- In `R/brand.R` and `R/mod_thresholds.R`,
-  - fix: Help popovers in the app are wider, so most help fits without scrolling, and very long help scrolls instead of running off the screen.
 - In `R/read_rcc.R`,
   - fix: Empty RCC attributes, such as a blank owner or comment, are read as empty text instead of repeating the attribute name.
   - fix: A probe named like an RCC section, such as `Messages`, no longer breaks parsing.
@@ -236,8 +220,6 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
     Only a trailing pipe and number, such as `|0` or `|0.014`, is removed.
   - fix: Attribute values that contain `|` followed by digits, such as the comment `Batch|2`, are kept as written.
   - fix: Accessions are read exactly as written, and probes whose accessions differ between files are reported as a clash.
-- In `R/interop.R`,
-  - fix: `as_nacho()` on a `NanoStringRccSet` gives the same probe names as `load_rcc()` on the same RCC files.
 - In `R/load_rcc.R`,
   - fix: `load_rcc()` checks a `plexset_id` column when you supply one.
     Values outside `S1` to `S8`, and an id that repeats with the same `plexset_id`, raise a classed error before any file is read into a matrix.
@@ -246,12 +228,6 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - fix: Housekeeping prediction no longer returns missing gene names when there are fewer than five candidates.
   - fix: Predicting housekeeping genes no longer misaligns probes when some RCC files lack a probe.
   - fix: PCA components have a fixed sign, so plots no longer flip between machines.
-  - fix: The warning about missing lane or sample attributes comes once, when the object is built, and `normalise()` and `exclude_outliers()` no longer repeat it.
-- In `R/nacho-class.R`,
-  - fix: Outlier thresholds accept `-Inf` as a lower bound, `Inf` as an upper bound, and `-Inf` as `LoD`, to mean no bound.
-    `normalise()`, `upgrade_nacho()`, `read_nacho()` and the `nacho` validator refuse `NaN`, an `Inf` lower bound, a negative upper bound and an `Inf` `LoD`, with a classed error.
-    To read a saved object with `LoD = Inf`, first change it to a finite value or `-Inf`.
-    `autoplot()` draws no threshold line for an open bound, `summary()` shows it as `NA`, and the report leaves it out.
 
 # NACHO 2.0.8
 
