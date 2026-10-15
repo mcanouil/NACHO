@@ -92,11 +92,22 @@ app_plot <- function(x, type, options, dark, interactive = FALSE) {
   )
 }
 
+#' Options for the selected sample of an interactive plot
+#'
+#' The selected point keeps its fill and grows a little, with a rose ring, so
+#' it does not hide the box or the points next to it.
+#' Rose is outside the group colours and the flag colours of the plots.
+#'
+#' @noRd
 girafe_selection <- function(selected = NULL) {
   ggiraph::opts_selection(
     type = "single",
     only_shiny = TRUE,
-    css = "stroke:currentColor;stroke-width:3px;r:6px;",
+    css = paste0(
+      "stroke:",
+      nacho_palette[["rose"]],
+      ";stroke-width:2.5px;r:3.5px;"
+    ),
     selected = selected
   )
 }

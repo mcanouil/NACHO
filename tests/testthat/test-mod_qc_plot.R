@@ -603,3 +603,12 @@ test_that("app_girafe() draws with the cached font set", {
     )
   )
 })
+
+test_that("a selected sample gets a rose ring and keeps its own fill", {
+  skip_if_not_installed("ggiraph")
+  css <- NACHO:::girafe_selection()$css
+  expect_match(css, "stroke:#D85460;", fixed = TRUE)
+  expect_match(css, "stroke-width:2.5px;", fixed = TRUE)
+  expect_match(css, "r:3.5px;", fixed = TRUE)
+  expect_no_match(css, "fill", fixed = TRUE)
+})
