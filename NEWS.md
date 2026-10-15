@@ -175,7 +175,7 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
 - In `R/mod_data.R`,
   - perf: With mirai installed, the app reads uploaded RCC files in a background R process, so other sessions of the app stay responsive.
     The Data page shows the current stage of the import under the Import button.
-  - perf: The import reads each uploaded RCC file once to find PlexSet files, instead of reading it in full twice, which saves about a third of the time for large uploads.
+  - perf: To find PlexSet files, the app now checks only the lines that can name a PlexSet code class, which makes importing a large upload about a third faster.
 
 ## Fixes
 

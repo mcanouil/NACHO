@@ -57,21 +57,21 @@ list_upload <- function(files) {
   )
 }
 
-#' The columns that join the sample sheet to the RCC files
+#' Match the RCC files of an upload to its sample sheet
 #'
-#' @noRd
-sheet_keys <- function(plexset) {
-  if (plexset) c("IDFILE", "plexset_id") else "IDFILE"
-}
-
-#' Load the RCC files of an upload
+#' PlexSet files give one target for each sample, `S1` to `S8`.
+#' A sample sheet without the key columns, or that matches no file, is not
+#' used.
 #'
 #' @param listing The output of `list_upload()`.
 #'
-#' @return A `nacho` object.
+#' @return A list with `targets`, one row for each sample, with the sample
+#'   sheet columns when the sheet is used; `plexset`; `sheet_columns`, the
+#'   columns of the sheet when it is used; and `problems`, the messages about
+#'   the sample sheets.
 #'
 #' @noRd
-load_upload <- function(listing) {
+upload_targets <- function(listing) {
   targets <- listing[["rcc"]]
   plexset <- all(targets[["plexset"]])
   if (plexset) {
@@ -85,40 +85,63 @@ load_upload <- function(listing) {
       by = "IDFILE"
     )
   }
+  problems <- character()
   ignored <- listing[["ignored_sheets"]]
   if (length(ignored) > 0) {
-    nacho_warn(
-      "Only the first sample sheet is used, so {.file {ignored}} {?was/were} ignored.",
-      class = "sample_sheet_discarded"
+    problems <- cli::format_inline(
+      "Only the first sample sheet is used, so {.file {ignored}} {?was/were} ignored."
     )
   }
   sheet <- listing[["sheet"]]
   sheet_columns <- character()
   if (!is.null(sheet)) {
-    merge_by <- sheet_keys(plexset)
+    merge_by <- if (plexset) c("IDFILE", "plexset_id") else "IDFILE"
     missing_columns <- setdiff(merge_by, names(sheet))
+    matched <- if (length(missing_columns) == 0) {
+      merge_sample_sheet(targets, sheet, merge_by)
+    }
     if (length(missing_columns) > 0) {
-      nacho_warn(
-        "The sample sheet was discarded, because it has no {.val {missing_columns}} column{?s}.",
-        class = "sample_sheet_discarded"
+      problems <- c(
+        problems,
+        cli::format_inline(
+          "The sample sheet was discarded, because it has no {.val {missing_columns}} column{?s}."
+        )
+      )
+    } else if (nrow(matched) == 0) {
+      problems <- c(
+        problems,
+        "The sample sheet was discarded, because it matches no uploaded RCC file."
       )
     } else {
-      matched <- merge_sample_sheet(targets, sheet, merge_by)
-      if (nrow(matched) == 0) {
-        nacho_warn(
-          "The sample sheet was discarded, because it matches no uploaded RCC file.",
-          class = "sample_sheet_discarded"
-        )
-      } else {
-        targets <- matched
-        sheet_columns <- names(sheet)
-      }
+      targets <- matched
+      sheet_columns <- names(sheet)
     }
   }
+  list(
+    targets = targets,
+    plexset = plexset,
+    sheet_columns = sheet_columns,
+    problems = cli::ansi_strip(problems)
+  )
+}
+
+#' Load the RCC files of an upload
+#'
+#' @param listing The output of `list_upload()`.
+#'
+#' @return A `nacho` object.
+#'
+#' @noRd
+load_upload <- function(listing) {
+  matched <- upload_targets(listing)
+  for (problem in matched[["problems"]]) {
+    nacho_warn("{problem}", class = "sample_sheet_discarded")
+  }
+  targets <- matched[["targets"]]
   sample_columns <- c(
     "IDFILE",
-    if (plexset) "plexset_id",
-    setdiff(sheet_columns, c("IDFILE", "plexset_id"))
+    if (matched[["plexset"]]) "plexset_id",
+    setdiff(matched[["sheet_columns"]], c("IDFILE", "plexset_id"))
   )
   load_rcc(
     data_directory = unique(mapply(
@@ -133,8 +156,7 @@ load_upload <- function(listing) {
 
 #' Describe an upload before it is imported
 #'
-#' Sample sheet rows match a file on its bare name, as in
-#' `merge_sample_sheet()`.
+#' The sample sheet is matched to the files as in `load_upload()`.
 #'
 #' @param listing The output of `list_upload()`.
 #'
@@ -144,10 +166,9 @@ load_upload <- function(listing) {
 #' @noRd
 upload_preview <- function(listing) {
   rcc <- listing[["rcc"]]
-  plexset <- all(rcc[["plexset"]])
   files <- basename(rcc[["IDFILE"]])
-  table <- data.frame(
-    File = basename(rcc[["name"]]),
+  rows <- data.frame(
+    File = files,
     From = rcc[["from"]],
     PlexSet = ifelse(rcc[["plexset"]], "yes", "no"),
     check.names = FALSE
@@ -156,59 +177,35 @@ upload_preview <- function(listing) {
     cli::format_inline("{nrow(rcc)} RCC file{?s}"),
     paste(sum(rcc[["plexset"]]), "PlexSet")
   )
-  notes <- character()
-  sheet <- listing[["sheet"]]
-  missing_columns <- setdiff(sheet_keys(plexset), names(sheet))
-  if (is.null(sheet)) {
-    notes <- "No sample sheet."
-  } else if (length(missing_columns) > 0) {
-    notes <- cli::format_inline(
-      "The sample sheet has no {.val {missing_columns}} column{?s}, so it is not used."
-    )
-  } else {
-    sheet_files <- basename(sheet[["IDFILE"]])
-    if (plexset) {
-      wells <- vapply(
-        files,
-        function(file) {
-          found <- sheet[["plexset_id"]][sheet_files == file]
-          length(intersect(found, paste0("S", seq_len(8))))
-        },
-        integer(1)
-      )
-      table[["In sample sheet"]] <- paste(wells, "of 8")
-      absent <- sum(wells == 0)
+  matched <- upload_targets(listing)
+  notes <- matched[["problems"]]
+  if (is.null(listing[["sheet"]])) {
+    notes <- c(notes, "No sample sheet.")
+  } else if (length(matched[["sheet_columns"]]) > 0) {
+    found <- as.vector(table(factor(
+      matched[["targets"]][["IDFILE"]],
+      levels = rcc[["IDFILE"]]
+    )))
+    rows[["In sample sheet"]] <- if (matched[["plexset"]]) {
+      paste(found, "of 8")
     } else {
-      found <- files %in% sheet_files
-      table[["In sample sheet"]] <- ifelse(found, "yes", "no")
-      absent <- sum(!found)
+      ifelse(found > 0, "yes", "no")
     }
-    orphans <- sum(!sheet_files %in% files)
+    orphans <- sum(!basename(listing[["sheet"]][["IDFILE"]]) %in% files)
     counts <- c(
       counts,
-      paste(absent, "not in the sample sheet"),
+      paste(sum(found == 0), "not in the sample sheet"),
       if (orphans > 0) {
         cli::format_inline("{orphans} sample sheet row{?s} with no file")
       }
     )
   }
-  ignored <- listing[["ignored_sheets"]]
-  if (length(ignored) > 0) {
-    notes <- c(
-      notes,
-      cli::format_inline(
-        "Only the first sample sheet is used, so {ignored} {?is/are} ignored."
-      )
-    )
-  }
   list(
-    summary = cli::ansi_strip(
-      paste(
-        c(paste0(paste(counts, collapse = ", "), "."), notes),
-        collapse = " "
-      )
+    summary = paste(
+      c(paste0(paste(counts, collapse = ", "), "."), notes),
+      collapse = " "
     ),
-    table = table
+    table = rows
   )
 }
 
@@ -427,7 +424,10 @@ mod_data_ui <- function(id) {
         "The sample sheet is a CSV file with an IDFILE column holding the RCC file names, ",
         "and plexset_id (S1 to S8) for PlexSet files."
       ),
-      shiny::div(class = "small mt-2", shiny::textOutput(ns("preview_summary"))),
+      shiny::div(
+        class = "small mt-2",
+        shiny::textOutput(ns("preview_summary"))
+      ),
       shiny::div(
         class = "overflow-auto small",
         style = "max-height: 300px;",

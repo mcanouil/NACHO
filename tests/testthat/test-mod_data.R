@@ -6,6 +6,21 @@ expect_nacho <- function(object) {
   testthat::expect_true(S7::S7_inherits(object, NACHO:::nacho))
 }
 
+sheet_upload <- function(
+  sheet,
+  name = "samplesheet.csv",
+  envir = parent.frame()
+) {
+  path <- file.path(withr::local_tempdir(.local_envir = envir), "0")
+  utils::write.csv(sheet, path, row.names = FALSE)
+  data.frame(
+    name = name,
+    size = file.size(path),
+    type = "text/csv",
+    datapath = path
+  )
+}
+
 upload_table <- function(data_directory, sample_sheet = NULL, rcc_type = "") {
   rcc_files <- list.files(
     data_directory,
@@ -23,32 +38,25 @@ upload_table <- function(data_directory, sample_sheet = NULL, rcc_type = "") {
     datapath = upload_paths
   )
   if (!is.null(sample_sheet)) {
-    sheet_path <- file.path(upload_directory, "sheet")
-    utils::write.csv(sample_sheet, sheet_path, row.names = FALSE)
     uploaded <- rbind(
       uploaded,
-      data.frame(
-        name = "samplesheet.csv",
-        size = file.size(sheet_path),
-        type = "text/csv",
-        datapath = sheet_path
-      )
+      sheet_upload(sample_sheet, envir = parent.frame())
     )
   }
   uploaded
 }
 
 read_files <- function(files) {
-  NACHO:::load_upload(NACHO:::list_upload(files))
-}
-
-read_upload <- function(...) {
   withCallingHandlers(
-    read_files(upload_table(...)),
+    NACHO:::load_upload(NACHO:::list_upload(files)),
     nacho_warning_metric_unavailable = function(cnd) {
       invokeRestart("muffleWarning")
     }
   )
+}
+
+read_upload <- function(...) {
+  read_files(upload_table(...))
 }
 
 test_that("loads uploaded RCC files without a sample sheet", {
@@ -318,12 +326,7 @@ test_that("a zip made from a folder is read", {
     datapath = archive
   )
   expect_nacho(
-    withCallingHandlers(
-      read_files(zipped),
-      nacho_warning_metric_unavailable = function(cnd) {
-        invokeRestart("muffleWarning")
-      }
-    )
+    read_files(zipped)
   )
 })
 
@@ -438,12 +441,7 @@ test_that("a sample sheet with bare file names matches files in a zip", {
     fresh <- tempfile()
     file.copy(sheet_path, fresh)
     sheet_row$datapath <- fresh
-    nacho <- withCallingHandlers(
-      read_files(rbind(zip_upload(rcc, folder), sheet_row)),
-      nacho_warning_metric_unavailable = function(cnd) {
-        invokeRestart("muffleWarning")
-      }
-    )
+    nacho <- read_files(rbind(zip_upload(rcc, folder), sheet_row))
     expect_true("group" %in% names(nacho_samples(nacho)))
   }
 })
@@ -465,12 +463,7 @@ test_that("a sample sheet that matches no file is announced", {
     datapath = sheet_path
   )
   expect_warning(
-    withCallingHandlers(
-      read_files(rbind(zip_upload(rcc), sheet_row)),
-      nacho_warning_metric_unavailable = function(cnd) {
-        invokeRestart("muffleWarning")
-      }
-    ),
+    read_files(rbind(zip_upload(rcc), sheet_row)),
     "matches no",
     class = "nacho_warning_sample_sheet_discarded"
   )
@@ -759,16 +752,6 @@ salmon_files <- function() {
   )
 }
 
-sheet_upload <- function(sheet, name = "sheet.csv") {
-  path <- file.path(withr::local_tempdir(.local_envir = parent.frame()), "0")
-  utils::write.csv(sheet, path, row.names = FALSE)
-  data.frame(
-    name = name,
-    size = file.size(path),
-    type = "text/csv",
-    datapath = path
-  )
-}
 
 test_that("list_upload() lists the RCC files with their PlexSet flag", {
   listing <- NACHO:::list_upload(upload_table("salmon_data"))
@@ -875,12 +858,27 @@ test_that("the preview says when there is no usable sample sheet", {
   expect_false("In sample sheet" %in% names(without_id$table))
   expect_match(
     without_id$summary,
-    "The sample sheet has no \"IDFILE\" and \"plexset_id\" columns, so it is not used.",
+    "The sample sheet was discarded, because it has no \"IDFILE\" and \"plexset_id\" columns.",
     fixed = TRUE
   )
   expect_match(
     without_id$summary,
-    "Only the first sample sheet is used, so second.csv is ignored.",
+    "Only the first sample sheet is used, so 'second.csv' was ignored.",
+    fixed = TRUE
+  )
+})
+
+test_that("the preview says when the sample sheet matches no file", {
+  preview <- NACHO:::upload_preview(
+    NACHO:::list_upload(rbind(
+      upload_table("salmon_data"),
+      sheet_upload(data.frame(IDFILE = "other.RCC", plexset_id = "S1"))
+    ))
+  )
+  expect_false("In sample sheet" %in% names(preview$table))
+  expect_match(
+    preview$summary,
+    "The sample sheet was discarded, because it matches no uploaded RCC file.",
     fixed = TRUE
   )
 })
