@@ -401,3 +401,18 @@ test_that("a row index past the end of the table is ignored", {
     }
   )
 })
+
+test_that("the reactable table renders empty when no sample is flagged", {
+  skip_if_not_installed("reactable")
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = shiny::reactiveVal(GSE74821),
+      qc = shiny::reactive(nacho_qc(GSE74821))
+    ),
+    {
+      session$setInputs(flagged_only = TRUE)
+      expect_match(paste(unlist(output$samples), collapse = ""), "reactable")
+    }
+  )
+})

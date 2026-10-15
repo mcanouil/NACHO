@@ -142,7 +142,7 @@ To clear the selection, choose **None**.
 
 The table on the **Samples** page lists every sample, with the flagged samples first.
 The status of each sample shows as a coloured word: fail, pass or not assessed.
-Turn on **Flagged only** to hide the samples that pass.
+Turn on **Flagged only** to show only the flagged samples.
 If you have the `reactable` package, you can also sort the table by a column, search it, and click a row to select that sample.
 
 ```{r}
