@@ -314,3 +314,50 @@ test_that("the samples card holds a reactable table only when it is installed", 
   html <- htmltools::renderTags(NACHO:::mod_outliers_ui("o"))$html
   expect_match(html, "reactable", fixed = TRUE)
 })
+
+test_that("deselecting the row of a visible sample clears the selection", {
+  skip_if_not_installed("reactable")
+  x <- flagged_gse()
+  table <- nacho_qc(x)
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = shiny::reactiveVal(x),
+      qc = shiny::reactive(table),
+      selected = selected
+    ),
+    {
+      session$setInputs(flagged_only = FALSE)
+      passed <- rows()[[1]][nrow(rows())]
+      session$setInputs(samples__reactable__selected = nrow(rows()))
+      expect_identical(selected(), passed)
+      session$setInputs(samples__reactable__selected = NULL)
+      expect_identical(selected(), character())
+      session$setInputs(samples__reactable__selected = nrow(rows()))
+      session$setInputs(flagged_only = TRUE)
+      session$setInputs(samples__reactable__selected = NULL)
+      expect_identical(selected(), passed)
+    }
+  )
+})
+
+test_that("the reactable table shows the labels and the status badges", {
+  skip_if_not_installed("reactable")
+  for (x in list(flagged_gse(), plexset_nacho)) {
+    table <- nacho_qc(x)
+    shiny::testServer(
+      NACHO:::mod_outliers_server,
+      args = list(object = shiny::reactiveVal(x), qc = shiny::reactive(table)),
+      {
+        session$setInputs(flagged_only = FALSE)
+        widget <- paste(unlist(output$samples), collapse = "")
+        expect_match(widget, "Cartridge", fixed = TRUE)
+        expect_match(widget, "badge text-bg-", fixed = TRUE)
+        if ("lane_status" %in% names(table)) {
+          expect_match(widget, "Lane status", fixed = TRUE)
+        }
+      }
+    )
+  }
+})

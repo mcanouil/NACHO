@@ -180,12 +180,24 @@ mod_outliers_server <- function(
           theme = samples_table_theme()
         )
       })
-      shiny::observeEvent(input$samples__reactable__selected, {
-        id <- rows()[[1]][input$samples__reactable__selected]
-        if (!identical(id, selected())) {
-          selected(id)
-        }
-      })
+      shiny::observeEvent(
+        input$samples__reactable__selected,
+        {
+          index <- input$samples__reactable__selected
+          if (length(index) > 0) {
+            id <- rows()[[1]][index]
+          } else if (any(selected() %in% rows()[[1]])) {
+            id <- character()
+          } else {
+            return(invisible(NULL))
+          }
+          if (!identical(id, selected())) {
+            selected(id)
+          }
+        },
+        ignoreNULL = FALSE,
+        ignoreInit = TRUE
+      )
       shiny::observeEvent(
         selected(),
         {
