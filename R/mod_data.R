@@ -48,13 +48,14 @@ list_upload <- function(files) {
     logical(1)
   ))
   rownames(rcc) <- NULL
-  list(
-    rcc = rcc,
-    sheet = if (nrow(sheets) > 0) {
-      data.table::fread(sheets[["datapath"]][1], data.table = FALSE)
-    },
-    ignored_sheets = sheets[["name"]][-1]
-  )
+  sheet <- NULL
+  if (nrow(sheets) > 0) {
+    sheet <- data.table::fread(sheets[["datapath"]][1], data.table = FALSE)
+    if ("IDFILE" %in% names(sheet)) {
+      sheet[["IDFILE"]] <- as.character(sheet[["IDFILE"]])
+    }
+  }
+  list(rcc = rcc, sheet = sheet, ignored_sheets = sheets[["name"]][-1])
 }
 
 #' Match the RCC files of an upload to its sample sheet
@@ -499,7 +500,10 @@ mod_data_server <- function(id, initial = NULL) {
       if (inherits(listing(), "error")) {
         return(list(summary = upload_error(listing()), table = NULL))
       }
-      upload_preview(listing())
+      tryCatch(
+        upload_preview(listing()),
+        error = function(cnd) list(summary = upload_error(cnd), table = NULL)
+      )
     })
     output$preview_summary <- shiny::renderText(preview()[["summary"]])
     output$preview_table <- shiny::renderTable(preview()[["table"]])

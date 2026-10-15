@@ -95,27 +95,6 @@ main <- function() {
   shoot("app-data.png")
   frame()
 
-  # Upload preview, with a sample sheet that covers part of the files.
-  rcc <- list.files(
-    "tests/testthat/salmon_data",
-    pattern = "\\.RCC$",
-    full.names = TRUE
-  )
-  sheet <- file.path(tempfile("nacho-sheet-"), "samplesheet.csv")
-  dir.create(dirname(sheet))
-  utils::write.csv(
-    data.frame(
-      IDFILE = c(rep(basename(rcc[1:10]), each = 8), rep(basename(rcc[11]), 4)),
-      plexset_id = c(rep(paste0("S", 1:8), 10), paste0("S", 1:4)),
-      group = "case"
-    ),
-    sheet,
-    row.names = FALSE
-  )
-  app$upload_file(`data-files` = c(rcc, sheet))
-  app$wait_for_idle(duration = 1000)
-  shoot("app-upload-preview.png")
-
   # Threshold help popover.
   click("button[aria-label='More about Binding density']")
   app$wait_for_js(
@@ -255,6 +234,29 @@ main <- function() {
       )
     )
   }
+
+  # Upload preview, last, so the chosen files stay out of the other figures.
+  go_to("Data")
+  rcc <- list.files(
+    "tests/testthat/salmon_data",
+    pattern = "\\.RCC$",
+    full.names = TRUE
+  )
+  sheet <- file.path(tempfile("nacho-sheet-"), "samplesheet.csv")
+  dir.create(dirname(sheet))
+  utils::write.csv(
+    data.frame(
+      IDFILE = c(rep(basename(rcc[1:10]), each = 8), rep(basename(rcc[11]), 4)),
+      plexset_id = c(rep(paste0("S", 1:8), 10), paste0("S", 1:4)),
+      group = "case"
+    ),
+    sheet,
+    row.names = FALSE
+  )
+  app$upload_file(`data-files` = c(rcc, sheet))
+  app$wait_for_idle(duration = 1000)
+  app$run_js("document.activeElement.blur()")
+  shoot("app-upload-preview.png")
 
   gif <- "man/figures/README-nacho_app.gif"
   unlink(gif)

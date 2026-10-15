@@ -883,6 +883,29 @@ test_that("the preview says when the sample sheet matches no file", {
   )
 })
 
+test_that("a sample sheet with numbers in IDFILE is read as file names", {
+  directory <- withr::local_tempdir()
+  file.copy(
+    list.files(
+      geo_fixture("GSE178516")[["dir"]],
+      pattern = "\\.RCC\\.gz$",
+      full.names = TRUE
+    )[1],
+    directory
+  )
+  listing <- NACHO:::list_upload(rbind(
+    upload_table(directory),
+    sheet_upload(data.frame(IDFILE = 1:2))
+  ))
+  expect_type(listing$sheet$IDFILE, "character")
+  preview <- NACHO:::upload_preview(listing)
+  expect_match(
+    preview$summary,
+    "The sample sheet was discarded, because it matches no uploaded RCC file.",
+    fixed = TRUE
+  )
+})
+
 test_that("choosing files shows the preview", {
   local_no_mirai()
   shiny::testServer(NACHO:::mod_data_server, {
