@@ -244,18 +244,28 @@ help_text <- function(name) {
 #'
 #' @noRd
 qc_failures <- function(x, qc = nacho_qc(x)) {
-  columns <- intersect(
+  columns <- qc_table_columns(x, qc, status = FALSE)
+  qc[qc[["status"]] %in% "fail", columns, drop = FALSE]
+}
+
+#' The quality-control columns shown for each sample
+#'
+#' @param status Whether to keep the `status` column.
+#'
+#' @noRd
+qc_table_columns <- function(x, qc, status = TRUE) {
+  intersect(
     c(
       x@settings[["id_colname"]],
       "lane",
       "lane_status",
       "CartridgeID",
+      if (status) "status",
       "n_flags",
       "reason"
     ),
     names(qc)
   )
-  qc[qc[["status"]] %in% "fail", columns, drop = FALSE]
 }
 
 #' Format a metric value for the report

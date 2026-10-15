@@ -150,12 +150,13 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - feat: The Export page also downloads an R script that repeats the analysis of the app with `load_rcc()`, `normalise()` and the thresholds you set, and shows it before you download it.
   - feat: A Help menu in the navbar opens About NACHO, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.
   - feat: The "Flagged samples" page is now the "Samples" page.
-    It still lists the flagged samples first, and then lists every sample.
+    One table lists every sample with its status as a coloured word, flagged samples first, and a "Flagged only" switch hides the others.
+    With reactable installed, you can sort and search the table, and click a row to select that sample in the plots.
 - In `R/mod_data.R`,
   - feat: When you choose files, the Data page lists the RCC files of the upload before you import them, zip archives included.
     For each file, it shows the zip it came from, whether it is a PlexSet file, and whether the sample sheet lists it.
 - In `DESCRIPTION`,
-  - build: chromote, gdtools, ggiraph, jsonlite, later, mirai, parallel and shinytest2 join Suggests, and promises and yaml join Imports.
+  - build: chromote, gdtools, ggiraph, jsonlite, later, mirai, parallel, reactable and shinytest2 join Suggests, and promises and yaml join Imports.
 - In `vignettes/`,
   - docs: The vignette shows the NACHO 3 workflow on the example RCC files shipped with the package, and the GEO analysis moves to the article "Analyse a GEO study" on the website, with GSE178516.
   - docs: A new article on the website shows what the quality-control report looks like, with screenshots taken from a real report each time the site is built.

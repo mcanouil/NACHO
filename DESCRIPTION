@@ -66,6 +66,7 @@ Suggests:
     parallel,
     png (>= 0.1-9),
     quarto (>= 1.5.1),
+    reactable (>= 0.4.5),
     rmarkdown (>= 1.16),
     roxygen2 (>= 8.1.0),
     shinytest2 (>= 0.5.1),

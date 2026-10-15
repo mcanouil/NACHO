@@ -100,7 +100,7 @@ tour_steps <- function() {
       element = "#outliers-highlight",
       title = "Samples",
       description = paste(
-        "Choose a sample to mark it in the tables. Interactive plots outline",
+        "Choose a sample to mark it in the table. Interactive plots outline",
         "the same sample."
       ),
       page = "Samples"
