@@ -124,7 +124,11 @@ reproduce_script <- function(object) {
       "# This loads every RCC file of the folder, so samples left out before",
       "# the app are back.",
       if (uploaded) {
-        "# Point these to your RCC files and sample sheet."
+        c(
+          "# Point these to your RCC files and sample sheet. The sample sheet",
+          "# is a CSV file with an IDFILE column of RCC file names, and a",
+          "# plexset_id column (S1 to S8) for PlexSet files."
+        )
       } else {
         "# Point this to your sample sheet."
       },

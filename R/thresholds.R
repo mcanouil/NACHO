@@ -331,6 +331,7 @@ check_thresholds <- function(
 #' read_thresholds(file)
 #' unlink(file)
 write_thresholds <- function(thresholds, file) {
+  check_thresholds(thresholds)
   writeLines(thresholds_yaml(thresholds), file, sep = "")
   invisible(file)
 }

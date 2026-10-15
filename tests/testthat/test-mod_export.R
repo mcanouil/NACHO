@@ -444,14 +444,6 @@ test_that("the R script loads uploaded files from the paths the user sets", {
   script <- NACHO:::reproduce_script(app)
   expect_false("nacho <- GSE74821" %in% script)
   expect_true(any(grepl("load_rcc(", script, fixed = TRUE)))
-  expect_true(
-    paste0(
-      "  data_directory = ",
-      deparse(salmon_nacho@provenance[["data_directory"]]),
-      ","
-    ) %in%
-      script
-  )
   expect_same_result(run_script(script, test_path("salmon_data"), sheet), app)
 })
 
@@ -503,4 +495,27 @@ test_that("the R script leaves an unknown instrument to load_rcc()", {
   script <- NACHO:::reproduce_script(x)
   expect_true("  instrument = NULL," %in% script)
   expect_no_error(parse(text = script))
+})
+
+test_that("the R script keeps the folder the object was loaded from", {
+  x <- salmon_nacho
+  x@provenance[["data_directory"]] <- "/data/run1"
+  script <- NACHO:::reproduce_script(x)
+  expect_true("  data_directory = \"/data/run1\"," %in% script)
+})
+
+test_that("the R script names the sample sheet columns for an upload", {
+  x <- salmon_nacho
+  x@provenance[["data_directory"]] <- withr::local_tempdir()
+  comments <- grep("^#", NACHO:::reproduce_script(x), value = TRUE)
+  expect_true(any(grepl("IDFILE", comments, fixed = TRUE)))
+  expect_true(any(grepl("plexset_id", comments, fixed = TRUE)))
+})
+
+test_that("write_thresholds() names itself in its errors", {
+  error <- expect_error(
+    write_thresholds(list(FoV = "high"), withr::local_tempfile()),
+    class = "nacho_error"
+  )
+  expect_identical(deparse(error$call[[1]]), "write_thresholds")
 })
