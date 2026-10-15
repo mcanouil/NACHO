@@ -361,3 +361,43 @@ test_that("the reactable table shows the labels and the status badges", {
     )
   }
 })
+
+test_that("the plain table renders empty when no sample is flagged", {
+  local_no_reactable()
+  expect_identical(NACHO:::status_badge(character()), character())
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = shiny::reactiveVal(GSE74821),
+      qc = shiny::reactive(nacho_qc(GSE74821))
+    ),
+    {
+      session$setInputs(flagged_only = TRUE)
+      expect_match(output$samples, "<table", fixed = TRUE)
+    }
+  )
+})
+
+test_that("a row index past the end of the table is ignored", {
+  skip_if_not_installed("reactable")
+  x <- flagged_gse()
+  table <- nacho_qc(x)
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_outliers_server,
+    args = list(
+      object = shiny::reactiveVal(x),
+      qc = shiny::reactive(table),
+      selected = selected
+    ),
+    {
+      session$setInputs(flagged_only = TRUE)
+      session$setInputs(samples__reactable__selected = nrow(rows()) + 5L)
+      expect_identical(selected(), character())
+      session$setInputs(samples__reactable__selected = 1L)
+      chosen <- selected()
+      session$setInputs(samples__reactable__selected = nrow(rows()) + 5L)
+      expect_identical(selected(), chosen)
+    }
+  )
+})

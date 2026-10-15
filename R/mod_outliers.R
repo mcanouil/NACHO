@@ -40,6 +40,9 @@ samples_table_labels <- c(
 #'
 #' @noRd
 status_badge <- function(status) {
+  if (length(status) == 0) {
+    return(character())
+  }
   style <- ifelse(
     is.na(status),
     "secondary",
@@ -184,6 +187,9 @@ mod_outliers_server <- function(
         input$samples__reactable__selected,
         {
           index <- input$samples__reactable__selected
+          if (any(index > nrow(rows()))) {
+            return(invisible(NULL))
+          }
           if (length(index) > 0) {
             id <- rows()[[1]][index]
           } else if (any(selected() %in% rows()[[1]])) {
