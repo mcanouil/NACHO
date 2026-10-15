@@ -40,7 +40,10 @@ shiny::runApp(nacho_app())
 ## Load data
 
 The **Data** page loads a study.
-Choose RCC files, zip archives and an optional sample sheet, then click **Import**.
+Choose RCC files, zip archives and an optional sample sheet.
+The page then lists the RCC files that it found, with the zip archive of each file, whether it is a PlexSet file, and whether the sample sheet lists it.
+For a PlexSet file, the list shows how many of the eight samples, S1 to S8, are in the sample sheet.
+Check the list, then click **Import**.
 If you have the `mirai` package, the app reads the files in the background, and the line under **Import** shows the current stage.
 Without `mirai`, the app is blocked until the import ends.
 The sample sheet is a CSV file with an `IDFILE` column that holds the RCC file names.
@@ -59,6 +62,16 @@ Point at the information icon next to **Flagged** to see why samples are flagged
 #|   you choose RCC files and load the example data. The threshold sidebar is
 #|   on the left.
 knitr::include_graphics("figures/app-data.png")
+```
+
+```{r}
+#| echo: false
+#| fig-alt: >-
+#|   The Data page after 12 PlexSet RCC files and a sample sheet are chosen.
+#|   Above the Import button, a line reads "12 RCC files, 12 PlexSet, 1 not in
+#|   the sample sheet", and a table lists each file with the columns File,
+#|   From, PlexSet and In sample sheet, where most files show 8 of 8.
+knitr::include_graphics("figures/app-upload-preview.png")
 ```
 
 ## Set the thresholds

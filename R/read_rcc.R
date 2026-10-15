@@ -131,6 +131,7 @@ is_plexset_classes <- function(code_class) {
 #'
 #' Reads the file cheaply, without requiring every section to be present or
 #' closed, so it also works on partial files.
+#' Only the lines that can hold a PlexSet code class are checked.
 #'
 #' @param file Path to an `.RCC` or `.RCC.gz` file.
 #'
@@ -139,8 +140,12 @@ is_plexset_classes <- function(code_class) {
 #' @return `TRUE` when the file holds all eight PlexSet code classes,
 #'   `Endogenous1s` to `Endogenous8s`, matched exactly.
 is_plexset_rcc <- function(file) {
-  lines <- trim_trailing_space(readLines(file, warn = FALSE))
-  is_plexset_classes(sub(",.*$", "", lines))
+  lines <- grep(
+    "^Endogenous[1-8]s",
+    readLines(file, warn = FALSE),
+    value = TRUE
+  )
+  is_plexset_classes(sub(",.*$", "", trim_trailing_space(lines)))
 }
 
 #' Split a parsed RCC file into its samples

@@ -194,3 +194,27 @@ test_that("is_plexset_rcc() never errors on a partial file", {
   expect_false(NACHO:::is_plexset_rcc(single))
   expect_true(NACHO:::is_plexset_rcc(plexset))
 })
+
+test_that("is_plexset_rcc() agrees with a check of every line", {
+  every_line <- function(file) {
+    lines <- NACHO:::trim_trailing_space(readLines(file, warn = FALSE))
+    NACHO:::is_plexset_classes(sub(",.*$", "", lines))
+  }
+  spaced <- withr::local_tempfile(fileext = ".RCC")
+  writeLines(paste0("Endogenous", 1:8, "s,GENE,NM_1,12   "), spaced)
+  files <- c(
+    spaced,
+    list.files(test_path("salmon_data"), full.names = TRUE),
+    unlist(lapply(c("GSE270837", "GSE178516", "GSE346526"), function(series) {
+      list.files(
+        geo_fixture(series)[["dir"]],
+        pattern = "\\.RCC\\.gz$",
+        full.names = TRUE
+      )
+    }))
+  )
+  expect_identical(
+    vapply(files, NACHO:::is_plexset_rcc, logical(1)),
+    vapply(files, every_line, logical(1))
+  )
+})
