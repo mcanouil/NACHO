@@ -92,7 +92,7 @@ visualise(GSE74821)
 
 ```{r}
 #| echo: false
-#| fig-alt: "Short recording of the NACHO app on the example data. The summary strip changes when the field of view threshold moves to 95 and one sample is flagged. A selected sample is outlined in the QC metrics plots. The recording then shows the Samples, Normalisation and Batch pages, the Help menu, and the Export page with a report ready to download."
+#| fig-alt: "Short recording of the NACHO app on the example data. The summary strip changes when the field of view threshold moves to 95 and one sample is flagged. A selected sample is outlined in the QC metrics plots. The recording then shows the Samples, Normalisation and Batch pages, the Help menu, and the Export page with a report ready to download and the Reproduce in R card."
 knitr::include_graphics("man/figures/README-nacho_app.gif")
 ```
 

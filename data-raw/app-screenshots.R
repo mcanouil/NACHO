@@ -148,6 +148,9 @@ main <- function() {
   go_to("Samples")
   shoot("app-selected-samples.png")
   frame()
+  # Clear the selection, so the later figures show plain plots.
+  app$set_inputs(`outliers-highlight` = "", wait_ = FALSE)
+  Sys.sleep(1)
 
   go_to("Normalisation")
   shoot("app-normalisation.png")
@@ -222,6 +225,7 @@ main <- function() {
 
   # The picture for the vignette.
   go_to("QC metrics")
+  app$run_js("document.activeElement.blur()")
   shoot("README-app.png", "vignettes")
   if (nzchar(Sys.which("magick"))) {
     system2(

@@ -163,9 +163,9 @@ If you have the `reactable` package, you can also sort the table by a column, se
 ```{r}
 #| echo: false
 #| fig-alt: >-
-#|   The QC metrics page with one sample selected. The sample appears as a
-#|   large dark circle in the binding density, field of view and linearity
-#|   plots.
+#|   The QC metrics page with one sample selected. In the binding density,
+#|   field of view and linearity plots, the sample's point has a rose ring
+#|   around it.
 knitr::include_graphics("figures/app-selected-qc.png")
 ```
 

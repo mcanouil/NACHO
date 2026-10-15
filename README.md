@@ -41,13 +41,13 @@ nacho <- load_rcc(
   n_comp = 5
 )
 #> ℹ Reading 6 RCC files
-#> ✔ Reading 6 RCC files [27ms]
+#> ✔ Reading 6 RCC files [31ms]
 #> 
 #> ℹ Assembling 6 samples
-#> ✔ Assembling 6 samples [17ms]
+#> ✔ Assembling 6 samples [18ms]
 #> 
 #> ℹ Computing quality-control metrics and normalising
-#> ✔ Computing quality-control metrics and normalising [26ms]
+#> ✔ Computing quality-control metrics and normalising [39ms]
 #> 
 nacho_qc(nacho)[, c("IDFILE", "status", "n_flags", "reason")]
 #>                  IDFILE status n_flags reason
@@ -98,7 +98,7 @@ Open the app on a `nacho` object with `visualise()`.
 visualise(GSE74821)
 ```
 
-<img src="man/figures/README-nacho_app.gif" alt="Short recording of the NACHO app on the example data. The summary strip changes when the field of view threshold moves to 95 and one sample is flagged. A selected sample is outlined in the QC metrics plots. The recording then shows the Samples, Normalisation and Batch pages, the Help menu, and the Export page with a report ready to download." width="100%" />
+<img src="man/figures/README-nacho_app.gif" alt="Short recording of the NACHO app on the example data. The summary strip changes when the field of view threshold moves to 95 and one sample is flagged. A selected sample is outlined in the QC metrics plots. The recording then shows the Samples, Normalisation and Batch pages, the Help menu, and the Export page with a report ready to download and the Reproduce in R card." width="100%" />
 
 The articles “Explore quality control in the app” and “Analyse a GEO
 study” on the [package website](https://m.canouil.dev/NACHO/) show each
