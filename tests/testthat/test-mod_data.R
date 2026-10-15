@@ -6,6 +6,21 @@ expect_nacho <- function(object) {
   testthat::expect_true(S7::S7_inherits(object, NACHO:::nacho))
 }
 
+sheet_upload <- function(
+  sheet,
+  name = "samplesheet.csv",
+  envir = parent.frame()
+) {
+  path <- file.path(withr::local_tempdir(.local_envir = envir), "0")
+  utils::write.csv(sheet, path, row.names = FALSE)
+  data.frame(
+    name = name,
+    size = file.size(path),
+    type = "text/csv",
+    datapath = path
+  )
+}
+
 upload_table <- function(data_directory, sample_sheet = NULL, rcc_type = "") {
   rcc_files <- list.files(
     data_directory,
@@ -23,28 +38,25 @@ upload_table <- function(data_directory, sample_sheet = NULL, rcc_type = "") {
     datapath = upload_paths
   )
   if (!is.null(sample_sheet)) {
-    sheet_path <- file.path(upload_directory, "sheet")
-    utils::write.csv(sample_sheet, sheet_path, row.names = FALSE)
     uploaded <- rbind(
       uploaded,
-      data.frame(
-        name = "samplesheet.csv",
-        size = file.size(sheet_path),
-        type = "text/csv",
-        datapath = sheet_path
-      )
+      sheet_upload(sample_sheet, envir = parent.frame())
     )
   }
   uploaded
 }
 
-read_upload <- function(...) {
+read_files <- function(files) {
   withCallingHandlers(
-    NACHO:::read_uploads(upload_table(...)),
+    NACHO:::load_upload(NACHO:::list_upload(files)),
     nacho_warning_metric_unavailable = function(cnd) {
       invokeRestart("muffleWarning")
     }
   )
+}
+
+read_upload <- function(...) {
+  read_files(upload_table(...))
 }
 
 test_that("loads uploaded RCC files without a sample sheet", {
@@ -210,7 +222,7 @@ test_that("an upload without RCC files is refused", {
     datapath = path
   )
   expect_error(
-    NACHO:::read_uploads(files),
+    read_files(files),
     class = "nacho_error_bad_upload"
   )
 })
@@ -218,7 +230,7 @@ test_that("an upload without RCC files is refused", {
 test_that("a discarded sample sheet is announced", {
   sample_sheet <- data.frame(file = "salmon_01_01.RCC", group = "case")
   expect_warning(
-    nacho <- NACHO:::read_uploads(upload_table("salmon_data", sample_sheet)),
+    nacho <- read_files(upload_table("salmon_data", sample_sheet)),
     "IDFILE",
     class = "nacho_warning_sample_sheet_discarded"
   )
@@ -227,6 +239,7 @@ test_that("a discarded sample sheet is announced", {
 
 test_that("a rejected upload keeps the previous data", {
   messages <- character()
+  local_no_mirai()
   local_mocked_bindings(
     notify_user = function(message, type) {
       messages <<- c(messages, type)
@@ -253,15 +266,18 @@ test_that("a rejected upload keeps the previous data", {
 })
 
 test_that("the module loads an upload", {
+  local_no_mirai()
   shiny::testServer(NACHO:::mod_data_server, {
     expect_null(session$returned())
     session$setInputs(files = upload_table("salmon_data"), import = 1)
+    wait_for_task(task, session)
     expect_true(S7::S7_inherits(session$returned(), NACHO:::nacho))
   })
 })
 
 test_that("a corrupt zip shows an error and keeps the previous data", {
   types <- character()
+  local_no_mirai()
   local_mocked_bindings(
     notify_user = function(message, type) types <<- c(types, type)
   )
@@ -278,7 +294,7 @@ test_that("a corrupt zip shows an error and keeps the previous data", {
     NACHO:::mod_data_server,
     args = list(initial = GSE74821),
     {
-      suppressWarnings(session$setInputs(files = bad, import = 1))
+      session$setInputs(files = bad, import = 1)
       expect_identical(session$returned(), GSE74821)
     }
   )
@@ -310,12 +326,7 @@ test_that("a zip made from a folder is read", {
     datapath = archive
   )
   expect_nacho(
-    withCallingHandlers(
-      NACHO:::read_uploads(zipped),
-      nacho_warning_metric_unavailable = function(cnd) {
-        invokeRestart("muffleWarning")
-      }
-    )
+    read_files(zipped)
   )
 })
 
@@ -335,7 +346,7 @@ test_that("extra sample sheets are announced", {
   )
   expect_warning(
     withCallingHandlers(
-      NACHO:::read_uploads(rbind(uploads, second)),
+      read_files(rbind(uploads, second)),
       nacho_warning_metric_unavailable = function(cnd) {
         invokeRestart("muffleWarning")
       },
@@ -380,7 +391,7 @@ test_that("an empty zip is refused as an upload without RCC files", {
     datapath = paste0(archive, ".zip")
   )
   expect_error(
-    NACHO:::read_uploads(empty),
+    read_files(empty),
     "holds no RCC file",
     class = "nacho_error_bad_upload"
   )
@@ -388,6 +399,7 @@ test_that("an empty zip is refused as an upload without RCC files", {
 
 test_that("a corrupt zip names the problem", {
   messages <- character()
+  local_no_mirai()
   local_mocked_bindings(
     notify_user = function(message, type) messages <<- c(messages, message)
   )
@@ -400,7 +412,7 @@ test_that("a corrupt zip names the problem", {
     datapath = path
   )
   shiny::testServer(NACHO:::mod_data_server, {
-    suppressWarnings(session$setInputs(files = bad, import = 1))
+    session$setInputs(files = bad, import = 1)
   })
   expect_match(messages, "not a valid zip archive")
 })
@@ -429,12 +441,7 @@ test_that("a sample sheet with bare file names matches files in a zip", {
     fresh <- tempfile()
     file.copy(sheet_path, fresh)
     sheet_row$datapath <- fresh
-    nacho <- withCallingHandlers(
-      NACHO:::read_uploads(rbind(zip_upload(rcc, folder), sheet_row)),
-      nacho_warning_metric_unavailable = function(cnd) {
-        invokeRestart("muffleWarning")
-      }
-    )
+    nacho <- read_files(rbind(zip_upload(rcc, folder), sheet_row))
     expect_true("group" %in% names(nacho_samples(nacho)))
   }
 })
@@ -456,12 +463,7 @@ test_that("a sample sheet that matches no file is announced", {
     datapath = sheet_path
   )
   expect_warning(
-    withCallingHandlers(
-      NACHO:::read_uploads(rbind(zip_upload(rcc), sheet_row)),
-      nacho_warning_metric_unavailable = function(cnd) {
-        invokeRestart("muffleWarning")
-      }
-    ),
+    read_files(rbind(zip_upload(rcc), sheet_row)),
     "matches no",
     class = "nacho_warning_sample_sheet_discarded"
   )
@@ -515,12 +517,14 @@ test_that("an error toast stays open until it is closed", {
 
 test_that("a discarded sample sheet and other load warnings become warning toasts", {
   types <- character()
+  local_no_mirai()
   local_mocked_bindings(
     notify_user = function(message, type) types <<- c(types, type)
   )
   sheet <- data.frame(file = "salmon_01_01.RCC", group = "case")
   shiny::testServer(NACHO:::mod_data_server, {
     session$setInputs(files = upload_table("salmon_data", sheet), import = 1)
+    wait_for_task(task, session)
     expect_true(S7::S7_inherits(session$returned(), NACHO:::nacho))
   })
   expect_true("warning" %in% types)
@@ -529,9 +533,11 @@ test_that("a discarded sample sheet and other load warnings become warning toast
 
 test_that("any load warning of the package is shown as a warning toast", {
   messages <- character()
+  local_no_mirai()
   local_mocked_bindings(
     notify_user = function(message, type) messages <<- c(messages, message),
-    read_uploads = function(files) {
+    list_upload = function(files) list(),
+    load_upload = function(listing) {
       NACHO:::nacho_warn("Too few genes.", class = "n_comp_reduced")
       GSE74821
     }
@@ -541,6 +547,7 @@ test_that("any load warning of the package is shown as a warning toast", {
       files = data.frame(name = "a", size = 1, type = "x", datapath = "a"),
       import = 1
     )
+    wait_for_task(task, session)
     expect_identical(session$returned(), GSE74821)
   })
   expect_identical(messages, "Too few genes.")
@@ -588,4 +595,348 @@ test_that("an upload name cannot leave the upload folder", {
   )
   expect_identical(upload$name, "escaped.RCC")
   expect_true(file.exists(file.path(directory, "escaped.RCC")))
+})
+
+test_that("an import returns the object and writes its last stage", {
+  progress <- withr::local_tempfile()
+  imported <- NACHO:::import_uploads(
+    NACHO:::list_upload(upload_table("salmon_data")),
+    progress
+  )
+  expect_nacho(imported$object)
+  expect_null(imported$error)
+  expect_identical(
+    readLines(progress),
+    "Computing quality-control metrics and normalising"
+  )
+})
+
+test_that("an import returns its warnings as text", {
+  local_mocked_bindings(
+    load_upload = function(listing) {
+      NACHO:::nacho_warn("Metric missing.", class = "metric_unavailable")
+      NACHO:::nacho_warn("Too few genes.", class = "n_comp_reduced")
+      warning("Not from NACHO.")
+      GSE74821
+    }
+  )
+  expect_warning(
+    imported <- NACHO:::import_uploads(list()),
+    "Not from NACHO."
+  )
+  expect_identical(imported$object, GSE74821)
+  expect_identical(imported$warnings, "Too few genes.")
+  expect_null(imported$error)
+})
+
+test_that("an import returns its error as text", {
+  local_mocked_bindings(
+    load_upload = function(listing) {
+      NACHO:::nacho_warn("Too few genes.", class = "n_comp_reduced")
+      NACHO:::nacho_abort("No RCC file.", class = "bad_upload")
+    }
+  )
+  imported <- NACHO:::import_uploads(list())
+  expect_null(imported$object)
+  expect_identical(imported$warnings, "Too few genes.")
+  expect_identical(imported$error, "No RCC file.")
+  local_mocked_bindings(load_upload = function(listing) stop("disk full"))
+  expect_identical(
+    NACHO:::import_uploads(list())$error,
+    "The upload could not be read: disk full"
+  )
+})
+
+test_that("the upload panel says when the import blocks the app", {
+  ui <- function() htmltools::renderTags(NACHO:::mod_data_ui("data"))$html
+  local_mocked_bindings(has_package = function(package) FALSE)
+  expect_match(ui(), "install mirai to import in the background", fixed = TRUE)
+  local_mocked_bindings(has_package = function(package) TRUE)
+  expect_no_match(ui(), "install mirai", fixed = TRUE)
+})
+
+test_that("a background import shows its stage and then loads the object", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  local_mocked_bindings(
+    has_package = function(package) TRUE,
+    run_in_daemon = function(fun, args, compute) {
+      progress_file <- args[[2]]
+      mirai::mirai(
+        {
+          writeLines("Reading 2 RCC files", progress_file)
+          Sys.sleep(1)
+          list(object = "loaded", warnings = character(), error = NULL)
+        },
+        progress_file = progress_file,
+        .compute = compute
+      )
+    }
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(files = upload_table("salmon_data"), import = 1)
+    wait_until(
+      session,
+      function() {
+        session$elapse(250)
+        nzchar(output$progress)
+      },
+      tries = 100
+    )
+    expect_identical(output$progress, "Reading 2 RCC files")
+    wait_for_task(task, session, tries = 100)
+    expect_identical(session$returned(), "loaded")
+    expect_identical(output$progress, "")
+    session$close()
+    expect_false(file.exists(progress_file))
+  })
+})
+
+test_that("the background import uses the installed NACHO", {
+  skip_on_cran()
+  skip_if_not_installed("mirai")
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(files = upload_table("salmon_data"), import = 1)
+    wait_for_task(task, session, tries = 300)
+    expect_nacho(session$returned())
+  })
+})
+
+test_that("the example data loaded during an import is kept", {
+  local_no_mirai()
+  local_mocked_bindings(
+    run_in_daemon = function(fun, args, compute) {
+      promises::promise(function(resolve, reject) {
+        later::later(
+          function() {
+            resolve(list(object = "late", warnings = character(), error = NULL))
+          },
+          0.5
+        )
+      })
+    }
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(files = upload_table("salmon_data"), import = 1)
+    session$setInputs(example = 1)
+    wait_for_task(task, session)
+    expect_identical(session$returned(), GSE74821)
+  })
+})
+
+test_that("choosing files starts the import daemon", {
+  skip_if_not_installed("mirai")
+  started <- 0
+  local_mocked_bindings(has_package = function(package) TRUE)
+  local_mocked_bindings(
+    daemons = function(n, ...) {
+      if (n > 0) {
+        started <<- started + 1
+      }
+      invisible(NULL)
+    },
+    mirai = function(...) invisible(NULL),
+    .package = "mirai"
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(files = upload_table("salmon_data"))
+    expect_identical(started, 1)
+  })
+})
+
+salmon_files <- function() {
+  list.files(
+    testthat::test_path("salmon_data"),
+    pattern = "\\.RCC$",
+    ignore.case = TRUE
+  )
+}
+
+
+test_that("list_upload() lists the RCC files with their PlexSet flag", {
+  listing <- NACHO:::list_upload(upload_table("salmon_data"))
+  expect_identical(listing$rcc$name, salmon_files())
+  expect_identical(listing$rcc$from, rep("", length(salmon_files())))
+  expect_true(all(listing$rcc$plexset))
+  expect_true(all(file.exists(listing$rcc$datapath)))
+  expect_null(listing$sheet)
+  expect_identical(listing$ignored_sheets, character())
+})
+
+test_that("list_upload() names the zip each file came from", {
+  rcc <- list.files(test_path("salmon_data"), full.names = TRUE)
+  listing <- NACHO:::list_upload(zip_upload(rcc, "run1"))
+  expect_identical(basename(listing$rcc$name), basename(rcc))
+  expect_identical(listing$rcc$from, rep("run.zip", length(rcc)))
+})
+
+test_that("list_upload() reads the first sample sheet and names the others", {
+  sheet <- data.frame(IDFILE = "salmon_01_01.RCC", plexset_id = "S1")
+  files <- rbind(
+    upload_table("salmon_data"),
+    sheet_upload(sheet),
+    sheet_upload(sheet, "second.csv")
+  )
+  listing <- NACHO:::list_upload(files)
+  expect_identical(listing$sheet$IDFILE, "salmon_01_01.RCC")
+  expect_identical(listing$ignored_sheets, "second.csv")
+})
+
+test_that("list_upload() refuses an upload without RCC files", {
+  expect_error(
+    NACHO:::list_upload(sheet_upload(data.frame(IDFILE = "x.RCC"))),
+    "holds no RCC file",
+    class = "nacho_error_bad_upload"
+  )
+})
+
+test_that("the preview counts PlexSet wells found in the sample sheet", {
+  files <- salmon_files()
+  sheet <- data.frame(
+    IDFILE = c(rep(files[1], 8), rep(files[2], 3), "other.RCC"),
+    plexset_id = c(paste0("S", 1:8), paste0("S", 1:3), "S1")
+  )
+  preview <- NACHO:::upload_preview(
+    NACHO:::list_upload(rbind(upload_table("salmon_data"), sheet_upload(sheet)))
+  )
+  expect_identical(
+    preview$table[["In sample sheet"]],
+    c("8 of 8", "3 of 8", rep("0 of 8", length(files) - 2))
+  )
+  expect_identical(preview$table[["PlexSet"]], rep("yes", length(files)))
+  expect_identical(
+    preview$summary,
+    sprintf(
+      "%d RCC files, %d PlexSet, %d not in the sample sheet, 1 sample sheet row with no file.",
+      length(files),
+      length(files),
+      length(files) - 2
+    )
+  )
+})
+
+test_that("the preview matches single-sample files by file name", {
+  directory <- withr::local_tempdir()
+  sources <- list.files(
+    geo_fixture("GSE178516")[["dir"]],
+    pattern = "\\.RCC\\.gz$",
+    full.names = TRUE
+  )
+  file.copy(sources, directory)
+  sheet <- data.frame(IDFILE = basename(sources[1]))
+  preview <- NACHO:::upload_preview(
+    NACHO:::list_upload(rbind(upload_table(directory), sheet_upload(sheet)))
+  )
+  expect_identical(
+    preview$table[["In sample sheet"]],
+    c("yes", rep("no", length(sources) - 1))
+  )
+  expect_identical(preview$table[["PlexSet"]], rep("no", length(sources)))
+  expect_identical(
+    preview$summary,
+    sprintf(
+      "%d RCC files, 0 PlexSet, %d not in the sample sheet.",
+      length(sources),
+      length(sources) - 1
+    )
+  )
+})
+
+test_that("the preview says when there is no usable sample sheet", {
+  preview <- NACHO:::upload_preview(
+    NACHO:::list_upload(upload_table("salmon_data"))
+  )
+  expect_false("In sample sheet" %in% names(preview$table))
+  expect_match(preview$summary, "No sample sheet.", fixed = TRUE)
+  without_id <- NACHO:::upload_preview(
+    NACHO:::list_upload(rbind(
+      upload_table("salmon_data"),
+      sheet_upload(data.frame(file = "salmon_01_01.RCC")),
+      sheet_upload(data.frame(file = "x"), "second.csv")
+    ))
+  )
+  expect_false("In sample sheet" %in% names(without_id$table))
+  expect_match(
+    without_id$summary,
+    "The sample sheet was discarded, because it has no \"IDFILE\" and \"plexset_id\" columns.",
+    fixed = TRUE
+  )
+  expect_match(
+    without_id$summary,
+    "Only the first sample sheet is used, so 'second.csv' was ignored.",
+    fixed = TRUE
+  )
+})
+
+test_that("the preview says when the sample sheet matches no file", {
+  preview <- NACHO:::upload_preview(
+    NACHO:::list_upload(rbind(
+      upload_table("salmon_data"),
+      sheet_upload(data.frame(IDFILE = "other.RCC", plexset_id = "S1"))
+    ))
+  )
+  expect_false("In sample sheet" %in% names(preview$table))
+  expect_match(
+    preview$summary,
+    "The sample sheet was discarded, because it matches no uploaded RCC file.",
+    fixed = TRUE
+  )
+})
+
+test_that("a sample sheet with numbers in IDFILE is read as file names", {
+  directory <- withr::local_tempdir()
+  file.copy(
+    list.files(
+      geo_fixture("GSE178516")[["dir"]],
+      pattern = "\\.RCC\\.gz$",
+      full.names = TRUE
+    )[1],
+    directory
+  )
+  listing <- NACHO:::list_upload(rbind(
+    upload_table(directory),
+    sheet_upload(data.frame(IDFILE = 1:2))
+  ))
+  expect_type(listing$sheet$IDFILE, "character")
+  preview <- NACHO:::upload_preview(listing)
+  expect_match(
+    preview$summary,
+    "The sample sheet was discarded, because it matches no uploaded RCC file.",
+    fixed = TRUE
+  )
+})
+
+test_that("sample sheet columns named like the listing columns are kept", {
+  sheet <- data.frame(
+    IDFILE = rep(salmon_files(), each = 8),
+    plexset_id = paste0("S", 1:8),
+    plexset = "panel A",
+    from = "site 1"
+  )
+  nacho <- read_upload("salmon_data", sheet)
+  expect_identical(unique(nacho_samples(nacho)[["plexset"]]), "panel A")
+  expect_identical(unique(nacho_samples(nacho)[["from"]]), "site 1")
+})
+
+test_that("choosing files shows the preview", {
+  local_no_mirai()
+  shiny::testServer(NACHO:::mod_data_server, {
+    expect_identical(output$preview_summary, "")
+    session$setInputs(files = upload_table("salmon_data"))
+    expect_match(output$preview_summary, "RCC files, ", fixed = TRUE)
+    expect_match(output$preview_table, salmon_files()[1], fixed = TRUE)
+  })
+})
+
+test_that("an upload that cannot be listed shows its error in the preview", {
+  local_no_mirai()
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message)
+  )
+  shiny::testServer(NACHO:::mod_data_server, {
+    session$setInputs(files = sheet_upload(data.frame(IDFILE = "x.RCC")))
+    expect_match(output$preview_summary, "holds no RCC file", fixed = TRUE)
+    expect_identical(messages, character())
+  })
 })

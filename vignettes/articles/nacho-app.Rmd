@@ -40,7 +40,12 @@ shiny::runApp(nacho_app())
 ## Load data
 
 The **Data** page loads a study.
-Choose RCC files, zip archives and an optional sample sheet, then click **Import**.
+Choose RCC files, zip archives and an optional sample sheet.
+The page then lists the RCC files that it found, with the zip archive of each file, whether it is a PlexSet file, and whether the sample sheet lists it.
+For a PlexSet file, the list shows how many of the eight samples, S1 to S8, are in the sample sheet.
+Check the list, then click **Import**.
+If you have the `mirai` package, the app reads the files in the background, and the line under **Import** shows the current stage.
+Without `mirai`, the app is blocked until the import ends.
 The sample sheet is a CSV file with an `IDFILE` column that holds the RCC file names.
 For PlexSet files, it also has a `plexset_id` column with the values S1 to S8.
 To try the app first, click **Load the example data (GSE74821)**.
@@ -57,6 +62,16 @@ Point at the information icon next to **Flagged** to see why samples are flagged
 #|   you choose RCC files and load the example data. The threshold sidebar is
 #|   on the left.
 knitr::include_graphics("figures/app-data.png")
+```
+
+```{r}
+#| echo: false
+#| fig-alt: >-
+#|   The Data page after 12 PlexSet RCC files and a sample sheet are chosen.
+#|   Above the Import button, a line reads "12 RCC files, 12 PlexSet, 1 not in
+#|   the sample sheet", and a table lists each file with the columns File,
+#|   From, PlexSet and In sample sheet, where most files show 8 of 8.
+knitr::include_graphics("figures/app-upload-preview.png")
 ```
 
 ## Set the thresholds
@@ -201,6 +216,10 @@ The **Export** page saves your work.
 - **nacho object (RDS)** holds the object.
   Read it back in R with `read_nacho()`.
 - **Render the report** builds a quality-control report.
+- **R script** holds R code that repeats the analysis of the app, with the same normalisation and thresholds.
+  The **Reproduce in R** card shows the script before you download it.
+  For your own data, set the paths to your RCC files and sample sheet at the top of the script.
+  For the example data, the script runs as it is.
 
 For the report, enter a title and an author, both optional, and choose HTML or PDF (Typst).
 Then click **Render the report**.
@@ -214,7 +233,8 @@ If you have the `mirai` package, the app renders the report in the background.
 #|   The Export page. A card lists three download buttons for the data. A
 #|   second card holds the title and author fields, the HTML and PDF choice,
 #|   the Render the report button, and a button to download the finished
-#|   report.
+#|   report. Below them, the Reproduce in R card has an R script button and
+#|   the start of the script.
 knitr::include_graphics("figures/app-export.png")
 ```
 

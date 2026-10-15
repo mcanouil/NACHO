@@ -53,19 +53,9 @@ stub_render <- function(x, format, output_dir, title = NULL, author = NULL) {
   path
 }
 
-wait_for_task <- function(task, session, status = "success") {
-  for (i in 1:50) {
-    session$flushReact()
-    if (identical(task$status(), status)) {
-      break
-    }
-    later::run_now(0.1)
-  }
-}
-
 test_that("the report renders in a task and offers a download", {
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = stub_render
   )
   shiny::testServer(
@@ -80,8 +70,8 @@ test_that("the report renders in a task and offers a download", {
 })
 
 test_that("changing the object withdraws the report", {
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = stub_render
   )
   object <- shiny::reactiveVal(GSE74821)
@@ -106,8 +96,8 @@ test_that("changing the object withdraws the report", {
 })
 
 test_that("one report folder per session holds one report and goes away", {
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = stub_render
   )
   folder <- NULL
@@ -131,8 +121,8 @@ test_that("one report folder per session holds one report and goes away", {
 test_that("a report finished for an old object is deleted", {
   object <- shiny::reactiveVal(GSE74821)
   finished <- NULL
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = function(x, format, output_dir, ...) {
       object(flagged_gse())
       finished <<- stub_render(x, format, output_dir)
@@ -154,8 +144,8 @@ test_that("a report finished for an old object is deleted", {
 
 test_that("a failed render reaches the user as an error toast", {
   toasts <- list()
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = function(x, format, output_dir, ...) stop("Quarto exploded."),
     notify_user = function(message, type) {
       toasts[[length(toasts) + 1L]] <<- list(message = message, type = type)
@@ -178,35 +168,6 @@ test_that("a failed render reaches the user as an error toast", {
       expect_match(toasts[[1]]$message, "Quarto exploded.", fixed = TRUE)
     }
   )
-})
-
-test_that("the background render hands the library paths to the daemon", {
-  skip_if_not_installed("mirai")
-  captured <- NULL
-  local_mocked_bindings(has_package = function(package) TRUE)
-  local_mocked_bindings(
-    mirai = function(.expression, ..., .compute = NULL) {
-      captured <<- list(
-        expression = paste(deparse(substitute(.expression)), collapse = " "),
-        args = list(...),
-        compute = .compute
-      )
-      "task"
-    },
-    .package = "mirai"
-  )
-  expect_identical(
-    NACHO:::render_in_background(GSE74821, "html", "folder", "profile"),
-    "task"
-  )
-  expect_identical(captured$compute, "profile")
-  expect_match(captured$expression, ".libPaths(libs)", fixed = TRUE)
-  expect_match(captured$expression, "NACHO::render", fixed = TRUE)
-  expect_setequal(
-    names(captured$args),
-    c("object", "format", "output_dir", "title", "author", "libs")
-  )
-  expect_identical(captured$args$libs, .libPaths())
 })
 
 test_that("the CSV export defuses spreadsheet formulas", {
@@ -248,7 +209,7 @@ test_that("ending the session stops a running background render", {
   pid_file <- withr::local_tempfile()
   local_mocked_bindings(
     has_package = function(package) TRUE,
-    render_in_background = function(object, format, output_dir, compute, ...) {
+    run_in_daemon = function(fun, args, compute) {
       mirai::mirai(
         {
           writeLines(as.character(Sys.getpid()), pid_file)
@@ -287,29 +248,6 @@ test_that("ending the session stops a running background render", {
   expect_lt(as.numeric(Sys.time() - started, units = "secs"), 20)
 })
 
-test_that("a render stopped after the session ends never settles", {
-  skip_on_cran()
-  skip_if_not_installed("mirai")
-  mirai::daemons(1, dispatcher = TRUE, .compute = "nacho-settle")
-  withr::defer(mirai::daemons(0, .compute = "nacho-settle"))
-  outcome <- function(ended) {
-    settled <- "pending"
-    running <- mirai::mirai(Sys.sleep(30), .compute = "nacho-settle")
-    promises::then(
-      NACHO:::settle_while_open(running, function() ended),
-      onFulfilled = function(value) settled <<- "resolved",
-      onRejected = function(error) settled <<- "rejected"
-    )
-    mirai::stop_mirai(running)
-    for (i in 1:20) {
-      later::run_now(0.1)
-    }
-    settled
-  }
-  expect_identical(outcome(ended = FALSE), "rejected")
-  expect_identical(outcome(ended = TRUE), "pending")
-})
-
 test_that("the report card has labelled title and author fields", {
   html <- htmltools::renderTags(
     NACHO:::mod_export_ui("export", quarto = TRUE)
@@ -331,8 +269,8 @@ test_that("the report card has labelled title and author fields", {
 
 test_that("the render gets the title and author, blank ones as NULL", {
   seen <- list()
+  local_no_mirai()
   local_mocked_bindings(
-    has_package = function(package) package != "mirai",
     render = function(x, format, output_dir, title = NULL, author = NULL) {
       seen <<- list(title = title, author = author)
       stub_render(x, format, output_dir)
@@ -367,4 +305,160 @@ test_that("the thresholds download reads back exactly", {
       expect_identical(read_thresholds(output$thresholds_yaml), x@thresholds)
     }
   )
+})
+
+run_script <- function(lines, data_directory = NULL, sample_sheet = NULL) {
+  lines <- lines[lines != "library(NACHO)"]
+  if (!is.null(data_directory)) {
+    lines <- sub(
+      "\"path/to/rcc-files\"",
+      deparse(data_directory),
+      lines,
+      fixed = TRUE
+    )
+    lines <- sub(
+      "\"path/to/samplesheet.csv\"",
+      deparse(sample_sheet),
+      lines,
+      fixed = TRUE
+    )
+  }
+  env <- new.env(parent = parent.frame())
+  suppressWarnings(suppressMessages(eval(parse(text = lines), envir = env)))
+  env[["nacho"]]
+}
+
+tune_app <- function(
+  x,
+  method,
+  background = "none",
+  mode = "threshold",
+  ruv_k = NULL,
+  thresholds = x@thresholds
+) {
+  chosen <- list(
+    normalisation_method = method,
+    ruv_k = ruv_k,
+    background = background,
+    background_mode = mode
+  )
+  suppressWarnings(NACHO:::tune_object(x, chosen, thresholds))
+}
+
+expect_same_result <- function(script, app) {
+  testthat::expect_identical(
+    nacho_counts(script, normalised = TRUE),
+    nacho_counts(app, normalised = TRUE)
+  )
+  testthat::expect_identical(nacho_qc(script), nacho_qc(app))
+  testthat::expect_identical(script@thresholds, app@thresholds)
+}
+
+test_that("the R script reproduces the example data as tuned in the app", {
+  thresholds <- utils::modifyList(
+    GSE74821@thresholds,
+    list(FoV = 95, BD = c(0.1, 2))
+  )
+  app <- tune_app(GSE74821, "GEO", "mean", "subtract", thresholds = thresholds)
+  script <- NACHO:::reproduce_script(app)
+  expect_true("nacho <- GSE74821" %in% script)
+  expect_same_result(run_script(script), app)
+})
+
+test_that("the R script reproduces RUVg with its number of factors", {
+  skip_if_not_installed("RUVSeq")
+  app <- tune_app(GSE74821, "RUVg", ruv_k = 2L)
+  expect_same_result(run_script(NACHO:::reproduce_script(app)), app)
+})
+
+test_that("the R script loads uploaded files from the paths the user sets", {
+  sheet <- withr::local_tempfile(fileext = ".csv")
+  utils::write.csv(
+    salmon_tidy[c("IDFILE", "plexset_id")],
+    sheet,
+    row.names = FALSE
+  )
+  app <- tune_app(salmon_nacho, "GLM")
+  script <- NACHO:::reproduce_script(app)
+  expect_false("nacho <- GSE74821" %in% script)
+  expect_true(any(grepl("load_rcc(", script, fixed = TRUE)))
+  expect_same_result(run_script(script, test_path("salmon_data"), sheet), app)
+})
+
+test_that("the example data is still known after normalise() adds provenance", {
+  x <- GSE74821
+  x@provenance[["glm_fallback"]] <- TRUE
+  expect_true("nacho <- GSE74821" %in% NACHO:::reproduce_script(x))
+})
+
+test_that("a subset of the example data is not reproduced as the example", {
+  script <- NACHO:::reproduce_script(flagged_gse())
+  expect_false("nacho <- GSE74821" %in% script)
+  expect_true(any(grepl("load_rcc(", script, fixed = TRUE)))
+})
+
+test_that("the Export page previews and downloads the R script", {
+  shiny::testServer(
+    NACHO:::mod_export_server,
+    args = list(object = shiny::reactiveVal(GSE74821), quarto = FALSE),
+    {
+      expect_identical(
+        output$script,
+        paste(NACHO:::reproduce_script(GSE74821), collapse = "\n")
+      )
+      expect_identical(
+        readLines(output$script_r),
+        NACHO:::reproduce_script(GSE74821)
+      )
+    }
+  )
+  html <- htmltools::renderTags(
+    NACHO:::mod_export_ui("export", quarto = FALSE)
+  )$html
+  expect_match(html, "Reproduce in R", fixed = TRUE)
+  expect_match(html, "id=\"export-script_r\"", fixed = TRUE)
+})
+
+test_that("the R script keeps the placeholder for an uploaded folder", {
+  x <- salmon_nacho
+  x@provenance[["data_directory"]] <- withr::local_tempdir()
+  script <- NACHO:::reproduce_script(x)
+  expect_true("  data_directory = \"path/to/rcc-files\"," %in% script)
+  expect_true(any(grepl("every RCC file of the folder", script, fixed = TRUE)))
+})
+
+test_that("the R script leaves an unknown instrument to load_rcc()", {
+  x <- salmon_nacho
+  x@thresholds[["instrument"]] <- NA_character_
+  script <- NACHO:::reproduce_script(x)
+  expect_true("  instrument = NULL," %in% script)
+  expect_no_error(parse(text = script))
+})
+
+test_that("the R script keeps the folder the object was loaded from", {
+  x <- salmon_nacho
+  x@provenance[["data_directory"]] <- R.home("bin")
+  script <- NACHO:::reproduce_script(x)
+  expect_true(
+    paste0("  data_directory = ", deparse(R.home("bin")), ",") %in% script
+  )
+  x@provenance[["data_directory"]] <- "/no/such/run1"
+  script <- NACHO:::reproduce_script(x)
+  expect_true("  data_directory = \"path/to/rcc-files\"," %in% script)
+})
+
+test_that("the R script names the sample sheet columns for an upload", {
+  x <- salmon_nacho
+  x@provenance[["data_directory"]] <- withr::local_tempdir()
+  comments <- grep("^#", NACHO:::reproduce_script(x), value = TRUE)
+  expect_true(any(grepl("IDFILE", comments, fixed = TRUE)))
+  expect_true(any(grepl("plexset_id", comments, fixed = TRUE)))
+})
+
+test_that("write_thresholds() names itself in its errors", {
+  error <- expect_error(
+    write_thresholds(list(FoV = "high"), withr::local_tempfile()),
+    class = "nacho_error"
+  )
+  expect_identical(deparse(error$call[[1]]), "write_thresholds")
 })

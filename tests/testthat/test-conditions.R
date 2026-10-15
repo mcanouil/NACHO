@@ -81,3 +81,24 @@ test_that("check_package() names the install command", {
     error = TRUE
   )
 })
+
+test_that("a progress step is written to the progress file, even when quiet", {
+  path <- withr::local_tempfile()
+  withr::local_options(nacho.quiet = TRUE, nacho.progress_file = path)
+  n <- 3
+  (function() NACHO:::nacho_progress_step("Reading {n} file{?s}"))()
+  expect_identical(readLines(path), "Reading 3 files")
+  (function() NACHO:::nacho_progress_step("Assembling"))()
+  expect_identical(readLines(path), "Assembling")
+})
+
+test_that("a progress step is written without colours", {
+  path <- withr::local_tempfile()
+  withr::local_options(
+    cli.num_colors = 256,
+    nacho.quiet = TRUE,
+    nacho.progress_file = path
+  )
+  (function() NACHO:::nacho_progress_step("Reading {.val run1}"))()
+  expect_identical(readLines(path), "Reading \"run1\"")
+})

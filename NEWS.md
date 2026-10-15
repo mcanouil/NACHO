@@ -147,10 +147,14 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS and the report, with an optional title and author.
     The report can be HTML or PDF, and it renders in the background when mirai is installed.
     If you close the app page during a render, the render stops.
+  - feat: The Export page also downloads an R script that repeats the analysis of the app with `load_rcc()`, `normalise()` and the thresholds you set, and shows it before you download it.
   - feat: A Help menu in the navbar opens About NACHO, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.
   - feat: The "Flagged samples" page is now the "Samples" page.
     One table lists every sample with its status as a coloured word, flagged samples first, and a "Flagged only" switch hides the others.
     With reactable installed, you can sort and search the table, and click a row to select that sample in the plots.
+- In `R/mod_data.R`,
+  - feat: When you choose files, the Data page lists the RCC files of the upload before you import them, zip archives included.
+    For each file, it shows the zip it came from, whether it is a PlexSet file, and whether the sample sheet lists it.
 - In `DESCRIPTION`,
   - build: chromote, gdtools, ggiraph, jsonlite, later, mirai, parallel, reactable and shinytest2 join Suggests, and promises and yaml join Imports.
 - In `vignettes/`,
@@ -170,6 +174,10 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - perf: With mirai installed, the app builds the plots of a page in parallel on a small pool of workers shared by all sessions, stays responsive while they build, and stops the unfinished plots of a page you leave.
     `options(nacho.plot_workers = n)` sets the number of workers, and `0` builds plots in the app process; the app from `deploy()` uses one worker.
   - perf: Interactive plots built once are shared between browser tabs and sessions of the same app.
+- In `R/mod_data.R`,
+  - perf: With mirai installed, the app reads uploaded RCC files in a background R process, so other sessions of the app stay responsive.
+    The Data page shows the current stage of the import under the Import button.
+  - perf: The app finds PlexSet files when it lists the upload, and checks only the lines that can name a PlexSet code class, so a large upload takes about a third less time once you click Import.
 
 ## Fixes
 
