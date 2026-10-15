@@ -2,7 +2,14 @@
 set -euo pipefail
 
 dir="${1:-.}"
-version="$(sed -n 's/^Version:[[:space:]]*//p' "${dir}/DESCRIPTION" 2>/dev/null || true)"
+
+field_value() {
+  sed -n "s/^$1:[[:space:]]*//p" "$2" 2>/dev/null |
+    tr -d '\r' |
+    sed 's/[[:space:]]*$//'
+}
+
+version="$(field_value Version "${dir}/DESCRIPTION" || true)"
 
 if [ -z "${version}" ]; then
   echo "::error::No Version field in ${dir}/DESCRIPTION." >&2
@@ -26,10 +33,10 @@ fi
 
 recorded_versions() {
   if [ -f "${dir}/CRAN-SUBMISSION" ]; then
-    sed -n 's/^Version:[[:space:]]*//p' "${dir}/CRAN-SUBMISSION"
+    field_value Version "${dir}/CRAN-SUBMISSION"
   fi
   git -C "${dir}" show origin/main:CRAN-SUBMISSION 2>/dev/null |
-    sed -n 's/^Version:[[:space:]]*//p' || true
+    field_value Version /dev/stdin || true
 }
 
 if grep -Fxq "${version}" <<<"$(recorded_versions)"; then

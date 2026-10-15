@@ -2,72 +2,84 @@
 % Please edit documentation in R/autoplot.R
 \name{autoplot.nacho}
 \alias{autoplot.nacho}
-\title{Plot quality-control metrics and thresholds of a "nacho" object}
-\usage{
-\method{autoplot}{nacho}(
+\title{Plot the quality control of a nacho object}
+\value{
+A \code{ggplot} object.
+}
+\description{
+Draws any of the quality-control figures of the Shiny app
+(\code{\link[=visualise]{visualise()}}) and of the HTML or PDF report (\code{\link[=render]{render()}}).
+}
+\section{Usage}{
+
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{autoplot(
   object,
-  x,
+  type,
   colour = "CartridgeID",
   size = 0.5,
   show_legend = TRUE,
   show_outliers = TRUE,
   outliers_factor = 1,
   outliers_labels = NULL,
-  ...
+  dark = FALSE
 )
+}\if{html}{\out{</div>}}
 }
-\arguments{
-\item{object}{[\link{list}] List obtained from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
-\item{x}{[\link{character}] Character string naming the quality-control metrics to plot from \code{nacho_object}.
-The possible values are:
+\section{Arguments}{
+
 \itemize{
-\item \code{"BD"} (Binding Density)
-\item \code{"FoV"} (Imaging)
-\item \code{"PCL"} (Positive Control Linearity)
-\item \code{"LoD"} (Limit of Detection)
-\item \code{"Positive"} (Positive Controls)
-\item \code{"Negative"} (Negative Controls)
-\item \code{"Housekeeping"} (Housekeeping Genes)
-\item \code{"PN"} (Positive Controls vs. Negative Controls)
-\item \code{"ACBD"} (Average Counts vs. Binding Density)
-\item \code{"ACMC"} (Average Counts vs. Median Counts)
-\item \code{"PCA12"} (Principal Component 1 vs. 2)
-\item \code{"PCAi"} (Principal Component scree plot)
-\item \code{"PCA"} (Principal Components planes)
-\item \code{"PFNF"} (Positive Factor vs. Negative Factor)
-\item \code{"HF"} (Housekeeping Factor)
-\item \code{"NORM"} (Normalisation Factor)
-}}
-
-\item{colour}{[\link{character}] Character string of the column in \code{ssheet_csv}
-or more generally in \code{nacho_object$nacho} to be used as grouping colour.}
-
-\item{size}{[\link{numeric}] A numeric controlling point size
-(\code{\link[ggplot2:geom_point]{ggplot2::geom_point()}}
-or line width (\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}).}
-
-\item{show_legend}{[\link{logical}] Boolean to indicate whether the plot legends should
-be plotted (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
-
-\item{show_outliers}{[\link{logical}] Boolean to indicate whether the outliers should be highlighted
-in red (\code{TRUE}) or not (\code{FALSE}). Default is \code{TRUE}.}
-
-\item{outliers_factor}{[\link{numeric}] Size factor for outliers compared to \code{size}. Default is \code{1}.}
-
-\item{outliers_labels}{[\link{character}] Character to indicate which column in \code{nacho_object$nacho}
-should be used to be printed as the labels for outliers or not. Default is \code{NULL}.}
-
-\item{...}{Other arguments (Not used).}
+\item \code{object}: A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.
+\item \code{type}: The plot to draw, one of:
+\itemize{
+\item \code{"BD"}: Binding Density.
+\item \code{"FoV"}: Field of View (imaging).
+\item \code{"PCL"}: Positive Control Linearity.
+\item \code{"LoD"}: Limit of Detection.
+\item \code{"Positive"}: Positive controls.
+\item \code{"Negative"}: Negative controls.
+\item \code{"Housekeeping"}: Housekeeping genes.
+\item \code{"PN"}: Positive controls against negative controls.
+\item \code{"ACBD"}: Average counts against binding density.
+\item \code{"ACMC"}: Average counts against median counts.
+\item \code{"PCA12"}: Principal component 1 against 2.
+\item \code{"PCAi"}: Scree plot of the principal components.
+\item \code{"PCA"}: Planes of the first principal components.
+\item \code{"PFNF"}: Positive factor against negative factor.
+\item \code{"HF"}: Housekeeping factor.
+\item \code{"NORM"}: Normalisation factor.
+\item \code{"Stability"}: geNorm stability of the housekeeping genes, see
+\code{\link[=housekeeping_stability]{housekeeping_stability()}}.
+The dashed line marks M = 1.5, the limit geNorm suggests for
+homogeneous samples.
+This plot ignores \code{colour}, \code{show_legend}, \code{show_outliers} and
+\code{outliers_labels}.
+\item \code{"RLE"}: Relative log expression of the normalised endogenous genes.
+This plot ignores \code{size}, \code{show_outliers}, \code{outliers_factor} and
+\code{outliers_labels}.
+\item \code{"BatchFactors"}: Normalisation factors by cartridge.
+This plot ignores \code{show_outliers}, \code{outliers_factor} and
+\code{outliers_labels}.
+\item \code{"PCBatch"}: Share of each principal component explained by cartridge
+and date; see \code{\link[=batch_diagnostics]{batch_diagnostics()}}.
+Tiles with no value stay grey and unlabelled.
+This plot ignores \code{colour}, \code{size}, \code{show_legend}, \code{show_outliers},
+\code{outliers_factor} and \code{outliers_labels}.
 }
-\description{
-This function plots any of the quality-control figures available
-within the Shiny app using \code{\link[=visualise]{visualise()}} or in the HTML report from \code{\link[=render]{render()}}.
+\item \code{colour}: The column of \code{nacho_samples(object)} that colours the points.
+\item \code{size}: The point size, and the line width in the \code{"NORM"} plot.
+\item \code{show_legend}: If \code{FALSE}, hide the colour legend.
+\item \code{show_outliers}: If \code{TRUE}, draw the flagged samples as triangles in the
+accent colour: rust on a light background, amber on a dark one.
+\item \code{outliers_factor}: The size of the flagged samples, relative to \code{size}.
+\item \code{outliers_labels}: The column of \code{nacho_samples(object)} that labels the
+flagged samples, or \code{NULL} for no labels.
+Labels imply \code{show_outliers = TRUE}.
+\item \code{dark}: If \code{TRUE}, draw the plot for a dark background.
 }
+}
+
 \examples{
-
-data(GSE74821)
-
-autoplot(GSE74821, x = "BD")
-
+autoplot(GSE74821, type = "BD")
 }

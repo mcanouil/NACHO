@@ -1,9 +1,5 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # NAnoString quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" alt="NACHO hexagonal logo" />
-
-<!-- badges: start -->
 
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
@@ -15,7 +11,6 @@ tag](https://img.shields.io/github/tag/mcanouil/NACHO.svg?label=latest%20tag&inc
 [![cran
 checks_worst](https://badges.cranchecks.info/worst/NACHO.svg)](https://cran.r-project.org/web/checks/check_results_NACHO.html)
 [![CRAN_Download_total](https://cranlogs.r-pkg.org/badges/NACHO)](https://cran.r-project.org/package=NACHO)
-<!-- badges: end -->
 
 ## Installation
 
@@ -28,80 +23,107 @@ install.packages("NACHO")
 pak::pak("mcanouil/NACHO")
 ```
 
-## Overview
+## Quick start
 
-*NACHO* (**NA**noString quality **C**ontrol das**H**b**O**ard) is
-developed for NanoString nCounter data.  
-NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA)
-expression assay and works with fluorescent barcodes.  
-Each barcode is assigned an mRNA/miRNA, which can be counted after
-bonding with its target.  
-As a result each count of a specific barcode represents the presence of
-its target mRNA/miRNA.
-
-*NACHO* is able to load, visualise and normalise the exported NanoString
-nCounter data and facilitates the user in performing a quality
-control.  
-*NACHO* does this by visualising quality control metrics, expression of
-control genes, principal components and sample specific size factors in
-an interactive web application.
-
-With the use of two functions, RCC files are summarised and visualised,
-namely: `load_rcc()` and `visualise()`.
-
-- The `load_rcc()` function is used to preprocess the data.
-- The `visualise()` function initiates a [Shiny-based
-  dashboard](https://shiny.posit.co/) that visualises all relevant QC
-  plots.
-
-*NACHO* also includes a function `normalise()`, which (re)calculates
-sample specific size factors and normalises the data.
-
-- The `normalise()` function creates a list in which your settings, the
-  raw counts and normalised counts are stored.
-
-In addition (since v0.6.0) *NACHO* includes two (three) additional
-functions:
-
-- The `render()` function renders a full quality-control report (HTML)
-  based on the results of a call to `load_rcc()` or `normalise()` (using
-  `print()` in an R Markdown chunk).
-- The `autoplot()` function draws any quality-control metrics from
-  `visualise()` and `render()`.
-
-For more `vignette("NACHO")` and `vignette("NACHO-analysis")`.
-
-### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
+The package ships six samples of the public study GSE178516, so this
+runs offline. `load_rcc()` reads the RCC files, computes the
+quality-control metrics and normalises the counts.
 
 ``` r
-shiny::runApp(system.file("app", package = "NACHO"))
+library(NACHO)
+
+data_directory <- system.file("extdata", "GSE178516", package = "NACHO")
+nacho <- load_rcc(
+  data_directory = data_directory,
+  ssheet_csv = file.path(data_directory, "samplesheet.csv"),
+  id_colname = "IDFILE",
+  instrument = "max",
+  n_comp = 5
+)
+#> ℹ Reading 6 RCC files
+#> ✔ Reading 6 RCC files [31ms]
+#> 
+#> ℹ Assembling 6 samples
+#> ✔ Assembling 6 samples [18ms]
+#> 
+#> ℹ Computing quality-control metrics and normalising
+#> ✔ Computing quality-control metrics and normalising [39ms]
+#> 
+nacho_qc(nacho)[, c("IDFILE", "status", "n_flags", "reason")]
+#>                  IDFILE status n_flags reason
+#> 1 GSM5393247_S02.RCC.gz   pass       0   <NA>
+#> 2 GSM5393248_S13.RCC.gz   pass       0   <NA>
+#> 3 GSM5393250_S15.RCC.gz   pass       0   <NA>
+#> 4 GSM5393251_S16.RCC.gz   pass       0   <NA>
+#> 5 GSM5393267_S46.RCC.gz   pass       0   <NA>
+#> 6 GSM5393268_S47.RCC.gz   pass       0   <NA>
 ```
 
-<img src="man/figures/README-nacho_app.gif" alt="NACHO Shiny application in use." width="100%" />
+`autoplot()` draws any quality-control figure, `render()` writes a
+report with Quarto, and `visualise()` opens the app.
+
+``` r
+autoplot(nacho, type = "BD")
+```
+
+<img src="man/figures/README-quick-start-plot-1.png" alt="Box plot of the binding density of each cartridge, with the limits of the quality control drawn as dashed lines." width="100%" />
+
+``` r
+render(nacho, output_dir = tempdir())
+visualise(nacho)
+```
+
+## Overview
+
+NACHO works with NanoString nCounter data. It reads the RCC files, flags
+the samples that fail quality control and normalises the counts.
+
+- `load_rcc()` reads the RCC files and a sample sheet, computes the
+  quality-control metrics and normalises the counts.
+- `visualise()` opens a Shiny app to look at every metric and change the
+  limits.
+- `autoplot()` draws any quality-control figure as a `ggplot2` plot.
+- `render()` writes a quality-control report with Quarto, as an HTML or
+  a PDF file.
+- `normalise()` runs the normalisation again with new settings.
+
+The [package website](https://m.canouil.dev/NACHO/) shows the app, the
+report and a full analysis.
+
+### Shiny application
+
+Open the app on a `nacho` object with `visualise()`.
 
 ``` r
 visualise(GSE74821)
 ```
 
-<img src="man/figures/README-visualise.png" alt="NACHO interactive dashboard showing quality-control plots for the GSE74821 dataset." width="100%" />
+<img src="man/figures/README-nacho_app.gif" alt="Short recording of the NACHO app on the example data. The summary strip changes when the field of view threshold moves to 95 and one sample is flagged. A selected sample is outlined in the QC metrics plots. The recording then shows the Samples, Normalisation and Batch pages, the Help menu, and the Export page with a report ready to download and the Reproduce in R card." width="100%" />
+
+The articles “Explore quality control in the app” and “Analyse a GEO
+study” on the [package website](https://m.canouil.dev/NACHO/) show each
+page of the app and a full analysis of GSE178516. The article “Moving
+from NACHO 2” on the same website maps the NACHO 2 code to NACHO 3.
 
 ## Citing NACHO
 
 <p>
 
 Canouil M, Bouland GA, Bonnefond A, Froguel P, ’t Hart LM, Slieker RC
-(2019). “NACHO: an R package for quality control of NanoString nCounter
-data.” <em>Bioinformatics</em>. ISSN 1367-4803.
+(2020). “NACHO: an R package for quality control of NanoString nCounter
+data.” <em>Bioinformatics</em>, <b>36</b>(3), 970–971. ISSN 1367-4803.
 <a href="https://doi.org/10.1093/bioinformatics/btz647">doi:10.1093/bioinformatics/btz647</a>.
 </p>
 
-    @Article{,
+    @Article{Canouil2020,
       title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
       author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
       journal = {Bioinformatics},
-      address = {Oxford, England},
-      year = {2019},
-      month = {aug},
+      year = {2020},
+      month = {feb},
+      volume = {36},
+      number = {3},
+      pages = {970--971},
       issn = {1367-4803},
       doi = {10.1093/bioinformatics/btz647},
     }
@@ -111,12 +133,12 @@ data.” <em>Bioinformatics</em>. ISSN 1367-4803.
 ## Getting help
 
 If you encounter a clear bug, please file a minimal reproducible example
-on [GitHub](https://github.com/mcanouil/NACHO/issues).  
+on [GitHub](https://github.com/mcanouil/NACHO/issues).\
 For questions and other discussion, please contact the package
 maintainer.
 
 ## Code of Conduct
 
 Please note that this project is released with a [Contributor Code of
-Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).  
+Conduct](https://github.com/mcanouil/NACHO/blob/main/.github/CODE_OF_CONDUCT.md).\
 By contributing to this project, you agree to abide by its terms.

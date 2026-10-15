@@ -6,36 +6,68 @@
 #' @param ssheet_csv [[character]] or [[data.frame]] Either a string with the name of the CSV
 #'   of the samplesheet or the samplesheet as a `data.frame`.
 #'   Should contain a column that matches the file names in the folder.
+#'   NACHO computes the columns `Date`, `ID`, `BD`, `ScannerID`,
+#'   `StagePosition`, `CartridgeID`, `FoV`, `PCL`, `LoD`, `MC`, `MedC`,
+#'   `Positive_factor`, `Negative_factor`, `Detection_rate`, `Background`,
+#'   `House_factor`, `Housekeeping_detected`, `Ligation_order`, `Ligation_R2`,
+#'   `Ligation_NEG`, `Haemolysis`, `is_outlier`, `PC1`, `PC2`, ... and `W_1`,
+#'   `W_2`, ....
+#'   A sample sheet column with one of these names is replaced, with a warning.
 #' @param id_colname [[character]] Character string of the column in `ssheet_csv` that matches
 #'   the file names in `data_directory`.
 #' @param housekeeping_genes [[character]] A vector of names of the miRNAs/mRNAs
 #'   that should be used as housekeeping genes. Default is `NULL`.
 #' @param housekeeping_predict [[logical]] Boolean to indicate whether the housekeeping genes
 #'   should be predicted (`TRUE`) or not (`FALSE`). Default is `FALSE`.
+#'   Prediction picks the five most stable genes by geNorm on the raw counts.
+#'   It is skipped for the miRNA methods of `normalisation_method`.
 #' @param housekeeping_norm [[logical]] Boolean to indicate whether the housekeeping normalisation
-#'   should be performed. Default is `TRUE`.
-#' @param normalisation_method [[character]] Either `"GEO"` or `"GLM"`.
-#'   Character string to indicate normalisation using the geometric mean (`"GEO"`)
-#'   or a generalized linear model (`"GLM"`). Default is `"GEO"`.
+#'   should be performed.
+#'   `NULL` (the default) normalises with housekeeping genes for mRNA panels
+#'   that have them.
+#'   On miRNA panels, whose housekeeping mRNAs sit at background, it does so
+#'   only when you pass `housekeeping_genes` or set `housekeeping_predict = TRUE`.
+#'   Pass `TRUE` or `FALSE` to override this.
+#'   The miRNA methods of `normalisation_method` ignore it.
+#' @param normalisation_method [[character]] `"GEO"` (the default) or `"GLM"`
+#'   scale samples by their positive controls, with the geometric mean or a
+#'   Poisson model, then by the housekeeping genes; `"RUVg"` scales by the
+#'   positive controls with the geometric mean, then removes `ruv_k` factors
+#'   of unwanted variation estimated from the housekeeping genes, which
+#'   [nacho_samples()] returns as `W_1`, `W_2`, ... for use as covariates.
+#'   For miRNA panels, `"stable_mirna"`, `"total_mirna"`, `"spike_in"` and
+#'   `"ligation"` scale by the five most stable miRNAs, the miRNAs above 50
+#'   counts, the spike-in controls or the ligation positive controls, in the
+#'   order Bruker recommends for plasma and serum.
+#'   These methods ignore `housekeeping_genes`, `housekeeping_predict` and
+#'   `housekeeping_norm`, and give their scaling factor as `House_factor`.
+#'   When a GLM fit fails, NACHO warns and uses the geometric mean instead, as
+#'   [normalise()] describes.
+#' @param ruv_k [[numeric]] The number of unwanted factors RUVg removes;
+#'   `NULL` uses [suggest_ruv_k()].
+#'   A `ruv_k` above two less than the number of samples, or one less than the
+#'   number of control genes, is lowered with a `nacho_warning_ruv_k_reduced`
+#'   warning.
+#'   Other methods ignore it.
+#' @param background [[character]] How to estimate each sample's background
+#'   from its negative controls: `"none"` (the default), `"mean"`,
+#'   `"mean_2sd"` (mean plus two standard deviations), `"median"`, `"max"` or
+#'   `"geo"` (geometric mean).
+#' @param background_mode [[character]] What to do with that background:
+#'   `"threshold"` (the default) raises lower counts to it, which Bruker
+#'   recommends when fold changes matter, and `"subtract"` removes it and
+#'   floors at 0.
+#' @param instrument [[character]] The nCounter instrument, `"max"`,
+#'   `"flex"`, `"pro"` or `"sprint"`, which sets the binding density limits.
+#'   `NULL` (the default) reads it from the RCC files when they say, and
+#'   otherwise uses the MAX/FLEX limits with a warning.
+#' @param preset [[character]] `"nsolver"` (the default) or `"legacy"`; see
+#'   [nacho_thresholds()].
 #' @param n_comp [[numeric]] Number indicating the number of principal components to compute.
 #'  Cannot be more than n-1 samples. Default is `10`.
 #'
-#' @return [[list]] A list object of class `"nacho"`:
-#' \describe{
-#'   \item{`access`}{[[character]] Value passed to [`load_rcc()`] in `id_colname`.}
-#'   \item{`housekeeping_genes`}{[[character]] Value passed to [`load_rcc()`].}
-#'   \item{`housekeeping_predict`}{[[logical]] Value passed to [`load_rcc()`].}
-#'   \item{`housekeeping_norm`}{[[logical]] Value passed to [`load_rcc()`].}
-#'   \item{`normalisation_method`}{[[character]] Value passed to [`load_rcc()`].}
-#'   \item{`remove_outliers`}{[[logical]] `FALSE`.}
-#'   \item{`n_comp`}{[[numeric]] Value passed to [`load_rcc()`].}
-#'   \item{`data_directory`}{[[character]] Value passed to [`load_rcc()`].}
-#'   \item{`pc_sum`}{[[data.frame]] A `data.frame` with `n_comp` rows and four columns:
-#'     "Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
-#'   \item{`nacho`}{[[data.frame]] A `data.frame` with all columns from the sample sheet `ssheet_csv`
-#'     and all computed columns, *i.e.*, quality-control metrics and counts, with one row per sample and probe.}
-#'   \item{`outliers_thresholds`}{[[list]] A `list` of the (default) quality-control thresholds used.}
-#' }
+#' @return A `nacho` object; read its content with [nacho_counts()],
+#'   [nacho_samples()], [nacho_probes()] and [nacho_qc()].
 #'
 #' @export
 #'
@@ -77,16 +109,46 @@ load_rcc <- function(
   id_colname = NULL,
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
-  housekeeping_norm = TRUE,
+  housekeeping_norm = NULL,
   normalisation_method = "GEO",
+  background = "none",
+  background_mode = "threshold",
+  ruv_k = NULL,
+  instrument = NULL,
+  preset = "nsolver",
   n_comp = 10
 ) {
-  file_path <- Code_Summary <- CodeClass <- NULL # no visible binding for global variable
   if (missing(data_directory) || missing(ssheet_csv)) {
-    stop('[NACHO] "data_directory" and "ssheet_csv" must be provided.')
+    nacho_abort(
+      "{.arg data_directory} and {.arg ssheet_csv} must both be provided.",
+      class = "bad_argument"
+    )
   }
-  data_directory <- normalizePath(data_directory, mustWork = TRUE)
-  if (is.vector(ssheet_csv, "character") && length(ssheet_csv) > 1) {
+
+  check_string(data_directory)
+  if (!dir.exists(data_directory)) {
+    nacho_abort(
+      "The directory {.path {data_directory}} does not exist.",
+      class = "missing_file"
+    )
+  }
+  data_directory <- normalizePath(data_directory)
+  choices <- check_settings(
+    housekeeping_genes,
+    housekeeping_predict,
+    housekeeping_norm %||% TRUE,
+    normalisation_method,
+    n_comp,
+    background,
+    background_mode,
+    ruv_k
+  )
+  if (!is.null(instrument)) {
+    instrument <- check_choice(instrument, nacho_instruments)
+  }
+  preset <- check_choice(preset, nacho_presets)
+
+  if (is.character(ssheet_csv) && length(ssheet_csv) > 1) {
     if (is.null(names(ssheet_csv))) {
       ssheet_csv <- data.frame(IDFILE = ssheet_csv)
     } else {
@@ -95,200 +157,380 @@ load_rcc <- function(
     }
     id_colname <- "IDFILE"
   }
-
-  requires_id_colname <- inherits(ssheet_csv, "data.frame") ||
-    (is.vector(ssheet_csv, "character") && length(ssheet_csv) == 1)
-  if (is.null(id_colname) && requires_id_colname) {
-    stop('[NACHO] "id_colname" must be provided as a column of "ssheet_csv".')
-  }
-
-  message("[NACHO] Importing RCC files.")
-  nacho_df <- switch(
-    EXPR = paste(
-      as.integer(inherits(ssheet_csv, c("data.frame", "character"), TRUE) > 0),
-      collapse = ""
-    ),
-    "10" = ssheet_csv,
-    "01" = data.table::fread(file = ssheet_csv, header = TRUE, sep = ","),
-    stop('[NACHO] "ssheet_csv" must be a "data.frame" or path to csv.')
-  )
-
-  nacho_df <- data.table::as.data.table(nacho_df)[
-    j = `:=`(
-      "file_path" = file.path(data_directory, nacho_df[[id_colname]])
-    )
-  ]
-
-  if (nacho_df[j = !all(sapply(X = file_path, FUN = file.exists))]) {
-    stop('[NACHO] Not all values from "id_colname" are mapped to an RCC file.')
-  }
-
-  is_plexset <- vapply(
-    X = unique(nacho_df[["file_path"]]),
-    FUN = is_plexset_rcc,
-    FUN.VALUE = logical(1)
-  )
-  if (any(is_plexset) && !all(is_plexset)) {
-    stop(
-      "[NACHO] RCC files mix PlexSet and single-sample files.\n",
-      "  Load each kind of file separately."
-    )
-  }
-  has_duplicates <- anyDuplicated(nacho_df[[id_colname]]) != 0
-  if (all(is_plexset) && !"plexset_id" %in% colnames(nacho_df)) {
-    if (has_duplicates) {
-      stop(
-        '[NACHO] "id_colname" contains duplicates and "plexset_id" was not provided.\n',
-        '  For PlexSet RCC files, "plexset_id" column is required to identify samples.'
+  if (rlang::is_string(ssheet_csv)) {
+    if (!file.exists(ssheet_csv)) {
+      nacho_abort(
+        "The sample sheet {.file {ssheet_csv}} does not exist.",
+        class = "missing_file"
       )
     }
-    nacho_df <- nacho_df[rep(seq_len(nrow(nacho_df)), each = 8)]
+    ssheet_csv <- data.table::fread(file = ssheet_csv, header = TRUE, sep = ",")
+  }
+  if (!is.data.frame(ssheet_csv)) {
+    nacho_abort(
+      "{.arg ssheet_csv} must be a data frame or the path to a CSV file, not {.obj_type_friendly {ssheet_csv}}.",
+      class = "bad_argument"
+    )
+  }
+  check_string(id_colname)
+  check_column(id_colname, ssheet_csv)
+  check_id_colname(id_colname)
+
+  nacho_df <- data.table::as.data.table(ssheet_csv)
+  nacho_df[["file_path"]] <- file.path(data_directory, nacho_df[[id_colname]])
+
+  missing_files <- unique(nacho_df[[id_colname]][
+    !file.exists(nacho_df[["file_path"]])
+  ])
+  if (length(missing_files) > 0) {
+    nacho_abort(
+      c(
+        paste0(
+          "{length(missing_files)} value{?s} of {.field {id_colname}} {?does/do} not match ",
+          "an RCC file in {.path {data_directory}}."
+        ),
+        x = "Missing: {.file {utils::head(missing_files, 5)}}{if (length(missing_files) > 5) ', ...'}.",
+        i = "Check that {.arg id_colname} holds file names, including the {.val .RCC} or {.val .RCC.gz} extension."
+      ),
+      class = "missing_file"
+    )
+  }
+  files <- unique(nacho_df[["file_path"]])
+  if (length(files) == 0) {
+    nacho_abort(
+      c(
+        "{.arg ssheet_csv} lists no file to read from {.path {data_directory}}.",
+        i = "List at least one {.val .RCC} or {.val .RCC.gz} file of that folder in {.arg ssheet_csv}."
+      ),
+      class = "missing_file"
+    )
+  }
+  nacho_progress_step("Reading {length(files)} RCC files")
+  parsed <- lapply(files, read_rcc)
+  is_plexset <- vapply(
+    parsed,
+    function(p) is_plexset_classes(p[["code_summary"]][["CodeClass"]]),
+    logical(1)
+  )
+  if (any(is_plexset) && !all(is_plexset)) {
+    nacho_abort(
+      c(
+        "RCC files mix PlexSet and single-sample files.",
+        i = "Load each kind of file separately."
+      ),
+      class = "mixed_rcc_types"
+    )
+  }
+  rcc_type <- if (all(is_plexset)) "n8" else "n1"
+  duplicated_ids <- duplicated_values(nacho_df[[id_colname]])
+  if (rcc_type == "n8" && !"plexset_id" %in% names(nacho_df)) {
+    if (length(duplicated_ids) > 0) {
+      abort_duplicate_ids(duplicated_ids, id_colname)
+    }
+    nacho_df <- nacho_df[rep(seq_len(nrow(nacho_df)), each = 8), ]
     nacho_df[["plexset_id"]] <- rep(
       paste0("S", seq_len(8)),
       times = nrow(nacho_df) / 8
     )
   }
-  if (!all(is_plexset) && has_duplicates) {
-    stop(
-      '[NACHO] "id_colname" contains duplicates, but the RCC files are not PlexSet files.\n',
-      '  Each single-sample RCC file must appear once in "ssheet_csv".'
-    )
+  if (rcc_type == "n8" && "plexset_id" %in% names(nacho_df)) {
+    abort_bad_plexset_ids(nacho_df[["plexset_id"]])
+    abort_duplicate_plexset_pairs(nacho_df, id_colname)
+  }
+  if (rcc_type == "n1" && length(duplicated_ids) > 0) {
+    abort_duplicate_ids(duplicated_ids, id_colname)
   }
 
-  if (all(is_plexset)) {
-    type_set <- "n8"
-    nacho_df <- merge(
-      x = nacho_df,
-      y = nacho_df[
-        j = unique(.SD),
-        .SDcols = c(id_colname, "file_path")
-      ][
-        j = data.table::rbindlist(lapply(X = file_path, FUN = read_rcc)),
-        by = c(id_colname, "file_path")
-      ],
-      by = c(id_colname, "file_path", "plexset_id"),
-      all.x = TRUE
-    )[
-      j = (id_colname) := apply(.SD, 1, paste, collapse = "_"),
-      .SDcols = c(id_colname, "plexset_id")
-    ]
-    nacho_df <- nacho_df[
-      j = unlist(Code_Summary, recursive = FALSE),
-      by = setdiff(names(nacho_df), "Code_Summary")
-    ][
-      j = `:=`(CodeClass = sub("[0-8]+s$", "", CodeClass))
-    ]
-  } else {
-    type_set <- "n1"
-    nacho_df <- nacho_df[
-      j = data.table::rbindlist(lapply(X = file_path, FUN = read_rcc)),
-      by = c(unique(c(id_colname, "file_path", names(nacho_df))))
-    ]
-    nacho_df <- nacho_df[
-      j = unlist(Code_Summary, recursive = FALSE),
-      by = setdiff(names(nacho_df), "Code_Summary")
-    ]
-  }
-  cat("\n")
-
-  nanostring_versions <- nacho_df[
-    j = unique(.SD),
-    .SDcols = c("Header.header_FileVersion", "Header.header_SoftwareVersion")
-  ]
-  if (nrow(nanostring_versions) > 1) {
-    stop(
-      "[NACHO] Multiple NanoString file/software versions detected.\n",
-      "  Please provide a set of files with the same version.\n",
-      paste(
-        sapply(
-          X = c("Header.header_FileVersion", "Header.header_SoftwareVersion"),
-          FUN = function(x) {
-            sprintf(
-              "  - %s: '%s'",
-              sub("Header.header_", "", x),
-              paste(nanostring_versions[[x]], collapse = "', '")
-            )
-          },
-          USE.NAMES = FALSE
-        ),
-        collapse = "\n"
+  versions <- unique(do.call(
+    rbind,
+    lapply(parsed, function(p) {
+      data.frame(
+        file = unname(p[["attributes"]]["Header.header_FileVersion"]),
+        software = unname(p[["attributes"]]["Header.header_SoftwareVersion"])
       )
+    })
+  ))
+  if (nrow(versions) > 1) {
+    nacho_abort(
+      c(
+        "RCC files come from more than one NanoString file or software version.",
+        "*" = "File versions: {.val {unique(versions[['file']])}}.",
+        "*" = "Software versions: {.val {unique(versions[['software']])}}.",
+        i = "Load each version separately."
+      ),
+      class = "mixed_versions"
     )
   }
 
-  message("[NACHO] Performing QC and formatting data.")
-  has_hkg <- any(grepl("Housekeeping", nacho_df[["CodeClass"]]))
+  nacho_progress_step("Assembling {nrow(nacho_df)} sample{?s}")
+  file_index <- match(nacho_df[["file_path"]], files)
+  pieces <- lapply(parsed, rcc_samples)
+  sample_codes <- lapply(seq_len(nrow(nacho_df)), function(k) {
+    piece <- pieces[[file_index[k]]]
+    if (rcc_type == "n8") piece[[nacho_df[["plexset_id"]][k]]] else piece[[1]]
+  })
+  if (rcc_type == "n8") {
+    nacho_df[[id_colname]] <- paste(
+      nacho_df[[id_colname]],
+      nacho_df[["plexset_id"]],
+      sep = "_"
+    )
+  }
+  ids <- as.character(nacho_df[[id_colname]])
+
+  probe_counts <- build_probe_counts(
+    codes = data.table::rbindlist(sample_codes),
+    column = rep(seq_along(sample_codes), vapply(sample_codes, nrow, 1L)),
+    ids = ids,
+    clash_message = c(
+      "The same probe name has different code classes or accessions across RCC files.",
+      x = "Probe{?s}: {.val {utils::head(clashes, 5)}}.",
+      i = "Load files from the same CodeSet together."
+    ),
+    clash_class = "rcc_parse"
+  )
+  probes <- probe_counts[["probes"]]
+  counts <- probe_counts[["counts"]]
+
+  attributes <- data.table::rbindlist(
+    lapply(parsed, function(p) {
+      as.list(c(p[["attributes"]], Messages = p[["messages"]]))
+    }),
+    fill = TRUE
+  )
+  sheet <- as.data.frame(nacho_df)
+  sheet <- sheet[, setdiff(names(sheet), "file_path"), drop = FALSE]
+  reserved <- names(sheet)[is_computed_sample_column(names(sheet))]
+  if (length(reserved) > 0) {
+    nacho_warn(
+      c(
+        "NACHO computes the sample sheet column{?s} {.field {reserved}}, so {?it is/they are} replaced.",
+        i = "Rename {cli::qty(length(reserved))}{?it/them} in {.arg ssheet_csv} to keep your values."
+      ),
+      class = "reserved_column"
+    )
+  }
+  samples <- cbind(
+    column_first(sheet, id_colname),
+    as.data.frame(attributes)[file_index, , drop = FALSE]
+  )
+  sample_order <- order(ids, method = "radix")
+  samples <- samples[sample_order, , drop = FALSE]
+  rownames(samples) <- NULL
+  counts <- counts[, sample_order, drop = FALSE]
+
+  check_housekeeping_genes(housekeeping_genes, probes[["Name"]])
+  housekeeping_norm <- resolve_housekeeping_norm(
+    probes[["CodeClass"]],
+    housekeeping_genes,
+    housekeeping_predict,
+    housekeeping_norm,
+    detect_panel(probes, samples)
+  )
+
+  nacho_progress_step("Computing quality-control metrics and normalising")
+  build_nacho(
+    counts = counts,
+    probes = probes,
+    samples = samples,
+    settings = list(
+      id_colname = id_colname,
+      housekeeping_genes = housekeeping_genes,
+      housekeeping_predict = housekeeping_predict,
+      housekeeping_norm = housekeeping_norm,
+      normalisation_method = choices[["normalisation_method"]],
+      ruv_k = if (!is.null(ruv_k)) as.integer(ruv_k),
+      background = choices[["background"]],
+      background_mode = choices[["background_mode"]],
+      n_comp = as.integer(n_comp)
+    ),
+    thresholds = thresholds_for_samples(samples, instrument, preset),
+    rcc_type = rcc_type,
+    provenance = new_provenance(
+      data_directory = data_directory,
+      file_version = versions[["file"]],
+      software_version = versions[["software"]]
+    )
+  )
+}
+
+#' Turn housekeeping normalisation off when no housekeeping gene is available
+#'
+#' @param code_class The code class of each probe.
+#' @param panel `"mirna"` or `"mrna"`, from `detect_panel()`.
+#'
+#' @return `housekeeping_norm`.
+#'   `NULL` becomes `TRUE` on an mRNA panel, or on a miRNA panel when
+#'   `housekeeping_genes` is given or `housekeeping_predict` is `TRUE`, and
+#'   `FALSE` otherwise.
+#'   It is set to `FALSE` with a warning when there are
+#'   no `Housekeeping` probes, no `housekeeping_genes` and no prediction.
+#'
+#' @noRd
+resolve_housekeeping_norm <- function(
+  code_class,
+  housekeeping_genes,
+  housekeeping_predict,
+  housekeeping_norm,
+  panel
+) {
+  if (is.null(housekeeping_norm)) {
+    housekeeping_norm <- panel == "mrna" ||
+      !is.null(housekeeping_genes) ||
+      isTRUE(housekeeping_predict)
+  }
   if (
-    !has_hkg &&
+    !any(grepl("Housekeeping", code_class)) &&
       is.null(housekeeping_genes) &&
       !housekeeping_predict &&
       housekeeping_norm
   ) {
-    message(paste(
-      '[NACHO] "housekeeping_norm" has been set to FALSE.',
-      "  Note:",
-      "  - No default housekeeping genes available in your data;",
-      '  - "housekeeping_genes" is NULL;',
-      '  - "housekeeping_predict" is FALSE.',
-      sep = "\n"
-    ))
-    housekeeping_norm <- FALSE
-  }
-  nacho_object <- qc_rcc(
-    data_directory = data_directory,
-    nacho_df = nacho_df,
-    id_colname = id_colname,
-    housekeeping_genes = housekeeping_genes,
-    housekeeping_predict = housekeeping_predict,
-    housekeeping_norm = housekeeping_norm,
-    normalisation_method = normalisation_method,
-    n_comp = n_comp
-  )
-
-  attributes(nacho_object) <- c(attributes(nacho_object), RCC_type = type_set)
-
-  ot <- list(
-    BD = c(0.1, 2.25),
-    FoV = 75,
-    LoD = 2,
-    PCL = 0.95,
-    Positive_factor = c(1 / 4, 4),
-    House_factor = c(1 / 11, 11)
-  )
-  nacho_object[["outliers_thresholds"]] <- ot
-  nacho_object <- check_outliers(nacho_object)
-
-  message(
-    paste0(
-      '[NACHO] Normalising data using "',
-      normalisation_method,
-      '" method ',
-      if (housekeeping_norm) "with" else "without",
-      " housekeeping genes."
+    nacho_warn(
+      c(
+        "Housekeeping normalisation is off, because no housekeeping genes are available.",
+        i = paste0(
+          "There are no {.val Housekeeping} probes, {.arg housekeeping_genes} is {.code NULL} ",
+          "and {.arg housekeeping_predict} is {.code FALSE}."
+        )
+      ),
+      class = "no_housekeeping"
     )
+    return(FALSE)
+  }
+  housekeeping_norm
+}
+
+#' Refuse housekeeping genes that are not probes of the data
+#'
+#' @noRd
+check_housekeeping_genes <- function(
+  housekeeping_genes,
+  probe_names,
+  call = rlang::caller_env()
+) {
+  unknown <- setdiff(housekeeping_genes, probe_names)
+  if (length(unknown) > 0) {
+    nacho_abort(
+      c(
+        "{.arg housekeeping_genes} has name{?s} that {?is/are} not a probe: {.val {utils::head(unknown, 5)}}.",
+        i = "Use the names in {.code nacho_probes(x)$Name}."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(housekeeping_genes)
+}
+
+#' Keep the housekeeping genes of the settings that are still probes
+#'
+#' The setting is `NULL` when none is left.
+#'
+#' @noRd
+prune_housekeeping <- function(settings, probe_names) {
+  genes <- settings[["housekeeping_genes"]]
+  genes <- genes[genes %in% probe_names]
+  settings["housekeeping_genes"] <- list(if (length(genes) > 0) genes else NULL)
+  settings
+}
+
+#' Build the probe table and the counts matrix from long probe counts
+#'
+#' @param codes A data frame with the columns `CodeClass`, `Name`, `Accession`
+#'   and `Count`, one row per probe and sample.
+#' @param column The column of the counts matrix for each row of `codes`.
+#' @param ids The sample identifiers, used as the column names.
+#' @param clash_message The cli message raised when a probe name has more than
+#'   one code class or accession. It can refer to `clashes`, the clashing names.
+#' @param clash_class The error class, without the `nacho_error_` prefix.
+#' @param call The call to report in the error.
+#'
+#' @return A list with `probes`, the unique probes ordered by code class then
+#'   name, and `counts`, an integer matrix of probes by samples.
+#'
+#' @noRd
+build_probe_counts <- function(
+  codes,
+  column,
+  ids,
+  clash_message,
+  clash_class,
+  call = rlang::caller_env()
+) {
+  probe_columns <- c("CodeClass", "Name", "Accession")
+  probes <- unique(data.table::as.data.table(codes), by = probe_columns)
+  probes <- as.data.frame(probes)[, probe_columns]
+  probes <- probes[
+    order(probes[["CodeClass"]], probes[["Name"]], method = "radix"),
+  ]
+  rownames(probes) <- NULL
+  # Used only inside the cli glue string of clash_message.
+  clashes <- duplicated_values(probes[["Name"]]) # nolint: object_usage_linter.
+  if (length(clashes) > 0) {
+    nacho_abort(clash_message, class = clash_class, call = call)
+  }
+  counts <- matrix(
+    NA_integer_,
+    nrow = nrow(probes),
+    ncol = length(ids),
+    dimnames = list(probes[["Name"]], ids)
   )
-  nacho_object[["nacho"]][["Count_Norm"]] <- normalise_counts(
-    data = nacho_object[["nacho"]],
-    housekeeping_norm = housekeeping_norm
+  counts[cbind(match(codes[["Name"]], probes[["Name"]]), column)] <-
+    as.integer(codes[["Count"]])
+  list(probes = probes, counts = counts)
+}
+
+abort_duplicate_ids <- function(
+  duplicated_ids,
+  id_colname,
+  call = rlang::caller_env()
+) {
+  nacho_abort(
+    c(
+      "{.field {id_colname}} contains duplicated values: {.val {utils::head(duplicated_ids, 3)}}.",
+      i = "PlexSet RCC files hold 8 samples each; add a {.field plexset_id} column ({.val S1} to {.val S8}).",
+      i = "For single-sample RCC files, make {.field {id_colname}} unique."
+    ),
+    class = "duplicate_id",
+    call = call
   )
+}
 
-  message(paste(
-    "[NACHO] Returning a list.",
-    "  $ access              : character",
-    "  $ housekeeping_genes  : character",
-    "  $ housekeeping_predict: logical",
-    "  $ housekeeping_norm   : logical",
-    "  $ normalisation_method: character",
-    "  $ remove_outliers     : logical",
-    "  $ n_comp              : numeric",
-    "  $ data_directory      : character",
-    "  $ pc_sum              : data.frame",
-    "  $ nacho               : data.frame",
-    "  $ outliers_thresholds : list",
-    sep = "\n"
-  ))
+abort_bad_plexset_ids <- function(plexset_id, call = rlang::caller_env()) {
+  valid_values <- paste0("S", seq_len(8))
+  bad_values <- unique(plexset_id[!plexset_id %in% valid_values])
+  if (length(bad_values) > 0) {
+    nacho_abort(
+      c(
+        "{.field plexset_id} must be one of {.val {valid_values}}.",
+        x = "Found: {.val {utils::head(bad_values, 5)}}."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(plexset_id)
+}
 
-  class(nacho_object) <- "nacho"
-
-  nacho_object
+abort_duplicate_plexset_pairs <- function(
+  nacho_df,
+  id_colname,
+  call = rlang::caller_env()
+) {
+  pairs <- paste(nacho_df[[id_colname]], nacho_df[["plexset_id"]], sep = "\r")
+  duplicated_ids <- unique(nacho_df[[id_colname]][duplicated(pairs)])
+  if (length(duplicated_ids) > 0) {
+    nacho_abort(
+      c(
+        paste0(
+          "{.field {id_colname}} and {.field plexset_id} together contain duplicated pairs: ",
+          "{.val {utils::head(duplicated_ids, 3)}}."
+        ),
+        i = "Each PlexSet sample needs a unique {.field {id_colname}}/{.field plexset_id} pair."
+      ),
+      class = "duplicate_id",
+      call = call
+    )
+  }
+  invisible(nacho_df)
 }

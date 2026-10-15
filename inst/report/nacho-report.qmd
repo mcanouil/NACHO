@@ -1,0 +1,93 @@
+---
+brand:
+  light: _brand.yml
+params:
+  nacho_rds: ""
+knitr:
+  opts_chunk:
+    fig.retina: 1
+format:
+  html:
+    lang: en-US
+    format-links: false
+    embed-resources: true
+    template-partials:
+      - partials/title-block.html
+    title-block-banner: true
+    theme:
+      light: [brand, nacho-report.scss]
+    filters:
+      - path: accessible-tables.lua
+        at: post-quarto
+      - path: caption-prefix.lua
+        at: post-render
+    language:
+      skip-to-content: "Skip to the report"
+    toc: true
+    toc-title: Contents
+    toc-location: right
+    toc-depth: 2
+    number-sections: true
+    fig-width: 7
+    fig-height: 4.5
+    fig-dpi: 96
+  typst:
+    lang: en-US
+    papersize: a4
+    pdf-standard: ua-1
+    font-paths: fonts
+    fig-format: png
+    fig-dpi: 300
+    filters:
+      - nacho-styles.lua
+    template-partials:
+      - partials/typst-template.typ
+      - partials/typst-show.typ
+    toc: true
+    toc-title: Contents
+    toc-depth: 1
+    section-numbering: "1.1"
+crossref:
+  title-delim: "."
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+if (knitr::is_html_output()) {
+  knitr::opts_chunk$set(fig.retina = 2)
+}
+report <- NACHO:::report_setup(params$nacho_rds)
+x <- report$object
+```
+
+# Decision summary
+
+```{r}
+#| label: decisions
+#| output: asis
+cat(NACHO:::report_decisions(x), sep = "\n")
+```
+
+# Settings and thresholds
+
+```{r}
+#| label: parameters
+#| output: asis
+cat(NACHO:::report_parameters(x), sep = "\n")
+```
+
+```{r}
+#| label: body
+#| output: asis
+NACHO:::report_body(report)
+```
+
+```{r}
+#| label: methods
+#| output: asis
+cat(NACHO:::report_methods(x), sep = "\n")
+```

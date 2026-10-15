@@ -1,240 +1,504 @@
-upload_to_app <- function(
-  data_directory,
-  sample_sheet = NULL,
-  rcc_type = ""
-) {
-  testthat::skip_if_not_installed("markdown")
-  rcc_files <- list.files(
-    data_directory,
-    pattern = "\\.(rcc|rcc\\.gz|zip)$",
-    ignore.case = TRUE,
-    full.names = TRUE
-  )
-  upload_directory <- tempfile("upload")
-  dir.create(upload_directory)
-  on.exit(unlink(upload_directory, recursive = TRUE))
-  upload_paths <- file.path(upload_directory, seq_along(rcc_files))
-  file.copy(rcc_files, upload_paths)
-  uploaded <- data.frame(
-    name = basename(rcc_files),
-    size = file.size(rcc_files),
-    type = rcc_type,
-    datapath = upload_paths
-  )
-  if (!is.null(sample_sheet)) {
-    sheet_path <- file.path(upload_directory, "sheet")
-    utils::write.csv(sample_sheet, sheet_path, row.names = FALSE)
-    uploaded <- rbind(
-      uploaded,
-      data.frame(
-        name = "samplesheet.csv",
-        size = file.size(sheet_path),
-        type = "text/csv",
-        datapath = sheet_path
-      )
+test_that("nacho_app() builds a Shiny app", {
+  expect_s3_class(nacho_app(), "shiny.appobj")
+  expect_s3_class(nacho_app(GSE74821), "shiny.appobj")
+  expect_error(nacho_app(iris), class = "nacho_error_bad_object")
+})
+
+test_that("the app flags samples when a threshold moves", {
+  testthat::skip_on_cran()
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$elapse(600)
+    expect_identical(sum(qc()$status == "fail"), 0L)
+    session$setInputs(`thresholds-FoV` = 99.9)
+    session$elapse(600)
+    expect_gt(sum(qc()$status == "fail"), 0L)
+  })
+})
+
+test_that("the app normalises again when the method changes", {
+  testthat::skip_on_cran()
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$setInputs(
+      `thresholds-method` = "RUVg",
+      `thresholds-ruv_k` = 1,
+      `thresholds-background` = "none",
+      `thresholds-background_mode` = "threshold"
     )
-  }
-
-  nacho <- NULL
-  # nolint start: object_usage_linter. testServer() provides session and the app reactives.
-  shiny::testServer(
-    shiny::shinyAppDir(system.file("app", package = "NACHO")),
-    {
-      session$setInputs(norm_method = "GEO", rcc_files = uploaded)
-      nacho <<- nacho_react()
-    }
-  )
-  # nolint end
-  nacho
-}
-
-test_that("app loads uploaded RCC files without a sample sheet", {
-  expect_s3_class(upload_to_app("salmon_data"), "nacho")
+    session$elapse(600)
+    expect_identical(tuned()@settings$normalisation_method, "RUVg")
+    expect_true("W_1" %in% names(nacho_samples(tuned())))
+  })
 })
 
-test_that("app loads uploaded PlexSet RCC files", {
-  nacho <- upload_to_app("plexset_data")
-  expect_s3_class(nacho, "nacho")
-  expect_type(nacho[["nacho"]][["plexset_id"]], "character")
+test_that("a method the data cannot support shows a message, not a crash", {
+  testthat::skip_on_cran()
+  toy <- toy_nacho(6L)
+  shiny::testServer(NACHO:::app_server(toy, done = TRUE), {
+    # The 6-sample toy data makes ggplot2 warn about an empty density layer.
+    suppressWarnings(session$flushReact())
+    session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
+    session$elapse(600)
+    expect_error(tuned(), class = "shiny.silent.error")
+  })
 })
 
-test_that("app merges an uploaded sample sheet", {
-  sample_sheet <- expand.grid(
-    IDFILE = basename(list.files("salmon_data", pattern = "\\.RCC$")),
-    plexset_id = paste0("S", seq_len(8)),
-    stringsAsFactors = FALSE
-  )
-  sample_sheet[["group"]] <- "case"
-  nacho <- upload_to_app("salmon_data", sample_sheet)
-  expect_true("group" %in% names(nacho[["nacho"]]))
-})
-
-test_that("app discards a sample sheet without IDFILE", {
-  sample_sheet <- data.frame(file = "salmon_01_01.RCC", group = "case")
-  nacho <- upload_to_app("salmon_data", sample_sheet)
-  expect_s3_class(nacho, "nacho")
-  expect_false("group" %in% names(nacho[["nacho"]]))
-})
-
-test_that("app merges a sample sheet by IDFILE for single-sample RCC files", {
-  single_directory <- tempfile("single")
-  dir.create(single_directory)
-  on.exit(unlink(single_directory, recursive = TRUE))
-  for (rcc in list.files(
-    "salmon_data",
-    pattern = "\\.RCC$",
-    full.names = TRUE
-  )) {
-    writeLines(
-      gsub("Endogenous8s", "Endogenous", readLines(rcc)),
-      file.path(single_directory, basename(rcc))
-    )
-  }
-
-  merged <- upload_to_app(
-    single_directory,
-    data.frame(IDFILE = list.files(single_directory), group = "case")
-  )
-  expect_true("group" %in% names(merged[["nacho"]]))
-
-  discarded <- upload_to_app(
-    single_directory,
-    data.frame(file = list.files(single_directory), group = "case")
-  )
-  expect_s3_class(discarded, "nacho")
-  expect_false("group" %in% names(discarded[["nacho"]]))
-})
-
-test_that("app discards a PlexSet sample sheet without plexset_id", {
-  sample_sheet <- data.frame(
-    IDFILE = basename(list.files("salmon_data", pattern = "\\.RCC$")),
-    group = "case"
-  )
-  nacho <- upload_to_app("salmon_data", sample_sheet)
-  expect_s3_class(nacho, "nacho")
-  expect_false("group" %in% names(nacho[["nacho"]]))
-})
-
-test_that("instrument presets give a full binding density range", {
-  app_utils <- new.env()
-  sys.source(
-    system.file("app", "utils.R", package = "NACHO"),
-    envir = app_utils
-  )
-  expect_identical(app_utils[["bd_range"]]("MAX/FLEX"), c(0.1, 2.25))
-  expect_identical(app_utils[["bd_range"]]("SPRINT"), c(0.1, 1.8))
-})
-
-test_that("app loads a zip archive whatever MIME type the browser sends", {
-  skip_if(!nzchar(Sys.which("zip")), "zip is not available.")
-  archive_directory <- withr::local_tempdir()
-  withr::with_dir(
-    test_path("salmon_data"),
-    utils::zip(
-      file.path(archive_directory, "salmon.zip"),
-      list.files(pattern = "\\.RCC$"),
-      flags = "-q"
-    )
-  )
-  for (mime_type in c("application/zip", "application/x-zip-compressed")) {
-    expect_s3_class(
-      upload_to_app(archive_directory, rcc_type = mime_type),
-      "nacho"
-    )
-  }
-})
-
-test_that("app matches file extensions regardless of case", {
-  lower_directory <- withr::local_tempdir()
-  rcc_files <- list.files("salmon_data", pattern = "\\.RCC$")
-  file.copy(
-    file.path("salmon_data", rcc_files),
-    file.path(lower_directory, sub("\\.RCC$", ".rcc", rcc_files))
-  )
-  sample_sheet <- expand.grid(
-    IDFILE = sub("\\.RCC$", ".rcc", rcc_files),
-    plexset_id = paste0("S", seq_len(8)),
-    stringsAsFactors = FALSE
-  )
-  sample_sheet[["group"]] <- "case"
-  nacho <- upload_to_app(lower_directory, sample_sheet)
-  expect_true("group" %in% names(nacho[["nacho"]]))
-})
-
-test_that("app keeps gzipped RCC files next to a sample sheet", {
-  gz_directory <- withr::local_tempdir()
-  for (rcc in list.files("salmon_data", pattern = "\\.RCC$")) {
-    connection <- gzfile(file.path(gz_directory, paste0(rcc, ".gz")), "w")
-    writeLines(readLines(file.path("salmon_data", rcc)), connection)
-    close(connection)
-  }
-  sample_sheet <- expand.grid(
-    IDFILE = list.files(gz_directory),
-    plexset_id = paste0("S", seq_len(8)),
-    stringsAsFactors = FALSE
-  )
-  sample_sheet[["group"]] <- "case"
-  nacho <- upload_to_app(gz_directory, sample_sheet)
-  expect_true("group" %in% names(nacho[["nacho"]]))
-})
-
-test_that("app tells the user when it discards a sample sheet", {
-  notified <- NULL
+test_that("Done returns the tuned object", {
+  testthat::skip_on_cran()
+  returned <- NULL
   local_mocked_bindings(
-    showNotification = function(ui, ...) {
-      notified <<- ui
+    stopApp = function(returnValue = NULL) returned <<- returnValue,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$setInputs(`thresholds-FoV` = 99.9)
+    session$elapse(600)
+    session$setInputs(done = 1)
+  })
+  expect_true(S7::S7_inherits(returned, NACHO:::nacho))
+  expect_identical(returned@thresholds$FoV, 99.9)
+})
+
+test_that("help pages render with shiny::markdown()", {
+  for (name in c("nacho", "bd", "fov", "pcl", "lod", "pf", "hgf")) {
+    expect_s3_class(NACHO:::help_page(name), "html")
+  }
+})
+
+test_that("Done warns instead of closing when the settings fail", {
+  testthat::skip_on_cran()
+  stopped <- FALSE
+  warned <- NULL
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) {
+      if (!is.null(returnValue)) stopped <<- TRUE
     },
     .package = "shiny"
   )
-  sample_sheet <- data.frame(file = "salmon_01_01.RCC", group = "case")
-  upload_to_app("salmon_data", sample_sheet)
-  expect_match(notified, "IDFILE")
+  local_mocked_bindings(
+    notify_user = function(message, type) warned <<- type
+  )
+  shiny::testServer(NACHO:::app_server(toy_nacho(6L), done = TRUE), {
+    # The 6-sample toy data makes ggplot2 warn about an empty density layer.
+    suppressWarnings(session$flushReact())
+    session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
+    session$elapse(600)
+    session$setInputs(done = 1)
+  })
+  expect_false(stopped)
+  expect_identical(warned, "warning")
 })
 
-test_that("app help pages render without writing under R CMD check", {
-  skip_if_not_installed("markdown")
-  app_directory <- withr::local_tempdir()
-  expect_true(file.copy(
-    system.file("app", package = "NACHO"),
-    app_directory,
-    recursive = TRUE
-  ))
-  app_directory <- file.path(app_directory, "app")
-  markdown_files <- list.files(
-    file.path(app_directory, "www"),
-    pattern = "\\.md$",
-    full.names = TRUE
-  )
-  expect_gt(length(markdown_files), 0)
-  checksums <- tools::md5sum(markdown_files)
-  app_utils <- new.env()
-  sys.source(file.path(app_directory, "utils.R"), envir = app_utils)
-  withr::local_envvar(`_R_CHECK_PACKAGE_NAME_` = "NACHO")
-  withr::local_dir(app_directory)
-  for (about in c("nacho", app_utils[["about_pages"]])) {
-    expect_s3_class(app_utils[["include_about"]](about), "html")
-  }
-  expect_identical(tools::md5sum(markdown_files), checksums)
+test_that("each plot module draws its own plot type", {
+  testthat::skip_on_cran()
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$elapse(600)
+    expect_identical(output$`BD-plot`$alt, plot_alt_texts[["BD"]])
+    expect_identical(output$`PCBatch-plot`$alt, plot_alt_texts[["PCBatch"]])
+  })
 })
 
-test_that("app help links match the help page lookup", {
-  skip_if_not_installed("markdown")
-  app_directory <- system.file("app", package = "NACHO")
-  app_utils <- new.env()
-  sys.source(file.path(app_directory, "utils.R"), envir = app_utils)
-  request <- new.env()
-  request[["REQUEST_METHOD"]] <- "GET"
-  request[["PATH_INFO"]] <- "/"
-  request[["QUERY_STRING"]] <- ""
-  request[["HTTP_HOST"]] <- "localhost"
-  response <- shiny::shinyAppDir(app_directory)[["httpHandler"]](request)
-  page <- response[["content"]]
-  if (is.raw(page)) {
-    page <- rawToChar(page)
-  }
-  link_ids <- regmatches(page, gregexpr("id=\"about_[a-z]+\"", page))[[1]]
-  expect_setequal(
-    gsub("^id=\"about_|\"$", "", link_ids),
-    unname(app_utils[["about_pages"]])
+test_that("the page holds every navigation panel and plot card", {
+  html <- as.character(NACHO:::app_ui(done = TRUE))
+  panels <- c(
+    "Data",
+    "QC metrics",
+    "Controls",
+    "Counts",
+    "Normalisation",
+    "Batch",
+    "Samples",
+    "About NACHO"
   )
+  for (title in c(panels, NACHO:::app_plot_titles)) {
+    expect_match(html, title, fixed = TRUE)
+  }
+  expect_match(html, "data-value=\"Samples\"", fixed = TRUE)
+  expect_no_match(html, "data-value=\"Flagged samples\"", fixed = TRUE)
+})
+
+test_that("Done uses the thresholds as they stand, before the debounce", {
+  testthat::skip_on_cran()
+  returned <- NULL
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) returned <<- returnValue,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$elapse(600)
+    session$setInputs(`thresholds-FoV` = 99.9)
+    session$setInputs(done = 1)
+  })
+  expect_identical(returned@thresholds$FoV, 99.9)
+})
+
+test_that("the Done button only exists when the app is allowed to stop", {
+  testthat::skip_on_cran()
+  expect_no_match(
+    as.character(NACHO:::app_ui(done = FALSE)),
+    "Done",
+    fixed = TRUE
+  )
+  expect_match(
+    as.character(NACHO:::app_ui(done = TRUE)),
+    "Done",
+    fixed = TRUE
+  )
+})
+
+test_that("a deployed app never stops on Done", {
+  testthat::skip_on_cran()
+  stopped <- FALSE
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) stopped <<- TRUE,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = FALSE), {
+    session$flushReact()
+    session$setInputs(done = 1)
+  })
+  expect_false(stopped)
+})
+
+test_that("Done explains why the object cannot be returned", {
+  testthat::skip_on_cran()
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message)
+  )
+  shiny::testServer(NACHO:::app_server(toy_nacho(6L), done = TRUE), {
+    # The 6-sample toy data makes ggplot2 warn about an empty density layer.
+    suppressWarnings(session$flushReact())
+    session$setInputs(`thresholds-method` = "RUVg", `thresholds-ruv_k` = 3)
+    session$setInputs(done = 1)
+  })
+  expect_match(messages, "before clicking Done")
+  expect_gt(
+    nchar(messages),
+    nchar(
+      "Choose a normalisation method these data support before clicking Done."
+    )
+  )
+})
+
+test_that("closing the page ends visualise() but not a deployed app", {
+  stopped <- 0L
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) stopped <<- stopped + 1L,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = FALSE), {
+    session$close()
+  })
+  expect_identical(stopped, 0L)
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$close()
+  })
+  expect_identical(stopped, 1L)
+})
+
+test_that("closing the page after Done keeps the tuned object", {
+  testthat::skip_on_cran()
+  values <- list()
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) {
+      values[[length(values) + 1L]] <<- returnValue
+    },
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$setInputs(done = 1)
+    session$close()
+  })
+  expect_length(values, 1L)
+  expect_false(is.null(values[[1]]))
+})
+
+test_that("pages without data explain what to do", {
+  html <- as.character(NACHO:::app_ui(done = FALSE))
+  expect_match(html, "Load the example data", fixed = TRUE)
+  expect_match(html, "output.has_data === true", fixed = TRUE)
+  expect_match(html, "output.has_data === false", fixed = TRUE)
+  expect_match(html, as.character(shiny::useBusyIndicators()), fixed = TRUE)
+  pages <- unique(regmatches(
+    html,
+    gregexpr(
+      '(?<=data-toggle="tab" data-bs-toggle="tab" data-value=")[^"]+',
+      html,
+      perl = TRUE
+    )
+  )[[1]])
+  with_data <- setdiff(pages, c("Data", "About NACHO"))
+  expect_gt(length(with_data), 0L)
+  expect_equal(
+    lengths(regmatches(html, gregexpr("No data yet.", html, fixed = TRUE))),
+    length(with_data)
+  )
+})
+
+test_that("the overview shows only when data is loaded", {
+  html <- as.character(NACHO:::app_ui(done = FALSE))
+  expect_match(
+    html,
+    "data-display-if=\"output.has_data === true\"[^>]*>\\s*<div[^>]*nacho-summary",
+    perl = TRUE
+  )
+  expect_match(html, "Summary of the data", fixed = TRUE)
+})
+
+test_that("the app reports whether it has data", {
+  testthat::skip_on_cran()
+  shiny::testServer(NACHO:::app_server(NULL), {
+    expect_false(output$has_data)
+  })
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    expect_true(output$has_data)
+  })
+})
+
+test_that("normalisation warnings reach the user once as toasts", {
+  testthat::skip_on_cran()
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message)
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$flushReact()
+    session$setInputs(
+      `thresholds-method` = "RUVg",
+      `thresholds-ruv_k` = 50,
+      `thresholds-background` = "none",
+      `thresholds-background_mode` = "threshold"
+    )
+    session$elapse(600)
+    tuned()
+    session$setInputs(`thresholds-FoV` = 90)
+    session$elapse(600)
+    tuned()
+  })
+  expect_length(messages, 1L)
+  expect_match(messages, "ruv_k")
+})
+
+test_that("changing the normalisation settings announces the warning again", {
+  testthat::skip_on_cran()
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message)
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$flushReact()
+    session$setInputs(
+      `thresholds-method` = "RUVg",
+      `thresholds-ruv_k` = 50,
+      `thresholds-background` = "none",
+      `thresholds-background_mode` = "threshold"
+    )
+    session$elapse(600)
+    tuned()
+    session$setInputs(`thresholds-ruv_k` = 60)
+    session$elapse(600)
+    tuned()
+  })
+  expect_length(messages, 2L)
+  expect_match(messages, "ruv_k")
+})
+
+test_that("an unavailable metric is muffled without a toast", {
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message),
+    tune_object = function(object, chosen, thresholds) {
+      NACHO:::nacho_warn("No such metric.", class = "metric_unavailable")
+      object
+    }
+  )
+  expect_no_warning(
+    NACHO:::tune_with_toasts(GSE74821, list(), NULL, new.env())
+  )
+  expect_length(messages, 0L)
+})
+
+test_that("Done sends normalisation warnings to the user", {
+  testthat::skip_on_cran()
+  messages <- character()
+  local_mocked_bindings(
+    notify_user = function(message, type) messages <<- c(messages, message),
+    .package = "NACHO"
+  )
+  local_mocked_bindings(
+    stopApp = function(returnValue = NULL) NULL,
+    .package = "shiny"
+  )
+  shiny::testServer(NACHO:::app_server(GSE74821, done = TRUE), {
+    session$flushReact()
+    session$setInputs(
+      `thresholds-method` = "RUVg",
+      `thresholds-ruv_k` = 50,
+      `thresholds-background` = "none",
+      `thresholds-background_mode` = "threshold"
+    )
+    session$setInputs(done = 1)
+  })
+  expect_match(messages, "ruv_k")
+})
+
+test_that("plots follow the dark-mode toggle", {
+  testthat::skip_on_cran()
+  html <- as.character(NACHO:::app_ui(done = FALSE))
+  expect_match(html, 'id="dark_mode"', fixed = TRUE)
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$setInputs(dark_mode = "dark")
+    expect_true(dark())
+    session$setInputs(dark_mode = "light")
+    expect_false(dark())
+  })
+})
+
+test_that("the page loads the bold and italic faces of the brand font", {
+  deps <- htmltools::resolveDependencies(
+    htmltools::findDependencies(NACHO:::app_ui(done = FALSE))
+  )
+  fonts <- Filter(function(d) d$name == "nacho-fonts", deps)
+  expect_length(fonts, 1L)
+  css <- paste(
+    readLines(file.path(fonts[[1]]$src$file, fonts[[1]]$stylesheet)),
+    collapse = "\n"
+  )
+  expect_match(css, "font-weight: 700", fixed = TRUE)
+  expect_match(css, "font-style: italic", fixed = TRUE)
+})
+
+test_that("cards for plots that do not apply are hidden", {
+  testthat::skip_on_cran()
+  shiny::testServer(NACHO:::app_server(plexset_nacho), {
+    session$flushReact()
+    types <- strsplit(output$applicable, ",", fixed = TRUE)[[1]]
+    expect_false(any(c("PCL", "LoD") %in% types))
+    expect_true("BD" %in% types)
+  })
+  shiny::testServer(NACHO:::app_server(GSE74821), {
+    session$flushReact()
+    types <- strsplit(output$applicable, ",", fixed = TRUE)[[1]]
+    expect_true(all(c("PCL", "LoD", "HF") %in% types))
+  })
+  html <- as.character(NACHO:::app_ui(done = FALSE))
+  expect_match(html, "output.applicable.indexOf(&#39;,PCL,&#39;)", fixed = TRUE)
+})
+
+test_that("a new object is normalised once, with its own settings", {
+  testthat::skip_on_cran()
+  geo <- suppressMessages(
+    normalise(GSE74821, normalisation_method = "GEO")
+  )
+  methods <- character()
+  tune <- NACHO:::tune_object
+  local_mocked_bindings(
+    tune_object = function(object, chosen, thresholds) {
+      methods <<- c(methods, chosen$normalisation_method)
+      tune(object, chosen, thresholds)
+    },
+    .package = "NACHO"
+  )
+  shiny::testServer(NACHO:::app_server(geo), {
+    session$flushReact()
+    tuned()
+    session$setInputs(`data-example` = 1)
+    session$flushReact()
+    tuned()
+  })
+  expect_identical(methods, c("GEO", "GLM"))
+})
+
+test_that("pages grow with their content instead of squeezing it", {
+  html <- as.character(NACHO:::app_ui(done = FALSE))
+  panes <- regmatches(html, gregexpr('<div class="tab-pane[^"]*"', html))[[1]]
+  expect_gt(length(panes), 0L)
+  expect_no_match(panes, "html-fill-container")
+})
+
+test_that("help popovers are wider than the Bootstrap default", {
+  expect_match(
+    NACHO:::popover_rules,
+    "\\.popover\\.nacho-help \\{[^}]*--bs-popover-max-width: min\\(40rem, 90vw\\)"
+  )
+  expect_match(NACHO:::popover_rules, "max-height: 70vh", fixed = TRUE)
+})
+
+test_that("help_links() reads the links from DESCRIPTION", {
+  links <- NACHO:::help_links()
+  expect_identical(links[["documentation"]], "https://m.canouil.dev/NACHO/")
+  expect_identical(
+    links[["discussions"]],
+    "https://github.com/mcanouil/NACHO/discussions"
+  )
+  expect_identical(
+    links[["issues"]],
+    "https://github.com/mcanouil/NACHO/issues"
+  )
+})
+
+test_that("help_links() names what DESCRIPTION lacks", {
+  complete <- list(
+    URL = "https://github.com/mcanouil/NACHO/, https://m.canouil.dev/NACHO/",
+    BugReports = "https://github.com/mcanouil/NACHO/issues"
+  )
+  cases <- list(
+    no_url = list(BugReports = complete$BugReports),
+    no_github = list(
+      URL = "https://m.canouil.dev/NACHO/",
+      BugReports = complete$BugReports
+    ),
+    no_site = list(
+      URL = "https://github.com/mcanouil/NACHO/",
+      BugReports = complete$BugReports
+    ),
+    no_bugreports = list(URL = complete$URL)
+  )
+  for (case in names(cases)) {
+    testthat::local_mocked_bindings(
+      package_description = function() cases[[case]],
+      .package = "NACHO"
+    )
+    expect_error(NACHO:::help_links(), class = "nacho_error_bad_description")
+  }
+})
+
+test_that("the Help menu holds six items and safe external links", {
+  html <- as.character(NACHO:::app_ui())
+  expect_match(html, 'data-value="help"', fixed = TRUE)
+  labels <- c(
+    "Take the tour",
+    "About NACHO",
+    "Documentation",
+    "Ask a question",
+    "Report a problem",
+    "Cite NACHO"
+  )
+  for (label in labels) {
+    expect_match(html, label, fixed = TRUE)
+  }
+  links <- regmatches(
+    html,
+    gregexpr('<a [^>]*href="https://[^"]*"[^>]*>', html)
+  )[[1]]
+  links <- links[grepl("github.com/mcanouil/NACHO|m.canouil.dev/NACHO", links)]
+  expect_length(links, 3)
+  expect_true(all(grepl('target="_blank"', links, fixed = TRUE)))
+  expect_true(all(grepl('rel="noopener"', links, fixed = TRUE)))
+  expect_match(html, "(opens in a new tab)", fixed = TRUE)
+})
+
+test_that("Cite NACHO shows the citation", {
+  expect_match(
+    as.character(NACHO:::citation_html()),
+    "<em>Bioinformatics</em>",
+    fixed = TRUE
+  )
+  expect_match(NACHO:::citation_bibtex(), "@Article{Canouil2020,", fixed = TRUE)
 })

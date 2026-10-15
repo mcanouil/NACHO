@@ -1,20 +1,19 @@
-#' Visualise quality-control metrics of a "nacho" object
+#' Explore and tune quality control in the NACHO app
 #'
-#' This function visualises results from [`load_rcc()`] or [`normalise()`]
-#' several quality-control metrics in an interactive Shiny application,
-#' in which thresholds can be customised and exported.
+#' Opens [nacho_app()] on `nacho_object`.
+#' Change thresholds and normalisation settings in the sidebar, then click
+#' "Done" to close the app and get the tuned object back.
 #'
 #' @inheritParams normalise
 #'
-#' @importFrom shinyWidgets dropdownButton tooltipOptions
+#' @return The tuned `nacho` object, invisibly, once you click "Done".
 #' @export
 #'
 #' @examples
-#'
 #' if (interactive()) {
 #'   data(GSE74821)
-#'   # Must be run in an interactive R session!
-#'   visualise(GSE74821)
+#'   tuned <- visualise(GSE74821)
+#'   nacho_qc(tuned)
 #' }
 #'
 #' if (interactive()) {
@@ -47,71 +46,18 @@
 #'   )
 #'   visualise(nacho)
 #'
-#'   # (re)Normalise data by removing outliers
-#'   nacho_norm <- normalise(
-#'     nacho_object = nacho,
-#'     remove_outliers = TRUE
-#'   )
-#'   visualise(nacho_norm)
+#'   # Drop the outliers and normalise the other samples again
+#'   visualise(exclude_outliers(nacho))
 #'
-#'   # (re)Normalise data with "GLM" method and removing outliers
-#'   nacho_norm <- normalise(
-#'     nacho_object = nacho,
-#'     normalisation_method = "GLM",
-#'     remove_outliers = TRUE
-#'   )
-#'   visualise(nacho_norm)
+#'   # Normalise with the "GLM" method, then drop the outliers
+#'   nacho_glm <- normalise(nacho, normalisation_method = "GLM")
+#'   visualise(exclude_outliers(nacho_glm))
 #' }
 #'
 visualise <- function(nacho_object) {
-  if (missing(nacho_object)) {
-    stop(
-      '[NACHO] "nacho_object" is missing, results from "load_rcc()" and/or "normalise()" is mandatory!'
-    )
-  }
-  if (!inherits(nacho_object, "nacho")) {
-    stop(
-      '[NACHO] "nacho_object" must be of class "nacho" from "load_rcc()" and/or "normalise()" !'
-    )
-  }
-  mandatory_fields <- c(
-    "access",
-    "housekeeping_genes",
-    "housekeeping_predict",
-    "housekeeping_norm",
-    "normalisation_method",
-    "remove_outliers",
-    "n_comp",
-    "data_directory",
-    "pc_sum",
-    "nacho",
-    "outliers_thresholds"
-  )
-  if (!all(mandatory_fields %in% names(nacho_object))) {
-    stop(
-      '[NACHO] Mandatory fields are missing in "',
-      substitute(nacho_object),
-      '"!\n',
-      '  "load_rcc()" and/or "normalise()" must be called before "visualise()".'
-    )
-  }
-
-  nacho_object <- check_outliers(nacho_object)
-  shiny::shinyOptions(nacho_object = nacho_object)
-  on.exit(shiny::shinyOptions(nacho_object = NULL))
-
-  if (!interactive()) {
-    stop("[NACHO] Must be run in an interactive R session!")
-  }
-
-  if (!requireNamespace("markdown", quietly = TRUE)) {
-    stop(
-      "[NACHO] The \"markdown\" package is required to run the app.\n",
-      "  Install it with install.packages(\"markdown\")."
-    )
-  }
-
-  shiny::runApp(system.file("app", package = "NACHO"))
+  check_nacho(nacho_object)
+  check_interactive("visualise")
+  invisible(shiny::runApp(nacho_app(nacho_object, done = TRUE)))
 }
 
 

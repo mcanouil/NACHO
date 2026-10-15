@@ -10,8 +10,13 @@ load_rcc(
   id_colname = NULL,
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
-  housekeeping_norm = TRUE,
+  housekeeping_norm = NULL,
   normalisation_method = "GEO",
+  background = "none",
+  background_mode = "threshold",
+  ruv_k = NULL,
+  instrument = NULL,
+  preset = "nsolver",
   n_comp = 10
 )
 }
@@ -20,7 +25,14 @@ load_rcc(
 
 \item{ssheet_csv}{[\link{character}] or [\link{data.frame}] Either a string with the name of the CSV
 of the samplesheet or the samplesheet as a \code{data.frame}.
-Should contain a column that matches the file names in the folder.}
+Should contain a column that matches the file names in the folder.
+NACHO computes the columns \code{Date}, \code{ID}, \code{BD}, \code{ScannerID},
+\code{StagePosition}, \code{CartridgeID}, \code{FoV}, \code{PCL}, \code{LoD}, \code{MC}, \code{MedC},
+\code{Positive_factor}, \code{Negative_factor}, \code{Detection_rate}, \code{Background},
+\code{House_factor}, \code{Housekeeping_detected}, \code{Ligation_order}, \code{Ligation_R2},
+\code{Ligation_NEG}, \code{Haemolysis}, \code{is_outlier}, \code{PC1}, \code{PC2}, ... and \code{W_1},
+\code{W_2}, ....
+A sample sheet column with one of these names is replaced, with a warning.}
 
 \item{id_colname}{[\link{character}] Character string of the column in \code{ssheet_csv} that matches
 the file names in \code{data_directory}.}
@@ -29,35 +41,65 @@ the file names in \code{data_directory}.}
 that should be used as housekeeping genes. Default is \code{NULL}.}
 
 \item{housekeeping_predict}{[\link{logical}] Boolean to indicate whether the housekeeping genes
-should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
+should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.
+Prediction picks the five most stable genes by geNorm on the raw counts.
+It is skipped for the miRNA methods of \code{normalisation_method}.}
 
 \item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation
-should be performed. Default is \code{TRUE}.}
+should be performed.
+\code{NULL} (the default) normalises with housekeeping genes for mRNA panels
+that have them.
+On miRNA panels, whose housekeeping mRNAs sit at background, it does so
+only when you pass \code{housekeeping_genes} or set \code{housekeeping_predict = TRUE}.
+Pass \code{TRUE} or \code{FALSE} to override this.
+The miRNA methods of \code{normalisation_method} ignore it.}
 
-\item{normalisation_method}{[\link{character}] Either \code{"GEO"} or \code{"GLM"}.
-Character string to indicate normalisation using the geometric mean (\code{"GEO"})
-or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
+\item{normalisation_method}{[\link{character}] \code{"GEO"} (the default) or \code{"GLM"}
+scale samples by their positive controls, with the geometric mean or a
+Poisson model, then by the housekeeping genes; \code{"RUVg"} scales by the
+positive controls with the geometric mean, then removes \code{ruv_k} factors
+of unwanted variation estimated from the housekeeping genes, which
+\code{\link[=nacho_samples]{nacho_samples()}} returns as \code{W_1}, \code{W_2}, ... for use as covariates.
+For miRNA panels, \code{"stable_mirna"}, \code{"total_mirna"}, \code{"spike_in"} and
+\code{"ligation"} scale by the five most stable miRNAs, the miRNAs above 50
+counts, the spike-in controls or the ligation positive controls, in the
+order Bruker recommends for plasma and serum.
+These methods ignore \code{housekeeping_genes}, \code{housekeeping_predict} and
+\code{housekeeping_norm}, and give their scaling factor as \code{House_factor}.
+When a GLM fit fails, NACHO warns and uses the geometric mean instead, as
+\code{\link[=normalise]{normalise()}} describes.}
+
+\item{background}{[\link{character}] How to estimate each sample's background
+from its negative controls: \code{"none"} (the default), \code{"mean"},
+\code{"mean_2sd"} (mean plus two standard deviations), \code{"median"}, \code{"max"} or
+\code{"geo"} (geometric mean).}
+
+\item{background_mode}{[\link{character}] What to do with that background:
+\code{"threshold"} (the default) raises lower counts to it, which Bruker
+recommends when fold changes matter, and \code{"subtract"} removes it and
+floors at 0.}
+
+\item{ruv_k}{[\link{numeric}] The number of unwanted factors RUVg removes;
+\code{NULL} uses \code{\link[=suggest_ruv_k]{suggest_ruv_k()}}.
+A \code{ruv_k} above two less than the number of samples, or one less than the
+number of control genes, is lowered with a \code{nacho_warning_ruv_k_reduced}
+warning.
+Other methods ignore it.}
+
+\item{instrument}{[\link{character}] The nCounter instrument, \code{"max"},
+\code{"flex"}, \code{"pro"} or \code{"sprint"}, which sets the binding density limits.
+\code{NULL} (the default) reads it from the RCC files when they say, and
+otherwise uses the MAX/FLEX limits with a warning.}
+
+\item{preset}{[\link{character}] \code{"nsolver"} (the default) or \code{"legacy"}; see
+\code{\link[=nacho_thresholds]{nacho_thresholds()}}.}
 
 \item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
 }
 \value{
-[\link{list}] A list object of class \code{"nacho"}:
-\describe{
-\item{\code{access}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}} in \code{id_colname}.}
-\item{\code{housekeeping_genes}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{housekeeping_predict}}{[\link{logical}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{housekeeping_norm}}{[\link{logical}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{normalisation_method}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{remove_outliers}}{[\link{logical}] \code{FALSE}.}
-\item{\code{n_comp}}{[\link{numeric}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{data_directory}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{pc_sum}}{[\link{data.frame}] A \code{data.frame} with \code{n_comp} rows and four columns:
-"Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
-\item{\code{nacho}}{[\link{data.frame}] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
-and all computed columns, \emph{i.e.}, quality-control metrics and counts, with one row per sample and probe.}
-\item{\code{outliers_thresholds}}{[\link{list}] A \code{list} of the (default) quality-control thresholds used.}
-}
+A \code{nacho} object; read its content with \code{\link[=nacho_counts]{nacho_counts()}},
+\code{\link[=nacho_samples]{nacho_samples()}}, \code{\link[=nacho_probes]{nacho_probes()}} and \code{\link[=nacho_qc]{nacho_qc()}}.
 }
 \description{
 This function is used to preprocess the data from NanoString nCounter.

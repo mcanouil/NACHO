@@ -30,37 +30,105 @@ Description: NanoString nCounter data are gene expression assays
     expression of control genes, principal components and sample specific
     size factors in an interactive web application.
 License: GPL-3
+Copyright: See file inst/COPYRIGHTS.
 URL: https://github.com/mcanouil/NACHO/,
     https://m.canouil.dev/NACHO/
 BugReports: https://github.com/mcanouil/NACHO/issues
-Depends: 
-    R (>= 4.1.0)
+Depends:
+    R (>= 4.3)
 Imports:
+    methods,
     utils,
+    grDevices,
+    bslib (>= 0.10.0),
+    brand.yml (>= 0.1.0),
+    cli (>= 3.6.0),
     data.table,
     ggplot2 (>= 4.0.0),
     ggforce (>= 0.5.0),
     ggrepel (>= 0.9.6),
-    knitr (>= 1.39),
-    rmarkdown (>= 1.16),
+    htmltools (>= 0.5.9),
+    promises (>= 1.3.2),
+    rlang (>= 1.1.0),
+    S7 (>= 0.2.2),
     scales (>= 1.4.0),
-    shiny (>= 1.7.4),
-    shinyWidgets (>= 0.4.9)
+    shiny (>= 1.11.0),
+    yaml (>= 2.3.12)
 Suggests:
-    markdown (>= 1.3),
+    chromote (>= 0.5.1),
+    colorspace (>= 2.1-3),
+    gdtools (>= 0.5.1),
+    ggiraph (>= 0.9.6),
+    jsonlite (>= 2.0.0),
+    knitr (>= 1.39),
+    later,
+    mirai (>= 2.7.3),
+    parallel,
+    png (>= 0.1-9),
+    quarto (>= 1.5.1),
+    reactable (>= 0.4.5),
+    rmarkdown (>= 1.16),
     roxygen2 (>= 8.1.0),
+    shinytest2 (>= 0.5.1),
     testthat (>= 3.1.5),
+    vdiffr (>= 1.0.9),
     withr,
     covr (>= 3.3.2),
     Biobase,
     GEOquery,
-    limma
-VignetteBuilder: 
+    limma,
+    NanoStringNCTools,
+    NormqPCR,
+    RUVSeq,
+    S4Vectors,
+    SummarizedExperiment
+biocViews:
+VignetteBuilder:
     knitr
 Encoding: UTF-8
 Language: en-GB
 LazyData: true
 Roxygen: list(markdown = TRUE)
-SystemRequirements: pandoc (>= 2.11)
+SystemRequirements: Quarto command-line interface (>= 1.9.18), pandoc (>= 2.11)
+Config/Needs/website: pdftools
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.0
+Collate: 
+    'GSE74821.R'
+    'NACHO-package.R'
+    'thresholds.R'
+    'qc.R'
+    'nacho-class.R'
+    'accessors.R'
+    'daemon.R'
+    'render.R'
+    'mod_export.R'
+    'qc-table.R'
+    'report.R'
+    'mod_qc_plot.R'
+    'mod_batch.R'
+    'mod_outliers.R'
+    'mod_overview.R'
+    'mod_thresholds.R'
+    'load_rcc.R'
+    'mod_data.R'
+    'tour.R'
+    'app.R'
+    'autoplot.R'
+    'stability.R'
+    'ruv.R'
+    'mirna.R'
+    'batch.R'
+    'brand.R'
+    'conditions.R'
+    'deploy.R'
+    'detection.R'
+    'interop.R'
+    'methods.R'
+    'normalise.R'
+    'plot_worker.R'
+    'read_nacho.R'
+    'read_rcc.R'
+    'utils.R'
+    'visualise.R'
+    'zzz.R'

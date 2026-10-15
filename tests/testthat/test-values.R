@@ -1,3 +1,17 @@
+gse_geo <- suppressMessages(normalise(
+  GSE74821,
+  normalisation_method = "GEO",
+  background = "geo",
+  background_mode = "subtract",
+  outliers_thresholds = nacho_thresholds(preset = "legacy")
+))
+gse_df <- data.table::as.data.table(as.data.frame(gse_geo, long = TRUE))
+gse_id <- "IDFILE"
+gse_samples <- per_sample_ref(
+  gse_geo,
+  c("Positive_factor", "Negative_factor", "House_factor", "PCL", "LoD", "FoV")
+)
+
 test_that("positive factor is the mean over the sample geometric means of POS_A to POS_E", {
   positives <- gse_df[
     gse_df[["CodeClass"]] == "Positive" & gse_df[["Name"]] != "POS_F(0.125)"
@@ -32,7 +46,8 @@ test_that("negative factor is the geometric mean of the negatives kept after exc
 test_that("housekeeping factor uses background-corrected counts floored at 1", {
   housekeeping <- merge(
     gse_df[
-      gse_df[["Name"]] %in% gse_geo[["housekeeping_genes"]],
+      gse_df[["Name"]] %in%
+        nacho_probes(gse_geo)$Name[nacho_probes(gse_geo)$is_housekeeping],
       c(gse_id, "Name", "Count"),
       with = FALSE
     ],
@@ -104,26 +119,18 @@ test_that("field of view is the percentage of counted fields", {
   expect_equal(gse_samples[["FoV"]], expected)
 })
 
-test_that("normalised counts above background are corrected, scaled and rounded", {
-  expected <- (gse_df[["Count"]] - gse_df[["Negative_factor"]]) *
+test_that("normalised counts are background-subtracted at 0, scaled and not rounded", {
+  expected <- pmax(gse_df[["Count"]] - gse_df[["Negative_factor"]], 0) *
     gse_df[["Positive_factor"]] *
     gse_df[["House_factor"]]
-  above_background <- expected >= 1
-  expect_equal(
-    gse_df[["Count_Norm"]][above_background],
-    round(expected[above_background])
-  )
+  expect_equal(gse_df[["Count_Norm"]], expected)
+  expect_false(all(gse_df[["Count_Norm"]] == round(gse_df[["Count_Norm"]])))
 })
 
-test_that("normalised counts at or below background are floored at 0.1 after rounding", {
-  expected <- round(
-    (gse_df[["Count"]] - gse_df[["Negative_factor"]]) *
-      gse_df[["Positive_factor"]] *
-      gse_df[["House_factor"]]
-  )
-  expected[expected <= 0] <- 0.1
-  expect_equal(gse_df[["Count_Norm"]], expected)
-  expect_false(any(gse_df[["Count_Norm"]] == 0))
+test_that("normalised counts at or below background are 0 before scaling", {
+  at_background <- gse_df[["Count"]] <= gse_df[["Negative_factor"]]
+  expect_true(any(at_background))
+  expect_true(all(gse_df[["Count_Norm"]][at_background] == 0))
 })
 
 test_that("PCA stores sample scores on log counts", {
@@ -136,21 +143,27 @@ test_that("PCA stores sample scores on log counts", {
   expected <- stats::prcomp(t(log(counts + 1)))
   pcs <- per_sample_ref(
     gse_geo,
-    sprintf("PC%02d", seq_len(gse_geo[["n_comp"]]))
+    sprintf("PC%02d", seq_len(ncol(gse_geo@pca$scores)))
   )
   expect_equal(
     abs(unname(as.matrix(pcs[, -1]))),
-    abs(unname(expected[["x"]][pcs[[gse_id]], seq_len(gse_geo[["n_comp"]])]))
+    abs(unname(expected[["x"]][
+      pcs[[gse_id]],
+      seq_len(ncol(gse_geo@pca$scores))
+    ]))
   )
   expect_equal(
-    gse_geo[["pc_sum"]][["Proportion of Variance"]],
+    gse_geo@pca$importance[["Proportion of Variance"]],
     unname(summary(expected)[["importance"]][
       "Proportion of Variance",
-      seq_len(gse_geo[["n_comp"]])
+      seq_len(ncol(gse_geo@pca$scores))
     ])
   )
 })
 
 test_that("limit of detection is NA when the negatives do not vary", {
-  expect_identical(NACHO:::qc_limit_detection(10, c(0, 0, 0, 0)), NA_real_)
+  expect_identical(
+    NACHO:::sample_lod(matrix(10), matrix(c(0, 0, 0, 0), ncol = 1)),
+    NA_real_
+  )
 })

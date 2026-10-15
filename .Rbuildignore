@@ -12,6 +12,12 @@
 ^CRAN-SUBMISSION$
 ^revdep$
 ^README\.Rmd$
-^man/figures/README-nacho_app\.gif$
+^man/figures/README-.*\.gif$
 ^LICENSE\.md$
 ^data-raw$
+^vignettes/articles$
+^\.superpowers$
+^\.kata\.toml$
+^\.ruff_cache$
+^\.roborev$
+\.DS_Store$

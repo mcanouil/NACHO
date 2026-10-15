@@ -14,13 +14,19 @@ The checks still run on `main`, and the submission workflow checks the tarball a
 Tick "rhub" to run the R-hub checks as well.
 They're optional, and `cran-comments.md` only lists them when they run.
 
-Untick "auto-merge" when `cran-comments.md` needs a note, for example to explain breaking changes.
+Untick "auto-merge" when `cran-comments.md` needs a note, for example to explain breaking changes or a NOTE you expect from the check.
 The pull request is then assigned to you: edit the file on it and merge it yourself.
 
 ## 2. Submit to CRAN
 
 Merging the bump starts the "CRAN submission" workflow.
 It builds the tarball with the PDF manual and runs `R CMD check --as-cran`.
+
+The workflow then compares the check with the results line of `cran-comments.md`, for example `0 errors | 0 warnings | 1 note`.
+It stops before the upload only if `cran-comments.md` reports fewer errors, warnings or notes than the check found.
+A file that reports more problems than the check found passes.
+The check step before it already stops on any WARNING or ERROR, so the workflow lists only the NOTE sections that the file must explain.
+Open a pull request that explains each NOTE in `cran-comments.md` and corrects the results line, merge it, then run "CRAN submission" by hand from `main` with "dry run" unticked.
 
 It then waits for your approval on the `cran` environment.
 Approve it, and the workflow uploads the tarball and records the submission in `CRAN-SUBMISSION` on `main`.
@@ -50,9 +56,12 @@ Once CRAN's acceptance email arrives, run the "CRAN post-release" workflow from 
 
 It checks that CRAN serves the version, tags `vX.Y.Z` on the submitted commit, and publishes the "NACHO X.Y.Z" release with the notes from `NEWS.md`.
 The release deploys the pkgdown site.
+A draft release `vX.Y.Z` stops the run, so publish or delete it before you run the workflow again.
 It then opens a pull request that starts the next development version and removes `CRAN-SUBMISSION`.
 
 If CRAN doesn't serve the version yet, the workflow stops without changing anything, and you can run it again later.
+
+If a run stops after it published the release, run it again: it keeps the existing release when its tag points to the submitted commit, and goes on to the development version.
 
 ## Scripts and tests
 

@@ -1,0 +1,156 @@
+toy_nacho <- function(n_samples = 4L) {
+  ids <- sprintf("S%02d.RCC", seq_len(n_samples))
+  probes <- data.frame(
+    CodeClass = c(
+      rep("Positive", 6),
+      rep("Negative", 2),
+      "Housekeeping",
+      "Endogenous",
+      "Endogenous"
+    ),
+    Name = c(
+      sprintf("POS_%s(%s)", LETTERS[1:6], c(128, 32, 8, 2, 0.5, 0.125)),
+      "NEG_A(0)",
+      "NEG_B(0)",
+      "HK1",
+      "GENE1",
+      "GENE2"
+    ),
+    Accession = sprintf("ACC%02d", 1:11),
+    is_housekeeping = c(rep(FALSE, 8), TRUE, FALSE, FALSE),
+    is_excluded = FALSE
+  )
+  counts <- matrix(
+    seq_len(11L * n_samples) + 10L,
+    nrow = 11,
+    dimnames = list(probes$Name, ids)
+  )
+  samples <- data.frame(
+    IDFILE = ids,
+    CartridgeID = rep(c("C1", "C2"), length.out = n_samples),
+    BD = 1,
+    FoV = 100,
+    PCL = 0.99,
+    LoD = 5,
+    MC = 10,
+    MedC = 10,
+    Positive_factor = 1,
+    Negative_factor = 1,
+    Background = NA_real_,
+    House_factor = 1
+  )
+  thresholds <- nacho_thresholds(preset = "legacy")
+  provenance <- NACHO:::new_provenance(
+    data_directory = NULL,
+    file_version = "1.7",
+    software_version = "4.0.0.3"
+  )
+  provenance[["nacho_version"]] <- "0.0.0"
+  NACHO:::nacho(
+    counts = counts,
+    normalised = counts * 1,
+    probes = probes,
+    samples = samples,
+    settings = list(
+      id_colname = "IDFILE",
+      housekeeping_genes = "HK1",
+      housekeeping_predict = FALSE,
+      housekeeping_norm = TRUE,
+      normalisation_method = "GEO",
+      ruv_k = NULL,
+      background = "none",
+      background_mode = "threshold",
+      n_comp = 2L
+    ),
+    thresholds = thresholds,
+    pca = suppressWarnings(NACHO:::compute_pca(counts, 2L)),
+    rcc_type = "n1",
+    provenance = provenance
+  )
+}
+
+expect_not_available <- function(object, type) {
+  plot <- NULL
+  testthat::expect_warning(
+    plot <- NACHO::autoplot(object, type = type),
+    class = "nacho_warning_metric_unavailable",
+    info = type
+  )
+  testthat::expect_s3_class(plot, "ggplot")
+  testthat::expect_no_warning(built <- ggplot2::ggplot_build(plot))
+  testthat::expect_length(plot[["layers"]], 1)
+  testthat::expect_identical(
+    built[["data"]][[1]][["label"]],
+    "Not available!",
+    info = type
+  )
+}
+
+flagged_gse <- function() {
+  x <- NACHO::GSE74821[, 1:12]
+  thresholds <- x@thresholds
+  thresholds[["FoV"]] <- 99.9
+  x <- NACHO::normalise(x, outliers_thresholds = thresholds)
+  stopifnot(any(NACHO:::flagged_samples(x)))
+  x
+}
+
+flagged_points <- function(plot) {
+  built <- ggplot2::ggplot_build(plot)
+  triangles <- lapply(built$data, function(d) {
+    if ("shape" %in% names(d)) d[d$shape %in% 17, c("colour", "shape")]
+  })
+  do.call(rbind, triangles)
+}
+
+tuned_gse <- function(...) {
+  thresholds <- utils::modifyList(NACHO::GSE74821@thresholds, list(...))
+  NACHO::normalise(NACHO::GSE74821, outliers_thresholds = thresholds)
+}
+
+expect_row <- function(text, start, source) {
+  lines <- strsplit(text, "\n", fixed = TRUE)[[1]]
+  row <- lines[startsWith(lines, start)]
+  testthat::expect_length(row, 1L)
+  testthat::expect_true(grepl(source, row, fixed = TRUE), info = row)
+}
+
+odd_ids_nacho <- function() {
+  x <- toy_nacho(4L)
+  samples <- x@samples
+  samples$IDFILE[2] <- "a*b_c<d>|e[1]"
+  samples$CartridgeID[2] <- "C_2"
+  samples$FoV[2] <- 50
+  S7::prop(x, "samples", check = FALSE) <- samples
+  x
+}
+
+british_stems <- paste(
+  "normalis|colour|recognis|analys(e|ing)|behaviour|centre|favour",
+  "organis|summaris|visualis|haemoly|minimis|maximis|grey|licence|whilst",
+  sep = "|"
+)
+
+wait_until <- function(session, done, tries = 50) {
+  for (i in seq_len(tries)) {
+    session$flushReact()
+    if (done()) {
+      session$flushReact()
+      return(invisible(TRUE))
+    }
+    later::run_now(0.1)
+  }
+  testthat::fail(paste("Gave up after", tries, "tries of", deparse1(done)))
+}
+
+wait_for_task <- function(task, session, status = "success", tries = 50) {
+  wait_until(session, function() identical(task$status(), status), tries)
+}
+
+local_no_mirai <- function(env = parent.frame()) {
+  testthat::local_mocked_bindings(
+    has_package = function(package) package != "mirai",
+    .package = "NACHO",
+    .env = env
+  )
+}

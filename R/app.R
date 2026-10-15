@@ -1,0 +1,445 @@
+#' @include tour.R mod_data.R mod_thresholds.R mod_qc_plot.R mod_overview.R mod_outliers.R mod_batch.R mod_export.R
+NULL
+
+#' Run the NACHO app
+#'
+#' Opens the quality-control app on a `nacho` object, or on an empty upload
+#' page.
+#' Use [visualise()] to get the tuned object back in the R session.
+#'
+#' @param x A `nacho` object from [load_rcc()] or [normalise()], or `NULL` to
+#'   start by uploading RCC files.
+#' @param done If `TRUE`, the app shows a "Done" button that closes it and
+#'   returns the tuned object.
+#'   Keep `FALSE` for a deployed app, because closing it would stop the
+#'   server for every user.
+#'
+#' @return A Shiny app object; print it or pass it to [shiny::runApp()].
+#'
+#' @section Plot workers:
+#' When the mirai and ggiraph packages are installed, the app builds the
+#' interactive plots of a page at the same time, in background R processes.
+#' The processes and the plot cache belong to the R process that runs the
+#' app.
+#' All users of that R process share them.
+#' The app starts the processes when the first user opens a page with
+#' interactive plots, and stops them when the app stops.
+#' By default, the app starts one process for each CPU core minus one, with a
+#' maximum of four.
+#' The app from [deploy()] starts one process.
+#'
+#' Each process keeps a copy of the study that it draws, so its memory grows
+#' with the size of the study.
+#' For `GSE74821`, each process uses about 170 MB.
+#' To find the number of processes, divide the memory that you can give to the
+#' plots by the memory of one process.
+#' Set the `nacho.plot_workers` option to that number before you start the
+#' app, for example `options(nacho.plot_workers = 2)`.
+#' To build all plots in the app process, set the option to `0`.
+#' If the processes do not start, the app builds the plots in its own process.
+#'
+#' The processes use the installed NACHO package.
+#'
+#' @export
+#'
+#' @examples
+#' if (interactive()) {
+#'   shiny::runApp(nacho_app(GSE74821))
+#' }
+nacho_app <- function(x = NULL, done = FALSE) {
+  if (!is.null(x)) {
+    check_nacho(x)
+  }
+  shiny::addResourcePath("nacho-brand", brand_path())
+  interactive <- plots_interactive()
+  quarto <- quarto_available()
+  shiny::shinyApp(
+    ui = function(request) app_ui(done, interactive, quarto),
+    server = app_server(x, done, interactive, quarto)
+  )
+}
+
+help_page <- function(name) {
+  shiny::markdown(help_text(name))
+}
+
+empty_state <- function() {
+  bslib::card(
+    bslib::card_body(
+      class = "text-center",
+      shiny::tags$p("No data yet."),
+      shiny::tags$p(
+        "Load RCC files on the Data page, or load the example data to explore the app."
+      )
+    )
+  )
+}
+
+with_data <- function(...) {
+  shiny::tagList(
+    shiny::conditionalPanel("output.has_data === true", ...),
+    shiny::conditionalPanel("output.has_data === false", empty_state())
+  )
+}
+
+#' Titles of the plot pages, which are also the values of `input$page`
+#'
+#' @noRd
+app_page_titles <- c(
+  qc_metrics = "QC metrics",
+  controls = "Controls",
+  counts = "Counts",
+  normalisation = "Normalisation",
+  batch = "Batch"
+)
+
+plot_page <- function(page, interactive = FALSE) {
+  bslib::layout_columns(
+    col_widths = bslib::breakpoints(sm = 12, lg = 6),
+    !!!lapply(app_plot_types[[page]], function(type) {
+      shiny::conditionalPanel(
+        sprintf(
+          "output.applicable && output.applicable.indexOf(',%s,') >= 0",
+          type
+        ),
+        mod_qc_plot_ui(type, interactive = interactive)
+      )
+    })
+  )
+}
+
+app_ui <- function(done = FALSE, interactive = FALSE, quarto = FALSE) {
+  bslib::page_navbar(
+    title = shiny::tags$span(
+      shiny::tags$img(src = "nacho-brand/nacho_hex.png", height = 24, alt = ""),
+      "NACHO"
+    ),
+    window_title = "NACHO",
+    fillable = FALSE,
+    id = "page",
+    header = shiny::tagList(
+      shiny::useBusyIndicators(),
+      brand_font_dependency(),
+      tour_dependencies(),
+      restore_help_focus,
+      if (interactive) selection_echo_guard,
+      shiny::conditionalPanel(
+        "output.has_data === true",
+        mod_overview_ui("overview")
+      )
+    ),
+    theme = nacho_theme(),
+    navbar_options = bslib::navbar_options(
+      bg = nacho_palette[["navy"]],
+      theme = "dark"
+    ),
+    sidebar = bslib::sidebar(
+      title = "Thresholds",
+      width = 320,
+      mod_thresholds_ui("thresholds"),
+      if (done) shiny::actionButton("done", "Done", class = "btn-primary")
+    ),
+    bslib::nav_panel("Data", mod_data_ui("data")),
+    bslib::nav_panel(
+      app_page_titles[["qc_metrics"]],
+      with_data(plot_page("qc_metrics", interactive))
+    ),
+    bslib::nav_panel(
+      app_page_titles[["controls"]],
+      with_data(plot_page("controls", interactive))
+    ),
+    bslib::nav_panel(
+      app_page_titles[["counts"]],
+      with_data(plot_page("counts", interactive))
+    ),
+    bslib::nav_panel(
+      app_page_titles[["normalisation"]],
+      with_data(plot_page("normalisation", interactive))
+    ),
+    bslib::nav_panel(
+      app_page_titles[["batch"]],
+      with_data(mod_batch_ui("batch", interactive))
+    ),
+    bslib::nav_panel(
+      "Samples",
+      with_data(mod_outliers_ui("outliers", interactive))
+    ),
+    bslib::nav_panel("Export", with_data(mod_export_ui("export", quarto))),
+    help_menu(),
+    bslib::nav_spacer(),
+    bslib::nav_item(bslib::input_dark_mode(id = "dark_mode"))
+  )
+}
+
+package_description <- function() {
+  utils::packageDescription("NACHO")
+}
+
+help_links <- function() {
+  description <- package_description()
+  urls <- trimws(strsplit(description[["URL"]] %||% "", ",")[[1]])
+  github <- urls[grepl("^https://github.com/", urls)][1]
+  site <- urls[nzchar(urls) & !grepl("^https://github.com/", urls)][1]
+  issues <- description[["BugReports"]]
+  missing <- c(
+    "a GitHub URL in the URL field" = is.na(github),
+    "a documentation site URL in the URL field" = is.na(site),
+    "the BugReports field" = is.null(issues) || !nzchar(issues)
+  )
+  if (any(missing)) {
+    nacho_abort(
+      c(
+        "The DESCRIPTION file of NACHO lacks {names(missing)[missing]}.",
+        i = "Reinstall NACHO so the Help menu can link to its pages."
+      ),
+      class = "bad_description"
+    )
+  }
+  c(
+    documentation = site,
+    discussions = paste0(sub("/$", "", github), "/discussions"),
+    issues = issues
+  )
+}
+
+unnamed_icon <- function(name) {
+  icon <- shiny::icon(name, `aria-hidden` = "true")
+  icon$attribs[["aria-label"]] <- NULL
+  icon
+}
+
+external_link <- function(label, href) {
+  shiny::tags$a(
+    class = "dropdown-item",
+    href = href,
+    target = "_blank",
+    rel = "noopener",
+    label,
+    unnamed_icon("arrow-up-right-from-square"),
+    shiny::tags$span(class = "visually-hidden", "(opens in a new tab)")
+  )
+}
+
+restore_help_focus <- shiny::tags$script(shiny::HTML(
+  "$(document).on('hidden.bs.modal', function(event) {
+    if ($(event.target).find('.nacho-cite').length === 0) {
+      return;
+    }
+    $('a.dropdown-toggle').filter(function() {
+      return $(this).text().trim() === 'Help';
+    }).first().trigger('focus');
+  });"
+))
+
+help_menu <- function() {
+  links <- help_links()
+  bslib::nav_menu(
+    "Help",
+    value = "help",
+    align = "right",
+    bslib::nav_item(
+      shiny::tags$button(
+        id = "tour",
+        type = "button",
+        class = "dropdown-item action-button",
+        "Take the tour"
+      )
+    ),
+    bslib::nav_panel("About NACHO", help_page("nacho")),
+    bslib::nav_item(external_link("Documentation", links[["documentation"]])),
+    bslib::nav_item(external_link("Ask a question", links[["discussions"]])),
+    bslib::nav_item(external_link("Report a problem", links[["issues"]])),
+    bslib::nav_item(
+      shiny::tags$button(
+        id = "cite",
+        type = "button",
+        class = "dropdown-item action-button",
+        "Cite NACHO"
+      )
+    )
+  )
+}
+
+citation_html <- function() {
+  shiny::HTML(paste(
+    format(utils::citation("NACHO"), style = "html"),
+    collapse = "\n"
+  ))
+}
+
+citation_bibtex <- function() {
+  paste(format(utils::citation("NACHO"), style = "bibtex"), collapse = "\n")
+}
+
+tune_object <- function(object, chosen, thresholds) {
+  tryCatch(
+    rlang::with_options(
+      normalise(
+        object,
+        normalisation_method = chosen$normalisation_method,
+        ruv_k = chosen$ruv_k,
+        background = chosen$background,
+        background_mode = chosen$background_mode,
+        outliers_thresholds = thresholds
+      ),
+      nacho.quiet = TRUE
+    ),
+    nacho_error = function(cnd) {
+      shiny::validate(
+        shiny::need(FALSE, cli::ansi_strip(rlang::cnd_message(cnd)))
+      )
+    }
+  )
+}
+
+tune_with_toasts <- function(object, chosen, thresholds, announced) {
+  key <- list(object@provenance, dim(object@counts), chosen)
+  if (!identical(announced$key, key)) {
+    announced$key <- key
+    announced$messages <- character()
+  }
+  withCallingHandlers(
+    tune_object(object, chosen, thresholds),
+    nacho_warning_metric_unavailable = function(cnd) {
+      invokeRestart("muffleWarning")
+    },
+    nacho_warning = function(cnd) {
+      message <- cli::ansi_strip(rlang::cnd_message(cnd))
+      if (!message %in% announced$messages) {
+        announced$messages <- c(announced$messages, message)
+        notify_user(message, "warning")
+      }
+      invokeRestart("muffleWarning")
+    }
+  )
+}
+
+app_server <- function(
+  x,
+  done = FALSE,
+  interactive = FALSE,
+  quarto = FALSE
+) {
+  function(input, output, session) {
+    loaded <- mod_data_server("data", initial = x)
+    settings <- mod_thresholds_server("thresholds", data = loaded)
+    # The value must stay logical: text such as "FALSE" is truthy in JavaScript.
+    output$has_data <- shiny::markRenderFunction(
+      uiFunc = shiny::textOutput,
+      renderFunc = function(shinysession, name, ...) !is.null(loaded())
+    )
+    shiny::outputOptions(output, "has_data", suspendWhenHidden = FALSE)
+    dark <- shiny::reactive(identical(input$dark_mode, "dark"))
+    announced <- new.env()
+    tuned <- shiny::reactive(
+      tune_with_toasts(
+        shiny::req(loaded()),
+        settings$settings(),
+        settings$thresholds(),
+        announced
+      )
+    )
+    qc <- shiny::reactive(nacho_qc(tuned()))
+    output$applicable <- shiny::renderText(
+      paste0(
+        ",",
+        paste(applicable_plots(shiny::req(tuned())), collapse = ","),
+        ","
+      )
+    )
+    shiny::outputOptions(output, "applicable", suspendWhenHidden = FALSE)
+    mod_overview_server("overview", tuned, qc)
+    selected <- shiny::reactiveVal(character())
+    mod_outliers_server("outliers", tuned, qc, selected)
+    mod_batch_server("batch", tuned)
+    mod_export_server("export", tuned, quarto)
+    shiny::observeEvent(input$cite, {
+      shiny::showModal(shiny::modalDialog(
+        title = "Cite NACHO",
+        shiny::tags$div(
+          class = "nacho-cite",
+          citation_html(),
+          shiny::tags$pre(
+            style = "white-space: pre-wrap; word-break: break-word;",
+            citation_bibtex()
+          )
+        ),
+        easyClose = TRUE,
+        footer = shiny::modalButton("Close")
+      ))
+    })
+    shiny::observeEvent(input$tour, {
+      if (is.null(loaded())) {
+        loaded(example_data())
+      }
+      start_tour(session)
+    })
+    workers <- if (interactive) plot_workers_start()
+    for (page in names(app_plot_types)) {
+      local({
+        title <- app_page_titles[[page]]
+        active <- shiny::reactive(identical(input$page, title))
+        lapply(app_plot_types[[page]], function(type) {
+          mod_qc_plot_server(
+            type,
+            object = tuned,
+            qc = qc,
+            type = type,
+            dark = dark,
+            selected = selected,
+            interactive = interactive,
+            active = active,
+            workers = workers
+          )
+        })
+      })
+    }
+    if (done) {
+      finished <- new.env()
+      observe_done(input, loaded, settings, announced, finished)
+      session$onSessionEnded(function() {
+        if (!isTRUE(finished$done)) shiny::stopApp(NULL)
+      })
+    }
+  }
+}
+
+observe_done <- function(
+  input,
+  data,
+  settings,
+  announced = new.env(),
+  finished = new.env()
+) {
+  shiny::observeEvent(input$done, {
+    if (is.null(data())) {
+      finished$done <- TRUE
+      return(shiny::stopApp(NULL))
+    }
+    problem <- NULL
+    result <- tryCatch(
+      tune_with_toasts(
+        data(),
+        settings$settings(),
+        settings$current_thresholds(),
+        announced
+      ),
+      shiny.silent.error = function(cnd) {
+        problem <<- conditionMessage(cnd)
+        NULL
+      }
+    )
+    if (is.null(result)) {
+      notify_user(
+        paste(
+          problem,
+          "Choose a normalisation method these data support before clicking Done."
+        ),
+        "warning"
+      )
+    } else {
+      finished$done <- TRUE
+      shiny::stopApp(result)
+    }
+  })
+}
