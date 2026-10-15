@@ -680,6 +680,29 @@ test_that("load_rcc() refuses an id column with a computed name", {
   expect_match(conditionMessage(error), "ID", fixed = TRUE)
 })
 
+test_that("load_rcc() refuses an id column named like a quality-control column", {
+  fixture <- geo_fixture("GSE178516")
+  for (name in c(
+    "status",
+    "reason",
+    "n_flags",
+    "lane",
+    "lane_status",
+    "FoV_status"
+  )) {
+    sheet <- stats::setNames(
+      data.frame(fixture$samplesheet$IDFILE),
+      name
+    )
+    error <- expect_error(
+      load_rcc(fixture$dir, sheet, name),
+      class = "nacho_error_bad_argument",
+      info = name
+    )
+    expect_match(conditionMessage(error), name, fixed = TRUE, info = name)
+  }
+})
+
 test_that("load_rcc() refuses housekeeping genes that are not probes", {
   fixture <- geo_fixture("GSE178516")
   error <- expect_error(

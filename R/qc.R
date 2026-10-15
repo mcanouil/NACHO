@@ -219,16 +219,27 @@ is_computed_sample_column <- function(names) {
 
 #' Refuse a sample id column whose name NACHO computes
 #'
+#' The names of the quality-control table are refused too, since
+#' `nacho_qc()` would overwrite the sample ids with them.
+#'
 #' @noRd
 check_id_colname <- function(
   id_colname,
   arg = "id_colname",
   call = rlang::caller_env()
 ) {
-  if (is_computed_sample_column(id_colname)) {
+  qc_columns <- c(
+    "lane",
+    "lane_status",
+    "status",
+    "n_flags",
+    "reason",
+    paste0(qc_metrics, "_status")
+  )
+  if (is_computed_sample_column(id_colname) || id_colname %in% qc_columns) {
     nacho_abort(
       c(
-        "{.arg {arg}} cannot be {.val {id_colname}}, since NACHO computes a sample column of that name.",
+        "{.arg {arg}} cannot be {.val {id_colname}}, since NACHO computes a column of that name.",
         i = "Rename the id column, for example to {.val IDFILE}."
       ),
       class = "bad_argument",
