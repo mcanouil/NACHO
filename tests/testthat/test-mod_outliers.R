@@ -412,7 +412,9 @@ test_that("the reactable table renders empty when no sample is flagged", {
     ),
     {
       session$setInputs(flagged_only = TRUE)
-      expect_match(paste(unlist(output$samples), collapse = ""), "reactable")
+      widget <- paste(unlist(output$samples), collapse = "")
+      expect_match(widget, "\"name\":\"Reactable\"", fixed = TRUE)
+      expect_match(widget, "\"IDFILE\":[]", fixed = TRUE)
     }
   )
 })
