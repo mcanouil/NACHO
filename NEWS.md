@@ -147,6 +147,7 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS and the report, with an optional title and author.
     The report can be HTML or PDF, and it renders in the background when mirai is installed.
     If you close the app page during a render, the render stops.
+  - feat: The Export page also downloads an R script that repeats the analysis of the app with `load_rcc()`, `normalise()` and the thresholds you set, and shows it before you download it.
   - feat: A Help menu in the navbar opens About NACHO, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.
   - feat: The "Flagged samples" page is now the "Samples" page.
     It still lists the flagged samples first, and then lists every sample.
