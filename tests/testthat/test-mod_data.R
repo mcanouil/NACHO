@@ -906,6 +906,18 @@ test_that("a sample sheet with numbers in IDFILE is read as file names", {
   )
 })
 
+test_that("sample sheet columns named like the listing columns are kept", {
+  sheet <- data.frame(
+    IDFILE = rep(salmon_files(), each = 8),
+    plexset_id = paste0("S", 1:8),
+    plexset = "panel A",
+    from = "site 1"
+  )
+  nacho <- read_upload("salmon_data", sheet)
+  expect_identical(unique(nacho_samples(nacho)[["plexset"]]), "panel A")
+  expect_identical(unique(nacho_samples(nacho)[["from"]]), "site 1")
+})
+
 test_that("choosing files shows the preview", {
   local_no_mirai()
   shiny::testServer(NACHO:::mod_data_server, {

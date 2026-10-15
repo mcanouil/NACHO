@@ -73,8 +73,8 @@ list_upload <- function(files) {
 #'
 #' @noRd
 upload_targets <- function(listing) {
-  targets <- listing[["rcc"]]
-  plexset <- all(targets[["plexset"]])
+  plexset <- all(listing[["rcc"]][["plexset"]])
+  targets <- listing[["rcc"]][, c("IDFILE", "datapath"), drop = FALSE]
   if (plexset) {
     targets <- merge(
       targets,
