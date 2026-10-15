@@ -169,6 +169,9 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - perf: With mirai installed, the app builds the plots of a page in parallel on a small pool of workers shared by all sessions, stays responsive while they build, and stops the unfinished plots of a page you leave.
     `options(nacho.plot_workers = n)` sets the number of workers, and `0` builds plots in the app process; the app from `deploy()` uses one worker.
   - perf: Interactive plots built once are shared between browser tabs and sessions of the same app.
+- In `R/mod_data.R`,
+  - perf: With mirai installed, the app reads uploaded RCC files in a background R process, so other sessions of the app stay responsive.
+    The Data page shows the current stage of the import under the Import button.
 
 ## Fixes
 

@@ -99,6 +99,7 @@ Collate:
     'qc.R'
     'nacho-class.R'
     'accessors.R'
+    'daemon.R'
     'render.R'
     'mod_export.R'
     'qc-table.R'

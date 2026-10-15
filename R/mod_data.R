@@ -1,4 +1,4 @@
-#' @include load_rcc.R
+#' @include load_rcc.R daemon.R
 NULL
 
 #' Load the files of a Shiny upload
@@ -10,6 +10,7 @@ NULL
 #'
 #' @noRd
 read_uploads <- function(files) {
+  nacho_progress_step("Unpacking {nrow(files)} uploaded file{?s}")
   targets <- do.call(
     rbind,
     lapply(seq_len(nrow(files)), function(i) {
@@ -91,6 +92,49 @@ read_uploads <- function(files) {
     ssheet_csv = targets[, sample_columns, drop = FALSE],
     id_colname = "IDFILE"
   )
+}
+
+#' Load the files of a Shiny upload and keep what the user must see
+#'
+#' The app runs this function in a mirai daemon, where warnings and errors
+#' do not reach the session, so they come back as text.
+#'
+#' @inheritParams read_uploads
+#' @param progress_file The file that receives each stage of the import, or
+#'   `NULL`.
+#'
+#' @return A list with `object`, the `nacho` object or `NULL`, `warnings`, the
+#'   messages of the NACHO warnings, and `error`, the message of the error or
+#'   `NULL`.
+#'
+#' @noRd
+import_uploads <- function(files, progress_file = NULL) {
+  warnings <- character()
+  error <- NULL
+  object <- withCallingHandlers(
+    tryCatch(
+      rlang::with_options(
+        read_uploads(files),
+        nacho.quiet = TRUE,
+        nacho.progress_file = progress_file
+      ),
+      error = function(cnd) {
+        error <<- cli::ansi_strip(rlang::cnd_message(cnd))
+        if (!inherits(cnd, "nacho_error")) {
+          error <<- paste("The upload could not be read:", error)
+        }
+        NULL
+      }
+    ),
+    nacho_warning_metric_unavailable = function(cnd) {
+      invokeRestart("muffleWarning")
+    },
+    nacho_warning = function(cnd) {
+      warnings <<- c(warnings, cli::ansi_strip(rlang::cnd_message(cnd)))
+      invokeRestart("muffleWarning")
+    }
+  )
+  list(object = object, warnings = warnings, error = error)
 }
 
 #' Join a sample sheet to the uploaded files
@@ -247,7 +291,16 @@ mod_data_ui <- function(id) {
       "The sample sheet is a CSV file with an IDFILE column holding the RCC file names, ",
       "and plexset_id (S1 to S8) for PlexSet files."
     ),
-    bslib::input_task_button(ns("import"), "Import"),
+    if (!has_package("mirai")) {
+      shiny::helpText(
+        "Importing blocks the app until it finishes;",
+        "install mirai to import in the background."
+      )
+    },
+    shiny::div(
+      bslib::input_task_button(ns("import"), "Import", class = "w-100"),
+      shiny::div(class = "small text-muted", shiny::textOutput(ns("progress")))
+    ),
     shiny::actionButton(
       ns("example"),
       "Load the example data (GSE74821)",
@@ -264,37 +317,54 @@ mod_data_ui <- function(id) {
 mod_data_server <- function(id, initial = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
     current <- shiny::reactiveVal(initial)
+    progress_file <- tempfile("nacho-import-", fileext = ".txt")
+    awaited <- FALSE
+    task <- session_task(
+      session,
+      "import",
+      "import_uploads",
+      on_success = function(imported) {
+        if (!awaited) {
+          return(invisible(NULL))
+        }
+        awaited <<- FALSE
+        for (message in imported[["warnings"]]) {
+          notify_user(message, "warning")
+        }
+        if (is.null(imported[["error"]])) {
+          current(imported[["object"]])
+        } else {
+          notify_user(imported[["error"]], "error")
+        }
+      },
+      on_error = function(message) {
+        notify_user(paste("The upload could not be read:", message), "error")
+      },
+      on_end = function() unlink(progress_file),
+      warm_on = shiny::reactive(input$files)
+    )
     shiny::observeEvent(input$import, {
       if (is.null(input$files)) {
         notify_user("Choose the RCC files to import first.", "warning")
         return()
       }
-      files <- input$files
-      loaded <- withCallingHandlers(
-        tryCatch(
-          rlang::with_options(read_uploads(files), nacho.quiet = TRUE),
-          error = function(cnd) {
-            message <- cli::ansi_strip(rlang::cnd_message(cnd))
-            if (!inherits(cnd, "nacho_error")) {
-              message <- paste("The upload could not be read:", message)
-            }
-            notify_user(message, "error")
-            NULL
-          }
-        ),
-        nacho_warning_metric_unavailable = function(cnd) {
-          invokeRestart("muffleWarning")
-        },
-        nacho_warning = function(cnd) {
-          notify_user(cli::ansi_strip(rlang::cnd_message(cnd)), "warning")
-          invokeRestart("muffleWarning")
-        }
-      )
-      if (!is.null(loaded)) {
-        current(loaded)
+      unlink(progress_file)
+      awaited <<- TRUE
+      task$invoke(input$files, progress_file)
+    })
+    output$progress <- shiny::renderText({
+      if (task$status() != "running") {
+        return("")
+      }
+      shiny::invalidateLater(250)
+      if (file.exists(progress_file)) {
+        readLines(progress_file, warn = FALSE)
       }
     })
-    shiny::observeEvent(input$example, current(example_data()))
+    shiny::observeEvent(input$example, {
+      awaited <<- FALSE
+      current(example_data())
+    })
     current
   })
 }

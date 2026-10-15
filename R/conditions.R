@@ -71,11 +71,22 @@ nacho_inform <- function(message, ..., .envir = parent.frame()) {
 #' Report a stage of a long computation
 #'
 #' The step closes when the calling function exits.
+#' When the option `nacho.progress_file` holds a path, the step is also written
+#' to that file, even when NACHO is quiet, so the app can show it.
 #'
 #' @inheritParams nacho_abort
 #'
 #' @noRd
 nacho_progress_step <- function(message, .envir = parent.frame()) {
+  progress_file <- getOption("nacho.progress_file")
+  if (!is.null(progress_file)) {
+    staged <- paste0(progress_file, ".tmp")
+    writeLines(
+      cli::ansi_strip(cli::format_inline(message, .envir = .envir)),
+      staged
+    )
+    file.rename(staged, progress_file)
+  }
   if (nacho_is_quiet()) {
     return(invisible(NULL))
   }

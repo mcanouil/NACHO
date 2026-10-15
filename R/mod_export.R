@@ -1,52 +1,5 @@
-#' @include render.R
+#' @include render.R daemon.R
 NULL
-
-#' Render the report, in a mirai daemon when mirai is installed
-#'
-#' The background render uses the installed NACHO package, not the loaded
-#' one, so reinstall NACHO after you change `render()`.
-#'
-#' @param compute The mirai compute profile that runs the render.
-#'
-#' @noRd
-render_in_background <- function(
-  object,
-  format,
-  output_dir,
-  compute = NULL,
-  title = NULL,
-  author = NULL
-) {
-  if (has_package("mirai")) {
-    libs <- .libPaths()
-    return(mirai::mirai(
-      {
-        .libPaths(libs)
-        NACHO::render(
-          object,
-          format = format,
-          output_dir = output_dir,
-          title = title,
-          author = author
-        )
-      },
-      object = object,
-      format = format,
-      output_dir = output_dir,
-      title = title,
-      author = author,
-      libs = libs,
-      .compute = compute
-    ))
-  }
-  render(
-    object,
-    format = format,
-    output_dir = output_dir,
-    title = title,
-    author = author
-  )
-}
 
 #' Turn blank text input into NULL, so render() leaves the field out
 #'
@@ -54,28 +7,6 @@ render_in_background <- function(
 blank_to_null <- function(x) {
   x <- trimws(x %||% "")
   if (nzchar(x)) x else NULL
-}
-
-#' Hand a background render to an ExtendedTask
-#'
-#' After the session ends, the promise never settles, so the task does not
-#' write to the reactive values of a session that no longer exists.
-#'
-#' @param running A mirai, or the result of a render that is already done.
-#' @param ended A function that returns `TRUE` after the session ends.
-#'
-#' @noRd
-settle_while_open <- function(running, ended) {
-  if (!inherits(running, "mirai")) {
-    return(running)
-  }
-  promises::promise(function(resolve, reject) {
-    promises::then(
-      running,
-      onFulfilled = function(value) if (!ended()) resolve(value),
-      onRejected = function(error) if (!ended()) reject(error)
-    )
-  })
 }
 
 spreadsheet_safe <- function(data) {
@@ -162,39 +93,22 @@ mod_export_server <- function(id, object, quarto) {
       return(invisible(NULL))
     }
     report_dir <- tempfile("nacho-report-")
-    profile <- basename(report_dir)
     report_path <- shiny::reactiveVal(NULL)
     requested <- NULL
-    running <- NULL
-    daemons_on <- FALSE
-    ended <- FALSE
-    session$onSessionEnded(function() {
-      ended <<- TRUE
-      if (inherits(running, "mirai")) {
-        mirai::stop_mirai(running)
-      }
-      if (daemons_on) {
-        mirai::daemons(0, .compute = profile)
-      }
-      unlink(report_dir, recursive = TRUE)
-    })
-    start_render <- function(object, format, output_dir, title, author) {
-      if (has_package("mirai") && !daemons_on) {
-        mirai::daemons(1, dispatcher = TRUE, .compute = profile)
-        daemons_on <<- TRUE
-      }
-      running <<- render_in_background(
-        object,
-        format,
-        output_dir,
-        profile,
-        title,
-        author
-      )
-      settle_while_open(running, function() ended)
-    }
-    task <- shiny::ExtendedTask$new(start_render) |>
-      bslib::bind_task_button("render")
+    task <- session_task(
+      session,
+      "render",
+      "render",
+      on_success = function(path) {
+        if (identical(object(), requested)) {
+          report_path(path)
+        } else {
+          unlink(path)
+        }
+      },
+      on_error = function(message) notify_user(message, "error"),
+      on_end = function() unlink(report_dir, recursive = TRUE)
+    )
     drop_report <- function() {
       unlink(report_path())
       report_path(NULL)
@@ -204,31 +118,13 @@ mod_export_server <- function(id, object, quarto) {
       requested <<- object()
       task$invoke(
         requested,
-        input$format,
-        report_dir,
-        blank_to_null(input$title),
-        blank_to_null(input$author)
+        format = input$format,
+        output_dir = report_dir,
+        title = blank_to_null(input$title),
+        author = blank_to_null(input$author)
       )
     })
     shiny::observeEvent(object(), drop_report(), ignoreInit = TRUE)
-    shiny::observeEvent(task$status(), {
-      if (ended) {
-        return(invisible(NULL))
-      }
-      if (task$status() == "success") {
-        if (identical(object(), requested)) {
-          report_path(task$result())
-        } else {
-          unlink(task$result())
-        }
-      } else if (task$status() == "error") {
-        reason <- tryCatch(
-          task$result(),
-          error = function(cnd) cli::ansi_strip(rlang::cnd_message(cnd))
-        )
-        notify_user(reason, "error")
-      }
-    })
     output$report_ready <- shiny::renderUI({
       shiny::req(report_path())
       shiny::downloadButton(
