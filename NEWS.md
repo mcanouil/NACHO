@@ -150,6 +150,9 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - feat: A Help menu in the navbar opens About NACHO, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.
   - feat: The "Flagged samples" page is now the "Samples" page.
     It still lists the flagged samples first, and then lists every sample.
+- In `R/mod_data.R`,
+  - feat: When you choose files, the Data page lists the RCC files of the upload before you import them, zip archives included.
+    For each file, it shows the zip it came from, whether it is a PlexSet file, and whether the sample sheet lists it.
 - In `DESCRIPTION`,
   - build: chromote, gdtools, ggiraph, jsonlite, later, mirai, parallel and shinytest2 join Suggests, and promises and yaml join Imports.
 - In `vignettes/`,
@@ -172,6 +175,7 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
 - In `R/mod_data.R`,
   - perf: With mirai installed, the app reads uploaded RCC files in a background R process, so other sessions of the app stay responsive.
     The Data page shows the current stage of the import under the Import button.
+  - perf: The app finds PlexSet files when it lists the upload, and checks only the lines that can name a PlexSet code class, so a large upload takes about a third less time once you click Import.
 
 ## Fixes
 

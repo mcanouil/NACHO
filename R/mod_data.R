@@ -1,16 +1,21 @@
 #' @include load_rcc.R daemon.R
 NULL
 
-#' Load the files of a Shiny upload
+#' List the files of a Shiny upload
+#'
+#' Zip archives are extracted and the other files get their original names
+#' back, so the function runs once for each upload.
 #'
 #' @param files The data frame of [shiny::fileInput()]: `name`, `size`,
 #'   `type` and `datapath`.
 #'
-#' @return A `nacho` object.
+#' @return A list with `rcc`, a data frame of the RCC files with `name`,
+#'   `datapath`, `IDFILE`, `from`, the zip archive of the file or `""`, and
+#'   `plexset`; `sheet`, the first sample sheet or `NULL`; and
+#'   `ignored_sheets`, the names of the other sample sheets.
 #'
 #' @noRd
-read_uploads <- function(files) {
-  nacho_progress_step("Unpacking {nrow(files)} uploaded file{?s}")
+list_upload <- function(files) {
   targets <- do.call(
     rbind,
     lapply(seq_len(nrow(files)), function(i) {
@@ -23,12 +28,12 @@ read_uploads <- function(files) {
   )
   is_sheet <- grepl("\\.csv$", targets[["name"]], ignore.case = TRUE)
   sheets <- targets[is_sheet, , drop = FALSE]
-  targets <- targets[
+  rcc <- targets[
     grepl("\\.rcc(\\.gz)?$", targets[["name"]], ignore.case = TRUE),
     ,
     drop = FALSE
   ]
-  if (nrow(targets) == 0) {
+  if (nrow(rcc) == 0) {
     nacho_abort(
       c(
         "The upload holds no RCC file.",
@@ -37,7 +42,39 @@ read_uploads <- function(files) {
       class = "bad_upload"
     )
   }
-  plexset <- all(vapply(targets[["datapath"]], is_plexset_rcc, logical(1)))
+  rcc[["plexset"]] <- unname(vapply(
+    rcc[["datapath"]],
+    is_plexset_rcc,
+    logical(1)
+  ))
+  rownames(rcc) <- NULL
+  sheet <- NULL
+  if (nrow(sheets) > 0) {
+    sheet <- data.table::fread(sheets[["datapath"]][1], data.table = FALSE)
+    if ("IDFILE" %in% names(sheet)) {
+      sheet[["IDFILE"]] <- as.character(sheet[["IDFILE"]])
+    }
+  }
+  list(rcc = rcc, sheet = sheet, ignored_sheets = sheets[["name"]][-1])
+}
+
+#' Match the RCC files of an upload to its sample sheet
+#'
+#' PlexSet files give one target for each sample, `S1` to `S8`.
+#' A sample sheet without the key columns, or that matches no file, is not
+#' used.
+#'
+#' @param listing The output of `list_upload()`.
+#'
+#' @return A list with `targets`, one row for each sample, with the sample
+#'   sheet columns when the sheet is used; `plexset`; `sheet_columns`, the
+#'   columns of the sheet when it is used; and `problems`, the messages about
+#'   the sample sheets.
+#'
+#' @noRd
+upload_targets <- function(listing) {
+  plexset <- all(listing[["rcc"]][["plexset"]])
+  targets <- listing[["rcc"]][, c("IDFILE", "datapath"), drop = FALSE]
   if (plexset) {
     targets <- merge(
       targets,
@@ -49,39 +86,63 @@ read_uploads <- function(files) {
       by = "IDFILE"
     )
   }
-  if (nrow(sheets) > 1) {
-    nacho_warn(
-      "Only the first sample sheet is used, so {.file {sheets[['name']][-1]}} {?was/were} ignored.",
-      class = "sample_sheet_discarded"
+  problems <- character()
+  ignored <- listing[["ignored_sheets"]]
+  if (length(ignored) > 0) {
+    problems <- cli::format_inline(
+      "Only the first sample sheet is used, so {.file {ignored}} {?was/were} ignored."
     )
   }
+  sheet <- listing[["sheet"]]
   sheet_columns <- character()
-  if (nrow(sheets) > 0) {
-    sheet <- data.table::fread(sheets[["datapath"]][1], data.table = FALSE)
+  if (!is.null(sheet)) {
     merge_by <- if (plexset) c("IDFILE", "plexset_id") else "IDFILE"
     missing_columns <- setdiff(merge_by, names(sheet))
+    matched <- if (length(missing_columns) == 0) {
+      merge_sample_sheet(targets, sheet, merge_by)
+    }
     if (length(missing_columns) > 0) {
-      nacho_warn(
-        "The sample sheet was discarded, because it has no {.val {missing_columns}} column{?s}.",
-        class = "sample_sheet_discarded"
+      problems <- c(
+        problems,
+        cli::format_inline(
+          "The sample sheet was discarded, because it has no {.val {missing_columns}} column{?s}."
+        )
+      )
+    } else if (nrow(matched) == 0) {
+      problems <- c(
+        problems,
+        "The sample sheet was discarded, because it matches no uploaded RCC file."
       )
     } else {
-      matched <- merge_sample_sheet(targets, sheet, merge_by)
-      if (nrow(matched) == 0) {
-        nacho_warn(
-          "The sample sheet was discarded, because it matches no uploaded RCC file.",
-          class = "sample_sheet_discarded"
-        )
-      } else {
-        targets <- matched
-        sheet_columns <- names(sheet)
-      }
+      targets <- matched
+      sheet_columns <- names(sheet)
     }
   }
+  list(
+    targets = targets,
+    plexset = plexset,
+    sheet_columns = sheet_columns,
+    problems = cli::ansi_strip(problems)
+  )
+}
+
+#' Load the RCC files of an upload
+#'
+#' @param listing The output of `list_upload()`.
+#'
+#' @return A `nacho` object.
+#'
+#' @noRd
+load_upload <- function(listing) {
+  matched <- upload_targets(listing)
+  for (problem in matched[["problems"]]) {
+    nacho_warn("{problem}", class = "sample_sheet_discarded")
+  }
+  targets <- matched[["targets"]]
   sample_columns <- c(
     "IDFILE",
-    if (plexset) "plexset_id",
-    setdiff(sheet_columns, c("IDFILE", "plexset_id"))
+    if (matched[["plexset"]]) "plexset_id",
+    setdiff(matched[["sheet_columns"]], c("IDFILE", "plexset_id"))
   )
   load_rcc(
     data_directory = unique(mapply(
@@ -94,12 +155,67 @@ read_uploads <- function(files) {
   )
 }
 
+#' Describe an upload before it is imported
+#'
+#' The sample sheet is matched to the files as in `load_upload()`.
+#'
+#' @param listing The output of `list_upload()`.
+#'
+#' @return A list with `summary`, one line of text, and `table`, one row for
+#'   each RCC file.
+#'
+#' @noRd
+upload_preview <- function(listing) {
+  rcc <- listing[["rcc"]]
+  files <- basename(rcc[["IDFILE"]])
+  rows <- data.frame(
+    File = files,
+    From = rcc[["from"]],
+    PlexSet = ifelse(rcc[["plexset"]], "yes", "no"),
+    check.names = FALSE
+  )
+  counts <- c(
+    cli::format_inline("{nrow(rcc)} RCC file{?s}"),
+    paste(sum(rcc[["plexset"]]), "PlexSet")
+  )
+  matched <- upload_targets(listing)
+  notes <- matched[["problems"]]
+  if (is.null(listing[["sheet"]])) {
+    notes <- c(notes, "No sample sheet.")
+  } else if (length(matched[["sheet_columns"]]) > 0) {
+    found <- as.vector(table(factor(
+      matched[["targets"]][["IDFILE"]],
+      levels = rcc[["IDFILE"]]
+    )))
+    rows[["In sample sheet"]] <- if (matched[["plexset"]]) {
+      paste(found, "of 8")
+    } else {
+      ifelse(found > 0, "yes", "no")
+    }
+    orphans <- sum(!basename(listing[["sheet"]][["IDFILE"]]) %in% files)
+    counts <- c(
+      counts,
+      paste(sum(found == 0), "not in the sample sheet"),
+      if (orphans > 0) {
+        cli::format_inline("{orphans} sample sheet row{?s} with no file")
+      }
+    )
+  }
+  list(
+    summary = paste(
+      c(paste0(paste(counts, collapse = ", "), "."), notes),
+      collapse = " "
+    ),
+    table = rows
+  )
+}
+
 #' Load the files of a Shiny upload and keep what the user must see
 #'
 #' The app runs this function in a mirai daemon, where warnings and errors
 #' do not reach the session, so they come back as text.
 #'
-#' @inheritParams read_uploads
+#' @param listing The output of `list_upload()`.
 #' @param progress_file The file that receives each stage of the import, or
 #'   `NULL`.
 #'
@@ -108,21 +224,18 @@ read_uploads <- function(files) {
 #'   `NULL`.
 #'
 #' @noRd
-import_uploads <- function(files, progress_file = NULL) {
+import_uploads <- function(listing, progress_file = NULL) {
   warnings <- character()
   error <- NULL
   object <- withCallingHandlers(
     tryCatch(
       rlang::with_options(
-        read_uploads(files),
+        load_upload(listing),
         nacho.quiet = TRUE,
         nacho.progress_file = progress_file
       ),
       error = function(cnd) {
-        error <<- cli::ansi_strip(rlang::cnd_message(cnd))
-        if (!inherits(cnd, "nacho_error")) {
-          error <<- paste("The upload could not be read:", error)
-        }
+        error <<- upload_error(cnd)
         NULL
       }
     ),
@@ -135,6 +248,17 @@ import_uploads <- function(files, progress_file = NULL) {
     }
   )
   list(object = object, warnings = warnings, error = error)
+}
+
+#' Give the message of an error raised by an upload
+#'
+#' @noRd
+upload_error <- function(cnd) {
+  message <- cli::ansi_strip(rlang::cnd_message(cnd))
+  if (inherits(cnd, "nacho_error")) {
+    return(message)
+  }
+  paste("The upload could not be read:", message)
 }
 
 #' Join a sample sheet to the uploaded files
@@ -165,7 +289,8 @@ merge_sample_sheet <- function(targets, sheet, merge_by) {
 #'
 #' @param name,datapath,type One row of the [shiny::fileInput()] table.
 #'
-#' @return A data frame with `name`, `datapath`, `type` and `IDFILE`.
+#' @return A data frame with `name`, `datapath`, `type`, `IDFILE` and `from`,
+#'   the zip archive of the file or `""`.
 #'
 #' @noRd
 expand_upload <- function(name, datapath, type) {
@@ -200,7 +325,8 @@ expand_upload <- function(name, datapath, type) {
         name = character(),
         datapath = character(),
         type = character(),
-        IDFILE = character()
+        IDFILE = character(),
+        from = character()
       ))
     }
     extracted <- file.path(basename(extract_directory), files)
@@ -208,12 +334,19 @@ expand_upload <- function(name, datapath, type) {
       name = extracted,
       datapath = file.path(extract_directory, files),
       type = type,
-      IDFILE = extracted
+      IDFILE = extracted,
+      from = name
     ))
   }
   renamed <- file.path(dirname(datapath), name)
   file.rename(from = datapath, to = renamed)
-  data.frame(name = name, datapath = renamed, type = type, IDFILE = name)
+  data.frame(
+    name = name,
+    datapath = renamed,
+    type = type,
+    IDFILE = name,
+    from = ""
+  )
 }
 
 #' Refuse zip entries that would be extracted outside the upload folder
@@ -287,9 +420,20 @@ mod_data_ui <- function(id) {
       multiple = TRUE,
       accept = c(".RCC", ".rcc", ".gz", ".zip", ".csv")
     ),
-    shiny::helpText(
-      "The sample sheet is a CSV file with an IDFILE column holding the RCC file names, ",
-      "and plexset_id (S1 to S8) for PlexSet files."
+    shiny::div(
+      shiny::helpText(
+        "The sample sheet is a CSV file with an IDFILE column holding the RCC file names, ",
+        "and plexset_id (S1 to S8) for PlexSet files."
+      ),
+      shiny::div(
+        class = "small mt-2",
+        shiny::textOutput(ns("preview_summary"))
+      ),
+      shiny::div(
+        class = "overflow-auto small",
+        style = "max-height: 300px;",
+        shiny::tableOutput(ns("preview_table"))
+      )
     ),
     if (!has_package("mirai")) {
       shiny::helpText(
@@ -343,14 +487,38 @@ mod_data_server <- function(id, initial = NULL) {
       on_end = function() unlink(progress_file),
       warm_on = shiny::reactive(input$files)
     )
+    listing <- shiny::reactive({
+      if (is.null(input$files)) {
+        return(NULL)
+      }
+      tryCatch(list_upload(input$files), error = function(cnd) cnd)
+    })
+    preview <- shiny::reactive({
+      if (is.null(listing())) {
+        return(list(summary = "", table = NULL))
+      }
+      if (inherits(listing(), "error")) {
+        return(list(summary = upload_error(listing()), table = NULL))
+      }
+      tryCatch(
+        upload_preview(listing()),
+        error = function(cnd) list(summary = upload_error(cnd), table = NULL)
+      )
+    })
+    output$preview_summary <- shiny::renderText(preview()[["summary"]])
+    output$preview_table <- shiny::renderTable(preview()[["table"]])
     shiny::observeEvent(input$import, {
       if (is.null(input$files)) {
         notify_user("Choose the RCC files to import first.", "warning")
         return()
       }
+      if (inherits(listing(), "error")) {
+        notify_user(upload_error(listing()), "error")
+        return()
+      }
       unlink(progress_file)
       awaited <<- TRUE
-      task$invoke(input$files, progress_file)
+      task$invoke(listing(), progress_file)
     })
     output$progress <- shiny::renderText({
       if (task$status() != "running") {
