@@ -227,7 +227,7 @@ cleaned <- exclude_outliers(geo_norm)
 # miRNA panels
 
 `load_rcc()` recognises miRNA panels from their probes.
-The folder `GSE270837` holds six samples from such a panel.
+The folder `GSE270837` holds six samples from such a panel, measured on an nCounter SPRINT, so we load them with the SPRINT limits.
 
 ```{r}
 #| label: mirna
@@ -236,7 +236,7 @@ mirna <- load_rcc(
   data_directory = mirna_directory,
   ssheet_csv = file.path(mirna_directory, "samplesheet.csv"),
   id_colname = "IDFILE",
-  instrument = "max",
+  instrument = "sprint",
   n_comp = 5
 )
 print(mirna)
@@ -257,7 +257,7 @@ The bound below is an example; choose it from the `Ligation_NEG` values of your 
 ```{r}
 #| label: mirna-whole-blood
 #| eval: false
-thresholds <- nacho_thresholds(instrument = "max")
+thresholds <- nacho_thresholds(instrument = "sprint")
 thresholds[["Ligation_NEG"]] <- c(-Inf, 100)
 mirna <- normalise(mirna, outliers_thresholds = thresholds)
 ```
