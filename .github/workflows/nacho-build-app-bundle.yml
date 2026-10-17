@@ -50,7 +50,7 @@ env:
   APP_DESC: "NanoString quality control dashboard"
   APP_HOMEPAGE: "https://github.com/mcanouil/NACHO"
   APP_LICENSE: "GPL-3.0"
-  APP_MODE: "auto"
+  APP_MODE: "flat"
   APP_SUBDIR: "inst/app"
   PKG_SUBDIR: "."
   ENTRY_FN: ""
