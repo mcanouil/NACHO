@@ -221,9 +221,8 @@ main <- function() {
   )
   Sys.sleep(2)
   shoot("app-done.png")
-  app$run_js(
-    "document.querySelectorAll('.accordion-button.collapsed').forEach(b => b.click())"
-  )
+  click(".accordion-item[data-value='Imaging'] .accordion-button")
+  app$wait_for_js("document.querySelector('.collapsing') === null")
 
   # The picture for the vignette.
   go_to("QC metrics")
