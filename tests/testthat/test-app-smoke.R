@@ -272,3 +272,39 @@ test_that("the app loads the example data from an empty start", {
     "48"
   )
 })
+
+test_that("each page opens one threshold panel of the sidebar", {
+  skip_if_no_browser()
+  app <- shinytest2::AppDriver$new(
+    nacho_app(GSE74821),
+    name = "sidebar-panels",
+    load_timeout = 60000,
+    timeout = 20000
+  )
+  on.exit(app$stop(), add = TRUE)
+  open_panels <- paste0(
+    "Array.from(document.querySelectorAll(",
+    "'#thresholds-sections .accordion-collapse.show'))",
+    ".map(e => e.closest('.accordion-item').dataset.value).join(',')"
+  )
+  wait_for_open <- function(panel) {
+    app$wait_for_js(sprintf(
+      "document.querySelector('.collapsing') === null && %s === '%s'",
+      open_panels,
+      panel
+    ))
+    expect_identical(app$get_js(open_panels), panel)
+  }
+  wait_for_open("Preset")
+  for (page in names(app_sidebar_panels)) {
+    app$run_js(sprintf(
+      "document.querySelector('a[data-value=\"%s\"]').click()",
+      page
+    ))
+    wait_for_open(app_sidebar_panels[[page]])
+  }
+  app$run_js(
+    "document.querySelector('.accordion-item[data-value=\"miRNA\"] .accordion-button').click()"
+  )
+  wait_for_open("miRNA")
+})

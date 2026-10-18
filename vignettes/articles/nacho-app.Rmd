@@ -78,6 +78,9 @@ knitr::include_graphics("figures/app-upload-preview.png")
 
 The sidebar on the left holds the thresholds and the normalisation settings.
 Every page uses them.
+Only one section is open at a time.
+Each page opens the section that matches its content and folds the others.
+For example, the **QC metrics** page opens **Imaging**.
 
 - **Preset** gives a set of starting thresholds.
   Choose the `nSolver` preset or the `NACHO 2` preset, and choose your instrument.

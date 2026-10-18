@@ -158,6 +158,7 @@ The article "Moving from NACHO 2" on the [package website](https://m.canouil.dev
   - feat: The app starts from the object's own thresholds and keeps its preset and instrument.
     It offers RUVg, the miRNA methods and the background settings.
   - feat: The app has one sidebar with every threshold and the instrument presets, and a reset button puts the thresholds back to the preset.
+    Each page opens the sidebar section that matches it, such as Imaging on the QC metrics page, and folds the others.
   - feat: A summary strip at the top of every page shows the samples, the cartridges (lanes for PlexSet), the flagged samples with their reasons, and the method.
   - feat: Each plot sits in a card that opens full screen, and interactive plots redraw to fill the card.
     The display options of a card set the colour, legend, point size and labels, and you can download the plot as a PNG at the size you choose.

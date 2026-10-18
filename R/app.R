@@ -93,6 +93,20 @@ app_page_titles <- c(
   batch = "Batch"
 )
 
+#' Threshold panel of the sidebar that each page opens
+#'
+#' @noRd
+app_sidebar_panels <- c(
+  Data = "Preset",
+  "QC metrics" = "Imaging",
+  Controls = "Controls",
+  Counts = "Content",
+  Normalisation = "Normalisation",
+  Batch = "Normalisation",
+  Samples = "Preset",
+  Export = "Preset"
+)
+
 plot_page <- function(page, interactive = FALSE) {
   bslib::layout_columns(
     col_widths = bslib::breakpoints(sm = 12, lg = 6),
@@ -353,6 +367,14 @@ app_server <- function(
     mod_outliers_server("outliers", tuned, qc, selected)
     mod_batch_server("batch", tuned)
     mod_export_server("export", tuned, quarto)
+    shiny::observeEvent(input$page, {
+      if (input$page %in% names(app_sidebar_panels)) {
+        bslib::accordion_panel_set(
+          "thresholds-sections",
+          app_sidebar_panels[[input$page]]
+        )
+      }
+    })
     shiny::observeEvent(input$cite, {
       shiny::showModal(shiny::modalDialog(
         title = "Cite NACHO",

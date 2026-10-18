@@ -163,8 +163,8 @@ mod_thresholds_ui <- function(id) {
   }
   bslib::accordion(
     id = ns("sections"),
-    multiple = TRUE,
-    open = c("Preset", "Imaging"),
+    multiple = FALSE,
+    open = "Preset",
     bslib::accordion_panel(
       "Preset",
       shiny::selectInput(
