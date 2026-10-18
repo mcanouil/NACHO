@@ -25,7 +25,7 @@ main <- function() {
   app <- shinytest2::AppDriver$new(
     NACHO::nacho_app(NACHO::GSE74821, done = TRUE),
     width = 1280,
-    height = 800,
+    height = 1192,
     load_timeout = 60000,
     timeout = 60000
   )
@@ -95,7 +95,9 @@ main <- function() {
   shoot("app-data.png")
   frame()
 
-  # Threshold help popover.
+  # Threshold help popover, in the Imaging section.
+  click(".accordion-item[data-value='Imaging'] .accordion-button")
+  app$wait_for_js("document.querySelector('.collapsing') === null")
   click("button[aria-label='More about Binding density']")
   app$wait_for_js(
     "document.querySelectorAll('.popover.show').length > 0",
@@ -268,6 +270,7 @@ main <- function() {
     list.files(frames, pattern = "^frame-.*[.]png$", full.names = TRUE),
     gif_file = gif,
     width = 900,
+    height = 838,
     delay = 1,
     loop = TRUE,
     progress = FALSE
