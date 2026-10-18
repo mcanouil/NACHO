@@ -150,6 +150,20 @@ threshold_group_body <- function(x, limits, ns, group) {
   threshold_inputs(x, limits, ns, metrics)
 }
 
+#' Sidebar panel that each page of the app opens
+#'
+#' @noRd
+app_sidebar_panels <- c(
+  Data = "Preset",
+  "QC metrics" = "Imaging",
+  Controls = "Controls",
+  Counts = "Content",
+  Normalisation = "Normalisation",
+  Batch = "Normalisation",
+  Samples = "Preset",
+  Export = "Preset"
+)
+
 preset_choices <- c(nSolver = "nsolver", "NACHO 2" = "legacy")
 
 preset_label <- function(preset) {
@@ -237,8 +251,13 @@ settings_of <- function(x) {
   )
 }
 
-mod_thresholds_server <- function(id, data) {
+mod_thresholds_server <- function(id, data, page = shiny::reactive(NULL)) {
   shiny::moduleServer(id, function(input, output, session) {
+    shiny::observeEvent(page(), {
+      if (page() %in% names(app_sidebar_panels)) {
+        bslib::accordion_panel_set("sections", app_sidebar_panels[[page()]])
+      }
+    })
     current <- shiny::reactiveVal()
     base <- shiny::reactiveVal()
     published <- shiny::reactiveVal()
