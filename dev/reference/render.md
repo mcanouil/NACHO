@@ -1,103 +1,112 @@
-# Render an HTML report of a "nacho" object
+# Render the quality-control report of a nacho object
 
-This function creates an R Markdown script and renders it as an HTML
-document. The HTML document is a quality-control report using all the
-metrics from
-[`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
-based on recommendations from NanoString.
+Writes a quality-control report with Quarto. The report starts with a
+cover that gives the study details. Then comes a decision summary, with
+the flagged samples and notes on how the data were processed. A table
+gives each setting and limit, with its meaning and its source. Each plot
+of [`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md)
+and each table has a short "How to read this". A methods appendix gives
+the citation and the package versions.
 
 ## Usage
 
 ``` r
 render(
-  nacho_object,
-  colour = "CartridgeID",
-  output_file = "NACHO_QC.html",
+  x,
+  format = c("html", "typst"),
   output_dir = ".",
+  colour = "CartridgeID",
+  group = NULL,
   size = 1,
   show_legend = TRUE,
-  show_outliers = TRUE,
   outliers_factor = 1,
   outliers_labels = NULL,
-  clean = TRUE
+  title = NULL,
+  author = NULL
 )
 ```
 
 ## Arguments
 
-- nacho_object:
+- x:
 
-  \[[list](https://rdrr.io/r/base/list.html)\] A list object of class
-  `"nacho"` obtained from
+  A `nacho` object from
   [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
   or
   [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
 
-- colour:
+- format:
 
-  \[[character](https://rdrr.io/r/base/character.html)\] Character
-  string of the column in `ssheet_csv` or more generally in
-  `nacho_object$nacho` to be used as grouping colour.
-
-- output_file:
-
-  \[[character](https://rdrr.io/r/base/character.html)\] The name of the
-  output file.
+  `"html"` (the default) for a self-contained HTML file, or `"typst"`
+  for a PDF.
 
 - output_dir:
 
-  \[[character](https://rdrr.io/r/base/character.html)\] The output
-  directory for the rendered output_file. This allows for a choice of an
-  alternate directory to which the output file should be written (the
-  default output directory is the working directory, *i.e.*, `.`). If a
-  path is provided with a filename in `output_file` the directory
-  specified here will take precedence. Please note that any directory
-  path provided will create any necessary directories if they do not
-  exist.
+  The directory to write `nacho-report.html` or `nacho-report.pdf` to.
+  It is created when it does not exist.
+
+- colour:
+
+  The column of `nacho_samples(x)` that colours the samples.
+
+- group:
+
+  The column of `nacho_samples(x)` with the biological groups, or
+  `NULL`. With a group, the report checks whether batches and groups are
+  confounded; see
+  [`batch_diagnostics()`](https://m.canouil.dev/NACHO/dev/reference/batch_diagnostics.md).
 
 - size:
 
-  \[[numeric](https://rdrr.io/r/base/numeric.html)\] A numeric
-  controlling point size
-  ([`ggplot2::geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html)
-  or line width
-  ([`ggplot2::geom_line()`](https://ggplot2.tidyverse.org/reference/geom_path.html)).
+  The point size.
 
 - show_legend:
 
-  \[[logical](https://rdrr.io/r/base/logical.html)\] Boolean to indicate
-  whether the plot legends should be plotted (`TRUE`) or not (`FALSE`).
-  Default is `TRUE`.
-
-- show_outliers:
-
-  \[[logical](https://rdrr.io/r/base/logical.html)\] Boolean to indicate
-  whether the outliers should be highlighted in red (`TRUE`) or not
-  (`FALSE`). Default is `TRUE`.
+  If `FALSE`, hide the colour legends.
 
 - outliers_factor:
 
-  \[[numeric](https://rdrr.io/r/base/numeric.html)\] Size factor for
-  outliers compared to `size`. Default is `1`.
+  The size of flagged samples, relative to `size`.
 
 - outliers_labels:
 
-  \[[character](https://rdrr.io/r/base/character.html)\] Character to
-  indicate which column in `nacho_object$nacho` should be used to be
-  printed as the labels for outliers or not. Default is `NULL`.
+  The column of `nacho_samples(x)` that labels the flagged samples, or
+  `NULL` for no labels.
 
-- clean:
+- title:
 
-  \[[logical](https://rdrr.io/r/base/logical.html)\] Boolean to indicate
-  whether the Rmd and RData files used to produce the HTML report are
-  removed from `output_dir`. Default is `TRUE`.
+  The report title. `NULL` or empty uses "NanoString quality-control
+  report". A missing value (`NA`) is an error.
+
+- author:
+
+  Who prepared the report, as one string, for example
+  `"Jane Doe, Genomics Core"`. `NULL` or empty leaves it out. A missing
+  value (`NA`) is an error.
+
+## Value
+
+The path of the report, invisibly.
+
+## Details
+
+The report needs the Quarto command-line interface 1.9.18 or newer, and
+the quarto, knitr and rmarkdown packages. RStudio and Positron bundle
+Quarto; elsewhere, install it from
+<https://quarto.org/docs/get-started/>. The PDF goes through Typst,
+which Quarto bundles, so no LaTeX is needed.
+
+The PDF is tagged and declares PDF/UA-1. When Typst compiles the PDF, it
+checks the PDF/UA-1 rules that it can enforce. When Quarto shows the
+warning "verapdf is not installed", you can ignore it: it only means
+that Quarto did not do the extra validation step.
 
 ## Examples
 
 ``` r
-
 if (interactive()) {
   data(GSE74821)
-  render(GSE74821)
+  render(GSE74821, output_dir = tempdir())
+  render(GSE74821, format = "typst", output_dir = tempdir())
 }
 ```

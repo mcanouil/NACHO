@@ -5,7 +5,7 @@ Deploy (copy) the Shiny application to the specified directory
 ## Usage
 
 ``` r
-deploy(directory = "/srv/shiny-server", app_name = "NACHO")
+deploy(directory, app_name = "NACHO")
 ```
 
 ## Arguments
@@ -27,13 +27,23 @@ whether the deployment is successful (`TRUE`) or not (`FALSE`).
 
 ## Details
 
-The app needs the markdown package on the server to show its help pages.
+The deployed app calls
+[`NACHO::nacho_app()`](https://m.canouil.dev/NACHO/dev/reference/nacho_app.md),
+so the server needs NACHO installed. The app sets the
+`nacho.plot_workers` option to `1` when the option is not set, so it
+starts one background process for the interactive plots. That process
+and the plot cache belong to the R process that runs the app, and each
+process keeps a copy of the study, so its memory grows with the size of
+the study (about 170 MB for `GSE74821`). To change the number of
+processes, set the option before the app starts, for example in
+`.Rprofile` on the server. See the "Plot workers" section of
+[`nacho_app()`](https://m.canouil.dev/NACHO/dev/reference/nacho_app.md).
 
 ## Examples
 
 ``` r
 
-deploy(directory = ".")
+deploy(directory = tempdir())
 #> [1] TRUE
 
 if (interactive()) {

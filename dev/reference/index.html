@@ -19,7 +19,12 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/NACHO-analysis.html">NACHO Analysis</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Articles</h6></li>
+    <li><a class="dropdown-item" href="../articles/nacho-app.html">Explore quality control in the app</a></li>
+    <li><a class="dropdown-item" href="../articles/nacho-report.html">The Quality-Control Report</a></li>
+    <li><a class="dropdown-item" href="../articles/nacho-analysis.html">Analyse a GEO study</a></li>
+    <li><a class="dropdown-item" href="../articles/moving-from-nacho-2.html">Moving from NACHO 2</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -61,17 +66,73 @@
 
         <dt>
 
-          <code><a href="normalise.html">normalise()</a></code>
+          <code><a href="read_nacho.html">read_nacho()</a></code>
 
         </dt>
-        <dd>(re)Normalise a "nacho" object</dd>
+        <dd>Read a saved NACHO object</dd>
 
         <dt>
 
-          <code><a href="check_outliers.html">check_outliers()</a></code>
+          <code><a href="upgrade_nacho.html">upgrade_nacho()</a></code>
 
         </dt>
-        <dd>Annotate a "nacho" object for outliers</dd>
+        <dd>Convert a NACHO 2 object to NACHO 3</dd>
+
+        <dt>
+
+          <code><a href="as_summarized_experiment.html">as_summarized_experiment()</a></code> <code><a href="as_summarized_experiment.html">as_nacho()</a></code>
+
+        </dt>
+        <dd>Convert between nacho objects and Bioconductor containers</dd>
+
+        <dt>
+
+          <code><a href="nacho_thresholds.html">nacho_thresholds()</a></code>
+
+        </dt>
+        <dd>Quality-control thresholds</dd>
+
+        <dt>
+
+          <code><a href="write_thresholds.html">write_thresholds()</a></code> <code><a href="write_thresholds.html">read_thresholds()</a></code>
+
+        </dt>
+        <dd>Write and read quality-control thresholds</dd>
+
+        <dt>
+
+          <code><a href="normalise.html">normalise()</a></code>
+
+        </dt>
+        <dd>(Re)normalise a nacho object</dd>
+
+        <dt>
+
+          <code><a href="exclude_outliers.html">exclude_outliers()</a></code>
+
+        </dt>
+        <dd>Drop outliers and normalise the other samples again</dd>
+
+        <dt>
+
+          <code><a href="housekeeping_stability.html">housekeeping_stability()</a></code>
+
+        </dt>
+        <dd>Rank genes by expression stability</dd>
+
+        <dt>
+
+          <code><a href="suggest_ruv_k.html">suggest_ruv_k()</a></code>
+
+        </dt>
+        <dd>Suggest how many unwanted factors RUVg should remove</dd>
+
+        <dt>
+
+          <code><a href="batch_diagnostics.html">batch_diagnostics()</a></code>
+
+        </dt>
+        <dd>Batch and confounding diagnostics</dd>
       </dl></div><div class="section level2">
       <h2 id="visualise-and-report">Visualise and report<a class="anchor" aria-label="anchor" href="#visualise-and-report"></a></h2>
 
@@ -87,28 +148,42 @@
           <code><a href="visualise.html">visualise()</a></code>
 
         </dt>
-        <dd>Visualise quality-control metrics of a "nacho" object</dd>
+        <dd>Explore and tune quality control in the NACHO app</dd>
 
         <dt>
 
-          <code><a href="autoplot.nacho.html">autoplot(<i>&lt;nacho&gt;</i>)</a></code>
+          <code><a href="autoplot.nacho.html">autoplot.nacho</a></code>
 
         </dt>
-        <dd>Plot quality-control metrics and thresholds of a "nacho" object</dd>
+        <dd>Plot the quality control of a nacho object</dd>
 
         <dt>
 
-          <code><a href="print.nacho.html">print(<i>&lt;nacho&gt;</i>)</a></code>
+          <code><a href="nacho-methods.html">nacho-methods</a></code>
 
         </dt>
-        <dd>Print method for "nacho" object</dd>
+        <dd>Basic methods for a nacho object</dd>
+
+        <dt>
+
+          <code><a href="nacho-accessors.html">nacho_counts()</a></code> <code><a href="nacho-accessors.html">nacho_samples()</a></code> <code><a href="nacho-accessors.html">nacho_probes()</a></code> <code><a href="nacho-accessors.html">nacho_qc()</a></code>
+
+        </dt>
+        <dd>Get the content of a nacho object</dd>
+
+        <dt>
+
+          <code><a href="filter_detected.html">filter_detected()</a></code>
+
+        </dt>
+        <dd>Keep genes detected in enough samples</dd>
 
         <dt>
 
           <code><a href="render.html">render()</a></code>
 
         </dt>
-        <dd>Render an HTML report of a "nacho" object</dd>
+        <dd>Render the quality-control report of a nacho object</dd>
       </dl></div><div class="section level2">
       <h2 id="shiny-application">Shiny application<a class="anchor" aria-label="anchor" href="#shiny-application"></a></h2>
 
@@ -120,6 +195,13 @@
 
 
       <dl><dt>
+
+          <code><a href="nacho_app.html">nacho_app()</a></code>
+
+        </dt>
+        <dd>Run the NACHO app</dd>
+
+        <dt>
 
           <code><a href="deploy.html">deploy()</a></code>
 

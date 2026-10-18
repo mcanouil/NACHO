@@ -37,7 +37,12 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/NACHO-analysis.html">NACHO Analysis</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Articles</h6></li>
+    <li><a class="dropdown-item" href="../articles/nacho-app.html">Explore quality control in the app</a></li>
+    <li><a class="dropdown-item" href="../articles/nacho-report.html">The Quality-Control Report</a></li>
+    <li><a class="dropdown-item" href="../articles/nacho-analysis.html">Analyse a GEO study</a></li>
+    <li><a class="dropdown-item" href="../articles/moving-from-nacho-2.html">Moving from NACHO 2</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -74,7 +79,7 @@ Control dasHbOard</h3>
                         <h4 data-toc-skip class="author">Mickaël
 Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D.</h4>
             
-            <h4 data-toc-skip class="date">October 01, 2026</h4>
+            <h4 data-toc-skip class="date">18 October 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/mcanouil/NACHO/blob/main/vignettes/NACHO.Rmd" class="external-link"><code>vignettes/NACHO.Rmd</code></a></small>
       <div class="d-none name"><code>NACHO.Rmd</code></div>
@@ -101,54 +106,47 @@ Canouil, Ph.D., Gerard A. Bouland and Roderick C. Slieker, Ph.D.</h4>
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
 <p><em>NACHO</em> (<strong>NA</strong>noString quality
-<strong>C</strong>ontrol das<strong>H</strong>b<strong>O</strong>ard) is
-developed for NanoString nCounter data.<br>
-NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA)
-expression assay and works with fluorescent barcodes.<br>
-Each barcode is assigned an mRNA/miRNA, which can be counted after
-bonding with its target.<br>
-As a result each count of a specific barcode represents the presence of
-its target mRNA/miRNA.</p>
-<p><em>NACHO</em> is able to load, visualise and normalise the exported
-NanoString nCounter data and facilitates the user in performing a
-quality control.<br><em>NACHO</em> does this by visualising quality control metrics,
-expression of control genes, principal components and sample specific
-size factors in an interactive web application.</p>
-<p>With the use of two functions, RCC files are summarised and
-visualised, namely: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> and
-<code><a href="../reference/visualise.html">visualise()</a></code>.</p>
+<strong>C</strong>ontrol das<strong>H</strong>b<strong>O</strong>ard)
+works with NanoString nCounter data. An nCounter assay measures
+messenger RNA and micro RNA (mRNA/miRNA) expression with fluorescent
+barcodes. Each barcode is assigned to an mRNA or miRNA, and it is
+counted after it binds its target. Each count of a barcode therefore
+shows how much of its target is present.</p>
+<p><em>NACHO</em> loads, visualizes and normalizes the exported nCounter
+data, and it helps you to check its quality. It shows quality control
+metrics, the expression of control genes, principal components and
+sample-specific size factors in an interactive web application.</p>
+<p>Two functions summarize and visualize the RCC files:</p>
 <ul>
-<li>The <code><a href="../reference/load_rcc.html">load_rcc()</a></code> function is used to preprocess the
-data.</li>
-<li>The <code><a href="../reference/visualise.html">visualise()</a></code> function initiates a <a href="https://shiny.posit.co/" class="external-link">Shiny-based dashboard</a> that visualises
-all relevant QC plots.</li>
+<li>The <code><a href="../reference/load_rcc.html">load_rcc()</a></code> function preprocesses the data.</li>
+<li>The <code><a href="../reference/visualise.html">visualise()</a></code> function starts a <a href="https://shiny.posit.co/" class="external-link">Shiny-based dashboard</a> with all
+relevant QC plots.</li>
 </ul>
-<p><em>NACHO</em> also includes a function <code><a href="../reference/normalise.html">normalise()</a></code>,
-which (re)calculates sample specific size factors and normalises the
+<p><em>NACHO</em> also has a <code><a href="../reference/normalise.html">normalise()</a></code> function. It
+calculates the sample-specific size factors again and normalizes the
 data.</p>
 <ul>
-<li>The <code><a href="../reference/normalise.html">normalise()</a></code> function creates a list in which your
-settings, the raw counts and normalised counts are stored.</li>
+<li>The <code><a href="../reference/normalise.html">normalise()</a></code> function returns a <code>nacho</code>
+object that holds your settings, the raw counts and the normalized
+counts.</li>
 </ul>
-<p>In addition (since v0.6.0) <em>NACHO</em> includes two (three)
-additional functions:</p>
+<p>Since v0.6.0, <em>NACHO</em> has two more functions:</p>
 <ul>
-<li>The <code><a href="../reference/render.html">render()</a></code> function renders a full quality-control
-report (HTML) based on the results of a call to <code><a href="../reference/load_rcc.html">load_rcc()</a></code>
-or <code><a href="../reference/normalise.html">normalise()</a></code> (using <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> in an R Markdown
-chunk).</li>
-<li>The <code><a href="../reference/autoplot.html">autoplot()</a></code> function draws any quality-control
-metrics from <code><a href="../reference/visualise.html">visualise()</a></code> and <code><a href="../reference/render.html">render()</a></code>.</li>
+<li>The <code><a href="../reference/render.html">render()</a></code> function writes a full quality control
+report with Quarto, as an HTML or PDF file, from the result of
+<code><a href="../reference/load_rcc.html">load_rcc()</a></code> or <code><a href="../reference/normalise.html">normalise()</a></code>.</li>
+<li>The <code><a href="../reference/autoplot.html">autoplot()</a></code> function draws the quality control
+metrics of <code><a href="../reference/visualise.html">visualise()</a></code> and <code><a href="../reference/render.html">render()</a></code>.</li>
 </ul>
-<p>For more <code><a href="../articles/NACHO.html">vignette("NACHO")</a></code> and
-<code><a href="../articles/NACHO-analysis.html">vignette("NACHO-analysis")</a></code>.</p>
+<p>For more information, see <code><a href="../articles/NACHO.html">vignette("NACHO")</a></code> and the
+articles on the package website.</p>
 <p>
 Canouil M, Bouland GA, Bonnefond A, Froguel P, ’t Hart LM, Slieker RC
 (2020). “NACHO: an R package for quality control of NanoString nCounter
 data.” <em>Bioinformatics</em>, <b>36</b>(3), 970–971. ISSN 1367-4803.
 <a href="https://doi.org/10.1093/bioinformatics/btz647" class="external-link">doi:10.1093/bioinformatics/btz647</a>.
 </p>
-<pre><code>@Article{,
+<pre><code>@Article{Canouil2020,
   title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
   author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
   journal = {Bioinformatics},
@@ -162,772 +160,436 @@ data.” <em>Bioinformatics</em>, <b>36</b>(3), 970–971. ISSN 1367-4803.
 }</code></pre>
 </div>
 <div class="section level2">
-<h2 id="an-example">An example<a class="anchor" aria-label="anchor" href="#an-example"></a>
+<h2 id="load-rcc-files">Load RCC files<a class="anchor" aria-label="anchor" href="#load-rcc-files"></a>
 </h2>
-<p>To display the usage and utility of <em>NACHO</em>, we show three
-examples in which the above mentioned functions are used and the results
-are briefly examined.</p>
-<p><em>NACHO</em> comes with presummarised data and in the first example
-we use this dataset to call the interactive web application using
-<code><a href="../reference/visualise.html">visualise()</a></code>.<br>
-In the second example, we show the process of going from raw RCC files
-to visualisations with a dataset queried from <strong>GEO</strong> using
-<code>GEOquery</code>.<br>
-In the third example, we use the summarised dataset from the second
-example to calculate the sample specific size factors using
-<code><a href="../reference/normalise.html">normalise()</a></code> and its added functionality to predict
-housekeeping genes.</p>
-<p>Besides creating interactive visualisations, <em>NACHO</em> also
-identifies poorly performing samples which can be seen under the Outlier
-Table tab in the interactive web application.<br>
-While calling <code><a href="../reference/normalise.html">normalise()</a></code>, the user has the possibility to
-remove these outliers before size factor calculation.</p>
-<div class="section level3">
-<h3 id="get-nanostring-ncounter-data">Get NanoString nCounter data<a class="anchor" aria-label="anchor" href="#get-nanostring-ncounter-data"></a>
-</h3>
-<div class="section level4">
-<h4 id="presummarised-data-from-nacho">Presummarised data from <em>NACHO</em><a class="anchor" aria-label="anchor" href="#presummarised-data-from-nacho"></a>
-</h4>
-<p>This example shows how to use summarised data to call the interactive
-web application.<br>
-The raw data used is from a study of <span class="citation">Liu et al.
-(<a href="#ref-liu_pam50_2016">2016</a>)</span> and was acquired from
-the NCBI GEO public database <span class="citation">(<a href="#ref-barrett_ncbi_2013">Barrett et al. 2013</a>)</span>.</p>
+<p><em>NACHO</em> ships three small datasets in
+<code>inst/extdata</code>, so every chunk below runs offline.
+<code>GSE178516</code> holds six mRNA samples measured with the
+PanCancer IO 360 panel. <code>GSE270837</code> holds six miRNA samples.
+<code>GSE346526</code> holds six mRNA samples in RCC files that nSolver
+4.0.1.8 wrote. All three come from the NCBI GEO public database <span class="citation">(<a href="#ref-barrett_ncbi_2013">Barrett et al.
+2013</a>)</span>, and each folder has a <code>samplesheet.csv</code>
+whose <code>IDFILE</code> column holds the exact name of each RCC
+file.</p>
+<p><code><a href="../reference/load_rcc.html">load_rcc()</a></code> takes the folder with the RCC files, the
+samplesheet and the name of the identifier column. It reads the files,
+computes the quality-control metrics, normalises the counts and returns
+a <code>nacho</code> object. With only six samples, there are at most
+five principal components, so we ask for five. The RCC files do not name
+the instrument, so we say it is an nCounter MAX, which sets the binding
+density limits.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mcanouil/NACHO/" class="external-link">NACHO</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">GSE74821</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/visualise.html">visualise</a></span><span class="op">(</span><span class="va">GSE74821</span><span class="op">)</span></span></code></pre></div>
-<p><img src="README-visualise.png" class="r-plt" alt="NACHO dashboard on the QC Metrics tab, with threshold sliders on the left and boxplots of binding density, field of view, positive control linearity and limit of detection per cartridge." width="650px" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="va">data_directory</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE178516"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span></span>
+<span><span class="va">nacho</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_rcc.html">load_rcc</a></span><span class="op">(</span></span>
+<span>  data_directory <span class="op">=</span> <span class="va">data_directory</span>,</span>
+<span>  ssheet_csv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">data_directory</span>, <span class="st">"samplesheet.csv"</span><span class="op">)</span>,</span>
+<span>  id_colname <span class="op">=</span> <span class="st">"IDFILE"</span>,</span>
+<span>  instrument <span class="op">=</span> <span class="st">"max"</span>,</span>
+<span>  n_comp <span class="op">=</span> <span class="fl">5</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading 6 RCC files</span></span>
+<span><span class="co">## <span style="color: #00BB00;">✔</span> Reading 6 RCC files <span style="color: #B2B2B2;">[25ms]</span></span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Assembling 6 samples</span></span>
+<span><span class="co">## <span style="color: #00BB00;">✔</span> Assembling 6 samples <span style="color: #B2B2B2;">[19ms]</span></span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Computing quality-control metrics and normalising</span></span>
+<span><span class="co">## <span style="color: #00BB00;">✔</span> Computing quality-control metrics and normalising <span style="color: #B2B2B2;">[21ms]</span></span></span>
+<span><span class="co">## </span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">nacho</span><span class="op">)</span></span>
+<span><span class="co">## &lt;nacho&gt; 6 samples, 784 probes, from single-sample RCC files</span></span>
+<span><span class="co">## Normalisation: GEO, with 20 housekeeping genes</span></span>
+<span><span class="co">## Flagged samples: 0 of 6</span></span>
+<span><span class="co">## Created with NACHO 2.0.8.9000</span></span></code></pre></div>
 </div>
-<div class="section level4">
-<h4 id="raw-data-from-geo">Raw data from GEO<a class="anchor" aria-label="anchor" href="#raw-data-from-geo"></a>
-</h4>
-<p>Numerous NanoString nCounter datasets are available from GEO <span class="citation">(<a href="#ref-barrett_ncbi_2013">Barrett et al.
-2013</a>)</span>.<br>
-In this example, we use a miRNA dataset from the study of <span class="citation">Bruce et al. (<a href="#ref-bruce_identification_2015">2015</a>)</span> with the GEO
-accession number: <strong>GSE70970</strong>. The samples were measured
-with two versions of the miRNA CodeSet, each exported by a different
-nSolver version, and <code><a href="../reference/load_rcc.html">load_rcc()</a></code> refuses files that mix
-versions. The following code extracts the data and keeps the samples
-measured with <code>NS_H_miR_1.4</code>.</p>
+<div class="section level2">
+<h2 id="read-the-object">Read the object<a class="anchor" aria-label="anchor" href="#read-the-object"></a>
+</h2>
+<p>Four accessors give you the content of a <code>nacho</code> object as
+plain matrices and data frames. <code><a href="../reference/nacho-accessors.html">nacho_counts()</a></code> returns the
+counts, with one row per probe and one column per sample. Pass
+<code>normalised = TRUE</code> for the normalised counts, and
+<code>log2 = TRUE</code> for <code>log2(count + 1)</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/seandavi/GEOquery" class="external-link">GEOquery</a></span><span class="op">)</span></span>
-<span><span class="va">data_directory</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"Data"</span><span class="op">)</span></span>
-<span><span class="co"># Download data</span></span>
-<span><span class="va">gse</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://seandavi.github.io/GEOquery/reference/getGEO.html" class="external-link">getGEO</a></span><span class="op">(</span><span class="st">"GSE70970"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="http://seandavi.github.io/GEOquery/reference/getGEOSuppFiles.html" class="external-link">getGEOSuppFiles</a></span><span class="op">(</span>GEO <span class="op">=</span> <span class="st">"GSE70970"</span>, baseDir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># Unzip data</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/untar.html" class="external-link">untar</a></span><span class="op">(</span></span>
-<span>  tarfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"GSE70970"</span>, <span class="st">"GSE70970_RAW.tar"</span><span class="op">)</span>,</span>
-<span>  exdir <span class="op">=</span> <span class="va">data_directory</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co"># Get phenotypes and add IDs</span></span>
-<span><span class="va">targets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/phenoData.html" class="external-link">pData</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/Biobase/man/phenoData.html" class="external-link">phenoData</a></span><span class="op">(</span><span class="va">gse</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">rcc_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">data_directory</span>, pattern <span class="op">=</span> <span class="st">"\\.RCC(\\.gz)?$"</span>, ignore.case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">targets</span><span class="op">$</span><span class="va">IDFILE</span> <span class="op">&lt;-</span> <span class="va">rcc_files</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">targets</span><span class="op">$</span><span class="va">geo_accession</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"_.*"</span>, <span class="st">""</span>, <span class="va">rcc_files</span><span class="op">)</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="va">targets</span> <span class="op">&lt;-</span> <span class="va">targets</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">targets</span><span class="op">$</span><span class="va">IDFILE</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="co"># Keep the samples measured with the same CodeSet</span></span>
-<span><span class="va">codeset</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span></span>
-<span>  X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">data_directory</span>, <span class="va">targets</span><span class="op">$</span><span class="va">IDFILE</span><span class="op">)</span>,</span>
-<span>  FUN <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">file</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">header</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"^GeneRLF,"</span>, <span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="va">file</span>, n <span class="op">=</span> <span class="fl">40</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">header</span><span class="op">)</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="cn">NA_character_</span> <span class="kw">else</span> <span class="va">header</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
-<span>  <span class="op">}</span>,</span>
-<span>  FUN.VALUE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">targets</span> <span class="op">&lt;-</span> <span class="va">targets</span><span class="op">[</span><span class="va">codeset</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="st">"GeneRLF,NS_H_miR_1.4"</span>, <span class="op">]</span></span></code></pre></div>
-<pre><code><span><span class="co">##                                 IDFILE                title geo_accession</span></span>
-<span><span class="co">## GSM1824143   GSM1824143_NPC-T-1.RCC.gz   NPC-Training Set-1    GSM1824143</span></span>
-<span><span class="co">## GSM1824144  GSM1824144_NPC-T-10.RCC.gz  NPC-Training Set-10    GSM1824144</span></span>
-<span><span class="co">## GSM1824145 GSM1824145_NPC-T-100.RCC.gz NPC-Training Set-100    GSM1824145</span></span>
-<span><span class="co">## GSM1824146 GSM1824146_NPC-T-101.RCC.gz NPC-Training Set-101    GSM1824146</span></span>
-<span><span class="co">## GSM1824147 GSM1824147_NPC-T-102.RCC.gz NPC-Training Set-102    GSM1824147</span></span>
-<span><span class="co">##                           status submission_date last_update_date type</span></span>
-<span><span class="co">## GSM1824143 Public on Jul 17 2015     Jul 15 2015      Jul 20 2015  RNA</span></span>
-<span><span class="co">## GSM1824144 Public on Jul 17 2015     Jul 15 2015      Jul 20 2015  RNA</span></span>
-<span><span class="co">## GSM1824145 Public on Jul 17 2015     Jul 15 2015      Jul 20 2015  RNA</span></span>
-<span><span class="co">## GSM1824146 Public on Jul 17 2015     Jul 15 2015      Jul 20 2015  RNA</span></span>
-<span><span class="co">## GSM1824147 Public on Jul 17 2015     Jul 15 2015      Jul 20 2015  RNA</span></span>
-<span><span class="co">##            channel_count                      source_name_ch1 organism_ch1</span></span>
-<span><span class="co">## GSM1824143             1 FFPE Nasopharyngeal Carcinoma Biopsy Homo sapiens</span></span>
-<span><span class="co">## GSM1824144             1 FFPE Nasopharyngeal Carcinoma Biopsy Homo sapiens</span></span>
-<span><span class="co">## GSM1824145             1 FFPE Nasopharyngeal Carcinoma Biopsy Homo sapiens</span></span>
-<span><span class="co">## GSM1824146             1 FFPE Nasopharyngeal Carcinoma Biopsy Homo sapiens</span></span>
-<span><span class="co">## GSM1824147             1 FFPE Nasopharyngeal Carcinoma Biopsy Homo sapiens</span></span>
-<span><span class="co">##            characteristics_ch1     characteristics_ch1.1 characteristics_ch1.2</span></span>
-<span><span class="co">## GSM1824143    distant.event: 0 distant.time: 5.095140315     survival.event: 0</span></span>
-<span><span class="co">## GSM1824144    distant.event: 0 distant.time: 7.471594798     survival.event: 0</span></span>
-<span><span class="co">## GSM1824145    distant.event: 0   distant.time: 4.8678987     survival.event: 0</span></span>
-<span><span class="co">## GSM1824146    distant.event: 0 distant.time: 3.835728953     survival.event: 0</span></span>
-<span><span class="co">## GSM1824147    distant.event: 0 distant.time: 4.292950034     survival.event: 0</span></span>
-<span><span class="co">##                 characteristics_ch1.3 characteristics_ch1.4</span></span>
-<span><span class="co">## GSM1824143 survival.time: 5.095140315        local.event: 1</span></span>
-<span><span class="co">## GSM1824144 survival.time: 7.471594798        local.event: 1</span></span>
-<span><span class="co">## GSM1824145   survival.time: 4.8678987        local.event: 0</span></span>
-<span><span class="co">## GSM1824146 survival.time: 3.835728953        local.event: 0</span></span>
-<span><span class="co">## GSM1824147 survival.time: 4.292950034        local.event: 1</span></span>
-<span><span class="co">##              characteristics_ch1.5            characteristics_ch1.6</span></span>
-<span><span class="co">## GSM1824143 local.time: 5.075975359 local.regional.time: 5.075975359</span></span>
-<span><span class="co">## GSM1824144 local.time: 1.204654346 local.regional.time: 1.204654346</span></span>
-<span><span class="co">## GSM1824145   local.time: 4.8678987   local.regional.time: 4.8678987</span></span>
-<span><span class="co">## GSM1824146 local.time: 3.835728953 local.regional.time: 3.835728953</span></span>
-<span><span class="co">## GSM1824147 local.time: 2.828199863 local.regional.time: 2.828199863</span></span>
-<span><span class="co">##              characteristics_ch1.7   characteristics_ch1.8</span></span>
-<span><span class="co">## GSM1824143 local.regional.event: 1 nodal.time: 5.095140315</span></span>
-<span><span class="co">## GSM1824144 local.regional.event: 1 nodal.time: 7.471594798</span></span>
-<span><span class="co">## GSM1824145 local.regional.event: 0   nodal.time: 4.8678987</span></span>
-<span><span class="co">## GSM1824146 local.regional.event: 0 nodal.time: 3.835728953</span></span>
-<span><span class="co">## GSM1824147 local.regional.event: 1 nodal.time: 4.292950034</span></span>
-<span><span class="co">##            characteristics_ch1.9 characteristics_ch1.10</span></span>
-<span><span class="co">## GSM1824143        nodal.event: 0       disease.event: 1</span></span>
-<span><span class="co">## GSM1824144        nodal.event: 0       disease.event: 1</span></span>
-<span><span class="co">## GSM1824145        nodal.event: 0       disease.event: 0</span></span>
-<span><span class="co">## GSM1824146        nodal.event: 0       disease.event: 0</span></span>
-<span><span class="co">## GSM1824147        nodal.event: 0       disease.event: 1</span></span>
-<span><span class="co">##               characteristics_ch1.11 characteristics_ch1.12</span></span>
-<span><span class="co">## GSM1824143 disease.time: 5.075975359                  t: T1</span></span>
-<span><span class="co">## GSM1824144 disease.time: 1.204654346                  t: T1</span></span>
-<span><span class="co">## GSM1824145   disease.time: 4.8678987                  t: T1</span></span>
-<span><span class="co">## GSM1824146 disease.time: 3.835728953                  t: T3</span></span>
-<span><span class="co">## GSM1824147 disease.time: 2.828199863                  t: T3</span></span>
-<span><span class="co">##            characteristics_ch1.13 characteristics_ch1.14</span></span>
-<span><span class="co">## GSM1824143                  n: N0       age: 45.97260274</span></span>
-<span><span class="co">## GSM1824144                 n: N2c              age: 46.4</span></span>
-<span><span class="co">## GSM1824145                  n: N1       age: 50.36438356</span></span>
-<span><span class="co">## GSM1824146                  n: N0       age: 64.09041096</span></span>
-<span><span class="co">## GSM1824147                  n: N2       age: 27.57808219</span></span>
-<span><span class="co">##                    characteristics_ch1.15 characteristics_ch1.16</span></span>
-<span><span class="co">## GSM1824143 disease.spec.time: 5.095140315  disease.spec.event: 0</span></span>
-<span><span class="co">## GSM1824144 disease.spec.time: 7.471594798  disease.spec.event: 0</span></span>
-<span><span class="co">## GSM1824145   disease.spec.time: 4.8678987  disease.spec.event: 0</span></span>
-<span><span class="co">## GSM1824146 disease.spec.time: 3.835728953  disease.spec.event: 0</span></span>
-<span><span class="co">## GSM1824147 disease.spec.time: 4.292950034  disease.spec.event: 0</span></span>
-<span><span class="co">##            characteristics_ch1.17 characteristics_ch1.18 characteristics_ch1.19</span></span>
-<span><span class="co">## GSM1824143           gender: Male               chemo: 0               bin.t: 0</span></span>
-<span><span class="co">## GSM1824144           gender: Male               chemo: 1               bin.t: 0</span></span>
-<span><span class="co">## GSM1824145           gender: Male               chemo: 0               bin.t: 0</span></span>
-<span><span class="co">## GSM1824146         gender: Female               chemo: 1               bin.t: 1</span></span>
-<span><span class="co">## GSM1824147           gender: Male               chemo: 1               bin.t: 1</span></span>
-<span><span class="co">##               treatment_protocol_ch1 growth_protocol_ch1 molecule_ch1</span></span>
-<span><span class="co">## GSM1824143 Xylene de-paraffinization                  NA    total RNA</span></span>
-<span><span class="co">## GSM1824144 Xylene de-paraffinization                  NA    total RNA</span></span>
-<span><span class="co">## GSM1824145 Xylene de-paraffinization                  NA    total RNA</span></span>
-<span><span class="co">## GSM1824146 Xylene de-paraffinization                  NA    total RNA</span></span>
-<span><span class="co">## GSM1824147 Xylene de-paraffinization                  NA    total RNA</span></span>
-<span><span class="co">##                                                           extract_protocol_ch1</span></span>
-<span><span class="co">## GSM1824143 Recover All Total Nucleic Acid Isolation Kit for FFPE (Ambion, Inc)</span></span>
-<span><span class="co">## GSM1824144 Recover All Total Nucleic Acid Isolation Kit for FFPE (Ambion, Inc)</span></span>
-<span><span class="co">## GSM1824145 Recover All Total Nucleic Acid Isolation Kit for FFPE (Ambion, Inc)</span></span>
-<span><span class="co">## GSM1824146 Recover All Total Nucleic Acid Isolation Kit for FFPE (Ambion, Inc)</span></span>
-<span><span class="co">## GSM1824147 Recover All Total Nucleic Acid Isolation Kit for FFPE (Ambion, Inc)</span></span>
-<span><span class="co">##                                 label_ch1                  label_protocol_ch1</span></span>
-<span><span class="co">## GSM1824143 Nanostring fluorophore barcode Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824144 Nanostring fluorophore barcode Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824145 Nanostring fluorophore barcode Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824146 Nanostring fluorophore barcode Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824147 Nanostring fluorophore barcode Nanostring nCounter Analysis System</span></span>
-<span><span class="co">##            taxid_ch1                        hyb_protocol</span></span>
-<span><span class="co">## GSM1824143      9606 Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824144      9606 Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824145      9606 Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824146      9606 Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824147      9606 Nanostring nCounter Analysis System</span></span>
-<span><span class="co">##                                  scan_protocol</span></span>
-<span><span class="co">## GSM1824143 Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824144 Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824145 Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824146 Nanostring nCounter Analysis System</span></span>
-<span><span class="co">## GSM1824147 Nanostring nCounter Analysis System</span></span>
-<span><span class="co">##                                                                                           data_processing</span></span>
-<span><span class="co">## GSM1824143 variance stabilization and normalization (vsn) called through the NanoStringNorm package for R</span></span>
-<span><span class="co">## GSM1824144 variance stabilization and normalization (vsn) called through the NanoStringNorm package for R</span></span>
-<span><span class="co">## GSM1824145 variance stabilization and normalization (vsn) called through the NanoStringNorm package for R</span></span>
-<span><span class="co">## GSM1824146 variance stabilization and normalization (vsn) called through the NanoStringNorm package for R</span></span>
-<span><span class="co">## GSM1824147 variance stabilization and normalization (vsn) called through the NanoStringNorm package for R</span></span>
-<span><span class="co">##            platform_id contact_name         contact_email</span></span>
-<span><span class="co">## GSM1824143    GPL20699  Jeff,,Bruce jbruce@uhnresearch.ca</span></span>
-<span><span class="co">## GSM1824144    GPL20699  Jeff,,Bruce jbruce@uhnresearch.ca</span></span>
-<span><span class="co">## GSM1824145    GPL20699  Jeff,,Bruce jbruce@uhnresearch.ca</span></span>
-<span><span class="co">## GSM1824146    GPL20699  Jeff,,Bruce jbruce@uhnresearch.ca</span></span>
-<span><span class="co">## GSM1824147    GPL20699  Jeff,,Bruce jbruce@uhnresearch.ca</span></span>
-<span><span class="co">##                          contact_institute contact_address contact_city</span></span>
-<span><span class="co">## GSM1824143 Princess Margaret Cancer Centre 101 College St.      Toronto</span></span>
-<span><span class="co">## GSM1824144 Princess Margaret Cancer Centre 101 College St.      Toronto</span></span>
-<span><span class="co">## GSM1824145 Princess Margaret Cancer Centre 101 College St.      Toronto</span></span>
-<span><span class="co">## GSM1824146 Princess Margaret Cancer Centre 101 College St.      Toronto</span></span>
-<span><span class="co">## GSM1824147 Princess Margaret Cancer Centre 101 College St.      Toronto</span></span>
-<span><span class="co">##            contact_state contact_zip/postal_code contact_country</span></span>
-<span><span class="co">## GSM1824143       Ontario                  M5G1L7          Canada</span></span>
-<span><span class="co">## GSM1824144       Ontario                  M5G1L7          Canada</span></span>
-<span><span class="co">## GSM1824145       Ontario                  M5G1L7          Canada</span></span>
-<span><span class="co">## GSM1824146       Ontario                  M5G1L7          Canada</span></span>
-<span><span class="co">## GSM1824147       Ontario                  M5G1L7          Canada</span></span>
-<span><span class="co">##                                                                                        supplementary_file</span></span>
-<span><span class="co">## GSM1824143   ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1824nnn/GSM1824143/suppl/GSM1824143_NPC-T-1.RCC.gz</span></span>
-<span><span class="co">## GSM1824144  ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1824nnn/GSM1824144/suppl/GSM1824144_NPC-T-10.RCC.gz</span></span>
-<span><span class="co">## GSM1824145 ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1824nnn/GSM1824145/suppl/GSM1824145_NPC-T-100.RCC.gz</span></span>
-<span><span class="co">## GSM1824146 ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1824nnn/GSM1824146/suppl/GSM1824146_NPC-T-101.RCC.gz</span></span>
-<span><span class="co">## GSM1824147 ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM1824nnn/GSM1824147/suppl/GSM1824147_NPC-T-102.RCC.gz</span></span>
-<span><span class="co">##            data_row_count     age:ch1 bin.t:ch1 chemo:ch1 disease.event:ch1</span></span>
-<span><span class="co">## GSM1824143            734 45.97260274         0         0                 1</span></span>
-<span><span class="co">## GSM1824144            734        46.4         0         1                 1</span></span>
-<span><span class="co">## GSM1824145            734 50.36438356         0         0                 0</span></span>
-<span><span class="co">## GSM1824146            734 64.09041096         1         1                 0</span></span>
-<span><span class="co">## GSM1824147            734 27.57808219         1         1                 1</span></span>
-<span><span class="co">##            disease.spec.event:ch1 disease.spec.time:ch1 disease.time:ch1</span></span>
-<span><span class="co">## GSM1824143                      0           5.095140315      5.075975359</span></span>
-<span><span class="co">## GSM1824144                      0           7.471594798      1.204654346</span></span>
-<span><span class="co">## GSM1824145                      0             4.8678987        4.8678987</span></span>
-<span><span class="co">## GSM1824146                      0           3.835728953      3.835728953</span></span>
-<span><span class="co">## GSM1824147                      0           4.292950034      2.828199863</span></span>
-<span><span class="co">##            distant.event:ch1 distant.time:ch1 gender:ch1 local.event:ch1</span></span>
-<span><span class="co">## GSM1824143                 0      5.095140315       Male               1</span></span>
-<span><span class="co">## GSM1824144                 0      7.471594798       Male               1</span></span>
-<span><span class="co">## GSM1824145                 0        4.8678987       Male               0</span></span>
-<span><span class="co">## GSM1824146                 0      3.835728953     Female               0</span></span>
-<span><span class="co">## GSM1824147                 0      4.292950034       Male               1</span></span>
-<span><span class="co">##            local.regional.event:ch1 local.regional.time:ch1 local.time:ch1</span></span>
-<span><span class="co">## GSM1824143                        1             5.075975359    5.075975359</span></span>
-<span><span class="co">## GSM1824144                        1             1.204654346    1.204654346</span></span>
-<span><span class="co">## GSM1824145                        0               4.8678987      4.8678987</span></span>
-<span><span class="co">## GSM1824146                        0             3.835728953    3.835728953</span></span>
-<span><span class="co">## GSM1824147                        1             2.828199863    2.828199863</span></span>
-<span><span class="co">##            n:ch1 nodal.event:ch1 nodal.time:ch1 survival.event:ch1</span></span>
-<span><span class="co">## GSM1824143    N0               0    5.095140315                  0</span></span>
-<span><span class="co">## GSM1824144   N2c               0    7.471594798                  0</span></span>
-<span><span class="co">## GSM1824145    N1               0      4.8678987                  0</span></span>
-<span><span class="co">## GSM1824146    N0               0    3.835728953                  0</span></span>
-<span><span class="co">## GSM1824147    N2               0    4.292950034                  0</span></span>
-<span><span class="co">##            survival.time:ch1 t:ch1</span></span>
-<span><span class="co">## GSM1824143       5.095140315    T1</span></span>
-<span><span class="co">## GSM1824144       7.471594798    T1</span></span>
-<span><span class="co">## GSM1824145         4.8678987    T1</span></span>
-<span><span class="co">## GSM1824146       3.835728953    T3</span></span>
-<span><span class="co">## GSM1824147       4.292950034    T3</span></span></code></pre>
-<p>After we extracted the dataset to the
-<code>/tmp/RtmpxtCUIr/GSE70970/Data</code> directory, a
-<code>Samplesheet.csv</code> containing a column with the exact names of
-the files for each sample can be written or used as is.</p>
-</div>
-</div>
-<div class="section level3">
-<h3 id="the-load_rcc-function">The <code>load_rcc()</code> function<a class="anchor" aria-label="anchor" href="#the-load_rcc-function"></a>
-</h3>
-<p>The first argument requires the path to the directory containing the
-RCC files, the second argument is the location of the samplesheet,
-followed by the third argument with the column name containing the exact
-names of the files.<br>
-The <code>housekeeping_genes</code> and
-<code>normalisation_method</code> arguments respectively indicate which
-housekeeping genes and normalisation method should be used.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho-accessors.html">nacho_counts</a></span><span class="op">(</span><span class="va">nacho</span><span class="op">)</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">##        GSM5393247_S02.RCC.gz GSM5393248_S13.RCC.gz GSM5393250_S15.RCC.gz</span></span>
+<span><span class="co">## A2M                      255                   549                  5061</span></span>
+<span><span class="co">## ACVR1C                    11                    52                   184</span></span>
+<span><span class="co">## ADAM12                     1                     8                    14</span></span>
+<span><span class="co">## ADGRE1                     2                     0                    26</span></span>
+<span><span class="co">## ADM                       62                   181                   117</span></span></code></pre></div>
+<p><code><a href="../reference/nacho-accessors.html">nacho_samples()</a></code> has one row per sample, with the
+samplesheet columns, the RCC header fields and the quality-control
+metrics.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho-accessors.html">nacho_samples</a></span><span class="op">(</span><span class="va">nacho</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"IDFILE"</span>, <span class="st">"title"</span>, <span class="st">"CartridgeID"</span>, <span class="st">"BD"</span>, <span class="st">"FoV"</span><span class="op">)</span><span class="op">]</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">##                  IDFILE       title  CartridgeID   BD   FoV</span></span>
+<span><span class="co">## 1 GSM5393247_S02.RCC.gz Patient S02 Lynch Lauf 1 0.34  99.8</span></span>
+<span><span class="co">## 2 GSM5393248_S13.RCC.gz Patient S13 Lynch Lauf 1 0.38 100.0</span></span>
+<span><span class="co">## 3 GSM5393250_S15.RCC.gz Patient S15 Lynch Lauf 1 0.62  99.8</span></span></code></pre></div>
+<p><code><a href="../reference/nacho-accessors.html">nacho_probes()</a></code> has one row per probe, with its code
+class, its detection rate and whether it is a housekeeping gene.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">GSE70970_sum</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_rcc.html">load_rcc</a></span><span class="op">(</span></span>
-<span>  data_directory <span class="op">=</span> <span class="va">data_directory</span>, <span class="co"># Where the data is</span></span>
-<span>  ssheet_csv <span class="op">=</span> <span class="va">targets</span>, <span class="co"># The samplesheet</span></span>
-<span>  id_colname <span class="op">=</span> <span class="st">"IDFILE"</span>, <span class="co"># Name of the column that contains the unique identifiers</span></span>
-<span>  housekeeping_genes <span class="op">=</span> <span class="cn">NULL</span>, <span class="co"># Custom list of housekeeping genes</span></span>
-<span>  housekeeping_predict <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># Whether or not to predict the housekeeping genes</span></span>
-<span>  normalisation_method <span class="op">=</span> <span class="st">"GEO"</span>, <span class="co"># Geometric mean or GLM</span></span>
-<span>  n_comp <span class="op">=</span> <span class="fl">5</span> <span class="co"># Number indicating how many principal components should be computed.</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">## [NACHO] Importing RCC files.</span></span>
-<span><span class="co">## [NACHO] Performing QC and formatting data.</span></span>
-<span><span class="co">## [NACHO] Searching for the best housekeeping genes.</span></span>
-<span><span class="co">## [NACHO] Computing normalisation factors using "GEO" method for housekeeping genes prediction.</span></span>
-<span><span class="co">## [NACHO] The following predicted housekeeping genes will be used for normalisation:</span></span>
-<span><span class="co">##   - ebv-miR-BHRF1-3</span></span>
-<span><span class="co">##   - ebv-miR-BHRF1-1</span></span>
-<span><span class="co">##   - ebv-miR-BART9</span></span>
-<span><span class="co">##   - hsa-miR-720</span></span>
-<span><span class="co">##   - hsa-miR-103</span></span>
-<span><span class="co">## [NACHO] Computing normalisation factors using "GEO" method.</span></span>
-<span><span class="co">## [NACHO] Missing values have been replaced with zeros for PCA.</span></span>
-<span><span class="co">## [NACHO] Normalising data using "GEO" method with housekeeping genes.</span></span>
-<span><span class="co">## [NACHO] Returning a list.</span></span>
-<span><span class="co">##   $ access              : character</span></span>
-<span><span class="co">##   $ housekeeping_genes  : character</span></span>
-<span><span class="co">##   $ housekeeping_predict: logical</span></span>
-<span><span class="co">##   $ housekeeping_norm   : logical</span></span>
-<span><span class="co">##   $ normalisation_method: character</span></span>
-<span><span class="co">##   $ remove_outliers     : logical</span></span>
-<span><span class="co">##   $ n_comp              : numeric</span></span>
-<span><span class="co">##   $ data_directory      : character</span></span>
-<span><span class="co">##   $ pc_sum              : data.frame</span></span>
-<span><span class="co">##   $ nacho               : data.frame</span></span>
-<span><span class="co">##   $ outliers_thresholds : list</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="the-visualise-function">The <code>visualise()</code> function<a class="anchor" aria-label="anchor" href="#the-visualise-function"></a>
-</h3>
-<p>When the summarisation is done, the summarised (or normalised) data
-can be visualised using the <code><a href="../reference/visualise.html">visualise()</a></code> function as can be
-seen in the following chunk of code.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho-accessors.html">nacho_probes</a></span><span class="op">(</span><span class="va">nacho</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">##    CodeClass   Name   Accession detection_rate is_housekeeping is_excluded</span></span>
+<span><span class="co">## 1 Endogenous    A2M NM_000014.4            1.0           FALSE       FALSE</span></span>
+<span><span class="co">## 2 Endogenous ACVR1C NM_145259.2            1.0           FALSE       FALSE</span></span>
+<span><span class="co">## 3 Endogenous ADAM12 NM_003474.5            0.5           FALSE       FALSE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho-accessors.html">nacho_probes</a></span><span class="op">(</span><span class="va">nacho</span><span class="op">)</span><span class="op">[[</span><span class="st">"CodeClass"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##   Endogenous Housekeeping     Negative     Positive </span></span>
+<span><span class="co">##          750           20            8            6</span></span></code></pre></div>
+<p><code><a href="../reference/nacho-accessors.html">nacho_qc()</a></code> has the quality-control table, one row per
+sample.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/visualise.html">visualise</a></span><span class="op">(</span><span class="va">GSE70970_sum</span><span class="op">)</span></span></code></pre></div>
-<p>The sidebar includes widgets to control quality-control thresholds.
-These widgets differ according to the selected tab. Each sample in the
-plots can be coloured based on either technical specifications which are
-included in the RCC files or based on specifications of your own
-choosing, though these specifications need to be included in the
-samplesheet.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho-accessors.html">nacho_qc</a></span><span class="op">(</span><span class="va">nacho</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"IDFILE"</span>, <span class="st">"BD"</span>, <span class="st">"FoV"</span>, <span class="st">"PCL"</span>, <span class="st">"LoD"</span><span class="op">)</span><span class="op">]</span>, n <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">##                  IDFILE   BD   FoV     PCL   LoD</span></span>
+<span><span class="co">## 1 GSM5393247_S02.RCC.gz 0.34  99.8 0.98757 11.42</span></span>
+<span><span class="co">## 2 GSM5393248_S13.RCC.gz 0.38 100.0 0.98809 21.76</span></span>
+<span><span class="co">## 3 GSM5393250_S15.RCC.gz 0.62  99.8 0.98463 11.12</span></span></code></pre></div>
+<p>Earlier versions of <em>NACHO</em> kept all of this in a
+<code>$nacho</code> data frame. That slot is gone, and the article
+“Moving from NACHO 2” on the <a href="https://m.canouil.dev/NACHO/">package website</a> maps each old
+element to its accessor.</p>
 </div>
-<div class="section level3">
-<h3 id="the-normalise-function">The <code>normalise()</code> function<a class="anchor" aria-label="anchor" href="#the-normalise-function"></a>
-</h3>
-<p><em>NACHO</em> allows the discovery of housekeeping genes within your
-own dataset. <em>NACHO</em> finds the five best suitable housekeeping
-genes, however, it is possible that one of these five genes might not be
-suitable, which is why a subset of these discovered housekeeping genes
-might work better in some cases. For this example, we use the
-<strong>GSE70970</strong> dataset from the previous example. The
-discovered housekeeping genes are saved in the result object as
-<strong>predicted_housekeeping</strong>.</p>
+<div class="section level2">
+<h2 id="quality-control">Quality control<a class="anchor" aria-label="anchor" href="#quality-control"></a>
+</h2>
+<p>A sample is flagged when a metric falls outside its limits.
+<code><a href="../reference/nacho_thresholds.html">nacho_thresholds()</a></code> builds those limits. The default
+<code>"nsolver"</code> preset follows the nCounter knowledge base, and
+<code>preset = "legacy"</code> reproduces the limits of <em>NACHO</em>
+2.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">GSE70970_sum</span><span class="op">[[</span><span class="st">"housekeeping_genes"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">## [1] "ebv-miR-BHRF1-3" "ebv-miR-BHRF1-1" "ebv-miR-BART9"   "hsa-miR-720"    </span></span>
-<span><span class="co">## [5] "hsa-miR-103"</span></span></code></pre></div>
-<p>Let’s say <em>ebv-miR-BHRF1-3</em> and <em>ebv-miR-BHRF1-1</em> are
-not suitable, therefore, you want to exclude these genes from the
-normalisation process.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho_thresholds.html">nacho_thresholds</a></span><span class="op">(</span><span class="op">)</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">## List of 13</span></span>
+<span><span class="co">##  $ preset               : chr "nsolver"</span></span>
+<span><span class="co">##  $ instrument           : chr "max"</span></span>
+<span><span class="co">##  $ BD                   : num [1:2] 0.05 2.25</span></span>
+<span><span class="co">##  $ FoV                  : num 75</span></span>
+<span><span class="co">##  $ PCL                  : num 0.95</span></span>
+<span><span class="co">##  $ LoD                  : num 2</span></span>
+<span><span class="co">##  $ Positive_factor      : num [1:2] 0.3 3</span></span>
+<span><span class="co">##  $ House_factor         : num [1:2] 0.1 10</span></span>
+<span><span class="co">##  $ Housekeeping_detected: num 3</span></span>
+<span><span class="co">##  $ Ligation_order       : num 1</span></span>
+<span><span class="co">##  $ Ligation_R2          : num 0.95</span></span>
+<span><span class="co">##  $ Ligation_NEG         : num [1:2] -Inf 0</span></span>
+<span><span class="co">##  $ Haemolysis           : num [1:2] -Inf Inf</span></span></code></pre></div>
+<p>Each <code>*_status</code> column of <code><a href="../reference/nacho-accessors.html">nacho_qc()</a></code> holds
+the result of one check. Three more columns summarise them:
+<code>status</code>, <code>n_flags</code> and <code>reason</code>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">my_housekeeping</span> <span class="op">&lt;-</span> <span class="va">GSE70970_sum</span><span class="op">[[</span><span class="st">"housekeeping_genes"</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">my_housekeeping</span><span class="op">)</span></span>
-<span><span class="co">## [1] "ebv-miR-BART9" "hsa-miR-720"   "hsa-miR-103"</span></span></code></pre></div>
-<p>The next step is the actual normalisation. The first argument
-requires the summary which is created with the <code><a href="../reference/load_rcc.html">load_rcc()</a></code>
-function. The second argument requires a vector of gene names. In this
-case, it is a subset of the discovered housekeeping genes we just made.
-With the third argument the user has the choice to remove the outliers.
-Lastly, the normalisation method can be chosen.<br>
-Here, the user has a choice between <code>"GLM"</code> or
-<code>"GEO"</code>. The differences between normalisation methods are
-nuanced, however, a preference for either method is use case
-specific.<br>
-In this example, <code>"GLM"</code> is used.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/nacho-accessors.html">nacho_qc</a></span><span class="op">(</span><span class="va">nacho</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"IDFILE"</span>, <span class="st">"status"</span>, <span class="st">"n_flags"</span>, <span class="st">"reason"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">##                  IDFILE status n_flags reason</span></span>
+<span><span class="co">## 1 GSM5393247_S02.RCC.gz   pass       0   &lt;NA&gt;</span></span>
+<span><span class="co">## 2 GSM5393248_S13.RCC.gz   pass       0   &lt;NA&gt;</span></span>
+<span><span class="co">## 3 GSM5393250_S15.RCC.gz   pass       0   &lt;NA&gt;</span></span>
+<span><span class="co">## 4 GSM5393251_S16.RCC.gz   pass       0   &lt;NA&gt;</span></span>
+<span><span class="co">## 5 GSM5393267_S46.RCC.gz   pass       0   &lt;NA&gt;</span></span>
+<span><span class="co">## 6 GSM5393268_S47.RCC.gz   pass       0   &lt;NA&gt;</span></span></code></pre></div>
+<p>All six samples pass. To use the legacy limits, give
+<code><a href="../reference/load_rcc.html">load_rcc()</a></code> the preset, or pass new limits to
+<code><a href="../reference/normalise.html">normalise()</a></code>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">GSE70970_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalise.html">normalise</a></span><span class="op">(</span></span>
-<span>  nacho_object <span class="op">=</span> <span class="va">GSE70970_sum</span>,</span>
-<span>  housekeeping_genes <span class="op">=</span> <span class="va">my_housekeeping</span>,</span>
-<span>  housekeeping_predict <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  housekeeping_norm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  normalisation_method <span class="op">=</span> <span class="st">"GEO"</span>,</span>
-<span>  remove_outliers <span class="op">=</span> <span class="cn">TRUE</span></span>
+<code class="sourceCode R"><span><span class="va">legacy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_rcc.html">load_rcc</a></span><span class="op">(</span></span>
+<span>  data_directory <span class="op">=</span> <span class="va">data_directory</span>,</span>
+<span>  ssheet_csv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">data_directory</span>, <span class="st">"samplesheet.csv"</span><span class="op">)</span>,</span>
+<span>  id_colname <span class="op">=</span> <span class="st">"IDFILE"</span>,</span>
+<span>  instrument <span class="op">=</span> <span class="st">"max"</span>,</span>
+<span>  n_comp <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  preset <span class="op">=</span> <span class="st">"legacy"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">## [NACHO] Normalising "GSE70970_sum" with new value for parameters:</span></span>
-<span><span class="co">##   - housekeeping_genes = TRUE</span></span>
-<span><span class="co">##   - housekeeping_predict = TRUE</span></span>
-<span><span class="co">##   - remove_outliers = TRUE</span></span>
-<span><span class="co">## [NACHO] Computing normalisation factors using "GEO" method.</span></span>
-<span><span class="co">## [NACHO] Missing values have been replaced with zeros for PCA.</span></span>
-<span><span class="co">## [NACHO] Returning a list.</span></span>
-<span><span class="co">##   $ access              : character</span></span>
-<span><span class="co">##   $ housekeeping_genes  : character</span></span>
-<span><span class="co">##   $ housekeeping_predict: logical</span></span>
-<span><span class="co">##   $ housekeeping_norm   : logical</span></span>
-<span><span class="co">##   $ normalisation_method: character</span></span>
-<span><span class="co">##   $ remove_outliers     : logical</span></span>
-<span><span class="co">##   $ n_comp              : numeric</span></span>
-<span><span class="co">##   $ data_directory      : character</span></span>
-<span><span class="co">##   $ pc_sum              : data.frame</span></span>
-<span><span class="co">##   $ nacho               : data.frame</span></span>
-<span><span class="co">##   $ outliers_thresholds : list</span></span></code></pre></div>
-<p><code><a href="../reference/normalise.html">normalise()</a></code> returns a <code>list</code> object, like
-<code><a href="../reference/load_rcc.html">load_rcc()</a></code>. Its <code>nacho</code> slot holds the raw
-counts in <code>Count</code> and the normalised counts in
-<code>Count_Norm</code>.</p>
-</div>
-<div class="section level3">
-<h3 id="the-autoplot-function">The <code>autoplot()</code> function<a class="anchor" aria-label="anchor" href="#the-autoplot-function"></a>
-</h3>
-<p>The <code><a href="../reference/autoplot.html">autoplot()</a></code> function provides an easy way to plot any
-quality-control from the <code><a href="../reference/visualise.html">visualise()</a></code> function.</p>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading 6 RCC files</span></span>
+<span><span class="co">## <span style="color: #00BB00;">✔</span> Reading 6 RCC files <span style="color: #B2B2B2;">[12ms]</span></span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Assembling 6 samples</span></span>
+<span><span class="co">## <span style="color: #00BB00;">✔</span> Assembling 6 samples <span style="color: #B2B2B2;">[11ms]</span></span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Computing quality-control metrics and normalising</span></span>
+<span><span class="co">## <span style="color: #00BB00;">✔</span> Computing quality-control metrics and normalising <span style="color: #B2B2B2;">[14ms]</span></span></span>
+<span><span class="co">## </span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho-accessors.html">nacho_qc</a></span><span class="op">(</span><span class="va">legacy</span><span class="op">)</span><span class="op">[[</span><span class="st">"status"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## pass </span></span>
+<span><span class="co">##    6</span></span></code></pre></div>
+<p><code><a href="../reference/write_thresholds.html">write_thresholds()</a></code> saves a set of limits to a YAML file,
+and <code><a href="../reference/write_thresholds.html">read_thresholds()</a></code> reads the file back. With this file,
+you can use the same limits for each study. The <strong>Export</strong>
+page of the app writes the same file.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/autoplot.html">autoplot</a></span><span class="op">(</span></span>
-<span>  object <span class="op">=</span> <span class="va">GSE74821</span>,</span>
-<span>  x <span class="op">=</span> <span class="st">"BD"</span>,</span>
-<span>  colour <span class="op">=</span> <span class="st">"CartridgeID"</span>,</span>
-<span>  size <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  show_legend <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>The possible metrics (<code>x</code>) are:</p>
-<ul>
-<li>
-<code>"BD"</code> (Binding Density)</li>
-<li>
-<code>"FoV"</code> (Imaging)</li>
-<li>
-<code>"PCL"</code> (Positive Control Linearity)</li>
-<li>
-<code>"LoD"</code> (Limit of Detection)</li>
-<li>
-<code>"Positive"</code> (Positive Controls)</li>
-<li>
-<code>"Negative"</code> (Negative Controls)</li>
-<li>
-<code>"Housekeeping"</code> (Housekeeping Genes)</li>
-<li>
-<code>"PN"</code> (Positive Controls vs. Negative Controls)</li>
-<li>
-<code>"ACBD"</code> (Average Counts vs. Binding Density)</li>
-<li>
-<code>"ACMC"</code> (Average Counts vs. Median Counts)</li>
-<li>
-<code>"PCA12"</code> (Principal Component 1 vs. 2)</li>
-<li>
-<code>"PCAi"</code> (Principal Component scree plot)</li>
-<li>
-<code>"PCA"</code> (Principal Components planes)</li>
-<li>
-<code>"PFNF"</code> (Positive Factor vs. Negative Factor)</li>
-<li>
-<code>"HF"</code> (Housekeeping Factor)</li>
-<li>
-<code>"NORM"</code> (Normalisation Factor)</li>
-</ul>
-<div class="section level4">
-<h4 id="binding-density">Binding Density<a class="anchor" aria-label="anchor" href="#binding-density"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="va">thresholds_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".yml"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/write_thresholds.html">write_thresholds</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho_thresholds.html">nacho_thresholds</a></span><span class="op">(</span>preset <span class="op">=</span> <span class="st">"legacy"</span><span class="op">)</span>, <span class="va">thresholds_file</span><span class="op">)</span></span>
+<span><span class="va">legacy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalise.html">normalise</a></span><span class="op">(</span><span class="va">nacho</span>, outliers_thresholds <span class="op">=</span> <span class="fu"><a href="../reference/write_thresholds.html">read_thresholds</a></span><span class="op">(</span><span class="va">thresholds_file</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">## Normalising again with new settings:</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">•</span> thresholds preset</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho-accessors.html">nacho_qc</a></span><span class="op">(</span><span class="va">legacy</span><span class="op">)</span><span class="op">[[</span><span class="st">"status"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## pass </span></span>
+<span><span class="co">##    6</span></span></code></pre></div>
 </div>
-<div class="section level4">
-<h4 id="imaging">Imaging<a class="anchor" aria-label="anchor" href="#imaging"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="positive-control-linearity">Positive Control Linearity<a class="anchor" aria-label="anchor" href="#positive-control-linearity"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="limit-of-detection">Limit of Detection<a class="anchor" aria-label="anchor" href="#limit-of-detection"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="positive-controls">Positive Controls<a class="anchor" aria-label="anchor" href="#positive-controls"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="negative-controls">Negative Controls<a class="anchor" aria-label="anchor" href="#negative-controls"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-6.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="housekeeping-genes">Housekeeping Genes<a class="anchor" aria-label="anchor" href="#housekeeping-genes"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-7.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="positive-controls-vs--negative-controls">Positive Controls vs. Negative Controls<a class="anchor" aria-label="anchor" href="#positive-controls-vs--negative-controls"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-8.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="average-counts-vs--binding-density">Average Counts vs. Binding Density<a class="anchor" aria-label="anchor" href="#average-counts-vs--binding-density"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-9.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="average-counts-vs--median-counts">Average Counts vs. Median Counts<a class="anchor" aria-label="anchor" href="#average-counts-vs--median-counts"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-10.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="principal-component-1-vs--2">Principal Component 1 vs. 2<a class="anchor" aria-label="anchor" href="#principal-component-1-vs--2"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-11.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="principal-component-scree-plot">Principal Component scree plot<a class="anchor" aria-label="anchor" href="#principal-component-scree-plot"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-12.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="principal-components-planes">Principal Components planes<a class="anchor" aria-label="anchor" href="#principal-components-planes"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-13.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="positive-factor-vs--negative-factor">Positive Factor vs. Negative Factor<a class="anchor" aria-label="anchor" href="#positive-factor-vs--negative-factor"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-14.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="housekeeping-factor">Housekeeping Factor<a class="anchor" aria-label="anchor" href="#housekeeping-factor"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-15.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level4">
-<h4 id="normalisation-factor">Normalisation Factor<a class="anchor" aria-label="anchor" href="#normalisation-factor"></a>
-</h4>
-<p><img src="NACHO_files/figure-html/unnamed-chunk-11-16.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-</div>
-<div class="section level3">
-<h3 id="nacho-as-a-standalone-app">NACHO as a standalone app<a class="anchor" aria-label="anchor" href="#nacho-as-a-standalone-app"></a>
-</h3>
-<p><em>NACHO</em> is also available as a standalone app to be used in a
-Shiny Server configuration. A convenience function <code><a href="../reference/deploy.html">deploy()</a></code>
-is available to directly copy the <em>NACHO</em> app to the default
-directory of a Shiny Server.</p>
+<div class="section level2">
+<h2 id="normalise">Normalise<a class="anchor" aria-label="anchor" href="#normalise"></a>
+</h2>
+<p><code><a href="../reference/normalise.html">normalise()</a></code> normalises a <code>nacho</code> object again
+with new settings and returns a new object. The default scales the
+samples with the geometric mean of the positive controls
+(<code>"GEO"</code>). <code>"GLM"</code> fits a Poisson model to the
+positive and negative controls instead.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/deploy.html">deploy</a></span><span class="op">(</span>directory <span class="op">=</span> <span class="st">"/srv/shiny-server"</span>, app_name <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span></span></code></pre></div>
-<p>The app can also be run directly, without manually summarising and
-normalising RCC files:</p>
+<code class="sourceCode R"><span><span class="va">geo_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalise.html">normalise</a></span><span class="op">(</span><span class="va">nacho</span>, normalisation_method <span class="op">=</span> <span class="st">"GEO"</span><span class="op">)</span></span>
+<span><span class="co">## The settings are the same as in the input, so `normalise()` returns it</span></span>
+<span><span class="co">## unchanged.</span></span>
+<span><span class="va">glm_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalise.html">normalise</a></span><span class="op">(</span><span class="va">nacho</span>, normalisation_method <span class="op">=</span> <span class="st">"GLM"</span><span class="op">)</span></span>
+<span><span class="co">## Normalising again with new settings:</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">•</span> normalisation_method</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho-accessors.html">nacho_counts</a></span><span class="op">(</span><span class="va">glm_norm</span>, normalised <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">##        GSM5393247_S02.RCC.gz GSM5393248_S13.RCC.gz GSM5393250_S15.RCC.gz</span></span>
+<span><span class="co">## A2M              1511.749015             935.45044           2951.662509</span></span>
+<span><span class="co">## ACVR1C             65.212703              88.60368            107.311974</span></span>
+<span><span class="co">## ADAM12              5.928428              13.63134              8.165042</span></span></code></pre></div>
+<p>Background handling has two arguments. <code>background</code>
+chooses how to estimate each sample’s background from its negative
+controls, for example <code>"mean_2sd"</code>.
+<code>background_mode</code> chooses what to do with it:
+<code>"threshold"</code> raises lower counts to the background, and
+<code>"subtract"</code> removes it.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/runApp.html" class="external-link">runApp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"app"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="README-app.png" class="r-plt" alt="NACHO Shiny application on the Upload RCC Files tab, with a choice of normalisation method and a file picker for RCC files." width="650px" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level3">
-<h3 id="the-render-function">The <code>render()</code> function<a class="anchor" aria-label="anchor" href="#the-render-function"></a>
-</h3>
-<p>The <code><a href="../reference/render.html">render()</a></code> function renders a comprehensive HTML
-report, using <code>print(..., echo = TRUE)</code>, which includes all
-quality-control metrics and description of those metrics.</p>
+<code class="sourceCode R"><span><span class="va">background</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalise.html">normalise</a></span><span class="op">(</span></span>
+<span>  <span class="va">nacho</span>,</span>
+<span>  background <span class="op">=</span> <span class="st">"mean_2sd"</span>,</span>
+<span>  background_mode <span class="op">=</span> <span class="st">"subtract"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">## Normalising again with new settings:</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">•</span> background</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">•</span> background_mode</span></span></code></pre></div>
+<p><code><a href="../reference/exclude_outliers.html">exclude_outliers()</a></code> drops the flagged samples and
+normalises the remaining ones again. Here nothing is flagged, so the
+object stays as it is.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/render.html">render</a></span><span class="op">(</span></span>
-<span>  nacho_object <span class="op">=</span> <span class="va">GSE74821</span>,</span>
-<span>  colour <span class="op">=</span> <span class="st">"CartridgeID"</span>,</span>
-<span>  output_file <span class="op">=</span> <span class="st">"NACHO_QC.html"</span>,</span>
-<span>  output_dir <span class="op">=</span> <span class="st">"."</span>,</span>
-<span>  size <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  show_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  clean <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>The underneath function <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> can be used directly
-within any R Markdown chunk, setting the parameter
-<code>echo = TRUE</code>.</p>
+<code class="sourceCode R"><span><span class="va">cleaned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/exclude_outliers.html">exclude_outliers</a></span><span class="op">(</span><span class="va">geo_norm</span><span class="op">)</span></span>
+<span><span class="co">## No sample is flagged, so nothing is removed.</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="mirna-panels">miRNA panels<a class="anchor" aria-label="anchor" href="#mirna-panels"></a>
+</h2>
+<p><code><a href="../reference/load_rcc.html">load_rcc()</a></code> recognises miRNA panels from their probes.
+The folder <code>GSE270837</code> holds six samples from such a panel,
+measured on an nCounter SPRINT, so we load them with the SPRINT
+limits.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
-<span>  x <span class="op">=</span> <span class="va">GSE74821</span>,</span>
-<span>  colour <span class="op">=</span> <span class="st">"CartridgeID"</span>,</span>
-<span>  size <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  show_legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  echo <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  title_level <span class="op">=</span> <span class="fl">3</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<div class="section level4">
-<h4 id="rcc-summary">RCC Summary<a class="anchor" aria-label="anchor" href="#rcc-summary"></a>
-</h4>
-<ul>
-<li>Samples: 48</li>
-<li>Endogenous: 50</li>
-<li>Housekeeping: 8</li>
-<li>Negative: 8</li>
-<li>Positive: 6</li>
-</ul>
+<code class="sourceCode R"><span><span class="va">mirna_directory</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"GSE270837"</span>, package <span class="op">=</span> <span class="st">"NACHO"</span><span class="op">)</span></span>
+<span><span class="va">mirna</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_rcc.html">load_rcc</a></span><span class="op">(</span></span>
+<span>  data_directory <span class="op">=</span> <span class="va">mirna_directory</span>,</span>
+<span>  ssheet_csv <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">mirna_directory</span>, <span class="st">"samplesheet.csv"</span><span class="op">)</span>,</span>
+<span>  id_colname <span class="op">=</span> <span class="st">"IDFILE"</span>,</span>
+<span>  instrument <span class="op">=</span> <span class="st">"sprint"</span>,</span>
+<span>  n_comp <span class="op">=</span> <span class="fl">5</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Reading 6 RCC files</span></span>
+<span><span class="co">## <span style="color: #00BB00;">✔</span> Reading 6 RCC files <span style="color: #B2B2B2;">[15ms]</span></span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Assembling 6 samples</span></span>
+<span><span class="co">## <span style="color: #00BB00;">✔</span> Assembling 6 samples <span style="color: #B2B2B2;">[11ms]</span></span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## <span style="color: #00BBBB;">ℹ</span> Computing quality-control metrics and normalising</span></span>
+<span><span class="co">## <span style="color: #00BB00;">✔</span> Computing quality-control metrics and normalising <span style="color: #B2B2B2;">[12ms]</span></span></span>
+<span><span class="co">## </span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">mirna</span><span class="op">)</span></span>
+<span><span class="co">## &lt;nacho&gt; 6 samples, 828 probes, from single-sample RCC files</span></span>
+<span><span class="co">## Normalisation: GEO, without housekeeping genes</span></span>
+<span><span class="co">## Flagged samples: 0 of 6</span></span>
+<span><span class="co">## Created with NACHO 2.0.8.9000</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu"><a href="../reference/nacho-accessors.html">nacho_probes</a></span><span class="op">(</span><span class="va">mirna</span><span class="op">)</span><span class="op">[[</span><span class="st">"CodeClass"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">##  Endogenous1 Housekeeping     Ligation     Negative     Positive      SpikeIn </span></span>
+<span><span class="co">##          798            5            6            8            6            5</span></span></code></pre></div>
+<p>The housekeeping mRNAs of a miRNA panel sit at the background level,
+so housekeeping normalisation is off by default. It only switches on
+when you pass <code>housekeeping_genes</code> or set
+<code>housekeeping_predict = TRUE</code>. The miRNA methods of
+<code>normalisation_method</code> (<code>"stable_mirna"</code>,
+<code>"total_mirna"</code>, <code>"spike_in"</code> and
+<code>"ligation"</code>) scale the samples with miRNAs or with the
+spike-in and ligation controls instead.</p>
+<p><code>Ligation_NEG</code> flags a sample when its largest ligation
+negative control is above the detection limit. Whole-blood RNA raises
+the ligation negative <code>LIG_NEG_A</code> together with red blood
+cell miRNAs such as miR-451a. Thus most samples of a whole-blood study
+can fail <code>Ligation_NEG</code> without a fault in the assay. When
+more than half of the samples fail, <code><a href="../reference/load_rcc.html">load_rcc()</a></code> warns about
+this pattern. For whole-blood samples, set a higher upper bound for
+<code>Ligation_NEG</code> and normalise again. The bound below is an
+example; choose it from the <code>Ligation_NEG</code> values of your
+study.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">thresholds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nacho_thresholds.html">nacho_thresholds</a></span><span class="op">(</span>instrument <span class="op">=</span> <span class="st">"sprint"</span><span class="op">)</span></span>
+<span><span class="va">thresholds</span><span class="op">[[</span><span class="st">"Ligation_NEG"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>, <span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">mirna</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/normalise.html">normalise</a></span><span class="op">(</span><span class="va">mirna</span>, outliers_thresholds <span class="op">=</span> <span class="va">thresholds</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level4">
-<h4 id="settings">Settings<a class="anchor" aria-label="anchor" href="#settings"></a>
-</h4>
-<ul>
-<li><p>Predict housekeeping genes: FALSE</p></li>
-<li><p>Normalise using housekeeping genes: TRUE</p></li>
-<li><p>Housekeeping genes available: MRPL19, PSMC4, SF3A1, RPLP0, PUM1,
-ACTB, TFRC and GUSB</p></li>
-<li><p>Normalise using: GLM</p></li>
-<li><p>Principal components to compute: 10</p></li>
-<li>
-<p>Remove outliers: FALSE</p>
-<ul>
-<li>Binding Density (BD) &lt; 0.1</li>
-<li>Binding Density (BD) &gt; 2.25</li>
-<li>Field of View (FoV) &lt; 75</li>
-<li>Positive Control Linearity (PCL) &lt; 0.95</li>
-<li>Limit of Detection (LoD) &lt; 2</li>
-<li>Positive normalisation factor (Positive_factor) &lt; 0.25</li>
-<li>Positive normalisation factor (Positive_factor) &gt; 4</li>
-<li>Housekeeping normalisation factor (house_factor) &lt; 0.091</li>
-<li>Housekeeping normalisation factor (house_factor) &gt; 11</li>
-</ul>
-</li>
-</ul>
+<div class="section level2">
+<h2 id="plots">Plots<a class="anchor" aria-label="anchor" href="#plots"></a>
+</h2>
+<p><code><a href="../reference/autoplot.html">autoplot()</a></code> draws any quality-control figure of the app
+and of the report. It takes the object and a <code>type</code>, and
+returns a <code>ggplot</code> object.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">nacho</span>, type <span class="op">=</span> <span class="st">"BD"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="NACHO_files/figure-html/plot-bd-1.png" class="r-plt" alt="Box plot of the binding density of each cartridge, with the limits of the quality control drawn as dashed lines." width="700" style="display: block; margin: auto;"></p>
+<p>Every <code>type</code> takes the same arguments:
+<code>colour</code>, <code>size</code>, <code>show_legend</code>,
+<code>show_outliers</code>, <code>outliers_factor</code>,
+<code>outliers_labels</code> and <code>dark</code>. A few plot types
+ignore some of them, and <code><a href="../reference/autoplot.nacho.html">?autoplot.nacho</a></code> says which. The
+relative log expression of the normalised counts shows whether the
+samples line up.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">geo_norm</span>, type <span class="op">=</span> <span class="st">"RLE"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="NACHO_files/figure-html/plot-rle-1.png" class="r-plt" alt="Box plots of the relative log expression of each sample, centred on zero." width="700" style="display: block; margin: auto;"></p>
+<p>The first two principal components show how the samples spread.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/autoplot.html">autoplot</a></span><span class="op">(</span><span class="va">geo_norm</span>, type <span class="op">=</span> <span class="st">"PCA12"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="NACHO_files/figure-html/plot-pca-1.png" class="r-plt" alt="Scatter plot of the first two principal components, with one point per sample coloured by cartridge." width="700" style="display: block; margin: auto;"></p>
+<p>This table lists every plot type.</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th align="left"><code>type</code></th>
+<th align="left">What it shows</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>"BD"</code></td>
+<td align="left">Binding Density.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>"FoV"</code></td>
+<td align="left">Field of View (imaging).</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>"PCL"</code></td>
+<td align="left">Positive Control Linearity.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>"LoD"</code></td>
+<td align="left">Limit of Detection.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>"Positive"</code></td>
+<td align="left">Positive controls.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>"Negative"</code></td>
+<td align="left">Negative controls.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>"Housekeeping"</code></td>
+<td align="left">Housekeeping genes.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>"PN"</code></td>
+<td align="left">Positive controls against negative controls.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>"ACBD"</code></td>
+<td align="left">Average counts against binding density.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>"ACMC"</code></td>
+<td align="left">Average counts against median counts.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>"PCA12"</code></td>
+<td align="left">Principal component 1 against 2.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>"PCAi"</code></td>
+<td align="left">Scree plot of the principal components.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>"PCA"</code></td>
+<td align="left">Planes of the first principal components.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>"PFNF"</code></td>
+<td align="left">Positive factor against negative factor.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>"HF"</code></td>
+<td align="left">Housekeeping factor.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>"NORM"</code></td>
+<td align="left">Normalisation factor.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>"Stability"</code></td>
+<td align="left">geNorm stability of the housekeeping genes.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>"RLE"</code></td>
+<td align="left">Relative log expression of the normalised endogenous
+genes.</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>"BatchFactors"</code></td>
+<td align="left">Normalisation factors by cartridge.</td>
+</tr>
+<tr class="even">
+<td align="left"><code>"PCBatch"</code></td>
+<td align="left">Share of each principal component explained by
+cartridge and date.</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div class="section level4">
-<h4 id="qc-metrics">QC Metrics<a class="anchor" aria-label="anchor" href="#qc-metrics"></a>
-</h4>
-<div class="section level5">
-<h5 id="binding-density-1">Binding Density<a class="anchor" aria-label="anchor" href="#binding-density-1"></a>
-</h5>
-<p>The imaging unit only counts the codes that are unambiguously
-distinguishable.<br>
-It simply will not count codes that overlap within an image.<br>
-This provides increased confidence that the molecular counts you receive
-are from truly recognisable codes.<br>
-Under most conditions, forgoing the few barcodes that do overlap will
-not impact your data.<br>
-Too many overlapping codes in the image, however, will create a
-condition called image saturation in which significant data loss could
-occur (critical data loss from saturation is uncommon).</p>
-<p>To determine the level of image saturation, the nCounter instrument
-calculates the number of optical features per square micron for each
-lane as it processes the images.<br>
-This is called the <strong>Binding Density</strong>
-(<strong>BD</strong>).<br>
-The <strong>Binding Density</strong> is useful for determining whether
-data collection has been compromised due to image saturation. The
-acceptable range for <strong>Binding Density</strong> is:</p>
-<ul>
-<li>
-<code>0.1 - 2.25</code> for
-<strong>MAX</strong>/<strong>FLEX</strong> instruments</li>
-<li>
-<code>0.1 - 1.8</code> for <strong>SPRINT</strong> instruments</li>
-</ul>
-<p>Within these ranges, relatively few reporters on the slide surface
-will overlap, enabling the instrument to accurately tabulate counts for
-each reporter species.<br>
-A <strong>Binding Density</strong> significantly greater than the upper
-limit in either range is indicative of overlapping reporters on the
-slide surface.<br>
-The counts observed in lanes with a <strong>Binding Density</strong> at
-this level may have had significant numbers of codes ignored, which
-could potentially affect quantification and linearity of the assay.</p>
-<p><img src="NACHO_files/figure-html/print-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
+<div class="section level2">
+<h2 id="report">Report<a class="anchor" aria-label="anchor" href="#report"></a>
+</h2>
+<p><code><a href="../reference/render.html">render()</a></code> builds a report with every quality-control
+metric and a description of each. It writes a self-contained HTML file,
+or a Typst PDF with <code>format = "typst"</code>, and returns the path.
+It needs Quarto 1.9.18 or newer. The article “The Quality-Control
+Report” on the <a href="https://m.canouil.dev/NACHO/">package
+website</a> shows what the report looks like.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/render.html">render</a></span><span class="op">(</span><span class="va">nacho</span>, format <span class="op">=</span> <span class="st">"html"</span>, output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level5">
-<h5 id="field-of-view-imaging">Field of View (Imaging)<a class="anchor" aria-label="anchor" href="#field-of-view-imaging"></a>
-</h5>
-<p>Each individual lane scanned on an nCounter system is divided into a
-few hundred imaging sections, called Fields of View
-(<strong>FOV</strong>), the exact number of which will depend on the
-system being used (<em>i.e.</em>, <strong>MAX/FLEX</strong> or
-<strong>SPRINT</strong>), and the scanner settings selected by the
-user.<br>
-The system images these <strong>FOV</strong>s separately, and sums the
-barcode counts of all <strong>FOV</strong>s from a single lane to form
-the final raw data count for each unique barcode target.<br>
-Finally, the system reports the number of <strong>FOV</strong>s
-successfully imaged as <strong>FOV</strong> Counted.</p>
-<p>Significant discrepancy between the number of <strong>FOV</strong>
-for which imaging was attempted (<strong>FOV Count</strong>) and for
-which imaging was successful (<strong>FOV Counted</strong>) may indicate
-an issue with imaging performance.<br>
-Recommended percentage of registered FOVs (<em>i.e.</em>, <strong>FOV
-Counted</strong> over <strong>FOV Count</strong>) is
-<code>75 %</code>.</p>
-<p><img src="NACHO_files/figure-html/print-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
+<div class="section level2">
+<h2 id="app">App<a class="anchor" aria-label="anchor" href="#app"></a>
+</h2>
+<p><code><a href="../reference/visualise.html">visualise()</a></code> opens the interactive app. The sidebar holds
+the quality-control thresholds and the normalisation settings for every
+page. When you click Done, <code><a href="../reference/visualise.html">visualise()</a></code> returns the tuned
+object to your R session.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tuned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/visualise.html">visualise</a></span><span class="op">(</span><span class="va">nacho</span><span class="op">)</span></span></code></pre></div>
+<p><img src="README-app.png" class="r-plt" alt="NACHO app on the QC metrics page, with the threshold sliders on the left and box plots of binding density and field of view for each cartridge." width="650px" style="display: block; margin: auto;"></p>
+<p>The article “Explore quality control in the app” on the <a href="https://m.canouil.dev/NACHO/">package website</a> walks through
+every page of the app.</p>
 </div>
-<div class="section level5">
-<h5 id="positive-control-linearity-1">Positive Control Linearity<a class="anchor" aria-label="anchor" href="#positive-control-linearity-1"></a>
-</h5>
-<p>Six synthetic DNA control targets are included with every nCounter
-Gene Expression assay.<br>
-Their concentrations range linearly (in <em>codeset</em>) from
-<code>128 fM</code> to <code>0.125 fM</code>, and they are referred to
-as <strong>POS_A</strong> to <strong>POS_F</strong>, respectively.<br>
-These <strong>Positive Controls</strong> are typically used to measure
-the efficiency of the hybridization reaction, and their step-wise
-concentrations also make them useful in checking the linearity
-performance of the assay.</p>
-<p>Since the known concentrations of the <strong>Positive
-Controls</strong> increase in a linear fashion, the resulting counts
-should, as well.</p>
-<!--
-Note that because **POS_F** has a known concentration of `0.125 fM`, which is considered below the limit of detection of the system, it should be excluded from this calculation (although you will see that **POS_F** counts are significantly higher than the negative control counts in most cases).
--->
-<p><img src="NACHO_files/figure-html/print-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level5">
-<h5 id="limit-of-detection-1">Limit of Detection<a class="anchor" aria-label="anchor" href="#limit-of-detection-1"></a>
-</h5>
-<p>The limit of detection (<strong>LoD</strong>) is determined by
-measuring the ability to detect <strong>POS_E</strong>, the
-<code>0.5 fM</code> positive control probe, which corresponds to about
-10,000 copies of this target within each sample tube.<br>
-On a <strong>FLEX</strong>/<strong>MAX</strong> system, the standard
-input of <code>100 ng</code> of total RNA will roughly correspond to
-about 10,000 cell equivalents (assuming one cell contains
-<code>10 pg</code> total RNA on average).<br>
-An nCounter assay run on the <strong>FLEX</strong>/<strong>MAX</strong>
-system should thus conservatively be able to detect roughly one
-transcript copy per cell for each target (or 10,000 total transcript
-copies).<br>
-In most (codeset) assays, you will observe that even the
-<strong>POS_F</strong> probe (equivalent to 0.25 copies per cell) is
-detectable above background.</p>
-<p><img src="NACHO_files/figure-html/print-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-</div>
-<div class="section level4">
-<h4 id="control-genes">Control Genes<a class="anchor" aria-label="anchor" href="#control-genes"></a>
-</h4>
-<div class="section level5">
-<h5 id="positive">Positive<a class="anchor" aria-label="anchor" href="#positive"></a>
-</h5>
-<p><img src="NACHO_files/figure-html/print-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level5">
-<h5 id="negative">Negative<a class="anchor" aria-label="anchor" href="#negative"></a>
-</h5>
-<p><img src="NACHO_files/figure-html/print-6.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level5">
-<h5 id="housekeeping">Housekeeping<a class="anchor" aria-label="anchor" href="#housekeeping"></a>
-</h5>
-<p><img src="NACHO_files/figure-html/print-7.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level5">
-<h5 id="control-probe-expression">Control Probe Expression<a class="anchor" aria-label="anchor" href="#control-probe-expression"></a>
-</h5>
-<p><img src="NACHO_files/figure-html/print-8.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-</div>
-<div class="section level4">
-<h4 id="quality-control-visuals">Quality-Control Visuals<a class="anchor" aria-label="anchor" href="#quality-control-visuals"></a>
-</h4>
-<div class="section level5">
-<h5 id="average-count-vs--binding-density">Average Count vs. Binding Density<a class="anchor" aria-label="anchor" href="#average-count-vs--binding-density"></a>
-</h5>
-<p><img src="NACHO_files/figure-html/print-9.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level5">
-<h5 id="average-count-vs--median-count">Average Count vs. Median Count<a class="anchor" aria-label="anchor" href="#average-count-vs--median-count"></a>
-</h5>
-<p><img src="NACHO_files/figure-html/print-10.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level5">
-<h5 id="principal-component">Principal Component<a class="anchor" aria-label="anchor" href="#principal-component"></a>
-</h5>
-<div class="section level6">
-<h6 id="pc1-vs--pc2">PC1 vs. PC2<a class="anchor" aria-label="anchor" href="#pc1-vs--pc2"></a>
-</h6>
-<p><img src="NACHO_files/figure-html/print-11.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level6">
-<h6 id="factorial-planes">Factorial planes<a class="anchor" aria-label="anchor" href="#factorial-planes"></a>
-</h6>
-<p><img src="NACHO_files/figure-html/print-12.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level6">
-<h6 id="proportion-of-variance-explained">Proportion of Variance Explained<a class="anchor" aria-label="anchor" href="#proportion-of-variance-explained"></a>
-</h6>
-<p><img src="NACHO_files/figure-html/print-13.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-</div>
-</div>
-<div class="section level4">
-<h4 id="normalisation">Normalisation<a class="anchor" aria-label="anchor" href="#normalisation"></a>
-</h4>
-<div class="section level5">
-<h5 id="positive-factor-vs--background-threshold">Positive Factor vs. Background Threshold<a class="anchor" aria-label="anchor" href="#positive-factor-vs--background-threshold"></a>
-</h5>
-<p><img src="NACHO_files/figure-html/print-14.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level5">
-<h5 id="housekeeping-factor-1">Housekeeping Factor<a class="anchor" aria-label="anchor" href="#housekeeping-factor-1"></a>
-</h5>
-<p><img src="NACHO_files/figure-html/print-15.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level5">
-<h5 id="normalisation-result">Normalisation Result<a class="anchor" aria-label="anchor" href="#normalisation-result"></a>
-</h5>
-<p><img src="NACHO_files/figure-html/print-16.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-</div>
-</div>
-</div>
+<div class="section level2">
+<h2 id="bioconductor">Bioconductor<a class="anchor" aria-label="anchor" href="#bioconductor"></a>
+</h2>
+<p><code><a href="../reference/as_summarized_experiment.html">as_summarized_experiment()</a></code> converts a <code>nacho</code>
+object into a <code>SummarizedExperiment</code>, and
+<code><a href="../reference/as_summarized_experiment.html">as_nacho()</a></code> converts it back. This needs the
+<em>SummarizedExperiment</em> package from Bioconductor.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">se</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_summarized_experiment.html">as_summarized_experiment</a></span><span class="op">(</span><span class="va">nacho</span><span class="op">)</span></span>
+<span><span class="va">se</span></span>
+<span><span class="co">## class: SummarizedExperiment </span></span>
+<span><span class="co">## dim: 784 6 </span></span>
+<span><span class="co">## metadata(1): nacho</span></span>
+<span><span class="co">## assays(2): counts normalised</span></span>
+<span><span class="co">## rownames(784): A2M ACVR1C ... POS_E(0.5) POS_F(0.125)</span></span>
+<span><span class="co">## rowData names(6): CodeClass Name ... is_housekeeping is_excluded</span></span>
+<span><span class="co">## colnames(6): GSM5393247_S02.RCC.gz GSM5393248_S13.RCC.gz ...</span></span>
+<span><span class="co">##   GSM5393267_S46.RCC.gz GSM5393268_S47.RCC.gz</span></span>
+<span><span class="co">## colData names(42): IDFILE geo_accession ... PC04 PC05</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -938,19 +600,6 @@ Barrett, Tanya, Stephen E. Wilhite, Pierre Ledoux, et al. 2013.
 <span>“<span>NCBI</span> <span>GEO</span>: Archive for Functional
 Genomics Data Sets—Update.”</span> <em>Nucleic Acids Research</em> 41
 (January): D991–95. <a href="https://doi.org/10.1093/nar/gks1193" class="external-link">https://doi.org/10.1093/nar/gks1193</a>.
-</div>
-<div id="ref-bruce_identification_2015" class="csl-entry">
-Bruce, Jeff P., Angela B. Y. Hui, Wei Shi, et al. 2015.
-<span>“Identification of a <span class="nocase">microRNA</span>
-Signature Associated with Risk of Distant Metastasis in Nasopharyngeal
-Carcinoma.”</span> <em>Oncotarget</em> 6 (6): 4537–50. <a href="https://doi.org/10.18632/oncotarget.3005" class="external-link">https://doi.org/10.18632/oncotarget.3005</a>.
-</div>
-<div id="ref-liu_pam50_2016" class="csl-entry">
-Liu, Minetta C., Brandelyn N. Pitcher, Elaine R. Mardis, et al. 2016.
-<span>“<span>PAM</span>50 Gene Signatures and Breast Cancer Prognosis
-with Adjuvant Anthracycline- and Taxane-Based Chemotherapy: Correlative
-Analysis of C9741 (Alliance).”</span> <em>Npj Breast Cancer</em> 2
-(January): 15023. <a href="https://doi.org/10.1038/npjbcancer.2015.23" class="external-link">https://doi.org/10.1038/npjbcancer.2015.23</a>.
 </div>
 </div>
 </div>

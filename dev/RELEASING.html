@@ -19,7 +19,12 @@
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/NACHO-analysis.html">NACHO Analysis</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Articles</h6></li>
+    <li><a class="dropdown-item" href="articles/nacho-app.html">Explore quality control in the app</a></li>
+    <li><a class="dropdown-item" href="articles/nacho-report.html">The Quality-Control Report</a></li>
+    <li><a class="dropdown-item" href="articles/nacho-analysis.html">Analyse a GEO study</a></li>
+    <li><a class="dropdown-item" href="articles/moving-from-nacho-2.html">Moving from NACHO 2</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -51,15 +56,16 @@
 <p>Run the “Release” workflow from <code>main</code> and pick <code>patch</code>, <code>minor</code> or <code>major</code>.</p>
 <p>It updates <code>DESCRIPTION</code>, <code>NEWS.md</code>, <code>CITATION.cff</code> and <code>cran-comments.md</code>, checks spelling and URLs, and opens a pull request called “chore: release NACHO X.Y.Z”. The pull request merges straight away, because the bump can’t break anything the checks cover. The checks still run on <code>main</code>, and the submission workflow checks the tarball again before anything goes to CRAN.</p>
 <p>Tick “rhub” to run the R-hub checks as well. They’re optional, and <code>cran-comments.md</code> only lists them when they run.</p>
-<p>Untick “auto-merge” when <code>cran-comments.md</code> needs a note, for example to explain breaking changes. The pull request is then assigned to you: edit the file on it and merge it yourself.</p>
+<p>Untick “auto-merge” when <code>cran-comments.md</code> needs a note, for example to explain breaking changes or a NOTE you expect from the check. The pull request is then assigned to you: edit the file on it and merge it yourself.</p>
 </div>
 <div class="section level2">
 <h2 id="id_2-submit-to-cran">2. Submit to CRAN<a class="anchor" aria-label="anchor" href="#id_2-submit-to-cran"></a></h2>
 <p>Merging the bump starts the “CRAN submission” workflow. It builds the tarball with the PDF manual and runs <code>R CMD check --as-cran</code>.</p>
+<p>The workflow then compares the check with the results line of <code>cran-comments.md</code>, for example <code>0 errors | 0 warnings | 1 note</code>. It stops before the upload only if <code>cran-comments.md</code> reports fewer errors, warnings or notes than the check found. A file that reports more problems than the check found passes. The check step before it already stops on any WARNING or ERROR, so the workflow lists only the NOTE sections that the file must explain. Open a pull request that explains each NOTE in <code>cran-comments.md</code> and corrects the results line, merge it, then run “CRAN submission” by hand from <code>main</code> with “dry run” unticked.</p>
 <p>It then waits for your approval on the <code>cran</code> environment. Approve it, and the workflow uploads the tarball and records the submission in <code>CRAN-SUBMISSION</code> on <code>main</code>. CRAN then emails the maintainer, and the submission only counts once you click the link in that email.</p>
 <p>Before the upload, the workflow checks <code>main</code> again. If <code>CRAN-SUBMISSION</code> there already records this version, it stops, so a re-run never submits twice.</p>
 <p>To rehearse without uploading, run “CRAN submission” by hand from <code>main</code> with “dry run” ticked. It builds and checks the tarball of whatever version <code>main</code> holds, even a development one. It still asks for approval on the <code>cran</code> environment, then stops before uploading.</p>
-<p>If the upload step fails because devtools changed, submit from a local checkout with <code><a href="https://devtools.r-lib.org/reference/submit_cran.html" class="external-link">devtools::submit_cran()</a></code>.</p>
+<p>If the upload step fails because devtools changed, submit from a local checkout with <code>devtools::submit_cran()</code>.</p>
 <div class="section level3">
 <h3 id="when-cran-asks-for-changes">When CRAN asks for changes<a class="anchor" aria-label="anchor" href="#when-cran-asks-for-changes"></a></h3>
 <p>A rejected version stays recorded in <code>CRAN-SUBMISSION</code>, so the workflow won’t submit it again on its own.</p>
@@ -71,8 +77,9 @@
 <div class="section level2">
 <h2 id="id_3-publish-the-release">3. Publish the release<a class="anchor" aria-label="anchor" href="#id_3-publish-the-release"></a></h2>
 <p>Once CRAN’s acceptance email arrives, run the “CRAN post-release” workflow from <code>main</code>.</p>
-<p>It checks that CRAN serves the version, tags <code>vX.Y.Z</code> on the submitted commit, and publishes the “NACHO X.Y.Z” release with the notes from <code>NEWS.md</code>. The release deploys the pkgdown site. It then opens a pull request that starts the next development version and removes <code>CRAN-SUBMISSION</code>.</p>
+<p>It checks that CRAN serves the version, tags <code>vX.Y.Z</code> on the submitted commit, and publishes the “NACHO X.Y.Z” release with the notes from <code>NEWS.md</code>. The release deploys the pkgdown site. A draft release <code>vX.Y.Z</code> stops the run, so publish or delete it before you run the workflow again. It then opens a pull request that starts the next development version and removes <code>CRAN-SUBMISSION</code>.</p>
 <p>If CRAN doesn’t serve the version yet, the workflow stops without changing anything, and you can run it again later.</p>
+<p>If a run stops after it published the release, run it again: it keeps the existing release when its tag points to the submitted commit, and goes on to the development version.</p>
 </div>
 <div class="section level2">
 <h2 id="scripts-and-tests">Scripts and tests<a class="anchor" aria-label="anchor" href="#scripts-and-tests"></a></h2>

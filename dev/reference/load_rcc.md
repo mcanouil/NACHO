@@ -11,8 +11,13 @@ load_rcc(
   id_colname = NULL,
   housekeeping_genes = NULL,
   housekeeping_predict = FALSE,
-  housekeeping_norm = TRUE,
+  housekeeping_norm = NULL,
   normalisation_method = "GEO",
+  background = "none",
+  background_mode = "threshold",
+  ruv_k = NULL,
+  instrument = NULL,
+  preset = "nsolver",
   n_comp = 10
 )
 ```
@@ -30,7 +35,13 @@ load_rcc(
   \[[data.frame](https://rdrr.io/r/base/data.frame.html)\] Either a
   string with the name of the CSV of the samplesheet or the samplesheet
   as a `data.frame`. Should contain a column that matches the file names
-  in the folder.
+  in the folder. NACHO computes the columns `Date`, `ID`, `BD`,
+  `ScannerID`, `StagePosition`, `CartridgeID`, `FoV`, `PCL`, `LoD`,
+  `MC`, `MedC`, `Positive_factor`, `Negative_factor`, `Detection_rate`,
+  `Background`, `House_factor`, `Housekeeping_detected`,
+  `Ligation_order`, `Ligation_R2`, `Ligation_NEG`, `Haemolysis`,
+  `is_outlier`, `PC1`, `PC2`, ... and `W_1`, `W_2`, .... A sample sheet
+  column with one of these names is replaced, with a warning.
 
 - id_colname:
 
@@ -48,20 +59,76 @@ load_rcc(
 
   \[[logical](https://rdrr.io/r/base/logical.html)\] Boolean to indicate
   whether the housekeeping genes should be predicted (`TRUE`) or not
-  (`FALSE`). Default is `FALSE`.
+  (`FALSE`). Default is `FALSE`. Prediction picks the five most stable
+  genes by geNorm on the raw counts. It is skipped for the miRNA methods
+  of `normalisation_method`.
 
 - housekeeping_norm:
 
   \[[logical](https://rdrr.io/r/base/logical.html)\] Boolean to indicate
-  whether the housekeeping normalisation should be performed. Default is
-  `TRUE`.
+  whether the housekeeping normalisation should be performed. `NULL`
+  (the default) normalises with housekeeping genes for mRNA panels that
+  have them. On miRNA panels, whose housekeeping mRNAs sit at
+  background, it does so only when you pass `housekeeping_genes` or set
+  `housekeeping_predict = TRUE`. Pass `TRUE` or `FALSE` to override
+  this. The miRNA methods of `normalisation_method` ignore it.
 
 - normalisation_method:
 
-  \[[character](https://rdrr.io/r/base/character.html)\] Either `"GEO"`
-  or `"GLM"`. Character string to indicate normalisation using the
-  geometric mean (`"GEO"`) or a generalized linear model (`"GLM"`).
-  Default is `"GEO"`.
+  \[[character](https://rdrr.io/r/base/character.html)\] `"GEO"` (the
+  default) or `"GLM"` scale samples by their positive controls, with the
+  geometric mean or a Poisson model, then by the housekeeping genes;
+  `"RUVg"` scales by the positive controls with the geometric mean, then
+  removes `ruv_k` factors of unwanted variation estimated from the
+  housekeeping genes, which
+  [`nacho_samples()`](https://m.canouil.dev/NACHO/dev/reference/nacho-accessors.md)
+  returns as `W_1`, `W_2`, ... for use as covariates. For miRNA panels,
+  `"stable_mirna"`, `"total_mirna"`, `"spike_in"` and `"ligation"` scale
+  by the five most stable miRNAs, the miRNAs above 50 counts, the
+  spike-in controls or the ligation positive controls, in the order
+  Bruker recommends for plasma and serum. These methods ignore
+  `housekeeping_genes`, `housekeeping_predict` and `housekeeping_norm`,
+  and give their scaling factor as `House_factor`. When a GLM fit fails,
+  NACHO warns and uses the geometric mean instead, as
+  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+  describes.
+
+- background:
+
+  \[[character](https://rdrr.io/r/base/character.html)\] How to estimate
+  each sample's background from its negative controls: `"none"` (the
+  default), `"mean"`, `"mean_2sd"` (mean plus two standard deviations),
+  `"median"`, `"max"` or `"geo"` (geometric mean).
+
+- background_mode:
+
+  \[[character](https://rdrr.io/r/base/character.html)\] What to do with
+  that background: `"threshold"` (the default) raises lower counts to
+  it, which Bruker recommends when fold changes matter, and `"subtract"`
+  removes it and floors at 0.
+
+- ruv_k:
+
+  \[[numeric](https://rdrr.io/r/base/numeric.html)\] The number of
+  unwanted factors RUVg removes; `NULL` uses
+  [`suggest_ruv_k()`](https://m.canouil.dev/NACHO/dev/reference/suggest_ruv_k.md).
+  A `ruv_k` above two less than the number of samples, or one less than
+  the number of control genes, is lowered with a
+  `nacho_warning_ruv_k_reduced` warning. Other methods ignore it.
+
+- instrument:
+
+  \[[character](https://rdrr.io/r/base/character.html)\] The nCounter
+  instrument, `"max"`, `"flex"`, `"pro"` or `"sprint"`, which sets the
+  binding density limits. `NULL` (the default) reads it from the RCC
+  files when they say, and otherwise uses the MAX/FLEX limits with a
+  warning.
+
+- preset:
+
+  \[[character](https://rdrr.io/r/base/character.html)\] `"nsolver"`
+  (the default) or `"legacy"`; see
+  [`nacho_thresholds()`](https://m.canouil.dev/NACHO/dev/reference/nacho_thresholds.md).
 
 - n_comp:
 
@@ -71,66 +138,12 @@ load_rcc(
 
 ## Value
 
-\[[list](https://rdrr.io/r/base/list.html)\] A list object of class
-`"nacho"`:
-
-- `access`:
-
-  \[[character](https://rdrr.io/r/base/character.html)\] Value passed to
-  `load_rcc()` in `id_colname`.
-
-- `housekeeping_genes`:
-
-  \[[character](https://rdrr.io/r/base/character.html)\] Value passed to
-  `load_rcc()`.
-
-- `housekeeping_predict`:
-
-  \[[logical](https://rdrr.io/r/base/logical.html)\] Value passed to
-  `load_rcc()`.
-
-- `housekeeping_norm`:
-
-  \[[logical](https://rdrr.io/r/base/logical.html)\] Value passed to
-  `load_rcc()`.
-
-- `normalisation_method`:
-
-  \[[character](https://rdrr.io/r/base/character.html)\] Value passed to
-  `load_rcc()`.
-
-- `remove_outliers`:
-
-  \[[logical](https://rdrr.io/r/base/logical.html)\] `FALSE`.
-
-- `n_comp`:
-
-  \[[numeric](https://rdrr.io/r/base/numeric.html)\] Value passed to
-  `load_rcc()`.
-
-- `data_directory`:
-
-  \[[character](https://rdrr.io/r/base/character.html)\] Value passed to
-  `load_rcc()`.
-
-- `pc_sum`:
-
-  \[[data.frame](https://rdrr.io/r/base/data.frame.html)\] A
-  `data.frame` with `n_comp` rows and four columns: "Standard
-  deviation", "Proportion of Variance", "Cumulative Proportion" and
-  "PC".
-
-- `nacho`:
-
-  \[[data.frame](https://rdrr.io/r/base/data.frame.html)\] A
-  `data.frame` with all columns from the sample sheet `ssheet_csv` and
-  all computed columns, *i.e.*, quality-control metrics and counts, with
-  one row per sample and probe.
-
-- `outliers_thresholds`:
-
-  \[[list](https://rdrr.io/r/base/list.html)\] A `list` of the (default)
-  quality-control thresholds used.
+A `nacho` object; read its content with
+[`nacho_counts()`](https://m.canouil.dev/NACHO/dev/reference/nacho-accessors.md),
+[`nacho_samples()`](https://m.canouil.dev/NACHO/dev/reference/nacho-accessors.md),
+[`nacho_probes()`](https://m.canouil.dev/NACHO/dev/reference/nacho-accessors.md)
+and
+[`nacho_qc()`](https://m.canouil.dev/NACHO/dev/reference/nacho-accessors.md).
 
 ## Examples
 

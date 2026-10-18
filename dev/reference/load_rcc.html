@@ -19,7 +19,12 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/NACHO-analysis.html">NACHO Analysis</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Articles</h6></li>
+    <li><a class="dropdown-item" href="../articles/nacho-app.html">Explore quality control in the app</a></li>
+    <li><a class="dropdown-item" href="../articles/nacho-report.html">The Quality-Control Report</a></li>
+    <li><a class="dropdown-item" href="../articles/nacho-analysis.html">Analyse a GEO study</a></li>
+    <li><a class="dropdown-item" href="../articles/moving-from-nacho-2.html">Moving from NACHO 2</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -56,8 +61,13 @@
 <span>  id_colname <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  housekeeping_genes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  housekeeping_predict <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  housekeeping_norm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  housekeeping_norm <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  normalisation_method <span class="op">=</span> <span class="st">"GEO"</span>,</span>
+<span>  background <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  background_mode <span class="op">=</span> <span class="st">"threshold"</span>,</span>
+<span>  ruv_k <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  instrument <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  preset <span class="op">=</span> <span class="st">"nsolver"</span>,</span>
 <span>  n_comp <span class="op">=</span> <span class="fl">10</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -73,7 +83,14 @@
 <dt id="arg-ssheet-csv">ssheet_csv<a class="anchor" aria-label="anchor" href="#arg-ssheet-csv"></a></dt>
 <dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] or [<a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a>] Either a string with the name of the CSV
 of the samplesheet or the samplesheet as a <code>data.frame</code>.
-Should contain a column that matches the file names in the folder.</p></dd>
+Should contain a column that matches the file names in the folder.
+NACHO computes the columns <code>Date</code>, <code>ID</code>, <code>BD</code>, <code>ScannerID</code>,
+<code>StagePosition</code>, <code>CartridgeID</code>, <code>FoV</code>, <code>PCL</code>, <code>LoD</code>, <code>MC</code>, <code>MedC</code>,
+<code>Positive_factor</code>, <code>Negative_factor</code>, <code>Detection_rate</code>, <code>Background</code>,
+<code>House_factor</code>, <code>Housekeeping_detected</code>, <code>Ligation_order</code>, <code>Ligation_R2</code>,
+<code>Ligation_NEG</code>, <code>Haemolysis</code>, <code>is_outlier</code>, <code>PC1</code>, <code>PC2</code>, ... and <code>W_1</code>,
+<code>W_2</code>, ....
+A sample sheet column with one of these names is replaced, with a warning.</p></dd>
 
 
 <dt id="arg-id-colname">id_colname<a class="anchor" aria-label="anchor" href="#arg-id-colname"></a></dt>
@@ -88,18 +105,72 @@ that should be used as housekeeping genes. Default is <code>NULL</code>.</p></dd
 
 <dt id="arg-housekeeping-predict">housekeeping_predict<a class="anchor" aria-label="anchor" href="#arg-housekeeping-predict"></a></dt>
 <dd><p>[<a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a>] Boolean to indicate whether the housekeeping genes
-should be predicted (<code>TRUE</code>) or not (<code>FALSE</code>). Default is <code>FALSE</code>.</p></dd>
+should be predicted (<code>TRUE</code>) or not (<code>FALSE</code>). Default is <code>FALSE</code>.
+Prediction picks the five most stable genes by geNorm on the raw counts.
+It is skipped for the miRNA methods of <code>normalisation_method</code>.</p></dd>
 
 
 <dt id="arg-housekeeping-norm">housekeeping_norm<a class="anchor" aria-label="anchor" href="#arg-housekeeping-norm"></a></dt>
 <dd><p>[<a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a>] Boolean to indicate whether the housekeeping normalisation
-should be performed. Default is <code>TRUE</code>.</p></dd>
+should be performed.
+<code>NULL</code> (the default) normalises with housekeeping genes for mRNA panels
+that have them.
+On miRNA panels, whose housekeeping mRNAs sit at background, it does so
+only when you pass <code>housekeeping_genes</code> or set <code>housekeeping_predict = TRUE</code>.
+Pass <code>TRUE</code> or <code>FALSE</code> to override this.
+The miRNA methods of <code>normalisation_method</code> ignore it.</p></dd>
 
 
 <dt id="arg-normalisation-method">normalisation_method<a class="anchor" aria-label="anchor" href="#arg-normalisation-method"></a></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] Either <code>"GEO"</code> or <code>"GLM"</code>.
-Character string to indicate normalisation using the geometric mean (<code>"GEO"</code>)
-or a generalized linear model (<code>"GLM"</code>). Default is <code>"GEO"</code>.</p></dd>
+<dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] <code>"GEO"</code> (the default) or <code>"GLM"</code>
+scale samples by their positive controls, with the geometric mean or a
+Poisson model, then by the housekeeping genes; <code>"RUVg"</code> scales by the
+positive controls with the geometric mean, then removes <code>ruv_k</code> factors
+of unwanted variation estimated from the housekeeping genes, which
+<code><a href="nacho-accessors.html">nacho_samples()</a></code> returns as <code>W_1</code>, <code>W_2</code>, ... for use as covariates.
+For miRNA panels, <code>"stable_mirna"</code>, <code>"total_mirna"</code>, <code>"spike_in"</code> and
+<code>"ligation"</code> scale by the five most stable miRNAs, the miRNAs above 50
+counts, the spike-in controls or the ligation positive controls, in the
+order Bruker recommends for plasma and serum.
+These methods ignore <code>housekeeping_genes</code>, <code>housekeeping_predict</code> and
+<code>housekeeping_norm</code>, and give their scaling factor as <code>House_factor</code>.
+When a GLM fit fails, NACHO warns and uses the geometric mean instead, as
+<code><a href="normalise.html">normalise()</a></code> describes.</p></dd>
+
+
+<dt id="arg-background">background<a class="anchor" aria-label="anchor" href="#arg-background"></a></dt>
+<dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] How to estimate each sample's background
+from its negative controls: <code>"none"</code> (the default), <code>"mean"</code>,
+<code>"mean_2sd"</code> (mean plus two standard deviations), <code>"median"</code>, <code>"max"</code> or
+<code>"geo"</code> (geometric mean).</p></dd>
+
+
+<dt id="arg-background-mode">background_mode<a class="anchor" aria-label="anchor" href="#arg-background-mode"></a></dt>
+<dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] What to do with that background:
+<code>"threshold"</code> (the default) raises lower counts to it, which Bruker
+recommends when fold changes matter, and <code>"subtract"</code> removes it and
+floors at 0.</p></dd>
+
+
+<dt id="arg-ruv-k">ruv_k<a class="anchor" aria-label="anchor" href="#arg-ruv-k"></a></dt>
+<dd><p>[<a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a>] The number of unwanted factors RUVg removes;
+<code>NULL</code> uses <code><a href="suggest_ruv_k.html">suggest_ruv_k()</a></code>.
+A <code>ruv_k</code> above two less than the number of samples, or one less than the
+number of control genes, is lowered with a <code>nacho_warning_ruv_k_reduced</code>
+warning.
+Other methods ignore it.</p></dd>
+
+
+<dt id="arg-instrument">instrument<a class="anchor" aria-label="anchor" href="#arg-instrument"></a></dt>
+<dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] The nCounter instrument, <code>"max"</code>,
+<code>"flex"</code>, <code>"pro"</code> or <code>"sprint"</code>, which sets the binding density limits.
+<code>NULL</code> (the default) reads it from the RCC files when they say, and
+otherwise uses the MAX/FLEX limits with a warning.</p></dd>
+
+
+<dt id="arg-preset">preset<a class="anchor" aria-label="anchor" href="#arg-preset"></a></dt>
+<dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] <code>"nsolver"</code> (the default) or <code>"legacy"</code>; see
+<code><a href="nacho_thresholds.html">nacho_thresholds()</a></code>.</p></dd>
 
 
 <dt id="arg-n-comp">n_comp<a class="anchor" aria-label="anchor" href="#arg-n-comp"></a></dt>
@@ -109,43 +180,9 @@ Cannot be more than n-1 samples. Default is <code>10</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>[<a href="https://rdrr.io/r/base/list.html" class="external-link">list</a>] A list object of class <code>"nacho"</code>:</p><dl><dt><code>access</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] Value passed to <code>load_rcc()</code> in <code>id_colname</code>.</p></dd>
-
-<dt><code>housekeeping_genes</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] Value passed to <code>load_rcc()</code>.</p></dd>
-
-<dt><code>housekeeping_predict</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a>] Value passed to <code>load_rcc()</code>.</p></dd>
-
-<dt><code>housekeeping_norm</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a>] Value passed to <code>load_rcc()</code>.</p></dd>
-
-<dt><code>normalisation_method</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] Value passed to <code>load_rcc()</code>.</p></dd>
-
-<dt><code>remove_outliers</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a>] <code>FALSE</code>.</p></dd>
-
-<dt><code>n_comp</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a>] Value passed to <code>load_rcc()</code>.</p></dd>
-
-<dt><code>data_directory</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/character.html" class="external-link">character</a>] Value passed to <code>load_rcc()</code>.</p></dd>
-
-<dt><code>pc_sum</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a>] A <code>data.frame</code> with <code>n_comp</code> rows and four columns:
-"Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".</p></dd>
-
-<dt><code>nacho</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a>] A <code>data.frame</code> with all columns from the sample sheet <code>ssheet_csv</code>
-and all computed columns, <em>i.e.</em>, quality-control metrics and counts, with one row per sample and probe.</p></dd>
-
-<dt><code>outliers_thresholds</code></dt>
-<dd><p>[<a href="https://rdrr.io/r/base/list.html" class="external-link">list</a>] A <code>list</code> of the (default) quality-control thresholds used.</p></dd>
-
-
-</dl></div>
+    <p>A <code>nacho</code> object; read its content with <code><a href="nacho-accessors.html">nacho_counts()</a></code>,
+<code><a href="nacho-accessors.html">nacho_samples()</a></code>, <code><a href="nacho-accessors.html">nacho_probes()</a></code> and <code><a href="nacho-accessors.html">nacho_qc()</a></code>.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

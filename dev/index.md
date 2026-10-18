@@ -1,130 +1,119 @@
-# NAnoString quality Control dasHbOard ![NACHO hexagonal logo](reference/figures/nacho_hex.png)
+# NACHO
 
-## Installation
+Step 1
 
-``` r
+## Load
 
-# Install NACHO from CRAN:
-install.packages("NACHO")
+Read the RCC files and a sample sheet. One call computes the
+quality-control metrics and normalises the counts.
 
-# Or the development version from GitHub:
-# install.packages("pak")
-pak::pak("mcanouil/NACHO")
-```
-
-## Overview
-
-*NACHO* (**NA**noString quality **C**ontrol das**H**b**O**ard) is
-developed for NanoString nCounter data.  
-NanoString nCounter data is a messenger-RNA/micro-RNA (mRNA/miRNA)
-expression assay and works with fluorescent barcodes.  
-Each barcode is assigned an mRNA/miRNA, which can be counted after
-bonding with its target.  
-As a result each count of a specific barcode represents the presence of
-its target mRNA/miRNA.
-
-*NACHO* is able to load, visualise and normalise the exported NanoString
-nCounter data and facilitates the user in performing a quality
-control.  
-*NACHO* does this by visualising quality control metrics, expression of
-control genes, principal components and sample specific size factors in
-an interactive web application.
-
-With the use of two functions, RCC files are summarised and visualised,
-namely:
 [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
-and
-[`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md).
 
-- The
-  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
-  function is used to preprocess the data.
-- The
-  [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
-  function initiates a [Shiny-based dashboard](https://shiny.posit.co/)
-  that visualises all relevant QC plots.
+Step 2
 
-*NACHO* also includes a function
-[`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md),
-which (re)calculates sample specific size factors and normalises the
-data.
+## Check
 
-- The
-  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
-  function creates a list in which your settings, the raw counts and
-  normalised counts are stored.
+Look at each metric in the app, or plot one metric in your own script.
 
-In addition (since v0.6.0) *NACHO* includes two (three) additional
-functions:
+[`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
+[`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md)
 
-- The [`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)
-  function renders a full quality-control report (HTML) based on the
-  results of a call to
-  [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
-  or
-  [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
-  (using [`print()`](https://rdrr.io/r/base/print.html) in an R Markdown
-  chunk).
-- The
-  [`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md)
-  function draws any quality-control metrics from
-  [`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
-  and [`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md).
+Step 3
 
-For more
-[`vignette("NACHO")`](https://m.canouil.dev/NACHO/dev/articles/NACHO.md)
-and
-[`vignette("NACHO-analysis")`](https://m.canouil.dev/NACHO/dev/articles/NACHO-analysis.md).
+## Share
 
-### Shiny Application ([demo](https://mcanouil.shinyapps.io/NACHO_data/))
+Write an HTML or PDF report that records the decisions you made.
+
+[`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)
+
+![The quality-control metrics page of the NACHO app, with a box plot for
+each metric and the limits drawn as dashed
+lines.](articles/figures/app-qc-metrics.png)
+
+The quality-control metrics page of the NACHO app, with a box plot for
+each metric and the limits drawn as dashed lines.
+
+Shiny app
+
+## See every sample, change every limit
+
+- The summary strip counts the flagged samples while you move a limit.
+- Select a sample once, and every plot outlines it.
+- Separate pages show the control probes, the normalisation and the
+  batch effects.
+- The Export page writes the report from the app.
 
 ``` r
 
-shiny::runApp(system.file("app", package = "NACHO"))
+visualise(nacho)
 ```
 
-![NACHO Shiny application in
-use.](reference/figures/README-nacho_app.gif)
+[Explore quality control in the
+app](https://m.canouil.dev/NACHO/dev/articles/nacho-app.md)
+
+![The top of the HTML report, with the study header and the decision
+summary for one flagged sample.](home/report-html.png)
+
+The top of the HTML report, with the study header and the decision
+summary for one flagged sample.
+
+![The cover page of the PDF report.](home/report-pdf-cover.png)
+
+The cover page of the PDF report.
+
+![A page of the PDF report, with the running header, the decision
+summary and the page footer.](home/report-pdf-page.png)
+
+A page of the PDF report, with the running header, the decision summary
+and the page footer.
+
+Quarto report
+
+## A quality-control record you can hand over
+
+- The same `nacho` object gives an HTML report or a PDF report.
+- The decision summary comes first: which samples fail, and why.
+- Figures have numbers and captions, and tables are accessible.
+- A methods section records the settings and the software versions.
 
 ``` r
 
-visualise(GSE74821)
+render(nacho, format = "typst")
 ```
 
-![NACHO interactive dashboard showing quality-control plots for the
-GSE74821 dataset.](reference/figures/README-visualise.png)
+[Write a quality-control
+report](https://m.canouil.dev/NACHO/dev/articles/nacho-report.md)
 
-## Citing NACHO
+![Box plot of the binding density of each cartridge, with the limits of
+the quality control drawn as dashed
+lines.](reference/figures/README-quick-start-plot-1.png)
 
-Canouil M, Bouland GA, Bonnefond A, Froguel P, ’t Hart LM, Slieker RC
-(2019). “NACHO: an R package for quality control of NanoString nCounter
-data.” *Bioinformatics*. ISSN 1367-4803.
-[doi:10.1093/bioinformatics/btz647](https://doi.org/10.1093/bioinformatics/btz647).
+Box plot of the binding density of each cartridge, with the limits of
+the quality control drawn as dashed lines.
 
-``` R
-@Article{,
-  title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
-  author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
-  journal = {Bioinformatics},
-  address = {Oxford, England},
-  year = {2019},
-  month = {aug},
-  issn = {1367-4803},
-  doi = {10.1093/bioinformatics/btz647},
-}
-```
+Analysis
 
-------------------------------------------------------------------------
+## Part of your R workflow
 
-## Getting help
+- [`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md)
+  draws each quality-control figure as a `ggplot2` plot.
+- [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
+  and
+  [`exclude_outliers()`](https://m.canouil.dev/NACHO/dev/reference/exclude_outliers.md)
+  run again with new settings.
+- [`as_summarized_experiment()`](https://m.canouil.dev/NACHO/dev/reference/as_summarized_experiment.md)
+  gives the counts to Bioconductor.
 
-If you encounter a clear bug, please file a minimal reproducible example
-on [GitHub](https://github.com/mcanouil/NACHO/issues).  
-For questions and other discussion, please contact the package
-maintainer.
+[Analyse a GEO
+study](https://m.canouil.dev/NACHO/dev/articles/nacho-analysis.md)
+[Moving from NACHO
+2](https://m.canouil.dev/NACHO/dev/articles/moving-from-nacho-2.md)
 
-## Code of Conduct
+## Cite and get help
 
-Please note that this project is released with a [Contributor Code of
-Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).  
-By contributing to this project, you agree to abide by its terms.
+If you use NACHO in your work, [cite the article in
+*Bioinformatics*](https://m.canouil.dev/NACHO/dev/authors.html#citation).
+To report a bug, open an issue on
+[GitHub](https://github.com/mcanouil/NACHO/issues) with a minimal
+reproducible example. This project has a [Contributor Code of
+Conduct](https://github.com/mcanouil/NACHO/blob/main/.github/CODE_OF_CONDUCT.md).

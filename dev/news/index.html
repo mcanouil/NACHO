@@ -19,7 +19,12 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/NACHO-analysis.html">NACHO Analysis</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Articles</h6></li>
+    <li><a class="dropdown-item" href="../articles/nacho-app.html">Explore quality control in the app</a></li>
+    <li><a class="dropdown-item" href="../articles/nacho-report.html">The Quality-Control Report</a></li>
+    <li><a class="dropdown-item" href="../articles/nacho-analysis.html">Analyse a GEO study</a></li>
+    <li><a class="dropdown-item" href="../articles/moving-from-nacho-2.html">Moving from NACHO 2</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -45,6 +50,218 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="nacho-development-version">NACHO (development version)<a class="anchor" aria-label="anchor" href="#nacho-development-version"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
+<p>If you use NACHO 2, you can stay on NACHO 2.*, or convert your saved objects with <code><a href="../reference/upgrade_nacho.html">upgrade_nacho()</a></code> and <code><a href="../reference/read_nacho.html">read_nacho()</a></code>. The article “Moving from NACHO 2” on the <a href="https://m.canouil.dev/NACHO/">package website</a> maps NACHO 2 code to NACHO 3.</p>
+<ul><li>In <code>R/nacho-class.R</code>, <code>R/accessors.R</code> and <code>R/methods.R</code>,
+<ul><li>feat: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> and <code><a href="../reference/normalise.html">normalise()</a></code> return an S7 <code>nacho</code> object. Read it with <code><a href="../reference/nacho-accessors.html">nacho_counts()</a></code>, <code><a href="../reference/nacho-accessors.html">nacho_samples()</a></code>, <code><a href="../reference/nacho-accessors.html">nacho_probes()</a></code> and <code><a href="../reference/nacho-accessors.html">nacho_qc()</a></code>. The <code>$nacho</code> long table and the other list slots are gone; <code>as.data.frame(x, long = TRUE)</code> gives the long layout.</li>
+<li>feat: <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> shows a short summary, and the full report comes from <code><a href="../reference/render.html">render()</a></code>.</li>
+<li>feat: The path the data were loaded from is now part of the object’s provenance, and <code>GSE74821</code> no longer stores it.</li>
+</ul></li>
+<li>In <code>R/conditions.R</code>,
+<ul><li>feat: Errors, warnings and messages use cli and carry classes such as <code>nacho_error_bad_argument</code>, so your code can catch the ones it expects.</li>
+</ul></li>
+<li>In <code>R/load_rcc.R</code>,
+<ul><li>feat: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> refuses duplicated sample ids in single-sample RCC files. PlexSet files can repeat an id, because <code>plexset_id</code> tells their samples apart.</li>
+<li>feat: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> refuses RCC files whose probes clash, that is, share a name but differ in code class or accession, and the error names those probes.</li>
+<li>feat: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> refuses an RCC sample that repeats a probe name, with a clear error.</li>
+<li>feat: miRNA panels are no longer normalised with housekeeping genes by default, because their housekeeping mRNAs sit at background. To turn it back on, pass <code>housekeeping_genes</code>, <code>housekeeping_predict = TRUE</code> or <code>housekeeping_norm = TRUE</code>.</li>
+</ul></li>
+<li>In <code>R/accessors.R</code> and <code>R/normalise.R</code>,
+<ul><li>feat: <code><a href="../reference/nacho-accessors.html">nacho_qc()</a></code> replaces <code>is_outlier</code> with a status for each metric, <code>n_flags</code>, an overall <code>status</code> and a readable <code>reason</code>. <code>check_outliers()</code> is gone, because the status always follows the object’s thresholds.</li>
+<li>feat: <code><a href="../reference/exclude_outliers.html">exclude_outliers()</a></code> drops the flagged samples and normalises the rest again. <code><a href="../reference/normalise.html">normalise()</a></code> no longer has <code>remove_outliers</code>.</li>
+</ul></li>
+<li>In <code>R/autoplot.R</code>,
+<ul><li>feat: <code><a href="../reference/autoplot.html">autoplot()</a></code> takes the plot name in <code>type</code> instead of <code>x</code>, and points NACHO 2 code that still passes <code>x</code> to the new argument.</li>
+<li>feat: Plot labels, help pages and the threshold labels in the app use US spelling, such as “Normalized” and “Hemolysis”.</li>
+<li>feat: Plots use the NACHO brand. Groups take the Okabe-Ito colours, up to eight groups on a light background and seven on a dark one, and viridis beyond that. Flagged samples are rust triangles instead of red points.</li>
+</ul></li>
+<li>In <code>R/render.R</code>,
+<ul><li>feat: <code><a href="../reference/render.html">render()</a></code> builds the report with Quarto instead of R Markdown, as a self-contained HTML file, or as a Typst PDF with <code>format = "typst"</code>. It needs the Quarto command-line interface 1.9.18 or newer, which RStudio and Positron bundle.</li>
+<li>feat: <code><a href="../reference/render.html">render()</a></code> takes the object as <code>x</code>, writes <code>nacho-report.html</code> or <code>nacho-report.pdf</code> to <code>output_dir</code>, and returns the path. <code>output_file</code>, <code>show_outliers</code> and <code>clean</code> are gone.</li>
+</ul></li>
+<li>In <code>R/thresholds.R</code>,
+<ul><li>feat: Samples are flagged against the nSolver thresholds by default. <code>nacho_thresholds(preset = "legacy")</code> keeps the NACHO 2 limits, and with <code>background = "geo", background_mode = "subtract"</code> it gives the NACHO 2 outlier calls back.</li>
+</ul></li>
+<li>In <code>R/qc.R</code>,
+<ul><li>feat: Negative probes are excluded with Bruker’s rule, which drops at most two probes that sit 3-fold above the others. The legacy preset keeps the NACHO 2 rule.</li>
+<li>feat: In the nSolver preset, positive control linearity leaves out POS_F and adds 1 to every count.</li>
+<li>feat: Under the default nSolver preset, the ligation controls of miRNA panels flag samples.</li>
+<li>feat: Normalised counts are no longer rounded or floored at 0.1.</li>
+<li>feat: There is no background correction by default (<code>background = "none"</code>). Choose a statistic with <code>background</code>, and whether to threshold or subtract with <code>background_mode</code>. <code>background = "geo", background_mode = "subtract"</code> gives the NACHO 2 correction, and subtracting floors the counts at 0.</li>
+<li>feat: <code>Negative_factor</code> is always the geometric mean of the kept negative controls, with <code>normalisation_method = "GLM"</code> too. The new <code>Background</code> column holds the background that was applied. So with <code>"GLM"</code>, normalised counts differ from NACHO 2, which subtracted the model intercept.</li>
+<li>feat: <code>housekeeping_predict = TRUE</code> picks the five most stable genes by geNorm, among the genes above background in at least 90% of samples, instead of the five with the smallest spread.</li>
+</ul></li>
+<li>In <code>R/interop.R</code>,
+<ul><li>feat: <code><a href="../reference/as_summarized_experiment.html">as_nacho()</a></code> no longer normalises a miRNA <code>SummarizedExperiment</code> without saved settings with housekeeping genes, unless you set <code>housekeeping_norm = TRUE</code> or give <code>housekeeping_genes</code>.</li>
+</ul></li>
+<li>In <code>R/deploy.R</code>,
+<ul><li>feat: <code><a href="../reference/deploy.html">deploy()</a></code> has no default <code>directory</code> any more, so pass the folder yourself; it used to be <code>/srv/shiny-server</code>.</li>
+</ul></li>
+<li>In <code>DESCRIPTION</code>,
+<ul><li>build: NACHO needs R 4.3 or newer.</li>
+<li>build: knitr and rmarkdown move to Suggests, and quarto joins them.</li>
+<li>build: The app no longer needs shinyWidgets or markdown, and needs shiny 1.11.0 or newer.</li>
+</ul></li>
+<li>In <code>R/visualise.R</code>,
+<ul><li>feat: <code><a href="../reference/visualise.html">visualise()</a></code> returns the tuned object when you click “Done”, and no longer writes <code>nacho_object.rds</code> to <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>.</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<ul><li>In <code>R/render.R</code>,
+<ul><li>feat: The report reads as a quality-control record. It opens with a cover holding the study details, then a summary of the decision, with the flagged samples and notes on how the data were processed. A table lists every setting and limit with its meaning and source, each figure and table has a short “How to read this”, and an appendix gives the methods, the citation and the package versions.</li>
+<li>feat: <code><a href="../reference/render.html">render()</a></code> gains <code>title</code> and <code>author</code> for the report cover, and the Export page of the app has the same fields.</li>
+<li>feat: The HTML and PDF reports have the same content and the NACHO look. The PDF is a tagged PDF that declares PDF/UA-1, and Typst checks it against the PDF/UA-1 rules it can enforce. The HTML report has landmarks, a skip link and labelled tables.</li>
+<li>feat: <code><a href="../reference/render.html">render()</a></code> gains <code>group</code>, which adds the batch design and its cross-tables, and warns when batch and biology are confounded.</li>
+</ul></li>
+<li>In <code>R/nacho-class.R</code>, <code>R/accessors.R</code> and <code>R/methods.R</code>,
+<ul><li>feat: <code>x[, j]</code> subsets samples and <code>x[i, ]</code> subsets probes, and both recompute the PCA and the outlier flags. Subsetting probes, or <code><a href="../reference/filter_detected.html">filter_detected()</a></code>, also removes the dropped genes from the <code>housekeeping_genes</code> setting. When none are left, the object warns that it uses its Housekeeping probes, or, when it has none, turns <code>housekeeping_norm</code> off with a warning.</li>
+</ul></li>
+<li>In <code>R/read_nacho.R</code>,
+<ul><li>feat: <code><a href="../reference/upgrade_nacho.html">upgrade_nacho()</a></code> converts a NACHO 2 object, and <code><a href="../reference/read_nacho.html">read_nacho()</a></code> reads an object saved by any NACHO version.</li>
+<li>feat: Upgraded NACHO 2 objects move to the legacy preset, with <code>background = "geo", background_mode = "subtract"</code>, so they keep their NACHO 2 flags and background correction. Use <code><a href="../reference/normalise.html">normalise()</a></code> to switch them to the nSolver preset.</li>
+<li>feat: <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/format.html" class="external-link">format()</a></code> on a NACHO 2 object show one line that points to <code><a href="../reference/upgrade_nacho.html">upgrade_nacho()</a></code>. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, <code>[</code> and <code><a href="../reference/autoplot.html">autoplot()</a></code> refuse it with a classed error.</li>
+</ul></li>
+<li>In <code>R/interop.R</code>,
+<ul><li>feat: <code><a href="../reference/as_summarized_experiment.html">as_summarized_experiment()</a></code> and <code><a href="../reference/as_summarized_experiment.html">as_nacho()</a></code> convert between <code>nacho</code> objects and <code>SummarizedExperiment</code>. <code><a href="../reference/as_summarized_experiment.html">as_nacho()</a></code> also reads a <code>NanoStringRccSet</code> from NanoStringNCTools, with the same probe names as <code><a href="../reference/load_rcc.html">load_rcc()</a></code> on the same RCC files.</li>
+</ul></li>
+<li>In <code>R/nacho-class.R</code>,
+<ul><li>feat: Outlier thresholds accept <code>-Inf</code> as a lower bound, <code>Inf</code> as an upper bound, and <code>-Inf</code> as <code>LoD</code>, to mean no bound. <code><a href="../reference/normalise.html">normalise()</a></code>, <code><a href="../reference/upgrade_nacho.html">upgrade_nacho()</a></code> and <code><a href="../reference/read_nacho.html">read_nacho()</a></code> refuse <code>NaN</code>, an <code>Inf</code> lower bound, a negative upper bound and an <code>Inf</code> <code>LoD</code>, with a classed error. To read a saved object with <code>LoD = Inf</code>, first change it to a finite value or <code>-Inf</code>. <code><a href="../reference/autoplot.html">autoplot()</a></code> draws no threshold line for an open bound, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> shows it as <code>NA</code>, and the report leaves it out.</li>
+</ul></li>
+<li>In <code>R/thresholds.R</code> and <code>R/load_rcc.R</code>,
+<ul><li>feat: <code><a href="../reference/nacho_thresholds.html">nacho_thresholds()</a></code> builds thresholds for the MAX, FLEX, PRO and SPRINT instruments. <code><a href="../reference/load_rcc.html">load_rcc()</a></code> gains <code>instrument</code> and <code>preset</code>, and reads the instrument from MAX/FLEX files. When it can’t read the instrument, it warns with class <code>nacho_warning_instrument_unknown</code> and uses the MAX/FLEX values.</li>
+</ul></li>
+<li>In <code>R/thresholds.R</code>, <code>R/mod_thresholds.R</code> and <code>R/mod_export.R</code>,
+<ul><li>feat: <code><a href="../reference/write_thresholds.html">write_thresholds()</a></code> saves thresholds to a YAML file and <code><a href="../reference/write_thresholds.html">read_thresholds()</a></code> reads them back, so you can use one set of limits for every study. The Export page of the app writes the same file, and the Preset section of the sidebar loads it. A file without a miRNA threshold takes it from the preset named in the file.</li>
+</ul></li>
+<li>In <code>R/detection.R</code> and <code>R/accessors.R</code>,
+<ul><li>feat: A gene counts as detected in a sample when its count is above the mean of the kept negative probes plus two standard deviations. <code><a href="../reference/nacho-accessors.html">nacho_samples()</a></code> gains <code>Detection_rate</code>, the share of endogenous genes each sample detects, and <code><a href="../reference/nacho-accessors.html">nacho_probes()</a></code> gains <code>detection_rate</code>, the share of samples that detect each gene.</li>
+<li>feat: <code>filter_detected(x, min_rate)</code> keeps the genes detected often enough, where <code>min_rate</code> is the share of samples in which a gene must be detected.</li>
+</ul></li>
+<li>In <code>R/qc-table.R</code>,
+<ul><li>feat: For PlexSet files, <code><a href="../reference/nacho-accessors.html">nacho_qc()</a></code> has a <code>lane_status</code>, and a lane that fails flags its eight samples. Their reason reads “lane fails” followed by the metric name.</li>
+</ul></li>
+<li>In <code>R/methods.R</code>,
+<ul><li>feat: <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> lists the excluded negative probes.</li>
+</ul></li>
+<li>In <code>R/qc.R</code>,
+<ul><li>feat: Quality control runs on data without lane attributes. The metrics that need them are <code>NA</code>, with one warning.</li>
+<li>feat: Following Bruker’s RNA content check, <code><a href="../reference/nacho-accessors.html">nacho_qc()</a></code> flags samples with too few housekeeping genes above background. <code>Housekeeping_detected</code> holds the count, and the nSolver preset flags a sample below 3, while the legacy preset uses 0 and never flags.</li>
+<li>feat: A sample with fewer than two negative probes with counts has no detection limit, so its <code>Detection_rate</code> and <code>Housekeeping_detected</code> are missing. <code><a href="../reference/load_rcc.html">load_rcc()</a></code> then gives one <code>metric_unavailable</code> warning that names those samples.</li>
+<li>feat: GLM normalisation starts from the least squares line and checks that it converges. When a sample doesn’t fit, it falls back to the geometric mean with a classed warning, the stored <code>normalisation_method</code> reads <code>"GEO"</code>, and <code>provenance$glm_fallback</code> lists the samples that failed.</li>
+</ul></li>
+<li>In <code>R/conditions.R</code>,
+<ul><li>feat: <code>options(nacho.quiet = TRUE)</code> silences the progress and informative messages.</li>
+</ul></li>
+<li>In <code>R/load_rcc.R</code>,
+<ul><li>feat: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> and <code><a href="../reference/normalise.html">normalise()</a></code> check their arguments before they read any file.</li>
+<li>feat: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> reads gzipped RCC files directly, and accepts files with Windows line endings.</li>
+<li>feat: <code>background</code> and <code>background_mode</code> choose how the negative controls correct each sample.</li>
+</ul></li>
+<li>In <code>R/normalise.R</code>,
+<ul><li>feat: <code><a href="../reference/normalise.html">normalise()</a></code> checks <code>outliers_thresholds</code> before it runs.</li>
+<li>feat: <code><a href="../reference/normalise.html">?normalise</a></code> documents the order of the normalisation steps.</li>
+<li>feat: When you change only <code>outliers_thresholds</code> in <code><a href="../reference/normalise.html">normalise()</a></code>, it recalculates the flags without rebuilding the object.</li>
+<li>feat: <code><a href="../reference/normalise.html">normalise()</a></code> refuses a thresholds list written for NACHO 2, one without <code>preset</code>, and the error points to <code><a href="../reference/nacho_thresholds.html">nacho_thresholds()</a></code>.</li>
+</ul></li>
+<li>In <code>R/autoplot.R</code>,
+<ul><li>feat: <code><a href="../reference/autoplot.html">autoplot()</a></code> checks that <code>colour</code> and <code>outliers_labels</code> name columns of <code><a href="../reference/nacho-accessors.html">nacho_samples()</a></code>, and <code>outliers_labels</code> must be a column name.</li>
+<li>feat: <code><a href="../reference/autoplot.html">autoplot()</a></code> gains <code>dark</code>, which draws the plot for a dark background, with amber flags.</li>
+</ul></li>
+<li>In <code>inst/extdata/</code>,
+<ul><li>feat: <code>GSE346526</code> holds six mRNA samples in RCC files written by nSolver 4.0.1.8, the most recent nSolver version on GEO in October 2026.</li>
+</ul></li>
+<li>In <code>inst/brand/</code>,
+<ul><li>feat: NACHO ships its brand file with the Source Sans 3 and JetBrains Mono fonts, so the app, the report and the website look the same, even offline.</li>
+</ul></li>
+<li>In <code>R/stability.R</code>,
+<ul><li>feat: <code><a href="../reference/housekeeping_stability.html">housekeeping_stability()</a></code> ranks reference genes with geNorm and NormFinder, gives the geNorm pairwise variation, and tests each gene against a biological group. <code>autoplot(x, type = "Stability")</code> draws the ranking.</li>
+</ul></li>
+<li>In <code>R/ruv.R</code>,
+<ul><li>feat: <code>normalisation_method = "RUVg"</code> removes unwanted variation estimated from the housekeeping genes, and adds the factors to <code><a href="../reference/nacho-accessors.html">nacho_samples()</a></code> as <code>W_1</code>, <code>W_2</code>, and so on. <code><a href="../reference/suggest_ruv_k.html">suggest_ruv_k()</a></code> suggests how many factors to remove. <code><a href="../reference/normalise.html">normalise()</a></code> lowers an explicit <code>ruv_k</code> to two less than the number of samples, or to one less than the number of control genes, with a <code>nacho_warning_ruv_k_reduced</code> warning, because a larger <code>k</code> fits the samples exactly.</li>
+</ul></li>
+<li>In <code>R/mirna.R</code>,
+<ul><li>feat: NACHO recognises miRNA panels and offers <code>normalisation_method = "stable_mirna"</code>, <code>"total_mirna"</code>, <code>"spike_in"</code> and <code>"ligation"</code>.</li>
+<li>feat: <code><a href="../reference/nacho-accessors.html">nacho_qc()</a></code> checks the ligation controls of miRNA panels, and <code>nacho_thresholds(haemolysis = TRUE)</code> flags haemolysed plasma and serum samples.</li>
+<li>feat: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> warns when more than half of the samples fail <code>Ligation_NEG</code>, and shows how to relax the threshold. This happens with whole-blood RNA, where miRNAs from red blood cells raise <code>LIG_NEG_A</code>.</li>
+</ul></li>
+<li>In <code>R/batch.R</code> and <code>R/autoplot.R</code>,
+<ul><li>feat: <code><a href="../reference/batch_diagnostics.html">batch_diagnostics()</a></code> crosses the study groups with cartridges and dates, with Cramér’s V and a flag when a batch holds a single group. It also tests the QC metrics against each batch, and measures how much of each principal component each batch explains. <code><a href="../reference/autoplot.html">autoplot()</a></code> draws <code>"RLE"</code>, <code>"BatchFactors"</code> and <code>"PCBatch"</code>.</li>
+</ul></li>
+<li>In <code>R/app.R</code>,
+<ul><li>feat: <code><a href="../reference/nacho_app.html">nacho_app()</a></code> returns the app as a Shiny app object, so you can run it from any R session or deploy it. <code><a href="../reference/deploy.html">deploy()</a></code> copies a one-line <code>app.R</code> that calls it, and the “Done” button only appears with <code>nacho_app(done = TRUE)</code>, which <code><a href="../reference/visualise.html">visualise()</a></code> uses.</li>
+<li>feat: The app starts from the object’s own thresholds and keeps its preset and instrument. It offers RUVg, the miRNA methods and the background settings.</li>
+<li>feat: The app has one sidebar with every threshold and the instrument presets, and a reset button puts the thresholds back to the preset. Each page opens the sidebar section that matches it, such as Imaging on the QC metrics page, and folds the others.</li>
+<li>feat: A summary strip at the top of every page shows the samples, the cartridges (lanes for PlexSet), the flagged samples with their reasons, and the method.</li>
+<li>feat: Each plot sits in a card that opens full screen, and interactive plots redraw to fill the card. The display options of a card set the colour, legend, point size and labels, and you can download the plot as a PNG at the size you choose.</li>
+<li>feat: A dark mode toggle in the navbar switches the app and its plots.</li>
+<li>feat: A guided tour in the Help menu walks you through the app, and loads the example data first when no data are loaded.</li>
+<li>feat: Each threshold has a help popover next to it, and upload errors and normalisation warnings show once, as toasts.</li>
+<li>feat: Before the batch plots, the Batch page shows the design and cross-tables of the batches against the biological groups.</li>
+<li>feat: Pages without data explain what to do, and “Load the example data” opens GSE74821.</li>
+<li>feat: The app uses the NACHO brand, with a navy navbar and the brand fonts in light and dark mode.</li>
+<li>feat: With ggiraph installed, hovering over a point shows the sample and its value, and clicking it outlines that sample in every plot that shows one point per sample. The “Highlight a sample” list on the Samples page does the same from the keyboard.</li>
+<li>feat: The Export page downloads the quality-control table as CSV, the thresholds as YAML, the object as RDS, and the report, with an optional title and author. The report can be HTML or PDF, and it renders in the background when mirai is installed. If you close the app page during a render, the render stops.</li>
+<li>feat: The Export page also shows and downloads an R script that repeats the analysis of the app with <code><a href="../reference/load_rcc.html">load_rcc()</a></code>, <code><a href="../reference/normalise.html">normalise()</a></code> and the thresholds you set.</li>
+<li>feat: A Help menu in the navbar opens About NACHO, links to the documentation, GitHub Discussions and the issue tracker, and shows how to cite NACHO.</li>
+<li>feat: The Samples page lists every sample in one table, flagged samples first, with its status as a coloured word, and a “Flagged only” switch hides the others. With reactable installed, you can sort and search the table, and click a row to select that sample in the plots.</li>
+</ul></li>
+<li>In <code>R/mod_data.R</code>,
+<ul><li>feat: When you choose files, the Data page lists the RCC files of the upload before you import them, including those inside zip archives. For each file, it shows the zip it came from, whether it is a PlexSet file, and whether the sample sheet lists it.</li>
+</ul></li>
+<li>In <code>DESCRIPTION</code>,
+<ul><li>build: chromote, gdtools, ggiraph, jsonlite, later, mirai, parallel, reactable and shinytest2 join Suggests, and promises and yaml join Imports.</li>
+</ul></li>
+<li>In <code>vignettes/</code>,
+<ul><li>docs: The vignette shows the NACHO 3 workflow on the example RCC files shipped with the package. The GEO analysis moves to the article “Analyse a GEO study” on the website, with GSE178516.</li>
+<li>docs: A new article on the website shows what the quality-control report looks like, with screenshots of a real report taken each time the site is built.</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="performance-development-version">Performance<a class="anchor" aria-label="anchor" href="#performance-development-version"></a></h3>
+<ul><li>In <code>R/read_rcc.R</code>, <code>R/load_rcc.R</code> and <code>R/qc.R</code>,
+<ul><li>perf: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> reads each RCC file once, with exact section tags, and computes quality control on count matrices. Loading 768 samples takes about 2.5 seconds, against about 9 in NACHO 2.</li>
+</ul></li>
+<li>In <code>R/autoplot.R</code>,
+<ul><li>perf: On 768 samples, the relative log expression, normalisation and positive against negative plots draw in under a second, instead of 2 to 6 seconds. The trend line of the last two now fits the mean of each sample, which gives the same line, with a band that shows the spread between samples. Studies with fewer than seven samples keep the earlier trend, fitted on every point.</li>
+</ul></li>
+<li>In <code>R/mod_qc_plot.R</code> and <code>R/plot_worker.R</code>,
+<ul><li>perf: With mirai installed, the app builds the plots of a page in parallel, on a small pool of workers shared by all sessions. The app stays responsive while they build, and stops building the plots of a page you leave. <code>options(nacho.plot_workers = n)</code> sets the number of workers, and <code>0</code> builds the plots in the app process; the app from <code><a href="../reference/deploy.html">deploy()</a></code> uses one worker. If a worker stops while the app runs, the app builds the plots itself.</li>
+<li>perf: An interactive plot is built once and shared between the browser tabs and sessions of the same app.</li>
+</ul></li>
+<li>In <code>R/mod_data.R</code>,
+<ul><li>perf: With mirai installed, the app reads uploaded RCC files in a background R process, so other sessions of the app stay responsive. The Data page shows the current stage of the import under the Import button.</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixes-development-version">Fixes<a class="anchor" aria-label="anchor" href="#fixes-development-version"></a></h3>
+<ul><li>In <code>R/app.R</code>,
+<ul><li>fix: The app detects PlexSet files from their exact code classes.</li>
+</ul></li>
+<li>In <code>R/autoplot.R</code>,
+<ul><li>fix: <code><a href="../reference/autoplot.html">autoplot()</a></code> draws samples with a missing outlier flag as ordinary points, where NACHO 2 left them out of the plot.</li>
+</ul></li>
+<li>In <code>R/render.R</code>,
+<ul><li>fix: <code><a href="../reference/render.html">render()</a></code> no longer deletes a folder named <code>tmp_nacho</code> in <code>output_dir</code>.</li>
+</ul></li>
+<li>In <code>R/read_rcc.R</code>,
+<ul><li>fix: Empty RCC attributes, such as a blank owner or comment, are read as empty text instead of repeating the attribute name.</li>
+<li>fix: A probe named like an RCC section, such as <code>Messages</code>, no longer breaks parsing.</li>
+<li>fix: Probe names keep every inner <code>|</code> field, so protein names such as <code>4E-BP1(53H11)|NA|EIF4EBP1|53H11|0</code> stay intact. Only a trailing pipe and number, such as <code>|0</code> or <code>|0.014</code>, is removed.</li>
+<li>fix: Attribute values that contain <code>|</code> followed by digits, such as the comment <code>Batch|2</code>, are kept as written.</li>
+<li>fix: Accessions are read exactly as written, and probes whose accessions differ between files are reported as a clash.</li>
+</ul></li>
+<li>In <code>R/load_rcc.R</code>,
+<ul><li>fix: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> checks a <code>plexset_id</code> column when you supply one. Values outside <code>S1</code> to <code>S8</code>, and an id that repeats with the same <code>plexset_id</code>, raise a classed error before any file is read into a matrix.</li>
+<li>fix: <code><a href="../reference/load_rcc.html">load_rcc()</a></code> says when the sample sheet lists no file to read, instead of failing with an internal error.</li>
+</ul></li>
+<li>In <code>R/qc.R</code>,
+<ul><li>fix: Housekeeping prediction no longer returns missing gene names when there are fewer than five candidates.</li>
+<li>fix: Predicting housekeeping genes no longer misaligns probes when some RCC files lack a probe.</li>
+<li>fix: PCA components have a fixed sign, so plots no longer flip between machines.</li>
+</ul></li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.0.8" id="nacho-208">NACHO 2.0.8<a class="anchor" aria-label="anchor" href="#nacho-208"></a></h2><p class="text-muted">CRAN release: 2026-10-01</p>
@@ -91,7 +308,7 @@
 <li>docs: fix typos and grammar, and spell GitHub, NanoString, R Markdown and Shiny consistently.</li>
 <li>In <code>vignettes/</code>,
 <ul><li>docs: keep only the GSE70970 samples measured with the <code>NS_H_miR_1.4</code> CodeSet, since its two CodeSets come from different nSolver versions and <code><a href="../reference/load_rcc.html">load_rcc()</a></code> refuses files that mix versions.</li>
-<li>docs: attach data.table in the analysis vignette, which uses <code><a href="https://rdrr.io/pkg/data.table/man/dcast.data.table.html" class="external-link">dcast()</a></code> and <code><a href="https://rdrr.io/pkg/data.table/man/as.data.table.html" class="external-link">as.data.table()</a></code>.</li>
+<li>docs: attach data.table in the analysis vignette, which uses <code>dcast()</code> and <code>as.data.table()</code>.</li>
 <li>docs: link to GEO over https in the bibliography, since the http address now redirects.</li>
 </ul></li>
 <li>In <code>pkgdown/</code>,
@@ -342,7 +559,7 @@
 <div class="section level3">
 <h3 id="minor-improvements-and-fixes-1-0-0">Minor improvements and fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-fixes-1-0-0"></a></h3>
 <ul><li>In <code>R/visualise.R</code>, <code>R/render.R</code>, <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code>R/load_rcc.R</code> and <code>R/normalise.R</code>,
-<ul><li>replace function to check for outliers, now uses <code><a href="../reference/check_outliers.html">check_outliers()</a></code>.</li>
+<ul><li>replace function to check for outliers, now uses <code>check_outliers()</code>.</li>
 </ul></li>
 <li>In <code>R/visualise.R</code>, replace datatable (render and output) with classical table. (<a href="https://github.com/mcanouil/NACHO/issues/13" class="external-link">#13</a>)</li>
 <li>In <code>R/autoplot.R</code>,

@@ -1,122 +1,110 @@
-# Plot quality-control metrics and thresholds of a "nacho" object
+# Plot the quality control of a nacho object
 
-This function plots any of the quality-control figures available within
-the Shiny app using
-[`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md)
-or in the HTML report from
-[`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md).
+Draws any of the quality-control figures of the Shiny app
+([`visualise()`](https://m.canouil.dev/NACHO/dev/reference/visualise.md))
+and of the HTML or PDF report
+([`render()`](https://m.canouil.dev/NACHO/dev/reference/render.md)).
+
+## Value
+
+A `ggplot` object.
 
 ## Usage
 
-``` r
-# S3 method for class 'nacho'
-autoplot(
-  object,
-  x,
-  colour = "CartridgeID",
-  size = 0.5,
-  show_legend = TRUE,
-  show_outliers = TRUE,
-  outliers_factor = 1,
-  outliers_labels = NULL,
-  ...
-)
-```
+    autoplot(
+      object,
+      type,
+      colour = "CartridgeID",
+      size = 0.5,
+      show_legend = TRUE,
+      show_outliers = TRUE,
+      outliers_factor = 1,
+      outliers_labels = NULL,
+      dark = FALSE
+    )
 
 ## Arguments
 
-- object:
-
-  \[[list](https://rdrr.io/r/base/list.html)\] List obtained from
+- `object`: A `nacho` object from
   [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
   or
   [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
 
-- x:
+- `type`: The plot to draw, one of:
 
-  \[[character](https://rdrr.io/r/base/character.html)\] Character
-  string naming the quality-control metrics to plot from `nacho_object`.
-  The possible values are:
+  - `"BD"`: Binding Density.
 
-  - `"BD"` (Binding Density)
+  - `"FoV"`: Field of View (imaging).
 
-  - `"FoV"` (Imaging)
+  - `"PCL"`: Positive Control Linearity.
 
-  - `"PCL"` (Positive Control Linearity)
+  - `"LoD"`: Limit of Detection.
 
-  - `"LoD"` (Limit of Detection)
+  - `"Positive"`: Positive controls.
 
-  - `"Positive"` (Positive Controls)
+  - `"Negative"`: Negative controls.
 
-  - `"Negative"` (Negative Controls)
+  - `"Housekeeping"`: Housekeeping genes.
 
-  - `"Housekeeping"` (Housekeeping Genes)
+  - `"PN"`: Positive controls against negative controls.
 
-  - `"PN"` (Positive Controls vs. Negative Controls)
+  - `"ACBD"`: Average counts against binding density.
 
-  - `"ACBD"` (Average Counts vs. Binding Density)
+  - `"ACMC"`: Average counts against median counts.
 
-  - `"ACMC"` (Average Counts vs. Median Counts)
+  - `"PCA12"`: Principal component 1 against 2.
 
-  - `"PCA12"` (Principal Component 1 vs. 2)
+  - `"PCAi"`: Scree plot of the principal components.
 
-  - `"PCAi"` (Principal Component scree plot)
+  - `"PCA"`: Planes of the first principal components.
 
-  - `"PCA"` (Principal Components planes)
+  - `"PFNF"`: Positive factor against negative factor.
 
-  - `"PFNF"` (Positive Factor vs. Negative Factor)
+  - `"HF"`: Housekeeping factor.
 
-  - `"HF"` (Housekeeping Factor)
+  - `"NORM"`: Normalisation factor.
 
-  - `"NORM"` (Normalisation Factor)
+  - `"Stability"`: geNorm stability of the housekeeping genes, see
+    [`housekeeping_stability()`](https://m.canouil.dev/NACHO/dev/reference/housekeeping_stability.md).
+    The dashed line marks M = 1.5, the limit geNorm suggests for
+    homogeneous samples. This plot ignores `colour`, `show_legend`,
+    `show_outliers` and `outliers_labels`.
 
-- colour:
+  - `"RLE"`: Relative log expression of the normalised endogenous genes.
+    This plot ignores `size`, `show_outliers`, `outliers_factor` and
+    `outliers_labels`.
 
-  \[[character](https://rdrr.io/r/base/character.html)\] Character
-  string of the column in `ssheet_csv` or more generally in
-  `nacho_object$nacho` to be used as grouping colour.
+  - `"BatchFactors"`: Normalisation factors by cartridge. This plot
+    ignores `show_outliers`, `outliers_factor` and `outliers_labels`.
 
-- size:
+  - `"PCBatch"`: Share of each principal component explained by
+    cartridge and date; see
+    [`batch_diagnostics()`](https://m.canouil.dev/NACHO/dev/reference/batch_diagnostics.md).
+    Tiles with no value stay grey and unlabelled. This plot ignores
+    `colour`, `size`, `show_legend`, `show_outliers`, `outliers_factor`
+    and `outliers_labels`.
 
-  \[[numeric](https://rdrr.io/r/base/numeric.html)\] A numeric
-  controlling point size
-  ([`ggplot2::geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html)
-  or line width
-  ([`ggplot2::geom_line()`](https://ggplot2.tidyverse.org/reference/geom_path.html)).
+- `colour`: The column of `nacho_samples(object)` that colours the
+  points.
 
-- show_legend:
+- `size`: The point size, and the line width in the `"NORM"` plot.
 
-  \[[logical](https://rdrr.io/r/base/logical.html)\] Boolean to indicate
-  whether the plot legends should be plotted (`TRUE`) or not (`FALSE`).
-  Default is `TRUE`.
+- `show_legend`: If `FALSE`, hide the colour legend.
 
-- show_outliers:
+- `show_outliers`: If `TRUE`, draw the flagged samples as triangles in
+  the accent colour: rust on a light background, amber on a dark one.
 
-  \[[logical](https://rdrr.io/r/base/logical.html)\] Boolean to indicate
-  whether the outliers should be highlighted in red (`TRUE`) or not
-  (`FALSE`). Default is `TRUE`.
+- `outliers_factor`: The size of the flagged samples, relative to
+  `size`.
 
-- outliers_factor:
+- `outliers_labels`: The column of `nacho_samples(object)` that labels
+  the flagged samples, or `NULL` for no labels. Labels imply
+  `show_outliers = TRUE`.
 
-  \[[numeric](https://rdrr.io/r/base/numeric.html)\] Size factor for
-  outliers compared to `size`. Default is `1`.
-
-- outliers_labels:
-
-  \[[character](https://rdrr.io/r/base/character.html)\] Character to
-  indicate which column in `nacho_object$nacho` should be used to be
-  printed as the labels for outliers or not. Default is `NULL`.
-
-- ...:
-
-  Other arguments (Not used).
+- `dark`: If `TRUE`, draw the plot for a dark background.
 
 ## Examples
 
 ``` r
-
-data(GSE74821)
-
-autoplot(GSE74821, x = "BD")
-
+autoplot(GSE74821, type = "BD")
 ```

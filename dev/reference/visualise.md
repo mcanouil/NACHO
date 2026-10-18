@@ -1,10 +1,10 @@
-# Visualise quality-control metrics of a "nacho" object
+# Explore and tune quality control in the NACHO app
 
-This function visualises results from
-[`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md) or
-[`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md)
-several quality-control metrics in an interactive Shiny application, in
-which thresholds can be customised and exported.
+Opens
+[`nacho_app()`](https://m.canouil.dev/NACHO/dev/reference/nacho_app.md)
+on `nacho_object`. Change thresholds and normalisation settings in the
+sidebar, then click "Done" to close the app and get the tuned object
+back.
 
 ## Usage
 
@@ -16,20 +16,22 @@ visualise(nacho_object)
 
 - nacho_object:
 
-  \[[list](https://rdrr.io/r/base/list.html)\] A list object of class
-  `"nacho"` obtained from
+  A `nacho` object from
   [`load_rcc()`](https://m.canouil.dev/NACHO/dev/reference/load_rcc.md)
   or
   [`normalise()`](https://m.canouil.dev/NACHO/dev/reference/normalise.md).
 
+## Value
+
+The tuned `nacho` object, invisibly, once you click "Done".
+
 ## Examples
 
 ``` r
-
 if (interactive()) {
   data(GSE74821)
-  # Must be run in an interactive R session!
-  visualise(GSE74821)
+  tuned <- visualise(GSE74821)
+  nacho_qc(tuned)
 }
 
 if (interactive()) {
@@ -62,19 +64,11 @@ if (interactive()) {
   )
   visualise(nacho)
 
-  # (re)Normalise data by removing outliers
-  nacho_norm <- normalise(
-    nacho_object = nacho,
-    remove_outliers = TRUE
-  )
-  visualise(nacho_norm)
+  # Drop the outliers and normalise the other samples again
+  visualise(exclude_outliers(nacho))
 
-  # (re)Normalise data with "GLM" method and removing outliers
-  nacho_norm <- normalise(
-    nacho_object = nacho,
-    normalisation_method = "GLM",
-    remove_outliers = TRUE
-  )
-  visualise(nacho_norm)
+  # Normalise with the "GLM" method, then drop the outliers
+  nacho_glm <- normalise(nacho, normalisation_method = "GLM")
+  visualise(exclude_outliers(nacho_glm))
 }
 ```
