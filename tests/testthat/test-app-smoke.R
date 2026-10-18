@@ -296,12 +296,22 @@ test_that("each page opens one threshold panel of the sidebar", {
     expect_identical(app$get_js(open_panels), panel)
   }
   wait_for_open("Preset")
-  for (page in names(app_sidebar_panels)) {
+  pages <- c(
+    "QC metrics" = "Imaging",
+    Data = "Preset",
+    Controls = "Controls",
+    Export = "Preset",
+    Counts = "Content",
+    Batch = "Normalisation",
+    Samples = "Preset",
+    Normalisation = "Normalisation"
+  )
+  for (page in names(pages)) {
     app$run_js(sprintf(
       "document.querySelector('a[data-value=\"%s\"]').click()",
       page
     ))
-    wait_for_open(app_sidebar_panels[[page]])
+    wait_for_open(pages[[page]])
   }
   app$run_js(
     "document.querySelector('.accordion-item[data-value=\"miRNA\"] .accordion-button').click()"
