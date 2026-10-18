@@ -205,6 +205,15 @@ test_that("the sidebar groups every threshold in an accordion", {
   expect_match(ui, 'data-display-if="[^"]*RUVg[^"]*"')
 })
 
+test_that("every page opens a panel that the sidebar has", {
+  ui <- htmltools::renderTags(NACHO:::mod_thresholds_ui("thresholds"))$html
+  panels <- regmatches(
+    ui,
+    gregexpr('(?<=class="accordion-item" data-value=")[^"]+', ui, perl = TRUE)
+  )[[1]]
+  expect_true(all(NACHO:::app_sidebar_panels %in% panels))
+})
+
 test_that("reset brings back the preset limits", {
   shiny::testServer(
     NACHO:::mod_thresholds_server,

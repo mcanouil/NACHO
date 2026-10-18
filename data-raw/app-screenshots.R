@@ -19,13 +19,15 @@ if (
 main <- function() {
   figures <- "vignettes/articles/figures"
   frames <- tempfile("nacho-frames-")
+  window <- c(width = 1280, height = 1192)
+  gif_width <- 900
   dir.create(figures, recursive = TRUE, showWarnings = FALSE)
   dir.create(frames)
 
   app <- shinytest2::AppDriver$new(
     NACHO::nacho_app(NACHO::GSE74821, done = TRUE),
-    width = 1280,
-    height = 1192,
+    width = window[["width"]],
+    height = window[["height"]],
     load_timeout = 60000,
     timeout = 60000
   )
@@ -268,8 +270,8 @@ main <- function() {
   gifski::gifski(
     list.files(frames, pattern = "^frame-.*[.]png$", full.names = TRUE),
     gif_file = gif,
-    width = 900,
-    height = 838,
+    width = gif_width,
+    height = round(gif_width * window[["height"]] / window[["width"]]),
     delay = 1,
     loop = TRUE,
     progress = FALSE
