@@ -3,130 +3,123 @@
 \name{normalise}
 \alias{normalise}
 \alias{normalize}
-\title{(re)Normalise a "nacho" object}
+\title{(Re)normalise a nacho object}
 \usage{
 normalise(
   nacho_object,
-  housekeeping_genes = nacho_object[["housekeeping_genes"]],
-  housekeeping_predict = nacho_object[["housekeeping_predict"]],
-  housekeeping_norm = nacho_object[["housekeeping_norm"]],
-  normalisation_method = nacho_object[["normalisation_method"]],
-  n_comp = nacho_object[["n_comp"]],
-  remove_outliers = nacho_object[["remove_outliers"]],
-  outliers_thresholds = nacho_object[["outliers_thresholds"]]
+  housekeeping_genes = nacho_object@settings[["housekeeping_genes"]],
+  housekeeping_predict = nacho_object@settings[["housekeeping_predict"]],
+  housekeeping_norm = nacho_object@settings[["housekeeping_norm"]],
+  normalisation_method = nacho_object@settings[["normalisation_method"]],
+  background = nacho_object@settings[["background"]],
+  background_mode = nacho_object@settings[["background_mode"]],
+  ruv_k = nacho_object@settings[["ruv_k"]],
+  n_comp = nacho_object@settings[["n_comp"]],
+  outliers_thresholds = nacho_object@thresholds,
+  ...
 )
 }
 \arguments{
-\item{nacho_object}{[\link{list}] A list object of class \code{"nacho"} obtained
-from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
+\item{nacho_object}{A \code{nacho} object from \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
 
 \item{housekeeping_genes}{[\link{character}] A vector of names of the miRNAs/mRNAs
 that should be used as housekeeping genes. Default is \code{NULL}.}
 
 \item{housekeeping_predict}{[\link{logical}] Boolean to indicate whether the housekeeping genes
-should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.}
+should be predicted (\code{TRUE}) or not (\code{FALSE}). Default is \code{FALSE}.
+Prediction picks the five most stable genes by geNorm on the raw counts.
+It is skipped for the miRNA methods of \code{normalisation_method}.}
 
 \item{housekeeping_norm}{[\link{logical}] Boolean to indicate whether the housekeeping normalisation
-should be performed. Default is \code{TRUE}.}
+should be performed.
+The default is the setting stored in \code{nacho_object}, which is \code{TRUE} or \code{FALSE}.}
 
-\item{normalisation_method}{[\link{character}] Either \code{"GEO"} or \code{"GLM"}.
-Character string to indicate normalisation using the geometric mean (\code{"GEO"})
-or a generalized linear model (\code{"GLM"}). Default is \code{"GEO"}.}
+\item{normalisation_method}{[\link{character}] \code{"GEO"} (the default) or \code{"GLM"}
+scale samples by their positive controls, with the geometric mean or a
+Poisson model, then by the housekeeping genes; \code{"RUVg"} scales by the
+positive controls with the geometric mean, then removes \code{ruv_k} factors
+of unwanted variation estimated from the housekeeping genes, which
+\code{\link[=nacho_samples]{nacho_samples()}} returns as \code{W_1}, \code{W_2}, ... for use as covariates.
+For miRNA panels, \code{"stable_mirna"}, \code{"total_mirna"}, \code{"spike_in"} and
+\code{"ligation"} scale by the five most stable miRNAs, the miRNAs above 50
+counts, the spike-in controls or the ligation positive controls, in the
+order Bruker recommends for plasma and serum.
+These methods ignore \code{housekeeping_genes}, \code{housekeeping_predict} and
+\code{housekeeping_norm}, and give their scaling factor as \code{House_factor}.
+When a GLM fit fails, NACHO warns and uses the geometric mean instead, as
+\code{\link[=normalise]{normalise()}} describes.}
+
+\item{background}{[\link{character}] How to estimate each sample's background
+from its negative controls: \code{"none"} (the default), \code{"mean"},
+\code{"mean_2sd"} (mean plus two standard deviations), \code{"median"}, \code{"max"} or
+\code{"geo"} (geometric mean).}
+
+\item{background_mode}{[\link{character}] What to do with that background:
+\code{"threshold"} (the default) raises lower counts to it, which Bruker
+recommends when fold changes matter, and \code{"subtract"} removes it and
+floors at 0.}
+
+\item{ruv_k}{[\link{numeric}] The number of unwanted factors RUVg removes.
+\code{normalise()} reuses the \code{ruv_k} stored in the object, so pass
+\code{ruv_k = NULL} to have \code{\link[=suggest_ruv_k]{suggest_ruv_k()}} choose again.
+A \code{ruv_k} above two less than the number of samples, or one less than the
+number of control genes, is lowered with a \code{nacho_warning_ruv_k_reduced}
+warning.
+Other methods ignore it.}
 
 \item{n_comp}{[\link{numeric}] Number indicating the number of principal components to compute.
 Cannot be more than n-1 samples. Default is \code{10}.}
 
-\item{remove_outliers}{[\link{logical}] A boolean to indicate if outliers should be excluded.}
+\item{outliers_thresholds}{A list of quality-control thresholds, as
+returned by \code{\link[=nacho_thresholds]{nacho_thresholds()}}.}
 
-\item{outliers_thresholds}{[\link{list}] List of thresholds to exclude outliers.}
+\item{...}{Must be empty.}
 }
 \value{
-[\link{list}] A list containing parameters and data.
-\describe{
-\item{\code{access}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}} in \code{id_colname}.}
-\item{\code{housekeeping_genes}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
-\item{\code{housekeeping_predict}}{[\link{logical}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{housekeeping_norm}}{[\link{logical}] Value passed to \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
-\item{\code{normalisation_method}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}} or \code{\link[=normalise]{normalise()}}.}
-\item{\code{remove_outliers}}{[\link{logical}] Value passed to \code{\link[=normalise]{normalise()}}.}
-\item{\code{n_comp}}{[\link{numeric}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{data_directory}}{[\link{character}] Value passed to \code{\link[=load_rcc]{load_rcc()}}.}
-\item{\code{pc_sum}}{[\link{data.frame}] A \code{data.frame} with \code{n_comp} rows and four columns:
-"Standard deviation", "Proportion of Variance", "Cumulative Proportion" and "PC".}
-\item{\code{nacho}}{[\link{data.frame}] A \code{data.frame} with all columns from the sample sheet \code{ssheet_csv}
-and all computed columns, \emph{i.e.}, quality-control metrics and counts, with one row per sample and probe.}
-\item{\code{outliers_thresholds}}{[\link{list}] A \code{list} of the quality-control thresholds used.}
-}
+A \code{nacho} object.
 }
 \description{
-This function creates a list in which your settings, the raw counts and normalised counts are stored,
-using the result from a call to \code{\link[=load_rcc]{load_rcc()}}.
+(Re)normalise a nacho object
 }
 \details{
-Outliers definition (\code{remove_outliers = TRUE}):
-\itemize{
-\item Binding Density (\code{BD}) < 0.1
-\item Binding Density (\code{BD}) > 2.25
-\item Field of View (\code{FoV}) < 75
-\item Positive Control Linearity (\code{PCL}) < 0.95
-\item Limit of Detection (\code{LoD}) < 2
-\item Positive normalisation factor (\code{Positive_factor}) < 0.25
-\item Positive normalisation factor (\code{Positive_factor}) > 4
-\item Housekeeping normalisation factor (\code{house_factor}) < 1/11
-\item Housekeeping normalisation factor (\code{house_factor}) > 11
-}
+When only the limits in \code{outliers_thresholds} change and the preset stays
+the same, \code{normalise()} keeps the counts and stores the new thresholds; the flags follow them whenever you
+read \code{\link[=nacho_qc]{nacho_qc()}}.
+Otherwise it computes the quality-control metrics, the normalisation
+factors, the normalised counts and the PCA again.
+
+\code{\link[=nacho_qc]{nacho_qc()}} lists the flags, and \code{\link[=exclude_outliers]{exclude_outliers()}} drops the flagged
+samples.
+
+With \code{normalisation_method = "GLM"}, each sample's positive and negative
+control counts plus 1 are fitted against their known concentrations
+with a Poisson GLM and an identity link, and the positive factor is the
+mean slope over the sample's slope.
+When the fit fails for any sample, NACHO warns and uses the geometric
+mean for every sample, so all samples stay on the same scale.
+The recorded \code{normalisation_method} then becomes \code{"GEO"}, and the failed
+samples are listed in \code{provenance$glm_fallback}.
+
+The normalisation runs in this order: raw counts, negative probe
+exclusion, background (\code{background} and \code{background_mode}), positive
+control factor (\code{normalisation_method}), then content factor
+(housekeeping genes when \code{housekeeping_norm} is \code{TRUE}).
+RUVg works on \code{log2(count + 1)} after the positive factor and returns
+counts on the count scale, floored at 0.
+It replaces the housekeeping scaling, so \code{housekeeping_norm} has no effect
+and \code{House_factor} is not computed, and it corrects only the endogenous
+and housekeeping probes.
+The miRNA methods \code{"stable_mirna"}, \code{"total_mirna"}, \code{"spike_in"} and
+\code{"ligation"} also ignore \code{housekeeping_norm}, \code{housekeeping_genes} and
+\code{housekeeping_predict}.
+They store their factor in \code{House_factor}, which is judged against the
+\code{House_factor} threshold, and the probes they used in
+\code{provenance$content_probes}.
+Normalised counts are otherwise neither rounded nor floored; use
+\code{nacho_counts(x, normalised = TRUE, log2 = TRUE)} for \code{log2(count + 1)}.
 }
 \examples{
-
 data(GSE74821)
-GSE74821_norm <- normalise(
-  nacho_object = GSE74821,
-  housekeeping_norm = TRUE,
-  normalisation_method = "GEO",
-  remove_outliers = TRUE
-)
-
-if (interactive()) {
-  library(GEOquery)
-  library(NACHO)
-
-  # Import data from GEO
-  gse <- GEOquery::getGEO(GEO = "GSE74821")
-  targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
-  GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
-  utils::untar(
-    tarfile = file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),
-    exdir = file.path(tempdir(), "GSE74821")
-  )
-  targets$IDFILE <- list.files(
-    path = file.path(tempdir(), "GSE74821"),
-    pattern = ".RCC.gz$"
-  )
-  targets[] <- lapply(X = targets, FUN = iconv, from = "latin1", to = "ASCII")
-  utils::write.csv(
-    x = targets,
-    file = file.path(tempdir(), "GSE74821", "Samplesheet.csv")
-  )
-
-  # Read RCC files and format
-  nacho <- load_rcc(
-    data_directory = file.path(tempdir(), "GSE74821"),
-    ssheet_csv = file.path(tempdir(), "GSE74821", "Samplesheet.csv"),
-    id_colname = "IDFILE"
-  )
-
-  # (re)Normalise data by removing outliers
-  nacho_norm <- normalise(
-    nacho_object = nacho,
-    remove_outliers = TRUE
-  )
-
-  # (re)Normalise data with "GLM" method and removing outliers
-  nacho_norm <- normalise(
-    nacho_object = nacho,
-    normalisation_method = "GLM",
-    remove_outliers = TRUE
-  )
-}
-
+GSE74821_geo <- normalise(GSE74821, normalisation_method = "GEO")
+nacho_qc(GSE74821_geo)
 }

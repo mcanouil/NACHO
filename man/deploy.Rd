@@ -4,7 +4,7 @@
 \alias{deploy}
 \title{Deploy (copy) the Shiny application to the specified directory}
 \usage{
-deploy(directory = "/srv/shiny-server", app_name = "NACHO")
+deploy(directory, app_name = "NACHO")
 }
 \arguments{
 \item{directory}{[\link{character}] A character vector of one path to the new location.}
@@ -18,11 +18,20 @@ deploy(directory = "/srv/shiny-server", app_name = "NACHO")
 Deploy (copy) the Shiny application to the specified directory
 }
 \details{
-The app needs the markdown package on the server to show its help pages.
+The deployed app calls \code{NACHO::nacho_app()}, so the server needs
+NACHO installed.
+The app sets the \code{nacho.plot_workers} option to \code{1} when the option is
+not set, so it starts one background process for the interactive plots.
+That process and the plot cache belong to the R process that runs the
+app, and each process keeps a copy of the study, so its memory grows with
+the size of the study (about 170 MB for \code{GSE74821}).
+To change the number of processes, set the option before the app starts,
+for example in \code{.Rprofile} on the server.
+See the "Plot workers" section of \code{\link[=nacho_app]{nacho_app()}}.
 }
 \examples{
 
-deploy(directory = ".")
+deploy(directory = tempdir())
 
 if (interactive()) {
   shiny::runApp("NACHO")

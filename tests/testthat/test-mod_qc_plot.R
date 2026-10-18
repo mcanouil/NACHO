@@ -1,0 +1,614 @@
+plot_args <- function(x, type, dark = shiny::reactive(FALSE)) {
+  list(
+    object = shiny::reactiveVal(x),
+    qc = shiny::reactive(nacho_qc(x)),
+    type = type,
+    dark = dark
+  )
+}
+
+test_that("every app plot type is a known plot type", {
+  types <- unlist(NACHO:::app_plot_types, use.names = FALSE)
+  expect_true(all(types %in% names(NACHO:::nacho_plot_registry)))
+  expect_false(anyDuplicated(types) > 0)
+  expect_true(all(types %in% names(NACHO:::app_plot_titles)))
+})
+
+test_that("app_plot() muffles unavailable metrics only", {
+  expect_no_warning(
+    NACHO:::app_plot(
+      plexset_nacho,
+      "PCL",
+      list(colour = "CartridgeID"),
+      dark = FALSE
+    )
+  )
+})
+
+test_that("the module draws its plot and follows dark mode", {
+  dark <- shiny::reactiveVal(FALSE)
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(GSE74821, "BD", dark),
+    {
+      session$setInputs(colour = "CartridgeID")
+      expect_s3_class(session$returned(), "ggplot")
+      expect_identical(output$plot$alt, NACHO:::plot_alt_texts[["BD"]])
+      dark(TRUE)
+      session$flushReact()
+      theme <- ggplot2::complete_theme(session$returned()$theme)
+      expect_identical(
+        ggplot2::calc_element("plot.background", theme)$fill,
+        "#111821"
+      )
+    }
+  )
+})
+
+test_that("an unknown colour column falls back to CartridgeID", {
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(GSE74821, "BD", shiny::reactive(FALSE)),
+    {
+      session$setInputs(colour = "nope")
+      plot <- session$returned()
+      point_layers <- Filter(
+        function(layer) inherits(layer$geom, "GeomPoint"),
+        plot$layers
+      )
+      mappings <- c(list(plot$mapping), lapply(point_layers, `[[`, "mapping"))
+      colours <- unlist(lapply(mappings, function(mapping) {
+        if (is.null(mapping$colour)) NULL else rlang::as_label(mapping$colour)
+      }))
+      expect_true("CartridgeID" %in% colours)
+    }
+  )
+})
+
+test_that("plots that ignore colour have no colour control", {
+  expect_match(
+    as.character(NACHO:::mod_qc_plot_ui("BD")),
+    "Colour by",
+    fixed = TRUE
+  )
+  for (type in c("Stability", "PCBatch")) {
+    expect_no_match(
+      as.character(NACHO:::mod_qc_plot_ui(type)),
+      "Colour by",
+      fixed = TRUE
+    )
+  }
+})
+
+test_that("each card has a labelled options button and a summary", {
+  html <- htmltools::renderTags(NACHO:::mod_qc_plot_ui("BD", "BD"))$html
+  expect_match(
+    html,
+    'aria-label="Display options for Binding density"',
+    fixed = TRUE
+  )
+  expect_match(html, "full-screen", fixed = TRUE)
+  expect_match(html, 'id="BD-summary"', fixed = TRUE)
+})
+
+test_that("plot_summary() gives counts in one sentence", {
+  x <- flagged_gse()
+  expect_match(
+    NACHO:::plot_summary(x, nacho_qc(x)),
+    "^12 samples on 1 cartridges?; [1-9] flagged: GSM"
+  )
+  expect_identical(
+    NACHO:::plot_summary(GSE74821, nacho_qc(GSE74821)),
+    "48 samples on 4 cartridges; none flagged."
+  )
+})
+
+test_that("the plot downloads as PNG at the chosen size", {
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(GSE74821, "BD", shiny::reactive(FALSE)),
+    {
+      session$setInputs(colour = "CartridgeID", width = 10, height = 8)
+      path <- output$download
+      expect_identical(unname(tools::file_ext(path)), "png")
+      expect_gt(file.size(path), 1000)
+    }
+  )
+})
+
+test_that("plot_summary() lists at most three flagged samples", {
+  x <- NACHO::GSE74821
+  thresholds <- x@thresholds
+  thresholds[["FoV"]] <- 99.9
+  x <- NACHO::normalise(x, outliers_thresholds = thresholds)
+  flagged <- sum(nacho_qc(x)[["status"]] %in% "fail")
+  expect_gt(flagged, 4)
+  summary <- NACHO:::plot_summary(x, nacho_qc(x))
+  expect_match(summary, sprintf("; %d flagged: ", flagged), fixed = TRUE)
+  expect_match(summary, sprintf(" and %d more\\.$", flagged - 3))
+  expect_equal(lengths(regmatches(summary, gregexpr("GSM", summary))), 3)
+})
+
+test_that("the summary counts flagged samples exactly", {
+  x <- flagged_gse()
+  flagged <- sum(nacho_qc(x)[["status"]] %in% "fail")
+  expect_match(
+    NACHO:::plot_summary(x, nacho_qc(x)),
+    sprintf("; %d flagged: ", flagged),
+    fixed = TRUE
+  )
+})
+
+test_that("a cleared download size falls back to 16 by 12 cm", {
+  skip_if_not_installed("png")
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(GSE74821, "BD", shiny::reactive(FALSE)),
+    {
+      session$setInputs(colour = "CartridgeID", width = NA, height = NA)
+      path <- output$download
+      dims <- dim(png::readPNG(path))
+      expect_equal(dims[2] / dims[1], 16 / 12, tolerance = 0.01)
+    }
+  )
+})
+
+test_that("the download background is the paper colour", {
+  skip_if_not_installed("png")
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(GSE74821, "BD", shiny::reactive(FALSE)),
+    {
+      session$setInputs(colour = "CartridgeID", width = 10, height = 8)
+      image <- png::readPNG(output$download)
+      corner <- grDevices::rgb(image[1, 1, 1], image[1, 1, 2], image[1, 1, 3])
+      expect_identical(
+        toupper(corner),
+        toupper(NACHO:::plot_colours(FALSE)[["paper"]])
+      )
+    }
+  )
+})
+
+test_that("the display options reach the plot", {
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(flagged_gse(), "FoV", shiny::reactive(FALSE)),
+    {
+      session$setInputs(
+        colour = "CartridgeID",
+        show_legend = FALSE,
+        size = 3,
+        labels = "CartridgeID"
+      )
+      built <- ggplot2::ggplot_build(session$returned())
+      sizes <- unlist(lapply(built$data, function(d) d$size))
+      expect_true(3 %in% sizes)
+      expect_true(any(vapply(
+        built$data,
+        function(d) "label" %in% names(d),
+        logical(1)
+      )))
+      expect_identical(
+        session$returned()$guides$guides[["colour"]],
+        "none"
+      )
+    }
+  )
+})
+
+test_that("Stability and PCBatch keep only the options autoplot() honours", {
+  for (type in c("Stability", "PCBatch")) {
+    html <- as.character(NACHO:::mod_qc_plot_ui(type))
+    for (label in c("Colour by", "Show the legend", "Label flagged samples")) {
+      expect_no_match(html, label, fixed = TRUE)
+    }
+    for (label in c("Point size", "Download PNG")) {
+      expect_match(html, label, fixed = TRUE)
+    }
+  }
+  html <- as.character(NACHO:::mod_qc_plot_ui("BD"))
+  for (label in c("Show the legend", "Label flagged samples")) {
+    expect_match(html, label, fixed = TRUE)
+  }
+})
+
+test_that("a metric plot names how many samples that metric flags", {
+  x <- flagged_gse()
+  qc <- nacho_qc(x)
+  fov <- sum(qc[["FoV_status"]] %in% "fail")
+  expect_gt(fov, 0)
+  expect_match(
+    NACHO:::plot_summary(x, qc, "FoV"),
+    sprintf(" %d flagged on FoV\\.$", fov)
+  )
+  expect_match(
+    NACHO:::plot_summary(GSE74821, nacho_qc(GSE74821), "BD"),
+    " None flagged on BD\\.$"
+  )
+  expect_no_match(NACHO:::plot_summary(x, qc, "PCA"), "flagged on")
+})
+
+test_that("the card summary uses the shared quality-control table", {
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = plot_args(flagged_gse(), "FoV"),
+    {
+      session$setInputs(colour = "CartridgeID")
+      expect_match(output$summary, "flagged on FoV\\.$")
+    }
+  )
+})
+
+test_that("download sizes are clamped to the input bounds", {
+  expect_identical(NACHO:::download_size(5000, 16), 50)
+  expect_identical(NACHO:::download_size(1, 16), 5)
+  expect_identical(NACHO:::download_size(10, 16), 10)
+  expect_identical(NACHO:::download_size(NA, 16), 16)
+  expect_identical(NACHO:::download_size(NULL, 12), 12)
+})
+
+test_that("a metric the data cannot assess is not reported as clean", {
+  qc <- nacho_qc(plexset_nacho)
+  expect_true(all(is.na(qc[["PCL_status"]])))
+  expect_match(
+    NACHO:::plot_summary(plexset_nacho, qc, "PCL"),
+    " PCL is not assessed for these data\\.$"
+  )
+  qc[["FoV_status"]] <- NULL
+  expect_match(
+    NACHO:::plot_summary(plexset_nacho, qc, "FoV"),
+    " FoV is not assessed for these data\\.$"
+  )
+})
+
+test_that("the cartridge count ignores missing cartridges", {
+  x <- GSE74821
+  qc <- nacho_qc(x)
+  qc[["CartridgeID"]][1:2] <- NA
+  expect_match(NACHO:::plot_summary(x, qc), "^48 samples on 4 cartridges;")
+  qc[["CartridgeID"]] <- NA_character_
+  expect_match(NACHO:::plot_summary(x, qc), "^48 samples; none flagged\\.")
+})
+
+test_that("without ggiraph the app falls back to static plots", {
+  local_mocked_bindings(
+    check_installed = function(...) {
+      rlang::abort("no", class = "rlib_error_package_not_found")
+    },
+    .package = "rlang"
+  )
+  expect_false(NACHO:::plots_interactive())
+})
+
+test_that("the interactive card holds a girafe output labelled for readers", {
+  skip_if_not_installed("ggiraph")
+  html <- htmltools::renderTags(
+    NACHO:::mod_qc_plot_ui("FoV", interactive = TRUE)
+  )$html
+  expect_match(html, 'role="img"', fixed = TRUE)
+  expect_match(html, "class=\"girafe ", fixed = TRUE)
+  expect_match(html, NACHO:::plot_alt_texts[["FoV"]], fixed = TRUE)
+  static <- htmltools::renderTags(NACHO:::mod_qc_plot_ui("FoV"))$html
+  expect_no_match(static, "class=\"girafe ")
+})
+
+test_that("nacho_app() threads the interactive choice to the UI and server", {
+  seen <- list()
+  local_mocked_bindings(
+    plots_interactive = function() TRUE,
+    app_ui = function(done = FALSE, interactive = FALSE, quarto = FALSE) {
+      seen$ui <<- interactive
+    },
+    app_server = function(
+      x,
+      done = FALSE,
+      interactive = FALSE,
+      quarto = FALSE
+    ) {
+      seen$server <<- interactive
+    }
+  )
+  local_mocked_bindings(
+    shinyApp = function(ui, server) {
+      force(server)
+      list(ui = ui)
+    },
+    .package = "shiny"
+  )
+  app <- nacho_app()
+  app$ui(NULL)
+  expect_identical(seen, list(server = TRUE, ui = TRUE))
+})
+
+test_that("the fallback tells the user, and ggiraph is detected when present", {
+  skip_if_not_installed("ggiraph")
+  expect_true(NACHO:::plots_interactive())
+  local_mocked_bindings(
+    check_installed = function(...) {
+      rlang::abort("no", class = "rlib_error_package_not_found")
+    },
+    .package = "rlang"
+  )
+  withr::local_options(nacho.quiet = FALSE, rlib_message_verbosity = "default")
+  expect_message(NACHO:::plots_interactive(), "ggiraph is not installed")
+})
+
+test_that("a click selects the sample in every plot", {
+  testthat::skip_on_cran()
+  skip_if_not_installed("ggiraph")
+  selected <- shiny::reactiveVal(character())
+  sent <- list()
+  testthat::local_mocked_bindings(
+    send_selection = function(session, output_id, value) {
+      sent[[session$ns(output_id)]] <<- value
+    }
+  )
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      id <- colnames(GSE74821@counts)[3]
+      session$setInputs(girafe_selected = id)
+      expect_identical(selected(), id)
+      selected(colnames(GSE74821@counts)[5])
+      session$flushReact()
+      expect_identical(
+        sent[[session$ns("girafe")]],
+        colnames(GSE74821@counts)[5]
+      )
+    }
+  )
+})
+
+test_that("a plot rendered after a selection shows it", {
+  testthat::skip_on_cran()
+  skip_if_not_installed("ggiraph")
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      session$setInputs(colour = "CartridgeID", size = 1)
+      id <- colnames(GSE74821@counts)[4]
+      selected(id)
+      session$flushReact()
+      session$setInputs(size = 2)
+      widget <- jsonlite::fromJSON(output$girafe, simplifyVector = FALSE)
+      expect_identical(unlist(widget$x$settings$select$selected), id)
+      expect_identical(widget$x$settings$select$type, "single")
+    }
+  )
+})
+
+test_that("a selection change does not render the plot again", {
+  testthat::skip_on_cran()
+  skip_if_not_installed("ggiraph")
+  renders <- 0L
+  original <- ggiraph::girafe_options
+  testthat::local_mocked_bindings(
+    girafe_options = function(...) {
+      renders <<- renders + 1L
+      original(...)
+    },
+    .package = "ggiraph"
+  )
+  selected <- shiny::reactiveVal(character())
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      session$setInputs(colour = "CartridgeID")
+      output$girafe
+      before <- renders
+      expect_gt(before, 0L)
+      selected(colnames(GSE74821@counts)[2])
+      session$flushReact()
+      output$girafe
+      expect_identical(renders, before)
+    }
+  )
+})
+
+test_that("the girafe toolbar is hidden from every reader", {
+  testthat::skip_on_cran()
+  skip_if_not_installed("ggiraph")
+  widget <- NACHO:::app_girafe(ggplot2::ggplot())
+  hidden <- widget$x$settings$toolbar$hidden
+  expect_true(all(
+    c("saveaspng", "zoom_onoff", "lasso_select") %in% hidden
+  ))
+})
+
+test_that("deselecting clears the selection, including an empty array", {
+  testthat::skip_on_cran()
+  skip_if_not_installed("ggiraph")
+  selected <- shiny::reactiveVal("a")
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      plot_args(GSE74821, "BD"),
+      list(selected = selected, interactive = TRUE)
+    ),
+    {
+      session$setInputs(girafe_selected = list())
+      expect_identical(selected(), character())
+      selected("a")
+      session$setInputs(girafe_selected = NULL)
+      expect_identical(selected(), character())
+    }
+  )
+})
+
+test_that("card_size() rounds pixels to 50 and converts to inches", {
+  expect_identical(
+    NACHO:::card_size(612, 349),
+    c(width = 600 / 96, height = 350 / 96)
+  )
+  expect_identical(NACHO:::card_size(NULL, NULL), c(width = 7, height = 4.5))
+  expect_identical(NACHO:::card_size(0, 0), c(width = 7, height = 4.5))
+})
+
+test_that("app_girafe() draws at the given size", {
+  testthat::skip_on_cran()
+  skip_if_not_installed("ggiraph")
+  widget <- NACHO:::app_girafe(ggplot2::ggplot(), width = 10, height = 6)
+  expect_match(widget$x$html, "viewBox='0 0 720 432'", fixed = TRUE)
+})
+
+test_that("the interactive card body fills the card", {
+  skip_if_not_installed("ggiraph")
+  html <- htmltools::renderTags(
+    NACHO:::mod_qc_plot_ui("BD", interactive = TRUE)
+  )$html
+  expect_match(
+    html,
+    '(?s)<div class="nacho-girafe" role="img"[^>]*>\\s*<div[^>]*height:100%;',
+    perl = TRUE
+  )
+  expect_no_match(html, "min-height: 350px", fixed = TRUE)
+  expect_match(html, "card-body[^\"]*html-fill-container")
+})
+
+test_that("the girafe follows the card size", {
+  testthat::skip_on_cran()
+  skip_if_not_installed("ggiraph")
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(plot_args(GSE74821, "BD"), list(interactive = TRUE)),
+    {
+      session$setInputs(colour = "CartridgeID")
+      session$elapse(300)
+      expect_identical(girafe_size(), NACHO:::card_size(600, 400))
+    }
+  )
+})
+
+test_that("the girafe is built once per rounded card size", {
+  testthat::skip_on_cran()
+  skip_if_not_installed("ggiraph")
+  builds <- 0L
+  original <- NACHO:::app_girafe
+  testthat::local_mocked_bindings(
+    app_girafe = function(...) {
+      builds <<- builds + 1L
+      original(...)
+    }
+  )
+  root <- shiny::MockShinySession$new()
+  root$clientData <- shiny::reactiveValues(
+    `output_BD-girafe_width` = 600,
+    `output_BD-girafe_height` = 350
+  )
+  resize <- function(width) {
+    root$clientData[["output_BD-girafe_width"]] <- width
+    root$flushReact()
+    root$elapse(300)
+  }
+  shiny::testServer(
+    NACHO:::mod_qc_plot_server,
+    args = c(
+      list(id = "BD"),
+      plot_args(GSE74821, "BD"),
+      list(interactive = TRUE)
+    ),
+    session = root,
+    {
+      shiny::getShinyOption("cache", default = session$cache)$reset()
+      sizes <- 0L
+      shiny::observe({
+        girafe_size()
+        sizes <<- sizes + 1L
+      })
+      session$setInputs(colour = "CartridgeID")
+      session$elapse(300)
+      output$girafe
+      expect_identical(c(builds, sizes), c(1L, 1L))
+      resize(610)
+      output$girafe
+      expect_identical(c(builds, sizes), c(1L, 1L))
+      resize(900)
+      output$girafe
+      expect_identical(c(builds, sizes), c(2L, 2L))
+      resize(600)
+      output$girafe
+      expect_identical(c(builds, sizes), c(2L, 3L))
+    }
+  )
+})
+
+test_that("the girafe font set is built once", {
+  skip_if_not_installed("ggiraph")
+  withr::defer(NACHO:::reset_girafe_font_set())
+  calls <- 0L
+  local_mocked_bindings(
+    build_font_set = function() {
+      calls <<- calls + 1L
+      structure(list(), class = "font_set")
+    }
+  )
+  NACHO:::reset_girafe_font_set()
+  first <- NACHO:::girafe_font_set()
+  second <- NACHO:::girafe_font_set()
+  expect_identical(calls, 1L)
+  expect_identical(first, second)
+})
+
+test_that("app_girafe() draws with the cached font set", {
+  testthat::skip_on_cran()
+  skip_if_not_installed("ggiraph")
+  withr::defer(NACHO:::reset_girafe_font_set())
+  NACHO:::reset_girafe_font_set()
+  expect_identical(NACHO:::girafe_font_set(), gdtools::font_set_liberation())
+  strip_ids <- function(widget) {
+    html <- htmltools::renderTags(widget)$html
+    html <- gsub("htmlwidget-[0-9a-f]+", "htmlwidget-id", html)
+    gsub("svg_[0-9a-f]+", "svg_id", html)
+  }
+  plot <- ggplot2::ggplot()
+  expect_s3_class(NACHO:::girafe_font_set(), "font_set")
+  expect_identical(
+    strip_ids(NACHO:::app_girafe(plot)),
+    strip_ids(
+      ggiraph::girafe(
+        ggobj = plot,
+        width_svg = 7,
+        height_svg = 4.5,
+        font_set = NACHO:::girafe_font_set(),
+        options = list(
+          ggiraph::opts_sizing(rescale = TRUE, width = 1),
+          ggiraph::opts_hover(css = "stroke:currentColor;stroke-width:2px;"),
+          ggiraph::opts_tooltip(use_fill = FALSE),
+          ggiraph::opts_toolbar(
+            hidden = c(
+              "lasso_select",
+              "lasso_deselect",
+              "zoom_onoff",
+              "zoom_rect",
+              "zoom_reset",
+              "saveaspng"
+            )
+          )
+        )
+      )
+    )
+  )
+})
+
+test_that("a selected sample gets a rose ring and keeps its own fill", {
+  skip_if_not_installed("ggiraph")
+  css <- NACHO:::girafe_selection()$css
+  expect_match(css, "stroke:#D85460;", fixed = TRUE)
+  expect_match(css, "stroke-width:2.5px;", fixed = TRUE)
+  expect_match(css, "r:3.5px;", fixed = TRUE)
+  expect_no_match(css, "fill", fixed = TRUE)
+})

@@ -40,7 +40,7 @@ body:
         - Data import (`load_rcc()`)
         - Normalisation (`normalise()`)
         - Plots (`autoplot()`)
-        - Outliers (`check_outliers()`)
+        - Quality control (`nacho_qc()`)
         - Report (`render()`)
         - Deployment (`deploy()`)
         - Other

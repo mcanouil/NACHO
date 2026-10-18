@@ -1,0 +1,488 @@
+#' @include nacho-class.R
+NULL
+
+#' Raise a classed NACHO error
+#'
+#' @param message A cli message, a character vector with optional `i`, `x`
+#'   and `*` names for bullets.
+#' @param class The specific class, without the `nacho_error_` prefix.
+#' @param ... Passed to [cli::cli_abort()].
+#' @param call The call reported in the error, the user-facing function.
+#' @param .envir The environment where cli interpolates `{}` expressions.
+#'
+#' @noRd
+nacho_abort <- function(
+  message,
+  class = NULL,
+  ...,
+  call = rlang::caller_env(),
+  .envir = parent.frame()
+) {
+  cli::cli_abort(
+    message,
+    class = c(
+      if (!is.null(class)) paste0("nacho_error_", class),
+      "nacho_error"
+    ),
+    ...,
+    call = call,
+    .envir = .envir
+  )
+}
+
+#' Raise a classed NACHO warning
+#'
+#' @inheritParams nacho_abort
+#' @param class The specific class, without the `nacho_warning_` prefix.
+#'
+#' @noRd
+nacho_warn <- function(message, class = NULL, ..., .envir = parent.frame()) {
+  cli::cli_warn(
+    message,
+    class = c(
+      if (!is.null(class)) paste0("nacho_warning_", class),
+      "nacho_warning"
+    ),
+    ...,
+    .envir = .envir
+  )
+}
+
+#' Tell whether NACHO should stay quiet
+#'
+#' @noRd
+nacho_is_quiet <- function() {
+  isTRUE(getOption("nacho.quiet")) ||
+    identical(getOption("rlib_message_verbosity"), "quiet")
+}
+
+#' Send an informative NACHO message
+#'
+#' @inheritParams nacho_abort
+#'
+#' @noRd
+nacho_inform <- function(message, ..., .envir = parent.frame()) {
+  if (nacho_is_quiet()) {
+    return(invisible(NULL))
+  }
+  cli::cli_inform(message, class = "nacho_message", ..., .envir = .envir)
+}
+
+#' Report a stage of a long computation
+#'
+#' The step closes when the calling function exits.
+#' When the option `nacho.progress_file` holds a path, the step is also written
+#' to that file, even when NACHO is quiet, so the app can show it.
+#'
+#' @inheritParams nacho_abort
+#'
+#' @noRd
+nacho_progress_step <- function(message, .envir = parent.frame()) {
+  progress_file <- getOption("nacho.progress_file")
+  if (!is.null(progress_file)) {
+    staged <- paste0(progress_file, ".tmp")
+    writeLines(
+      cli::ansi_strip(cli::format_inline(message, .envir = .envir)),
+      staged
+    )
+    file.rename(staged, progress_file)
+  }
+  if (nacho_is_quiet()) {
+    return(invisible(NULL))
+  }
+  cli::cli_progress_step(message, .envir = .envir)
+}
+
+check_bool <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (!rlang::is_bool(x)) {
+    nacho_abort(
+      "{.arg {arg}} must be {.code TRUE} or {.code FALSE}, not {.obj_type_friendly {x}}.",
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+check_string <- function(
+  x,
+  allow_null = FALSE,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (allow_null && is.null(x)) {
+    return(invisible(x))
+  }
+  if (!rlang::is_string(x) || !nzchar(x)) {
+    nacho_abort(
+      "{.arg {arg}} must be a single non-empty string, not {.obj_type_friendly {x}}.",
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+check_character <- function(
+  x,
+  allow_null = FALSE,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (allow_null && is.null(x)) {
+    return(invisible(x))
+  }
+  if (!is.character(x) || length(x) == 0 || anyNA(x)) {
+    nacho_abort(
+      "{.arg {arg}} must be a character vector without missing values, not {.obj_type_friendly {x}}.",
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+check_proportion <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (!is.numeric(x) || length(x) != 1 || is.na(x) || x < 0 || x > 1) {
+    found <- if (is.numeric(x) && length(x) == 1) {
+      "{.val {x}}"
+    } else {
+      "{.obj_type_friendly {x}}"
+    }
+    nacho_abort(
+      paste0(
+        "{.arg {arg}} must be one number between 0 and 1, not ",
+        found,
+        "."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+check_count <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env(),
+  min = 1
+) {
+  if (!rlang::is_scalar_integerish(x, finite = TRUE) || x < min) {
+    nacho_abort(
+      "{.arg {arg}} must be a whole number of at least {min}, not {.obj_type_friendly {x}}.",
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(x)
+}
+
+check_choice <- function(
+  x,
+  values,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  rlang::try_fetch(
+    rlang::arg_match(x, values, error_arg = arg, error_call = call),
+    error = function(cnd) {
+      hint <- unname(rlang::cnd_body(cnd))
+      nacho_abort(
+        c(
+          if (rlang::is_string(x)) {
+            "{.arg {arg}} must be one of {.or {.val {values}}}, not {.val {x}}."
+          } else {
+            "{.arg {arg}} must be one of {.or {.val {values}}}, not {.obj_type_friendly {x}}."
+          },
+          rlang::set_names(hint, rep("i", length(hint)))
+        ),
+        class = "bad_argument",
+        call = call
+      )
+    }
+  )
+}
+
+#' Check the normalisation settings
+#'
+#' @param arg_prefix Prepended to each setting name in error messages, such as
+#'   `"metadata(x)$nacho$settings$"`.
+#' @inheritParams nacho_abort
+#'
+#' @return A list of the matched `normalisation_method`, `background` and
+#'   `background_mode`.
+#'
+#' @noRd
+check_settings <- function(
+  housekeeping_genes,
+  housekeeping_predict,
+  housekeeping_norm,
+  normalisation_method,
+  n_comp,
+  background,
+  background_mode,
+  ruv_k = NULL,
+  arg_prefix = "",
+  call = rlang::caller_env()
+) {
+  check_character(
+    housekeeping_genes,
+    allow_null = TRUE,
+    arg = paste0(arg_prefix, "housekeeping_genes"),
+    call = call
+  )
+  check_bool(
+    housekeeping_predict,
+    arg = paste0(arg_prefix, "housekeeping_predict"),
+    call = call
+  )
+  check_bool(
+    housekeeping_norm,
+    arg = paste0(arg_prefix, "housekeeping_norm"),
+    call = call
+  )
+  normalisation_method <- check_choice(
+    normalisation_method,
+    nacho_normalisation_methods,
+    arg = paste0(arg_prefix, "normalisation_method"),
+    call = call
+  )
+  check_count(n_comp, arg = paste0(arg_prefix, "n_comp"), call = call)
+  if (!is.null(ruv_k)) {
+    check_count(
+      ruv_k,
+      arg = paste0(arg_prefix, "ruv_k"),
+      call = call,
+      min = 0
+    )
+  }
+  background <- check_choice(
+    background,
+    background_statistics,
+    arg = paste0(arg_prefix, "background"),
+    call = call
+  )
+  background_mode <- check_choice(
+    background_mode,
+    background_modes,
+    arg = paste0(arg_prefix, "background_mode"),
+    call = call
+  )
+  list(
+    normalisation_method = normalisation_method,
+    background = background,
+    background_mode = background_mode
+  )
+}
+
+#' List the values that appear more than once
+#'
+#' @noRd
+duplicated_values <- function(x) {
+  unique(x[duplicated(x)])
+}
+
+check_column <- function(
+  column,
+  data,
+  data_arg = rlang::caller_arg(data),
+  arg = rlang::caller_arg(column),
+  call = rlang::caller_env()
+) {
+  if (!column %in% names(data)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} must name a column of {.arg {data_arg}}.",
+        x = "There is no column {.field {column}}.",
+        i = "Available columns: {.field {utils::head(names(data), 10)}}{if (length(names(data)) > 10) ', ...'}."
+      ),
+      class = "bad_argument",
+      call = call
+    )
+  }
+  invisible(column)
+}
+
+check_interactive <- function(fn, call = rlang::caller_env()) {
+  if (!rlang::is_interactive()) {
+    nacho_abort(
+      c(
+        "{.fn {fn}} needs an interactive R session.",
+        i = "Run it from the console, not from a script or {.code Rscript}."
+      ),
+      class = "not_interactive",
+      call = call
+    )
+  }
+  invisible(TRUE)
+}
+
+has_package <- function(package) {
+  requireNamespace(package, quietly = TRUE)
+}
+
+check_package <- function(
+  package,
+  reason,
+  install = sprintf('install.packages("%s")', package),
+  call = rlang::caller_env()
+) {
+  if (!has_package(package)) {
+    nacho_abort(
+      c(
+        "The {.pkg {package}} package is needed {reason}.",
+        i = "Install it with {.code {install}}."
+      ),
+      class = "missing_package",
+      call = call
+    )
+  }
+  invisible(TRUE)
+}
+
+#' Tell whether an object is a NACHO 2 list
+#'
+#' @noRd
+is_nacho_v2 <- function(x) {
+  is.list(x) &&
+    inherits(x, "nacho") &&
+    !S7::S7_inherits(x) &&
+    "nacho" %in% names(x)
+}
+
+#' Check that an object is a "nacho" S7 object
+#'
+#' @inheritParams check_bool
+#'
+#' @noRd
+check_nacho <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  if (missing(x)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} is missing.",
+        i = "Create a {.cls nacho} object with {.fn load_rcc}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  if (is_nacho_v2(x)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} is a NACHO 2 object, which NACHO 3 cannot use.",
+        i = "Convert it with {.code upgrade_nacho({arg})}, or read the saved file with {.fn read_nacho}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  if (inherits(x, "nacho") && !S7::S7_inherits(x)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} has the NACHO 2 class {.cls nacho}, but not the NACHO 2 data.",
+        i = "Create a NACHO 3 object with {.fn load_rcc}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  if (!S7::S7_inherits(x, nacho)) {
+    nacho_abort(
+      c(
+        "{.arg {arg}} must be a {.cls nacho} object, not {.obj_type_friendly {x}}.",
+        i = "Create one with {.fn load_rcc}."
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  check_schema(
+    x@provenance[["schema_version"]],
+    subject = cli::format_inline("{.arg {arg}}"),
+    call = call
+  )
+  invisible(x)
+}
+
+#' Refuse a NACHO 2 object in a NACHO 3 method
+#'
+#' The S3 methods for the NACHO 2 class `nacho` call this, so a NACHO 2 list
+#' gets the `check_nacho()` error instead of a base R fallback. The final stop
+#' only guards the invariant that no such method returns.
+#'
+#' @inheritParams check_nacho
+#'
+#' @keywords internal
+#' @noRd
+abort_nacho_v2 <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
+  check_nacho(x, arg = arg, call = call)
+  nacho_abort(
+    c(
+      "Internal error: {.arg {arg}} reached a NACHO 2 method, but {.fn check_nacho} accepts it.",
+      i = "Please report this with a reproducible example."
+    ),
+    class = "internal",
+    call = call
+  )
+}
+
+#' Check that an object schema is the one this NACHO reads
+#'
+#' @param schema The schema version stored in a `nacho` object.
+#' @param subject The formatted name of the object or file, for the message.
+#' @inheritParams nacho_abort
+#'
+#' @noRd
+check_schema <- function(schema, subject, call = rlang::caller_env()) {
+  if (!identical(schema, nacho_schema_version)) {
+    nacho_abort(
+      c(
+        "{subject} has an object schema this NACHO cannot read.",
+        i = "{schema_hint(schema)}"
+      ),
+      class = "bad_object",
+      call = call
+    )
+  }
+  invisible(schema)
+}
+
+#' Explain why an object schema cannot be read
+#'
+#' @param schema The schema version stored in a `nacho` object.
+#'
+#' @return A string: a newer schema asks for a NACHO update, a missing or
+#'   malformed one is named as such, and any other one cannot be read.
+#'
+#' @noRd
+schema_hint <- function(schema) {
+  if (!rlang::is_scalar_integer(schema) || is.na(schema)) {
+    return("The schema version is missing or malformed.")
+  }
+  if (schema > nacho_schema_version) {
+    cli::format_inline(
+      "Schema {schema} is newer than schema {nacho_schema_version}, which this NACHO reads. Update NACHO to read it."
+    )
+  } else {
+    cli::format_inline(
+      "This NACHO reads schema {nacho_schema_version} only, not schema {schema}."
+    )
+  }
+}

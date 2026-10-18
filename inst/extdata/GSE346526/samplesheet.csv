@@ -1,0 +1,7 @@
+"IDFILE","geo_accession","title","treatment"
+"GSM10035461_01.RCC.gz","GSM10035461","Patient C_postTreatment","chemo+radiotherapy"
+"GSM10035462_02.RCC.gz","GSM10035462","Patient C_preTreatment","baseline"
+"GSM10035464_03.RCC.gz","GSM10035464","Patient E_postTreatment","chemo+radiotherapy"
+"GSM10035466_04.RCC.gz","GSM10035466","Patient E_preTreatment","baseline"
+"GSM10035468_05.RCC.gz","GSM10035468","Patient F_postTreatment","chemo+radiotherapy"
+"GSM10035469_06.RCC.gz","GSM10035469","Patient F_preTreatment","baseline"

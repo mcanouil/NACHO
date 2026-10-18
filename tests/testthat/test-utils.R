@@ -9,7 +9,7 @@ test_that("log-10 transform keeps infinite values in both directions", {
 })
 
 test_that("log-10 transform supports log tick guides", {
-  plot <- autoplot(GSE74821, x = "HF") +
+  plot <- autoplot(GSE74821, type = "HF") +
     ggplot2::guides(y = ggplot2::guide_axis_logticks())
   expect_no_error(ggplot2::ggplot_build(plot))
 })
