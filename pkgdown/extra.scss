@@ -141,12 +141,50 @@ body:has(.template-home) {
 .nacho-install {
   margin: 1.5rem 0 0;
 
-  code {
+  .sourceCode {
     display: inline-block;
-    padding: 0.5rem 0.9rem;
+    margin: 0;
+  }
+
+  pre {
+    margin: 0;
+    padding: 0.5rem 3.75rem 0.5rem 0.9rem;
+    border: 0;
     border-radius: 6px;
     background: rgba(0, 0, 0, 0.25);
+  }
+
+  code {
+    padding: 0;
+    background: none;
     color: $nacho-muted-on-navy;
+  }
+
+  .btn-copy-ex {
+    visibility: visible;
+    top: 50%;
+    right: 0.4rem;
+    transform: translateY(-50%);
+    border-color: rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: #FFFFFF;
+
+    &:hover,
+    &:focus-visible {
+      border-color: $nacho-amber;
+      color: $nacho-amber;
+    }
+  }
+}
+
+.nacho-install-more {
+  display: block;
+  margin-top: 0.5rem;
+  color: $nacho-amber;
+
+  &:hover,
+  &:focus-visible {
+    color: $nacho-yellow;
   }
 }
 
