@@ -25,6 +25,7 @@ $nacho-gradient: linear-gradient(90deg, $nacho-yellow, $nacho-amber, $nacho-oran
 }
 
 // pkgdown caps main at 50rem, which leaves an empty band on wide screens; main takes the width the sidebar leaves.
+// Remove once https://github.com/r-lib/pkgdown/issues/3031 is fixed upstream.
 @include media-breakpoint-up(xxl) {
   .row:has(> aside) > main {
     flex: 1 1 0;
