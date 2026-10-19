@@ -3,7 +3,6 @@ updates:
   - package-ecosystem: "github-actions"
     directories:
       - "/"
-      - "/.github/actions/*"
     schedule:
       interval: "cron"
       cronjob: "00 12 1 * *"
