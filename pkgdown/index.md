@@ -112,6 +112,35 @@ render(nacho, format = "typst")
 
 ::: {.nacho-closing}
 
+## Installation
+
+Install the release from CRAN:
+
+```r
+install.packages("NACHO")
+```
+
+If you want the development version and you do not have Rtools or Xcode, install the binary package from R-universe:
+
+```r
+install.packages(
+  "NACHO",
+  repos = c("https://mcanouil.r-universe.dev", "https://cloud.r-project.org")
+)
+```
+
+If you want the latest commit, install it from GitHub with pak.
+pak builds the package from source:
+
+```r
+# install.packages("pak")
+pak::pak("mcanouil/NACHO")
+```
+
+:::
+
+::: {.nacho-closing}
+
 ## Cite and get help
 
 If you use NACHO in your work, [cite the article in *Bioinformatics*](authors.html#citation).

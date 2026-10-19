@@ -15,10 +15,17 @@ checks_worst](https://badges.cranchecks.info/worst/NACHO.svg)](https://cran.r-pr
 ## Installation
 
 ``` r
-# Install NACHO from CRAN:
+# Install the release from CRAN:
 install.packages("NACHO")
 
-# Or the development version from GitHub:
+# Or install the development version as a binary package from R-universe,
+# which does not need Rtools or Xcode:
+install.packages(
+  "NACHO",
+  repos = c("https://mcanouil.r-universe.dev", "https://cloud.r-project.org")
+)
+
+# Or build the latest commit from GitHub with pak:
 # install.packages("pak")
 pak::pak("mcanouil/NACHO")
 ```
