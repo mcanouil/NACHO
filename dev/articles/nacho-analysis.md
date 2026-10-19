@@ -91,13 +91,13 @@ x <- load_rcc(
   instrument = "max"
 )
 #> ℹ Reading 30 RCC files
-#> ✔ Reading 30 RCC files [51ms]
+#> ✔ Reading 30 RCC files [85ms]
 #> 
 #> ℹ Assembling 30 samples
-#> ✔ Assembling 30 samples [16ms]
+#> ✔ Assembling 30 samples [28ms]
 #> 
 #> ℹ Computing quality-control metrics and normalising
-#> ✔ Computing quality-control metrics and normalising [30ms]
+#> ✔ Computing quality-control metrics and normalising [47ms]
 #> 
 print(x)
 #> <nacho> 30 samples, 784 probes, from single-sample RCC files

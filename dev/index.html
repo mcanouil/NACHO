@@ -79,7 +79,10 @@
         <a class="nacho-button nacho-button-primary" href="articles/NACHO.html">Get started</a>
         <a class="nacho-button" href="articles/nacho-report.html">See a report</a>
       </div>
-      <p class="nacho-install"><code>install.packages("NACHO")</code></p>
+      <div class="nacho-install">
+        <div class="sourceCode"><pre><code>install.packages("NACHO")</code></pre></div>
+        <a class="nacho-install-more" href="#installation">Other ways to install</a>
+      </div>
     </div>
     <figure class="nacho-hero-shot"><img src="reference/figures/README-nacho_app.gif" width="900" height="600" alt="Short recording of the NACHO app on the example data. The summary strip changes when the field of view threshold moves and one sample is flagged. The recording then shows the Samples, Normalisation, Batch and Export pages."></figure>
 </div>
@@ -190,6 +193,23 @@
 <p><a href="articles/nacho-analysis.html" class="nacho-more">Analyse a GEO study</a> <a href="articles/moving-from-nacho-2.html" class="nacho-more">Moving from NACHO 2</a></p>
 </div>
 </div>
+</div>
+<div class="section level2 nacho-closing">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>Install the release from CRAN:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"NACHO"</span><span class="op">)</span></span></code></pre></div>
+<p>If you want the development version without an extra package, install it from R-universe:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
+<span>  <span class="st">"NACHO"</span>,</span>
+<span>  repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://mcanouil.r-universe.dev"</span>, <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>If you want the latest commit, install it from GitHub with pak:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"mcanouil/NACHO"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2 nacho-closing">
 <h2 id="cite-and-get-help">Cite and get help<a class="anchor" aria-label="anchor" href="#cite-and-get-help"></a>

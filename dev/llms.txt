@@ -109,6 +109,34 @@ study](https://m.canouil.dev/NACHO/dev/articles/nacho-analysis.md)
 [Moving from NACHO
 2](https://m.canouil.dev/NACHO/dev/articles/moving-from-nacho-2.md)
 
+## Installation
+
+Install the release from CRAN:
+
+``` r
+
+install.packages("NACHO")
+```
+
+If you want the development version without an extra package, install it
+from R-universe:
+
+``` r
+
+install.packages(
+  "NACHO",
+  repos = c("https://mcanouil.r-universe.dev", "https://cloud.r-project.org")
+)
+```
+
+If you want the latest commit, install it from GitHub with pak:
+
+``` r
+
+# install.packages("pak")
+pak::pak("mcanouil/NACHO")
+```
+
 ## Cite and get help
 
 If you use NACHO in your work, [cite the article in
