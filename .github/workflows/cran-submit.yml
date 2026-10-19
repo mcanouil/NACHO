@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -65,21 +65,21 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7
 
       - name: Set up pandoc
-        uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+        uses: r-lib/actions/setup-pandoc@v2
 
       - name: Set up R
-        uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+        uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
 
       - name: Set up TinyTeX for the PDF manual
-        uses: r-lib/actions/setup-tinytex@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+        uses: r-lib/actions/setup-tinytex@v2
 
       - name: Install dependencies
-        uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
             any::rcmdcheck
@@ -107,7 +107,7 @@ jobs:
         run: .github/scripts/check-results.sh check/NACHO.Rcheck/00check.log cran-comments.md
 
       - name: Upload the tarball
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7
         with:
           name: cran-tarball
           path: cran/*.tar.gz
@@ -137,26 +137,26 @@ jobs:
           require-app: true
 
       - name: Checkout the built commit
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
           token: ${{ steps.token.outputs.token }}
 
       - name: Set up R
-        uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+        uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
 
       - name: Install the upload tools
-        uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
           packages: |
             any::devtools
             any::httr2
 
       - name: Download the tarball
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        uses: actions/download-artifact@v8
         with:
           name: cran-tarball
           path: cran
