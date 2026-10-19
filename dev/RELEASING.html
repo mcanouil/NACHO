@@ -51,12 +51,14 @@
 <div id="releasing-nacho" class="section level1">
 
 <p>Releases go to CRAN through three workflows. Each one is started or approved by the maintainer, so nothing reaches CRAN by accident.</p>
+<p>The “Release” and “CRAN post-release” workflows use the actions of <a href="https://github.com/mcanouil/release-actions" class="external-link">mcanouil/release-actions</a>. These actions get the GitHub App token, write the version, roll <code>NEWS.md</code>, open the pull requests and create the GitHub release. The “CRAN submission” workflow uses only the <code>token</code> action of release-actions. The steps for CRAN, R-hub and the R checks stay in this repository.</p>
 <div class="section level2">
 <h2 id="id_1-bump-the-version">1. Bump the version<a class="anchor" aria-label="anchor" href="#id_1-bump-the-version"></a></h2>
 <p>Run the “Release” workflow from <code>main</code> and pick <code>patch</code>, <code>minor</code> or <code>major</code>.</p>
-<p>It updates <code>DESCRIPTION</code>, <code>NEWS.md</code>, <code>CITATION.cff</code> and <code>cran-comments.md</code>, checks spelling and URLs, and opens a pull request called “chore: release NACHO X.Y.Z”. The pull request merges straight away, because the bump can’t break anything the checks cover. The checks still run on <code>main</code>, and the submission workflow checks the tarball again before anything goes to CRAN.</p>
+<p>It updates <code>DESCRIPTION</code>, <code>NEWS.md</code>, <code>CITATION.cff</code> and <code>cran-comments.md</code>, checks spelling and URLs, and opens a pull request called “chore: release NACHO X.Y.Z”. <code>NEWS.md</code> must start with <code># NACHO (development version)</code>, and this section must not be empty. The workflow renames this heading to <code># NACHO X.Y.Z</code>. The pull request merges straight away, because the bump can’t break anything the checks cover. The checks still run on <code>main</code>, and the submission workflow checks the tarball again before anything goes to CRAN.</p>
 <p>Tick “rhub” to run the R-hub checks as well. They’re optional, and <code>cran-comments.md</code> only lists them when they run.</p>
 <p>Untick “auto-merge” when <code>cran-comments.md</code> needs a note, for example to explain breaking changes or a NOTE you expect from the check. The pull request is then assigned to you: edit the file on it and merge it yourself.</p>
+<p>If you run the workflow again for the same version, it updates the open pull request on <code>ci/release-X-Y-Z</code>. It does not open a second pull request.</p>
 </div>
 <div class="section level2">
 <h2 id="id_2-submit-to-cran">2. Submit to CRAN<a class="anchor" aria-label="anchor" href="#id_2-submit-to-cran"></a></h2>
@@ -79,11 +81,11 @@
 <p>Once CRAN’s acceptance email arrives, run the “CRAN post-release” workflow from <code>main</code>.</p>
 <p>It checks that CRAN serves the version, tags <code>vX.Y.Z</code> on the submitted commit, and publishes the “NACHO X.Y.Z” release with the notes from <code>NEWS.md</code>. The release deploys the pkgdown site. A draft release <code>vX.Y.Z</code> stops the run, so publish or delete it before you run the workflow again. It then opens a pull request that starts the next development version and removes <code>CRAN-SUBMISSION</code>.</p>
 <p>If CRAN doesn’t serve the version yet, the workflow stops without changing anything, and you can run it again later.</p>
-<p>If a run stops after it published the release, run it again: it keeps the existing release when its tag points to the submitted commit, and goes on to the development version.</p>
+<p>If a run stops after it published the release, run it again: it keeps the existing release when its tag points to the submitted commit, and goes on to the development version. A release whose tag points to another commit stops the run.</p>
 </div>
 <div class="section level2">
 <h2 id="scripts-and-tests">Scripts and tests<a class="anchor" aria-label="anchor" href="#scripts-and-tests"></a></h2>
-<p>The workflows call the scripts in <code>.github/scripts/</code>. Run their tests from the repository root:</p>
+<p>The workflows call the scripts in <code>.github/scripts/</code> for the CRAN steps. Run their tests from the repository root:</p>
 <ul><li><code>.github/scripts/tests/test-release-scripts.sh</code></li>
 <li><code>Rscript --vanilla .github/scripts/tests/test-cran-upload.R</code></li>
 </ul></div>
