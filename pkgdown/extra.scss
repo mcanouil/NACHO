@@ -24,6 +24,15 @@ $nacho-gradient: linear-gradient(90deg, $nacho-yellow, $nacho-amber, $nacho-oran
   @extend %nacho-strip;
 }
 
+// pkgdown caps main at 50rem, which leaves an empty band on wide screens; main takes the width the sidebar leaves.
+@include media-breakpoint-up(xl) {
+  .row > main {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+  }
+}
+
 // pkgdown inverts generated images in dark mode; NACHO plots and screenshots keep their own colours.
 [data-bs-theme="dark"] {
   img.r-plt,
