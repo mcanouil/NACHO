@@ -26,7 +26,7 @@ $nacho-gradient: linear-gradient(90deg, $nacho-yellow, $nacho-amber, $nacho-oran
 
 // pkgdown caps main at 50rem, which leaves an empty band on wide screens; main takes the width the sidebar leaves.
 @include media-breakpoint-up(xl) {
-  .row > main {
+  .row:has(> aside) > main {
     flex: 1 1 0;
     min-width: 0;
     max-width: none;
