@@ -23,8 +23,8 @@ on:
 permissions:
   contents: read
 
-# Serialise releases and never cancel one in flight: an aborted run could
-# leave a pushed branch without its pull request.
+# Serialise releases so that two runs never bump the same version at once,
+# and never cancel one in flight.
 concurrency:
   group: release
   cancel-in-progress: false

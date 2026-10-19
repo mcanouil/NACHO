@@ -5,6 +5,7 @@ Each one is started or approved by the maintainer, so nothing reaches CRAN by ac
 
 The "Release" and "CRAN post-release" workflows use the actions of [mcanouil/release-actions](https://github.com/mcanouil/release-actions).
 These actions get the GitHub App token, write the version, roll `NEWS.md`, open the pull requests and create the GitHub release.
+The "CRAN submission" workflow uses only the `token` action of release-actions.
 The steps for CRAN, R-hub and the R checks stay in this repository.
 
 ## 1. Bump the version
