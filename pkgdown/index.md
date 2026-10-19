@@ -120,7 +120,7 @@ Install the release from CRAN:
 install.packages("NACHO")
 ```
 
-If you want the development version and you do not have Rtools or Xcode, install the binary package from R-universe:
+If you want the development version without an extra package, install it from R-universe:
 
 ```r
 install.packages(
@@ -129,8 +129,7 @@ install.packages(
 )
 ```
 
-If you want the latest commit, install it from GitHub with pak.
-pak builds the package from source:
+If you want the latest commit, install it from GitHub with pak:
 
 ```r
 # install.packages("pak")

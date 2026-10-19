@@ -50,14 +50,13 @@ knitr::include_graphics(path = "nacho_hex.png")
 # Install the release from CRAN:
 install.packages("NACHO")
 
-# Or install the development version as a binary package from R-universe,
-# which does not need Rtools or Xcode:
+# Or install the development version from R-universe:
 install.packages(
   "NACHO",
   repos = c("https://mcanouil.r-universe.dev", "https://cloud.r-project.org")
 )
 
-# Or build the latest commit from GitHub with pak:
+# Or install the latest commit from GitHub with pak:
 # install.packages("pak")
 pak::pak("mcanouil/NACHO")
 ```
