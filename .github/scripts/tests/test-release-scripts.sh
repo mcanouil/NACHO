@@ -95,28 +95,6 @@ mkdir -p "${tmp}/empty"
 check "guard fails without a version" 1 \
   "$(status_of "${scripts}/release-guard.sh" "${tmp}/empty")"
 
-cat >"${tmp}/NEWS.md" <<'EOF'
-# NACHO 2.0.7
-
-## Bug fixes
-
-- fix: Compute PCA scores for samples. (#60)
-
-# NACHO 2.0.6
-
-- fix: Older entry.
-EOF
-
-out="$("${scripts}/news-section.sh" 2.0.7 "${tmp}/NEWS.md")"
-check "news section starts at its first line" "## Bug fixes" \
-  "$(head -n 1 <<<"${out}")"
-check "news section stops before the next version" 0 \
-  "$(grep -c 'Older entry' <<<"${out}" || true)"
-check "news section fails for a missing version" 1 \
-  "$(status_of "${scripts}/news-section.sh" 9.9.9 "${tmp}/NEWS.md")"
-out="$("${scripts}/news-section.sh" 2.0.6 - <"${tmp}/NEWS.md")"
-check "news section reads standard input" "- fix: Older entry." "${out}"
-
 mkdir -p "${tmp}/crandb"
 printf '{"Package":"NACHO","Version":"2.0.7"}\n' >"${tmp}/crandb/NACHO"
 printf 'Version: 2.0.7\nDate: 2026-10-01 10:00:00 UTC\nSHA: 0123abc\n' \
@@ -133,86 +111,6 @@ check "accepted stops while CRAN serves the old version" 1 \
     "${scripts}/cran-accepted.sh" "${tmp}/CRAN-SUBMISSION")"
 check "accepted stops without a submission record" 1 \
   "$(status_of "${scripts}/cran-accepted.sh" "${tmp}/missing")"
-
-make_pkg() {
-  mkdir -p "$1"
-  printf 'Package: NACHO\nTitle: NanoString QC\nVersion: %s\nLicense: GPL-3\n' \
-    "$2" >"$1/DESCRIPTION"
-  printf '%b' "$3" >"$1/NEWS.md"
-}
-
-version_of() {
-  sed -n 's/^Version:[[:space:]]*//p' "$1/DESCRIPTION"
-}
-
-make_pkg "${tmp}/bump-patch" 2.0.6.9000 \
-  '# NACHO (development version)\n\n- fix: Something. (#60)\n\n# NACHO 2.0.6\n\n- fix: Older.\n'
-out="$("${scripts}/bump-version.sh" patch "${tmp}/bump-patch")"
-check "bump patch from a development version" 2.0.7 "$(field version <<<"${out}")"
-check "bump reports the previous version" 2.0.6.9000 "$(field previous <<<"${out}")"
-check "bump writes DESCRIPTION" 2.0.7 "$(version_of "${tmp}/bump-patch")"
-check "bump keeps the other DESCRIPTION lines" "Title: NanoString QC" \
-  "$(sed -n 2p "${tmp}/bump-patch/DESCRIPTION")"
-check "bump keeps the DESCRIPTION line count" 4 \
-  "$(wc -l <"${tmp}/bump-patch/DESCRIPTION" | tr -d ' ')"
-check "release renames the development heading" "# NACHO 2.0.7" \
-  "$(sed -n 1p "${tmp}/bump-patch/NEWS.md")"
-check "release keeps the NEWS body" "- fix: Something. (#60)" \
-  "$(sed -n 3p "${tmp}/bump-patch/NEWS.md")"
-check "release keeps the NEWS line count" 7 \
-  "$(wc -l <"${tmp}/bump-patch/NEWS.md" | tr -d ' ')"
-
-make_pkg "${tmp}/bump-major" 2.0.7.9000 '# NACHO (development version)\n'
-out="$("${scripts}/bump-version.sh" major "${tmp}/bump-major")"
-check "bump major from a development version" 3.0.0 "$(field version <<<"${out}")"
-
-make_pkg "${tmp}/bump-minor" 2.0.7 '# NACHO 2.0.7\n\n- fix: Older.\n'
-out="$("${scripts}/bump-version.sh" minor "${tmp}/bump-minor")"
-check "bump minor from a release" 2.1.0 "$(field version <<<"${out}")"
-check "release adds a heading when none is pending" "# NACHO 2.1.0" \
-  "$(sed -n 1p "${tmp}/bump-minor/NEWS.md")"
-check "release leaves a blank line under the new heading" "" \
-  "$(sed -n 2p "${tmp}/bump-minor/NEWS.md")"
-check "release keeps the old heading below" "# NACHO 2.0.7" \
-  "$(sed -n 3p "${tmp}/bump-minor/NEWS.md")"
-
-make_pkg "${tmp}/bump-dev" 2.0.7 '# NACHO 2.0.7\n\n- fix: Older.\n'
-out="$("${scripts}/bump-version.sh" dev "${tmp}/bump-dev")"
-check "dev bump appends 9000" 2.0.7.9000 "$(field version <<<"${out}")"
-check "dev bump adds the development heading" "# NACHO (development version)" \
-  "$(sed -n 1p "${tmp}/bump-dev/NEWS.md")"
-check "dev bump leaves a blank line under it" "" \
-  "$(sed -n 2p "${tmp}/bump-dev/NEWS.md")"
-check "dev bump keeps the release heading below" "# NACHO 2.0.7" \
-  "$(sed -n 3p "${tmp}/bump-dev/NEWS.md")"
-
-cp "${tmp}/bump-dev/NEWS.md" "${tmp}/news-before.md"
-out="$("${scripts}/bump-version.sh" dev "${tmp}/bump-dev")"
-check "dev bump on a development version changes nothing" 2.0.7.9000 \
-  "$(version_of "${tmp}/bump-dev")"
-check "dev bump on a development version keeps NEWS" "" \
-  "$(diff "${tmp}/news-before.md" "${tmp}/bump-dev/NEWS.md" || true)"
-
-make_pkg "${tmp}/bump-same" 2.0.6.9000 '# NACHO 2.0.7\n\n- fix: Written early.\n'
-"${scripts}/bump-version.sh" patch "${tmp}/bump-same" >/dev/null
-check "release keeps a heading that already matches" 1 \
-  "$(grep -c '^# NACHO 2.0.7$' "${tmp}/bump-same/NEWS.md")"
-
-make_pkg "${tmp}/bump-blank" 2.0.6.9000 '\n# NACHO (development version)\n\n- fix: X.\n'
-"${scripts}/bump-version.sh" patch "${tmp}/bump-blank" >/dev/null
-check "release renames a heading after leading blank lines" "# NACHO 2.0.7" \
-  "$(sed -n 2p "${tmp}/bump-blank/NEWS.md")"
-
-make_pkg "${tmp}/bump-bad" 2.0.7 '# NACHO 2.0.7\n'
-check "bump rejects an unknown level" 1 \
-  "$(status_of "${scripts}/bump-version.sh" huge "${tmp}/bump-bad")"
-check "a rejected bump leaves DESCRIPTION alone" 2.0.7 \
-  "$(version_of "${tmp}/bump-bad")"
-make_pkg "${tmp}/bump-malformed" 2.0.x '# NACHO 2.0.x\n'
-check "bump rejects a malformed version" 1 \
-  "$(status_of "${scripts}/bump-version.sh" patch "${tmp}/bump-malformed")"
-check "bump fails without DESCRIPTION" 1 \
-  "$(status_of "${scripts}/bump-version.sh" patch "${tmp}/missing")"
 
 printf '* checking CRAN incoming feasibility ... NOTE\nMaintainer: x\n* DONE\n\nStatus: 2 NOTEs\n' \
   >"${tmp}/check-notes.log"
@@ -247,22 +145,6 @@ check "results stop without a check log" 1 \
 out="$("${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-clean.md" 2>&1 || true)"
 check "results name the NOTE section" 1 \
   "$(grep -c 'checking CRAN incoming feasibility' <<<"${out}")"
-
-make_repo "${tmp}/tag" 2.0.7
-first="$(git -C "${tmp}/tag" rev-parse HEAD)"
-out="$("${scripts}/release-tag.sh" 2.0.7 "${first}" "${tmp}/tag")"
-check "tag check reports a missing tag" false "$(field tagged <<<"${out}")"
-git -C "${tmp}/tag" -c tag.gpgSign=false tag v2.0.7
-out="$("${scripts}/release-tag.sh" 2.0.7 "${first}" "${tmp}/tag")"
-check "tag check accepts a tag on the submitted commit" true \
-  "$(field tagged <<<"${out}")"
-git -C "${tmp}/tag" -c user.name=test -c user.email=test@example.com \
-  -c commit.gpgsign=false commit -q --allow-empty -m later
-second="$(git -C "${tmp}/tag" rev-parse HEAD)"
-check "tag check stops on a tag on another commit" 1 \
-  "$(status_of "${scripts}/release-tag.sh" 2.0.7 "${second}" "${tmp}/tag")"
-check "tag check fails without a version" 1 \
-  "$(status_of "${scripts}/release-tag.sh" "" "${first}" "${tmp}/tag")"
 
 if [ "${failures}" -gt 0 ]; then
   printf '%s check(s) failed\n' "${failures}"

@@ -40,28 +40,24 @@ jobs:
       actions: write
 
     env:
-      BUMP: ${{ inputs.version }}
       AUTO_MERGE: ${{ inputs.auto_merge }}
       RHUB: ${{ inputs.rhub }}
 
     steps:
-      - name: Create GitHub App token
-        id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+      # The App token pushes the bump branch, so the required checks of its
+      # pull request run; the default token would start none.
+      - name: Get the App token
+        id: token
+        uses: mcanouil/release-actions/token@v1
         with:
-          client-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.APP_KEY }}
+          app-id: ${{ vars.APP_ID }}
+          app-key: ${{ secrets.APP_KEY }}
+          require-app: true
 
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ steps.app-token.outputs.token }}
-
-      - name: Set up Git user
-        uses: ./.github/actions/setup-git-user
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          app-slug: ${{ steps.app-token.outputs.app-slug }}
+          token: ${{ steps.token.outputs.token }}
 
       - name: Set up R
         uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2.14.0
@@ -82,36 +78,27 @@ jobs:
       - name: Rebuild the GSE74821 example object
         run: Rscript data-raw/GSE74821.R
 
-      - name: Check that NEWS.md starts with the development heading
-        run: |
-          first="$(grep -m 1 -v '^[[:space:]]*$' NEWS.md)"
-          if [ "${first}" != "# NACHO (development version)" ]; then
-            echo "::error::NEWS.md must start with '# NACHO (development version)', found '${first}'."
-            exit 1
-          fi
-
+      # The r preset stops when NEWS.md has no development heading, and drops
+      # the .9000 part of the version.
       - name: Bump version and prepare release files
         id: bump
-        run: |
-          .github/scripts/bump-version.sh "${BUMP}" > "${RUNNER_TEMP}/bump.txt"
-          VERSION="$(sed -n 's/^version=//p' "${RUNNER_TEMP}/bump.txt")"
-          case "${VERSION}" in
-            *.*.*.*)
-              echo "::error::The bump left a development version (${VERSION})."
-              exit 1
-              ;;
-          esac
-          DATE="$(date -u +%Y-%m-%d)"
-          sed -E -i 's/^(version:[[:space:]]*).*/\1"'"${VERSION}"'"/' CITATION.cff
-          sed -E -i 's/^(date-released:[[:space:]]*).*/\1"'"${DATE}"'"/' CITATION.cff
-          sed "s/@VERSION@/${VERSION}/g" .github/templates/cran-comments.md > cran-comments.md
-          if [ "${RHUB}" != "true" ]; then
-            sed -i '/^- R-hub:/d' cran-comments.md
-          fi
-          {
-            echo "version=${VERSION}"
-            echo "branch=ci/release-${VERSION//./-}"
-          } >> "${GITHUB_OUTPUT}"
+        uses: mcanouil/release-actions/bump@v1
+        with:
+          bump: ${{ inputs.version }}
+          ecosystems: r, citation
+          tag-prefix: v
+          token: ${{ steps.token.outputs.token }}
+          after-bump: |
+            sed "s/@VERSION@/${VERSION}/g" .github/templates/cran-comments.md > cran-comments.md
+            if [ "${RHUB}" != "true" ]; then
+              sed -i '/^- R-hub:/d' cran-comments.md
+            fi
+
+      - name: Name the bump branch
+        id: branch
+        env:
+          VERSION: ${{ steps.bump.outputs.version }}
+        run: echo "branch=ci/release-${VERSION//./-}" >> "${GITHUB_OUTPUT}"
 
       - name: Validate CITATION.cff
         run: Rscript -e 'if (!isTRUE(cffr::cff_validate("CITATION.cff"))) quit(status = 1L)'
@@ -124,44 +111,33 @@ jobs:
         run: Rscript -e 'stopifnot(packageVersion("urlchecker") >= "2.0.0"); urlchecker::url_check()'
 
       - name: Commit and open the bump pull request
-        id: pr
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          VERSION: ${{ steps.bump.outputs.version }}
-          BRANCH: ${{ steps.bump.outputs.branch }}
-        run: |
-          if git ls-remote --exit-code --heads origin "${BRANCH}" > /dev/null 2>&1; then
-            echo "::error::${BRANCH} already exists. Close its pull request and delete the branch, then run the release again."
-            exit 1
-          fi
-          git switch -c "${BRANCH}"
-          git add DESCRIPTION NEWS.md CITATION.cff cran-comments.md data/GSE74821.rda
-          git commit -m "chore: bump version to ${VERSION}"
-          git push origin "${BRANCH}"
-          cat > "${RUNNER_TEMP}/pr-body.md" <<EOF
-          This bumps NACHO to ${VERSION} and refreshes \`CITATION.cff\` and \`cran-comments.md\`.
+        id: land
+        uses: mcanouil/release-actions/land@v1
+        with:
+          mode: pull-request
+          version: ${{ steps.bump.outputs.version }}
+          tag-prefix: v
+          message: "chore: release NACHO ${{ steps.bump.outputs.version }}"
+          branch: ${{ steps.branch.outputs.branch }}
+          body: |
+            This bumps NACHO to ${{ steps.bump.outputs.version }} and refreshes `CITATION.cff` and `cran-comments.md`.
 
-          Once it merges, the CRAN submission workflow builds and checks the tarball, then waits for approval on the \`cran\` environment before uploading.
-          EOF
-          PR_URL="$(gh pr create \
-            --base main \
-            --head "${BRANCH}" \
-            --title "chore: release NACHO ${VERSION}" \
-            --body-file "${RUNNER_TEMP}/pr-body.md" \
-            --label "Type: CI/CD :robot:")"
-          echo "pr_url=${PR_URL}" >> "${GITHUB_OUTPUT}"
-          if [ "${AUTO_MERGE}" = "true" ]; then
-            gh pr merge --auto --squash "${PR_URL}"
-          else
-            gh pr edit "${PR_URL}" --add-assignee "${GITHUB_ACTOR}"
-          fi
+            Once it merges, the CRAN submission workflow builds and checks the tarball, then waits for approval on the `cran` environment before uploading.
+          files: |
+            ${{ steps.bump.outputs.files }}
+            cran-comments.md
+            data/GSE74821.rda
+          merge: ${{ inputs.auto_merge && 'auto' || 'none' }}
+          wait: false
+          assignees: ${{ !inputs.auto_merge && github.actor || '' }}
+          token: ${{ steps.token.outputs.token }}
 
       - name: Dispatch R-hub checks
         if: ${{ inputs.rhub }}
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.bump.outputs.version }}
-          BRANCH: ${{ steps.bump.outputs.branch }}
+          BRANCH: ${{ steps.branch.outputs.branch }}
         run: |
           # Auto-merge waits for the required checks, so main still holds the
           # previous version here; the bump branch has the version to submit.
@@ -173,7 +149,7 @@ jobs:
       - name: Summary
         env:
           VERSION: ${{ steps.bump.outputs.version }}
-          PR_URL: ${{ steps.pr.outputs.pr_url }}
+          PR_URL: ${{ steps.land.outputs.pull-request }}
         run: |
           {
             echo "## Release ${VERSION}"
