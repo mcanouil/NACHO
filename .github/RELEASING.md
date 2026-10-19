@@ -3,11 +3,18 @@
 Releases go to CRAN through three workflows.
 Each one is started or approved by the maintainer, so nothing reaches CRAN by accident.
 
+The "Release" and "CRAN post-release" workflows use the actions of [mcanouil/release-actions](https://github.com/mcanouil/release-actions).
+These actions get the GitHub App token, write the version, roll `NEWS.md`, open the pull requests and create the GitHub release.
+The "CRAN submission" workflow uses only the `token` action of release-actions.
+The steps for CRAN, R-hub and the R checks stay in this repository.
+
 ## 1. Bump the version
 
 Run the "Release" workflow from `main` and pick `patch`, `minor` or `major`.
 
 It updates `DESCRIPTION`, `NEWS.md`, `CITATION.cff` and `cran-comments.md`, checks spelling and URLs, and opens a pull request called "chore: release NACHO X.Y.Z".
+`NEWS.md` must start with `# NACHO (development version)`, and this section must not be empty.
+The workflow renames this heading to `# NACHO X.Y.Z`.
 The pull request merges straight away, because the bump can't break anything the checks cover.
 The checks still run on `main`, and the submission workflow checks the tarball again before anything goes to CRAN.
 
@@ -16,6 +23,9 @@ They're optional, and `cran-comments.md` only lists them when they run.
 
 Untick "auto-merge" when `cran-comments.md` needs a note, for example to explain breaking changes or a NOTE you expect from the check.
 The pull request is then assigned to you: edit the file on it and merge it yourself.
+
+If you run the workflow again for the same version, it updates the open pull request on `ci/release-X-Y-Z`.
+It does not open a second pull request.
 
 ## 2. Submit to CRAN
 
@@ -62,10 +72,11 @@ It then opens a pull request that starts the next development version and remove
 If CRAN doesn't serve the version yet, the workflow stops without changing anything, and you can run it again later.
 
 If a run stops after it published the release, run it again: it keeps the existing release when its tag points to the submitted commit, and goes on to the development version.
+A release whose tag points to another commit stops the run.
 
 ## Scripts and tests
 
-The workflows call the scripts in `.github/scripts/`.
+The workflows call the scripts in `.github/scripts/` for the CRAN steps.
 Run their tests from the repository root:
 
 - `.github/scripts/tests/test-release-scripts.sh`
