@@ -21,3 +21,7 @@
 ^\.ruff_cache$
 ^\.roborev$
 \.DS_Store$
+^\.rvenvlib$
+^\.Renviron$
+^rproj\.lock$
+^rproj\.toml$

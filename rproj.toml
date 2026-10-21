@@ -1,0 +1,68 @@
+[project]
+name = "NACHO"
+version = "0.1.0"
+type = "project"
+
+[dependencies]
+R = ">= 4.3"
+S7 = ">= 0.2.2"
+"brand.yml" = ">= 0.1.0"
+bslib = ">= 0.10.0"
+cli = ">= 3.6.0"
+"data.table" = "*"
+ggforce = ">= 0.5.0"
+ggplot2 = ">= 4.0.0"
+ggrepel = ">= 0.9.6"
+grDevices = "*"
+htmltools = ">= 0.5.9"
+methods = "*"
+promises = ">= 1.3.2"
+rlang = ">= 1.1.0"
+scales = ">= 1.4.0"
+shiny = ">= 1.11.0"
+utils = "*"
+yaml = ">= 2.3.12"
+
+[dependency-groups.dev]
+Rsamtools = { version = "*", repository = "bioc-official" }
+Biobase = "*"
+GEOquery = "*"
+NanoStringNCTools = "*"
+NormqPCR = "*"
+RUVSeq = "*"
+S4Vectors = "*"
+SummarizedExperiment = "*"
+chromote = ">= 0.5.1"
+colorspace = ">= 2.1-3"
+covr = ">= 3.3.2"
+gdtools = ">= 0.5.1"
+ggiraph = ">= 0.9.6"
+jsonlite = ">= 2.0.0"
+knitr = ">= 1.39"
+later = "*"
+limma = "*"
+mirai = ">= 2.7.3"
+parallel = "*"
+png = ">= 0.1-9"
+quarto = ">= 1.5.1"
+reactable = ">= 0.4.5"
+rmarkdown = ">= 1.16"
+roxygen2 = ">= 8.1.0"
+shinytest2 = ">= 0.5.1"
+testthat = ">= 3.1.5"
+vdiffr = ">= 1.0.9"
+withr = "*"
+
+[dependency-groups.website]
+pdftools = "*"
+
+[[repository]]
+name = "bioc-official"
+url = "https://bioconductor.org/packages/3.23/bioc"
+explicit = true
+
+[config.roxygen2]
+version = "8.1.0"
+
+[config.testthat]
+edition = 3
