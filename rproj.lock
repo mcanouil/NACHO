@@ -6,6 +6,11 @@ url = "https://bioconductor.org/packages/3.23/bioc"
 explicit = true
 
 [[tool.rig.repository]]
+name = "cran-official"
+url = "https://cloud.r-project.org"
+explicit = true
+
+[[tool.rig.repository]]
 name = "bioc"
 metadata = "https://ppm-bioc.r-pkg.org/%v"
 
@@ -477,10 +482,11 @@ dependencies = [
     "Rcpp",
     "systemfonts",
 ]
-sources = ["https://p3m.dev/cran/2026-10-16/bin/macosx/sonoma-arm64/contrib/4.6/gdtools_0.5.2.tgz"]
-target = "bin/macosx/sonoma-arm64/4.6/gdtools_0.5.2-f25ce8e1.tgz"
+sources = ["https://cloud.r-project.org/bin/macosx/sonoma-arm64/contrib/4.6/gdtools_0.5.2.tgz"]
+target = "bin/macosx/sonoma-arm64/4.6/gdtools_0.5.2-1c7b8329.tgz"
 groups = ["dev"]
-metadata = { RemoteHash = "1d7e11d47bcb4bfc43c8a1a518810e4b62f743bf2b0c9bff9fc053644be8eef6", RemoteLinkingToHashes = "Rcpp@1.1.2=2746cf2fb188e5f0a84dbf5c8f68915b54564ed33e5754572f174e7b32e7f4f3" }
+repository = "cran-official"
+metadata = { Built = "2026-10-16 00:12:18 UTC", RemoteHash = "e907a613c135c7ab52adfbe1173972d5" }
 
 [[targets.packages]]
 package = "curl"
@@ -3473,7 +3479,7 @@ sources = ["file:///Users/mcanouil/Projects/packages/NACHO/"]
 target = ""
 groups = ["main"]
 is_project = true
-metadata = { RemoteSha = "7d78cff5784997cb9b93312af8848fff2850b8d4b9a722f4a44602d7645f5b92", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
+metadata = { RemoteSha = "8d70c65a59cf842430bac5a9a0c8b58a85d68dcfc7d1cc3f050d3708e259f090", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
 
 [[targets]]
 r_version = "4.6.1"
@@ -3941,11 +3947,12 @@ dependencies = [
     "Rcpp",
     "systemfonts",
 ]
-sources = ["https://p3m.dev/cran/2026-10-16/src/contrib/gdtools_0.5.2.tar.gz"]
-target = "src/gdtools_0.5.2-e4cf358c.tar.gz"
+sources = ["https://cloud.r-project.org/src/contrib/gdtools_0.5.2.tar.gz"]
+target = "src/gdtools_0.5.2-1c7b8329.tar.gz"
 groups = ["dev"]
+repository = "cran-official"
 system_requirements = "cairo, freetype2, fontconfig"
-metadata = { RemoteHash = "1d7e11d47bcb4bfc43c8a1a518810e4b62f743bf2b0c9bff9fc053644be8eef6", RemoteLinkingToHashes = "Rcpp@1.1.2=2746cf2fb188e5f0a84dbf5c8f68915b54564ed33e5754572f174e7b32e7f4f3" }
+metadata = { RemoteHash = "e907a613c135c7ab52adfbe1173972d5", RemoteLinkingToHashes = "Rcpp@1.1.2=2746cf2fb188e5f0a84dbf5c8f68915b54564ed33e5754572f174e7b32e7f4f3" }
 
 [[targets.packages]]
 package = "curl"
@@ -6964,7 +6971,7 @@ sources = ["file:///Users/mcanouil/Projects/packages/NACHO/"]
 target = ""
 groups = ["main"]
 is_project = true
-metadata = { RemoteSha = "7d78cff5784997cb9b93312af8848fff2850b8d4b9a722f4a44602d7645f5b92", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
+metadata = { RemoteSha = "8d70c65a59cf842430bac5a9a0c8b58a85d68dcfc7d1cc3f050d3708e259f090", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
 
 [[targets]]
 r_version = "4.6.1"
@@ -7422,18 +7429,20 @@ metadata = { RemoteHash = "550839fc2ae5d865db475ba2c1714144f07fa0c052c72135b0e4a
 [[targets.packages]]
 package = "gdtools"
 version = "0.5.2"
-binary = true
-platform = "x86_64-unknown-linux-gnu"
+binary = false
+platform = "source"
 dependencies = [
     "fontquiver",
     "htmltools",
     "Rcpp",
     "systemfonts",
 ]
-sources = ["https://p3m.dev/cran/2026-10-16/bin/linux/manylinux_2_28-x86_64/4.6/src/contrib/gdtools_0.5.2.tar.gz"]
-target = "bin/linux/manylinux_2_28-x86_64/4.6/gdtools_0.5.2-f25ce8e1.tar.gz"
+sources = ["https://cloud.r-project.org/src/contrib/gdtools_0.5.2.tar.gz"]
+target = "src/gdtools_0.5.2-1c7b8329.tar.gz"
 groups = ["dev"]
-metadata = { RemoteHash = "1d7e11d47bcb4bfc43c8a1a518810e4b62f743bf2b0c9bff9fc053644be8eef6", RemoteLinkingToHashes = "Rcpp@1.1.2=2746cf2fb188e5f0a84dbf5c8f68915b54564ed33e5754572f174e7b32e7f4f3" }
+repository = "cran-official"
+system_requirements = "cairo, freetype2, fontconfig"
+metadata = { RemoteHash = "e907a613c135c7ab52adfbe1173972d5", RemoteLinkingToHashes = "Rcpp@1.1.2=2746cf2fb188e5f0a84dbf5c8f68915b54564ed33e5754572f174e7b32e7f4f3" }
 
 [[targets.packages]]
 package = "curl"
@@ -10427,7 +10436,7 @@ sources = ["file:///Users/mcanouil/Projects/packages/NACHO/"]
 target = ""
 groups = ["main"]
 is_project = true
-metadata = { RemoteSha = "7d78cff5784997cb9b93312af8848fff2850b8d4b9a722f4a44602d7645f5b92", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
+metadata = { RemoteSha = "8d70c65a59cf842430bac5a9a0c8b58a85d68dcfc7d1cc3f050d3708e259f090", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
 
 [[targets]]
 r_version = "4.6.1"
@@ -10893,10 +10902,11 @@ dependencies = [
     "Rcpp",
     "systemfonts",
 ]
-sources = ["https://p3m.dev/cran/2026-10-16/bin/windows/contrib/4.6/gdtools_0.5.2.zip"]
-target = "bin/windows/4.6/gdtools_0.5.2-f25ce8e1.zip"
+sources = ["https://cloud.r-project.org/bin/windows/contrib/4.6/gdtools_0.5.2.zip"]
+target = "bin/windows/4.6/gdtools_0.5.2-1c7b8329.zip"
 groups = ["dev"]
-metadata = { RemoteHash = "1d7e11d47bcb4bfc43c8a1a518810e4b62f743bf2b0c9bff9fc053644be8eef6", RemoteLinkingToHashes = "Rcpp@1.1.2=2746cf2fb188e5f0a84dbf5c8f68915b54564ed33e5754572f174e7b32e7f4f3" }
+repository = "cran-official"
+metadata = { Built = "2026-10-17 23:52:37 UTC", RemoteHash = "e907a613c135c7ab52adfbe1173972d5" }
 
 [[targets.packages]]
 package = "curl"
@@ -13889,4 +13899,4 @@ sources = ["file:///Users/mcanouil/Projects/packages/NACHO/"]
 target = ""
 groups = ["main"]
 is_project = true
-metadata = { RemoteSha = "7d78cff5784997cb9b93312af8848fff2850b8d4b9a722f4a44602d7645f5b92", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
+metadata = { RemoteSha = "8d70c65a59cf842430bac5a9a0c8b58a85d68dcfc7d1cc3f050d3708e259f090", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }

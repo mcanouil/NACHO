@@ -35,7 +35,7 @@ SummarizedExperiment = "*"
 chromote = ">= 0.5.1"
 colorspace = ">= 2.1-3"
 covr = ">= 3.3.2"
-gdtools = ">= 0.5.1"
+gdtools = { version = ">= 0.5.1", repository = "cran-official" }
 ggiraph = ">= 0.9.6"
 jsonlite = ">= 2.0.0"
 knitr = ">= 1.39"
@@ -59,6 +59,11 @@ pdftools = "*"
 [[repository]]
 name = "bioc-official"
 url = "https://bioconductor.org/packages/3.23/bioc"
+explicit = true
+
+[[repository]]
+name = "cran-official"
+url = "https://cloud.r-project.org"
 explicit = true
 
 [config.roxygen2]
