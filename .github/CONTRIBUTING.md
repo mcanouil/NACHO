@@ -19,6 +19,21 @@ You can fix small typos in the documentation straight from the GitHub web interf
 - Don't edit the `.Rd` files under `man/`, because they are generated.
 - Edit `README.Rmd`, not `README.md`, and render it with `devtools::build_readme()`.
 
+## Development setup
+
+NACHO uses [rig](https://rig.r-lib.org/) to manage the package library of the project.
+Install rig, then run this command in the root of the repository:
+
+```sh
+rig proj sync
+```
+
+The command installs the dependencies from `rproj.toml` and NACHO itself into `.rvenv/`.
+The `.Renviron` file of the repository tells R to use this library.
+The command does not install development tools such as devtools and lintr.
+Install them in the `tools` library of rig, which rig adds to every project (see `rig proj --help`).
+If you do not use rig, R shows `! Project is not synced. Run: rig proj sync` when it starts in the repository, and uses your usual library.
+
 ## Pull request process
 
 - Create a Git branch for each pull request.

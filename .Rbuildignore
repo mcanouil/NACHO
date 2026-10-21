@@ -1,5 +1,3 @@
-^renv$
-^renv\.lock$
 ^\.git$
 ^\.github$
 ^\.gitignore$
@@ -21,3 +19,8 @@
 ^\.ruff_cache$
 ^\.roborev$
 \.DS_Store$
+^\.rvenv$
+^\.rvenvlib$
+^\.Renviron$
+^rproj\.lock$
+^rproj\.toml$
