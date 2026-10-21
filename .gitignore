@@ -2,8 +2,6 @@
 .Rhistory
 .RData
 .Rprofile
-renv/
-renv.lock
 pkgdown/assets/home/
 docs/
 
