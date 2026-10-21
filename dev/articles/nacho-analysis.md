@@ -46,6 +46,8 @@ geo <- tryCatch(
     )
   }
 )
+#> Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
+#> 'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'
 #> Setting options('download.file.method.GEOquery'='auto')
 #> Setting options('GEOquery.inmemory.gpl'=FALSE)
 #> Found 1 file(s)
@@ -91,13 +93,13 @@ x <- load_rcc(
   instrument = "max"
 )
 #> ℹ Reading 30 RCC files
-#> ✔ Reading 30 RCC files [86ms]
+#> ✔ Reading 30 RCC files [58ms]
 #> 
 #> ℹ Assembling 30 samples
-#> ✔ Assembling 30 samples [30ms]
+#> ✔ Assembling 30 samples [15ms]
 #> 
 #> ℹ Computing quality-control metrics and normalising
-#> ✔ Computing quality-control metrics and normalising [49ms]
+#> ✔ Computing quality-control metrics and normalising [20ms]
 #> 
 print(x)
 #> <nacho> 30 samples, 784 probes, from single-sample RCC files
