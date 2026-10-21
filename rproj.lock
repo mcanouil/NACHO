@@ -698,8 +698,8 @@ metadata = { RemoteHash = "3e74a0685541efb5ea763b92cfd5c859df71c46b0605967a0b5db
 [[targets.packages]]
 package = "Rsamtools"
 version = "2.28.0"
-binary = false
-platform = "source"
+binary = true
+platform = "aarch64-apple-darwin"
 dependencies = [
     "Seqinfo",
     "XVector",
@@ -712,11 +712,11 @@ dependencies = [
     "S4Vectors",
     "bitops",
 ]
-sources = ["https://bioconductor.org/packages/3.23/bioc/src/contrib/Rsamtools_2.28.0.tar.gz"]
-target = "src/Rsamtools_2.28.0-376b2173.tar.gz"
+sources = ["https://bioconductor.org/packages/3.23/bioc/bin/macosx/sonoma-arm64/contrib/4.6/Rsamtools_2.28.0.tgz"]
+target = "bin/macosx/sonoma-arm64/4.6/Rsamtools_2.28.0-376b2173.tgz"
 groups = ["dev"]
 repository = "bioc-official"
-metadata = { RemoteHash = "25f396ca7d0e44d30f6e46d70c7c1fc6", RemoteLinkingToHashes = "Biostrings@2.80.2=769b264c2110017581396e2487e274cfd93082cc79629571c52483c1f2ec8c14, S4Vectors@0.50.3=2faca526d6f2c69a6bbd75e6fcff2592b4f6b94e6792ced824a8f1e716590add, IRanges@2.46.0=a61e97812b0357411b770c5886b684fc6c0b59c05441f7336e46404e6898b3e9, XVector@0.52.0=80b520c984e9da13fe06a2a6bdf712fffa6275705f3d0fb16af60eb5fb28609d, Rhtslib@3.8.0=e89153bbac580adc2e988a095ce39c26e28cdf23b9a337988d18f66bc3b1eded" }
+metadata = { RemoteHash = "25f396ca7d0e44d30f6e46d70c7c1fc6" }
 
 [[targets.packages]]
 package = "cli"
@@ -3447,6 +3447,33 @@ sources = ["https://p3m.dev/cran/2023-01-18/bin/macosx/sonoma-arm64/contrib/4.6/
 target = "bin/macosx/sonoma-arm64/4.6/formatR_1.14-e094489e.tgz"
 groups = ["dev"]
 metadata = { RemoteHash = "4ebaab2c3f8527871655246b62abd060bc75dae1cec7f962ca4752b8080f474c" }
+
+[[targets.packages]]
+package = "NACHO"
+version = "2.0.8.9000"
+binary = false
+platform = "source"
+dependencies = [
+    "S7",
+    "brand.yml",
+    "bslib",
+    "cli",
+    "data.table",
+    "ggforce",
+    "ggplot2",
+    "ggrepel",
+    "htmltools",
+    "promises",
+    "rlang",
+    "scales",
+    "shiny",
+    "yaml",
+]
+sources = ["file:///Users/mcanouil/Projects/packages/NACHO/"]
+target = ""
+groups = ["main"]
+is_project = true
+metadata = { RemoteSha = "7d78cff5784997cb9b93312af8848fff2850b8d4b9a722f4a44602d7645f5b92", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
 
 [[targets]]
 r_version = "4.6.1"
@@ -6912,6 +6939,33 @@ target = "src/formatR_1.14-e094489e.tar.gz"
 groups = ["dev"]
 metadata = { RemoteHash = "4ebaab2c3f8527871655246b62abd060bc75dae1cec7f962ca4752b8080f474c" }
 
+[[targets.packages]]
+package = "NACHO"
+version = "2.0.8.9000"
+binary = false
+platform = "source"
+dependencies = [
+    "S7",
+    "brand.yml",
+    "bslib",
+    "cli",
+    "data.table",
+    "ggforce",
+    "ggplot2",
+    "ggrepel",
+    "htmltools",
+    "promises",
+    "rlang",
+    "scales",
+    "shiny",
+    "yaml",
+]
+sources = ["file:///Users/mcanouil/Projects/packages/NACHO/"]
+target = ""
+groups = ["main"]
+is_project = true
+metadata = { RemoteSha = "7d78cff5784997cb9b93312af8848fff2850b8d4b9a722f4a44602d7645f5b92", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
+
 [[targets]]
 r_version = "4.6.1"
 platform = "x86_64-unknown-linux-gnu"
@@ -10348,6 +10402,33 @@ target = "bin/linux/manylinux_2_28-x86_64/4.6/formatR_1.14-e094489e.tar.gz"
 groups = ["dev"]
 metadata = { RemoteHash = "4ebaab2c3f8527871655246b62abd060bc75dae1cec7f962ca4752b8080f474c" }
 
+[[targets.packages]]
+package = "NACHO"
+version = "2.0.8.9000"
+binary = false
+platform = "source"
+dependencies = [
+    "S7",
+    "brand.yml",
+    "bslib",
+    "cli",
+    "data.table",
+    "ggforce",
+    "ggplot2",
+    "ggrepel",
+    "htmltools",
+    "promises",
+    "rlang",
+    "scales",
+    "shiny",
+    "yaml",
+]
+sources = ["file:///Users/mcanouil/Projects/packages/NACHO/"]
+target = ""
+groups = ["main"]
+is_project = true
+metadata = { RemoteSha = "7d78cff5784997cb9b93312af8848fff2850b8d4b9a722f4a44602d7645f5b92", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
+
 [[targets]]
 r_version = "4.6.1"
 platform = "x86_64-w64-mingw32"
@@ -13782,3 +13863,30 @@ sources = ["https://p3m.dev/cran/2023-01-18/bin/windows/contrib/4.6/formatR_1.14
 target = "bin/windows/4.6/formatR_1.14-e094489e.zip"
 groups = ["dev"]
 metadata = { RemoteHash = "4ebaab2c3f8527871655246b62abd060bc75dae1cec7f962ca4752b8080f474c" }
+
+[[targets.packages]]
+package = "NACHO"
+version = "2.0.8.9000"
+binary = false
+platform = "source"
+dependencies = [
+    "S7",
+    "brand.yml",
+    "bslib",
+    "cli",
+    "data.table",
+    "ggforce",
+    "ggplot2",
+    "ggrepel",
+    "htmltools",
+    "promises",
+    "rlang",
+    "scales",
+    "shiny",
+    "yaml",
+]
+sources = ["file:///Users/mcanouil/Projects/packages/NACHO/"]
+target = ""
+groups = ["main"]
+is_project = true
+metadata = { RemoteSha = "7d78cff5784997cb9b93312af8848fff2850b8d4b9a722f4a44602d7645f5b92", RemoteType = "local", RemoteUrl = "/Users/mcanouil/Projects/packages/NACHO" }
