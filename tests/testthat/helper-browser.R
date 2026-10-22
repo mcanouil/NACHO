@@ -20,4 +20,8 @@ skip_if_no_browser <- function() {
     is.null(suppressMessages(chromote::find_chrome())),
     "Chrome is not available."
   )
+  # Chromote waits 10 seconds for each browser command, whatever the timeouts of AppDriver.
+  # The first page load of the app can take longer on the Windows runners of GitHub Actions.
+  browser <- chromote::default_chromote_object()
+  browser$default_timeout <- 60
 }
