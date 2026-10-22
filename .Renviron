@@ -19,7 +19,7 @@
 # it, so the whole list has to be spelled out.
 #
 # Note that `R --vanilla` ignores this file entirely.
-RVENV_R_LIBS_USER=${R_LIBS_USER}
+RVENV_R_LIBS_USER="${R_LIBS_USER}"
 R_LIBS_USER=.rvenvlib
 R_DEFAULT_PACKAGES=rvenv,datasets,utils,grDevices,graphics,stats,methods
 # rig rvenv end
