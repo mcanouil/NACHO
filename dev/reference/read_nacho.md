@@ -42,5 +42,5 @@ read_nacho(path)
 #> <nacho> 48 samples, 72 probes, from single-sample RCC files
 #> Normalisation: GLM, with 8 housekeeping genes
 #> Flagged samples: 0 of 48
-#> Created with NACHO 2.0.7.9000
+#> Created with NACHO 3.0.0
 ```

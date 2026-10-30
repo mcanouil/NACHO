@@ -32,7 +32,7 @@ print(GSE74821)
 #> <nacho> 48 samples, 72 probes, from single-sample RCC files
 #> Normalisation: GLM, with 8 housekeeping genes
 #> Flagged samples: 0 of 48
-#> Created with NACHO 2.0.7.9000
+#> Created with NACHO 3.0.0
 summary(GSE74821)
 #>                  metric lower upper n_fail n_missing
 #> 1                    BD  0.05  2.25      0         0
@@ -63,5 +63,5 @@ GSE74821[, 1:12]
 #> <nacho> 12 samples, 72 probes, from single-sample RCC files
 #> Normalisation: GLM, with 8 housekeeping genes
 #> Flagged samples: 0 of 12
-#> Created with NACHO 2.0.7.9000
+#> Created with NACHO 3.0.0
 ```
