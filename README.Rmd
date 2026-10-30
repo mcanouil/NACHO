@@ -110,13 +110,10 @@ The article "Moving from NACHO 2" on the same website maps the NACHO 2 code to N
 ```{r}
 #| echo: false
 #| results: asis
-print(citation("NACHO"), "html")
-```
-
-```{r}
-#| echo: false
-#| comment: ""
-print(citation("NACHO"), "bibtex")
+cat(format(citation("NACHO"), style = "textVersion"), sep = "\n\n")
+cat("\n\n```bibtex\n")
+cat(format(citation("NACHO"), style = "bibtex"), sep = "\n")
+cat("```\n")
 ```
 
 ---

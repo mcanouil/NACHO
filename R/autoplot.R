@@ -40,6 +40,10 @@ NULL
 #'   * `"PFNF"`: Positive factor against negative factor.
 #'   * `"HF"`: Housekeeping factor.
 #'   * `"NORM"`: Normalisation factor.
+#'     The line is a loess trend of the counts, fitted on the sample means
+#'     once there are enough samples.
+#'     The band around it is the 95% confidence interval of that trend, not the
+#'     spread of the genes, so it is thin once the counts are normalised.
 #'   * `"Stability"`: geNorm stability of the housekeeping genes, see
 #'     [housekeeping_stability()].
 #'     The dashed line marks M = 1.5, the limit geNorm suggests for

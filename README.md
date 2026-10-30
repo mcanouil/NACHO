@@ -47,13 +47,13 @@ nacho <- load_rcc(
   n_comp = 5
 )
 #> ℹ Reading 6 RCC files
-#> ✔ Reading 6 RCC files [31ms]
+#> ✔ Reading 6 RCC files [25ms]
 #> 
 #> ℹ Assembling 6 samples
 #> ✔ Assembling 6 samples [18ms]
 #> 
 #> ℹ Computing quality-control metrics and normalising
-#> ✔ Computing quality-control metrics and normalising [39ms]
+#> ✔ Computing quality-control metrics and normalising [24ms]
 #> 
 nacho_qc(nacho)[, c("IDFILE", "status", "n_flags", "reason")]
 #>                  IDFILE status n_flags reason
@@ -113,26 +113,25 @@ from NACHO 2” on the same website maps the NACHO 2 code to NACHO 3.
 
 ## Citing NACHO
 
-<p>
+Canouil, M., Bouland, G. A., Bonnefond, A., Froguel, P., ’t Hart, L. M.,
+& Slieker, R. C. (2020). “NACHO: an R package for quality control of
+NanoString nCounter data”. Bioinformatics, 36(3), 970-971. doi:
+10.1093/bioinformatics/btz647
 
-Canouil M, Bouland GA, Bonnefond A, Froguel P, ’t Hart LM, Slieker RC
-(2020). “NACHO: an R package for quality control of NanoString nCounter
-data.” <em>Bioinformatics</em>, <b>36</b>(3), 970–971. ISSN 1367-4803.
-<a href="https://doi.org/10.1093/bioinformatics/btz647">doi:10.1093/bioinformatics/btz647</a>.
-</p>
-
-    @Article{Canouil2020,
-      title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
-      author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
-      journal = {Bioinformatics},
-      year = {2020},
-      month = {feb},
-      volume = {36},
-      number = {3},
-      pages = {970--971},
-      issn = {1367-4803},
-      doi = {10.1093/bioinformatics/btz647},
-    }
+``` bibtex
+@Article{Canouil2020,
+  title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
+  author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
+  journal = {Bioinformatics},
+  year = {2020},
+  month = {feb},
+  volume = {36},
+  number = {3},
+  pages = {970--971},
+  issn = {1367-4803},
+  doi = {10.1093/bioinformatics/btz647},
+}
+```
 
 ------------------------------------------------------------------------
 
