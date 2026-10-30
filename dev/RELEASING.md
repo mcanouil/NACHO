@@ -64,7 +64,9 @@ re-run never submits twice.
 To rehearse without uploading, run “CRAN submission” by hand from `main`
 with “dry run” ticked. It builds and checks the tarball of whatever
 version `main` holds, even a development one. It still asks for approval
-on the `cran` environment, then stops before uploading.
+on the `cran` environment, then stops before uploading. A dry run
+reports NOTE sections that `cran-comments.md` leaves out as a warning,
+and does not stop for them. A check WARNING or ERROR still stops it.
 
 If the upload step fails because devtools changed, submit from a local
 checkout with `devtools::submit_cran()`.
