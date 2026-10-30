@@ -180,6 +180,30 @@ test_that("PCBatch shows one tile per component and batch variable", {
   expect_identical(nrow(plot$data), ncol(GSE74821@pca$scores) * 2L)
 })
 
+line_widths <- function(plot) {
+  gtable <- ggplot2::ggplotGrob(plot)
+  panel <- gtable$grobs[[which(gtable$layout$name == "panel")]]
+  widths <- numeric()
+  collect <- function(grob) {
+    if (inherits(grob, "gTree")) {
+      lapply(grob$children, collect)
+    } else if (!is.null(grob$gp$lwd)) {
+      widths <<- c(widths, grob$gp$lwd)
+    }
+    invisible(NULL)
+  }
+  collect(panel)
+  unique(round(widths, 2))
+}
+
+test_that("the RLE median line is as wide as the median of a boxplot", {
+  boxplot <- ggplot2::ggplot(data.frame(x = "a", y = 1:5)) +
+    ggplot2::aes(x = .data[["x"]], y = .data[["y"]]) +
+    ggplot2::geom_boxplot()
+  rle <- autoplot(GSE74821, type = "RLE")
+  expect_identical(max(line_widths(rle)), max(line_widths(boxplot)))
+})
+
 test_that("the RLE plot orders samples by a numeric colour numerically", {
   object <- GSE74821
   n <- nrow(object@samples)
@@ -505,6 +529,18 @@ test_that("BatchFactors labels the factors the samples have", {
   built <- ggplot2::ggplot_build(plot)
   expect_length(unique(built$data[[1]]$PANEL), 2L)
   expect_identical(plot$theme$legend.position, "bottom")
+})
+
+test_that("BatchFactors names the missing factor columns", {
+  toy <- toy_nacho(6L)
+  for (column in c("Positive_factor", "Negative_factor", "House_factor")) {
+    toy@samples[[column]] <- NULL
+  }
+  expect_error(
+    autoplot(toy, type = "BatchFactors"),
+    "Positive_factor, Negative_factor, and House_factor",
+    class = "nacho_error_bad_argument"
+  )
 })
 
 test_that("BatchFactors keeps the order positive, negative, housekeeping", {

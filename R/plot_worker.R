@@ -71,6 +71,10 @@ plot_pool$generation <- 0L
 #' When all daemons are connected, each one loads NACHO and builds the ggiraph
 #' font set, so the first page does not wait for that work.
 #' When the daemons cannot start, the plots build in the app process.
+#' When a pool that had started loses its daemons, the next call starts one new
+#' pool.
+#' A second pool that loses its daemons ends the workers, and the plots build in
+#' the app process until the app stops.
 #' Each pool has its own profile name, so a callback of a stopped pool, such
 #' as a late probe or warm-up, does nothing to the next pool.
 #'
@@ -101,7 +105,7 @@ plot_workers_start <- function() {
         TRUE
       },
       error = function(cnd) {
-        plot_workers_fail()
+        plot_workers_fail(retry = FALSE)
         FALSE
       }
     )
@@ -120,8 +124,9 @@ plot_workers_start <- function() {
 #' The probe is a small task with a time limit, sent before any build, so it
 #' does not wait behind builds.
 #' When a daemon answers, the pool is warm.
-#' When no daemon answers within the limit (30 seconds), the pool fails and the
-#' plots build in the app process.
+#' When no daemon answers within the limit (30 seconds), the workers end and
+#' the plots build in the app process, because a new pool would not start
+#' either.
 #' Builds have no time limit, because a large page can wait in the queue of a
 #' healthy pool for longer than that.
 #'
@@ -134,7 +139,9 @@ plot_workers_probe <- function(profile) {
       if (identical(plot_pool$profile, profile)) plot_pool$warm <- TRUE
     },
     onRejected = function(error) {
-      if (identical(plot_pool$profile, profile)) plot_workers_fail()
+      if (identical(plot_pool$profile, profile)) {
+        plot_workers_fail(retry = FALSE)
+      }
     }
   )
   invisible(NULL)
@@ -150,7 +157,7 @@ plot_workers_warm <- function(profile, count, libs, tries = 120L) {
   if (!identical(plot_pool$profile, profile) || isTRUE(plot_pool$failed)) {
     return(invisible(NULL))
   }
-  if (mirai::status(.compute = profile)$connections >= count) {
+  if (pool_connections(profile) >= count) {
     mirai::everywhere(
       {
         .libPaths(libs)
@@ -180,30 +187,47 @@ plot_workers_stop <- function() {
   }
   plot_pool$profile <- NULL
   plot_pool$failed <- NULL
+  plot_pool$failures <- NULL
   plot_pool$warm <- NULL
   invisible(NULL)
 }
 
-#' Give up on daemons that are unavailable
+#' Stop a pool whose daemons are unavailable
 #'
 #' This covers daemons that did not start and daemons that stopped.
 #'
-#' The pool stops, and the plots build in the app process until the app
-#' stops.
-#' The flag is set first, so builds that the stop rejects build in the app
-#' process.
+#' The pool stops and its profile is cleared before the daemons stop, so the
+#' builds that the stop rejects build in the app process, and their callbacks
+#' do not count the failure again.
+#' After a pool that had started, the next call of `plot_workers_start()`
+#' starts one new pool.
+#' The workers end for good when the daemons did not start (`retry = FALSE`)
+#' and after the second failed pool.
+#'
+#' @param retry Whether a pool that had started may be replaced once.
 #'
 #' @noRd
-plot_workers_fail <- function() {
+plot_workers_fail <- function(retry = TRUE) {
   if (isTRUE(plot_pool$failed)) {
     return(invisible(NULL))
   }
-  plot_pool$failed <- TRUE
-  if (!is.null(plot_pool$profile)) {
-    mirai::daemons(0, .compute = plot_pool$profile)
+  plot_pool$failures <- (plot_pool$failures %||% 0L) + 1L
+  final <- !retry || plot_pool$failures >= 2L
+  if (final) {
+    plot_pool$failed <- TRUE
+  }
+  profile <- plot_pool$profile
+  plot_pool$profile <- NULL
+  plot_pool$warm <- NULL
+  if (!is.null(profile)) {
+    mirai::daemons(0, .compute = profile)
   }
   nacho_inform(
-    "The plot workers are unavailable, so the app builds the plots itself."
+    if (final) {
+      "The plot workers are unavailable, so the app builds the plots itself."
+    } else {
+      "The plot workers stopped, so the app starts new ones."
+    }
   )
   invisible(NULL)
 }
@@ -213,12 +237,23 @@ plot_workers_fail <- function() {
 #' A pool is warm once a daemon has answered the start probe.
 #' When none is connected after that, a build sent to the pool would wait in
 #' the queue for ever.
+#' A dispatcher that no longer answers counts as no daemon connected.
 #'
 #' @noRd
 pool_lost <- function(profile) {
   isTRUE(plot_pool$warm) &&
     identical(plot_pool$profile, profile) &&
-    mirai::status(.compute = profile)$connections == 0L
+    pool_connections(profile) == 0L
+}
+
+#' Count the daemons connected to a pool
+#'
+#' @noRd
+pool_connections <- function(profile) {
+  tryCatch(
+    mirai::status(.compute = profile)$connections,
+    error = function(cnd) 0L
+  )
 }
 
 #' Build one card in the app process for a task
@@ -253,20 +288,24 @@ build_in_process <- function(build, key, args, cache) {
 #' After the session ends, the task does not settle, so it does not write to the
 #' reactive values of a session that no longer exists.
 #'
+#' The task asks for the pool when it builds, so a pool that replaces a failed
+#' one serves the cards that were already shown.
 #' When the daemon of a build stops, or no daemon is left, the pool fails and
 #' the build runs in the app process.
 #'
 #' @noRd
-card_task <- function(session, profile, jobs, cache) {
+card_task <- function(session, jobs, cache) {
   libs <- .libPaths()
   shiny::ExtendedTask$new(function(build, key, args) {
     if (!identical(build, jobs$build)) {
       return(NULL)
     }
-    if (!isTRUE(plot_pool$failed) && pool_lost(profile)) {
+    profile <- plot_workers_start()
+    if (!is.null(profile) && pool_lost(profile)) {
       plot_workers_fail()
+      profile <- plot_workers_start()
     }
-    if (isTRUE(plot_pool$failed)) {
+    if (is.null(profile)) {
       return(build_in_process(build, key, args, cache))
     }
     running <- mirai::mirai(
@@ -374,7 +413,7 @@ card_widget <- function(session, inputs, workers, active) {
   }
   jobs <- new.env(parent = emptyenv())
   jobs$build <- 0L
-  task <- card_task(session, workers, jobs, cache)
+  task <- card_task(session, jobs, cache)
   shown <- shiny::reactiveVal(NULL)
   pending <- shiny::reactiveVal(FALSE)
   stop_running <- function() {
