@@ -103,7 +103,7 @@ parity <- lapply(objects, function(x) {
     counts = x@counts,
     normalised = x@normalised,
     metrics = samples[, c("IDFILE", intersect(metrics, names(samples)))],
-    housekeeping_genes = x@settings[["housekeeping_genes"]],
+    housekeeping_genes = sort(x@settings[["housekeeping_genes"]]),
     scores = abs(x@pca[["scores"]]),
     importance = x@pca[["importance"]]
   )
