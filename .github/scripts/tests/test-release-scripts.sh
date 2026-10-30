@@ -136,7 +136,7 @@ check "results match a clean check" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-clean.md")"
 check "results match a CRLF cran-comments.md" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-crlf.md")"
-check "results stop on notes cran-comments.md leaves out" 2 \
+check "results stop on notes cran-comments.md leaves out" 3 \
   "$(exit_code_of "${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-clean.md")"
 check "results match notes cran-comments.md explains" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-notes.md")"
@@ -144,12 +144,12 @@ printf '## R CMD check results\n\n0 errors | 0 warnings | 1 note\n\n- NOTE one.\
   >"${tmp}/comments-one-note.md"
 check "results accept a note cran-comments.md explains but the check did not find" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-one-note.md")"
-check "results stop on a warning" 2 \
+check "results stop on a warning" 3 \
   "$(exit_code_of "${scripts}/check-results.sh" "${tmp}/check-warn.log" "${tmp}/comments-notes.md")"
 check "results stop without a results line" 1 \
-  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-none.md")"
+  "$(exit_code_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-none.md")"
 check "results stop without a check log" 1 \
-  "$(status_of "${scripts}/check-results.sh" "${tmp}/missing.log" "${tmp}/comments-clean.md")"
+  "$(exit_code_of "${scripts}/check-results.sh" "${tmp}/missing.log" "${tmp}/comments-clean.md")"
 out="$("${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-clean.md" 2>&1 || true)"
 check "results name the NOTE section" 1 \
   "$(grep -c 'checking CRAN incoming feasibility' <<<"${out}")"
