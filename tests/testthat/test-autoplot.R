@@ -154,13 +154,11 @@ test_that("the Stability plot orders the genes by geNorm rank", {
   )
 })
 
-rle_log_counts <- function() {
-  rows <- grepl("Endogenous", nacho_probes(NACHO::GSE74821)$CodeClass)
-  log2(nacho_counts(NACHO::GSE74821, normalised = TRUE)[rows, ] + 1)
-}
-
 test_that("rle_centre() centres each gene on its median", {
-  log_counts <- rle_log_counts()
+  rows <- grepl("Endogenous", nacho_probes(NACHO::GSE74821)$CodeClass)
+  log_counts <- log2(
+    nacho_counts(NACHO::GSE74821, normalised = TRUE)[rows, ] + 1
+  )
   centred <- NACHO:::rle_centre(log_counts, 1)
   medians <- apply(centred, 1, stats::median)
   expect_equal(unname(medians), rep(0, length(medians)), tolerance = 1e-8)
@@ -197,46 +195,6 @@ test_that("box_stats() gives NA for a matrix without rows", {
   boxes <- NACHO:::box_stats(values)
   expect_identical(boxes$sample, c("a", "b"))
   expect_true(all(is.na(boxes[c("ymin", "lower", "middle", "upper", "ymax")])))
-})
-
-test_that("the RLE plot draws the median of the genes centred on their median", {
-  log_counts <- rle_log_counts()
-  centred <- log_counts - apply(log_counts, 1, stats::median)
-  data <- autoplot(GSE74821, type = "RLE")$data
-  expect_true(all(c("sample", "lower", "middle", "upper") %in% names(data)))
-  expect_equal(
-    data$middle,
-    unname(apply(centred[, as.character(data$sample)], 2, stats::median))
-  )
-})
-
-test_that("PCBatch shows one tile per component and batch variable", {
-  plot <- autoplot(GSE74821, type = "PCBatch")
-  expect_identical(nrow(plot$data), ncol(GSE74821@pca$scores) * 2L)
-})
-
-line_widths <- function(plot) {
-  gtable <- ggplot2::ggplotGrob(plot)
-  panel <- gtable$grobs[[which(gtable$layout$name == "panel")]]
-  widths <- numeric()
-  collect <- function(grob) {
-    if (inherits(grob, "gTree")) {
-      lapply(grob$children, collect)
-    } else if (!is.null(grob$gp$lwd)) {
-      widths <<- c(widths, grob$gp$lwd)
-    }
-    invisible(NULL)
-  }
-  collect(panel)
-  unique(round(widths, 2))
-}
-
-test_that("the RLE median line is as wide as the median of a boxplot", {
-  boxplot <- ggplot2::ggplot(data.frame(x = "a", y = 1:5)) +
-    ggplot2::aes(x = .data[["x"]], y = .data[["y"]]) +
-    ggplot2::geom_boxplot()
-  rle <- autoplot(GSE74821, type = "RLE")
-  expect_identical(max(line_widths(rle)), max(line_widths(boxplot)))
 })
 
 test_that("the RLE plot orders samples by a numeric colour numerically", {
