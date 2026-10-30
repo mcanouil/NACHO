@@ -35,7 +35,7 @@ SummarizedExperiment = "*"
 chromote = ">= 0.5.1"
 colorspace = ">= 2.1-3"
 covr = ">= 3.3.2"
-gdtools = { version = ">= 0.5.1", repository = "cran-official" }
+gdtools = { version = ">= 0.5.2", repository = "cran-official" }
 ggiraph = ">= 0.9.6"
 jsonlite = ">= 2.0.0"
 knitr = ">= 1.39"
