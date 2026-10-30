@@ -54,12 +54,8 @@ checked and returned as is, and a NACHO 2 object gets a hint to use
 ## Examples
 
 ``` r
-if (requireNamespace("SummarizedExperiment", quietly = TRUE)) {
-  se <- as_summarized_experiment(GSE74821)
-  as_nacho(se)
+if (FALSE) { # interactive() && requireNamespace("SummarizedExperiment", quietly = TRUE)
+se <- as_summarized_experiment(GSE74821)
+as_nacho(se)
 }
-#> <nacho> 48 samples, 72 probes, from single-sample RCC files
-#> Normalisation: GLM, with 8 housekeeping genes
-#> Flagged samples: 0 of 48
-#> Created with NACHO 3.0.0
 ```
