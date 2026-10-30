@@ -446,7 +446,7 @@ test_that("builds that wait on a crashed pool all end in the app process", {
       if (calls == 1L) {
         real_mirai(quit(save = "no", status = 1L), .compute = .compute)
       } else {
-        real_mirai(Sys.sleep(1), .compute = .compute)
+        real_mirai(..., .compute = .compute)
       }
     },
     .package = "mirai"
@@ -469,7 +469,9 @@ test_that("builds that wait on a crashed pool all end in the app process", {
   }
   expect_true(settle(NULL, finished, seconds = 120))
   for (task in tasks) {
-    expect_null(shiny::isolate(task$result())$error)
+    result <- shiny::isolate(task$result())
+    expect_null(result$error)
+    expect_true(ggplot2::is_ggplot(result$value))
   }
 })
 

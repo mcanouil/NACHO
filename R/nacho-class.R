@@ -6,6 +6,21 @@ NULL
 #' @noRd
 nacho_schema_version <- 2L
 
+#' Describe duplicated values in a validity problem
+#'
+#' Up to three values are named, and an ellipsis shows that more follow.
+#'
+#' @noRd
+duplicate_problem <- function(label, values) {
+  duplicates <- duplicated_values(values)
+  sprintf(
+    "%s must be unique; duplicated: %s%s.",
+    label,
+    paste(utils::head(duplicates, 3), collapse = ", "),
+    if (length(duplicates) > 3L) ", ..." else ""
+  )
+}
+
 validate_nacho <- function(self) {
   counts <- self@counts
   if (!is.matrix(counts)) {
@@ -31,13 +46,7 @@ validate_nacho <- function(self) {
     problems <- c(problems, "The id column must come first in @samples.")
   }
   if (anyDuplicated(ids) > 0) {
-    problems <- c(
-      problems,
-      sprintf(
-        "Sample ids must be unique; duplicated: %s.",
-        paste(utils::head(unique(ids[duplicated(ids)]), 3), collapse = ", ")
-      )
-    )
+    problems <- c(problems, duplicate_problem("Sample ids", ids))
   }
   if (!identical(ids, colnames(counts))) {
     problems <- c(
@@ -75,16 +84,9 @@ validate_nacho <- function(self) {
       "The probe names in @probes must match rownames(@counts), in the same order."
     )
   } else if (anyDuplicated(self@probes[["Name"]]) > 0) {
-    probe_names <- as.character(self@probes[["Name"]])
     problems <- c(
       problems,
-      sprintf(
-        "Probe names must be unique; duplicated: %s.",
-        paste(
-          utils::head(unique(probe_names[duplicated(probe_names)]), 3),
-          collapse = ", "
-        )
-      )
+      duplicate_problem("Probe names", as.character(self@probes[["Name"]]))
     )
   }
   if (!rlang::is_string(self@rcc_type) || !self@rcc_type %in% c("n1", "n8")) {

@@ -91,6 +91,30 @@ test_that("the validator reports duplicated probe names", {
   )
 })
 
+test_that("the validator shows three duplicated probe names and an ellipsis", {
+  x <- toy_nacho()
+  probes <- x@probes
+  probes$Name[c(2, 4, 6, 8)] <- probes$Name[c(1, 3, 5, 7)]
+  counts <- x@counts
+  rownames(counts) <- probes$Name
+  normalised <- x@normalised
+  rownames(normalised) <- probes$Name
+  expect_error(
+    S7::set_props(
+      x,
+      probes = probes,
+      counts = counts,
+      normalised = normalised
+    ),
+    paste0(
+      "duplicated: ",
+      paste(probes$Name[c(1, 3, 5)], collapse = ", "),
+      ", ...."
+    ),
+    fixed = TRUE
+  )
+})
+
 test_that("the validator refuses insane thresholds", {
   x <- toy_nacho()
   thresholds <- x@thresholds

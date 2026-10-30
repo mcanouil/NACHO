@@ -1419,7 +1419,7 @@ plot_batch_factors <- function(
   if (length(factors) == 0L) {
     nacho_abort(
       c(
-        "The samples have none of the factor columns of {.arg BatchFactors}.",
+        "The samples have none of the factor columns that {.code type = \"BatchFactors\"} needs.",
         i = "Add {.field {names(labels)}} to the samples."
       ),
       class = "bad_argument"
