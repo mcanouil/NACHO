@@ -157,7 +157,7 @@ plot_workers_warm <- function(profile, count, libs, tries = 120L) {
   if (!identical(plot_pool$profile, profile) || isTRUE(plot_pool$failed)) {
     return(invisible(NULL))
   }
-  if (mirai::status(.compute = profile)$connections >= count) {
+  if (pool_connections(profile) >= count) {
     mirai::everywhere(
       {
         .libPaths(libs)

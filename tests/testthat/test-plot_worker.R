@@ -475,7 +475,7 @@ test_that("builds that wait on a crashed pool all end in the app process", {
   }
 })
 
-test_that("a pool whose daemons all left builds in the app process", {
+test_that("a pool whose daemons all left is replaced before the build", {
   skip_if_no_daemons()
   skip_if_not_installed("later")
   withr::defer(NACHO:::plot_workers_stop())
@@ -496,9 +496,11 @@ test_that("a pool whose daemons all left builds in the app process", {
   expect_true(ggplot2::is_ggplot(result$value))
   expect_null(NACHO:::plot_pool$failed)
   expect_identical(NACHO:::plot_pool$failures, 1L)
+  expect_false(identical(NACHO:::plot_pool$profile, profile))
+  expect_false(is.null(NACHO:::plot_pool$profile))
 })
 
-test_that("a pool that never reached full strength is lost once its daemon dies", {
+test_that("a pool that never reached full strength is replaced once its daemon dies", {
   skip_if_no_daemons()
   skip_if_not_installed("later")
   withr::defer(NACHO:::plot_workers_stop())
@@ -524,6 +526,8 @@ test_that("a pool that never reached full strength is lost once its daemon dies"
   expect_true(ggplot2::is_ggplot(result$value))
   expect_null(NACHO:::plot_pool$failed)
   expect_identical(NACHO:::plot_pool$failures, 1L)
+  expect_false(identical(NACHO:::plot_pool$profile, profile))
+  expect_false(is.null(NACHO:::plot_pool$profile))
 })
 
 test_that("a pool whose dispatcher no longer answers is lost", {
