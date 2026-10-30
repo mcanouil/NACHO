@@ -33,6 +33,12 @@ status_of() {
   if "$@" >/dev/null 2>&1; then echo 0; else echo 1; fi
 }
 
+exit_code_of() {
+  local code=0
+  "$@" >/dev/null 2>&1 || code=$?
+  echo "${code}"
+}
+
 make_repo "${tmp}/dev" 2.0.7.9000
 out="$("${scripts}/release-guard.sh" "${tmp}/dev")"
 check "guard skips a development version" false "$(field submit <<<"${out}")"
@@ -130,16 +136,16 @@ check "results match a clean check" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-clean.md")"
 check "results match a CRLF cran-comments.md" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-crlf.md")"
-check "results stop on notes cran-comments.md leaves out" 1 \
-  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-clean.md")"
+check "results stop on notes cran-comments.md leaves out" 2 \
+  "$(exit_code_of "${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-clean.md")"
 check "results match notes cran-comments.md explains" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-notes.md")"
 printf '## R CMD check results\n\n0 errors | 0 warnings | 1 note\n\n- NOTE one.\n' \
   >"${tmp}/comments-one-note.md"
 check "results accept a note cran-comments.md explains but the check did not find" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-one-note.md")"
-check "results stop on a warning" 1 \
-  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-warn.log" "${tmp}/comments-notes.md")"
+check "results stop on a warning" 2 \
+  "$(exit_code_of "${scripts}/check-results.sh" "${tmp}/check-warn.log" "${tmp}/comments-notes.md")"
 check "results stop without a results line" 1 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-none.md")"
 check "results stop without a check log" 1 \

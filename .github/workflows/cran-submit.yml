@@ -109,7 +109,7 @@ jobs:
         run: |
           status=0
           .github/scripts/check-results.sh check/NACHO.Rcheck/00check.log cran-comments.md > "${RUNNER_TEMP}/compare.txt" 2>&1 || status=$?
-          if [ "${DRY_RUN}" = "true" ]; then
+          if [ "${DRY_RUN}" = "true" ] && [ "${status}" -eq 2 ]; then
             sed 's/^::error::/::warning::/' "${RUNNER_TEMP}/compare.txt"
             exit 0
           fi

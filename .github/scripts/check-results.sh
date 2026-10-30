@@ -4,6 +4,8 @@ set -euo pipefail
 # Compare the Status line of an R CMD check log with the results line of
 # cran-comments.md, so the file sent to CRAN never reports fewer problems
 # than the check found.
+# Exit 2 means the check found more problems than cran-comments.md claims;
+# exit 1 means the comparison could not be made.
 # Usage: check-results.sh <00check.log> [cran-comments.md]
 
 log="${1:?Usage: check-results.sh <00check.log> [cran-comments.md]}"
@@ -49,7 +51,7 @@ if [ "${claimed_errors}" -lt "${errors}" ] ||
     echo "::error::${comments} reports fewer problems than the check found. The check found ${summary}, but ${comments} says ${claimed_summary}. Explain each problem in ${comments}, correct its results line, and run the CRAN submission again."
     tr -d '\r' <"${log}" | grep -E '\.\.\. .*(NOTE|WARNING|ERROR)$' || true
   } >&2
-  exit 1
+  exit 2
 fi
 
 echo "${comments} reports at least what the check found: check ${summary}, ${comments} ${claimed_summary}"
