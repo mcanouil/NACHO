@@ -563,7 +563,12 @@ test_that("BatchFactors labels the factors the samples have", {
   expect_identical(levels(plot$data[["factor"]]), c("Positive", "Housekeeping"))
   built <- ggplot2::ggplot_build(plot)
   expect_length(unique(built$data[[1]]$PANEL), 2L)
-  expect_true("guide-box-bottom" %in% ggplot2::ggplotGrob(plot)$layout$name)
+  gtable <- ggplot2::ggplotGrob(plot)
+  guide_box <- function(position) {
+    gtable$grobs[[match(paste0("guide-box-", position), gtable$layout$name)]]
+  }
+  expect_false(inherits(guide_box("bottom"), "zeroGrob"))
+  expect_true(inherits(guide_box("right"), "zeroGrob"))
 })
 
 test_that("BatchFactors names the missing factor columns", {
