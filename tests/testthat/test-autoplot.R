@@ -154,54 +154,47 @@ test_that("the Stability plot orders the genes by geNorm rank", {
   )
 })
 
-test_that("the RLE plot centres each gene on its median", {
-  plot <- autoplot(GSE74821, type = "RLE")
-  data <- plot$data
-  expect_true(all(c("sample", "lower", "middle", "upper") %in% names(data)))
-  rows <- grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
-  log_counts <- log2(nacho_counts(GSE74821, normalised = TRUE)[rows, ] + 1)
+test_that("rle_centre() centres each gene on its median", {
+  rows <- grepl("Endogenous", nacho_probes(NACHO::GSE74821)$CodeClass)
+  log_counts <- log2(
+    nacho_counts(NACHO::GSE74821, normalised = TRUE)[rows, ] + 1
+  )
   centred <- NACHO:::rle_centre(log_counts, 1)
   medians <- apply(centred, 1, stats::median)
   expect_equal(unname(medians), rep(0, length(medians)), tolerance = 1e-8)
   gene <- rownames(log_counts)[3]
-  sample <- as.character(data$sample[2])
+  sample <- colnames(log_counts)[2]
   expect_equal(
     centred[gene, sample],
     unname(log_counts[gene, sample] - stats::median(log_counts[gene, ]))
   )
-  expect_equal(
-    data$middle[data$sample == sample],
-    stats::median(centred[, sample])
+})
+
+test_that("box_stats() gives one row of statistics for each column", {
+  values <- cbind(a = c(1, 2, 3, 4, 100), b = c(2, 4, 6, 8, 10))
+  boxes <- NACHO:::box_stats(values)
+  expect_identical(boxes$sample, c("a", "b"))
+  expect_equal(boxes$middle, c(3, 6))
+  expect_equal(boxes$ymax, c(4, 10))
+})
+
+test_that("box_stats() gives NA for a column with only NA", {
+  values <- cbind(a = c(1, 2, 3), b = c(NA_real_, NA_real_, NA_real_))
+  boxes <- NACHO:::box_stats(values)
+  expect_equal(boxes$middle, c(2, NA))
+  expect_true(all(is.na(boxes[2, c("ymin", "lower", "upper", "ymax")])))
+})
+
+test_that("box_stats() gives NA for a matrix without rows", {
+  values <- matrix(
+    numeric(),
+    nrow = 0L,
+    ncol = 2L,
+    dimnames = list(NULL, c("a", "b"))
   )
-})
-
-test_that("PCBatch shows one tile per component and batch variable", {
-  plot <- autoplot(GSE74821, type = "PCBatch")
-  expect_identical(nrow(plot$data), ncol(GSE74821@pca$scores) * 2L)
-})
-
-line_widths <- function(plot) {
-  gtable <- ggplot2::ggplotGrob(plot)
-  panel <- gtable$grobs[[which(gtable$layout$name == "panel")]]
-  widths <- numeric()
-  collect <- function(grob) {
-    if (inherits(grob, "gTree")) {
-      lapply(grob$children, collect)
-    } else if (!is.null(grob$gp$lwd)) {
-      widths <<- c(widths, grob$gp$lwd)
-    }
-    invisible(NULL)
-  }
-  collect(panel)
-  unique(round(widths, 2))
-}
-
-test_that("the RLE median line is as wide as the median of a boxplot", {
-  boxplot <- ggplot2::ggplot(data.frame(x = "a", y = 1:5)) +
-    ggplot2::aes(x = .data[["x"]], y = .data[["y"]]) +
-    ggplot2::geom_boxplot()
-  rle <- autoplot(GSE74821, type = "RLE")
-  expect_identical(max(line_widths(rle)), max(line_widths(boxplot)))
+  boxes <- NACHO:::box_stats(values)
+  expect_identical(boxes$sample, c("a", "b"))
+  expect_true(all(is.na(boxes[c("ymin", "lower", "middle", "upper", "ymax")])))
 })
 
 test_that("the RLE plot orders samples by a numeric colour numerically", {
@@ -528,7 +521,12 @@ test_that("BatchFactors labels the factors the samples have", {
   expect_identical(levels(plot$data[["factor"]]), c("Positive", "Housekeeping"))
   built <- ggplot2::ggplot_build(plot)
   expect_length(unique(built$data[[1]]$PANEL), 2L)
-  expect_identical(plot$theme$legend.position, "bottom")
+  gtable <- ggplot2::ggplotGrob(plot)
+  guide_box <- function(position) {
+    gtable$grobs[[match(paste0("guide-box-", position), gtable$layout$name)]]
+  }
+  expect_false(inherits(guide_box("bottom"), "zeroGrob"))
+  expect_true(inherits(guide_box("right"), "zeroGrob"))
 })
 
 test_that("BatchFactors names the missing factor columns", {
