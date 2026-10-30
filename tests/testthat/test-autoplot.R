@@ -201,7 +201,7 @@ test_that("the RLE median line is as wide as the median of a boxplot", {
     ggplot2::aes(x = .data[["x"]], y = .data[["y"]]) +
     ggplot2::geom_boxplot()
   rle <- autoplot(GSE74821, type = "RLE")
-  expect_true(max(line_widths(rle)) <= max(line_widths(boxplot)))
+  expect_identical(max(line_widths(rle)), max(line_widths(boxplot)))
 })
 
 test_that("the RLE plot orders samples by a numeric colour numerically", {
