@@ -104,7 +104,17 @@ jobs:
           Rscript -e 'rcmdcheck::rcmdcheck(Sys.getenv("TARBALL"), args = "--as-cran", error_on = "warning", check_dir = "check")'
 
       - name: Compare the check with cran-comments.md
-        run: .github/scripts/check-results.sh check/NACHO.Rcheck/00check.log cran-comments.md
+        env:
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: |
+          status=0
+          .github/scripts/check-results.sh check/NACHO.Rcheck/00check.log cran-comments.md > "${RUNNER_TEMP}/compare.txt" 2>&1 || status=$?
+          if [ "${DRY_RUN}" = "true" ]; then
+            sed 's/^::error::/::warning::/' "${RUNNER_TEMP}/compare.txt"
+            exit 0
+          fi
+          cat "${RUNNER_TEMP}/compare.txt"
+          exit "${status}"
 
       - name: Upload the tarball
         uses: actions/upload-artifact@v7
