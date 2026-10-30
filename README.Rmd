@@ -12,6 +12,8 @@ knitr::opts_chunk$set(
 )
 ```
 
+<!-- markdownlint-disable MD013 MD033 -->
+
 # NAnoString quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" alt="NACHO hexagonal logo" />
 
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html)
@@ -110,13 +112,10 @@ The article "Moving from NACHO 2" on the same website maps the NACHO 2 code to N
 ```{r}
 #| echo: false
 #| results: asis
-print(citation("NACHO"), "html")
-```
-
-```{r}
-#| echo: false
-#| comment: ""
-print(citation("NACHO"), "bibtex")
+cat(format(citation("NACHO"), style = "text"), sep = "\n\n")
+cat("\n\n```bibtex\n")
+cat(format(citation("NACHO"), style = "bibtex"), sep = "\n")
+cat("```\n")
 ```
 
 ---
