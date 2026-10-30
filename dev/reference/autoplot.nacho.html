@@ -98,7 +98,11 @@
 <li><p><code>"PCA"</code>: Planes of the first principal components.</p></li>
 <li><p><code>"PFNF"</code>: Positive factor against negative factor.</p></li>
 <li><p><code>"HF"</code>: Housekeeping factor.</p></li>
-<li><p><code>"NORM"</code>: Normalisation factor.</p></li>
+<li><p><code>"NORM"</code>: Normalisation factor.
+The line is a loess trend of the counts, fitted on the sample means
+once there are enough samples.
+The band around it is the 95% confidence interval of that trend, not the
+spread of the genes, so it is thin once the counts are normalised.</p></li>
 <li><p><code>"Stability"</code>: geNorm stability of the housekeeping genes, see
 <code><a href="housekeeping_stability.html">housekeeping_stability()</a></code>.
 The dashed line marks M = 1.5, the limit geNorm suggests for

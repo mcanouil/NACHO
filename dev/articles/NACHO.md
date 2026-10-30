@@ -125,13 +125,13 @@ nacho <- load_rcc(
   n_comp = 5
 )
 ## ℹ Reading 6 RCC files
-## ✔ Reading 6 RCC files [42ms]
+## ✔ Reading 6 RCC files [25ms]
 ## 
 ## ℹ Assembling 6 samples
-## ✔ Assembling 6 samples [33ms]
+## ✔ Assembling 6 samples [20ms]
 ## 
 ## ℹ Computing quality-control metrics and normalising
-## ✔ Computing quality-control metrics and normalising [39ms]
+## ✔ Computing quality-control metrics and normalising [22ms]
 ## 
 print(nacho)
 ## <nacho> 6 samples, 784 probes, from single-sample RCC files
@@ -267,13 +267,13 @@ legacy <- load_rcc(
   preset = "legacy"
 )
 ## ℹ Reading 6 RCC files
-## ✔ Reading 6 RCC files [21ms]
+## ✔ Reading 6 RCC files [13ms]
 ## 
 ## ℹ Assembling 6 samples
-## ✔ Assembling 6 samples [19ms]
+## ✔ Assembling 6 samples [12ms]
 ## 
 ## ℹ Computing quality-control metrics and normalising
-## ✔ Computing quality-control metrics and normalising [25ms]
+## ✔ Computing quality-control metrics and normalising [15ms]
 ## 
 table(nacho_qc(legacy)[["status"]])
 ## 
@@ -369,13 +369,13 @@ mirna <- load_rcc(
   n_comp = 5
 )
 ## ℹ Reading 6 RCC files
-## ✔ Reading 6 RCC files [25ms]
+## ✔ Reading 6 RCC files [15ms]
 ## 
 ## ℹ Assembling 6 samples
-## ✔ Assembling 6 samples [20ms]
+## ✔ Assembling 6 samples [11ms]
 ## 
 ## ℹ Computing quality-control metrics and normalising
-## ✔ Computing quality-control metrics and normalising [20ms]
+## ✔ Computing quality-control metrics and normalising [12ms]
 ## 
 print(mirna)
 ## <nacho> 6 samples, 828 probes, from single-sample RCC files
