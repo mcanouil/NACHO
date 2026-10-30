@@ -1,6 +1,4 @@
 
-<!-- markdownlint-disable MD013 MD033 -->
-
 # NAnoString quality Control dasHbOard <img src="man/figures/nacho_hex.png" align="right" width="120" alt="NACHO hexagonal logo" />
 
 [![Lifecycle:
@@ -49,7 +47,7 @@ nacho <- load_rcc(
   n_comp = 5
 )
 #> ℹ Reading 6 RCC files
-#> ✔ Reading 6 RCC files [24ms]
+#> ✔ Reading 6 RCC files [25ms]
 #> 
 #> ℹ Assembling 6 samples
 #> ✔ Assembling 6 samples [18ms]
@@ -115,11 +113,10 @@ from NACHO 2” on the same website maps the NACHO 2 code to NACHO 3.
 
 ## Citing NACHO
 
-Canouil M, Bouland GA, Bonnefond A, Froguel P, ’t Hart LM, Slieker RC
-(2020). “NACHO: an R package for quality control of NanoString nCounter
-data.” *Bioinformatics*, *36*(3), 970-971. ISSN 1367-4803.
-<doi:10.1093/bioinformatics/btz647>
-<https://doi.org/10.1093/bioinformatics/btz647>.
+Canouil, M., Bouland, G. A., Bonnefond, A., Froguel, P., ’t Hart, L. M.,
+& Slieker, R. C. (2020). “NACHO: an R package for quality control of
+NanoString nCounter data”. Bioinformatics, 36(3), 970-971. doi:
+10.1093/bioinformatics/btz647
 
 ``` bibtex
 @Article{Canouil2020,
