@@ -154,24 +154,59 @@ test_that("the Stability plot orders the genes by geNorm rank", {
   )
 })
 
-test_that("the RLE plot centres each gene on its median", {
-  plot <- autoplot(GSE74821, type = "RLE")
-  data <- plot$data
-  expect_true(all(c("sample", "lower", "middle", "upper") %in% names(data)))
+rle_log_counts <- function() {
   rows <- grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
-  log_counts <- log2(nacho_counts(GSE74821, normalised = TRUE)[rows, ] + 1)
+  log2(nacho_counts(GSE74821, normalised = TRUE)[rows, ] + 1)
+}
+
+test_that("rle_centre() centres each gene on its median", {
+  log_counts <- rle_log_counts()
   centred <- NACHO:::rle_centre(log_counts, 1)
   medians <- apply(centred, 1, stats::median)
   expect_equal(unname(medians), rep(0, length(medians)), tolerance = 1e-8)
   gene <- rownames(log_counts)[3]
-  sample <- as.character(data$sample[2])
+  sample <- colnames(log_counts)[2]
   expect_equal(
     centred[gene, sample],
     unname(log_counts[gene, sample] - stats::median(log_counts[gene, ]))
   )
+})
+
+test_that("box_stats() gives one row of statistics for each column", {
+  values <- cbind(a = c(1, 2, 3, 4, 100), b = c(2, 4, 6, 8, 10))
+  boxes <- NACHO:::box_stats(values)
+  expect_identical(boxes$sample, c("a", "b"))
+  expect_equal(boxes$middle, c(3, 6))
+  expect_equal(boxes$ymax, c(4, 10))
+})
+
+test_that("box_stats() gives NA for a column with only NA", {
+  values <- cbind(a = c(1, 2, 3), b = c(NA_real_, NA_real_, NA_real_))
+  boxes <- NACHO:::box_stats(values)
+  expect_equal(boxes$middle, c(2, NA))
+  expect_true(all(is.na(boxes[2, c("ymin", "lower", "upper", "ymax")])))
+})
+
+test_that("box_stats() gives NA for a matrix without rows", {
+  values <- matrix(
+    numeric(),
+    nrow = 0L,
+    ncol = 2L,
+    dimnames = list(NULL, c("a", "b"))
+  )
+  boxes <- NACHO:::box_stats(values)
+  expect_identical(boxes$sample, c("a", "b"))
+  expect_true(all(is.na(boxes[c("ymin", "lower", "middle", "upper", "ymax")])))
+})
+
+test_that("the RLE plot draws the median of the genes centred on their median", {
+  log_counts <- rle_log_counts()
+  centred <- log_counts - apply(log_counts, 1, stats::median)
+  data <- autoplot(GSE74821, type = "RLE")$data
+  expect_true(all(c("sample", "lower", "middle", "upper") %in% names(data)))
   expect_equal(
-    data$middle[data$sample == sample],
-    stats::median(centred[, sample])
+    data$middle,
+    unname(apply(centred[, as.character(data$sample)], 2, stats::median))
   )
 })
 
@@ -528,7 +563,7 @@ test_that("BatchFactors labels the factors the samples have", {
   expect_identical(levels(plot$data[["factor"]]), c("Positive", "Housekeeping"))
   built <- ggplot2::ggplot_build(plot)
   expect_length(unique(built$data[[1]]$PANEL), 2L)
-  expect_identical(plot$theme$legend.position, "bottom")
+  expect_true("guide-box-bottom" %in% ggplot2::ggplotGrob(plot)$layout$name)
 })
 
 test_that("BatchFactors names the missing factor columns", {

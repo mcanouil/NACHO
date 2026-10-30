@@ -116,6 +116,7 @@ printf '* checking CRAN incoming feasibility ... NOTE\nMaintainer: x\n* DONE\n\n
   >"${tmp}/check-notes.log"
 printf '* DONE\n\nStatus: OK\n' >"${tmp}/check-ok.log"
 printf '* DONE\n\nStatus: 1 WARNING, 1 NOTE\n' >"${tmp}/check-warn.log"
+printf '* DONE\r\n\r\nStatus: OK\r\n' >"${tmp}/check-ok-crlf.log"
 printf '## R CMD check results\n\n0 errors | 0 warnings | 0 notes\n' \
   >"${tmp}/comments-clean.md"
 printf '## R CMD check results\n\n0 errors | 0 warnings | 2 notes\n\n- NOTE one.\n' \
@@ -128,6 +129,8 @@ check "results match a clean check" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-clean.md")"
 check "results match a CRLF cran-comments.md" 0 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok.log" "${tmp}/comments-crlf.md")"
+check "results read a CRLF check log" 0 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-ok-crlf.log" "${tmp}/comments-clean.md")"
 check "results stop on notes cran-comments.md leaves out" 1 \
   "$(status_of "${scripts}/check-results.sh" "${tmp}/check-notes.log" "${tmp}/comments-clean.md")"
 check "results match notes cran-comments.md explains" 0 \
