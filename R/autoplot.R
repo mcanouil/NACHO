@@ -1385,6 +1385,7 @@ plot_rle <- function(
       ),
       fill = plot_colours(dark)[["paper"]],
       width = 0.75,
+      middle.linewidth = 1,
       na.rm = TRUE
     ) +
     ggplot2::labs(
@@ -1415,6 +1416,15 @@ plot_batch_factors <- function(
     House_factor = "Housekeeping"
   )
   factors <- intersect(names(labels), names(samples))
+  if (length(factors) == 0L) {
+    nacho_abort(
+      c(
+        "The samples have none of the factor columns of {.arg BatchFactors}.",
+        i = "Add {.field {names(labels)}} to the samples."
+      ),
+      class = "bad_argument"
+    )
+  }
   data <- do.call(
     rbind,
     lapply(factors, function(f) {
@@ -1426,7 +1436,7 @@ plot_batch_factors <- function(
       )
     })
   )
-  data[["factor"]] <- factor(data[["factor"]], levels = labels[factors])
+  data[["factor"]] <- factor(data[["factor"]], levels = unname(labels[factors]))
   ggplot2::ggplot(data) +
     theme_nacho(dark) +
     ggplot2::aes(x = .data[["CartridgeID"]], y = .data[["value"]]) +

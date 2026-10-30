@@ -86,7 +86,8 @@ test_that("the validator reports duplicated probe names", {
       counts = counts,
       normalised = normalised
     ),
-    "Probe names must be unique"
+    paste0("Probe names must be unique; duplicated: ", probes$Name[1]),
+    fixed = TRUE
   )
 })
 

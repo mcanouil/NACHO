@@ -75,7 +75,17 @@ validate_nacho <- function(self) {
       "The probe names in @probes must match rownames(@counts), in the same order."
     )
   } else if (anyDuplicated(self@probes[["Name"]]) > 0) {
-    problems <- c(problems, "Probe names must be unique.")
+    probe_names <- as.character(self@probes[["Name"]])
+    problems <- c(
+      problems,
+      sprintf(
+        "Probe names must be unique; duplicated: %s.",
+        paste(
+          utils::head(unique(probe_names[duplicated(probe_names)]), 3),
+          collapse = ", "
+        )
+      )
+    )
   }
   if (!rlang::is_string(self@rcc_type) || !self@rcc_type %in% c("n1", "n8")) {
     problems <- c(problems, "@rcc_type must be \"n1\" or \"n8\".")
