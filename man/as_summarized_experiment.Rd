@@ -43,8 +43,10 @@ A \code{nacho} object is checked and returned as is, and a NACHO 2 object gets a
 hint to use \code{\link[=upgrade_nacho]{upgrade_nacho()}}.
 }
 \examples{
+\donttest{
 if (requireNamespace("SummarizedExperiment", quietly = TRUE)) {
   se <- as_summarized_experiment(GSE74821)
   as_nacho(se)
+}
 }
 }

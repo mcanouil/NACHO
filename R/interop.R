@@ -43,9 +43,11 @@ check_bioconductor <- function(packages, reason, call = rlang::caller_env()) {
 #' @return A `SummarizedExperiment`, or a `nacho` object.
 #' @export
 #' @examples
+#' \donttest{
 #' if (requireNamespace("SummarizedExperiment", quietly = TRUE)) {
 #'   se <- as_summarized_experiment(GSE74821)
 #'   as_nacho(se)
+#' }
 #' }
 as_summarized_experiment <- function(x) {
   check_nacho(x)
