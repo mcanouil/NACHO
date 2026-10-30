@@ -155,8 +155,8 @@ test_that("the Stability plot orders the genes by geNorm rank", {
 })
 
 rle_log_counts <- function() {
-  rows <- grepl("Endogenous", nacho_probes(GSE74821)$CodeClass)
-  log2(nacho_counts(GSE74821, normalised = TRUE)[rows, ] + 1)
+  rows <- grepl("Endogenous", nacho_probes(NACHO::GSE74821)$CodeClass)
+  log2(nacho_counts(NACHO::GSE74821, normalised = TRUE)[rows, ] + 1)
 }
 
 test_that("rle_centre() centres each gene on its median", {
