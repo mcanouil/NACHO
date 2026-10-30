@@ -170,7 +170,7 @@ card_args <- function(active, workers) {
   list(
     id = "BD",
     object = shiny::reactiveVal(NACHO::GSE74821),
-    qc = shiny::reactive(nacho_qc(NACHO::GSE74821)),
+    qc = shiny::reactive(NACHO::nacho_qc(NACHO::GSE74821)),
     type = "BD",
     dark = shiny::reactive(FALSE),
     interactive = TRUE,
@@ -291,7 +291,7 @@ test_that("a busy pool that answers is not taken as failed", {
     for (i in 1:6) {
       jobs <- new.env(parent = emptyenv())
       jobs$build <- 1L
-      task <- NACHO:::card_task(session, profile, jobs, cache)
+      task <- NACHO:::card_task(session, jobs, cache)
       args <- list(
         object = NACHO::GSE74821,
         type = "BD",
@@ -356,7 +356,7 @@ test_that("a build whose daemon dies builds in the app process", {
   skip_if_not_installed("later")
   withr::defer(NACHO:::plot_workers_stop())
   withr::local_options(nacho.plot_workers = 1, nacho.quiet = TRUE)
-  profile <- NACHO:::plot_workers_start()
+  NACHO:::plot_workers_start()
   expect_true(settle(NULL, function() isTRUE(NACHO:::plot_pool$warm)))
   real_mirai <- mirai::mirai
   local_mocked_bindings(
@@ -369,12 +369,108 @@ test_that("a build whose daemon dies builds in the app process", {
   on.exit(session$close(), add = TRUE)
   jobs <- new.env(parent = emptyenv())
   jobs$build <- 1L
-  task <- NACHO:::card_task(session, profile, jobs, session$cache)
+  task <- NACHO:::card_task(session, jobs, session$cache)
   result <- run_task(task, static_args())
   expect_null(result$error)
   expect_true(ggplot2::is_ggplot(result$value))
-  expect_true(NACHO:::plot_pool$failed)
+  expect_null(NACHO:::plot_pool$failed)
+  expect_identical(NACHO:::plot_pool$failures, 1L)
   expect_identical(session$cache$keys(), "key")
+})
+
+test_that("a crashed pool is replaced by one new pool", {
+  skip_if_no_daemons()
+  skip_if_not_installed("later")
+  withr::defer(NACHO:::plot_workers_stop())
+  withr::local_options(nacho.plot_workers = 1, nacho.quiet = TRUE)
+  first <- NACHO:::plot_workers_start()
+  expect_true(settle(NULL, function() isTRUE(NACHO:::plot_pool$warm)))
+  mirai::mirai(quit(save = "no", status = 1L), .compute = first)
+  expect_true(settle(NULL, function() {
+    mirai::status(.compute = first)$connections == 0L
+  }))
+  session <- shiny::MockShinySession$new()
+  on.exit(session$close(), add = TRUE)
+  jobs <- new.env(parent = emptyenv())
+  jobs$build <- 1L
+  task <- NACHO:::card_task(session, jobs, session$cache)
+  run_task(task, static_args())
+  second <- NACHO:::plot_workers_start()
+  expect_false(is.null(second))
+  expect_false(identical(second, first))
+  expect_true(settle(NULL, connected(second, 1L), seconds = 30))
+  expect_null(NACHO:::plot_pool$failed)
+})
+
+test_that("a second crash leaves the plots in the app process for good", {
+  skip_if_no_daemons()
+  skip_if_not_installed("later")
+  withr::defer(NACHO:::plot_workers_stop())
+  withr::local_options(nacho.plot_workers = 1, nacho.quiet = TRUE)
+  crash <- function() {
+    profile <- NACHO:::plot_workers_start()
+    expect_true(settle(NULL, function() isTRUE(NACHO:::plot_pool$warm)))
+    mirai::mirai(quit(save = "no", status = 1L), .compute = profile)
+    expect_true(settle(NULL, function() {
+      mirai::status(.compute = profile)$connections == 0L
+    }))
+    session <- shiny::MockShinySession$new()
+    on.exit(session$close(), add = TRUE)
+    jobs <- new.env(parent = emptyenv())
+    jobs$build <- 1L
+    result <- run_task(
+      NACHO:::card_task(session, jobs, session$cache),
+      static_args()
+    )
+    expect_true(ggplot2::is_ggplot(result$value))
+  }
+  crash()
+  expect_null(NACHO:::plot_pool$failed)
+  crash()
+  expect_true(NACHO:::plot_pool$failed)
+  expect_null(NACHO:::plot_workers_start())
+})
+
+test_that("builds that wait on a crashed pool all end in the app process", {
+  skip_if_no_daemons()
+  skip_if_not_installed("later")
+  withr::defer(NACHO:::plot_workers_stop())
+  withr::local_options(nacho.plot_workers = 2, nacho.quiet = TRUE)
+  profile <- NACHO:::plot_workers_start()
+  expect_true(settle(NULL, connected(profile, 2L), seconds = 30))
+  real_mirai <- mirai::mirai
+  calls <- 0L
+  local_mocked_bindings(
+    mirai = function(..., .compute) {
+      calls <<- calls + 1L
+      if (calls == 1L) {
+        real_mirai(quit(save = "no", status = 1L), .compute = .compute)
+      } else {
+        real_mirai(Sys.sleep(1), .compute = .compute)
+      }
+    },
+    .package = "mirai"
+  )
+  session <- shiny::MockShinySession$new()
+  on.exit(session$close(), add = TRUE)
+  tasks <- lapply(1:4, function(i) {
+    jobs <- new.env(parent = emptyenv())
+    jobs$build <- 1L
+    task <- NACHO:::card_task(session, jobs, session$cache)
+    shiny::isolate(task$invoke(1L, paste0("key", i), static_args()))
+    task
+  })
+  finished <- function() {
+    all(vapply(
+      tasks,
+      function(task) shiny::isolate(task$status()) != "running",
+      logical(1)
+    ))
+  }
+  expect_true(settle(NULL, finished, seconds = 120))
+  for (task in tasks) {
+    expect_null(shiny::isolate(task$result())$error)
+  }
 })
 
 test_that("a pool whose daemons all left builds in the app process", {
@@ -392,11 +488,12 @@ test_that("a pool whose daemons all left builds in the app process", {
   on.exit(session$close(), add = TRUE)
   jobs <- new.env(parent = emptyenv())
   jobs$build <- 1L
-  task <- NACHO:::card_task(session, profile, jobs, session$cache)
+  task <- NACHO:::card_task(session, jobs, session$cache)
   result <- run_task(task, static_args())
   expect_null(result$error)
   expect_true(ggplot2::is_ggplot(result$value))
-  expect_true(NACHO:::plot_pool$failed)
+  expect_null(NACHO:::plot_pool$failed)
+  expect_identical(NACHO:::plot_pool$failures, 1L)
 })
 
 test_that("a pool that never reached full strength is lost once its daemon dies", {
@@ -419,19 +516,34 @@ test_that("a pool that never reached full strength is lost once its daemon dies"
   on.exit(session$close(), add = TRUE)
   jobs <- new.env(parent = emptyenv())
   jobs$build <- 1L
-  task <- NACHO:::card_task(session, profile, jobs, session$cache)
+  task <- NACHO:::card_task(session, jobs, session$cache)
   result <- run_task(task, static_args())
   expect_null(result$error)
   expect_true(ggplot2::is_ggplot(result$value))
-  expect_true(NACHO:::plot_pool$failed)
+  expect_null(NACHO:::plot_pool$failed)
+  expect_identical(NACHO:::plot_pool$failures, 1L)
+})
+
+test_that("a pool whose dispatcher no longer answers is lost", {
+  skip_if_no_daemons()
+  withr::defer(NACHO:::plot_workers_stop())
+  withr::local_options(nacho.plot_workers = 1, nacho.quiet = TRUE)
+  profile <- NACHO:::plot_workers_start()
+  expect_true(settle(NULL, function() isTRUE(NACHO:::plot_pool$warm)))
+  expect_false(NACHO:::pool_lost(profile))
+  local_mocked_bindings(
+    status = function(...) stop("the dispatcher is gone"),
+    .package = "mirai"
+  )
+  expect_true(NACHO:::pool_lost(profile))
 })
 
 test_that("an interrupted build ends its task without a result", {
   skip_if_no_daemons()
   skip_if_not_installed("later")
-  profile <- "nacho-interrupt"
-  mirai::daemons(1, dispatcher = TRUE, .compute = profile)
-  withr::defer(mirai::daemons(0, .compute = profile))
+  withr::defer(NACHO:::plot_workers_stop())
+  withr::local_options(nacho.plot_workers = 1, nacho.quiet = TRUE)
+  NACHO:::plot_workers_start()
   real_mirai <- mirai::mirai
   local_mocked_bindings(
     mirai = function(..., .compute) {
@@ -449,7 +561,7 @@ test_that("an interrupted build ends its task without a result", {
   on.exit(session$close(), add = TRUE)
   jobs <- new.env(parent = emptyenv())
   jobs$build <- 1L
-  task <- NACHO:::card_task(session, profile, jobs, session$cache)
+  task <- NACHO:::card_task(session, jobs, session$cache)
   shiny::isolate(task$invoke(1L, "key", list()))
   finished <- function() shiny::isolate(task$status()) != "running"
   expect_true(settle(NULL, finished, seconds = 30))
