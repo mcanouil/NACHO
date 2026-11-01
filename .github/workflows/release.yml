@@ -19,6 +19,10 @@ on:
         type: boolean
         description: "Also run the R-hub checks and list them in cran-comments.md"
         default: false
+      rebuild_data:
+        type: boolean
+        description: "Rebuild the GSE74821 example object from GEO (untick when NCBI refuses the runner)"
+        default: true
 
 permissions:
   contents: read
@@ -76,6 +80,7 @@ jobs:
             any::Biobase
 
       - name: Rebuild the GSE74821 example object
+        if: ${{ inputs.rebuild_data }}
         run: Rscript data-raw/GSE74821.R
 
       # The r preset stops when NEWS.md has no development heading, and drops

@@ -24,6 +24,10 @@ They're optional, and `cran-comments.md` only lists them when they run.
 Untick "auto-merge" when `cran-comments.md` needs a note, for example to explain breaking changes or a NOTE you expect from the check.
 The pull request is then assigned to you: edit the file on it and merge it yourself.
 
+The workflow also rebuilds the `GSE74821` example object from GEO.
+Untick "rebuild_data" when NCBI refuses the runner, for example after a 403 or 404 in that step.
+Rebuild the object by hand first, so that it carries the version you release.
+
 If you run the workflow again for the same version, it updates the open pull request on `ci/release-X-Y-Z`.
 It does not open a second pull request.
 
