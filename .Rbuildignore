@@ -24,3 +24,4 @@
 ^\.Renviron$
 ^rproj\.lock$
 ^rproj\.toml$
+^inst/WORDLIST$

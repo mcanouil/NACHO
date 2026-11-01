@@ -25,6 +25,7 @@ NanoStringNCTools
 NormFinder
 ORCID
 Okabe
+PAXgene
 PanCancer
 PlexSet
 Poisson
@@ -70,8 +71,10 @@ jsonlite
 knitr
 limma
 lm
+loess
 mRNAs
 mcanouil
+miR
 miRNA
 miRNAs
 mirai
@@ -90,6 +93,7 @@ plexset
 popover
 popovers
 prereleases
+reactable
 rmarkdown
 roxygen
 rstudio
