@@ -46,6 +46,7 @@ jobs:
     env:
       AUTO_MERGE: ${{ inputs.auto_merge }}
       RHUB: ${{ inputs.rhub }}
+      REBUILD_DATA: ${{ inputs.rebuild_data }}
 
     steps:
       # The App token pushes the bump branch, so the required checks of its
@@ -76,6 +77,12 @@ jobs:
             any::cffr
             any::spelling
             any::urlchecker
+
+      - name: Install the packages that rebuild the example object
+        if: ${{ inputs.rebuild_data }}
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
             any::GEOquery
             any::Biobase
 
@@ -162,5 +169,6 @@ jobs:
             echo "- Bump pull request: ${PR_URL}"
             echo "- Auto-merge: ${AUTO_MERGE}"
             echo "- R-hub: ${RHUB}"
+            echo "- Rebuild data: ${REBUILD_DATA}"
             echo "- Next: the CRAN submission workflow starts when the pull request merges."
           } >> "${GITHUB_STEP_SUMMARY}"
