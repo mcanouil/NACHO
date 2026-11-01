@@ -10,14 +10,18 @@ if [ ! -f "${record}" ]; then
   exit 1
 fi
 
-version="$(sed -n 's/^Version:[[:space:]]*//p' "${record}")"
-sha="$(sed -n 's/^SHA:[[:space:]]*//p' "${record}")"
+field() {
+  sed -n "s/^$1:[[:space:]]*//p" | sed 's/[[:space:]]*$//'
+}
+
+version="$(field Version <"${record}")"
+sha="$(field SHA <"${record}")"
 if [ -z "${version}" ] || [ -z "${sha}" ]; then
   echo "::error::${record} lacks a Version or SHA field." >&2
   exit 1
 fi
 
-served="$(curl -fsSL "${cran}/web/packages/${package}/DESCRIPTION" | tr -d '\r' | sed -n 's/^Version:[[:space:]]*//p')"
+served="$(curl -fsSL "${cran}/web/packages/${package}/DESCRIPTION" | field Version)"
 if [ "${served}" != "${version}" ]; then
   echo "::error::CRAN serves ${package} ${served}, not ${version}. Run this again once CRAN's acceptance email arrives." >&2
   exit 1

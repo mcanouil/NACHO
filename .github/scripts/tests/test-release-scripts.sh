@@ -102,8 +102,8 @@ check "guard fails without a version" 1 \
   "$(status_of "${scripts}/release-guard.sh" "${tmp}/empty")"
 
 mkdir -p "${tmp}/cran/web/packages/NACHO"
-printf 'Package: NACHO\nVersion: 2.0.7\n' >"${tmp}/cran/web/packages/NACHO/DESCRIPTION"
-printf 'Version: 2.0.7\nDate: 2026-10-01 10:00:00 UTC\nSHA: 0123abc\n' \
+printf 'Package: NACHO\r\nVersion: 2.0.7\r\n' >"${tmp}/cran/web/packages/NACHO/DESCRIPTION"
+printf 'Version: 2.0.7\r\nDate: 2026-10-01 10:00:00 UTC\r\nSHA: 0123abc\r\n' \
   >"${tmp}/CRAN-SUBMISSION"
 out="$(CRAN_URL="file://${tmp}/cran" \
   "${scripts}/cran-accepted.sh" "${tmp}/CRAN-SUBMISSION")"
@@ -111,7 +111,7 @@ check "accepted reports the version" 2.0.7 "$(field version <<<"${out}")"
 check "accepted reports the submitted commit" 0123abc \
   "$(field sha <<<"${out}")"
 
-printf 'Package: NACHO\r\nVersion: 2.0.6\r\n' >"${tmp}/cran/web/packages/NACHO/DESCRIPTION"
+printf 'Package: NACHO\nVersion: 2.0.6\n' >"${tmp}/cran/web/packages/NACHO/DESCRIPTION"
 check "accepted stops while CRAN serves the old version" 1 \
   "$(status_of env CRAN_URL="file://${tmp}/cran" \
     "${scripts}/cran-accepted.sh" "${tmp}/CRAN-SUBMISSION")"
