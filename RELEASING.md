@@ -3,6 +3,14 @@
 Releases go to CRAN through three workflows. Each one is started or
 approved by the maintainer, so nothing reaches CRAN by accident.
 
+The “Release” and “CRAN post-release” workflows use the actions of
+[mcanouil/release-actions](https://github.com/mcanouil/release-actions).
+These actions get the GitHub App token, write the version, roll
+`NEWS.md`, open the pull requests and create the GitHub release. The
+“CRAN submission” workflow uses only the `token` action of
+release-actions. The steps for CRAN, R-hub and the R checks stay in this
+repository.
+
 ## 1. Bump the version
 
 Run the “Release” workflow from `main` and pick `patch`, `minor` or
@@ -10,22 +18,46 @@ Run the “Release” workflow from `main` and pick `patch`, `minor` or
 
 It updates `DESCRIPTION`, `NEWS.md`, `CITATION.cff` and
 `cran-comments.md`, checks spelling and URLs, and opens a pull request
-called “chore: release NACHO X.Y.Z”. The pull request merges straight
-away, because the bump can’t break anything the checks cover. The checks
-still run on `main`, and the submission workflow checks the tarball
-again before anything goes to CRAN.
+called “chore: release NACHO X.Y.Z”. `NEWS.md` must start with
+`# NACHO (development version)`, and this section must not be empty. The
+workflow renames this heading to `# NACHO X.Y.Z`. The pull request
+merges straight away, because the bump can’t break anything the checks
+cover. The checks still run on `main`, and the submission workflow
+checks the tarball again before anything goes to CRAN.
 
 Tick “rhub” to run the R-hub checks as well. They’re optional, and
 `cran-comments.md` only lists them when they run.
 
 Untick “auto-merge” when `cran-comments.md` needs a note, for example to
-explain breaking changes. The pull request is then assigned to you: edit
-the file on it and merge it yourself.
+explain breaking changes or a NOTE you expect from the check. The pull
+request is then assigned to you: edit the file on it and merge it
+yourself.
+
+The workflow also rebuilds the `GSE74821` example object from GEO.
+Untick “rebuild_data” when NCBI refuses the runner, for example after a
+403 or 404 in that step. The rebuild runs before the bump, so it records
+the development version. To record the release version instead, rebuild
+the object by hand with that version in `DESCRIPTION`, commit it, and
+run the workflow with “rebuild_data” unticked.
+
+If you run the workflow again for the same version, it updates the open
+pull request on `ci/release-X-Y-Z`. It does not open a second pull
+request.
 
 ## 2. Submit to CRAN
 
 Merging the bump starts the “CRAN submission” workflow. It builds the
 tarball with the PDF manual and runs `R CMD check --as-cran`.
+
+The workflow then compares the check with the results line of
+`cran-comments.md`, for example `0 errors | 0 warnings | 1 note`. It
+stops before the upload only if `cran-comments.md` reports fewer errors,
+warnings or notes than the check found. A file that reports more
+problems than the check found passes. The check step before it already
+stops on any WARNING or ERROR, so the workflow lists only the NOTE
+sections that the file must explain. Open a pull request that explains
+each NOTE in `cran-comments.md` and corrects the results line, merge it,
+then run “CRAN submission” by hand from `main` with “dry run” unticked.
 
 It then waits for your approval on the `cran` environment. Approve it,
 and the workflow uploads the tarball and records the submission in
@@ -39,10 +71,13 @@ re-run never submits twice.
 To rehearse without uploading, run “CRAN submission” by hand from `main`
 with “dry run” ticked. It builds and checks the tarball of whatever
 version `main` holds, even a development one. It still asks for approval
-on the `cran` environment, then stops before uploading.
+on the `cran` environment, then stops before uploading. A dry run
+reports NOTE sections that `cran-comments.md` leaves out as a warning,
+and does not stop for them. A check WARNING or ERROR still stops it.
 
 If the upload step fails because devtools changed, submit from a local
-checkout with `devtools::submit_cran()`.
+checkout with
+[`devtools::submit_cran()`](https://devtools.r-lib.org/reference/submit_cran.html).
 
 ### When CRAN asks for changes
 
@@ -65,17 +100,23 @@ workflow from `main`.
 
 It checks that CRAN serves the version, tags `vX.Y.Z` on the submitted
 commit, and publishes the “NACHO X.Y.Z” release with the notes from
-`NEWS.md`. The release deploys the pkgdown site. It then opens a pull
-request that starts the next development version and removes
-`CRAN-SUBMISSION`.
+`NEWS.md`. The release deploys the pkgdown site. A draft release
+`vX.Y.Z` stops the run, so publish or delete it before you run the
+workflow again. It then opens a pull request that starts the next
+development version and removes `CRAN-SUBMISSION`.
 
 If CRAN doesn’t serve the version yet, the workflow stops without
 changing anything, and you can run it again later.
 
+If a run stops after it published the release, run it again: it keeps
+the existing release when its tag points to the submitted commit, and
+goes on to the development version. A release whose tag points to
+another commit stops the run.
+
 ## Scripts and tests
 
-The workflows call the scripts in `.github/scripts/`. Run their tests
-from the repository root:
+The workflows call the scripts in `.github/scripts/` for the CRAN steps.
+Run their tests from the repository root:
 
 - `.github/scripts/tests/test-release-scripts.sh`
 - `Rscript --vanilla .github/scripts/tests/test-cran-upload.R`

@@ -13,14 +13,14 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/mcanouil/NACHO/blob/v2.0.8/inst/CITATION)
+[`inst/CITATION`](https://github.com/mcanouil/NACHO/blob/main/inst/CITATION)
 
 Canouil, M., Bouland, G. A., Bonnefond, A., Froguel, P., 't Hart, L. M.,
 & Slieker, R. C. (2020). "NACHO: an R package for quality control of
 NanoString nCounter data". Bioinformatics, 36(3), 970-971. doi:
 10.1093/bioinformatics/btz647
 
-    @Article{,
+    @Article{Canouil2020,
       title = {{NACHO}: an {R} package for quality control of {NanoString} {nCounter} data},
       author = {Mickaël Canouil and Gerard A. Bouland and Amélie Bonnefond and Philippe Froguel and Leen M. {'t Hart} and Roderick C. Slieker},
       journal = {Bioinformatics},

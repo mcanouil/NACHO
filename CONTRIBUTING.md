@@ -24,7 +24,25 @@ web interface, as long as you edit the source file.
 - Edit the roxygen comment in the `.R` file under `R/`.
 - Don’t edit the `.Rd` files under `man/`, because they are generated.
 - Edit `README.Rmd`, not `README.md`, and render it with
-  `devtools::build_readme()`.
+  [`devtools::build_readme()`](https://devtools.r-lib.org/reference/build_readme.html).
+
+## Development setup
+
+NACHO uses [rig](https://rig.r-lib.org/) to manage the package library
+of the project. Install rig, then run this command in the root of the
+repository:
+
+``` sh
+rig proj sync
+```
+
+The command installs the dependencies from `rproj.toml` and NACHO itself
+into `.rvenv/`. The `.Renviron` file of the repository tells R to use
+this library. The command does not install development tools such as
+devtools and lintr. Install them in the `tools` library of rig, which
+rig adds to every project (see `rig proj --help`). If you do not use
+rig, R shows `! Project is not synced. Run: rig proj sync` when it
+starts in the repository, and uses your usual library.
 
 ## Pull request process
 
@@ -40,12 +58,15 @@ web interface, as long as you edit the source file.
   change.
 
 - Document functions with [roxygen2](https://roxygen2.r-lib.org/) using
-  Markdown, then run `devtools::document()`.
+  Markdown, then run
+  [`devtools::document()`](https://devtools.r-lib.org/reference/document.html).
 
 - Add or update tests with [testthat](https://testthat.r-lib.org/)
   (edition 3). Pull requests with tests are much easier to review.
 
-- Run `devtools::check()` before you open the pull request.
+- Run
+  [`devtools::check()`](https://devtools.r-lib.org/reference/check.html)
+  before you open the pull request.
 
 - GitHub Actions runs `R CMD check` on macOS, Windows and Ubuntu for
   every pull request that isn’t a draft.
