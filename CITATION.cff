@@ -28,8 +28,8 @@ keywords:
   - normalisation
   - Shiny
 license: "GPL-3.0-only"
-version: "2.0.8"
-date-released: "2026-09-30"
+version: "3.0.0"
+date-released: "2026-11-01"
 preferred-citation:
   type: article
   title: "NACHO: an R package for quality control of NanoString nCounter data"

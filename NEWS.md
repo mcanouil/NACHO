@@ -1,4 +1,4 @@
-# NACHO (development version)
+# NACHO 3.0.0
 
 ## Breaking changes
 
