@@ -82,7 +82,8 @@ jobs:
         if: ${{ inputs.rebuild_data }}
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: |
+          cache: "false"
+          packages: |
             any::GEOquery
             any::Biobase
 
