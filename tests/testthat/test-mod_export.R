@@ -346,11 +346,14 @@ tune_app <- function(
 }
 
 expect_same_result <- function(script, app) {
-  testthat::expect_identical(
+  # GLM and RUVg fit through BLAS, and some BLAS libraries (such as MKL) round
+  # the same input differently between calls, so the two runs can differ in
+  # the last bits.
+  testthat::expect_equal(
     nacho_counts(script, normalised = TRUE),
     nacho_counts(app, normalised = TRUE)
   )
-  testthat::expect_identical(nacho_qc(script), nacho_qc(app))
+  testthat::expect_equal(nacho_qc(script), nacho_qc(app))
   testthat::expect_identical(script@thresholds, app@thresholds)
 }
 
