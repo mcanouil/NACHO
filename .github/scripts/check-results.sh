@@ -40,8 +40,30 @@ if [ -z "${claimed}" ]; then
   exit 1
 fi
 
+# The incoming feasibility check gives a NOTE when the last release is recent.
+# This NOTE needs no explanation when it says nothing else than the number
+# of days, so it does not count.
+update_only() {
+  tr -d '\r' <"${log}" | awk '
+    /^\* checking CRAN incoming feasibility \.\.\. .*NOTE$/ { inside = 1; next }
+    inside && /^\* / { inside = 0 }
+    inside {
+      if ($0 ~ /^[[:space:]]*$/ || $0 ~ /^[[:space:]]*Maintainer: /) next
+      if ($0 ~ /^[[:space:]]*Days since last update: [0-9]+[[:space:]]*$/) { days = 1; next }
+      other = 1
+    }
+    END { exit !(days && !other) }
+  '
+}
+
 read -r errors warnings notes <<<"${found}"
 read -r claimed_errors claimed_warnings claimed_notes <<<"${claimed}"
+skip_section='^$'
+if [ "${notes}" -gt 0 ] && update_only; then
+  notes=$((notes - 1))
+  skip_section='checking CRAN incoming feasibility'
+  echo "The CRAN incoming feasibility NOTE only gives the days since the last update, so it does not count."
+fi
 summary="${errors} errors | ${warnings} warnings | ${notes} notes"
 claimed_summary="${claimed_errors} errors | ${claimed_warnings} warnings | ${claimed_notes} notes"
 if [ "${claimed_errors}" -lt "${errors}" ] ||
@@ -49,7 +71,7 @@ if [ "${claimed_errors}" -lt "${errors}" ] ||
   [ "${claimed_notes}" -lt "${notes}" ]; then
   {
     echo "::error::${comments} reports fewer problems than the check found. The check found ${summary}, but ${comments} says ${claimed_summary}. Explain each problem in ${comments}, correct its results line, and run the CRAN submission again."
-    tr -d '\r' <"${log}" | grep -E '\.\.\. .*(NOTE|WARNING|ERROR)$' || true
+    tr -d '\r' <"${log}" | grep -E '\.\.\. .*(NOTE|WARNING|ERROR)$' | grep -v "${skip_section}" || true
   } >&2
   exit 3
 fi

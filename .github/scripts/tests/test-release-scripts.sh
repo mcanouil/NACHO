@@ -157,6 +157,28 @@ out="$("${scripts}/check-results.sh" "${tmp}/check-notes-crlf.log" "${tmp}/comme
 check "results name the NOTE section of a CRLF check log" 1 \
   "$(grep -c 'checking CRAN incoming feasibility' <<<"${out}")"
 
+printf '* checking CRAN incoming feasibility ... [3s/54s] NOTE\nMaintainer: x\nDays since last update: 1\n* DONE\n\nStatus: 1 NOTE\n' \
+  >"${tmp}/check-update.log"
+printf '* checking CRAN incoming feasibility ... NOTE\r\nMaintainer: x\r\n\r\nDays since last update: 3\r\n* DONE\r\n\r\nStatus: 1 NOTE\r\n' \
+  >"${tmp}/check-update-crlf.log"
+printf '* checking CRAN incoming feasibility ... NOTE\nMaintainer: x\nNew submission\nDays since last update: 1\n* DONE\n\nStatus: 1 NOTE\n' \
+  >"${tmp}/check-update-more.log"
+printf '* checking CRAN incoming feasibility ... NOTE\nMaintainer: x\nDays since last update: 1\n* checking R code for possible problems ... NOTE\nfoo: no visible binding\n* DONE\n\nStatus: 2 NOTEs\n' \
+  >"${tmp}/check-update-other.log"
+check "results accept a NOTE that only gives the days since the last update" 0 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-update.log" "${tmp}/comments-clean.md")"
+check "results accept that NOTE in a CRLF check log" 0 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-update-crlf.log" "${tmp}/comments-clean.md")"
+check "results stop on an incoming NOTE that says more than the days" 3 \
+  "$(exit_code_of "${scripts}/check-results.sh" "${tmp}/check-update-more.log" "${tmp}/comments-clean.md")"
+check "results stop on another NOTE next to the days since the last update" 3 \
+  "$(exit_code_of "${scripts}/check-results.sh" "${tmp}/check-update-other.log" "${tmp}/comments-clean.md")"
+check "results do not count the days since the last update as a note to explain" 0 \
+  "$(status_of "${scripts}/check-results.sh" "${tmp}/check-update-other.log" "${tmp}/comments-one-note.md")"
+out="$("${scripts}/check-results.sh" "${tmp}/check-update-other.log" "${tmp}/comments-clean.md" 2>&1 || true)"
+check "results name only the NOTE sections to explain" "0 1" \
+  "$(grep -c 'checking CRAN incoming feasibility' <<<"${out}") $(grep -c 'checking R code for possible problems' <<<"${out}")"
+
 if [ "${failures}" -gt 0 ]; then
   printf '%s check(s) failed\n' "${failures}"
   exit 1

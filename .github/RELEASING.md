@@ -42,6 +42,8 @@ It builds the tarball with the PDF manual and runs `R CMD check --as-cran`.
 The workflow then compares the check with the results line of `cran-comments.md`, for example `0 errors | 0 warnings | 1 note`.
 It stops before the upload only if `cran-comments.md` reports fewer errors, warnings or notes than the check found.
 A file that reports more problems than the check found passes.
+The "CRAN incoming feasibility" NOTE does not count when it only gives the days since the last update, as it does for a quick resubmission.
+If that NOTE says anything else, for example "New submission", it counts.
 The check step before it already stops on any WARNING or ERROR, so the workflow lists only the NOTE sections that the file must explain.
 Open a pull request that explains each NOTE in `cran-comments.md` and corrects the results line, merge it, then run "CRAN submission" by hand from `main` with "dry run" unticked.
 
