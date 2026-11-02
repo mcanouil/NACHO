@@ -24,10 +24,12 @@ They're optional, and `cran-comments.md` only lists them when they run.
 Untick "auto-merge" when `cran-comments.md` needs a note, for example to explain breaking changes or a NOTE you expect from the check.
 The pull request is then assigned to you: edit the file on it and merge it yourself.
 
-The workflow also rebuilds the `GSE74821` example object from GEO.
-Untick "rebuild_data" when NCBI refuses the runner, for example after a 403 or 404 in that step.
+Tick "rebuild_data" to rebuild the `GSE74821` example object from GEO as well.
+It's off by default, because NCBI often refuses the GitHub runners, for example with a 403, a 404 or a failed connection.
 The rebuild runs before the bump, so it records the development version.
-To record the release version instead, rebuild the object by hand with that version in `DESCRIPTION`, commit it, and run the workflow with "rebuild_data" unticked.
+To record the release version, rebuild the object by hand before you run the workflow.
+Set the release version in `DESCRIPTION`, run `Rscript data-raw/GSE74821.R`, then restore `DESCRIPTION` and commit only `data/GSE74821.rda`.
+A release version in `DESCRIPTION` on `main` starts the "CRAN submission" workflow, so don't commit it.
 
 If you run the workflow again for the same version, it updates the open pull request on `ci/release-X-Y-Z`.
 It does not open a second pull request.

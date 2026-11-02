@@ -21,8 +21,8 @@ on:
         default: false
       rebuild_data:
         type: boolean
-        description: "Rebuild the GSE74821 example object from GEO (untick when NCBI refuses the runner)"
-        default: true
+        description: "Also rebuild the GSE74821 example object from GEO (NCBI often refuses the runner)"
+        default: false
 
 permissions:
   contents: read
