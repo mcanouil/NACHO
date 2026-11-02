@@ -1,6 +1,17 @@
 # Changelog
 
+## NACHO 3.0.1
+
+### Tests
+
+- In `tests/testthat/test-mod_export.R`,
+  - test: The check that the R script reproduces the app allows last-bit
+    differences, so it passes with BLAS libraries such as MKL.
+    ([\#166](https://github.com/mcanouil/NACHO/issues/166))
+
 ## NACHO 3.0.0
+
+CRAN release: 2026-11-01
 
 ### Breaking changes
 
