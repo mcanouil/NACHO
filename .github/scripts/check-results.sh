@@ -43,9 +43,10 @@ fi
 # The incoming feasibility check gives a NOTE when the last release is recent.
 # This NOTE needs no explanation when it says nothing else than the number
 # of days, so it does not count.
+incoming='checking CRAN incoming feasibility'
 update_only() {
-  tr -d '\r' <"${log}" | awk '
-    /^\* checking CRAN incoming feasibility \.\.\. .*NOTE$/ { inside = 1; next }
+  tr -d '\r' <"${log}" | awk -v header="* ${incoming} ... " '
+    index($0, header) == 1 && /NOTE$/ { inside = 1; next }
     inside && /^\* / { inside = 0 }
     inside {
       if ($0 ~ /^[[:space:]]*$/ || $0 ~ /^[[:space:]]*Maintainer: /) next
@@ -61,7 +62,7 @@ read -r claimed_errors claimed_warnings claimed_notes <<<"${claimed}"
 skip_section='^$'
 if [ "${notes}" -gt 0 ] && update_only; then
   notes=$((notes - 1))
-  skip_section='checking CRAN incoming feasibility'
+  skip_section="${incoming}"
   echo "The CRAN incoming feasibility NOTE only gives the days since the last update, so it does not count."
 fi
 summary="${errors} errors | ${warnings} warnings | ${notes} notes"
