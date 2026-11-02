@@ -1,6 +1,6 @@
 ## Submission
 
-This is NACHO 3.0.0.
+This is NACHO 3.0.1.
 NEWS.md lists every change in this release.
 
 ## R CMD check results
@@ -10,7 +10,6 @@ NEWS.md lists every change in this release.
 ## Test environments
 
 - GitHub Actions: ubuntu-latest (R devel, release and oldrel-1), macOS-latest (R release) and windows-latest (R release).
-- R-hub: linux (R-devel), windows (R-devel), macos-arm64 (R release) and nosuggests.
 
 ## Reverse dependencies
 

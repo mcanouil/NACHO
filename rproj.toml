@@ -1,6 +1,6 @@
 [project]
 name = "NACHO"
-version = "3.0.0.9000"
+version = "3.0.1"
 type = "package"
 
 [dependencies]
