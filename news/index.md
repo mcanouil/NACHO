@@ -1,6 +1,18 @@
 # Changelog
 
+## NACHO (development version)
+
+### Bug fixes
+
+- In `R/zzz.R`,
+  - fix:
+    [`autoplot()`](https://m.canouil.dev/NACHO/reference/autoplot.md)
+    works again when NACHO is installed with S7 1.0.0.
+    ([\#171](https://github.com/mcanouil/NACHO/issues/171))
+
 ## NACHO 3.0.1
+
+CRAN release: 2026-11-02
 
 ### Tests
 

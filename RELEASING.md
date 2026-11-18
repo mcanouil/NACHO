@@ -56,11 +56,15 @@ The workflow then compares the check with the results line of
 `cran-comments.md`, for example `0 errors | 0 warnings | 1 note`. It
 stops before the upload only if `cran-comments.md` reports fewer errors,
 warnings or notes than the check found. A file that reports more
-problems than the check found passes. The check step before it already
-stops on any WARNING or ERROR, so the workflow lists only the NOTE
-sections that the file must explain. Open a pull request that explains
-each NOTE in `cran-comments.md` and corrects the results line, merge it,
-then run “CRAN submission” by hand from `main` with “dry run” unticked.
+problems than the check found passes. The “CRAN incoming feasibility”
+NOTE does not count when it only gives the days since the last update,
+as it does for a quick resubmission. If that NOTE says anything else,
+for example “New submission”, it counts. The check step before it
+already stops on any WARNING or ERROR, so the workflow lists only the
+NOTE sections that the file must explain. Open a pull request that
+explains each NOTE in `cran-comments.md` and corrects the results line,
+merge it, then run “CRAN submission” by hand from `main` with “dry run”
+unticked.
 
 It then waits for your approval on the `cran` environment. Approve it,
 and the workflow uploads the tarball and records the submission in
@@ -79,8 +83,7 @@ reports NOTE sections that `cran-comments.md` leaves out as a warning,
 and does not stop for them. A check WARNING or ERROR still stops it.
 
 If the upload step fails because devtools changed, submit from a local
-checkout with
-[`devtools::submit_cran()`](https://devtools.r-lib.org/reference/submit_cran.html).
+checkout with `devtools::submit_cran()`.
 
 ### When CRAN asks for changes
 
