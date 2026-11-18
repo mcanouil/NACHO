@@ -1,3 +1,7 @@
+test_that("autoplot re-exports the ggplot2 generic", {
+  expect_identical(NACHO::autoplot, ggplot2::autoplot)
+})
+
 test_that('Missing "object"', {
   expect_error(NACHO:::autoplot_nacho(), class = "nacho_error_bad_object")
 })
