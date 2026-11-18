@@ -20,7 +20,7 @@ jobs:
   r-cmd-check:
     if: ${{ github.event.pull_request.draft != true }}
     runs-on: ${{ matrix.config.os }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     # The ruleset on main requires "R CMD check ubuntu-latest (release)" and
     # "R CMD check ubuntu-latest (devel)", so this name must not change.
     name: R CMD check ${{ matrix.config.os }} (${{ matrix.config.r }})
