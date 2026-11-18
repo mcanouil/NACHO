@@ -1,3 +1,10 @@
+# NACHO 3.0.2
+
+## Bug fixes
+
+- In `R/zzz.R`,
+  - fix: `autoplot()` works again when NACHO is installed with S7 1.0.0. (#171)
+
 # NACHO 3.0.1
 
 ## Tests
