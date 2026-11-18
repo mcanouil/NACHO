@@ -122,19 +122,19 @@ nacho <- load_rcc(
   n_comp = 5
 )
 ## ℹ Reading 6 RCC files
-## ✔ Reading 6 RCC files [27ms]
+## ✔ Reading 6 RCC files [39ms]
 ## 
 ## ℹ Assembling 6 samples
-## ✔ Assembling 6 samples [20ms]
+## ✔ Assembling 6 samples [47ms]
 ## 
 ## ℹ Computing quality-control metrics and normalising
-## ✔ Computing quality-control metrics and normalising [25ms]
+## ✔ Computing quality-control metrics and normalising [29ms]
 ## 
 print(nacho)
 ## <nacho> 6 samples, 784 probes, from single-sample RCC files
 ## Normalisation: GEO, with 20 housekeeping genes
 ## Flagged samples: 0 of 6
-## Created with NACHO 3.0.1
+## Created with NACHO 3.0.2
 ```
 
 ## Read the object
@@ -264,13 +264,13 @@ legacy <- load_rcc(
   preset = "legacy"
 )
 ## ℹ Reading 6 RCC files
-## ✔ Reading 6 RCC files [16ms]
+## ✔ Reading 6 RCC files [21ms]
 ## 
 ## ℹ Assembling 6 samples
-## ✔ Assembling 6 samples [15ms]
+## ✔ Assembling 6 samples [20ms]
 ## 
 ## ℹ Computing quality-control metrics and normalising
-## ✔ Computing quality-control metrics and normalising [20ms]
+## ✔ Computing quality-control metrics and normalising [25ms]
 ## 
 table(nacho_qc(legacy)[["status"]])
 ## 
@@ -366,19 +366,19 @@ mirna <- load_rcc(
   n_comp = 5
 )
 ## ℹ Reading 6 RCC files
-## ✔ Reading 6 RCC files [31ms]
+## ✔ Reading 6 RCC files [26ms]
 ## 
 ## ℹ Assembling 6 samples
-## ✔ Assembling 6 samples [16ms]
+## ✔ Assembling 6 samples [19ms]
 ## 
 ## ℹ Computing quality-control metrics and normalising
-## ✔ Computing quality-control metrics and normalising [16ms]
+## ✔ Computing quality-control metrics and normalising [21ms]
 ## 
 print(mirna)
 ## <nacho> 6 samples, 828 probes, from single-sample RCC files
 ## Normalisation: GEO, without housekeeping genes
 ## Flagged samples: 0 of 6
-## Created with NACHO 3.0.1
+## Created with NACHO 3.0.2
 table(nacho_probes(mirna)[["CodeClass"]])
 ## 
 ##  Endogenous1 Housekeeping     Ligation     Negative     Positive      SpikeIn 

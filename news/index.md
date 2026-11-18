@@ -1,6 +1,6 @@
 # Changelog
 
-## NACHO (development version)
+## NACHO 3.0.2
 
 ### Bug fixes
 
