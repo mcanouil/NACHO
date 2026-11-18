@@ -5,7 +5,7 @@ type = "package"
 
 [dependencies]
 R = ">= 4.3"
-S7 = ">= 0.2.2"
+S7 = ">= 1.0.0"
 "brand.yml" = ">= 0.1.0"
 bslib = ">= 0.10.0"
 cli = ">= 3.6.0"
