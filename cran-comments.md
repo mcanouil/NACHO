@@ -1,9 +1,9 @@
 ## Submission
 
-This is NACHO 3.0.2.
+This is NACHO 3.0.1.
 NEWS.md lists every change in this release.
 
-This release fixes the failures found by the reverse-dependency checks of S7 1.0.0.
+This new release aims at fixing the floating numbers drift in MKL in the unit tests.
 
 ## R CMD check results
 
