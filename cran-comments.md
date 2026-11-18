@@ -1,13 +1,11 @@
 ## Submission
 
-This is NACHO 3.0.1.
+This is NACHO 3.0.2.
 NEWS.md lists every change in this release.
-
-This new release aims at fixing the floating numbers drift in MKL in the unit tests.
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 notes
+0 errors | 0 warnings | 0 notes
 
 ## Test environments
 
