@@ -2,6 +2,8 @@
 
 ## NACHO 3.0.2
 
+CRAN release: 2026-11-19
+
 ### Bug fixes
 
 - In `R/zzz.R`,

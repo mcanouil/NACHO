@@ -97,7 +97,7 @@ x <- load_rcc(
 #> ✔ Assembling 30 samples [27ms]
 #> 
 #> ℹ Computing quality-control metrics and normalising
-#> ✔ Computing quality-control metrics and normalising [35ms]
+#> ✔ Computing quality-control metrics and normalising [34ms]
 #> 
 print(x)
 #> <nacho> 30 samples, 784 probes, from single-sample RCC files
