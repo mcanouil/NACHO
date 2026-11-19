@@ -2,6 +2,33 @@
 
 ## NACHO (development version)
 
+## NACHO 3.0.2
+
+CRAN release: 2026-11-19
+
+### Bug fixes
+
+- In `R/zzz.R`,
+  - fix:
+    [`autoplot()`](https://m.canouil.dev/NACHO/dev/reference/autoplot.md)
+    works again when NACHO is installed with S7 1.0.0.
+    ([\#171](https://github.com/mcanouil/NACHO/issues/171))
+
+## NACHO 3.0.1
+
+CRAN release: 2026-11-02
+
+### Tests
+
+- In `tests/testthat/test-mod_export.R`,
+  - test: The check that the R script reproduces the app allows last-bit
+    differences, so it passes with BLAS libraries such as MKL.
+    ([\#166](https://github.com/mcanouil/NACHO/issues/166))
+
+## NACHO 3.0.0
+
+CRAN release: 2026-11-01
+
 ### Breaking changes
 
 If you use NACHO 2, you can stay on NACHO 2.\*, or convert your saved

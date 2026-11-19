@@ -91,19 +91,19 @@ x <- load_rcc(
   instrument = "max"
 )
 #> ℹ Reading 30 RCC files
-#> ✔ Reading 30 RCC files [85ms]
+#> ✔ Reading 30 RCC files [50ms]
 #> 
 #> ℹ Assembling 30 samples
-#> ✔ Assembling 30 samples [28ms]
+#> ✔ Assembling 30 samples [16ms]
 #> 
 #> ℹ Computing quality-control metrics and normalising
-#> ✔ Computing quality-control metrics and normalising [46ms]
+#> ✔ Computing quality-control metrics and normalising [20ms]
 #> 
 print(x)
 #> <nacho> 30 samples, 784 probes, from single-sample RCC files
 #> Normalisation: GEO, with 20 housekeeping genes
 #> Flagged samples: 2 of 30
-#> Created with NACHO 2.0.8.9000
+#> Created with NACHO 3.0.2.9000
 ```
 
 ## Check the design
