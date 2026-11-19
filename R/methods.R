@@ -285,8 +285,6 @@ S7::method(`[`, nacho) <- subset_nacho
 #' NACHO 2 objects are S3 lists of class `nacho`, which the S7 methods above
 #' never see. `print()` and `format()` describe the object in one line, and
 #' the other methods refuse it, so base R does not dump or coerce the list.
-#' `S7::method<-` leaves local copies of the base generics in the namespace,
-#' so these methods name `base::` to reach the base methods table.
 #'
 #' @param x,object A NACHO 2 object.
 #' @param row.names,optional,... Never used, because these methods always fail.
