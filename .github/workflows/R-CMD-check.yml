@@ -54,9 +54,8 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-          # Posit Package Manager has no binaries for R-devel, so pak builds
-          # every dependency from source; one worker per runner core keeps a
-          # cold cache within the job timeout.
+          # pak builds R-devel dependencies from source; four parallel
+          # workers keep a cold-cache build within the job timeout.
           Ncpus: 4
 
       - uses: r-lib/actions/setup-r-dependencies@v2
