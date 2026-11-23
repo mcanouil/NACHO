@@ -150,14 +150,18 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          files=$(find "$RUNNER_TEMP/package" -name 'testthat.Rout*' 2>/dev/null || true)
+          if [ ! -d "$RUNNER_TEMP/package" ]; then
+            echo "::warning::covr did not install the package, so no tests ran."
+            exit 0
+          fi
+          files=$(find "$RUNNER_TEMP/package" -type f -name 'testthat.Rout*')
           if [ -z "$files" ]; then
             echo "::warning::No testthat.Rout* file under $RUNNER_TEMP/package; check the covr install_path."
             exit 0
           fi
           while IFS= read -r file; do
             echo "::group::$file"
-            cat "$file"
+            cat "$file" || echo "::warning::Could not read $file."
             echo "::endgroup::"
           done <<< "$files"
         shell: bash
