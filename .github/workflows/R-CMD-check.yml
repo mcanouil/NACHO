@@ -148,7 +148,18 @@ jobs:
       # covr reports only that the tests failed; the details are in testthat.Rout.fail.
       - name: Show testthat output
         if: always()
-        run: find '${{ runner.temp }}/package' -name 'testthat.Rout*' -exec cat '{}' \; || true
+        run: |
+          set -euo pipefail
+          files=$(find "$RUNNER_TEMP/package" -name 'testthat.Rout*' 2>/dev/null || true)
+          if [ -z "$files" ]; then
+            echo "::warning::No testthat.Rout* file under $RUNNER_TEMP/package; check the covr install_path."
+            exit 0
+          fi
+          while IFS= read -r file; do
+            echo "::group::$file"
+            cat "$file"
+            echo "::endgroup::"
+          done <<< "$files"
         shell: bash
 
   format:
