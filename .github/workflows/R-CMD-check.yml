@@ -154,7 +154,8 @@ jobs:
             echo "::warning::covr did not install the package, so no tests ran."
             exit 0
           fi
-          files=$(find "$RUNNER_TEMP/package" -type f -name 'testthat.Rout*')
+          files=$(find "$RUNNER_TEMP/package" -type f -name 'testthat.Rout*') ||
+            echo "::warning::find could not read all of $RUNNER_TEMP/package."
           if [ -z "$files" ]; then
             echo "::warning::No testthat.Rout* file under $RUNNER_TEMP/package; check the covr install_path."
             exit 0
