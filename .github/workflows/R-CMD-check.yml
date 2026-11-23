@@ -61,6 +61,10 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
+          # The default saves the cache only when the job succeeds.
+          # R-devel builds every package from source, so a failed or
+          # cancelled devel job would otherwise start cold every time.
+          cache: always
 
       - name: Install HTML Tidy
         if: runner.os == 'Linux'
