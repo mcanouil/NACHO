@@ -26,6 +26,15 @@ mirna_fixture <- function(...) {
   ))
 }
 
+# GEOquery 2.82.0 and later return a SummarizedExperiment from getGEO().
+geo_samples <- function(series_matrix) {
+  if (methods::is(series_matrix, "SummarizedExperiment")) {
+    as.data.frame(SummarizedExperiment::colData(series_matrix), optional = TRUE)
+  } else {
+    Biobase::pData(series_matrix)
+  }
+}
+
 extract_geo_archive_or_skip <- function(series, series_dir) {
   tarfile <- file.path(series_dir, paste0(series, "_RAW.tar"))
   skip_series <- function(reason) {
