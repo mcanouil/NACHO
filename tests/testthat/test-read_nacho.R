@@ -270,7 +270,14 @@ test_that("read_nacho() migrates the frozen schema-1 object", {
   expect_identical(x@settings$background, "none")
   expect_identical(x@settings$background_mode, "subtract")
   expect_identical(x@thresholds$preset, "legacy")
-  expect_identical(S7::S7_class(x), NACHO:::nacho)
+  # covr rewrites the validator of NACHO:::nacho, so compare the class by
+  # identity fields rather than as a whole object.
+  expect_identical(S7::S7_class(x)@name, NACHO:::nacho@name)
+  expect_identical(S7::S7_class(x)@package, NACHO:::nacho@package)
+  expect_identical(
+    names(S7::S7_class(x)@properties),
+    names(NACHO:::nacho@properties)
+  )
 })
 
 test_that("migrating a schema 1 object with negatives subtracts the geometric mean", {
@@ -441,7 +448,14 @@ test_that("read_nacho() reads the frozen schema-2 object as is", {
   expect_identical(nacho_counts(x), saved@counts)
   expect_identical(nacho_counts(x, normalised = TRUE), saved@normalised)
   expect_identical(nacho_qc(x)$status, qc_status_of(saved))
-  expect_identical(S7::S7_class(x), NACHO:::nacho)
+  # covr rewrites the validator of NACHO:::nacho, so compare the class by
+  # identity fields rather than as a whole object.
+  expect_identical(S7::S7_class(x)@name, NACHO:::nacho@name)
+  expect_identical(S7::S7_class(x)@package, NACHO:::nacho@package)
+  expect_identical(
+    names(S7::S7_class(x)@properties),
+    names(NACHO:::nacho@properties)
+  )
 })
 
 expect_round_trip <- function(x) {
