@@ -36,7 +36,6 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
       NACHO_REQUIRE_QUARTO: "true"
 
     steps:
@@ -61,6 +60,14 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
+          # The default saves the cache only when the job succeeds.
+          # R-devel builds every package from source, so a devel job that
+          # fails or is cancelled after this step would otherwise start
+          # cold every time.
+          cache: always
+          # A new version invalidates the cache of every matrix job.
+          # Version 2 drops the devel cache built with R_KEEP_PKG_SOURCE.
+          cache-version: 2
 
       - name: Install HTML Tidy
         if: runner.os == 'Linux'
@@ -68,7 +75,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y tidy
 
+      # Keep source references for NACHO only. On R-devel, dependencies build
+      # from source, and S7 then keeps lazy-loaded source references. Those
+      # end up in NACHO's lazy-load database with the path of the temporary
+      # library that R CMD check deletes, so the tests fail to read S7.rdb.
       - uses: r-lib/actions/check-r-package@v2
+        env:
+          R_KEEP_PKG_SOURCE: yes
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
