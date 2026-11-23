@@ -26,16 +26,13 @@ mirna_fixture <- function(...) {
   ))
 }
 
-# GEOquery 2.82.0 and later return a SummarizedExperiment from getGEO(),
-# earlier versions return an ExpressionSet.
+# GEOquery 2.82.0 and later return a SummarizedExperiment from getGEO().
 geo_samples <- function(series_matrix) {
   if (methods::is(series_matrix, "SummarizedExperiment")) {
-    return(as.data.frame(
-      SummarizedExperiment::colData(series_matrix),
-      optional = TRUE
-    ))
+    as.data.frame(SummarizedExperiment::colData(series_matrix), optional = TRUE)
+  } else {
+    Biobase::pData(series_matrix)
   }
-  Biobase::pData(series_matrix)
 }
 
 extract_geo_archive_or_skip <- function(series, series_dir) {
