@@ -145,6 +145,12 @@ jobs:
           disable_search: true
           fail_ci_if_error: ${{ !github.event.pull_request.head.repo.fork }}
 
+      # covr reports only that the tests failed; the details are in testthat.Rout.fail.
+      - name: Show testthat output
+        if: always()
+        run: find '${{ runner.temp }}/package' -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
   format:
     if: ${{ github.event.pull_request.draft != true }}
     runs-on: ubuntu-latest
