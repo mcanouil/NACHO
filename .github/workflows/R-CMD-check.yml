@@ -61,9 +61,11 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
           # The default saves the cache only when the job succeeds.
-          # R-devel builds every package from source, so a failed or
-          # cancelled devel job would otherwise start cold every time.
+          # R-devel builds every package from source, so a devel job that
+          # fails or is cancelled after this step would otherwise start
+          # cold every time.
           cache: always
+          # A new version invalidates the cache of every matrix job.
           # Version 2 drops the devel cache built with R_KEEP_PKG_SOURCE.
           cache-version: 2
 
