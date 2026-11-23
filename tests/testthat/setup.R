@@ -1,5 +1,7 @@
+# Chrome can take more than the default 10 seconds to start on busy CI runners.
 withr::local_options(
   nacho.quiet = TRUE,
+  chromote.timeout = 60,
   .local_envir = testthat::teardown_env()
 )
 
