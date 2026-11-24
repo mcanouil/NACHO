@@ -5,6 +5,11 @@
 - In `DESCRIPTION` and `R/zzz.R`,
   - build: NACHO needs S7 1.0.0 or newer, and unregisters its S7 methods when it is unloaded. (#173)
 
+## Documentation
+
+- In `R/load_rcc.R`, `R/visualise.R` and `vignettes/articles/nacho-analysis.Rmd`,
+  - docs: The GEO examples read the sample table from the `SummarizedExperiment` that GEOquery 2.82.0 returns, and still work with older GEOquery. (#184)
+
 # NACHO 3.0.2
 
 ## Bug fixes

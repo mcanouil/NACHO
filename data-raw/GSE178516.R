@@ -2,6 +2,7 @@
 # GSE178516: PanCancer IO 360 panel on MAX/FLEX, 30 samples in 3 groups of 10
 # over 5 cartridges (PMID 34863788).
 series <- "GSE178516"
+source(file.path("data-raw", "geo-samples.R"))
 n_keep <- 6
 
 download_dir <- file.path(tempdir(), series)
@@ -18,7 +19,7 @@ rcc_files <- sort(list.files(
 ))
 stopifnot(length(rcc_files) == 30)
 
-phenotypes <- Biobase::pData(GEOquery::getGEO(GEO = series)[[1]])
+phenotypes <- geo_samples(GEOquery::getGEO(GEO = series)[[1]])
 # source_name_ch1 only has two levels (colorectal cancer tissue / colorectal
 # mucosa tissue), not the three groups described above; the three groups
 # (carrier mucosa, patient mucosa, carcinoma) live in the "group:ch1" column.

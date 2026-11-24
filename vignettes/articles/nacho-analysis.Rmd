@@ -61,7 +61,12 @@ if (length(rcc_files) != 30) {
     call. = FALSE
   )
 }
-phenotypes <- Biobase::pData(geo)
+# GEOquery 2.82.0 and later return a SummarizedExperiment.
+phenotypes <- if (methods::is(geo, "SummarizedExperiment")) {
+  as.data.frame(SummarizedExperiment::colData(geo), optional = TRUE)
+} else {
+  Biobase::pData(geo)
+}
 samplesheet <- data.frame(
   IDFILE = rcc_files,
   geo_accession = sub("_.*$", "", rcc_files)

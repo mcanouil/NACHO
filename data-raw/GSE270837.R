@@ -2,6 +2,7 @@
 # GSE270837: miRNA v3b panel on SPRINT, RCC FileVersion 2.0, 22 samples,
 # Hofmann et al. 2024, Extracellular Vesicle 4.
 series <- "GSE270837"
+source(file.path("data-raw", "geo-samples.R"))
 n_keep <- 6
 
 download_dir <- file.path(tempdir(), series)
@@ -18,7 +19,7 @@ rcc_files <- sort(list.files(
 ))
 stopifnot(length(rcc_files) == 22)
 
-phenotypes <- Biobase::pData(GEOquery::getGEO(GEO = series)[[1]])
+phenotypes <- geo_samples(GEOquery::getGEO(GEO = series)[[1]])
 keep <- rcc_files[round(seq(1, length(rcc_files), length.out = n_keep))]
 
 fixture_dir <- file.path("inst", "extdata", series)

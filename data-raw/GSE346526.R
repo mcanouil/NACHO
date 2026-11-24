@@ -3,6 +3,7 @@
 # from 8 patients, RCC file version 1.7 written by nSolver 4.0.1.8, the most
 # recent version found on GEO in October 2026.
 series <- "GSE346526"
+source(file.path("data-raw", "geo-samples.R"))
 patients <- c("C", "E", "F")
 
 download_dir <- file.path(tempdir(), series)
@@ -19,7 +20,7 @@ rcc_files <- sort(list.files(
 ))
 stopifnot(length(rcc_files) == 16)
 
-phenotypes <- Biobase::pData(GEOquery::getGEO(GEO = series)[[1]])
+phenotypes <- geo_samples(GEOquery::getGEO(GEO = series)[[1]])
 gsm <- sub("_.*$", "", basename(rcc_files))
 patient <- sub("^Patient ([A-Z])_.*$", "\\1", phenotypes[gsm, "title"])
 keep <- rcc_files[patient %in% patients]
