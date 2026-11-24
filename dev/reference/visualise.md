@@ -40,7 +40,12 @@ if (interactive()) {
 
   # Import data from GEO
   gse <- GEOquery::getGEO(GEO = "GSE74821")
-  targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
+  # GEOquery 2.82.0 and later return a SummarizedExperiment.
+  targets <- if (methods::is(gse[[1]], "SummarizedExperiment")) {
+    as.data.frame(SummarizedExperiment::colData(gse[[1]]), optional = TRUE)
+  } else {
+    Biobase::pData(gse[[1]])
+  }
   GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
   utils::untar(
     tarfile = file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),

@@ -59,7 +59,12 @@ if (length(rcc_files) != 30) {
     call. = FALSE
   )
 }
-phenotypes <- Biobase::pData(geo)
+# GEOquery 2.82.0 and later return a SummarizedExperiment.
+phenotypes <- if (methods::is(geo, "SummarizedExperiment")) {
+  as.data.frame(SummarizedExperiment::colData(geo), optional = TRUE)
+} else {
+  Biobase::pData(geo)
+}
 samplesheet <- data.frame(
   IDFILE = rcc_files,
   geo_accession = sub("_.*$", "", rcc_files)
@@ -91,13 +96,13 @@ x <- load_rcc(
   instrument = "max"
 )
 #> ℹ Reading 30 RCC files
-#> ✔ Reading 30 RCC files [53ms]
+#> ✔ Reading 30 RCC files [80ms]
 #> 
 #> ℹ Assembling 30 samples
-#> ✔ Assembling 30 samples [26ms]
+#> ✔ Assembling 30 samples [38ms]
 #> 
 #> ℹ Computing quality-control metrics and normalising
-#> ✔ Computing quality-control metrics and normalising [20ms]
+#> ✔ Computing quality-control metrics and normalising [31ms]
 #> 
 print(x)
 #> <nacho> 30 samples, 784 probes, from single-sample RCC files
