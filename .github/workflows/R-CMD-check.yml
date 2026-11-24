@@ -145,6 +145,28 @@ jobs:
           disable_search: true
           fail_ci_if_error: ${{ !github.event.pull_request.head.repo.fork }}
 
+      # covr reports only that the tests failed; the details are in testthat.Rout.fail.
+      - name: Show testthat output
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ ! -d "$RUNNER_TEMP/package" ]; then
+            echo "::warning::covr did not install the package, so no tests ran."
+            exit 0
+          fi
+          files=$(find "$RUNNER_TEMP/package" -type f -name 'testthat.Rout*') ||
+            echo "::warning::find could not read all of $RUNNER_TEMP/package."
+          if [ -z "$files" ]; then
+            echo "::warning::No testthat.Rout* file under $RUNNER_TEMP/package; check the covr install_path."
+            exit 0
+          fi
+          while IFS= read -r file; do
+            echo "::group::$file"
+            cat "$file" || echo "::warning::Could not read $file."
+            echo "::endgroup::"
+          done <<< "$files"
+        shell: bash
+
   format:
     if: ${{ github.event.pull_request.draft != true }}
     runs-on: ubuntu-latest
