@@ -184,7 +184,7 @@ test_that("using GEO GSE74821", {
     silent = TRUE
   )
   skip_if(inherits(gse, "try-error"), "GEO is unavailable.")
-  targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
+  targets <- geo_samples(gse[[1]])
   geo_files <- try(
     GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir()),
     silent = TRUE
@@ -245,7 +245,7 @@ test_that("using GEO GSE70970", {
     silent = TRUE
   )
   skip_if(inherits(gse, "try-error"), "GEO is unavailable.")
-  targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
+  targets <- geo_samples(gse[[1]])
   geo_files <- try(
     GEOquery::getGEOSuppFiles(GEO = "GSE70970", baseDir = tempdir()),
     silent = TRUE

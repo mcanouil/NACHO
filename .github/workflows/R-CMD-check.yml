@@ -20,6 +20,9 @@ jobs:
   r-cmd-check:
     if: ${{ github.event.pull_request.draft != true }}
     runs-on: ${{ matrix.config.os }}
+    # Bounds an intermittent hang in the tests. A cold R-devel build from
+    # source still fits, and a passing job takes 15 to 45 minutes.
+    timeout-minutes: 90
     # The ruleset on main requires "R CMD check ubuntu-latest (release)" and
     # "R CMD check ubuntu-latest (devel)", so this name must not change.
     name: R CMD check ${{ matrix.config.os }} (${{ matrix.config.r }})
@@ -36,7 +39,6 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      R_KEEP_PKG_SOURCE: yes
       NACHO_REQUIRE_QUARTO: "true"
 
     steps:
@@ -61,6 +63,14 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
+          # The default saves the cache only when the job succeeds.
+          # R-devel builds every package from source, so a devel job that
+          # fails or is cancelled after this step would otherwise start
+          # cold every time.
+          cache: always
+          # A new version invalidates the cache of every matrix job.
+          # Version 2 drops the devel cache built with R_KEEP_PKG_SOURCE.
+          cache-version: 2
 
       - name: Install HTML Tidy
         if: runner.os == 'Linux'
@@ -68,7 +78,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y tidy
 
+      # Keep source references for NACHO only. On R-devel, dependencies build
+      # from source, and S7 then keeps lazy-loaded source references. Those
+      # end up in NACHO's lazy-load database with the path of the temporary
+      # library that R CMD check deletes, so the tests fail to read S7.rdb.
       - uses: r-lib/actions/check-r-package@v2
+        env:
+          R_KEEP_PKG_SOURCE: yes
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
@@ -131,6 +147,28 @@ jobs:
           plugins: noop
           disable_search: true
           fail_ci_if_error: ${{ !github.event.pull_request.head.repo.fork }}
+
+      # covr reports only that the tests failed; the details are in testthat.Rout.fail.
+      - name: Show testthat output
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ ! -d "$RUNNER_TEMP/package" ]; then
+            echo "::warning::covr did not install the package, so no tests ran."
+            exit 0
+          fi
+          files=$(find "$RUNNER_TEMP/package" -type f -name 'testthat.Rout*') ||
+            echo "::warning::find could not read all of $RUNNER_TEMP/package."
+          if [ -z "$files" ]; then
+            echo "::warning::No testthat.Rout* file under $RUNNER_TEMP/package; check the covr install_path."
+            exit 0
+          fi
+          while IFS= read -r file; do
+            echo "::group::$file"
+            cat "$file" || echo "::warning::Could not read $file."
+            echo "::endgroup::"
+          done <<< "$files"
+        shell: bash
 
   format:
     if: ${{ github.event.pull_request.draft != true }}
