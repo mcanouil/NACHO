@@ -2,6 +2,13 @@
 
 ## NACHO (development version)
 
+### Dependencies
+
+- In `DESCRIPTION` and `R/zzz.R`,
+  - build: NACHO needs S7 1.0.0 or newer, and unregisters its S7 methods
+    when it is unloaded.
+    ([\#173](https://github.com/mcanouil/NACHO/issues/173))
+
 ## NACHO 3.0.2
 
 CRAN release: 2026-11-19

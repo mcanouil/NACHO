@@ -91,10 +91,10 @@ x <- load_rcc(
   instrument = "max"
 )
 #> ℹ Reading 30 RCC files
-#> ✔ Reading 30 RCC files [50ms]
+#> ✔ Reading 30 RCC files [53ms]
 #> 
 #> ℹ Assembling 30 samples
-#> ✔ Assembling 30 samples [16ms]
+#> ✔ Assembling 30 samples [26ms]
 #> 
 #> ℹ Computing quality-control metrics and normalising
 #> ✔ Computing quality-control metrics and normalising [20ms]
