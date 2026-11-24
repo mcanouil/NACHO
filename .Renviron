@@ -13,7 +13,8 @@
 # RVENV_R_LIBS_USER keeps the R_LIBS_USER this R installation had set by the
 # time this file is read, so that the `rvenv` package can put it back if the
 # project has no library yet. It is still unexpanded at this point, e.g. `%U`;
-# R expands the %-specs later, and so does the package.
+# R expands the %-specs later, and so does the package. The value is quoted
+# because R drops unquoted backslashes, which would break Windows paths.
 #
 # R_DEFAULT_PACKAGES replaces R's default package list rather than adding to
 # it, so the whole list has to be spelled out.
