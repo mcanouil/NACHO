@@ -20,6 +20,9 @@ jobs:
   r-cmd-check:
     if: ${{ github.event.pull_request.draft != true }}
     runs-on: ${{ matrix.config.os }}
+    # Bounds an intermittent hang in the tests. A cold R-devel build from
+    # source still fits, and a passing job takes 15 to 45 minutes.
+    timeout-minutes: 90
     # The ruleset on main requires "R CMD check ubuntu-latest (release)" and
     # "R CMD check ubuntu-latest (devel)", so this name must not change.
     name: R CMD check ${{ matrix.config.os }} (${{ matrix.config.r }})
