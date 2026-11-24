@@ -5,14 +5,15 @@
 # object carries no source references to this working tree or a temp
 # install library.
 source(file.path("data-raw", "install-nacho.R"))
+source(file.path("data-raw", "geo-samples.R"))
 
 build_gse74821 <- function() {
-  # install_nacho() is defined by the source() call above.
+  # install_nacho() and geo_samples() are defined by the source() calls above.
   nacho <- install_nacho(".") # nolint: object_usage_linter.
   on.exit(nacho$cleanup(), add = TRUE)
 
   gse <- GEOquery::getGEO(GEO = "GSE74821")
-  targets <- Biobase::pData(Biobase::phenoData(gse[[1]]))
+  targets <- geo_samples(gse[[1]]) # nolint: object_usage_linter.
   GEOquery::getGEOSuppFiles(GEO = "GSE74821", baseDir = tempdir())
   utils::untar(
     file.path(tempdir(), "GSE74821", "GSE74821_RAW.tar"),
